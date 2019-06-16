@@ -149,20 +149,20 @@
 
     invoke-virtual {v0, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
-    .line 40
-    :cond_8
-    const-string v1, "android.permission.CONTROL_DISPLAY_BRIGHTNESS"
+    # .line 40
+    # :cond_8
+    # const-string v1, "android.permission.WRITE_MEDIA_STORAGE"
 
-    invoke-virtual {p0, v1}, Landroid/app/Activity;->checkSelfPermission(Ljava/lang/String;)I
+    # invoke-virtual {p0, v1}, Landroid/app/Activity;->checkSelfPermission(Ljava/lang/String;)I
 
-    move-result v1
+    # move-result v1
 
-    if-eqz v1, :cond_9
+    # if-eqz v1, :cond_9
 
-    .line 41
-    const-string v1, "android.permission.CONTROL_DISPLAY_BRIGHTNESS"
+    # .line 41
+    # const-string v1, "android.permission.WRITE_MEDIA_STORAGE"
 
-    invoke-virtual {v0, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+    # invoke-virtual {v0, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
 
     .line 43
     :cond_9
