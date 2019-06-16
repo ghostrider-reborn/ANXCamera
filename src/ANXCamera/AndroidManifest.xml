@@ -41,7 +41,6 @@
     <uses-permission android:name="com.miui.powerkeeper.permission.KILL_CAMERA"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="com.miui.securitycenter.permission.PERM_USE_INFO"/>
-    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
     <original-package android:name="com.android.camera"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>

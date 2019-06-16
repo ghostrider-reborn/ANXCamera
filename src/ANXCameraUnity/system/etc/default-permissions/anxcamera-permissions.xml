@@ -27,7 +27,5 @@
             fixed="true" />
         <permission name="android.permission.PACKAGE_USAGE_STATS" 
             fixed="true" />
-        <permission name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" 
-            fixed="true" />
     </exception>
 </exceptions>
