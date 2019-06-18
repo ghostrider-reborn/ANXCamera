@@ -13,6 +13,7 @@ ui_print "  violet"
 ui_print "  whyred"
 ui_print "  equuleus"
 ui_print "  raphael"
+ui_print "  platina"
 ui_print ""
 ui_print "In decreasing order of support"
 ui_print ""
@@ -28,4 +29,10 @@ if device_check "perseus"; then
 	rm -rf $TMPDIR/system/lib/
 	rm -rf $TMPDIR/system/lib64/
 	ui_print "persy was here, it hates poco libs"
+fi
+
+if device_check "violet"; then 
+	rm -rf $TMPDIR/system/lib/
+	rm -rf $TMPDIR/system/lib64/
+	ui_print "violet was here, it hates poco libs, it loves someone else"
 fi
