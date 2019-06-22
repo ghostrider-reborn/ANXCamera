@@ -390,7 +390,7 @@
     <string name="popup_tip_3d_beauty_intro_text">3D ಸೌಂದರ್ಯ</string>
     <string name="sticker_tab1">ಮುದ್ದಾದ</string>
     <string name="sticker_tab2">ತಮಾಷೆ</string>
-    <string name="pref_privacy_title">ಗೌಪ್ಯತೆ ನೀತಿ</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">ಸಮ್ಮತಿ</string>
     <string name="do_not_remind_me">ಮತ್ತೆ ತೋರಿಸಬೇಡ</string>
     <string name="user_notice_identify_summary_format">ಕ್ಯಾಮರಾ ಬಳಸುವ ಮುನ್ನ, ನೀವು ನಮ್ಮ <a href="http://www.miui.com/res/doc/eula.html?lang=kn_IN">ಬಳಕೆದಾರ ಒಪ್ಪಂದ</a> ಮತ್ತು <a href="http://www.miui.com/res/doc/privacy.html?lang=kn_IN">ಗೌಪ್ಯತೆ ನೀತಿ</a>ಗಳಿಗೆ ಸಮ್ಮತಿಸಬೇಕು. ಮಾತ್ರವಲ್ಲ, ಸಹಜವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸಲು ಅದನ್ನು ಇಂಟರ್‌ನೆಟ್‌ಗೆ ಸಂಪರ್ಕಗೊಳಿಸಬೇಕು. ಸಮ್ಮತಿಯೇ?</string>
@@ -436,7 +436,7 @@
     <string name="lighting_pattern_holi">ಹೋಳಿ</string>
     <string name="pref_camera_video_bokeh_on">ವೀಡಿಯೊ ಬೊಕೆ</string>
     <string name="pref_camera_video_bokeh_off">ವೀಡಿಯೊ ಬೊಕೆ ಆಫ್‌ ಆಗಿದೆ</string>
-    <string name="view_privacy_policy">ಗೌಪ್ಯತೆ ನೀತಿ ವೀಕ್ಷಿಸಿ</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">ರಿಸೆಟ್‌</string>
     <string name="beauty_clear">ಅಳಿಸು</string>
     <string name="eye_light">ಕಣ್ಣಿನ ಮಿಂಚು</string>

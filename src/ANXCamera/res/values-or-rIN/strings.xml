@@ -390,7 +390,7 @@
     <string name="popup_tip_3d_beauty_intro_text">3D ସୁନ୍ଦରତା</string>
     <string name="sticker_tab1">କ୍ୟୁଟ</string>
     <string name="sticker_tab2">କୌତୁକିଆ</string>
-    <string name="pref_privacy_title">ଗୋପନୀୟତା ନୀତି</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">ସହମତ</string>
     <string name="do_not_remind_me">ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ</string>
     <string name="user_notice_identify_summary_format">କ୍ୟାମେରା ବ୍ୟବହାର ପୂର୍ବରୁ ଆପଣ ନିଶ୍ଚିତ ଭାବେ ଆମର <a href="http://www.miui.com/res/doc/eula.html?lang=en_US">ଉପଭୋକ୍ତା ଚୁକ୍ତି</a>ଏବଂ<a href="http://www.miui.com/res/doc/privacy.html?lang=en_US">ଗୋପନୀୟତା ନୀତି</a> ସହ ସହମତ ହେବା ଉଚିତ। ସାଧାରଣଭାବେ କାମ କରିବାକୁ କ୍ୟାମେରା ଇଣ୍ଟରନେଟ୍ ସହିତ ସଂଯୋଗ ଦରକାର କରେ । ସହମତ?</string>
@@ -435,7 +435,7 @@
     <string name="lighting_pattern_holi">ହୋଲି</string>
     <string name="pref_camera_video_bokeh_on">ଭିଡିଓ ବୋକେ</string>
     <string name="pref_camera_video_bokeh_off">ଭିଡିଓ ବୋକେ ବନ୍ଦ ଅଛି</string>
-    <string name="view_privacy_policy">ଗୋପନୀୟତା ନୀତି ଦେଖନ୍ତୁ</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">ପୁଣି ସେଟ୍‌ କରନ୍ତୁ</string>
     <string name="beauty_clear">ସଫା</string>
     <string name="eye_light">ଆଖି ସ୍ପାର୍କଲ୍</string>

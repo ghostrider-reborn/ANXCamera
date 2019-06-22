@@ -390,7 +390,7 @@ və sonra səs-küyün minimal səviyyədə olduğu şəkili yaradacaq."</string
     <string name="popup_tip_3d_beauty_intro_text">3D Gözəllik</string>
     <string name="sticker_tab1">Sevimli</string>
     <string name="sticker_tab2">Gülməli</string>
-    <string name="pref_privacy_title">Gizlilik Siyasəti</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Qəbul et</string>
     <string name="do_not_remind_me">Təkrar göstərmə</string>
     <string name="user_notice_identify_summary_format">Kamera tətbiqini istifadə etməzdən əvvəl, <a href="http://www.miui.com/res/doc/eula.html?lang=az_AZ">İstifadəçi Sazişi</a> and <a href="http://www.miui.com/res/doc/privacy.html?lang=az_AZ">Gizlilik Siyasəti</a> sazişlərimizi qəbul etməlisiniz.Kameranın həmçinin normal işləyə bilməsi üçün internetə qoşulması lazımdır. Qəbul edirsiniz?</string>
@@ -436,7 +436,7 @@ Daha yaxşı effekt üçün kamera obyektivini təmizləyin."</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh bağlıdır</string>
-    <string name="view_privacy_policy">Gizlilik Siyasətinə bax</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Sıfırla</string>
     <string name="beauty_clear">Təmizlə</string>
     <string name="eye_light">Göz parıldatma</string>

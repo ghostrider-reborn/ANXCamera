@@ -390,7 +390,7 @@
     <string name="popup_tip_3d_beauty_intro_text">3D Grožis</string>
     <string name="sticker_tab1">Mielas</string>
     <string name="sticker_tab2">Juokingas</string>
-    <string name="pref_privacy_title">Privatumo politika</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Sutikti</string>
     <string name="do_not_remind_me">Daugiau nerodyti</string>
     <string name="user_notice_identify_summary_format">Prieš naudodamiesi „Kamera“, turite sutikti su mūsų <a href="http://www.miui.com/res/doc/eula.html?lang=en_US">naudotojo sutartimi</a> ir <a href="http://www.miui.com/res/doc/privacy.html?lang=en_US">privatumo politika</a>. Kameros funkcionalumui užtikrinti taip pat reikalinga interneto prieiga. Sutikti?</string>
@@ -436,7 +436,7 @@ Nuvalykite jei reikalinga geresnė kokybė."</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh išjungtas</string>
-    <string name="view_privacy_policy">Peržiūrėti privatumo politiką</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Atstatyti</string>
     <string name="beauty_clear">Išvalyti</string>
     <string name="eye_light">Akių žibėjimas</string>

@@ -12,13 +12,9 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ReplacementTransformationMethod;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.android.camera.sensitive.SensitiveFilter;
-import miui.app.ActionBar;
 
 public class UserDefineWatermarkActivity extends Activity implements TextWatcher {
     private static final int MSG_BG_FILTER_WORDS = 1;
@@ -121,35 +117,6 @@ public class UserDefineWatermarkActivity extends Activity implements TextWatcher
         }
         String trim = this.mEtUserDefineWords.getText().toString().trim();
         return TextUtils.isEmpty(trim) ? getResources().getString(R.string.device_watermark_default_text) : trim.toUpperCase();
-    }
-
-    private void initTitle() {
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayOptions(16, 16);
-            actionBar.setCustomView(GeneralUtils.editModeTitleLayout());
-            View customView = actionBar.getCustomView();
-            ((TextView) customView.findViewById(16908310)).setText(getTitle());
-            TextView textView = (TextView) customView.findViewById(16908313);
-            textView.setBackgroundResource(R.drawable.action_mode_title_button_cancel);
-            textView.setText(null);
-            textView.setContentDescription(getText(17039360));
-            textView.setOnClickListener(new OnClickListener() {
-                public void onClick(View view) {
-                    UserDefineWatermarkActivity.this.onCancel();
-                }
-            });
-            TextView textView2 = (TextView) customView.findViewById(16908314);
-            textView2.setBackgroundResource(R.drawable.action_mode_title_button_confirm);
-            textView2.setText(null);
-            textView2.setContentDescription(getText(17039370));
-            textView2.setOnClickListener(new OnClickListener() {
-                public void onClick(View view) {
-                    UserDefineWatermarkActivity.this.onSave();
-                }
-            });
-            setTitle(getResources().getString(R.string.custom_watermark_words));
-        }
     }
 
     /* access modifiers changed from: private */
@@ -258,7 +225,6 @@ public class UserDefineWatermarkActivity extends Activity implements TextWatcher
     /* access modifiers changed from: protected */
     public void onStart() {
         super.onStart();
-        initTitle();
     }
 
     public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {

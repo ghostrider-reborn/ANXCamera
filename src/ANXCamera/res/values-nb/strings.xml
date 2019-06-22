@@ -390,7 +390,7 @@ og så opprette et bilde som har minimalt med støy."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D-skjønnhet</string>
     <string name="sticker_tab1">Søt</string>
     <string name="sticker_tab2">Morsom</string>
-    <string name="pref_privacy_title">Personvernerklæring</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Enig</string>
     <string name="do_not_remind_me">Ikke vis igjen</string>
     <string name="user_notice_identify_summary_format">Før du bruker Kamera, må du akseptere vår <a href="http://www.miui.com/res/doc/eula.html?lang=nb_NO">Brukeravtale</a> og<a href="http://www.miui.com/res/doc/privacy.html?lang=nb_NO">Personvernerklæring</a>. Kameraet må også være koblet til nett for å fungere normalt. Godtar du dette?</string>
@@ -436,7 +436,7 @@ i portrettmodus"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh er av</string>
-    <string name="view_privacy_policy">Se personvernerklæring</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Tilbakestill</string>
     <string name="beauty_clear">Fjern</string>
     <string name="eye_light">Øyelys</string>

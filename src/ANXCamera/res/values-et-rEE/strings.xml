@@ -390,7 +390,7 @@ ja loob siis vähima müratasemega pildi."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D Kaunitar</string>
     <string name="sticker_tab1">Armas</string>
     <string name="sticker_tab2">Naljakas</string>
-    <string name="pref_privacy_title">Privaatsuspoliitika</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Nõustun</string>
     <string name="do_not_remind_me">Ära näita uuesti</string>
     <string name="user_notice_identify_summary_format">Enne kaamera kasutamist peate nõustuma meie <a href="http://www.miui.com/res/doc/eula.html?lang=et_EE">Kasutajalepingu</a> ja <a href="http://www.miui.com/res/doc/privacy.html?lang=et_EE">Privaatsuspoliitikaga</a>. Kaamera peab tavapäraseks töötamiseks ühenduma internetiga. Nõus?</string>
@@ -436,7 +436,7 @@ Portreerežiimis"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh (udune taust)</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh on väljas</string>
-    <string name="view_privacy_policy">Vaata Privaatsuspoliitikat</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Lähtesta</string>
     <string name="beauty_clear">Kustuta</string>
     <string name="eye_light">Silma sära</string>

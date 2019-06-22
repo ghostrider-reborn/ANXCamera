@@ -390,7 +390,7 @@
     <string name="popup_tip_3d_beauty_intro_text">3D బ్యూటిఫై</string>
     <string name="sticker_tab1">క్యూట్</string>
     <string name="sticker_tab2">ఫన్నీ</string>
-    <string name="pref_privacy_title">గోప్యతా విధానం</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">అంగీకరిస్తున్నాను</string>
     <string name="do_not_remind_me">మళ్లీ చూపించవద్దు</string>
     <string name="user_notice_identify_summary_format">కెమెరాని ఉపయోగించే ముందు, మీరు మా <a href="http://www.miui.com/res/doc/eula.html?lang=te_IN">వినియోగదారు ఒప్పందం</a> మరియు <a href="http://www.miui.com/res/doc/privacy.html?lang=te_IN">గోప్యతా విధానం</a> రెండింటినీ అంగీకరించాలి. కెమెరా సాధారణంగా పని చేసేందుకు ఇంటర్నెట్‌కి కనెక్ట్ కావాలి. అంగీకరిస్తున్నారా?</string>
@@ -436,7 +436,7 @@
     <string name="lighting_pattern_holi">హోలీ</string>
     <string name="pref_camera_video_bokeh_on">వీడియో బొకే</string>
     <string name="pref_camera_video_bokeh_off">వీడియో బొకే ఆఫ్‌లో ఉంది</string>
-    <string name="view_privacy_policy">గోప్యతా విధానాన్ని చూడండి</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">రీసెట్ చేయి</string>
     <string name="beauty_clear">తీసివేయి</string>
     <string name="eye_light">కళ్ల మెరుపు</string>

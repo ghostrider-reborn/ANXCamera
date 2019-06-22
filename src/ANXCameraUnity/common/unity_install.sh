@@ -14,6 +14,8 @@ ui_print "  whyred"
 ui_print "  equuleus"
 ui_print "  raphael"
 ui_print "  platina"
+ui_print "  tulip"
+ui_print "  gemini"
 ui_print ""
 ui_print "In decreasing order of support"
 ui_print ""
@@ -34,5 +36,11 @@ fi
 if device_check "violet"; then 
 	rm -rf $TMPDIR/system/lib/
 	rm -rf $TMPDIR/system/lib64/
-	ui_print "violet was here, it hates poco libs, it loves someone else"
+	ui_print "violety was here, it hates poco libs, it loves someone else"
+fi
+
+if device_check "whyred"; then 
+	rm -rf $TMPDIR/system/lib/
+	rm -rf $TMPDIR/system/lib64/
+	ui_print "whyredy was here, it hates poco libs, it loves someone else"
 fi

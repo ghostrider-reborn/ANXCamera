@@ -390,7 +390,7 @@ och skapar sedan ett foto med minsta möjliga brus."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D-skönhet</string>
     <string name="sticker_tab1">Söt</string>
     <string name="sticker_tab2">Rolig</string>
-    <string name="pref_privacy_title">Integritetspolicy</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Godkänn</string>
     <string name="do_not_remind_me">Visa inte igen</string>
     <string name="user_notice_identify_summary_format">Innan du börjar använda Kameran måste du godkänna våra <a href="http://www.miui.com/res/doc/eula.html?lang=sv_SE">Användarvillkor</a> och vår <a href="http://www.miui.com/res/doc/privacy.html?lang=sv_SE">Integritetspolicy</a>. Kameran behöver också ansluta till internet för att fungera normalt. Godkänn?</string>
@@ -436,7 +436,7 @@ i Porträtt läge"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh är avstängd</string>
-    <string name="view_privacy_policy">Visa sekretesspolicy</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Nollställ</string>
     <string name="beauty_clear">Rensa</string>
     <string name="eye_light">Ögonglitter</string>

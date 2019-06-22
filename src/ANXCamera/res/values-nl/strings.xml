@@ -390,7 +390,7 @@ en een foto maken met een minimale hoeveelheid ruis."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D Beauty</string>
     <string name="sticker_tab1">Schattig</string>
     <string name="sticker_tab2">Grappig</string>
-    <string name="pref_privacy_title">Privacybeleid</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Akkoord</string>
     <string name="do_not_remind_me">Niet meer tonen</string>
     <string name="user_notice_identify_summary_format">Om Camera te gebruiken, moet u akkoord gaan met onze <a href="http://www.miui.com/res/doc/eula.html?lang=nl_NL">Gebruikersovereenkomst</a> en ons <a href="http://www.miui.com/res/doc/privacy.html?lang=nl_NL">Privacybeleid</a>. Camera heeft ook verbinding met het internet nodig om normaal te werken. Akkoord?</string>
@@ -436,7 +436,7 @@ in Portretmodus"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh is uitgeschakeld</string>
-    <string name="view_privacy_policy">Privacybeleid bekijken</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Resetten</string>
     <string name="beauty_clear">Wissen</string>
     <string name="eye_light">Oog schittering</string>

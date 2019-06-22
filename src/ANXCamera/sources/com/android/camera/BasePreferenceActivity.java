@@ -39,6 +39,7 @@ import java.util.List;
 
 public abstract class BasePreferenceActivity extends PreferenceActivity implements OnPreferenceChangeListener, OnPreferenceClickListener {
     public static final String FROM_WHERE = "from_where";
+    private static final String PREF_KEY_BOUNCE = "pref_bounce";
     private static final String PREF_KEY_PRIVACY = "pref_privacy";
     private static final String PREF_KEY_RESTORE = "pref_restore";
     public static final String REMOVE_KEYS = "remove_keys";
@@ -402,6 +403,10 @@ public abstract class BasePreferenceActivity extends PreferenceActivity implemen
         if (this.mUserDefineWatermark != null) {
             this.mUserDefineWatermark.setOnPreferenceClickListener(this);
         }
+        Preference findPreference6 = this.mPreferenceGroup.findPreference(PREF_KEY_BOUNCE);
+        if (findPreference6 != null) {
+            findPreference6.setOnPreferenceClickListener(this);
+        }
     }
 
     private void registerListener(PreferenceGroup preferenceGroup, OnPreferenceChangeListener onPreferenceChangeListener) {
@@ -741,7 +746,10 @@ public abstract class BasePreferenceActivity extends PreferenceActivity implemen
             }, getString(17039360), null);
             return true;
         } else if (preference.getKey().equals(PREF_KEY_PRIVACY)) {
-            ActivityLauncher.launchPrivacyPolicyWebpage(this);
+            ActivityLauncher.launchANXCameraInfo(this);
+            return true;
+        } else if (preference.getKey().equals(PREF_KEY_BOUNCE)) {
+            ActivityLauncher.launchANXBounceInfo(this);
             return true;
         } else if (preference.getKey().equals("user_define_watermark")) {
             Intent intent = new Intent(this, UserDefineWatermarkActivity.class);

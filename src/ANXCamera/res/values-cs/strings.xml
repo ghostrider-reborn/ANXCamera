@@ -390,7 +390,7 @@ a následně z nich vytvoří snímek s minimální hlučností."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D Zkrášlení</string>
     <string name="sticker_tab1">Roztomilý</string>
     <string name="sticker_tab2">Vtipný</string>
-    <string name="pref_privacy_title">Zásady ochrany osobních údajů</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Souhlasím</string>
     <string name="do_not_remind_me">Znovu nezobrazovat</string>
     <string name="user_notice_identify_summary_format">Před použitím Fotoaparátu musíte souhlasit s našimi <a href="http://www.miui.com/res/doc/eula.html?lang=cs_CZ">Smluvními podmínkami</a> a <a href="http://www.miui.com/res/doc/privacy.html?lang=cs_CZ">Zásadami ochrany osobních údajů</a>. Fotoaparát také vyžaduje pro správné fungování připojení k internetu. Souhlasíte?</string>
@@ -436,7 +436,7 @@ efekty studiového osvětlení"</string>
     <string name="lighting_pattern_holi">Hólí</string>
     <string name="pref_camera_video_bokeh_on">Rozmazání pozadí videa</string>
     <string name="pref_camera_video_bokeh_off">Rozmazání pozadí videa je vypnuto</string>
-    <string name="view_privacy_policy">Zobrazit Zásady ochrany osobních údajů</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Obnovit</string>
     <string name="beauty_clear">Vymazat</string>
     <string name="eye_light">Rozzáření očí</string>

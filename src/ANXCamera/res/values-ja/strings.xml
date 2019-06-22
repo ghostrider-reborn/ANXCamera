@@ -390,7 +390,7 @@
     <string name="popup_tip_3d_beauty_intro_text">3D美顔</string>
     <string name="sticker_tab1">かわいい</string>
     <string name="sticker_tab2">面白い</string>
-    <string name="pref_privacy_title">プライバシーポリシー</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">同意</string>
     <string name="do_not_remind_me">再度表示しない</string>
     <string name="user_notice_identify_summary_format">カメラを使用する前に、当社の<a href="http://www.miui.com/res/doc/eula.html?lang=ja_JP">使用許諾</a>および<a href="http://www.miui.com/res/doc/privacy.html?lang=ja_JP">プライバシーポリシー</a>に同意する必要があります。カメラが正常に動作するには、インターネット接続が必要です。同意しますか？</string>
@@ -436,7 +436,7 @@
     <string name="lighting_pattern_holi">ホーリー祭</string>
     <string name="pref_camera_video_bokeh_on">ビデオボケ</string>
     <string name="pref_camera_video_bokeh_off">ビデオボケはオフです</string>
-    <string name="view_privacy_policy">プライバシーポリシーを表示</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">リセット</string>
     <string name="beauty_clear">消去</string>
     <string name="eye_light">目の輝き</string>

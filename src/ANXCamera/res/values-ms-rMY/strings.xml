@@ -390,7 +390,7 @@ dan kemudian membuat tangkapan dengan bunyi bising yang sedikit."</string>
     <string name="popup_tip_3d_beauty_intro_text">Kecantikan 3D</string>
     <string name="sticker_tab1">Comel</string>
     <string name="sticker_tab2">Kelakar</string>
-    <string name="pref_privacy_title">Dasar Privasi</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Setuju</string>
     <string name="do_not_remind_me">Jangan tunjuk lagi</string>
     <string name="user_notice_identify_summary_format">Sebelum menggunakan Kamera, anda haruslah bersetuju dengan <a href="http://www.miui.com/res/doc/eula.html?lang=en_US">Perjanjian Pengguna</a> dan <a href="http://www.miui.com/res/doc/privacy.html?lang=en_US">Dasar Privasi</a> kami. Kamera juga perlu menyambung ke internet untuk berfungsi secara normal. Setuju?</string>
@@ -436,7 +436,7 @@ dalam mod Potret"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh dimatikan</string>
-    <string name="view_privacy_policy">Lihat Dasar Privasi</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Set semula</string>
     <string name="beauty_clear">Padam</string>
     <string name="eye_light">Kilauan mata</string>

@@ -349,118 +349,118 @@
     return-object v0
 .end method
 
-.method private initTitle()V
-    .locals 4
+# .method private initTitle()V
+#     .locals 4
 
-    invoke-virtual {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->getActionBar()Lmiui/app/ActionBar;
+#     invoke-virtual {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->getActionBar()Lmiui/app/ActionBar;
 
-    move-result-object v0
+#     move-result-object v0
 
-    if-nez v0, :cond_0
+#     if-nez v0, :cond_0
 
-    return-void
+#     return-void
 
-    :cond_0
-    const/16 v1, 0x10
+#     :cond_0
+#     const/16 v1, 0x10
 
-    invoke-virtual {v0, v1, v1}, Landroid/app/ActionBar;->setDisplayOptions(II)V
+#     invoke-virtual {v0, v1, v1}, Landroid/app/ActionBar;->setDisplayOptions(II)V
 
-    invoke-static {}, Lcom/android/camera/GeneralUtils;->editModeTitleLayout()I
+#     invoke-static {}, Lcom/android/camera/GeneralUtils;->editModeTitleLayout()I
 
-    move-result v1
+#     move-result v1
 
-    invoke-virtual {v0, v1}, Landroid/app/ActionBar;->setCustomView(I)V
+#     invoke-virtual {v0, v1}, Landroid/app/ActionBar;->setCustomView(I)V
 
-    invoke-virtual {v0}, Landroid/app/ActionBar;->getCustomView()Landroid/view/View;
+#     invoke-virtual {v0}, Landroid/app/ActionBar;->getCustomView()Landroid/view/View;
 
-    move-result-object v0
+#     move-result-object v0
 
-    const v1, 0x1020016
+#     const v1, 0x1020016
 
-    invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
+#     invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
-    move-result-object v1
+#     move-result-object v1
 
-    check-cast v1, Landroid/widget/TextView;
+#     check-cast v1, Landroid/widget/TextView;
 
-    invoke-virtual {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->getTitle()Ljava/lang/CharSequence;
+#     invoke-virtual {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->getTitle()Ljava/lang/CharSequence;
 
-    move-result-object v2
+#     move-result-object v2
 
-    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+#     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    const v1, 0x1020019
+#     const v1, 0x1020019
 
-    invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
+#     invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
-    move-result-object v1
+#     move-result-object v1
 
-    check-cast v1, Landroid/widget/TextView;
+#     check-cast v1, Landroid/widget/TextView;
 
-    const/high16 v2, 0x7f020000
+#     const/high16 v2, 0x7f020000
 
-    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setBackgroundResource(I)V
+#     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setBackgroundResource(I)V
 
-    const/4 v2, 0x0
+#     const/4 v2, 0x0
 
-    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+#     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    const/high16 v3, 0x1040000
+#     const/high16 v3, 0x1040000
 
-    invoke-virtual {p0, v3}, Lcom/android/camera/UserDefineWatermarkActivity;->getText(I)Ljava/lang/CharSequence;
+#     invoke-virtual {p0, v3}, Lcom/android/camera/UserDefineWatermarkActivity;->getText(I)Ljava/lang/CharSequence;
 
-    move-result-object v3
+#     move-result-object v3
 
-    invoke-virtual {v1, v3}, Landroid/widget/TextView;->setContentDescription(Ljava/lang/CharSequence;)V
+#     invoke-virtual {v1, v3}, Landroid/widget/TextView;->setContentDescription(Ljava/lang/CharSequence;)V
 
-    new-instance v3, Lcom/android/camera/UserDefineWatermarkActivity$1;
+#     new-instance v3, Lcom/android/camera/UserDefineWatermarkActivity$1;
 
-    invoke-direct {v3, p0}, Lcom/android/camera/UserDefineWatermarkActivity$1;-><init>(Lcom/android/camera/UserDefineWatermarkActivity;)V
+#     invoke-direct {v3, p0}, Lcom/android/camera/UserDefineWatermarkActivity$1;-><init>(Lcom/android/camera/UserDefineWatermarkActivity;)V
 
-    invoke-virtual {v1, v3}, Landroid/widget/TextView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+#     invoke-virtual {v1, v3}, Landroid/widget/TextView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
-    const v1, 0x102001a
+#     const v1, 0x102001a
 
-    invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
+#     invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
-    move-result-object v0
+#     move-result-object v0
 
-    check-cast v0, Landroid/widget/TextView;
+#     check-cast v0, Landroid/widget/TextView;
 
-    const v1, 0x7f020001
+#     const v1, 0x7f020001
 
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setBackgroundResource(I)V
+#     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setBackgroundResource(I)V
 
-    invoke-virtual {v0, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+#     invoke-virtual {v0, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
-    const v1, 0x104000a
+#     const v1, 0x104000a
 
-    invoke-virtual {p0, v1}, Lcom/android/camera/UserDefineWatermarkActivity;->getText(I)Ljava/lang/CharSequence;
+#     invoke-virtual {p0, v1}, Lcom/android/camera/UserDefineWatermarkActivity;->getText(I)Ljava/lang/CharSequence;
 
-    move-result-object v1
+#     move-result-object v1
 
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setContentDescription(Ljava/lang/CharSequence;)V
+#     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setContentDescription(Ljava/lang/CharSequence;)V
 
-    new-instance v1, Lcom/android/camera/UserDefineWatermarkActivity$2;
+#     new-instance v1, Lcom/android/camera/UserDefineWatermarkActivity$2;
 
-    invoke-direct {v1, p0}, Lcom/android/camera/UserDefineWatermarkActivity$2;-><init>(Lcom/android/camera/UserDefineWatermarkActivity;)V
+#     invoke-direct {v1, p0}, Lcom/android/camera/UserDefineWatermarkActivity$2;-><init>(Lcom/android/camera/UserDefineWatermarkActivity;)V
 
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+#     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
-    invoke-virtual {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->getResources()Landroid/content/res/Resources;
+#     invoke-virtual {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->getResources()Landroid/content/res/Resources;
 
-    move-result-object v0
+#     move-result-object v0
 
-    const v1, 0x7f090133
+#     const v1, 0x7f090133
 
-    invoke-virtual {v0, v1}, Landroid/content/res/Resources;->getString(I)Ljava/lang/String;
+#     invoke-virtual {v0, v1}, Landroid/content/res/Resources;->getString(I)Ljava/lang/String;
 
-    move-result-object v0
+#     move-result-object v0
 
-    invoke-virtual {p0, v0}, Lcom/android/camera/UserDefineWatermarkActivity;->setTitle(Ljava/lang/CharSequence;)V
+#     invoke-virtual {p0, v0}, Lcom/android/camera/UserDefineWatermarkActivity;->setTitle(Ljava/lang/CharSequence;)V
 
-    return-void
-.end method
+#     return-void
+# .end method
 
 .method private onCancel()V
     .locals 0
@@ -899,7 +899,7 @@
 
     invoke-super {p0}, Landroid/app/Activity;->onStart()V
 
-    invoke-direct {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->initTitle()V
+    # invoke-direct {p0}, Lcom/android/camera/UserDefineWatermarkActivity;->initTitle()V
 
     return-void
 .end method

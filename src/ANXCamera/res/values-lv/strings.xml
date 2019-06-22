@@ -390,7 +390,7 @@ un tad izveidos attēlu ar minimālu trokšņa daudzumu."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D Skaistums</string>
     <string name="sticker_tab1">Piemīlīgs</string>
     <string name="sticker_tab2">Smieklīgs</string>
-    <string name="pref_privacy_title">Konfidencialitātes politika</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Piekrist</string>
     <string name="do_not_remind_me">Vairs nerādīt</string>
     <string name="user_notice_identify_summary_format">Pirms Kameras izmantošanas, jums nepieciešams piekrist mūsu <a href="http://www.miui.com/res/doc/eula.html?lang=en_US">Lietotāju līgumam</a> un <a href="http://www.miui.com/res/doc/privacy.html?lang=en_US">Konfidencialitātes politikai</a>. Kamerai arī nepieciešams interneta savienojums, lai normāli darbotos. Piekrist?</string>
@@ -436,7 +436,7 @@ Labākam efektam, notīriet objektīvu."</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Video bokeh</string>
     <string name="pref_camera_video_bokeh_off">Video bokeh ir izslēgts</string>
-    <string name="view_privacy_policy">Skatīt Konfidencialitātes politiku</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Atiestatīt</string>
     <string name="beauty_clear">Notīrīt</string>
     <string name="eye_light">Acu mirdzēšana</string>

@@ -390,7 +390,7 @@
     <string name="popup_tip_3d_beauty_intro_text">3D Красота</string>
     <string name="sticker_tab1">Сладък</string>
     <string name="sticker_tab2">Забавен</string>
-    <string name="pref_privacy_title">Правила за поверителност</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Приемам</string>
     <string name="do_not_remind_me">Не показвай отново</string>
     <string name="user_notice_identify_summary_format">Преди да използвате камерата трябва да се съгласите с нашето Потребителско споразумение&lt;a href=http://www.miui.com/res/doc/eula.html?lang=en_US>и&lt;a href=http://www.miui.com/res/doc/privacy.html?lang=en_US>Политика на поверителност. Камерата се нуждае също от интернет, за да работи правилно. Приемате ли?</string>
@@ -434,7 +434,7 @@
     <string name="lighting_pattern_holi">Холи</string>
     <string name="pref_camera_video_bokeh_on">Ефект Боке за видео</string>
     <string name="pref_camera_video_bokeh_off">Ефект Боке за видео е изкл</string>
-    <string name="view_privacy_policy">Виж Политиката на поверителност</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Нулирай</string>
     <string name="beauty_clear">Изчисти</string>
     <string name="eye_light">Блясък в очите</string>

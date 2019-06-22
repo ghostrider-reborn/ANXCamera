@@ -390,7 +390,7 @@ majd ezekből állít össze egy kevéssé zajos képet."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D Szépség</string>
     <string name="sticker_tab1">Aranyos</string>
     <string name="sticker_tab2">Vicces</string>
-    <string name="pref_privacy_title">Adatvédelmi Irányelvek</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Elfogadás</string>
     <string name="do_not_remind_me">Ne mutassa újra</string>
     <string name="user_notice_identify_summary_format">A Kamera használata előtt Önnek el kell fogadnia a következő két dokumentumot: <a href="http://www.miui.com/res/doc/eula.html?lang=hu_HU">Felhasználói Szerződés</a> és <a href="http://www.miui.com/res/doc/privacy.html?lang=hu_HU">Adatvédelmi Irányelvek</a>. A hibátlan működéshez a Kamerának internetkapcsolatra is szüksége van. Elfogadja?</string>
@@ -436,7 +436,7 @@ Portrémódban"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Videó-bokeh bekapcsolva</string>
     <string name="pref_camera_video_bokeh_off">Videó-bokeh kikapcsolva</string>
-    <string name="view_privacy_policy">Adatvédelmi irányelvek megtekintése</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Visszaállítás</string>
     <string name="beauty_clear">Törlés</string>
     <string name="eye_light">A szem becsillanása</string>

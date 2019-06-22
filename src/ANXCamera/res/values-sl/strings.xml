@@ -390,7 +390,7 @@ in nato ustvarila sliko z minimalnim šumom."</string>
     <string name="popup_tip_3d_beauty_intro_text">3D olepševanje</string>
     <string name="sticker_tab1">Prikupno</string>
     <string name="sticker_tab2">Smešno</string>
-    <string name="pref_privacy_title">Pravila o zasebnosti</string>
+    <string name="pref_privacy_title">ANXCamera Info</string>
     <string name="user_agree">Sprejmem</string>
     <string name="do_not_remind_me">Ne prikaži več</string>
     <string name="user_notice_identify_summary_format">Pred uporabo kamere se morate strinjati z našimi <a href="http://www.miui.com/res/doc/eula.html?lang=sl_SI">Pogoji uporabe</a> in <a href="http://www.miui.com/res/doc/privacy.html?lang=sl_SI">Pravili o zasebnosti</a>. Fotoaparat mora vzpostaviti povezavo z internetom, da lahko deluje normalno. Se strinjate?</string>
@@ -436,7 +436,7 @@ v Portretnem načinu"</string>
     <string name="lighting_pattern_holi">Holi</string>
     <string name="pref_camera_video_bokeh_on">Izboljšana zameglitev videa</string>
     <string name="pref_camera_video_bokeh_off">Izboljšana zameglitev videa je izključena</string>
-    <string name="view_privacy_policy">Prikaži Pravila o zasebnosti</string>
+    <string name="view_privacy_policy">ANXCamera Info</string>
     <string name="beauty_reset">Ponastavi</string>
     <string name="beauty_clear">Počisti</string>
     <string name="eye_light">Bleščeče oči</string>

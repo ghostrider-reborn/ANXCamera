@@ -12,6 +12,8 @@
 
 .field private static final PREF_KEY_PRIVACY:Ljava/lang/String; = "pref_privacy"
 
+.field private static final PREF_KEY_BOUNCE:Ljava/lang/String; = "pref_bounce"
+
 .field private static final PREF_KEY_RESTORE:Ljava/lang/String; = "pref_restore"
 
 .field public static final REMOVE_KEYS:Ljava/lang/String; = "remove_keys"
@@ -1824,6 +1826,19 @@
     invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
 
     :cond_5
+    iget-object v0, p0, Lcom/android/camera/BasePreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_bounce"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_6
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_6
     return-void
 .end method
 
@@ -3475,9 +3490,26 @@
 
     move-result v0
 
+    if-eqz v0, :cond_0a
+
+    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXCameraInfo(Landroid/content/Context;)V
+
+    return v2
+
+    :cond_0a
+    invoke-virtual {p1}, Landroid/preference/Preference;->getKey()Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string v3, "pref_bounce"
+
+    invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
     if-eqz v0, :cond_1
 
-    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchPrivacyPolicyWebpage(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXBounceInfo(Landroid/content/Context;)V
 
     return v2
 
