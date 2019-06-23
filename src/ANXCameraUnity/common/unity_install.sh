@@ -16,6 +16,7 @@ ui_print "  raphael"
 ui_print "  platina"
 ui_print "  tulip"
 ui_print "  gemini"
+ui_print "  grus"
 ui_print ""
 ui_print "In decreasing order of support"
 ui_print ""
@@ -43,4 +44,10 @@ if device_check "whyred"; then
 	rm -rf $TMPDIR/system/lib/
 	rm -rf $TMPDIR/system/lib64/
 	ui_print "whyredy was here, it hates poco libs, it loves someone else"
+fi
+
+if [ -f /sdcard/.anxnolib ]; then
+	rm -rf $TMPDIR/system/lib/
+	rm -rf $TMPDIR/system/lib64/
+	ui_print "User hates poco libs, they love someone else"
 fi
