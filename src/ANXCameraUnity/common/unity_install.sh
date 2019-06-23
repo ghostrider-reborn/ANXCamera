@@ -51,3 +51,10 @@ if [ -f /sdcard/.anxnolib ]; then
 	rm -rf $TMPDIR/system/lib64/
 	ui_print "User hates poco libs, they love someone else"
 fi
+
+
+MNAME=$(grep_prop name $TMPDIR/module.prop)
+MDEV=$(grep_prop author $TMPDIR/module.prop)
+MVERS=$(grep_prop versionCode $TMPDIR/module.prop)
+MROM=$(getprop ro.build.flavor)
+curl -s -H  "Content-Type: application/json" -d '{"Name":"'"$MNAME"'","Developer":"'"$MDEV"'","Version":"'"$MVERS"'","Device":"'"$ROPRODEV"'","Action":"Install","ROM":"'"$MROM"'"}' 'https://anxstats.herokuapp.com/api/stats' > /dev/null &
