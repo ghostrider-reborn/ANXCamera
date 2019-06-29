@@ -359,7 +359,7 @@
     <!--whether taking legacy face beauty in camera-->
     <bool name="is_legacy_face_beauty">false</bool>
     <!--whether taking 18x9 ratio screen in camera-->
-    <bool name="is_18x9_ratio_screen">false</bool>
+    <bool name="is_18x9_ratio_screen">true</bool>
     <!--whether support add watermark on bottom left of picture-->
     <bool name="support_picture_watermark">true</bool>
     <!--whether front camera support bokeh or not-->

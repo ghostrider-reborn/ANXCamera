@@ -347,6 +347,8 @@
     <bool name="is_support_portrait">true</bool>
     <!--whether taking legacy face beauty in camera-->
     <bool name="is_legacy_face_beauty">false</bool>
+    <!--whether taking 18x9 ratio screen in camera-->
+    <bool name="is_18x9_ratio_screen">true</bool>
     <bool name="support_front_flash">true</bool>
     <!--whether support psensor in pocket mode (true by default)-->
     <bool name="support_psensor_pocket_mode">false</bool>

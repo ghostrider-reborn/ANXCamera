@@ -294,7 +294,7 @@
     <!-- Support Sign Verify In Cust Partition-->
     <bool name="support_sign_verify_in_cust">true</bool>
     <!--whether taking 18x9 ratio screen in camera-->
-    <bool name="is_18x9_ratio_screen">false</bool>
+    <bool name="is_18x9_ratio_screen">true</bool>
     <!--whether support portrait in camera-->
     <bool name="is_support_portrait">true</bool>
     <!--whether taking legacy face beauty in camera-->

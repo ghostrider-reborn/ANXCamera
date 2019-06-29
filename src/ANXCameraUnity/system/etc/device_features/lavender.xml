@@ -280,7 +280,7 @@
     <bool name="enable_flash_global">true</bool>
     <bool name="support_new_silentmode">true</bool>
     <!--whether taking 18x9 ratio screen in camera-->
-    <bool name="is_18x9_ratio_screen">false</bool>
+    <bool name="is_18x9_ratio_screen">true</bool>
     <!--whether support portrait in camera-->
     <bool name="is_support_portrait">true</bool>
     <!--whether camera support screen light-->

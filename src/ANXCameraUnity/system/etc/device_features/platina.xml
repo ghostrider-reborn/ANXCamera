@@ -338,7 +338,7 @@
         <item>/system/data-app/MiDrive/MiDrive.apk</item>
         <item>/system/data-app/MiuiDriveMode/MiuiDriveMode.apk</item>
     </string-array>
-    <bool name="is_18x9_ratio_screen">false</bool>
+    <bool name="is_18x9_ratio_screen">true</bool>
     <!--whether support portrait in camera-->
     <bool name="is_support_portrait">true</bool>
     <!--whether taking legacy face beauty in camera-->
