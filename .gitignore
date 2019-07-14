@@ -13,6 +13,7 @@ src/ANXCameraUnity/system/priv-app/ANXCamera/lib/arm64/*.so
 src/Arnob48MPFix/
 src/Dyneteve48MPFix/
 src/KubilWhyredyFix/
+src/ANXCamFix/
 
 src/ANXCamera/assets/mimoji/data.zip
 src/ANXCamera/assets/mimoji/model.zip

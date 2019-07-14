@@ -75,6 +75,7 @@ copy .\out\ANXMiuiCameraMagisk.zip /B .\out\ANXMiuiCameraMagisk_%anxversion%.zip
 
 decompile 
 java  -jar ..\ANXMiuiPortTools\apktool.jar d -p ..\ANXMiuiPortTools\MiuiFrameworks -f -b  -o "G:\Downloads\Android\miuicompare\MiuiCameraequu81213" "G:\Downloads\Android\miuicompare\MiuiCameraequu81213.apk"
+..\ANXMiuiPortTools\jadx\bin\jadx -d "G:\Downloads\Android\miuicompare\MiuiCameraViolet9711" -r "G:\Downloads\Android\miuicompare\MiuiCameraViolet9711.apk" --show-bad-code
 
 deodex system
 cd /mnt/g/downloads/android/vdex/vdexExtractor

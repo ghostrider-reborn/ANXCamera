@@ -98,7 +98,7 @@ public class AvatarEngineManager {
         RoyanTemplatePath = sb6.toString();
         StringBuilder sb7 = new StringBuilder();
         sb7.append(MimojiHelper.MODEL_PATH);
-        sb7.append("rabbit_v_0_0_0_2");
+        sb7.append("rabbit_v_0_0_0_1");
         RabbitTemplatePath = sb7.toString();
         StringBuilder sb8 = new StringBuilder();
         sb8.append(MimojiHelper.DATA_DIR);
