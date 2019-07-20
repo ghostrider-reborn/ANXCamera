@@ -9,7 +9,7 @@ import com.xiaomi.camera.liveshot.writer.SampleWriter.StatusNotifier;
 import java.nio.ByteBuffer;
 
 public class AudioSampleWriter extends SampleWriter {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = AudioSampleWriter.class.getSimpleName();
     private final Snapshot mAudioSnapshot;
     private final int mAudioTrackId;

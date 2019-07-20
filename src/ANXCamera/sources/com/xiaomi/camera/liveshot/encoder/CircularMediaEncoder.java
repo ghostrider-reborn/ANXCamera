@@ -24,7 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public abstract class CircularMediaEncoder extends Callback {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final int MSG_RELEASE_ENCODER = 2;
     private static final int MSG_START_ENCODING = 0;
     private static final int MSG_STOP_ENCODING = 1;
@@ -49,7 +49,7 @@ public abstract class CircularMediaEncoder extends Callback {
     protected final List<Snapshot> mSnapshots;
 
     protected static final class CyclicBuffer {
-        private static final boolean DEBUG = true;
+        private static final boolean DEBUG = false;
         private static final String TAG = CyclicBuffer.class.getSimpleName();
         private final byte[] mDataBuffer;
         private final LivePhotoResult[] mLivePhotoResults;

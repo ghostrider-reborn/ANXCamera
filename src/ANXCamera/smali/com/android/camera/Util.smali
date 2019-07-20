@@ -66,7 +66,7 @@
     .end annotation
 .end field
 
-.field public static final DEBUG:Z
+.field public static final DEBUG:Z = false
 
 .field public static final EXTRAS_SKIP_LOCK:Ljava/lang/String; = "skip_interception"
 

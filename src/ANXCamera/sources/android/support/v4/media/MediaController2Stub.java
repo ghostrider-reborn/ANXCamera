@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 class MediaController2Stub extends Stub {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "MediaController2Stub";
     private final WeakReference<MediaController2ImplBase> mController;
 

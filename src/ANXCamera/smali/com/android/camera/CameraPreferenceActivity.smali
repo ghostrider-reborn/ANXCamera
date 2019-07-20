@@ -1201,7 +1201,7 @@
     invoke-virtual {p0, v0, v1}, Lcom/android/camera/CameraPreferenceActivity;->removePreference(Landroid/preference/PreferenceGroup;Ljava/lang/String;)Z
 
     :cond_20
-    invoke-direct {p0}, Lcom/android/camera/CameraPreferenceActivity;->removeIncompatibleAdvancePreference()V
+    # invoke-direct {p0}, Lcom/android/camera/CameraPreferenceActivity;->removeIncompatibleAdvancePreference()V
 
     return-void
 .end method

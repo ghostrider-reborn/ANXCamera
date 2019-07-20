@@ -31,7 +31,7 @@ import java.util.concurrent.Executor;
 
 @TargetApi(19)
 class MediaSession2Stub extends Stub {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "MediaSession2Stub";
     /* access modifiers changed from: private */
     public static final SparseArray<SessionCommand2> sCommandsForOnCommandRequest = new SparseArray<>();

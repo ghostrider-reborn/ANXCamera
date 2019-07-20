@@ -29,7 +29,7 @@ import java.util.Queue;
 @TargetApi(18)
 public class AVCEncoder {
     private static final String[] BITRATE_MODES = {"BITRATE_MODE_CQ", "BITRATE_MODE_VBR", "BITRATE_MODE_CBR"};
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "AVCEncoder";
     private static int TIMEOUT_USEC = 5000;
     static AVCEncoderInterface mEncoderCaller = null;

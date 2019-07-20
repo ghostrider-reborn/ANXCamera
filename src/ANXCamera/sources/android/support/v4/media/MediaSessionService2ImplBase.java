@@ -8,7 +8,7 @@ import android.support.v4.media.MediaSessionService2.MediaNotification;
 import android.util.Log;
 
 class MediaSessionService2ImplBase implements SupportLibraryImpl {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "MSS2ImplBase";
     private final Object mLock = new Object();
     @GuardedBy("mLock")

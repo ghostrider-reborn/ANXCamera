@@ -11,7 +11,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class Common {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final float[] FULLSCREEN_VERTICES = {-1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
     public static final String TAG = "WIX";
     public static final boolean USE_TEXTURE_ENCODE_INPUT = true;

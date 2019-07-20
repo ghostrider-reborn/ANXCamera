@@ -51,7 +51,7 @@
 
 .field public static final CAMERA_MODE_VIDEO_CAPTURE:I = 0x4
 
-.field protected static final DEBUG:Z
+.field protected static final DEBUG:Z = false
 
 .field public static final LENS_DIRTY_DETECT_HINT_DURATION:I = 0x1f40
 

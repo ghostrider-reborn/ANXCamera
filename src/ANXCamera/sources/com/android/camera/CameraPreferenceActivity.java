@@ -259,7 +259,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         if (DataRepository.dataItemFeature().hg()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_SCAN_QRCODE);
         }
-        removeIncompatibleAdvancePreference();
     }
 
     private void filterByFrom() {

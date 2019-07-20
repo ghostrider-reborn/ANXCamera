@@ -9,7 +9,7 @@ import android.util.Log;
 
 @TargetApi(18)
 public class TEEglStateSaver {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "TEEglStateSaver";
     private EGLContext mSavedContext = EGL14.EGL_NO_CONTEXT;
     private EGLDisplay mSavedDisplay = EGL14.EGL_NO_DISPLAY;

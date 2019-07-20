@@ -11,7 +11,7 @@ import com.xiaomi.camera.liveshot.writer.SampleWriter.StatusNotifier;
 import java.nio.ByteBuffer;
 
 public class VideoSampleWriter extends SampleWriter {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final long MIN_DURATION = 500000;
     private static final String TAG = VideoSampleWriter.class.getSimpleName();
     private final MediaMuxer mMediaMuxer;
