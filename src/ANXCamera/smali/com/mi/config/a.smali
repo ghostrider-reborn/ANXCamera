@@ -688,7 +688,7 @@
 
     const-string v2, "raw"
 
-    const-string v3, "com.android.camera"
+    const-string v3, "com.oneplus.camera"
 
     invoke-virtual {v0, v1, v2, v3}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
 
