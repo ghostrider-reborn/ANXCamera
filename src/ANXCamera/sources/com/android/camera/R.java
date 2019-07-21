@@ -1596,14 +1596,6 @@ public final class R {
 
     public static final class mipmap {
         public static final int ic_launcher_camera = 2130903040;
-        /* added by JADX */
-        public static final int ic_launcher = 2130903041;
-        /* added by JADX */
-        public static final int ic_launcher_background = 2130903042;
-        /* added by JADX */
-        public static final int ic_launcher_foreground = 2130903043;
-        /* added by JADX */
-        public static final int ic_launcher_round = 2130903044;
     }
 
     public static final class plurals {
@@ -1618,44 +1610,6 @@ public final class R {
         public static final int feature_crux = 2131230723;
         public static final int goofy_face = 2131230724;
         public static final int xiaomi_static_config = 2131230725;
-        /* added by JADX */
-        public static final int feature_beryllium = 2131230726;
-        /* added by JADX */
-        public static final int feature_davinci = 2131230727;
-        /* added by JADX */
-        public static final int feature_davinciin = 2131230728;
-        /* added by JADX */
-        public static final int feature_dipper = 2131230729;
-        /* added by JADX */
-        public static final int feature_equuleus = 2131230730;
-        /* added by JADX */
-        public static final int feature_gemini = 2131230731;
-        /* added by JADX */
-        public static final int feature_grus = 2131230732;
-        /* added by JADX */
-        public static final int feature_laurus = 2131230733;
-        /* added by JADX */
-        public static final int feature_lavender = 2131230734;
-        /* added by JADX */
-        public static final int feature_perseus = 2131230735;
-        /* added by JADX */
-        public static final int feature_platina = 2131230736;
-        /* added by JADX */
-        public static final int feature_polaris = 2131230737;
-        /* added by JADX */
-        public static final int feature_pyxis = 2131230738;
-        /* added by JADX */
-        public static final int feature_raphael = 2131230739;
-        /* added by JADX */
-        public static final int feature_raphaelin = 2131230740;
-        /* added by JADX */
-        public static final int feature_sirius = 2131230741;
-        /* added by JADX */
-        public static final int feature_tulip = 2131230742;
-        /* added by JADX */
-        public static final int feature_violet = 2131230743;
-        /* added by JADX */
-        public static final int feature_whyred = 2131230744;
     }
 
     public static final class string {
@@ -2576,20 +2530,6 @@ public final class R {
         public static final int wideselfie_rotate_to_left_slowly = 2131296929;
         public static final int wideselfie_rotate_to_right_slowly = 2131296930;
         public static final int zoom_no_support_tip_48M = 2131296899;
-        /* added by JADX */
-        public static final int accessibility_camera_module_picker = 2131297150;
-        /* added by JADX */
-        public static final int accessibility_video_module_picker = 2131297151;
-        /* added by JADX */
-        public static final int accessibility_audio_shutter_bg = 2131297152;
-        /* added by JADX */
-        public static final int APKTOOL_DUMMY_398 = 2131297176;
-        /* added by JADX */
-        public static final int APKTOOL_DUMMY_399 = 2131297177;
-        /* added by JADX */
-        public static final int APKTOOL_DUMMY_39a = 2131297178;
-        /* added by JADX */
-        public static final int pref_bounce_title = 2131297179;
     }
 
     public static final class style {
@@ -2635,31 +2575,31 @@ public final class R {
     }
 
     public static final class styleable {
-        public static final int[] AlphaView = {R.attr.av_tabText, R.attr.av_tabTextSize, R.attr.av_textColorNormal, R.attr.av_textColorSelected};
+        public static final int[] AlphaView = {com.oneplus.camera.R.attr.av_tabText, com.oneplus.camera.R.attr.av_tabTextSize, com.oneplus.camera.R.attr.av_textColorNormal, com.oneplus.camera.R.attr.av_textColorSelected};
         public static final int AlphaView_av_tabText = 0;
         public static final int AlphaView_av_tabTextSize = 1;
         public static final int AlphaView_av_textColorNormal = 2;
         public static final int AlphaView_av_textColorSelected = 3;
-        public static final int[] CameraPreference = {R.attr.cameraTitle};
+        public static final int[] CameraPreference = {com.oneplus.camera.R.attr.cameraTitle};
         public static final int CameraPreference_cameraTitle = 0;
-        public static final int[] IconIndicator = {R.attr.icons, R.attr.modes};
+        public static final int[] IconIndicator = {com.oneplus.camera.R.attr.icons, com.oneplus.camera.R.attr.modes};
         public static final int IconIndicator_icons = 0;
         public static final int IconIndicator_modes = 1;
-        public static final int[] IconListPreference = {R.attr.icons, R.attr.singleIcon, R.attr.largeIcons, R.attr.images};
+        public static final int[] IconListPreference = {com.oneplus.camera.R.attr.icons, com.oneplus.camera.R.attr.singleIcon, com.oneplus.camera.R.attr.largeIcons, com.oneplus.camera.R.attr.images};
         public static final int IconListPreference_icons = 0;
         public static final int IconListPreference_images = 3;
         public static final int IconListPreference_largeIcons = 2;
         public static final int IconListPreference_singleIcon = 1;
-        public static final int[] ListPreference = {R.attr.key, R.attr.defaultValue, R.attr.entryValues, R.attr.entries, R.attr.hasPopup};
+        public static final int[] ListPreference = {com.oneplus.camera.R.attr.key, com.oneplus.camera.R.attr.defaultValue, com.oneplus.camera.R.attr.entryValues, com.oneplus.camera.R.attr.entries, com.oneplus.camera.R.attr.hasPopup};
         public static final int ListPreference_defaultValue = 1;
         public static final int ListPreference_entries = 3;
         public static final int ListPreference_entryValues = 2;
         public static final int ListPreference_hasPopup = 4;
         public static final int ListPreference_key = 0;
-        public static final int[] PreviewListPreference = {R.attr.labelList, R.attr.showArrow};
+        public static final int[] PreviewListPreference = {com.oneplus.camera.R.attr.labelList, com.oneplus.camera.R.attr.showArrow};
         public static final int PreviewListPreference_labelList = 0;
         public static final int PreviewListPreference_showArrow = 1;
-        public static final int[] RecyclerView = {16842948, 16842993, R.attr.layoutManager, R.attr.spanCount, R.attr.reverseLayout, R.attr.stackFromEnd, R.attr.fastScrollEnabled, R.attr.fastScrollVerticalThumbDrawable, R.attr.fastScrollVerticalTrackDrawable, R.attr.fastScrollHorizontalThumbDrawable, R.attr.fastScrollHorizontalTrackDrawable};
+        public static final int[] RecyclerView = {16842948, 16842993, com.oneplus.camera.R.attr.layoutManager, com.oneplus.camera.R.attr.spanCount, com.oneplus.camera.R.attr.reverseLayout, com.oneplus.camera.R.attr.stackFromEnd, com.oneplus.camera.R.attr.fastScrollEnabled, com.oneplus.camera.R.attr.fastScrollVerticalThumbDrawable, com.oneplus.camera.R.attr.fastScrollVerticalTrackDrawable, com.oneplus.camera.R.attr.fastScrollHorizontalThumbDrawable, com.oneplus.camera.R.attr.fastScrollHorizontalTrackDrawable};
         public static final int RecyclerView_android_descendantFocusability = 1;
         public static final int RecyclerView_android_orientation = 0;
         public static final int RecyclerView_fastScrollEnabled = 6;
@@ -2671,7 +2611,7 @@ public final class R {
         public static final int RecyclerView_reverseLayout = 4;
         public static final int RecyclerView_spanCount = 3;
         public static final int RecyclerView_stackFromEnd = 5;
-        public static final int[] ToggleSwitch = {R.attr.backgroundColor, R.attr.backgroundStrokeColor, R.attr.backgroundStrokeWidth, R.attr.thumbPadding, R.attr.thumbColor, R.attr.thumbShadowColor, R.attr.thumbShadowRadius, R.attr.textOn, R.attr.textOnColor, R.attr.textOff, R.attr.textOffColor, R.attr.textOffShadowColor, R.attr.textSize, R.attr.textOffShadowRadius, R.attr.duration, R.attr.checked};
+        public static final int[] ToggleSwitch = {com.oneplus.camera.R.attr.backgroundColor, com.oneplus.camera.R.attr.backgroundStrokeColor, com.oneplus.camera.R.attr.backgroundStrokeWidth, com.oneplus.camera.R.attr.thumbPadding, com.oneplus.camera.R.attr.thumbColor, com.oneplus.camera.R.attr.thumbShadowColor, com.oneplus.camera.R.attr.thumbShadowRadius, com.oneplus.camera.R.attr.textOn, com.oneplus.camera.R.attr.textOnColor, com.oneplus.camera.R.attr.textOff, com.oneplus.camera.R.attr.textOffColor, com.oneplus.camera.R.attr.textOffShadowColor, com.oneplus.camera.R.attr.textSize, com.oneplus.camera.R.attr.textOffShadowRadius, com.oneplus.camera.R.attr.duration, com.oneplus.camera.R.attr.checked};
         public static final int ToggleSwitch_backgroundColor = 0;
         public static final int ToggleSwitch_backgroundStrokeColor = 1;
         public static final int ToggleSwitch_backgroundStrokeWidth = 2;
@@ -2688,7 +2628,7 @@ public final class R {
         public static final int ToggleSwitch_thumbPadding = 3;
         public static final int ToggleSwitch_thumbShadowColor = 5;
         public static final int ToggleSwitch_thumbShadowRadius = 6;
-        public static final int[] ValuePreference = {R.attr.showArrow, R.attr.label, R.attr.maxEms};
+        public static final int[] ValuePreference = {com.oneplus.camera.R.attr.showArrow, com.oneplus.camera.R.attr.label, com.oneplus.camera.R.attr.maxEms};
         public static final int ValuePreference_label = 1;
         public static final int ValuePreference_maxEms = 2;
         public static final int ValuePreference_showArrow = 0;

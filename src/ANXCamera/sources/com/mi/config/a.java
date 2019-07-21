@@ -8,10 +8,10 @@ import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.HybridZoomingSystem;
-import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.data.DataItemBase;
 import com.android.camera.log.Log;
+import com.oneplus.camera.R;
 import com.ss.android.ttve.BuildConfig;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -206,7 +206,7 @@ public class a extends DataItemBase implements c {
     /* JADX WARNING: Removed duplicated region for block: B:27:0x005a A[EDGE_INSN: B:14:?->B:27:0x005a ?: BREAK  , ExcHandler: IOException | JSONException (r0v2 'e' java.lang.Exception A[CUSTOM_DECLARE]), Splitter:B:5:0x0023] */
     public void fw() {
         Resources resources = CameraAppImpl.getAndroidContext().getResources();
-        int identifier = resources.getIdentifier(a(resources), "raw", "com.android.camera");
+        int identifier = resources.getIdentifier(a(resources), "raw", "com.oneplus.camera");
         if (identifier <= 0) {
             Log.e(TAG, "feature list default");
             return;

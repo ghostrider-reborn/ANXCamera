@@ -1,11 +1,11 @@
 package com.android.camera.fragment.beauty;
 
-import com.android.camera.R;
 import com.android.camera.constant.BeautyConstant;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.protocol.ModeCoordinatorImpl;
 import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
 import com.android.camera.statistic.CameraStatUtil;
+import com.oneplus.camera.R;
 
 public class BeautyBodyFragment extends BaseBeautyMakeupFragment {
     /* access modifiers changed from: protected */

@@ -66,7 +66,7 @@ public class GeneralUtils {
             intent.setDataAndType(uri, z ? "video/*" : "image/*");
             Builder when = new Builder(context).setContentTitle(str).setContentText(str2).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setSmallIcon(17301569).setWhen(System.currentTimeMillis());
             NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification");
-            CompatibilityUtils.addChannelForNotificationBuilder(notificationManager, "com.android.camera.streetsnap", context.getResources().getString(R.string.camera_label), when);
+            CompatibilityUtils.addChannelForNotificationBuilder(notificationManager, "com.android.camera.streetsnap", context.getResources().getString(com.oneplus.camera.R.string.camera_label), when);
             Notification build = when.build();
             build.flags |= 16;
             build.extraNotification.setMessageCount(0);

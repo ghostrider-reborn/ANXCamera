@@ -5,13 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import com.android.camera.R;
 import com.android.camera.log.Log;
 import com.android.camera.ui.autoselectview.AlphaView;
 import com.android.camera.ui.autoselectview.AutoSelectAdapter;
 import com.android.camera.ui.autoselectview.AutoSelectHorizontalView;
 import com.android.camera.ui.autoselectview.AutoSelectViewHolder;
 import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
+import com.oneplus.camera.R;
 import java.util.ArrayList;
 
 public class MimojiTypeAdapter extends AutoSelectAdapter<MimojiTypeBean> {

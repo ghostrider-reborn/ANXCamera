@@ -8,9 +8,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
-import com.android.camera.R;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.global.DataItemGlobal;
+import com.oneplus.camera.R;
 import miui.app.AlertDialog;
 import miui.app.AlertDialog.Builder;
 

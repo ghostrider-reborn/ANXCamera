@@ -32,6 +32,7 @@ import com.android.camera.ui.PreviewListPreference;
 import com.android.camera.ui.ValuePreference;
 import com.android.camera2.DetachableClickListener;
 import com.mi.config.b;
+import com.oneplus.camera.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;

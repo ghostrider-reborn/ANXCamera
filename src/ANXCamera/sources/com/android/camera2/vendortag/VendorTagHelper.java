@@ -7,7 +7,7 @@ import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.CaptureResult;
 import android.util.Log;
 import com.android.camera.CameraAppImpl;
-import com.android.camera.R;
+import com.oneplus.camera.R;
 
 public class VendorTagHelper {
     private static final int RETHROW = 51966;

@@ -13,9 +13,9 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout.LayoutParams;
-import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.ui.MimojiEditGLTextureView;
+import com.oneplus.camera.R;
 
 public class MimojiPageChangeAnimManager {
     private int MOVE_TOP_DISPLACEMENT_OF_EDIT_LAYOUT;

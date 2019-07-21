@@ -9,9 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import com.android.camera.R;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
+import com.oneplus.camera.R;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.android.camera.R;
 import com.android.camera.fragment.music.RoundedCornersTransformation;
 import com.android.camera.ui.baseview.BaseRecyclerAdapter;
 import com.android.camera.ui.baseview.BaseRecyclerViewHolder;
@@ -17,6 +16,7 @@ import com.bumptech.glide.c;
 import com.bumptech.glide.load.i;
 import com.bumptech.glide.request.a.c.a;
 import com.bumptech.glide.request.f;
+import com.oneplus.camera.R;
 import java.util.ArrayList;
 
 public class MimojiThumbnailRecyclerAdapter extends BaseRecyclerAdapter<ASAvatarConfigInfo> {

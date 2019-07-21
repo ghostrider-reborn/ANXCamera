@@ -29,6 +29,7 @@ import com.android.camera.sensitive.SensitiveFilter;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.ValuePreference;
 import com.mi.config.b;
+import com.oneplus.camera.R;
 import miui.app.ActionBar;
 
 public class WatermarkActivity extends BasePreferenceActivity implements TextWatcher {

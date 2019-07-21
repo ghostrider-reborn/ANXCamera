@@ -3,10 +3,10 @@ package com.android.camera.fragment.beauty;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import com.android.camera.R;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.protocol.ModeCoordinatorImpl;
 import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
+import com.oneplus.camera.R;
 
 public class RemodelingParamsFragment extends MakeupParamsFragment {
     public static /* synthetic */ void lambda$initOnItemClickListener$0(RemodelingParamsFragment remodelingParamsFragment, AdapterView adapterView, View view, int i, long j) {

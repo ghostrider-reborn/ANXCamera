@@ -8,13 +8,13 @@ import android.os.Vibrator;
 import android.view.ViewConfiguration;
 import com.android.camera.GeneralUtils;
 import com.android.camera.ProximitySensorLock;
-import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
 import com.android.camera.snap.SnapCamera.SnapStatusListener;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.Storage;
+import com.oneplus.camera.R;
 
 public class SnapTrigger implements SnapStatusListener {
     private static final int INTERVAL_DELAY = 200;

@@ -22,7 +22,6 @@ import com.android.camera.ActivityBase;
 import com.android.camera.Camera;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
-import com.android.camera.R;
 import com.android.camera.ToastUtils;
 import com.android.camera.Util;
 import com.android.camera.animation.type.AlphaInOnSubscribe;
@@ -56,6 +55,7 @@ import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
 import com.android.camera.protocol.ModeProtocol.TopAlert;
 import com.android.camera.protocol.ModeProtocol.TopConfigProtocol;
 import com.android.camera.statistic.CameraStatUtil;
+import com.oneplus.camera.R;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import java.util.ArrayList;
@@ -612,7 +612,7 @@ public class FragmentTopConfig extends BaseFragment implements OnClickListener, 
         return true;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:15:0x004d, code lost:
-        r2 = com.android.camera.R.string.autozoom_hint;
+        r2 = com.oneplus.camera.R.string.autozoom_hint;
      */
     /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r2v2
   assigns: []

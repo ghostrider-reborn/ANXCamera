@@ -1,10 +1,10 @@
 package com.android.camera.fragment.beauty;
 
 import com.android.camera.CameraSettings;
-import com.android.camera.R;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.protocol.ModeCoordinatorImpl;
 import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
+import com.oneplus.camera.R;
 
 public class MakeupBeautyFragment extends BaseBeautyMakeupFragment {
     private static final String TAG = "MakeupBeautyFragment";

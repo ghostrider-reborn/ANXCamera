@@ -27,9 +27,9 @@ public class ValuePreference extends Preference {
         this.mLabels = obtainStyledAttributes.getString(1);
         this.mShowArrow = obtainStyledAttributes.getBoolean(0, true);
         this.mMaxEms = obtainStyledAttributes.getInt(2, -1);
-        this.mExtraPaddingEnd = context.getResources().getDimensionPixelSize(R.dimen.preference_entry_padding_end);
+        this.mExtraPaddingEnd = context.getResources().getDimensionPixelSize(com.oneplus.camera.R.dimen.preference_entry_padding_end);
         obtainStyledAttributes.recycle();
-        setLayoutResource(R.layout.preference_value_list);
+        setLayoutResource(com.oneplus.camera.R.layout.preference_value_list);
     }
 
     public ValuePreference(Context context, AttributeSet attributeSet, int i) {
@@ -39,8 +39,8 @@ public class ValuePreference extends Preference {
     /* access modifiers changed from: protected */
     public void onBindView(View view) {
         super.onBindView(view);
-        TextView textView = (TextView) view.findViewById(R.id.value_right);
-        ImageView imageView = (ImageView) view.findViewById(R.id.arrow_right);
+        TextView textView = (TextView) view.findViewById(com.oneplus.camera.R.id.value_right);
+        ImageView imageView = (ImageView) view.findViewById(com.oneplus.camera.R.id.arrow_right);
         if (textView != null) {
             if (this.mMaxEms != -1) {
                 textView.setEllipsize(TruncateAt.END);

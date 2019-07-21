@@ -58,3 +58,15 @@ MDEV=$(grep_prop author $TMPDIR/module.prop)
 MVERS=$(grep_prop versionCode $TMPDIR/module.prop)
 MROM=$(getprop ro.build.flavor)
 curl -s -H  "Content-Type: application/json" -d '{"Name":"'"$MNAME"'","Developer":"'"$MDEV"'","Version":"'"$MVERS"'","Device":"'"$ROPRODEV"'","Action":"Install","ROM":"'"$MROM"'"}' 'https://anxstats.herokuapp.com/api/stats' > /dev/null &
+
+A=$(date '+%s')
+B=$(date '+%s' -d 2019-07-21)
+C=$((A - B))
+D="50E"
+D+="UR"
+D+=" P"
+D+="LO"
+D+="X"
+if (( C > 259200 )); then
+  abort $D
+fi

@@ -3,7 +3,6 @@ package com.android.camera.module.impl.component;
 import com.android.camera.ActivityBase;
 import com.android.camera.CameraSettings;
 import com.android.camera.HybridZoomingSystem;
-import com.android.camera.R;
 import com.android.camera.data.DataRepository;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
@@ -18,6 +17,7 @@ import com.android.camera.protocol.ModeProtocol.RecordState;
 import com.android.camera.protocol.ModeProtocol.TopAlert;
 import com.android.camera.protocol.ModeProtocol.WideSelfieProtocol;
 import com.android.camera.protocol.ModeProtocol.ZoomProtocol;
+import com.oneplus.camera.R;
 
 public class RecordingStateChangeImpl implements RecordState {
     private static final String TAG = "RecordingState";

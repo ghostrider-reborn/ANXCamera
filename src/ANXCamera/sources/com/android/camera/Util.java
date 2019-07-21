@@ -111,6 +111,7 @@ import com.android.gallery3d.ui.StringTexture;
 import com.bytedance.frameworks.core.monitor.MonitorCommonConstants;
 import com.mi.config.b;
 import com.mi.config.d;
+import com.oneplus.camera.R;
 import com.ss.android.ttve.BuildConfig;
 import com.ss.android.ttve.common.TEDefine;
 import com.xiaomi.camera.core.ParallelTaskData;
