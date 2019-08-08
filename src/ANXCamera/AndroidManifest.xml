@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
     android:compileSdkVersion="28" 
     android:compileSdkVersionCodename="9" 
-    android:versionCode="130" 
-    android:versionName="130.AdmiredShallowStagbeetle" 
+    android:versionCode="133" 
+    android:versionName="133.WeeNecessarySolenodon" 
     package="com.android.camera" 
     platformBuildVersionCode="28" 
     platformBuildVersionName="9">

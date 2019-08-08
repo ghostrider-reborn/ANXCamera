@@ -46,6 +46,10 @@ elif device_check "raphael"; then
   rm -rf $TMPDIR/system/lib/
   rm -rf $TMPDIR/system/lib64/
   ui_print "raphy was here, it hates poco libs, it loves someone else"
+elif device_check "davinci"; then 
+  rm -rf $TMPDIR/system/lib/
+  rm -rf $TMPDIR/system/lib64/
+  ui_print "davincy was here, it hates poco libs, it loves someone else"
 elif [ -f /sdcard/.anxnolib ]; then
   rm -rf $TMPDIR/system/lib/
   rm -rf $TMPDIR/system/lib64/
