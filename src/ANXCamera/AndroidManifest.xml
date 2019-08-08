@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
     android:compileSdkVersion="28" 
     android:compileSdkVersionCodename="9" 
-    android:versionCode="131" 
-    android:versionName="131.DimgreyEarlyXenopterygii" 
-    package="com.oneplus.camera" 
+    android:versionCode="133" 
+    android:versionName="133.WeeNecessarySolenodon" 
+    package="com.android.camera" 
     platformBuildVersionCode="28" 
     platformBuildVersionName="9">
     <uses-sdk android:minSdkVersion="26" 
