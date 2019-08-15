@@ -1,7 +1,7 @@
 
 ROPRODEV=$(getprop ro.product.device)
 
-ui_print "Your device is recognized as $ROPRODEV" 
+ui_print "Your device is recognized as ->$ROPRODEV<-" 
 ui_print "It should be one of below:" 
 ui_print "  beryllium"
 ui_print "  violet"
@@ -23,8 +23,8 @@ ui_print "  pyxis"
 ui_print "  laurus"
 ui_print ""
 ui_print "In decreasing order of support"
-ui_print ""
-ui_print ""
+ui_print "Needs Testing for"
+ui_print "chiron jason mido sagit sakura vince wayne cactus cereus laurel_sprout lotus nitrogen onc riva rosy tiare ursa"
 
 if device_check "cepheus"; then 
   rm -rf $TMPDIR/system/lib/
