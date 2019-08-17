@@ -42,6 +42,8 @@ Add any other context about the problem here.
 5. Take Logcat (use alogcat or matlog, or adb logcat)
 6. Attach Logcat to this bug report.
 
+**Telegram username**
+[for e.g @XEonAX]
 
 **Additional context**
 Add any other context about the problem here.
