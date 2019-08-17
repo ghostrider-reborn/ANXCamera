@@ -34,3 +34,7 @@ Add any other context about the problem here.
 
 
 Bug reports without logcat will be closed directly.
+
+
+**Telegram username**
+[for e.g @XEonAX]
