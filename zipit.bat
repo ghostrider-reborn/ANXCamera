@@ -19,6 +19,12 @@ REM "C:\Program Files\7-Zip\7z.exe" a -tzip .\out\KubilWhyredyFix.zip .\src\Kubi
 REM copy .\out\KubilWhyredyFix.zip /B .\out\KubilWhyredyFix_%anxversion%.zip
 
 
+REM del .\out\LavendyFix.zip
+REM del .\out\LavendyFix_*.zip
+REM "C:\Program Files\7-Zip\7z.exe" a -tzip .\out\LavendyFix.zip .\src\LavendyFix\*
+REM copy .\out\LavendyFix.zip /B .\out\LavendyFix_%anxversion%.zip
+
+
 REM del .\out\ANXCamFix.zip
 REM del .\out\ANXCamFix_*.zip
 REM del .\out\ANXCamCustVendFix.zip
