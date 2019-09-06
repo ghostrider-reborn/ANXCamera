@@ -1,0 +1,48 @@
+package com.android.camera.data.data;
+
+import android.support.annotation.DrawableRes;
+import android.support.annotation.StringRes;
+import android.text.TextUtils;
+import com.android.camera.CameraAppImpl;
+
+public final class ComponentDataItem {
+    @DrawableRes
+    public static final int RES_NULL = -1;
+    @StringRes
+    public static final int STRING_NULL = -1;
+    @StringRes
+    public int mDisplayNameRes;
+    public String mDisplayNameStr;
+    @DrawableRes
+    public int mIconRes;
+    @DrawableRes
+    public int mIconSelectedRes;
+    public String mValue;
+
+    public ComponentDataItem(@DrawableRes int i, @DrawableRes int i2, @StringRes int i3, String str) {
+        this.mIconRes = i;
+        this.mIconSelectedRes = i2;
+        this.mDisplayNameRes = i3;
+        this.mValue = str;
+    }
+
+    public ComponentDataItem(@DrawableRes int i, @DrawableRes int i2, String str, String str2) {
+        this.mIconRes = i;
+        this.mIconSelectedRes = i2;
+        this.mDisplayNameStr = str;
+        this.mValue = str2;
+    }
+
+    public String toString() {
+        String string = TextUtils.isEmpty(this.mDisplayNameStr) ? CameraAppImpl.getAndroidContext().getString(this.mDisplayNameRes) : this.mDisplayNameStr;
+        StringBuilder sb = new StringBuilder();
+        sb.append("ComponentDataItem{mDisplayName='");
+        sb.append(string);
+        sb.append('\'');
+        sb.append("mValue='");
+        sb.append(this.mValue);
+        sb.append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+}
