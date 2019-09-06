@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.util.Size;
 import android.widget.Toast;
 import com.android.camera.ActivityBase;
@@ -272,14 +273,14 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             if (this.mIsFrontCamera) {
                 int i5 = this.mDeviceRotation;
                 if (i5 % 180 == 0) {
-                    i = (i5 + 180) % 360;
+                    i = (i5 + 180) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                     Thumbnail createThumbnail = Thumbnail.createThumbnail(null, this.mIsFrontCamera ? createBitmap : createBitmap2, i, this.mIsFrontCamera);
                     createThumbnail.startWaitingForUri();
                     this.mActivityBase.getThumbnailUpdater().setThumbnail(createThumbnail, true, true);
                     LiveModule liveModule = (LiveModule) this.mActivityBase.getCurrentModule();
                     ParallelTaskData parallelTaskData = new ParallelTaskData(liveModule != null ? liveModule.getActualCameraId() : 0, System.currentTimeMillis(), -4, null);
                     parallelTaskData.fillJpegData(bitmapData, 0);
-                    int jpegRotation = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % 360;
+                    int jpegRotation = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                     Size size = this.mDrawSize;
                     Builder builder = new Builder(size, size, size);
                     Location currentLocation = LocationManager.instance().getCurrentLocation();
@@ -302,7 +303,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             LiveModule liveModule2 = (LiveModule) this.mActivityBase.getCurrentModule();
             ParallelTaskData parallelTaskData2 = new ParallelTaskData(liveModule2 != null ? liveModule2.getActualCameraId() : 0, System.currentTimeMillis(), -4, null);
             parallelTaskData2.fillJpegData(bitmapData, 0);
-            int jpegRotation2 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % 360;
+            int jpegRotation2 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             Size size2 = this.mDrawSize;
             Builder builder2 = new Builder(size2, size2, size2);
             Location currentLocation2 = LocationManager.instance().getCurrentLocation();
@@ -329,7 +330,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         LiveModule liveModule22 = (LiveModule) this.mActivityBase.getCurrentModule();
         ParallelTaskData parallelTaskData22 = new ParallelTaskData(liveModule22 != null ? liveModule22.getActualCameraId() : 0, System.currentTimeMillis(), -4, null);
         parallelTaskData22.fillJpegData(bitmapData2, 0);
-        int jpegRotation22 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % 360;
+        int jpegRotation22 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         Size size22 = this.mDrawSize;
         Builder builder22 = new Builder(size22, size22, size22);
         Location currentLocation22 = LocationManager.instance().getCurrentLocation();

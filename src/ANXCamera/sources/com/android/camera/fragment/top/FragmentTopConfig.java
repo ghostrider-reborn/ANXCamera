@@ -29,7 +29,6 @@ import com.android.camera.ToastUtils;
 import com.android.camera.Util;
 import com.android.camera.animation.type.AlphaInOnSubscribe;
 import com.android.camera.animation.type.AlphaOutOnSubscribe;
-import com.android.camera.constant.DurationConstant;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.config.ComponentConfigFlash;
@@ -1811,7 +1810,7 @@ public class FragmentTopConfig extends BaseFragment implements OnClickListener, 
                 RotateDrawable rotateDrawable = (RotateDrawable) ((LayerDrawable) drawable).getDrawable(0);
                 ObjectAnimator objectAnimator = this.mLiveShotAnimator;
                 if (objectAnimator == null || objectAnimator.getTarget() != rotateDrawable) {
-                    this.mLiveShotAnimator = ObjectAnimator.ofInt(rotateDrawable, "level", new int[]{0, DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE});
+                    this.mLiveShotAnimator = ObjectAnimator.ofInt(rotateDrawable, "level", new int[]{0, 10000});
                     this.mLiveShotAnimator.setDuration(1000);
                     this.mLiveShotAnimator.setInterpolator(new CubicEaseInOutInterpolator());
                 }

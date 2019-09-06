@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.os.CountDownTimer;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.support.annotation.MainThread;
 import android.telephony.TelephonyManager;
 import android.util.Range;
@@ -707,7 +708,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     /* access modifiers changed from: protected */
     public void resizeForPreviewAspectRatio() {
-        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + 360) % 180 == 0) {
+        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
             MainContentProtocol mainContentProtocol = this.mMainProtocol;
             CameraSize cameraSize = this.mPreviewSize;
             mainContentProtocol.setPreviewAspectRatio(((float) cameraSize.height) / ((float) cameraSize.width));

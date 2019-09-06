@@ -9,6 +9,7 @@ import android.os.IHwBinder.DeathRecipient;
 import android.os.IHwInterface;
 import android.os.NativeHandle;
 import android.os.RemoteException;
+import android.os.statistics.E2EScenario;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -432,7 +433,7 @@ public interface b extends IHwInterface {
     }
 
     static b getService() throws RemoteException {
-        return getService("default");
+        return getService(E2EScenario.DEFAULT_CATEGORY);
     }
 
     static b getService(String str) throws RemoteException {
@@ -444,7 +445,7 @@ public interface b extends IHwInterface {
     }
 
     static b getService(boolean z) throws RemoteException {
-        return getService("default", z);
+        return getService(E2EScenario.DEFAULT_CATEGORY, z);
     }
 
     IHwBinder asBinder();

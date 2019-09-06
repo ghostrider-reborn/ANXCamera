@@ -112,7 +112,7 @@ class Huffman {
     }
 
     /* JADX WARNING: type inference failed for: r0v6, types: [int] */
-    /* JADX WARNING: type inference failed for: r0v7, types: [int, long] */
+    /* JADX WARNING: type inference failed for: r0v7, types: [long, int] */
     /* JADX WARNING: type inference failed for: r0v8 */
     /* JADX WARNING: type inference failed for: r0v9 */
     /* JADX WARNING: type inference failed for: r0v10 */

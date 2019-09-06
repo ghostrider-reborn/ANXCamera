@@ -6,7 +6,6 @@ import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import com.adobe.xmp.XMPSchemaRegistry;
 import com.adobe.xmp.options.SerializeOptions;
-import com.android.camera.constant.DurationConstant;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -638,7 +637,7 @@ public class XMPSerializerRDF {
                 this.padding = this.unicodeSize * 2048;
             }
             if (this.options.getIncludeThumbnailPad() && !this.xmp.doesPropertyExist(XMPConst.NS_XMP, "Thumbnails")) {
-                this.padding += this.unicodeSize * DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE;
+                this.padding += this.unicodeSize * 10000;
             }
         } else if (!this.options.getIncludeThumbnailPad()) {
             this.padding = 0;

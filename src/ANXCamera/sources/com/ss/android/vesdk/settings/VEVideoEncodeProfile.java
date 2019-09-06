@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Parcelable.Creator;
 import android.text.TextUtils;
-import com.android.camera.JpegEncodingQualityMappings;
 
 public enum VEVideoEncodeProfile implements Parcelable {
     ENCODE_PROFILE_UNKNOWN,
@@ -28,7 +27,7 @@ public enum VEVideoEncodeProfile implements Parcelable {
 
     public static VEVideoEncodeProfile valueOfString(String str) {
         VEVideoEncodeProfile vEVideoEncodeProfile = ENCODE_PROFILE_UNKNOWN;
-        return !TextUtils.isEmpty(str) ? "baseline".equals(str) ? ENCODE_PROFILE_BASELINE : "main".equals(str) ? ENCODE_PROFILE_MAIN : JpegEncodingQualityMappings.HIGH.equals(str) ? ENCODE_PROFILE_HIGH : vEVideoEncodeProfile : vEVideoEncodeProfile;
+        return !TextUtils.isEmpty(str) ? "baseline".equals(str) ? ENCODE_PROFILE_BASELINE : "main".equals(str) ? ENCODE_PROFILE_MAIN : "high".equals(str) ? ENCODE_PROFILE_HIGH : vEVideoEncodeProfile : vEVideoEncodeProfile;
     }
 
     public int describeContents() {

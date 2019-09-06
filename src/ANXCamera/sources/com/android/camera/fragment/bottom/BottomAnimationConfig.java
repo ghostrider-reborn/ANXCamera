@@ -42,7 +42,7 @@ public class BottomAnimationConfig {
                 } else if (i2 == 174) {
                     this.mDuration = DurationConstant.DURATION_LIVE_RECORD;
                 } else {
-                    this.mDuration = DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE;
+                    this.mDuration = 10000;
                 }
             } else {
                 this.mDuration = 30000;

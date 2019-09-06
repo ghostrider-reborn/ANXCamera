@@ -9,7 +9,6 @@ import android.media.Image;
 import android.media.Image.Plane;
 import android.os.Environment;
 import android.text.TextUtils;
-import com.android.camera.constant.DurationConstant;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -465,7 +464,7 @@ public class SuperNightProcess implements ProgressCallback {
         if (key7 != null) {
             int[] iArr7 = (int[]) totalCaptureResult.get(key7);
             if (iArr7 != null && iArr7.length > 0) {
-                rawInfo.luxIndex = iArr7[0] / DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE;
+                rawInfo.luxIndex = iArr7[0] / 10000;
                 StringBuilder sb13 = new StringBuilder();
                 sb13.append("luxIndex = ");
                 sb13.append(rawInfo.luxIndex);

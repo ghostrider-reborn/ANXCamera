@@ -9,6 +9,7 @@ import com.ss.android.ttve.common.TESpdLogManager.InfoLevel;
 import com.ss.android.vesdk.VELogUtil;
 import com.ss.android.vesdk.runtime.persistence.VESP;
 import java.text.SimpleDateFormat;
+import miui.reflect.Field;
 import org.json.JSONObject;
 
 public class VECloudCtrlManager {
@@ -77,7 +78,7 @@ public class VECloudCtrlManager {
                         long currentTimeMillis = System.currentTimeMillis();
                         InfoLevel infoLevel = InfoLevel.LEVEL3;
                         if (string3.hashCode() == 68) {
-                            if (string3.equals("D")) {
+                            if (string3.equals(Field.DOUBLE_SIGNATURE_PRIMITIVE)) {
                                 z2 = false;
                                 InfoLevel infoLevel2 = !z2 ? InfoLevel.LEVEL3 : InfoLevel.LEVEL0;
                                 if (this.mLogStatus && string.equals("true") && currentTimeMillis >= time && currentTimeMillis < time2) {

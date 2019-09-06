@@ -14,10 +14,10 @@ import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.text.TextUtils;
 import android.util.SizeF;
 import com.android.camera.R;
-import com.android.camera.constant.DurationConstant;
 import com.android.camera.log.Log;
 import com.arcsoft.camera.wideselfie.AwsInitParameter;
 import com.arcsoft.camera.wideselfie.ProcessResult;
@@ -253,7 +253,7 @@ public class WideSelfieEngineWrapper {
 
     public void resume() {
         if (!this.mSensorRegisted) {
-            this.mSensorManager.registerListener(this.mSensorEventListener, this.mSensor, DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE);
+            this.mSensorManager.registerListener(this.mSensorEventListener, this.mSensor, 10000);
             this.mSensorRegisted = true;
         }
     }
@@ -315,7 +315,7 @@ public class WideSelfieEngineWrapper {
         defaultInitParams.maxResultWidth = i;
         defaultInitParams.progressBarThumbHeight = this.mWideSelfieOrientation % 180 == 90 ? this.nThumbnailWidth : this.nThumbnailHeight;
         defaultInitParams.thumbnailWidth = 480;
-        defaultInitParams.thumbnailHeight = 360;
+        defaultInitParams.thumbnailHeight = ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         defaultInitParams.guideStopBarThumbHeight = 0;
         defaultInitParams.cameraViewAngleForWidth = this.mAngleSize.getWidth();
         defaultInitParams.cameraViewAngleForHeight = this.mAngleSize.getHeight();

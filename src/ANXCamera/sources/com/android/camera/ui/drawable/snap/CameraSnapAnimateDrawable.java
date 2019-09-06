@@ -209,30 +209,6 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
         }
     }
 
-    /* JADX WARNING: type inference failed for: r0v6, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$12] */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r0v6, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$12]
-  assigns: [com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$12]
-  uses: [android.animation.TimeInterpolator]
-  mth insns count: 35
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 1 */
     public void finishRecord(BottomAnimationConfig bottomAnimationConfig) {
         if (this.mRecordingPaint == null || bottomAnimationConfig.mIsInMimojiCreate) {
             invalidateSelf();
@@ -248,7 +224,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
             this.mTimeAnimator.setDuration(260);
             this.mTimeAnimator.setInterpolator(new CubicEaseInInterpolator() {
                 public float getInterpolation(float f2) {
-                    float interpolation = CameraSnapAnimateDrawable.super.getInterpolation(f2);
+                    float interpolation = super.getInterpolation(f2);
                     CameraSnapAnimateDrawable.this.mRoundPaintItem.updateValue(interpolation);
                     CameraSnapAnimateDrawable.this.mRecordingPaint.updateValue(interpolation);
                     CameraSnapAnimateDrawable.this.invalidateSelf();
@@ -698,30 +674,6 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
         this.mRingAnimator.start();
     }
 
-    /* JADX WARNING: type inference failed for: r1v2, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$2] */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r1v2, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$2]
-  assigns: [com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$2]
-  uses: [android.animation.TimeInterpolator]
-  mth insns count: 14
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 1 */
     public void startScaleDownAnimation() {
         CameraSnapPaintRound cameraSnapPaintRound = this.mRoundPaintItem;
         cameraSnapPaintRound.setTargetValues(0.63296f, cameraSnapPaintRound.mCurrentColor, cameraSnapPaintRound.mCurrentAlpha, cameraSnapPaintRound.mCurrentStrokeWidth);
@@ -729,7 +681,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
         ofFloat.setDuration(200);
         ofFloat.setInterpolator(new CubicEaseOutInterpolator() {
             public float getInterpolation(float f2) {
-                float interpolation = CameraSnapAnimateDrawable.super.getInterpolation(f2);
+                float interpolation = super.getInterpolation(f2);
                 CameraSnapAnimateDrawable.this.mRoundPaintItem.updateValue(interpolation);
                 CameraSnapAnimateDrawable.this.invalidateSelf();
                 return interpolation;
@@ -739,37 +691,13 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
         ofFloat.start();
     }
 
-    /* JADX WARNING: type inference failed for: r2v2, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$3] */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r2v2, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$3]
-  assigns: [com.android.camera.ui.drawable.snap.CameraSnapAnimateDrawable$3]
-  uses: [android.animation.TimeInterpolator]
-  mth insns count: 14
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 1 */
     public void startScaleUpAnimation(long j, AnimatorListener animatorListener) {
         ValueAnimator ofFloat = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         ofFloat.setStartDelay(j);
         ofFloat.setDuration(200);
         ofFloat.setInterpolator(new CubicEaseOutInterpolator() {
             public float getInterpolation(float f2) {
-                float interpolation = CameraSnapAnimateDrawable.super.getInterpolation(f2);
+                float interpolation = super.getInterpolation(f2);
                 CameraSnapAnimateDrawable.this.mRoundPaintItem.updateValue(interpolation);
                 CameraSnapAnimateDrawable.this.invalidateSelf();
                 return interpolation;

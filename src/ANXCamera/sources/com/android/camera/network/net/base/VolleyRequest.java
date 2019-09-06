@@ -1,7 +1,6 @@
 package com.android.camera.network.net.base;
 
 import android.os.Looper;
-import com.android.camera.constant.DurationConstant;
 import com.android.camera.network.net.HttpManager;
 import com.android.camera.network.threadpool.ThreadManager;
 import com.android.volley.DefaultRetryPolicy;
@@ -39,7 +38,7 @@ public abstract class VolleyRequest<T, E> extends BaseRequest<E> implements List
         this.mRequest = createVolleyRequest(this, this);
         Request<T> request = this.mRequest;
         if (request != null) {
-            request.setRetryPolicy(new DefaultRetryPolicy(DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE, 1, 1.0f));
+            request.setRetryPolicy(new DefaultRetryPolicy(10000, 1, 1.0f));
             this.mRequest.setShouldCache(isUseCache());
             Object tag = getTag();
             if (this.mRequest.getTag() == null && tag != null) {

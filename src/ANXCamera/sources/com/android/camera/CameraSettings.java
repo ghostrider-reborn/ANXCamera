@@ -8,6 +8,8 @@ import android.hardware.input.InputManager;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.SystemProperties;
+import android.provider.MiuiSettings;
+import android.provider.MiuiSettings.Key;
 import android.provider.Settings.Global;
 import android.provider.Settings.System;
 import android.support.annotation.Nullable;
@@ -369,7 +371,7 @@ public class CameraSettings {
     }
 
     public static int addExtraHeight(Context context, int i) {
-        return (b.yn || !Util.checkDeviceHasNavigationBar(context) || Global.getInt(context.getContentResolver(), "can_nav_bar_hide", 0) != 1) ? i : i + Util.getNavigationBarHeight(context);
+        return (b.yn || !Util.checkDeviceHasNavigationBar(context) || Global.getInt(context.getContentResolver(), MiuiSettings.Global.CAN_NAV_BAR_HIDE, 0) != 1) ? i : i + Util.getNavigationBarHeight(context);
     }
 
     public static void addLensDirtyDetectedTimes() {
@@ -694,7 +696,7 @@ public class CameraSettings {
 
     public static String getJpegQuality(boolean z) {
         String string = DataRepository.dataItemConfig().getString(KEY_JPEG_QUALITY, getString(R.string.pref_camera_jpegquality_default));
-        String str = z ? "normal" : JpegEncodingQualityMappings.HIGH;
+        String str = z ? "normal" : "high";
         return JpegEncodingQualityMappings.getQualityNumber(string) < JpegEncodingQualityMappings.getQualityNumber(str) ? string : str;
     }
 
@@ -744,7 +746,7 @@ public class CameraSettings {
     }
 
     public static String getMiuiSettingsKeyForStreetSnap(String str) {
-        return str.equals(getString(R.string.pref_camera_snap_value_take_picture)) ? "Street-snap-picture" : str.equals(getString(R.string.pref_camera_snap_value_take_movie)) ? "Street-snap-movie" : "none";
+        return str.equals(getString(R.string.pref_camera_snap_value_take_picture)) ? Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE : str.equals(getString(R.string.pref_camera_snap_value_take_movie)) ? Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE : "none";
     }
 
     public static int getPanoramaMoveDirection(Context context) {
@@ -958,7 +960,7 @@ public class CameraSettings {
         if (!b.ej()) {
             return 0;
         }
-        return (System.getInt(context.getContentResolver(), EDGE_HANDGRIP_MODE_SCREENSHOT, 0) | ((System.getInt(context.getContentResolver(), EDGE_HANDGRIP_MODE, 0) | System.getInt(context.getContentResolver(), EDGE_HANDGRIP_MODE_CLEAN, 0)) | System.getInt(context.getContentResolver(), EDGE_HANDGRIP_MODE_BACK, 0))) == 1 ? 2 : 0;
+        return (System.getInt(context.getContentResolver(), "edge_handgrip_screenshot", 0) | ((System.getInt(context.getContentResolver(), "edge_handgrip", 0) | System.getInt(context.getContentResolver(), "edge_handgrip_clean", 0)) | System.getInt(context.getContentResolver(), "edge_handgrip_back", 0))) == 1 ? 2 : 0;
     }
 
     public static String getTTLiveMusicJsonCache() {
@@ -1779,7 +1781,7 @@ public class CameraSettings {
     public static void readEdgePhotoSetting(Context context) {
         if (b.ej()) {
             boolean z = false;
-            if (System.getInt(context.getContentResolver(), EDGE_HANDGRIP_MODE_PHOTO, 0) == 1) {
+            if (System.getInt(context.getContentResolver(), "edge_handgrip_photo", 0) == 1) {
                 z = true;
             }
             sEdgePhotoEnable = z;

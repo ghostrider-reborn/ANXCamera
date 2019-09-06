@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
-    android:compileSdkVersion="29" 
+    android:compileSdkVersion="28" 
     android:compileSdkVersionCodename="10" 
+    android:versionCode="143" 
+    android:versionName="143.DimUnfinishedRattlesnake" 
     package="com.android.camera" 
-    platformBuildVersionCode="29" 
+    platformBuildVersionCode="28" 
     platformBuildVersionName="10">
+    <uses-sdk android:minSdkVersion="26" 
+        android:targetSdkVersion="28"/>
     <original-package android:name="com.android.camera"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera"/>
@@ -15,7 +19,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
+    <!-- <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/> -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
@@ -40,9 +44,8 @@
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
     <permission android:name="com.android.camera.permission.RESET_PREF" 
         android:protectionLevel="normal"/>
-    <application android:allowBackup="true" 
+    <application android:allowBackup="false" 
         android:appComponentFactory="android.support.v4.app.CoreComponentFactory" 
-        android:backupAgent="miui.app.backup.FullBackupAgent" 
         android:extractNativeLibs="false" 
         android:hardwareAccelerated="true" 
         android:icon="@mipmap/ic_launcher_camera" 
@@ -55,9 +58,12 @@
             android:value="2.2"/>
         <uses-library android:name="zxing.jar" 
             android:required="false"/>
-        <uses-library android:name="miui-stat.jar"/>
-        <uses-library android:name="cloud-common.jar"/>
-        <uses-library android:name="volley.jar"/>
+        <uses-library android:name="miui-stat.jar"
+            android:required="false"/>
+        <uses-library android:name="cloud-common.jar"
+            android:required="false"/>
+        <uses-library android:name="volley.jar"
+            android:required="false"/>
         <service android:exported="false" 
             android:name="com.android.camera.snap.SnapService" 
             android:permission="android.permission.BIND_JOB_SERVICE"/>

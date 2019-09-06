@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.statistics.E2EScenario;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
@@ -333,8 +334,10 @@ public class FragmentLiveSticker extends FragmentLiveBase implements OnCtaNotice
     }
 
     private void updateData() {
-        String str = "default";
-        new TTLiveStickerResourceRequest(CameraSettings.isLiveStickerInternalChannel() ? EffectConstants.CHANNEL_LOCAL_TEST : str, str).execute(!CameraSettings.isLiveStickerInternalChannel(), new ResponseListener() {
+        boolean z = !CameraSettings.isLiveStickerInternalChannel();
+        boolean isLiveStickerInternalChannel = CameraSettings.isLiveStickerInternalChannel();
+        String str = E2EScenario.DEFAULT_CATEGORY;
+        new TTLiveStickerResourceRequest(isLiveStickerInternalChannel ? EffectConstants.CHANNEL_LOCAL_TEST : str, str).execute(z, new ResponseListener() {
             public void onResponse(Object... objArr) {
                 final List list = objArr[0];
                 Completable.fromAction(new Action() {

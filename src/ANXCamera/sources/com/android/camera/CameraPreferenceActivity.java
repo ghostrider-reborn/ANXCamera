@@ -2,6 +2,7 @@ package com.android.camera;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
+import android.provider.MiuiSettings.Key;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -82,7 +84,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                         } else if (preference instanceof PreviewListPreference) {
                             ((PreviewListPreference) preference).setValue(str);
                         }
-                        Secure.putString(CameraPreferenceActivity.this.getContentResolver(), "key_long_press_volume_down", CameraSettings.getMiuiSettingsKeyForStreetSnap(str));
+                        Secure.putString(CameraPreferenceActivity.this.getContentResolver(), Key.LONG_PRESS_VOLUME_DOWN, CameraSettings.getMiuiSettingsKeyForStreetSnap(str));
                     } else if (i == -2) {
                         CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog.dismiss();
                         CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog = null;
@@ -541,9 +543,10 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     }
 
     private void resetSnapSetting() {
-        String str = "key_long_press_volume_down";
-        String string = Secure.getString(getContentResolver(), str);
-        if ("Street-snap-picture".equals(string) || "Street-snap-movie".equals(string)) {
+        ContentResolver contentResolver = getContentResolver();
+        String str = Key.LONG_PRESS_VOLUME_DOWN;
+        String string = Secure.getString(contentResolver, str);
+        if (Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string) || Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string)) {
             Secure.putString(getContentResolver(), str, "none");
         }
     }
@@ -589,9 +592,10 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             String string2 = getString(R.string.pref_camera_snap_default);
             previewListPreference2.setDefaultValue(string2);
             previewListPreference2.setValue(string2);
-            String str2 = "key_long_press_volume_down";
-            String string3 = Secure.getString(getContentResolver(), str2);
-            if ("public_transportation_shortcuts".equals(string3) || "none".equals(string3)) {
+            ContentResolver contentResolver = getContentResolver();
+            String str2 = Key.LONG_PRESS_VOLUME_DOWN;
+            String string3 = Secure.getString(contentResolver, str2);
+            if (Key.LONG_PRESS_VOLUME_DOWN_PAY.equals(string3) || "none".equals(string3)) {
                 previewListPreference2.setValue(getString(R.string.pref_camera_snap_value_off));
             } else {
                 String string4 = DataRepository.dataItemGlobal().getString(str, null);
@@ -599,9 +603,9 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                     Secure.putString(getContentResolver(), str2, CameraSettings.getMiuiSettingsKeyForStreetSnap(string4));
                     DataRepository.dataItemGlobal().editor().remove(str).apply();
                     previewListPreference2.setValue(string4);
-                } else if ("Street-snap-picture".equals(string3)) {
+                } else if (Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string3)) {
                     previewListPreference2.setValue(getString(R.string.pref_camera_snap_value_take_picture));
-                } else if ("Street-snap-movie".equals(string3)) {
+                } else if (Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string3)) {
                     previewListPreference2.setValue(getString(R.string.pref_camera_snap_value_take_movie));
                 }
             }
@@ -723,9 +727,10 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         } else if (obj instanceof String) {
             string = (String) obj;
         }
-        String str2 = "key_long_press_volume_down";
-        if (string.equals(getString(R.string.pref_camera_snap_value_take_picture)) || string.equals(getString(R.string.pref_camera_snap_value_take_movie))) {
-            if ("public_transportation_shortcuts".equals(Secure.getString(getContentResolver(), str2))) {
+        boolean equals = string.equals(getString(R.string.pref_camera_snap_value_take_picture));
+        String str2 = Key.LONG_PRESS_VOLUME_DOWN;
+        if (equals || string.equals(getString(R.string.pref_camera_snap_value_take_movie))) {
+            if (Key.LONG_PRESS_VOLUME_DOWN_PAY.equals(Secure.getString(getContentResolver(), str2))) {
                 bringUpDoubleConfirmDlg(preference, string);
                 return false;
             }

@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.os.Debug;
 import android.os.Debug.MemoryInfo;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -286,7 +287,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         checkNoGLES2Error();
         boolean z = i420Frame.localPreview && !i420Frame.backCamera;
         FloatBuffer floatBuffer2 = null;
-        int i4 = (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % 360;
+        int i4 = (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         if (i4 != 0) {
             if (i4 == 90) {
                 floatBuffer = z ? leftTextureCoordMirror : leftTextureCoord;
@@ -563,7 +564,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
                     sb.append(this._lastYStride);
                     Log.i(str, sb.toString());
                     this._lastYStride = i420Frame.yuvStrides[0];
-                    CalcRatioViewPort(i420Frame.width, i420Frame.height, (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % 360);
+                    CalcRatioViewPort(i420Frame.width, i420Frame.height, (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
                     checkNoGLES2Error();
                     this._lastYUVWidth = i420Frame.width;
                     this._lastYUVHeight = i420Frame.height;

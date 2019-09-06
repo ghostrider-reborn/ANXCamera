@@ -31,6 +31,8 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.MediaStore.Video.Media;
+import android.provider.MiuiSettings;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
 import android.support.annotation.NonNull;
@@ -360,10 +362,10 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     }
 
     private void initSnapType() {
-        String string = Secure.getString(this.mContext.getContentResolver(), "key_long_press_volume_down");
-        if (string.equals("Street-snap-picture")) {
+        String string = Secure.getString(this.mContext.getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN);
+        if (string.equals(MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE)) {
             this.mIsCamcorder = false;
-        } else if (string.equals("Street-snap-movie")) {
+        } else if (string.equals(MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE)) {
             this.mIsCamcorder = true;
         } else {
             this.mIsCamcorder = false;
@@ -379,13 +381,13 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
         String str = CameraSettings.KEY_CAMERA_SNAP;
         String string = dataItemGlobal.getString(str, null);
-        String str2 = "key_long_press_volume_down";
+        String str2 = MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN;
         if (string != null) {
             Secure.putString(context.getContentResolver(), str2, CameraSettings.getMiuiSettingsKeyForStreetSnap(string));
             DataRepository.dataItemGlobal().editor().remove(str).apply();
         }
         String string2 = Secure.getString(context.getContentResolver(), str2);
-        return "Street-snap-picture".equals(string2) || "Street-snap-movie".equals(string2);
+        return MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string2) || MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string2);
     }
 
     /* access modifiers changed from: private */
@@ -449,7 +451,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     private void setRecorderOrientationHint() {
         int sensorOrientation = this.mCameraCapabilities.getSensorOrientation();
         if (this.mOrientation != -1) {
-            sensorOrientation = this.mCameraCapabilities.getFacing() == 0 ? ((sensorOrientation - this.mOrientation) + 360) % 360 : (sensorOrientation + this.mOrientation) % 360;
+            sensorOrientation = this.mCameraCapabilities.getFacing() == 0 ? ((sensorOrientation - this.mOrientation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : (sensorOrientation + this.mOrientation) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         String str = TAG;
         StringBuilder sb = new StringBuilder();

@@ -31,6 +31,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.text.format.DateFormat;
 import android.util.Size;
 import android.view.KeyEvent;
@@ -1238,7 +1239,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         if (!(i == 0 || i == 90 || i == 180 || i == 270)) {
             i = 0;
         }
-        return (i + this.mDeviceOrientationAtCapture) % 360;
+        return (i + this.mDeviceOrientationAtCapture) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
     }
 
     /* access modifiers changed from: private */
@@ -1335,9 +1336,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         int displayRotation = Util.getDisplayRotation(this.mActivity);
         int i = this.mOrientation;
         if (i == -1) {
-            this.mInitParam.output_rotation = ((this.mCameraOrientation + displayRotation) + 360) % 360;
+            this.mInitParam.output_rotation = ((this.mCameraOrientation + displayRotation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         } else {
-            this.mInitParam.output_rotation = (((this.mCameraOrientation + displayRotation) + i) + 360) % 360;
+            this.mInitParam.output_rotation = (((this.mCameraOrientation + displayRotation) + i) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         String cameraLensType = CameraSettings.getCameraLensType(166);
         String str2 = TAG;

@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.os.Build.VERSION;
 import android.os.SystemProperties;
+import android.os.statistics.E2EScenario;
 import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.util.Size;
@@ -43,7 +44,7 @@ public class a extends DataItemBase implements c {
         String sb2 = sb.toString();
         try {
             String string = resources.getString(R.string.device_feature_configuration_file_name);
-            return (string == null || string.length() == 0 || "default".equals(string)) ? sb2 : string;
+            return (string == null || string.length() == 0 || E2EScenario.DEFAULT_CATEGORY.equals(string)) ? sb2 : string;
         } catch (NotFoundException e2) {
             Log.d(TAG, "Device feature configuration file name undefined", e2);
             return sb2;

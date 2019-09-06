@@ -2,6 +2,7 @@ package com.android.camera.fragment.vv;
 
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
+import android.os.statistics.E2EScenario;
 import com.android.camera.Util;
 import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
 import java.io.File;
@@ -119,7 +120,7 @@ public class VVItem extends BaseResourceItem {
             JSONObject optJSONObject = optJSONArray2.optJSONObject(i3);
             String optString = optJSONObject.optString("lang");
             String str2 = "name";
-            if (optString.equalsIgnoreCase("default")) {
+            if (optString.equalsIgnoreCase(E2EScenario.DEFAULT_CATEGORY)) {
                 this.name = optJSONObject.optString(str2);
             } else if (optString.equalsIgnoreCase(str)) {
                 this.name = optJSONObject.optString(str2);

@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.Surface;
@@ -187,7 +188,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
             public void onSurfaceReady(Surface surface) {
                 if (FragmentVVProcess.this.mWaitingResultSurfaceTexture) {
                     FragmentVVProcess.this.mWaitingResultSurfaceTexture = false;
-                    FragmentVVProcess.this.mTextureVideoView.setVideoSpecifiedSize(1920, 1080);
+                    FragmentVVProcess.this.mTextureVideoView.setVideoSpecifiedSize(1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
                     FragmentVVProcess.this.startPlay(surface);
                 }
             }

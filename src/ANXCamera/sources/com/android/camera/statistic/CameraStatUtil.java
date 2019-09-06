@@ -3,6 +3,7 @@ package com.android.camera.statistic;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.provider.MiuiSettings.System;
 import android.util.SparseArray;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -75,7 +76,7 @@ public class CameraStatUtil {
         sExposureTimeLessThan1sToName.put(1000, "1/1000s");
         sExposureTimeLessThan1sToName.put(2000, "1/500s");
         String str3 = "1/250s";
-        sExposureTimeLessThan1sToName.put(4000, str3);
+        sExposureTimeLessThan1sToName.put(System.STATUS_BAR_UPDATE_NETWORK_SPEED_INTERVAL_DEFAULT, str3);
         sExposureTimeLessThan1sToName.put(5000, str3);
         sExposureTimeLessThan1sToName.put(BaseModule.LENS_DIRTY_DETECT_HINT_DURATION, "1/125s");
         sExposureTimeLessThan1sToName.put(16667, "1/60s");

@@ -13,6 +13,7 @@ import android.hardware.Camera.PreviewCallback;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
@@ -361,7 +362,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
         Log.v(TAG, sb.toString());
         if (this.camera != null) {
             CameraInfo cameraInfo = this.info;
-            int i2 = cameraInfo.facing == 1 ? (360 - cameraInfo.orientation) % 360 : cameraInfo.orientation;
+            int i2 = cameraInfo.facing == 1 ? (360 - cameraInfo.orientation) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : cameraInfo.orientation;
             if (!this.bLandScapeMode) {
                 this.camera.setDisplayOrientation(i2);
             }
@@ -603,9 +604,9 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 this.rotation = 0;
             }
             if (this.info.facing == 1) {
-                this.frameRotation = ((this.info.orientation - this.rotation) + 360) % 360;
+                this.frameRotation = ((this.info.orientation - this.rotation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             } else if (this.info.facing == 0) {
-                this.frameRotation = (this.info.orientation + this.rotation) % 360;
+                this.frameRotation = (this.info.orientation + this.rotation) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             }
             ProvideCameraFrame(bArr, bArr.length, this.native_capturer, this.frameRotation);
             this.camera.addCallbackBuffer(bArr);

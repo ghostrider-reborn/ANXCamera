@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.MiuiSettings.ScreenEffect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -430,7 +431,7 @@ public class TERecorder implements a, OnProcessDataListener {
                 i = 270;
             }
         }
-        return camera_facing_id == CAMERA_FACING_ID.FACING_FRONT ? (540 - ((this.mCameraSettings.getOrientation() + i) % 360)) % 360 : ((this.mCameraSettings.getOrientation() - i) + 360) % 360;
+        return camera_facing_id == CAMERA_FACING_ID.FACING_FRONT ? (540 - ((this.mCameraSettings.getOrientation() + i) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT)) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : ((this.mCameraSettings.getOrientation() - i) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
     }
 
     private void initAudioPlayerIfNeed(int i) {

@@ -128,7 +128,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
         }
 
         private int[] getAndroidArrayRes(String str) {
-            String str2 = "I";
+            String str2 = Field.INT_SIGNATURE_PRIMITIVE;
             String str3 = CameraBrightness.TAG;
             try {
                 return CameraAppImpl.getAndroidContext().getResources().getIntArray(Field.of(array.class, str, str2).getInt(null));
@@ -150,7 +150,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
         }
 
         private boolean getAndroidBoolRes(String str, boolean z) {
-            String str2 = "I";
+            String str2 = Field.INT_SIGNATURE_PRIMITIVE;
             String str3 = CameraBrightness.TAG;
             try {
                 return CameraAppImpl.getAndroidContext().getResources().getBoolean(Field.of(bool.class, str, str2).getInt(null));
@@ -174,7 +174,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
         private int getAndroidIntResource(String str) {
             String str2 = CameraBrightness.TAG;
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(integer.class, str, "I").getInt(null));
+                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt(null));
             } catch (NoSuchFieldException e2) {
                 Log.e(str2, e2.getMessage());
                 return 0;
@@ -306,7 +306,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
         private int getMiuiIntResource(String str) {
             String str2 = CameraBrightness.TAG;
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(R.integer.class, str, "I").getInt(null));
+                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(R.integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt(null));
             } catch (NoSuchFieldException e2) {
                 Log.e(str2, e2.getMessage());
                 return 0;
