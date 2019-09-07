@@ -659,7 +659,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
 
     public void onBackPressed() {
         resetTimeOutFlag();
-        CameraPreferenceActivity.super.onBackPressed();
+        super.onBackPressed();
     }
 
     public void onCreate(Bundle bundle) {
@@ -675,7 +675,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
 
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() != 16908332) {
-            return CameraPreferenceActivity.super.onOptionsItemSelected(menuItem);
+            return super.onOptionsItemSelected(menuItem);
         }
         resetTimeOutFlag();
         finish();
@@ -760,7 +760,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
 
     /* access modifiers changed from: protected */
     public void onRestart() {
-        CameraPreferenceActivity.super.onRestart();
+        super.onRestart();
         if (this.mGoToActivity) {
             updateWaterMark(this.mPreferences, (ValuePreference) this.mWatermark);
             updatePhotoAssistanceTips(this.mPreferences, (ValuePreference) this.mPhotoAssistanceTips);
@@ -772,7 +772,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
 
     /* access modifiers changed from: protected */
     public void onResume() {
-        CameraPreferenceActivity.super.onResume();
+        super.onResume();
         updateQRCodeEntry();
         if (Util.isLabOptionsVisible()) {
             Toast.makeText(this, R.string.camera_facedetection_sub_option_hint, 1).show();

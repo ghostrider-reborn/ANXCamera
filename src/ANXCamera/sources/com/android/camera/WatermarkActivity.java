@@ -368,7 +368,7 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
             editText.removeTextChangedListener(this);
             this.mEtUserDefineWords.setTransformationMethod(null);
         }
-        WatermarkActivity.super.onDestroy();
+        super.onDestroy();
         release();
     }
 

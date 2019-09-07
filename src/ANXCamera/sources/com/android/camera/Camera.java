@@ -625,7 +625,7 @@ public class Camera extends ActivityBase implements OnRequestPermissionsResultCa
     private void setTranslucentNavigation(boolean z) {
         if (Util.checkDeviceHasNavigationBar(this)) {
             Window window = getWindow();
-            window.getDecorView().setSystemUiVisibility(768);
+            window.getDecorView().setSystemUiVisibility(4096);
             window.addFlags(Integer.MIN_VALUE);
         }
     }
