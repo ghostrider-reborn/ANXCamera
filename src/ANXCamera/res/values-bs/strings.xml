@@ -8,7 +8,7 @@
     <string name="cannot_connect_camera_once">Ne mogu se povezati sa kamerom</string>
     <string name="cannot_connect_camera_twice">Još uvijek se ne mogu povezai sa kamerom. Pokušajte resetirati Vaš uređaj.</string>
     <string name="camera_disabled">Kamera je onemogućena</string>
-    <string name="camera_label">Kamera</string>
+    <string name="camera_label">ANXKamera</string>
     <string name="video_camera_label">Videokamera</string>
     <string name="no_storage">Ubacite SD karticu prije upotrebe kamere</string>
     <string name="not_enough_space">SD kartica je puna</string>

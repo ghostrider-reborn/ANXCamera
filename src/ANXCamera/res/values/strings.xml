@@ -10,7 +10,7 @@
     <string name="cannot_connect_camera_once">"Can't connect to camera"</string>
     <string name="cannot_connect_camera_twice">"Still can't connect to camera. Try restarting your device."</string>
     <string name="camera_disabled">Camera has been disabled</string>
-    <string name="camera_label">Camera</string>
+    <string name="camera_label">ANXCamera</string>
     <string name="video_camera_label">Camcorder</string>
     <string name="no_storage">Insert SD card before using camera</string>
     <string name="not_enough_space">SD card is full</string>
@@ -20,7 +20,9 @@
     <string name="confirm_restore_message">"Restore Camera's default settings?"</string>
     <string name="confirm_location_title">Remember photo locations?</string>
     <string name="confirm_location_message">Tag your photos and videos with the locations where they are taken. Other apps can access this information along with your saved images.</string>
+    <string name="confirm_anxcamera_title">Welcome to ANXCamera</string>
     <string name="confirm_location_alert">Remember photo locations</string>
+    <string name="confirm_anxcamera_message">Portrait Mode might be Broken. Sponser me plox.</string>
     <string name="start_capture">OK</string>
     <string name="pref_camera_recordlocation_title">Save location info</string>
     <string name="pref_camera_recordlocation_default">false</string>
@@ -344,6 +346,9 @@
     <string name="face_score_info">Score: %.1f</string>
     <string name="pref_camera_show_gender_age_config_title">Age &amp; gender</string>
     <string name="pref_priority_storage_title">Save to SD card</string>
+    <string name="pref_anxbounce_title">Play ANXBounce</string>
+    <string name="pref_anxcamera_title">ANXCamera Chat</string>
+    <string name="pref_anxupdate_title">Check for Update</string>
     <string name="pref_camera_tilt_shift_entry_circle">Circle</string>
     <string name="pref_camera_tilt_shift_entry_parallel">Parallel</string>
     <string name="pref_camera_tilt_shift_entryvalue_circle">circle</string>

@@ -1653,6 +1653,8 @@ public final class R {
         public static final int zoom_ratio_item_image = 2131624321;
         public static final int zoom_ratio_item_text = 2131624322;
         public static final int zoom_ratio_toggle_button = 2131624040;
+        /* added by JADX */
+        public static final int view_anxbounce = 2131624323;
     }
 
     public static final class integer {
@@ -1797,6 +1799,14 @@ public final class R {
     public static final class mipmap {
         public static final int ic_launcher_camera = 2130903040;
         public static final int ic_mimoji = 2130903041;
+        /* added by JADX */
+        public static final int ic_launcher = 2130903042;
+        /* added by JADX */
+        public static final int ic_launcher_background = 2130903043;
+        /* added by JADX */
+        public static final int ic_launcher_foreground = 2130903044;
+        /* added by JADX */
+        public static final int ic_launcher_round = 2130903045;
     }
 
     public static final class plurals {
@@ -1810,6 +1820,86 @@ public final class R {
         public static final int feature_tucana = 2131230722;
         public static final int goofy_face = 2131230723;
         public static final int xiaomi_static_config = 2131230724;
+        /* added by JADX */
+        public static final int feature_andromeda = 2131230725;
+        /* added by JADX */
+        public static final int feature_begonia = 2131230726;
+        /* added by JADX */
+        public static final int feature_begoniain = 2131230727;
+        /* added by JADX */
+        public static final int feature_beryllium = 2131230728;
+        /* added by JADX */
+        public static final int feature_cactus = 2131230729;
+        /* added by JADX */
+        public static final int feature_cepheus = 2131230730;
+        /* added by JADX */
+        public static final int feature_cereus = 2131230731;
+        /* added by JADX */
+        public static final int feature_crux = 2131230732;
+        /* added by JADX */
+        public static final int feature_daisy_sprout = 2131230733;
+        /* added by JADX */
+        public static final int feature_davinci = 2131230734;
+        /* added by JADX */
+        public static final int feature_davinciin = 2131230735;
+        /* added by JADX */
+        public static final int feature_dipper = 2131230736;
+        /* added by JADX */
+        public static final int feature_equuleus = 2131230737;
+        /* added by JADX */
+        public static final int feature_gemini = 2131230738;
+        /* added by JADX */
+        public static final int feature_ginkgo = 2131230739;
+        /* added by JADX */
+        public static final int feature_grus = 2131230740;
+        /* added by JADX */
+        public static final int feature_jasmine_sprout = 2131230741;
+        /* added by JADX */
+        public static final int feature_jason = 2131230742;
+        /* added by JADX */
+        public static final int feature_laurel_sprout = 2131230743;
+        /* added by JADX */
+        public static final int feature_laurus = 2131230744;
+        /* added by JADX */
+        public static final int feature_lavender = 2131230745;
+        /* added by JADX */
+        public static final int feature_lotus = 2131230746;
+        /* added by JADX */
+        public static final int feature_nitrogen = 2131230747;
+        /* added by JADX */
+        public static final int feature_onc = 2131230748;
+        /* added by JADX */
+        public static final int feature_perseus = 2131230749;
+        /* added by JADX */
+        public static final int feature_platina = 2131230750;
+        /* added by JADX */
+        public static final int feature_polaris = 2131230751;
+        /* added by JADX */
+        public static final int feature_pyxis = 2131230752;
+        /* added by JADX */
+        public static final int feature_raphael = 2131230753;
+        /* added by JADX */
+        public static final int feature_raphaelin = 2131230754;
+        /* added by JADX */
+        public static final int feature_riva = 2131230755;
+        /* added by JADX */
+        public static final int feature_rosy = 2131230756;
+        /* added by JADX */
+        public static final int feature_sirius = 2131230757;
+        /* added by JADX */
+        public static final int feature_tissot = 2131230758;
+        /* added by JADX */
+        public static final int feature_tulip = 2131230759;
+        /* added by JADX */
+        public static final int feature_ursa = 2131230760;
+        /* added by JADX */
+        public static final int feature_vince = 2131230761;
+        /* added by JADX */
+        public static final int feature_violet = 2131230762;
+        /* added by JADX */
+        public static final int feature_whyred = 2131230763;
+        /* added by JADX */
+        public static final int feature_ysl = 2131230764;
     }
 
     public static final class string {
@@ -2829,6 +2919,16 @@ public final class R {
         public static final int APKTOOL_DUMMY_3e4 = 2131297252;
         /* added by JADX */
         public static final int pref_6mw_title = 2131297253;
+        /* added by JADX */
+        public static final int confirm_anxcamera_title = 2131297254;
+        /* added by JADX */
+        public static final int confirm_anxcamera_message = 2131297255;
+        /* added by JADX */
+        public static final int pref_anxbounce_title = 2131297256;
+        /* added by JADX */
+        public static final int pref_anxcamera_title = 2131297257;
+        /* added by JADX */
+        public static final int pref_anxupdate_title = 2131297258;
     }
 
     public static final class style {

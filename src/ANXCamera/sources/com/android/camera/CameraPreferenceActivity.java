@@ -40,6 +40,8 @@ import java.util.Iterator;
 
 public class CameraPreferenceActivity extends BasePreferenceActivity {
     public static final String IS_IMAGE_CAPTURE_INTENT = "IsCaptureIntent";
+    protected static final String PREF_KEY_ANXBATTLE = "pref_anxbattle";
+    protected static final String PREF_KEY_ANXCAMERA = "pref_anxcamera";
     protected static final String PREF_KEY_PRIVACY = "pref_privacy";
     protected static final String PREF_KEY_RESTORE = "pref_restore";
     public static final String REMOVE_KEYS = "remove_keys";
@@ -442,17 +444,29 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         if (findPreference2 != null) {
             findPreference2.setOnPreferenceClickListener(this);
         }
-        Preference findPreference3 = this.mPreferenceGroup.findPreference(CameraSettings.KEY_PRIORITY_STORAGE);
+        Preference findPreference3 = this.mPreferenceGroup.findPreference(PREF_KEY_ANXCAMERA);
         if (findPreference3 != null) {
             findPreference3.setOnPreferenceClickListener(this);
         }
-        Preference findPreference4 = this.mPreferenceGroup.findPreference(CameraSettings.KEY_FACE_DETECTION);
+        Preference findPreference4 = this.mPreferenceGroup.findPreference("pref_checkupdate");
         if (findPreference4 != null) {
             findPreference4.setOnPreferenceClickListener(this);
         }
-        Preference findPreference5 = this.mPreferenceGroup.findPreference(CameraSettings.KEY_SCAN_QRCODE);
+        Preference findPreference5 = this.mPreferenceGroup.findPreference(PREF_KEY_ANXBATTLE);
         if (findPreference5 != null) {
             findPreference5.setOnPreferenceClickListener(this);
+        }
+        Preference findPreference6 = this.mPreferenceGroup.findPreference(CameraSettings.KEY_PRIORITY_STORAGE);
+        if (findPreference6 != null) {
+            findPreference6.setOnPreferenceClickListener(this);
+        }
+        Preference findPreference7 = this.mPreferenceGroup.findPreference(CameraSettings.KEY_FACE_DETECTION);
+        if (findPreference7 != null) {
+            findPreference7.setOnPreferenceClickListener(this);
+        }
+        Preference findPreference8 = this.mPreferenceGroup.findPreference(CameraSettings.KEY_SCAN_QRCODE);
+        if (findPreference8 != null) {
+            findPreference8.setOnPreferenceClickListener(this);
         }
         this.mWatermark = this.mPreferenceGroup.findPreference(CameraSettings.KEY_WATERMARK);
         if (this.mWatermark != null) {

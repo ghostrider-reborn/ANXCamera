@@ -8,6 +8,12 @@
 
 .field protected static final PREF_KEY_PRIVACY:Ljava/lang/String; = "pref_privacy"
 
+.field protected static final PREF_KEY_ANXBATTLE:Ljava/lang/String; = "pref_anxbattle"
+
+.field protected static final PREF_KEY_ANXCAMERA:Ljava/lang/String; = "pref_anxcamera"
+
+.field protected static final PREF_KEY_ANXCAMERA:Ljava/lang/String; = "pref_checkupdate"
+
 .field protected static final PREF_KEY_RESTORE:Ljava/lang/String; = "pref_restore"
 
 .field public static final REMOVE_KEYS:Ljava/lang/String; = "remove_keys"
@@ -2076,6 +2082,45 @@
     iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
 
     const-string v1, "pref_privacy"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_22
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_22
+    iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_anxcamera"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_33
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_33
+    iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_checkupdate"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_44
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_44
+    iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_anxbattle"
 
     invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
 

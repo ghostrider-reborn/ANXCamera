@@ -8,7 +8,7 @@
     <string name="cannot_connect_camera_once">Ne mogu se povezati s fotoaparatom</string>
     <string name="cannot_connect_camera_twice">Ne mogu se povezati s fotoaparatom, ponovno pokrenite vaš uređaj.</string>
     <string name="camera_disabled">Fotoaparat je onemogućen</string>
-    <string name="camera_label">Fotoaparat</string>
+    <string name="camera_label">ANXFotoaparat</string>
     <string name="video_camera_label">Camcorder</string>
     <string name="no_storage">Umetnite SD karticu prije korištenja fotoaparata</string>
     <string name="not_enough_space">SD kartica je puna</string>

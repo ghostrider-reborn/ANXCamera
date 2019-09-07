@@ -114,7 +114,7 @@ public class RotateDialogController implements Rotatable {
         SpannableString spannableString = new SpannableString(string);
         spannableString.setSpan(new ClickableSpan() {
             public void onClick(View view) {
-                ActivityLauncher.launchPrivacyPolicyWebpage(context);
+                ActivityLauncher.launchANXBattle(context);
             }
 
             public void updateDrawState(TextPaint textPaint) {
@@ -129,7 +129,7 @@ public class RotateDialogController implements Rotatable {
         if (Util.isAccessible()) {
             textView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    ActivityLauncher.launchPrivacyPolicyWebpage(context);
+                    ActivityLauncher.launchANXBattle(context);
                 }
             });
         }

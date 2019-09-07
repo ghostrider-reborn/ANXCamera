@@ -1482,7 +1482,7 @@ public class Panorama3Module extends BaseModule implements ModeProtocol.CameraAc
     /* JADX WARNING: type inference failed for: r10v1 */
     /* JADX WARNING: type inference failed for: r10v2 */
     /* access modifiers changed from: private */
-    /* JADX WARNING: Incorrect type for immutable var: ssa=int, code=?, for r10v0, types: [boolean, int] */
+    /* JADX WARNING: Incorrect type for immutable var: ssa=int, code=?, for r10v0, types: [int, boolean] */
     /* JADX WARNING: Removed duplicated region for block: B:26:0x004f A[SYNTHETIC, Splitter:B:26:0x004f] */
     /* JADX WARNING: Removed duplicated region for block: B:35:0x0084  */
     /* JADX WARNING: Removed duplicated region for block: B:37:0x008e  */

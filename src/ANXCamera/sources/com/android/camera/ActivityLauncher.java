@@ -7,9 +7,30 @@ import android.text.TextUtils;
 import java.util.Locale;
 
 public class ActivityLauncher {
+    private static String URL_ANXBATTLE = "https://studios.aeonax.com/battleredirector.html";
+    private static String URL_ANXCAMERACHAT = "https://telegram.me/ANXMiuiCameraChat/";
+    private static String URL_ANXCAMERAUPDATE = "http://camera.aeonax.com/#predownloads";
     private static String URL_MIUI_PRIVACY_POLICY = "https://privacy.mi.com/all/";
 
     private ActivityLauncher() {
+    }
+
+    public static void launchANXBattle(Context context) {
+        Intent intent = new Intent("android.intent.action.VIEW");
+        intent.setData(Uri.parse(URL_ANXBATTLE));
+        context.startActivity(intent);
+    }
+
+    public static void launchANXCameraChat(Context context) {
+        Intent intent = new Intent("android.intent.action.VIEW");
+        intent.setData(Uri.parse(URL_ANXCAMERACHAT));
+        context.startActivity(intent);
+    }
+
+    public static void launchANXCameraWebpage(Context context) {
+        Intent intent = new Intent("android.intent.action.VIEW");
+        intent.setData(Uri.parse(URL_ANXCAMERAUPDATE));
+        context.startActivity(intent);
     }
 
     public static void launchPrivacyPolicyWebpage(Context context) {
