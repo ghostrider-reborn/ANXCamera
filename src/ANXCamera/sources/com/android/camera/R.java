@@ -1670,6 +1670,8 @@ public final class R {
         public static final int zoom_ratio_item_image = 2131296658;
         public static final int zoom_ratio_item_text = 2131296659;
         public static final int zoom_ratio_toggle_button = 2131296660;
+        /* added by JADX */
+        public static final int view_anxbounce = 2131296661;
     }
 
     public static final class integer {
@@ -2886,6 +2888,18 @@ public final class R {
         public static final int APKTOOL_DUMMY_399 = 2131690393;
         /* added by JADX */
         public static final int APKTOOL_DUMMY_39a = 2131690394;
+        /* added by JADX */
+        public static final int confirm_anxcamera_message = 2131690437;
+        /* added by JADX */
+        public static final int confirm_anxcamera_title = 2131690438;
+        /* added by JADX */
+        public static final int pref_anxbounce_title = 2131690439;
+        /* added by JADX */
+        public static final int pref_anxcamera_title = 2131690440;
+        /* added by JADX */
+        public static final int pref_anxupdate_title = 2131690441;
+        /* added by JADX */
+        public static final int view_anxbounce = 2131690442;
     }
 
     public static final class style {

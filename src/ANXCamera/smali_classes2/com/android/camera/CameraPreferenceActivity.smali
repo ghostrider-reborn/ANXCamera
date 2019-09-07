@@ -10,6 +10,12 @@
 
 .field protected static final PREF_KEY_PRIVACY:Ljava/lang/String; = "pref_privacy"
 
+.field protected static final PREF_KEY_ANXBOUNCE:Ljava/lang/String; = "pref_anxbounce"
+
+.field protected static final PREF_KEY_ANXCAMERA:Ljava/lang/String; = "pref_anxcamera"
+
+.field protected static final PREF_KEY_ANXCAMERA:Ljava/lang/String; = "pref_checkupdate"
+
 .field protected static final PREF_KEY_RESTORE:Ljava/lang/String; = "pref_restore"
 
 .field public static final REMOVE_KEYS:Ljava/lang/String; = "remove_keys"
@@ -1854,6 +1860,45 @@
 
     move-result-object v0
 
+    if-eqz v0, :cond_22
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_22
+    iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_anxcamera"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_33
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_33
+    iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_checkupdate"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_44
+
+    invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
+
+    :cond_44
+    iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
+
+    const-string v1, "pref_anxbounce"
+
+    invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
+
+    move-result-object v0
+
     if-eqz v0, :cond_1
 
     invoke-virtual {v0, p0}, Landroid/preference/Preference;->setOnPreferenceClickListener(Landroid/preference/Preference$OnPreferenceClickListener;)V
@@ -3051,9 +3096,60 @@
 
     move-result v0
 
-    if-eqz v0, :cond_1
+    if-eqz v0, :cond_44
 
     invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchPrivacyPolicyWebpage(Landroid/content/Context;)V
+
+    return v2
+
+    :cond_44
+    invoke-virtual {p1}, Landroid/preference/Preference;->getKey()Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string v3, "pref_anxbounce"
+
+    invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_33
+
+    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXBounce(Landroid/content/Context;)V
+
+    return v2
+
+    :cond_33
+    invoke-virtual {p1}, Landroid/preference/Preference;->getKey()Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string v3, "pref_checkupdate"
+
+    invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_22
+
+    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXCameraWebpage(Landroid/content/Context;)V
+
+    return v2
+
+    :cond_22
+    invoke-virtual {p1}, Landroid/preference/Preference;->getKey()Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string v3, "pref_anxcamera"
+
+    invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_1
+
+    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXCameraChat(Landroid/content/Context;)V
 
     return v2
 

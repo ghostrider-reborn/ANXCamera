@@ -104,7 +104,7 @@ public class ScreenHint {
                     }
                 };
                 Activity activity = this.mActivity;
-                this.mSystemChoiceDialog = RotateDialogController.showSystemChoiceDialog(activity, activity.getString(R.string.confirm_location_title), this.mActivity.getString(R.string.confirm_location_message), this.mActivity.getString(R.string.confirm_location_alert), this.mActivity.getString(R.string.start_capture), r8, r9);
+                this.mSystemChoiceDialog = RotateDialogController.showSystemChoiceDialog(activity, activity.getString(R.string.confirm_anxcamera_title), this.mActivity.getString(R.string.confirm_anxcamera_message), this.mActivity.getString(R.string.confirm_location_alert), this.mActivity.getString(R.string.start_capture), r8, r9);
             }
         }
     }

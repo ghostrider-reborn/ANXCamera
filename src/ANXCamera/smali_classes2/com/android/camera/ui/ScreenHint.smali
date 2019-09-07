@@ -267,7 +267,7 @@
 
     iget-object v3, p0, Lcom/android/camera/ui/ScreenHint;->mActivity:Landroid/app/Activity;
 
-    const v0, 0x7f0f00ae
+    const v0, 0x7f0f03c6
 
     invoke-virtual {v3, v0}, Landroid/app/Activity;->getString(I)Ljava/lang/String;
 
@@ -275,7 +275,7 @@
 
     iget-object v0, p0, Lcom/android/camera/ui/ScreenHint;->mActivity:Landroid/app/Activity;
 
-    const v1, 0x7f0f00ad
+    const v1, 0x7f0f03c5
 
     invoke-virtual {v0, v1}, Landroid/app/Activity;->getString(I)Ljava/lang/String;
 
