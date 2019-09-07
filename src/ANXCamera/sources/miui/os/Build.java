@@ -6,6 +6,7 @@ import android.os.IPowerManager;
 import android.os.IPowerManager.Stub;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.MiuiSettings.System;
 import android.text.TextUtils;
 import com.miui.internal.cust.PrivateConfig;
@@ -90,7 +91,7 @@ public class Build extends android.os.Build {
     public static final int USER_MODE_NORMAL = 0;
 
     /* JADX WARNING: Code restructure failed: missing block: B:237:0x03bf, code lost:
-        if ("cn_cta".equals(miui.os.SystemProperties.get(r4)) != false) goto L_0x03c1;
+        if ("cn_cta".equals(android.os.SystemProperties.get(r4)) != false) goto L_0x03c1;
      */
     /* JADX WARNING: Removed duplicated region for block: B:100:0x01e9  */
     /* JADX WARNING: Removed duplicated region for block: B:114:0x021f  */

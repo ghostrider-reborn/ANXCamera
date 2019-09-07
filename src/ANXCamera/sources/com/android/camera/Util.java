@@ -46,7 +46,7 @@ import android.opengl.GLES20;
 import android.os.Build.VERSION;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.os.IPowerManager;
+import android.os.IPowerManager.Stub;
 import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -68,7 +68,6 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.view.IWindowManager;
-import android.view.IWindowManager.Stub;
 import android.view.KeyEvent;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -552,15 +551,7 @@ public final class Util {
     }
 
     public static boolean checkDeviceHasNavigationBar(Context context) {
-        if (sWindowManager == null) {
-            sWindowManager = Stub.asInterface(ServiceManager.getService("window"));
-            try {
-                sHasNavigationBar = CompatibilityUtils.hasNavigationBar(context, sWindowManager);
-            } catch (Exception unused) {
-                Log.e(TAG, "checkDeviceHasNavigationBar exception");
-            }
-        }
-        return sHasNavigationBar;
+        return true;
     }
 
     public static void checkLockedOrientation(Activity activity) {
@@ -3094,7 +3085,7 @@ EDGE_INSN: B:63:0x00fe->B:47:0x00fe ?: BREAK  , SYNTHETIC] */
         }
         isLongRatioScreen = isLongRatioScreen(sWindowWidth, sWindowHeight);
         sFullScreenExtraMargin = context.getResources().getDimensionPixelSize(R.dimen.fullscreen_extra_margin);
-        sNavigationBarHeight = checkDeviceHasNavigationBar(context) ? getNavigationBarHeight(context) : calcNavigationBarHeight(context);
+        sNavigationBarHeight = getNavigationBarHeight(context);
         if (isNotchDevice) {
             if (isLongRatioScreen) {
                 sStatusBarHeight = getStatusBarHeight(context);
@@ -3305,7 +3296,7 @@ EDGE_INSN: B:63:0x00fe->B:47:0x00fe ?: BREAK  , SYNTHETIC] */
     }
 
     public static boolean isFullScreenNavBarHidden(Context context) {
-        return MiuiSettings.Global.getBoolean(context.getContentResolver(), MiuiSettings.Global.FORCE_FSG_NAV_BAR);
+        return true;
     }
 
     public static boolean isGlobalVersion() {
@@ -4421,7 +4412,7 @@ EDGE_INSN: B:63:0x00fe->B:47:0x00fe ?: BREAK  , SYNTHETIC] */
     }
 
     public static void setBrightnessRampRate(int i) {
-        IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
+        Stub.asInterface(ServiceManager.getService("power"));
     }
 
     public static void setPixels(byte[] bArr, int i, int i2, byte[] bArr2, int[] iArr) {

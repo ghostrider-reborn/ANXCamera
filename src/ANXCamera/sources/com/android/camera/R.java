@@ -1834,6 +1834,66 @@ public final class R {
         public static final int feature_raphaelin = 2131623939;
         public static final int goofy_face = 2131623940;
         public static final int xiaomi_static_config = 2131623941;
+        /* added by JADX */
+        public static final int feature_beryllium = 2131623942;
+        /* added by JADX */
+        public static final int feature_cactus = 2131623943;
+        /* added by JADX */
+        public static final int feature_cepheus = 2131623944;
+        /* added by JADX */
+        public static final int feature_cereus = 2131623945;
+        /* added by JADX */
+        public static final int feature_crux = 2131623946;
+        /* added by JADX */
+        public static final int feature_davinci = 2131623947;
+        /* added by JADX */
+        public static final int feature_davinciin = 2131623948;
+        /* added by JADX */
+        public static final int feature_dipper = 2131623949;
+        /* added by JADX */
+        public static final int feature_equuleus = 2131623950;
+        /* added by JADX */
+        public static final int feature_gemini = 2131623951;
+        /* added by JADX */
+        public static final int feature_grus = 2131623952;
+        /* added by JADX */
+        public static final int feature_jason = 2131623953;
+        /* added by JADX */
+        public static final int feature_laurel_sprout = 2131623954;
+        /* added by JADX */
+        public static final int feature_laurus = 2131623955;
+        /* added by JADX */
+        public static final int feature_lavender = 2131623956;
+        /* added by JADX */
+        public static final int feature_lotus = 2131623957;
+        /* added by JADX */
+        public static final int feature_nitrogen = 2131623958;
+        /* added by JADX */
+        public static final int feature_onc = 2131623959;
+        /* added by JADX */
+        public static final int feature_perseus = 2131623960;
+        /* added by JADX */
+        public static final int feature_platina = 2131623961;
+        /* added by JADX */
+        public static final int feature_polaris = 2131623962;
+        /* added by JADX */
+        public static final int feature_pyxis = 2131623963;
+        /* added by JADX */
+        public static final int feature_riva = 2131623964;
+        /* added by JADX */
+        public static final int feature_rosy = 2131623965;
+        /* added by JADX */
+        public static final int feature_sirius = 2131623966;
+        /* added by JADX */
+        public static final int feature_tulip = 2131623967;
+        /* added by JADX */
+        public static final int feature_ursa = 2131623968;
+        /* added by JADX */
+        public static final int feature_vince = 2131623969;
+        /* added by JADX */
+        public static final int feature_violet = 2131623970;
+        /* added by JADX */
+        public static final int feature_whyred = 2131623971;
     }
 
     public static final class string {

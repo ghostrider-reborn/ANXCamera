@@ -2810,29 +2810,29 @@
 
     invoke-direct {p0}, Lcom/android/camera/CameraPreferenceActivity;->initializeActivity()V
 
-    invoke-virtual {p0}, Lmiui/preference/PreferenceActivity;->getIntent()Landroid/content/Intent;
+    # invoke-virtual {p0}, Lmiui/preference/PreferenceActivity;->getIntent()Landroid/content/Intent;
 
-    move-result-object p1
+    # move-result-object p1
 
-    const-string v0, ":miui:starting_window_label"
+    # const-string v0, ":miui:starting_window_label"
 
-    invoke-virtual {p1, v0}, Landroid/content/Intent;->getCharSequenceExtra(Ljava/lang/String;)Ljava/lang/CharSequence;
+    # invoke-virtual {p1, v0}, Landroid/content/Intent;->getCharSequenceExtra(Ljava/lang/String;)Ljava/lang/CharSequence;
 
-    move-result-object p1
+    # move-result-object p1
 
-    if-eqz p1, :cond_1
+    # if-eqz p1, :cond_1
 
-    invoke-virtual {p0}, Lmiui/preference/PreferenceActivity;->getActionBar()Lmiui/app/ActionBar;
+    # invoke-virtual {p0}, Lmiui/preference/PreferenceActivity;->getActionBar()Lmiui/app/ActionBar;
 
-    move-result-object p0
+    # move-result-object p0
 
-    if-eqz p0, :cond_1
+    # if-eqz p0, :cond_1
 
-    const p1, 0x7f0f02a3
+    # const p1, 0x7f0f02a3
 
-    invoke-virtual {p0, p1}, Landroid/app/ActionBar;->setTitle(I)V
+    # invoke-virtual {p0, p1}, Landroid/app/ActionBar;->setTitle(I)V
 
-    :cond_1
+    # :cond_1
     return-void
 .end method
 

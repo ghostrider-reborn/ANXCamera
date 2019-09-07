@@ -35,7 +35,6 @@ import com.mi.config.b;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import miui.app.ActionBar;
 
 public class CameraPreferenceActivity extends BasePreferenceActivity {
     public static final String FROM_WHERE = "from_where";
@@ -69,7 +68,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     protected PreferenceScreen mPreferenceGroup;
     private Preference mWatermark;
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity] */
     private void bringUpDoubleConfirmDlg(final Preference preference, final String str) {
         if (this.mDoubleConfirmActionChooseDialog == null) {
             final boolean snapBoolValue = getSnapBoolValue(str);
@@ -437,34 +435,11 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     /* access modifiers changed from: private */
     public void installQRCodeReceiver() {
         new AsyncTask<Void, Void, Void>() {
-            /* JADX WARNING: type inference failed for: r3v1, types: [android.content.Context, com.android.camera.CameraPreferenceActivity] */
             /* access modifiers changed from: protected */
-            /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r3v1, types: [android.content.Context, com.android.camera.CameraPreferenceActivity]
-  assigns: [com.android.camera.CameraPreferenceActivity]
-  uses: [com.android.camera.CameraPreferenceActivity, android.content.Context]
-  mth insns count: 8
-            	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-            	at java.util.ArrayList.forEach(Unknown Source)
-            	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-            	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-            	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-            	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-            	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-            	at java.util.ArrayList.forEach(Unknown Source)
-            	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-            	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$0(DepthTraversal.java:13)
-            	at java.util.ArrayList.forEach(Unknown Source)
-            	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:13)
-            	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-            	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-            	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-            	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-             */
-            /* JADX WARNING: Unknown variable types count: 1 */
             public Void doInBackground(Void... voidArr) {
                 Log.v(CameraPreferenceActivity.TAG, "install...");
-                ? r3 = CameraPreferenceActivity.this;
-                Util.installPackage(r3, "com.xiaomi.scanner", r3.mAppInstalledListener, false, true);
+                CameraPreferenceActivity cameraPreferenceActivity = CameraPreferenceActivity.this;
+                Util.installPackage(cameraPreferenceActivity, "com.xiaomi.scanner", cameraPreferenceActivity.mAppInstalledListener, false, true);
                 return null;
             }
         }.execute(new Void[0]);
@@ -640,7 +615,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         }
     }
 
-    /* JADX WARNING: type inference failed for: r4v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, com.android.camera.BasePreferenceActivity] */
     private void updateQRCodeEntry() {
         PreferenceScreen preferenceScreen = this.mPreferenceGroup;
         String str = CameraSettings.KEY_SCAN_QRCODE;
@@ -688,7 +662,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         CameraPreferenceActivity.super.onBackPressed();
     }
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, miui.preference.PreferenceActivity, com.android.camera.BasePreferenceActivity] */
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.mFromWhere = getIntent().getIntExtra(FROM_WHERE, 0);
@@ -698,12 +671,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         CameraSettings.upgradeGlobalPreferences();
         Storage.initStorage(this);
         initializeActivity();
-        if (getIntent().getCharSequenceExtra(":miui:starting_window_label") != null) {
-            ActionBar actionBar = getActionBar();
-            if (actionBar != null) {
-                actionBar.setTitle(R.string.pref_camera_settings_category);
-            }
-        }
     }
 
     public boolean onOptionsItemSelected(MenuItem menuItem) {
@@ -740,7 +707,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         return true;
     }
 
-    /* JADX WARNING: type inference failed for: r11v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, miui.preference.PreferenceActivity] */
     public boolean onPreferenceClick(Preference preference) {
         if (preference.getKey().equals(PREF_KEY_RESTORE)) {
             RotateDialogController.showSystemAlertDialog(this, getString(R.string.confirm_restore_title), getString(R.string.confirm_restore_message), getString(17039370), new Runnable() {
@@ -804,7 +770,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         finish();
     }
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, miui.preference.PreferenceActivity] */
     /* access modifiers changed from: protected */
     public void onResume() {
         CameraPreferenceActivity.super.onResume();
