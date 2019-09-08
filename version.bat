@@ -14,6 +14,8 @@ call ..\ANXMiuiPortTools\versionizer.exe v=".\VERSION" incrementversionname=true
 
 ..\ANXMiuiPortTools\versionizer.exe v=".\VERSION" am=".\src\ANXCamera\AndroidManifest.xml" mm=".\src\ANXCamFix\module.prop"
 
+..\ANXMiuiPortTools\versionizer.exe v=".\VERSION" am=".\src\ANXCamera\AndroidManifest.xml" mm=".\src\ANXMimoji\module.prop"
+
 ..\ANXMiuiPortTools\versionizer.exe v=".\VERSION" am=".\src\ANXCamera\AndroidManifest.xml" mm=".\src\KubilWhyredyFix\module.prop"
 
 ..\ANXMiuiPortTools\versionizer.exe v=".\VERSION" am=".\src\ANXCamera\AndroidManifest.xml" mm=".\src\LavendyFix\module.prop"

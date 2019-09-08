@@ -3671,25 +3671,25 @@
 .method public isSupportRaw()Z
     .locals 1
 
-    # iget-object p0, p0, Lcom/android/camera2/CameraCapabilities;->mCharacteristics:Landroid/hardware/camera2/CameraCharacteristics;
+    iget-object p0, p0, Lcom/android/camera2/CameraCapabilities;->mCharacteristics:Landroid/hardware/camera2/CameraCharacteristics;
 
-    # sget-object v0, Landroid/hardware/camera2/CameraCharacteristics;->REQUEST_AVAILABLE_CAPABILITIES:Landroid/hardware/camera2/CameraCharacteristics$Key;
+    sget-object v0, Landroid/hardware/camera2/CameraCharacteristics;->REQUEST_AVAILABLE_CAPABILITIES:Landroid/hardware/camera2/CameraCharacteristics$Key;
 
-    # invoke-virtual {p0, v0}, Landroid/hardware/camera2/CameraCharacteristics;->get(Landroid/hardware/camera2/CameraCharacteristics$Key;)Ljava/lang/Object;
+    invoke-virtual {p0, v0}, Landroid/hardware/camera2/CameraCharacteristics;->get(Landroid/hardware/camera2/CameraCharacteristics$Key;)Ljava/lang/Object;
 
-    # move-result-object p0
+    move-result-object p0
 
-    # check-cast p0, [I
+    check-cast p0, [I
 
-    # const/4 v0, 0x3
+    const/4 v0, 0x3
 
-    # invoke-static {p0, v0}, Lcom/android/camera2/CameraCapabilities;->contains([II)Z
+    invoke-static {p0, v0}, Lcom/android/camera2/CameraCapabilities;->contains([II)Z
 
-    # move-result p0
+    move-result p0
 
-    # return p0
-    const/4 v0, 0x1
-    return v0
+    return p0
+    # const/4 v0, 0x1
+    # return v0
 .end method
 
 .method public isSupportRearBokeh()Z

@@ -868,7 +868,7 @@ public class CameraCapabilities {
     }
 
     public boolean isSupportRaw() {
-        return true;
+        return contains((int[]) this.mCharacteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES), 3);
     }
 
     public boolean isSupportRearBokeh() {

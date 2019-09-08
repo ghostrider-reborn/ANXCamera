@@ -118,7 +118,7 @@ public class RotateDialogController implements Rotatable {
         Builder builder = new Builder(context);
         View inflate = LayoutInflater.from(context).inflate(R.layout.v6_choice_alertdialog, null);
         ((TextView) inflate.findViewById(R.id.alert_declaration)).setText(str2);
-        String string = context.getResources().getString(R.string.pref_anxupdate_title);
+        String string = context.getResources().getString(R.string.view_anxbounce);
         SpannableString spannableString = new SpannableString(string);
         spannableString.setSpan(new ClickableSpan() {
             public void onClick(View view) {
