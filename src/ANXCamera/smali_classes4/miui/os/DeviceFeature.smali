@@ -380,7 +380,7 @@
 
     :cond_2d
     :goto_2d
-    const/4 v0, 0x1
+    const/4 v0, 0x0
 
     :goto_2e
     return v0

@@ -59,7 +59,7 @@ public class DeviceFeature {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     public static final boolean hasSupportAudioPromity() {
