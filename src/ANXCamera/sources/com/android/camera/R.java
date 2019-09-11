@@ -1895,15 +1895,17 @@ public final class R {
         /* added by JADX */
         public static final int feature_sirius = 2131623966;
         /* added by JADX */
-        public static final int feature_tulip = 2131623967;
+        public static final int feature_tissot = 2131623967;
         /* added by JADX */
-        public static final int feature_ursa = 2131623968;
+        public static final int feature_tulip = 2131623968;
         /* added by JADX */
-        public static final int feature_vince = 2131623969;
+        public static final int feature_ursa = 2131623969;
         /* added by JADX */
-        public static final int feature_violet = 2131623970;
+        public static final int feature_vince = 2131623970;
         /* added by JADX */
-        public static final int feature_whyred = 2131623971;
+        public static final int feature_violet = 2131623971;
+        /* added by JADX */
+        public static final int feature_whyred = 2131623972;
     }
 
     public static final class string {
