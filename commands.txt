@@ -80,3 +80,14 @@ java  -jar ..\ANXMiuiPortTools\apktool.jar d -p ..\ANXMiuiPortTools\MiuiFramewor
 deodex system
 cd /mnt/g/downloads/android/vdex/vdexExtractor
 /mnt/g/Downloads/Android/vdex/vdexExtractor/tools/deodex/run.sh -i /mnt/g/Downloads/Android/systembery9221/framework -o /mnt/g/Downloads/Android/systembery9221deodex/framework
+
+
+
+SFN Tree
+cd /home/frs/project/anxcamera/     
+tree  --noreport -n -X -i -s -D -f -A -P ANX*zip
+
+
+    sget-object v9, Lcom/android/camera/module/Camera2Module;->TAG:Ljava/lang/String;
+    const-string v10, "ANXZANGOL0"
+    invoke-static {v9, v10}, Lcom/android/camera/log/Log;->d(Ljava/lang/String;Ljava/lang/String;)I

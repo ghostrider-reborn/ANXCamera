@@ -25,14 +25,14 @@ REM "C:\Program Files\7-Zip\7z.exe" a -tzip .\out\LavendyFix.zip .\src\LavendyFi
 REM copy .\out\LavendyFix.zip /B .\out\LavendyFix_%anxversion%.zip
 
 
-del .\out\ANXCamFix.zip
-del .\out\ANXCamFix_*.zip
-del .\out\ANXCustLibs.zip
-del .\out\ANXCustLibs_*.zip
-"C:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXCustLibs.zip .\src\ANXCamFix\*
-copy .\out\ANXCustLibs.zip /B .\out\ANXCustLibs_%anxversion%.zip
+REM del .\out\ANXCamFix.zip
+REM del .\out\ANXCamFix_*.zip
+REM del .\out\ANXCustLibs.zip
+REM del .\out\ANXCustLibs_*.zip
+REM "C:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXCustLibs.zip .\src\ANXCamFix\*
+REM copy .\out\ANXCustLibs.zip /B .\out\ANXCustLibs_%anxversion%.zip
 
-adb push .\out\ANXCustLibs.zip  /sdcard/zips
+REM adb push .\out\ANXCustLibs.zip  /sdcard/zips
 
 
 REM del .\out\ANXMimoji.zip
