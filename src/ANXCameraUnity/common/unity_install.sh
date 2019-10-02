@@ -24,38 +24,11 @@ ui_print "  laurus"
 ui_print ""
 ui_print "In decreasing order of support"
 ui_print "Needs Testing for"
-ui_print "chiron jason mido sagit sakura vince wayne cactus cereus laurel_sprout lotus nitrogen onc riva rosy tiare ursa"
+ui_print "chiron jason mido sagit sakura vince wayne cactus cereus laurel_sprout lotus nitrogen onc riva rosy tiare ursa ysl"
 
-if device_check "cepheus"; then 
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "cephy was here, it hates poco libs"
-elif device_check "perseus"; then 
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "persy was here, it hates poco libs"
-elif device_check "violet"; then 
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "violety was here, it hates poco libs, it loves someone else"
-elif device_check "whyred"; then 
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "whyredy was here, it hates poco libs, it loves someone else"
-elif device_check "raphael"; then 
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "raphy was here, it hates poco libs, it loves someone else"
-elif device_check "davinci"; then 
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "davincy was here, it hates poco libs, it loves someone else"
-elif [ -f /sdcard/.anxnolib ]; then
-  rm -rf $TMPDIR/system/lib/
-  rm -rf $TMPDIR/system/lib64/
-  ui_print "User hates poco libs, they love someone else"
-fi
-
+rm -rf $TMPDIR/system/lib/
+rm -rf $TMPDIR/system/lib64/
+ui_print "ANX was here, it hates poco libs"
 
 MNAME=$(grep_prop name $TMPDIR/module.prop)
 MDEV=$(grep_prop author $TMPDIR/module.prop)

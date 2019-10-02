@@ -4270,15 +4270,7 @@ public class Camera2Module extends BaseModule implements Listener, ObjectViewLis
 
     /* access modifiers changed from: protected */
     public boolean isParallelSessionEnable() {
-        boolean z = false;
-        boolean z2 = (!CameraSettings.isCameraParallelProcessEnable() || getModuleIndex() == 173 || (isUltraWideBackCamera() && !b.isMTKPlatform()) || (!b.isMTKPlatform() && this.mIsImageCaptureIntent && !b.Kn)) ? false : false;
-        if (b.isMTKPlatform()) {
-            return z2;
-        }
-        if (isUltraWideBackCamera() || getModuleIndex() == 167 || isStandaloneMacroCamera()) {
-            z = false;
-        }
-        return z2 & z;
+        return false;
     }
 
     public boolean isSelectingCapturedResult() {

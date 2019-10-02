@@ -1906,6 +1906,8 @@ public final class R {
         public static final int feature_violet = 2131623971;
         /* added by JADX */
         public static final int feature_whyred = 2131623972;
+        /* added by JADX */
+        public static final int feature_ysl = 2131623973;
     }
 
     public static final class string {

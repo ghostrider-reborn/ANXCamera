@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
     android:compileSdkVersion="28" 
     android:compileSdkVersionCodename="10" 
-    android:versionCode="148" 
-    android:versionName="148.WhisperedDopeyAgouti" 
+    android:versionCode="151" 
+    android:versionName="151.InfantileApprehensiveDeinonychus" 
     package="com.android.camera" 
     platformBuildVersionCode="28" 
     platformBuildVersionName="10">
@@ -54,7 +54,8 @@
         android:name="com.android.camera.CameraAppImpl" 
         android:networkSecurityConfig="@xml/network_security_config" 
         android:supportsRtl="true" 
-        android:theme="@style/ThemeCamera" 
+        android:theme="@style/ThemeCamera"
+        android:requestLegacyExternalStorage="true"
         android:debuggable="true">
         <meta-data android:name="android.max_aspect" 
             android:value="2.2"/>

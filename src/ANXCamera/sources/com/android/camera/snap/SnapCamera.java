@@ -410,8 +410,8 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         }
     }
 
-    /* JADX WARNING: type inference failed for: r1v2, types: [com.android.camera.MiuiCameraSound, boolean] */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r1v2, types: [com.android.camera.MiuiCameraSound, boolean]
+    /* JADX WARNING: type inference failed for: r1v2, types: [boolean, com.android.camera.MiuiCameraSound] */
+    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r1v2, types: [boolean, com.android.camera.MiuiCameraSound]
   assigns: [boolean]
   uses: [?[int, boolean, OBJECT, ARRAY, byte, short, char], com.android.camera.MiuiCameraSound]
   mth insns count: 8

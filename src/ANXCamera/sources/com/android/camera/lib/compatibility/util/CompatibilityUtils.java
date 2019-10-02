@@ -18,6 +18,7 @@ import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRecorder;
+import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.SystemProperties;
@@ -65,7 +66,7 @@ public class CompatibilityUtils {
     }
 
     public static StreamConfigurationMap createStreamConfigMap(List<StreamConfiguration> list, CameraCharacteristics cameraCharacteristics) {
-        return V29Utils.createStreamConfigMap(list, cameraCharacteristics);
+        return VERSION.SDK_INT >= 29 ? V29Utils.createStreamConfigMap(list, cameraCharacteristics) : V28Utils.createStreamConfigMap(list, cameraCharacteristics);
     }
 
     public static String getInstallMethodDescription() {
