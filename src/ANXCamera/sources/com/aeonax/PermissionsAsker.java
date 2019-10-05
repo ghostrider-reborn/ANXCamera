@@ -31,11 +31,20 @@ public class PermissionsAsker {
             if (activity.checkSelfPermission("android.permission.INTERACT_ACROSS_USERS") != 0) {
                 permissons.add("android.permission.INTERACT_ACROSS_USERS");
             }
+            if (activity.checkSelfPermission("android.permission.WRITE_MEDIA_STORAGE") != 0) {
+                permissons.add("android.permission.WRITE_MEDIA_STORAGE");
+            }
             if (activity.checkSelfPermission("android.permission.WRITE_SECURE_SETTINGS") != 0) {
                 permissons.add("android.permission.WRITE_SECURE_SETTINGS");
             }
             if (activity.checkSelfPermission("android.permission.PACKAGE_USAGE_STATS") != 0) {
                 permissons.add("android.permission.PACKAGE_USAGE_STATS");
+            }
+            if (activity.checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") != 0) {
+                permissons.add("android.permission.READ_EXTERNAL_STORAGE");
+            }
+            if (activity.checkSelfPermission("android.permission.ACCESS_MEDIA_LOCATION") != 0) {
+                permissons.add("android.permission.ACCESS_MEDIA_LOCATION");
             }
             if (permissons.size() > 0) {
                 activity.requestPermissions((String[]) permissons.toArray(new String[permissons.size()]), 1);
