@@ -24,10 +24,8 @@ ui_print "  laurus"
 ui_print ""
 ui_print "In decreasing order of support"
 ui_print "Needs Testing for"
-ui_print "chiron jason mido sagit sakura vince wayne cactus cereus laurel_sprout lotus nitrogen onc riva rosy tiare ursa ysl"
+ui_print "chiron jason mido sagit sakura vince wayne cactus cereus laurel_sprout lotus nitrogen onc riva rosy tiare ursa ysl daisy_sprout jasmine_sprout"
 
-rm -rf $TMPDIR/system/lib/
-rm -rf $TMPDIR/system/lib64/
 ui_print "ANX was here, it hates poco libs"
 
 MNAME=$(grep_prop name $TMPDIR/module.prop)
