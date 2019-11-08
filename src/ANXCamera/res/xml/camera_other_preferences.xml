@@ -68,7 +68,7 @@
     </PreferenceCategory>
     <Preference android:persistent="false" android:title="@string/pref_privacy_title" android:key="pref_privacy" />
     <Preference android:persistent="false" android:title="@string/pref_anxcamera_title" android:key="pref_anxcamera" />
-    <Preference android:persistent="false" android:title="@string/pref_anxbounce_title" android:key="pref_anxbounce" />
+    <Preference android:persistent="false" android:title="@string/pref_anxbattle_title" android:key="pref_anxbattle" />
     <Preference android:persistent="false" android:title="@string/confirm_restore_title" android:key="pref_restore" />
     <Preference android:persistent="false" android:title="@string/pref_anxupdate_title" android:key="pref_checkupdate" />
 </PreferenceScreen>

@@ -118,11 +118,11 @@ public class RotateDialogController implements Rotatable {
         Builder builder = new Builder(context);
         View inflate = LayoutInflater.from(context).inflate(R.layout.v6_choice_alertdialog, null);
         ((TextView) inflate.findViewById(R.id.alert_declaration)).setText(str2);
-        String string = context.getResources().getString(R.string.view_anxbounce);
+        String string = context.getResources().getString(R.string.view_anxbattle);
         SpannableString spannableString = new SpannableString(string);
         spannableString.setSpan(new ClickableSpan() {
             public void onClick(View view) {
-                ActivityLauncher.launchANXBounce(context);
+                ActivityLauncher.launchANXBattle(context);
             }
 
             public void updateDrawState(TextPaint textPaint) {
@@ -130,14 +130,14 @@ public class RotateDialogController implements Rotatable {
                 textPaint.setColor(context.getResources().getColor(17170432));
             }
         }, 0, string.length(), 33);
-        TextView textView = (TextView) inflate.findViewById(R.id.view_anxbounce);
+        TextView textView = (TextView) inflate.findViewById(R.id.view_anxbattle);
         textView.setClickable(true);
         textView.setText(spannableString);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         if (Util.isAccessible()) {
             textView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    ActivityLauncher.launchANXBounce(context);
+                    ActivityLauncher.launchANXBattle(context);
                 }
             });
         }

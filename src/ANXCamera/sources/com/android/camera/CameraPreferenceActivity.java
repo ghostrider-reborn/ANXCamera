@@ -39,7 +39,7 @@ import java.util.Iterator;
 public class CameraPreferenceActivity extends BasePreferenceActivity {
     public static final String FROM_WHERE = "from_where";
     public static final String IS_IMAGE_CAPTURE_INTENT = "IsCaptureIntent";
-    protected static final String PREF_KEY_ANXBOUNCE = "pref_anxbounce";
+    protected static final String PREF_KEY_ANXBATTLE = "pref_anxbattle";
     protected static final String PREF_KEY_ANXCAMERA = "pref_anxcamera";
     protected static final String PREF_KEY_PRIVACY = "pref_privacy";
     protected static final String PREF_KEY_RESTORE = "pref_restore";
@@ -480,7 +480,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         if (findPreference4 != null) {
             findPreference4.setOnPreferenceClickListener(this);
         }
-        Preference findPreference5 = this.mPreferenceGroup.findPreference(PREF_KEY_ANXBOUNCE);
+        Preference findPreference5 = this.mPreferenceGroup.findPreference(PREF_KEY_ANXBATTLE);
         if (findPreference5 != null) {
             findPreference5.setOnPreferenceClickListener(this);
         }
@@ -732,8 +732,8 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         } else if (preference.getKey().equals(PREF_KEY_PRIVACY)) {
             ActivityLauncher.launchPrivacyPolicyWebpage(this);
             return true;
-        } else if (preference.getKey().equals(PREF_KEY_ANXBOUNCE)) {
-            ActivityLauncher.launchANXBounce(this);
+        } else if (preference.getKey().equals(PREF_KEY_ANXBATTLE)) {
+            ActivityLauncher.launchANXBattle(this);
             return true;
         } else if (preference.getKey().equals("pref_checkupdate")) {
             ActivityLauncher.launchANXCameraWebpage(this);

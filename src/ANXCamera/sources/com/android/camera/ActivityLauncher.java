@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import java.util.Locale;
 
 public class ActivityLauncher {
-    private static String URL_ANXBOUNCE = "https://studios.aeonax.com/bounceredirector.html";
+    private static String URL_ANXBATTLE = "https://studios.aeonax.com/battleredirector.html";
     private static String URL_ANXCAMERACHAT = "https://telegram.me/ANXMiuiCameraChat/";
     private static String URL_ANXCAMERAUPDATE = "http://camera.aeonax.com/#predownloads";
     private static String URL_MIUI_PRIVACY_POLICY = "https://privacy.mi.com/all/";
@@ -15,9 +15,9 @@ public class ActivityLauncher {
     private ActivityLauncher() {
     }
 
-    public static void launchANXBounce(Context context) {
+    public static void launchANXBattle(Context context) {
         Intent intent = new Intent("android.intent.action.VIEW");
-        intent.setData(Uri.parse(URL_ANXBOUNCE));
+        intent.setData(Uri.parse(URL_ANXBATTLE));
         context.startActivity(intent);
     }
 

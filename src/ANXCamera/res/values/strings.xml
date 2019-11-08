@@ -803,7 +803,7 @@ Keep the subject sharp while blurring the background."</string>
     <string name="pref_pic_flaw_tip_summary">拍摄的照片人物有闭眼或照片边缘有遮挡时，会在拍照界面实时给出提示</string>
     <string name="pref_pic_flaw_tip_title">照片瑕疵提示</string>
     <string name="pref_priority_storage_title">Save to SD card</string>
-    <string name="pref_anxbounce_title">Play ANXBounce</string>
+    <string name="pref_anxbattle_title">Play ANXBattle</string>
     <string name="pref_anxcamera_title">ANXCamera Chat</string>
     <string name="pref_anxupdate_title">Check for Update</string>
     <string name="pref_privacy_title">Privacy Policy</string>
@@ -970,7 +970,7 @@ Ultra wide angle mode comes to help when you can't move farther from the scene."
     <string name="video_file_name_format">"'VID'_yyyyMMdd_HHmmss"</string>
     <string name="video_reach_size_limit">Size limit reached.</string>
     <string name="video_ultra_clear_tip">4K UHD</string>
-    <string name="view_anxbounce">ANXBounce</string>
+    <string name="view_anxbattle">ANXBattle</string>
     <string name="view_privacy_policy">View Privacy Policy</string>
     <string name="vv_duartion_hint">%1$s | %2$d段 |%3$s秒</string>
     <string name="vv_hint">VISION仅支持横屏拍摄</string>

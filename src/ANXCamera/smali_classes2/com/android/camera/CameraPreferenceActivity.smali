@@ -10,7 +10,7 @@
 
 .field protected static final PREF_KEY_PRIVACY:Ljava/lang/String; = "pref_privacy"
 
-.field protected static final PREF_KEY_ANXBOUNCE:Ljava/lang/String; = "pref_anxbounce"
+.field protected static final PREF_KEY_ANXBATTLE:Ljava/lang/String; = "pref_anxbattle"
 
 .field protected static final PREF_KEY_ANXCAMERA:Ljava/lang/String; = "pref_anxcamera"
 
@@ -1893,7 +1893,7 @@
     :cond_44
     iget-object v0, p0, Lcom/android/camera/CameraPreferenceActivity;->mPreferenceGroup:Landroid/preference/PreferenceScreen;
 
-    const-string v1, "pref_anxbounce"
+    const-string v1, "pref_anxbattle"
 
     invoke-virtual {v0, v1}, Landroid/preference/PreferenceScreen;->findPreference(Ljava/lang/CharSequence;)Landroid/preference/Preference;
 
@@ -3107,7 +3107,7 @@
 
     move-result-object v0
 
-    const-string v3, "pref_anxbounce"
+    const-string v3, "pref_anxbattle"
 
     invoke-virtual {v0, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
@@ -3115,7 +3115,7 @@
 
     if-eqz v0, :cond_33
 
-    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXBounce(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/android/camera/ActivityLauncher;->launchANXBattle(Landroid/content/Context;)V
 
     return v2
 

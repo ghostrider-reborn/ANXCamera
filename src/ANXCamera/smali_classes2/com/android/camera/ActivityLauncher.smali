@@ -6,7 +6,7 @@
 # static fields
 .field private static URL_MIUI_PRIVACY_POLICY:Ljava/lang/String; = "https://privacy.mi.com/all/"
 .field private static URL_ANXCAMERACHAT:Ljava/lang/String; = "https://telegram.me/ANXMiuiCameraChat/"
-.field private static URL_ANXBOUNCE:Ljava/lang/String; = "https://studios.aeonax.com/bounceredirector.html"
+.field private static URL_ANXBATTLE:Ljava/lang/String; = "https://studios.aeonax.com/battleredirector.html"
 .field private static URL_ANXCAMERAUPDATE:Ljava/lang/String; = "http://camera.aeonax.com/#predownloads"
 
 
@@ -111,7 +111,7 @@
     return-void
 .end method
 
-.method public static launchANXBounce(Landroid/content/Context;)V
+.method public static launchANXBattle(Landroid/content/Context;)V
     .locals 2
 
     new-instance v0, Landroid/content/Intent;
@@ -120,7 +120,7 @@
 
     invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
 
-    sget-object v1, Lcom/android/camera/ActivityLauncher;->URL_ANXBOUNCE:Ljava/lang/String;
+    sget-object v1, Lcom/android/camera/ActivityLauncher;->URL_ANXBATTLE:Ljava/lang/String;
 
     invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
 
