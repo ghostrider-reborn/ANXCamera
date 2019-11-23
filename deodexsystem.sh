@@ -1,0 +1,1 @@
+ /mnt/g/Downloads/Android/vdex/vdexExtractor/tools/deodex/run.sh -i /mnt/g/ROOT/Tucana11.0.5.0/system/system/framework -o /mnt/g/ROOT/Tucana11.0.5.0/systemdeodex/framework
