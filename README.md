@@ -1,19 +1,13 @@
-# ANXCamera10
-MiuiCamera Port for Beryllium
+# ANXCamera
+MiuiCamera Port for Xiaomi's Phones
 
 Self sufficient repository to decompile to smali, recompile, sign, decompile to java, push to device app port.
 
-miui_POCOF1Global_9.4.26_146a17240f_9.0 was used as src.
+miui_TUCANAEEAGlobal_V11.0.5.0.PFDEUXM_08e1a88222_9.0 was used as src.
 
 Recommended to open this Repository in VSCode
 
-This repository requires `git-lfs`
-
-Get it from https://git-lfs.github.com/ 
-Follow Step 1 of Getting Started. i.e. run once `git lfs install`
-Then clone this repository. If you have already cloned, run clone once again.
-
-Also requires Java 1.7 or 1.8, and 7-zip.
+Requires Java 1.7 or 1.8, and 7-zip.
 
 Instructions for Development:
 
@@ -24,10 +18,11 @@ Instructions for Development:
   
 Instructions for Testing:
 
- 1. Download the `zip` from https://github.com/XEonAX/ANXCamera10/releases/
- 2. Install the Magisk `zip` with Magisk, or Unity `zip` with recovery
+ 1. Download the `zip` from https://camera.aeonax.com/#predownloads
+ 2. Install the `zip` with Magisk or recovery
  3. Reboot Once, if it doesn't work properly, reboot twice.
  4. Start Testing
+ 5. To uninstall, uninstall via Magisk or flash same zip via recovery
 
 
 Special Thanks to
@@ -41,11 +36,12 @@ Psygarden (https://forum.xda-developers.com/member.php?u=7645131) for his genera
 
 Steps to Port MiuiCamera from scratch:
 1. Unpack System of Miui ROM
+   1. Check `extractrom.bat`
 2. Setup Original files for Decompiling
-   1. Copy following to ANXCamera10\orig\MiuiFrameworks. Files to be taken from Unpacked ROM above 
+   1. Copy following to ANXCamera\orig\MiuiFrameworks. Files to be taken from Unpacked ROM above 
       1. framework\framework-res.apk
       2. app\miui\miui.apk
-   2. Copy following to ANXCamera10\orig
+   2. Copy following to ANXCamera\orig
       1. priv-app\MiuiCamera\MiuiCamera.apk
 3. Prepare APKTool for decompiling
    1. Install above framework files by running following commands
