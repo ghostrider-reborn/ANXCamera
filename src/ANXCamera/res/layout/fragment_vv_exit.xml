@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_gravity="center" android:orientation="vertical" android:id="@id/vv_dialog" android:background="@drawable/bg_vv_dialog" android:visibility="gone" android:layout_width="376.0dip" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="@dimen/vv_dialog_text_size" android:textColor="@color/vv_dialog_text_color" android:gravity="center" android:id="@id/vv_dialog_message" android:layout_width="fill_parent" android:layout_height="88.0dip" />
+    <View android:background="@color/live_share_divider_line" android:layout_width="fill_parent" android:layout_height="1.0px" />
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="54.0dip">
+        <TextView android:textSize="@dimen/vv_dialog_text_size" android:textColor="@color/vv_dialog_text_color" android:gravity="center" android:id="@id/vv_dialog_negative" android:background="@drawable/bg_vv_dialog_button_exit_negative" android:layout_width="0.0dip" android:layout_height="fill_parent" android:layout_weight="1.0" />
+        <View android:background="@color/live_share_divider_line" android:layout_width="1.0px" android:layout_height="fill_parent" />
+        <TextView android:textSize="@dimen/vv_dialog_text_size" android:textColor="@color/vv_dialog_positive_color" android:gravity="center" android:id="@id/vv_dialog_positive" android:background="@drawable/bg_vv_dialog_button_exit_positive" android:layout_width="0.0dip" android:layout_height="fill_parent" android:layout_weight="1.0" />
+    </LinearLayout>
+</LinearLayout>
