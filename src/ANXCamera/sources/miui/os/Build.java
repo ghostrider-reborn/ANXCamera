@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.MiuiSettings;
 import android.text.TextUtils;
 import com.miui.internal.cust.PrivateConfig;

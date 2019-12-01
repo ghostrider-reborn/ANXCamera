@@ -37,7 +37,6 @@ import com.mi.config.b;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import miui.app.ActionBar;
 
 public class CameraPreferenceActivity extends BasePreferenceActivity {
     public static final String IS_IMAGE_CAPTURE_INTENT = "IsCaptureIntent";
@@ -72,7 +71,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     protected PreferenceScreen mPreferenceGroup;
     private Preference mWatermark;
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity] */
     private void bringUpDoubleConfirmDlg(final Preference preference, final String str) {
         if (this.mDoubleConfirmActionChooseDialog == null) {
             final boolean snapBoolValue = getSnapBoolValue(str);
@@ -412,7 +410,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     /* access modifiers changed from: private */
     public void installQRCodeReceiver() {
         new AsyncTask<Void, Void, Void>() {
-            /* JADX WARNING: type inference failed for: r5v2, types: [android.content.Context, com.android.camera.CameraPreferenceActivity] */
             /* access modifiers changed from: protected */
             public Void doInBackground(Void... voidArr) {
                 Log.v(CameraPreferenceActivity.TAG, "install...");
@@ -575,7 +572,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         }
     }
 
-    /* JADX WARNING: type inference failed for: r4v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity] */
     private void updateQRCodeEntry() {
         CheckBoxPreference checkBoxPreference = (CheckBoxPreference) this.mPreferenceGroup.findPreference(CameraSettings.KEY_SCAN_QRCODE);
         if (checkBoxPreference != null && this.mPreferences.getBoolean(CameraSettings.KEY_SCAN_QRCODE, checkBoxPreference.isChecked()) && !CameraSettings.isQRCodeReceiverAvailable(this)) {
@@ -621,7 +617,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         super.onBackPressed();
     }
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, com.android.camera.BasePreferenceActivity] */
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.mFromWhere = getIntent().getIntExtra(BasePreferenceActivity.FROM_WHERE, 0);
@@ -633,12 +628,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         CameraSettings.upgradeGlobalPreferences();
         Storage.initStorage(this);
         initializeActivity();
-        if (getIntent().getCharSequenceExtra(":miui:starting_window_label") != null) {
-            ActionBar actionBar = getActionBar();
-            if (actionBar != null) {
-                actionBar.setTitle(R.string.pref_camera_settings_category);
-            }
-        }
     }
 
     public boolean onOptionsItemSelected(MenuItem menuItem) {
@@ -650,7 +639,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         return true;
     }
 
-    /* JADX WARNING: type inference failed for: r6v0, types: [com.android.camera.CameraPreferenceActivity, android.app.Activity, com.android.camera.BasePreferenceActivity] */
     public boolean onPreferenceChange(Preference preference, Object obj) {
         String key = preference.getKey();
         if (TextUtils.isEmpty(key)) {
@@ -693,7 +681,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         return super.onPreferenceChange(preference, obj);
     }
 
-    /* JADX WARNING: type inference failed for: r10v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity] */
     /* JADX WARNING: Can't fix incorrect switch cases order */
     public boolean onPreferenceClick(Preference preference) {
         char c;
@@ -785,7 +772,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         return false;
     }
 
-    /* JADX WARNING: type inference failed for: r1v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, android.app.Activity, com.android.camera.BasePreferenceActivity] */
     public void onRequestPermissionsResult(int i, @NonNull String[] strArr, @NonNull int[] iArr) {
         super.onRequestPermissionsResult(i, strArr, iArr);
         String str = TAG;
@@ -823,7 +809,6 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         finish();
     }
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.CameraPreferenceActivity, com.android.camera.BasePreferenceActivity] */
     /* access modifiers changed from: protected */
     public void onResume() {
         super.onResume();

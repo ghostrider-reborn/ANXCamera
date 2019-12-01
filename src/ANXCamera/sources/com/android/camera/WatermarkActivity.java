@@ -95,7 +95,6 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
         return SensitiveFilter.getInstance().getSensitiveWord((String) charSequence);
     }
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [android.content.Context, com.android.camera.WatermarkActivity] */
     private boolean checkContentlength(CharSequence charSequence) {
         StringBuilder sb = new StringBuilder(32);
         sb.append(charSequence);
@@ -121,7 +120,6 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
         }
     }
 
-    /* JADX WARNING: type inference failed for: r3v0, types: [android.content.Context, com.android.camera.WatermarkActivity] */
     /* access modifiers changed from: private */
     public void doInMainThread(Message message) {
         if (message.what == 2) {
@@ -221,7 +219,6 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
         }
     }
 
-    /* JADX WARNING: type inference failed for: r5v0, types: [android.content.Context, com.android.camera.WatermarkActivity, android.text.TextWatcher] */
     private void showDialog() {
         if (this.mAlertDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.EditAlertDialog);

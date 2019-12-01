@@ -32,6 +32,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.aeonax.PermissionsAsker;
 import com.android.camera.LocalParallelService;
 import com.android.camera.constant.GlobalConstant;
 import com.android.camera.data.DataRepository;
@@ -980,6 +981,7 @@ public class Camera extends ActivityBase implements ActivityCompat.OnRequestPerm
         this.mCameraIntentManager.setReferer(this);
         if (CompatibilityUtils.isInMultiWindowMode(this)) {
             super.onCreate((Bundle) null);
+            PermissionsAsker.Ask(this);
             ToastUtils.showToast((Context) this, (int) R.string.multi_window_mode_not_supported);
             Log.d(this.TAG, "isInMultiWindowMode call finish");
             finish();
@@ -991,6 +993,7 @@ public class Camera extends ActivityBase implements ActivityCompat.OnRequestPerm
                 Util.initialize(getApplicationContext());
             }
             super.onCreate(bundle);
+            PermissionsAsker.Ask(this);
             showFirstUsePermissionActivity();
             checkLocationPermission();
             if (!getKeyguardFlag()) {
@@ -1048,6 +1051,7 @@ public class Camera extends ActivityBase implements ActivityCompat.OnRequestPerm
             String str = this.TAG;
             Log.e(str, "An illegal caller:" + this.mCameraIntentManager.getCaller() + " use VOICE_CONTROL_INTENT!");
             super.onCreate((Bundle) null);
+            PermissionsAsker.Ask(this);
             finish();
         }
     }
