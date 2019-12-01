@@ -60,10 +60,17 @@ Steps to Port MiuiCamera from scratch:
    1. Run `recompile.bat` just to check whether we are able to recompile without any modification
    2. Run `sign.bat` to sign and zipalign
    3. Run `jadx.bat` to create java code from compiled apk. This fails, don't worry, it does whatever it can
-7. Next we will Deodex rom and decompile the required libs
-   1. Run in WSL or Linux `$ /<path to vdexExtractor>/tools/deodex/run.sh -i /<path to system>/framework -o /<path to deodex destination>/framework`
-   2. Above will deodex the system framework
-   3. Now we decompile the required libs
+7. We will try to Install this recompiled version, It should fail because of missing Java Libraries
+   1. Set `android:required="false"` of this libs
+8. Once it installs try running it.
+   1. It will crash as expected, because it fails to initialize MiuiSDK. 
+   2. Remove the initialization code. We don't want to init miui sdk cause we are not on miui.
+   3. Once you remove the init code and try to run, It fails with Hidden API Blacklisted Errors, That means we now have to move our app to priv-app. 
+   4. We need to now package it in a Unity Module so that it can be installed via Magisk.
+9.  Next we will Deodex rom and decompile the required libs
+   5. Run in WSL or Linux `$ /<path to vdexExtractor>/tools/deodex/run.sh -i /<path to system>/framework -o /<path to deodex destination>/framework`
+   6. Above will deodex the system framework
+   7. Now we decompile the required libs
       1. Copy latest baksmali.*.jar to `<path to deodex destination>`
       2. To identify what libs you need to decompile. Open `src\ANXCamera\AndroidManifest.xml`
          1. Find the `uses-library` XML Nodes. We need to decompile these
@@ -79,19 +86,19 @@ Steps to Port MiuiCamera from scratch:
          8. `java -jar baksmali-2.2.7.jar d -o gson .\framework\vdexExtractor_deodexed\gson\gson_classes.dex.dex`
          9. `java -jar baksmali-2.2.7.jar d -o volley .\framework\vdexExtractor_deodexed\volley\volley_classes.dex.dex`
          10. `java -jar baksmali-2.2.7.jar d -o zxing .\framework\vdexExtractor_deodexed\zxing\zxing_classes.dex.dex`
-8. Now we will add **few** of the above decompiles libs to our code
-   1. Create a folder `src\ANXCamera\smali_classes2`
-   2. Copy the **contents** of 
+10. Now we will add **few** of the above decompiles libs to our code
+   8. Create a folder `src\ANXCamera\smali_classes2`
+   9. Copy the **contents** of 
       1. `<path to deodex destination>\android-support-v7-recyclerview`
       2. `<path to deodex destination>\android-support-v13`
       3. `<path to deodex destination>\gson`
       4. `<path to deodex destination>\volley`
       5. `<path to deodex destination>\zxing`
-   3. to `src\ANXCamera\smali_classes2`. It should finally contain two folders
-      1. `android` and `com`
-9.  Set required = false in AndroidManifest of these libs as their code is now included
-10. Add missing smali files from decompiled miui rom
-11. Add native libs
-12. Edit Smali
-   4. ...
+   10. to `src\ANXCamera\smali_classes2`. It should finally contain two folders
+      6. `android` and `com`
+11. Set required = false in AndroidManifest of these libs as their code is now included
+12. Add missing smali files from decompiled miui rom
+13. Add native libs
+14. Edit Smali
+   11. ...
 
