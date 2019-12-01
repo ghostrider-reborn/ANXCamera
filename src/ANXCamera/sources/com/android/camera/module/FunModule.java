@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.media.AudioManager;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.provider.MiuiSettings;
 import android.support.annotation.MainThread;
 import android.telephony.TelephonyManager;
 import android.util.Range;
@@ -640,7 +641,7 @@ public class FunModule extends VideoBase implements ModeProtocol.FilterProtocol,
 
     /* access modifiers changed from: protected */
     public void resizeForPreviewAspectRatio() {
-        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + 360) % 180 == 0) {
+        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
             this.mMainProtocol.setPreviewAspectRatio(((float) this.mPreviewSize.height) / ((float) this.mPreviewSize.width));
         } else {
             this.mMainProtocol.setPreviewAspectRatio(((float) this.mPreviewSize.width) / ((float) this.mPreviewSize.height));

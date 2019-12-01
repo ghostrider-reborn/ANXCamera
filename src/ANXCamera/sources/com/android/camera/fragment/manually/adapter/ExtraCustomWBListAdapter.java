@@ -42,7 +42,7 @@ public class ExtraCustomWBListAdapter extends BaseAdapter implements AdapterView
 
     private void changeValue(int i) {
         int shotValueCount = getShotValueCount();
-        int i2 = i < shotValueCount ? 2000 + (i * 200) : 6000 + ((i - shotValueCount) * GAP_K_LONG_VALUE);
+        int i2 = i < shotValueCount ? 2000 + (i * 200) : 6000 + ((i - shotValueCount) * 500);
         int customWB = this.mManuallyWB.getCustomWB();
         if (i2 != customWB) {
             this.mManuallyWB.setCustomWB(i2);
@@ -74,7 +74,7 @@ public class ExtraCustomWBListAdapter extends BaseAdapter implements AdapterView
 
     public int getValuePosition() {
         int customWB = this.mManuallyWB.getCustomWB();
-        return customWB < 6000 ? (customWB - 2000) / 200 : ((customWB - 6000) / GAP_K_LONG_VALUE) + getShotValueCount();
+        return customWB < 6000 ? (customWB - 2000) / 200 : ((customWB - 6000) / 500) + getShotValueCount();
     }
 
     public View getView(int i, View view, ViewGroup viewGroup) {
@@ -91,7 +91,7 @@ public class ExtraCustomWBListAdapter extends BaseAdapter implements AdapterView
             viewHolder = (ViewHolder) view.getTag();
         }
         int shotValueCount = getShotValueCount();
-        viewHolder.mText.setText(i < shotValueCount ? String.valueOf(2000 + (i * 200)) : String.valueOf(6000 + ((i - shotValueCount) * GAP_K_LONG_VALUE)));
+        viewHolder.mText.setText(i < shotValueCount ? String.valueOf(2000 + (i * 200)) : String.valueOf(6000 + ((i - shotValueCount) * 500)));
         return view;
     }
 

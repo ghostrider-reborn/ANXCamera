@@ -24,6 +24,7 @@ import android.os.CountDownTimer;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.MiuiSettings;
 import android.support.annotation.MainThread;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.media.MediaPlayer2;
@@ -107,7 +108,7 @@ public class VideoModule extends VideoBase implements MediaRecorder.OnErrorListe
     private static final HashMap<String, Integer> HEVC_VIDEO_ENCODER_BITRATE = new HashMap<>();
     private static final int MAX_DURATION_4K = 480000;
     private static final int RESET_VIDEO_AUTO_FOCUS_TIME = 3000;
-    public static final Size SIZE_1080 = new Size(1920, 1080);
+    public static final Size SIZE_1080 = new Size(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
     public static final Size SIZE_720 = new Size(1280, Util.LIMIT_SURFACE_WIDTH);
     private static final long START_OFFSET_MS = 450;
     private static final int VIDEO_HFR_FRAME_RATE_120 = 120;
@@ -277,7 +278,7 @@ public class VideoModule extends VideoBase implements MediaRecorder.OnErrorListe
 
     private int getRecorderOrientationHint() {
         int sensorOrientation = this.mCameraCapabilities.getSensorOrientation();
-        return this.mOrientation != -1 ? isFrontCamera() ? ((sensorOrientation - this.mOrientation) + 360) % 360 : (sensorOrientation + this.mOrientation) % 360 : sensorOrientation;
+        return this.mOrientation != -1 ? isFrontCamera() ? ((sensorOrientation - this.mOrientation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : (sensorOrientation + this.mOrientation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : sensorOrientation;
     }
 
     private float getResourceFloat(int i, float f) {
@@ -871,7 +872,7 @@ public class VideoModule extends VideoBase implements MediaRecorder.OnErrorListe
         Class[] clsArr = {MediaRecorder.class};
         Method method = Util.getMethod(clsArr, "setParameter", "(Ljava/lang/String;)V");
         if (method != null) {
-            method.invoke(clsArr[0], mediaRecorder, new Object[]{str});
+            method.invoke(clsArr[0], mediaRecorder, str);
         }
     }
 
@@ -2008,7 +2009,7 @@ public class VideoModule extends VideoBase implements MediaRecorder.OnErrorListe
 
     /* access modifiers changed from: protected */
     public void resizeForPreviewAspectRatio() {
-        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + 360) % 180 == 0) {
+        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
             this.mMainProtocol.setPreviewAspectRatio(((float) this.mVideoSize.height) / ((float) this.mVideoSize.width));
         } else {
             this.mMainProtocol.setPreviewAspectRatio(((float) this.mVideoSize.width) / ((float) this.mVideoSize.height));

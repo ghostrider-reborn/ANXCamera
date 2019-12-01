@@ -7,7 +7,6 @@ import android.hardware.camera2.params.Face;
 import android.media.Image;
 import android.os.Environment;
 import android.text.TextUtils;
-import com.android.camera.constant.DurationConstant;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -337,7 +336,7 @@ public class SuperNightProcess implements ProgressCallback {
         if (this.LUX_INDEX_RESULT_KEY != null) {
             int[] iArr5 = (int[]) totalCaptureResult.get(this.LUX_INDEX_RESULT_KEY);
             if (iArr5 != null && iArr5.length > 0) {
-                rawInfo.luxIndex = iArr5[0] / DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE;
+                rawInfo.luxIndex = iArr5[0] / 10000;
                 LOG.d(TAG, "luxIndex = " + rawInfo.luxIndex);
                 for (int i9 = 0; i9 < iArr5.length; i9++) {
                     LOG.d("vendorTag", "luxIndex[" + i9 + "] = " + iArr5[i9]);

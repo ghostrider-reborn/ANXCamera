@@ -201,7 +201,6 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         this.mFocusingAnimator.start();
     }
 
-    /* JADX WARNING: type inference failed for: r1v5, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.focus.CameraFocusAnimateDrawable$5] */
     private void startNormalFocusSuccessAnimation() {
         if (this.mIsTouchFocus) {
             this.mPaintEvAdjust.setVisible(0);
@@ -214,7 +213,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         ofFloat.setDuration(200);
         ofFloat.setInterpolator(new CubicEaseInOutInterpolator() {
             public float getInterpolation(float f) {
-                float interpolation = CameraFocusAnimateDrawable.super.getInterpolation(f);
+                float interpolation = super.getInterpolation(f);
                 CameraFocusAnimateDrawable.this.mPaintBigCircle.updateValue(interpolation);
                 CameraFocusAnimateDrawable.this.mPaintCenterIndicator.updateValue(interpolation);
                 CameraFocusAnimateDrawable.this.mPaintEvAdjust.updateValue(interpolation);
@@ -385,7 +384,6 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
     public void start() {
     }
 
-    /* JADX WARNING: type inference failed for: r1v3, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.focus.CameraFocusAnimateDrawable$14] */
     public void startFocusFailAnimation() {
         cancelFocusingAnimation();
         if (isAnimatorRunning(this.mTouchDownAnimator)) {
@@ -399,7 +397,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
             ofFloat.setDuration(200);
             ofFloat.setInterpolator(new CubicEaseInOutInterpolator() {
                 public float getInterpolation(float f) {
-                    float interpolation = CameraFocusAnimateDrawable.super.getInterpolation(f);
+                    float interpolation = super.getInterpolation(f);
                     CameraFocusAnimateDrawable.this.mPaintBigCircle.updateValue(interpolation);
                     CameraFocusAnimateDrawable.this.mPaintCenterIndicator.updateValue(interpolation);
                     CameraFocusAnimateDrawable.this.invalidateSelf();
@@ -433,7 +431,6 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         }
     }
 
-    /* JADX WARNING: type inference failed for: r1v9, types: [android.animation.TimeInterpolator, com.android.camera.ui.drawable.focus.CameraFocusAnimateDrawable$1] */
     public void startTouchDownAnimation() {
         cancelFocusingAnimation();
         cancelSuccessAnimation();
@@ -450,7 +447,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         this.mTouchDownAnimator.setDuration(300);
         this.mTouchDownAnimator.setInterpolator(new CubicEaseOutInterpolator() {
             public float getInterpolation(float f) {
-                float interpolation = CameraFocusAnimateDrawable.super.getInterpolation(f);
+                float interpolation = super.getInterpolation(f);
                 CameraFocusAnimateDrawable.this.mPaintBigCircle.updateValue(interpolation);
                 CameraFocusAnimateDrawable.this.mPaintCenterIndicator.updateValue(interpolation);
                 CameraFocusAnimateDrawable.this.invalidateSelf();

@@ -10,6 +10,7 @@ import android.media.Image;
 import android.opengl.GLES20;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MiuiSettings;
 import android.text.TextUtils;
 import android.view.Surface;
 import com.android.camera.ActivityBase;
@@ -236,7 +237,7 @@ public class LiveSubVVImpl implements SurfaceTextureScreenNail.ExternalFrameProc
         }
         prepareEffectGraph();
         this.mComposeFile = new MediaComposeFile(this.mMediaEffectGraph);
-        this.mComposeFile.ConstructMediaComposeFile(1920, 1080, 20971520, 30);
+        this.mComposeFile.ConstructMediaComposeFile(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, 20971520, 30);
         this.mComposeFile.SetComposeNotify(new EffectNotifier() {
             public void OnReceiveFailed() {
                 android.util.Log.d(LiveSubVVImpl.TAG, "ComposeCameraRecord OnReceiveFinish");
@@ -397,7 +398,7 @@ public class LiveSubVVImpl implements SurfaceTextureScreenNail.ExternalFrameProc
         prepare(DataRepository.dataItemLive().getCurrentVVItem());
         this.mMediaCamera = new MediaEffectCamera();
         this.mMediaCamera.SetOrientation(90);
-        this.mMediaCamera.ConstructMediaEffectCamera(1920, 1080, 31457280, 30, this);
+        this.mMediaCamera.ConstructMediaEffectCamera(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, 31457280, 30, this);
     }
 
     public void prepare(VVItem vVItem) {
@@ -465,7 +466,7 @@ public class LiveSubVVImpl implements SurfaceTextureScreenNail.ExternalFrameProc
             }
         });
         this.mEffectMediaPlayer.SetViewSurface(surface);
-        this.mEffectMediaPlayer.setGravity(EffectMediaPlayer.SurfaceGravity.SurfaceGravityResizeAspectFit, 1920, 1080);
+        this.mEffectMediaPlayer.setGravity(EffectMediaPlayer.SurfaceGravity.SurfaceGravityResizeAspectFit, 1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
         this.mEffectMediaPlayer.SetPlayLoop(true);
         this.mEffectMediaPlayer.SetGraphLoop(true);
         this.mEffectMediaPlayer.StartPreView();

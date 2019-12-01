@@ -135,11 +135,11 @@ public class CameraBrightness implements CameraBrightnessCallback {
 
         private int[] getAndroidArrayRes(String str) {
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getIntArray(Field.of(R.array.class, str, "I").getInt((Object) null));
+                return CameraAppImpl.getAndroidContext().getResources().getIntArray(Field.of((Class<?>) R.array.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e) {
                 Log.e(CameraBrightness.TAG, e.getMessage());
                 try {
-                    return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, "I").getInt((Object) null));
+                    return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
                 } catch (NoSuchFieldException e2) {
                     Log.e(CameraBrightness.TAG, e2.getMessage());
                     return new int[]{0, 255};
@@ -149,17 +149,17 @@ public class CameraBrightness implements CameraBrightnessCallback {
                 }
             } catch (IllegalArgumentException e4) {
                 Log.e(CameraBrightness.TAG, e4.getMessage());
-                return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, "I").getInt((Object) null));
+                return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             }
         }
 
         private boolean getAndroidBoolRes(String str, boolean z) {
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getBoolean(Field.of(R.bool.class, str, "I").getInt((Object) null));
+                return CameraAppImpl.getAndroidContext().getResources().getBoolean(Field.of((Class<?>) R.bool.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e) {
                 Log.e(CameraBrightness.TAG, e.getMessage());
                 try {
-                    return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, "I").getInt((Object) null));
+                    return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
                 } catch (NoSuchFieldException e2) {
                     Log.e(CameraBrightness.TAG, e2.getMessage());
                     return z;
@@ -169,13 +169,13 @@ public class CameraBrightness implements CameraBrightnessCallback {
                 }
             } catch (IllegalArgumentException e4) {
                 Log.e(CameraBrightness.TAG, e4.getMessage());
-                return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, "I").getInt((Object) null));
+                return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             }
         }
 
         private int getAndroidIntResource(String str) {
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(R.integer.class, str, "I").getInt((Object) null));
+                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of((Class<?>) R.integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e) {
                 Log.e(CameraBrightness.TAG, e.getMessage());
                 return 0;
@@ -284,7 +284,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
 
         private int getMiuiIntResource(String str) {
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(R.integer.class, str, "I").getInt((Object) null));
+                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of((Class<?>) R.integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e) {
                 Log.e(CameraBrightness.TAG, e.getMessage());
                 return 0;

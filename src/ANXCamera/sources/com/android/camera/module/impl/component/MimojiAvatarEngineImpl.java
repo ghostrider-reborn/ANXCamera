@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MiuiSettings;
 import android.util.Size;
 import android.widget.Toast;
 import com.android.camera.ActivityBase;
@@ -238,17 +239,16 @@ public class MimojiAvatarEngineImpl implements SurfaceTextureScreenNail.External
         Bitmap createBitmap2 = Bitmap.createBitmap(createBitmap, 0, 0, this.mDrawSize.getWidth(), this.mDrawSize.getHeight(), matrix, false);
         int i = 0;
         byte[] bitmapData = Util.getBitmapData(createBitmap2, BaseModule.getJpegQuality(false));
-        Thumbnail createThumbnail = Thumbnail.createThumbnail((Uri) null, this.mIsFrontCamera ? createBitmap : createBitmap2, (!this.mIsFrontCamera || this.mDeviceRotation % 180 != 0) ? this.mDeviceRotation : (this.mDeviceRotation + 180) % 360, this.mIsFrontCamera);
+        Thumbnail createThumbnail = Thumbnail.createThumbnail((Uri) null, this.mIsFrontCamera ? createBitmap : createBitmap2, (!this.mIsFrontCamera || this.mDeviceRotation % 180 != 0) ? this.mDeviceRotation : (this.mDeviceRotation + 180) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, this.mIsFrontCamera);
         createThumbnail.startWaitingForUri();
         this.mActivityBase.getThumbnailUpdater().setThumbnail(createThumbnail, true, true);
         LiveModule liveModule = (LiveModule) this.mActivityBase.getCurrentModule();
         ParallelTaskData parallelTaskData = new ParallelTaskData(liveModule != null ? liveModule.getActualCameraId() : 0, System.currentTimeMillis(), -4, (String) null);
         parallelTaskData.fillJpegData(bitmapData, 0);
-        boolean z = this.mIsFrontCamera;
-        int i2 = this.mDeviceRotation;
+        int jpegRotation = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         ParallelTaskDataParameter.Builder builder = new ParallelTaskDataParameter.Builder(this.mDrawSize, this.mDrawSize, this.mDrawSize);
         Location currentLocation = LocationManager.instance().getCurrentLocation();
-        ParallelTaskDataParameter.Builder filterId = builder.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation((Util.getJpegRotation(z ? 1 : 0, i2) + 270) % 360).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
+        ParallelTaskDataParameter.Builder filterId = builder.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
         if (-1 != this.mOrientation) {
             i = this.mOrientation;
         }

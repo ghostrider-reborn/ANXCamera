@@ -72,7 +72,7 @@ public class ExifHelper {
                     if (latitude > 0.0d) {
                         exifInterface.setAttribute("GPSLatitudeRef", "N");
                     } else {
-                        exifInterface.setAttribute("GPSLatitudeRef", ExifInterface.GpsLatitudeRef.SOUTH);
+                        exifInterface.setAttribute("GPSLatitudeRef", "S");
                     }
                     if (longitude > 0.0d) {
                         exifInterface.setAttribute("GPSLongitudeRef", ExifInterface.GpsLongitudeRef.EAST);

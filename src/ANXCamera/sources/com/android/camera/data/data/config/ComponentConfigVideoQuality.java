@@ -2,6 +2,7 @@ package com.android.camera.data.data.config;
 
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.provider.MiuiSettings;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import com.android.camera.CameraSettings;
@@ -161,13 +162,13 @@ public class ComponentConfigVideoQuality extends ComponentData {
                     arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30_disable, (int) R.drawable.ic_config_720p_30_disable, (int) R.string.pref_video_quality_entry_720p, "5"));
                 }
             }
-            if (supportedOutputSize.contains(new CameraSize(1920, 1080)) && CamcorderProfile.hasProfile(i5, 6)) {
+            if (supportedOutputSize.contains(new CameraSize(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT)) && CamcorderProfile.hasProfile(i5, 6)) {
                 if (this.mForceValue == null || !this.mForceValue.equals("6")) {
                     arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30, (int) R.drawable.ic_config_1080p_30, (int) R.string.pref_video_quality_entry_1080p, "6"));
                 } else {
                     arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30_disable, (int) R.drawable.ic_config_1080p_30_disable, (int) R.string.pref_video_quality_entry_1080p, "6"));
                 }
-                if (i4 != 169 && isSupportFpsRange(1920, 1080, i6, cameraCapabilities2)) {
+                if (i4 != 169 && isSupportFpsRange(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, i6, cameraCapabilities2)) {
                     arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_60, (int) R.drawable.ic_config_1080p_60, (int) R.string.pref_video_quality_entry_1080p_60fps, QUALITY_1080P_60FPS));
                 }
             }

@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Debug;
+import android.provider.MiuiSettings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -253,7 +254,7 @@ public class VideoStreamsView extends GLSurfaceView implements GLSurfaceView.Ren
         checkNoGLES2Error();
         boolean z = i420Frame.localPreview && !i420Frame.backCamera;
         FloatBuffer floatBuffer = null;
-        int i2 = (Util.LIMIT_SURFACE_WIDTH + i420Frame.rotateAngle) % 360;
+        int i2 = (Util.LIMIT_SURFACE_WIDTH + i420Frame.rotateAngle) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         if (i2 == 0) {
             floatBuffer = z ? upTextureCoordMirror : upTextureCoord;
         } else if (i2 == 90) {
@@ -424,7 +425,7 @@ public class VideoStreamsView extends GLSurfaceView implements GLSurfaceView.Ren
                 if (!(this._lastYUVWidth == i420Frame.width && this._lastYUVHeight == i420Frame.height && !this._renderModelChanged && !this._surfaceSizeChanged && this._lastFrameAngle == i420Frame.rotateAngle && this._lastYStride == i420Frame.yuvStrides[0])) {
                     Log.i(TAG, "Generate texture because one of following property change: _lastYUVWidth:" + this._lastYUVWidth + " _lastYUVHeight:" + this._lastYUVHeight + " _renderModelChanged:" + this._renderModelChanged + " _surfaceSizeChanged:" + this._surfaceSizeChanged + " _lastYStride:" + this._lastYStride);
                     this._lastYStride = i420Frame.yuvStrides[0];
-                    CalcRatioViewPort(i420Frame.width, i420Frame.height, (Util.LIMIT_SURFACE_WIDTH + i420Frame.rotateAngle) % 360);
+                    CalcRatioViewPort(i420Frame.width, i420Frame.height, (Util.LIMIT_SURFACE_WIDTH + i420Frame.rotateAngle) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
                     checkNoGLES2Error();
                     this._lastYUVWidth = i420Frame.width;
                     this._lastYUVHeight = i420Frame.height;

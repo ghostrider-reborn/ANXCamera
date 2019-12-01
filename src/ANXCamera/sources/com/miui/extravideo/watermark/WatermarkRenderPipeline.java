@@ -3,6 +3,7 @@ package com.miui.extravideo.watermark;
 import android.graphics.Bitmap;
 import android.opengl.EGLContext;
 import android.opengl.GLES20;
+import android.provider.MiuiSettings;
 import com.miui.extravideo.watermark.gles.EglCore;
 import com.miui.extravideo.watermark.gles.GLFrameBuffer;
 import com.miui.extravideo.watermark.gles.OpenGlUtils;
@@ -220,7 +221,7 @@ public class WatermarkRenderPipeline {
     }
 
     public int[] getWatermarkRange(int i, int i2, int i3, boolean z, boolean z2) {
-        return getWatermarkRange(i, i2, (i3 + 270) % 360, z, z2, 0.11f);
+        return getWatermarkRange(i, i2, (i3 + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, z, z2, 0.11f);
     }
 
     public void init(int i, int i2, Bitmap bitmap, float[] fArr, int i3) {
@@ -238,7 +239,7 @@ public class WatermarkRenderPipeline {
         this.mPostFrameBuffer = new GLFrameBuffer(this.mWatermarkW, this.mWatermarkH);
         this.mYuvToRgbRender = new YuvToRgbRender();
         this.mRgbToYuvRender = new RgbToYuvRender();
-        if ((this.mWatermarkRotation + 360) % 360 == 90 || (this.mWatermarkRotation + 360) % 360 == 270) {
+        if ((this.mWatermarkRotation + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (this.mWatermarkRotation + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 270) {
             i4 = i;
             i5 = i2;
         } else {

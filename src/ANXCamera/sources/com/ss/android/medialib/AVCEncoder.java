@@ -11,7 +11,6 @@ import android.opengl.GLES20;
 import android.os.Build;
 import android.util.Pair;
 import android.view.Surface;
-import com.android.camera.constant.DurationConstant;
 import com.ss.android.medialib.common.TextureDrawer;
 import com.ss.android.medialib.log.VEMonitorKeys;
 import com.ss.android.ttve.monitor.TEMonitor;
@@ -239,7 +238,7 @@ public class AVCEncoder {
                                     VELogUtil.d(TAG, "mBufferInfo.flags = " + this.mBufferInfo.flags);
                                     if (dequeueOutputBuffer == -1) {
                                         if (z2 && TIMEOUT_USEC < 5000) {
-                                            TIMEOUT_USEC = DurationConstant.DURATION_VIDEO_RECORDING_CIRCLE;
+                                            TIMEOUT_USEC = 10000;
                                         }
                                         if (!z2 || this.mDrawCount == this.mEncodeCount || i6 >= 10) {
                                             break;

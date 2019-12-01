@@ -9,6 +9,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MiuiSettings;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
@@ -311,7 +312,7 @@ public class VideoCaptureAndroid implements Camera.PreviewCallback, SurfaceHolde
     public void setPreviewRotationOnCameraThread(int i) {
         Log.v(TAG, "setPreviewRotation:" + i);
         if (this.camera != null) {
-            int i2 = this.info.facing == 1 ? (360 - this.info.orientation) % 360 : this.info.orientation;
+            int i2 = this.info.facing == 1 ? (360 - this.info.orientation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : this.info.orientation;
             if (!this.bLandScapeMode) {
                 this.camera.setDisplayOrientation(i2);
             }
@@ -530,9 +531,9 @@ public class VideoCaptureAndroid implements Camera.PreviewCallback, SurfaceHolde
                 this.rotation = 0;
             }
             if (this.info.facing == 1) {
-                this.frameRotation = ((this.info.orientation - this.rotation) + 360) % 360;
+                this.frameRotation = ((this.info.orientation - this.rotation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             } else if (this.info.facing == 0) {
-                this.frameRotation = (this.info.orientation + this.rotation) % 360;
+                this.frameRotation = (this.info.orientation + this.rotation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             }
             ProvideCameraFrame(bArr, bArr.length, this.native_capturer, this.frameRotation);
             this.camera.addCallbackBuffer(bArr);

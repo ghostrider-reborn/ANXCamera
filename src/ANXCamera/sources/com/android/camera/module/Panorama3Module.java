@@ -29,6 +29,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.MiuiSettings;
 import android.text.format.DateFormat;
 import android.util.Size;
 import android.view.KeyEvent;
@@ -1190,7 +1191,7 @@ public class Panorama3Module extends BaseModule implements ModeProtocol.CameraAc
         if (!(i == 0 || i == 90 || i == 180 || i == 270)) {
             i = 0;
         }
-        return (i + this.mDeviceOrientationAtCapture) % 360;
+        return (i + this.mDeviceOrientationAtCapture) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
     }
 
     /* access modifiers changed from: private */
@@ -1282,9 +1283,9 @@ public class Panorama3Module extends BaseModule implements ModeProtocol.CameraAc
         this.mInitParam.direction = CameraSettings.getPanoramaMoveDirection(this.mActivity);
         int displayRotation = Util.getDisplayRotation(this.mActivity);
         if (this.mOrientation == -1) {
-            this.mInitParam.output_rotation = ((this.mCameraOrientation + displayRotation) + 360) % 360;
+            this.mInitParam.output_rotation = ((this.mCameraOrientation + displayRotation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         } else {
-            this.mInitParam.output_rotation = (((this.mCameraOrientation + displayRotation) + this.mOrientation) + 360) % 360;
+            this.mInitParam.output_rotation = (((this.mCameraOrientation + displayRotation) + this.mOrientation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         String cameraLensType = CameraSettings.getCameraLensType(166);
         String str = TAG;
@@ -1481,7 +1482,7 @@ public class Panorama3Module extends BaseModule implements ModeProtocol.CameraAc
     /* JADX WARNING: type inference failed for: r10v1 */
     /* JADX WARNING: type inference failed for: r10v2 */
     /* access modifiers changed from: private */
-    /* JADX WARNING: Incorrect type for immutable var: ssa=int, code=?, for r10v0, types: [int, boolean] */
+    /* JADX WARNING: Incorrect type for immutable var: ssa=int, code=?, for r10v0, types: [boolean, int] */
     /* JADX WARNING: Removed duplicated region for block: B:26:0x004f A[SYNTHETIC, Splitter:B:26:0x004f] */
     /* JADX WARNING: Removed duplicated region for block: B:35:0x0084  */
     /* JADX WARNING: Removed duplicated region for block: B:37:0x008e  */

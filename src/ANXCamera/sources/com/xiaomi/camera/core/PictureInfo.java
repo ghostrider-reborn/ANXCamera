@@ -2,6 +2,7 @@ package com.xiaomi.camera.core;
 
 import android.annotation.SuppressLint;
 import android.hardware.camera2.params.MeteringRectangle;
+import android.provider.MiuiSettings;
 import android.util.Log;
 import com.xiaomi.camera.base.RsaUtil;
 import java.io.UnsupportedEncodingException;
@@ -138,9 +139,9 @@ public class PictureInfo {
     }
 
     public String setAfRoi(int i, int i2, int i3) {
-        int i4 = i % 360;
+        int i4 = i % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         if (i4 < 0) {
-            i4 += 360;
+            i4 += MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         if (this.mXStart == 0 && this.mYStart == 0) {
             this.mAfRoi = "0";

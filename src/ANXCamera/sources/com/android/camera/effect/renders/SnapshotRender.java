@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MiuiSettings;
 import android.util.Size;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -173,7 +174,7 @@ public class SnapshotRender {
                 iArr = null;
                 bArr = null;
             } else {
-                iArr = Util.getWatermarkRange(drawYuvAttribute4.mPictureSize.getWidth(), drawYuvAttribute4.mPictureSize.getHeight(), (drawYuvAttribute4.mJpegRotation + 270) % 360, drawYuvAttribute4.mApplyWaterMark, drawYuvAttribute4.mTimeWatermark != null, SnapshotRender.this.mDeviceWaterMarkParam.isMiMovieWatermarkEnable() ? 0.31f : 0.11f);
+                iArr = Util.getWatermarkRange(drawYuvAttribute4.mPictureSize.getWidth(), drawYuvAttribute4.mPictureSize.getHeight(), (drawYuvAttribute4.mJpegRotation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute4.mApplyWaterMark, drawYuvAttribute4.mTimeWatermark != null, SnapshotRender.this.mDeviceWaterMarkParam.isMiMovieWatermarkEnable() ? 0.31f : 0.11f);
                 bArr = ImageUtil.getYuvData(drawYuvAttribute4.mImage);
                 MiYuvImage subYuvImage = Util.getSubYuvImage(bArr, width, height, rowStride, rowStride2, iArr);
                 String access$4002 = SnapshotRender.TAG;
@@ -231,7 +232,7 @@ public class SnapshotRender {
                     }
                     long currentTimeMillis3 = System.currentTimeMillis();
                     if (!z2) {
-                        iArr = Util.getWatermarkRange(i6, i5, (drawYuvAttribute2.mJpegRotation + 270) % 360, drawYuvAttribute2.mApplyWaterMark, drawYuvAttribute2.mTimeWatermark != null ? r7 : false, SnapshotRender.this.mDeviceWaterMarkParam.isMiMovieWatermarkEnable() ? 0.31f : 0.11f);
+                        iArr = Util.getWatermarkRange(i6, i5, (drawYuvAttribute2.mJpegRotation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute2.mApplyWaterMark, drawYuvAttribute2.mTimeWatermark != null ? r7 : false, SnapshotRender.this.mDeviceWaterMarkParam.isMiMovieWatermarkEnable() ? 0.31f : 0.11f);
                         int i18 = iArr[0];
                         i12 = iArr[r7];
                         i13 = i18;
@@ -420,7 +421,7 @@ public class SnapshotRender {
                 i3 = width;
             }
             if (drawYuvAttribute2.mApplyWaterMark) {
-                int[] watermarkRange = Util.getWatermarkRange(i3, i4, (drawYuvAttribute2.mJpegRotation + 270) % 360, drawYuvAttribute2.mApplyWaterMark, drawYuvAttribute2.mTimeWatermark != null, SnapshotRender.this.mDeviceWaterMarkParam.isMiMovieWatermarkEnable() ? 0.31f : 0.11f);
+                int[] watermarkRange = Util.getWatermarkRange(i3, i4, (drawYuvAttribute2.mJpegRotation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute2.mApplyWaterMark, drawYuvAttribute2.mTimeWatermark != null, SnapshotRender.this.mDeviceWaterMarkParam.isMiMovieWatermarkEnable() ? 0.31f : 0.11f);
                 i6 = i28;
                 RectF rectF6 = new RectF((float) (watermarkRange[0] + i2), (float) (watermarkRange[1] + i), (float) (watermarkRange[0] + watermarkRange[2] + i2), (float) (watermarkRange[1] + watermarkRange[3] + i));
                 i5 = i4;
@@ -663,7 +664,7 @@ public class SnapshotRender {
         private void drawWaterMark(WaterMark waterMark, int i, int i2, int i3, boolean z) {
             this.mGLCanvas.getState().pushState();
             if (z) {
-                int i4 = (i3 + 360) % 360;
+                int i4 = (i3 + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                 int i5 = waterMark.mPictureWidth;
                 if (i4 == 90 || i4 == 270) {
                     int i6 = waterMark.mPictureHeight;
@@ -908,7 +909,7 @@ public class SnapshotRender {
                     while (SnapshotRender.this.mBlockWidth > allocate.get(0)) {
                         int unused2 = SnapshotRender.this.mBlockWidth = SnapshotRender.this.mBlockWidth / 2;
                         access$500 /= 2;
-                        if ((drawYuvAttribute.mJpegRotation + 360) % 180 == 0) {
+                        if ((drawYuvAttribute.mJpegRotation + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
                             z = true;
                         }
                     }

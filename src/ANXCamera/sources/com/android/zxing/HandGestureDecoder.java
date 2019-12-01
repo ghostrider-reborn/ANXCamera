@@ -2,6 +2,7 @@ package com.android.zxing;
 
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.provider.MiuiSettings;
 import com.android.camera.CameraSettings;
 import com.android.camera.data.DataRepository;
 import com.android.camera.handgesture.HandGesture;
@@ -173,7 +174,7 @@ public class HandGestureDecoder extends Decoder {
         if (orientation == -1) {
             orientation = 0;
         }
-        return this.mHandGesture.detectGesture(previewImage.getData(), previewImage.getWidth(), previewImage.getHeight(), this.mCameraId == 1 ? 270 - orientation : (90 + orientation) % 360);
+        return this.mHandGesture.detectGesture(previewImage.getData(), previewImage.getWidth(), previewImage.getHeight(), this.mCameraId == 1 ? 270 - orientation : (90 + orientation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
     }
 
     public void init(int i) {
