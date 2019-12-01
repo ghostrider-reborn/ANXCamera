@@ -1,5 +1,6 @@
 package com.ss.android.ugc.effectmanager;
 
+import android.os.statistics.E2EScenario;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -306,7 +307,7 @@ public class EffectManager {
             if (!TextUtils.isEmpty(str)) {
                 this.mEffectChannelRepository.fetchList(str, currentTaskID, false);
             } else {
-                this.mEffectChannelRepository.fetchList("default", currentTaskID, false);
+                this.mEffectChannelRepository.fetchList(E2EScenario.DEFAULT_CATEGORY, currentTaskID, false);
             }
         } else if (iFetchEffectChannelListener != null) {
             iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
@@ -351,7 +352,7 @@ public class EffectManager {
             if (!TextUtils.isEmpty(str)) {
                 this.mEffectChannelRepository.fetchList(str, currentTaskID, true);
             } else {
-                this.mEffectChannelRepository.fetchList("default", currentTaskID, true);
+                this.mEffectChannelRepository.fetchList(E2EScenario.DEFAULT_CATEGORY, currentTaskID, true);
             }
         } else if (iFetchEffectChannelListener != null) {
             iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
@@ -388,7 +389,7 @@ public class EffectManager {
             if (!TextUtils.isEmpty(str)) {
                 this.mEffectChannelRepository.fetchExistEffectList(str, currentTaskID);
             } else {
-                this.mEffectChannelRepository.fetchExistEffectList("default", currentTaskID);
+                this.mEffectChannelRepository.fetchExistEffectList(E2EScenario.DEFAULT_CATEGORY, currentTaskID);
             }
         } else if (iFetchEffectChannelListener != null) {
             iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));

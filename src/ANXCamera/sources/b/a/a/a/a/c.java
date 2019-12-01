@@ -9,6 +9,7 @@ import android.os.HwParcel;
 import android.os.IHwBinder;
 import android.os.IHwInterface;
 import android.os.RemoteException;
+import android.os.statistics.E2EScenario;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -541,11 +542,11 @@ public interface c extends IBase {
     }
 
     static c kK() throws RemoteException {
-        return S("default");
+        return S(E2EScenario.DEFAULT_CATEGORY);
     }
 
     static c t(boolean z) throws RemoteException {
-        return b("default", z);
+        return b(E2EScenario.DEFAULT_CATEGORY, z);
     }
 
     b T(String str) throws RemoteException;

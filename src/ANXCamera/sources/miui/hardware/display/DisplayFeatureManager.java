@@ -7,6 +7,7 @@ import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.statistics.E2EScenario;
 import android.util.Slog;
 import java.util.NoSuchElementException;
 import miui.os.DeviceFeature;
@@ -107,7 +108,7 @@ public class DisplayFeatureManager {
                 String hidlServiceName = CONFIG_SERVICENAME_RESOURCEID == 0 ? HIDL_SERVICENAME_DEFAULT : Resources.getSystem().getString(CONFIG_SERVICENAME_RESOURCEID);
                 String str = TAG;
                 Slog.d(str, "initProxyLoced CONFIG_SERVICENAME_RESOURCEID = " + CONFIG_SERVICENAME_RESOURCEID + " hidlServiceName = " + hidlServiceName);
-                IHwBinder hb = HwBinder.getService(hidlServiceName, "default");
+                IHwBinder hb = HwBinder.getService(hidlServiceName, E2EScenario.DEFAULT_CATEGORY);
                 if (hb != null) {
                     hb.linkToDeath(this.mHwBinderDeathHandler, 10001);
                     this.mProxy = new DisplayFeatureServiceProxy(hb);

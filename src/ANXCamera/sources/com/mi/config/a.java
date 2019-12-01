@@ -3,6 +3,7 @@ package com.mi.config;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.SystemProperties;
+import android.os.statistics.E2EScenario;
 import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.util.Size;
@@ -73,7 +74,7 @@ public class a extends DataItemBase implements c {
         String str = "feature_" + b.rp;
         try {
             String string = resources.getString(R.string.device_feature_configuration_file_name);
-            return (string == null || string.length() == 0 || "default".equals(string)) ? str : string;
+            return (string == null || string.length() == 0 || E2EScenario.DEFAULT_CATEGORY.equals(string)) ? str : string;
         } catch (Resources.NotFoundException e) {
             Log.d(TAG, "Device feature configuration file name undefined", e);
             return str;

@@ -1023,7 +1023,7 @@ public interface IPerfShielder extends IInterface {
             L_0x00d8:
                 int r2 = r32.readInt()
                 if (r2 == 0) goto L_0x00e8
-                android.os.Parcelable$Creator r0 = android.os.statistics.E2EScenarioPayload.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenarioPayload> r0 = android.os.statistics.E2EScenarioPayload.CREATOR
                 java.lang.Object r0 = r0.createFromParcel(r15)
                 android.os.statistics.E2EScenarioPayload r0 = (android.os.statistics.E2EScenarioPayload) r0
             L_0x00e6:
@@ -1044,7 +1044,7 @@ public interface IPerfShielder extends IInterface {
                 r15.enforceInterface(r12)
                 int r1 = r32.readInt()
                 if (r1 == 0) goto L_0x010d
-                android.os.Parcelable$Creator r1 = android.os.statistics.E2EScenario.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenario> r1 = android.os.statistics.E2EScenario.CREATOR
                 java.lang.Object r1 = r1.createFromParcel(r15)
                 android.os.statistics.E2EScenario r1 = (android.os.statistics.E2EScenario) r1
                 goto L_0x010e
@@ -1054,7 +1054,7 @@ public interface IPerfShielder extends IInterface {
                 java.lang.String r7 = r32.readString()
                 int r2 = r32.readInt()
                 if (r2 == 0) goto L_0x0122
-                android.os.Parcelable$Creator r0 = android.os.statistics.E2EScenarioPayload.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenarioPayload> r0 = android.os.statistics.E2EScenarioPayload.CREATOR
                 java.lang.Object r0 = r0.createFromParcel(r15)
                 android.os.statistics.E2EScenarioPayload r0 = (android.os.statistics.E2EScenarioPayload) r0
             L_0x0120:
@@ -1091,7 +1091,7 @@ public interface IPerfShielder extends IInterface {
                 r15.enforceInterface(r12)
                 int r1 = r32.readInt()
                 if (r1 == 0) goto L_0x016c
-                android.os.Parcelable$Creator r0 = android.os.statistics.E2EScenario.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenario> r0 = android.os.statistics.E2EScenario.CREATOR
                 java.lang.Object r0 = r0.createFromParcel(r15)
                 android.os.statistics.E2EScenario r0 = (android.os.statistics.E2EScenario) r0
             L_0x016a:
@@ -1114,7 +1114,7 @@ public interface IPerfShielder extends IInterface {
                 r15.enforceInterface(r12)
                 int r1 = r32.readInt()
                 if (r1 == 0) goto L_0x0196
-                android.os.Parcelable$Creator r1 = android.os.statistics.E2EScenario.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenario> r1 = android.os.statistics.E2EScenario.CREATOR
                 java.lang.Object r1 = r1.createFromParcel(r15)
                 android.os.statistics.E2EScenario r1 = (android.os.statistics.E2EScenario) r1
                 goto L_0x0197
@@ -1123,7 +1123,7 @@ public interface IPerfShielder extends IInterface {
             L_0x0197:
                 int r2 = r32.readInt()
                 if (r2 == 0) goto L_0x01a6
-                android.os.Parcelable$Creator r2 = android.os.statistics.E2EScenarioSettings.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenarioSettings> r2 = android.os.statistics.E2EScenarioSettings.CREATOR
                 java.lang.Object r2 = r2.createFromParcel(r15)
                 android.os.statistics.E2EScenarioSettings r2 = (android.os.statistics.E2EScenarioSettings) r2
                 goto L_0x01a7
@@ -1133,7 +1133,7 @@ public interface IPerfShielder extends IInterface {
                 java.lang.String r16 = r32.readString()
                 int r3 = r32.readInt()
                 if (r3 == 0) goto L_0x01bb
-                android.os.Parcelable$Creator r0 = android.os.statistics.E2EScenarioPayload.CREATOR
+                android.os.Parcelable$Creator<android.os.statistics.E2EScenarioPayload> r0 = android.os.statistics.E2EScenarioPayload.CREATOR
                 java.lang.Object r0 = r0.createFromParcel(r15)
                 android.os.statistics.E2EScenarioPayload r0 = (android.os.statistics.E2EScenarioPayload) r0
             L_0x01b9:
