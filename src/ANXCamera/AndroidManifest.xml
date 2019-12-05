@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
     android:compileSdkVersion="29" 
     android:compileSdkVersionCodename="10" 
-    android:versionCode="172" 
-    android:versionName="172.DownrightIncompleteRoller" 
+    android:versionCode="160" 
+    android:versionName="160.ArcticIdealisticNyala" 
     package="com.android.camera" 
     platformBuildVersionCode="29" 
     platformBuildVersionName="10">
