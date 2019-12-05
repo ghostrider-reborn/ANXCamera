@@ -1700,7 +1700,7 @@
     :try_start_0
     iget-object v2, p0, Lcom/android/camera/module/impl/component/MimojiAvatarEngineImpl;->mContext:Landroid/content/Context;
 
-    const-string/jumbo v3, "vendor/camera/mimoji/data.zip"
+    const-string/jumbo v3, "system/etc/ANXCamera/mimoji/data.zip"
 
     sget-object v4, Lcom/android/camera/fragment/mimoji/MimojiHelper;->MIMOJI_DIR:Ljava/lang/String;
 

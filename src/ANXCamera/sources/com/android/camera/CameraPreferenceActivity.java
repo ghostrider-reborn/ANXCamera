@@ -337,10 +337,9 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         }
         if (b.gQ()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_SCAN_QRCODE);
-            return;
+        } else {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_VIEWFINDER);
         }
-        removePreference(this.mPreferenceGroup, CameraSettings.KEY_GOOGLE_LENS_SUGGESTIONS);
-        removePreference(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_VIEWFINDER);
     }
 
     private void filterGroup() {

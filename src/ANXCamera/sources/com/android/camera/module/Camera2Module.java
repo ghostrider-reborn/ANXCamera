@@ -4146,15 +4146,7 @@ public class Camera2Module extends BaseModule implements FocusManager2.Listener,
 
     /* access modifiers changed from: protected */
     public boolean isParallelSessionEnable() {
-        boolean z = false;
-        boolean z2 = CameraSettings.isCameraParallelProcessEnable() && getModuleIndex() != 173 && (!isUltraWideBackCamera() || b.isMTKPlatform()) && (b.isMTKPlatform() || !this.mIsImageCaptureIntent || b.sQ);
-        if (b.isMTKPlatform()) {
-            return z2;
-        }
-        if (!isUltraWideBackCamera() && getModuleIndex() != 167 && !isStandaloneMacroCamera() && (!DataRepository.dataItemFeature().hu() || getModuleIndex() != 175)) {
-            z = true;
-        }
-        return z2 & z;
+        return false;
     }
 
     /* access modifiers changed from: protected */

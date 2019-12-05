@@ -399,7 +399,7 @@ public class MimojiAvatarEngineImpl implements SurfaceTextureScreenNail.External
                 FileUtils.delDir(MimojiHelper.MIMOJI_DIR);
             }
             try {
-                Util.verifyFileZip(this.mContext, "vendor/camera/mimoji/data.zip", MimojiHelper.MIMOJI_DIR, 32768);
+                Util.verifyFileZip(this.mContext, "system/etc/ANXCamera/mimoji/data.zip", MimojiHelper.MIMOJI_DIR, 32768);
             } catch (Exception e) {
                 Log.e(TAG, "verify asset data zip failed...", e);
             }
@@ -407,7 +407,7 @@ public class MimojiAvatarEngineImpl implements SurfaceTextureScreenNail.External
                 public void run() {
                     long currentTimeMillis = System.currentTimeMillis();
                     try {
-                        Util.verifyFileZip(MimojiAvatarEngineImpl.this.mContext, "vendor/camera/mimoji/model.zip", MimojiHelper.MIMOJI_DIR, 32768);
+                        Util.verifyFileZip(MimojiAvatarEngineImpl.this.mContext, "system/etc/ANXCamera/mimoji/model.zip", MimojiHelper.MIMOJI_DIR, 32768);
                     } catch (Exception e) {
                         Log.e(MimojiAvatarEngineImpl.TAG, "verify asset model zip failed...", e);
                     }

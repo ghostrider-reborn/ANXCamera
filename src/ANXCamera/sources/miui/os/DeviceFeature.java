@@ -34,7 +34,7 @@ public class DeviceFeature {
     }
 
     public static final boolean hasPopupCameraSupport() {
-        return "raphael".equals(Build.DEVICE) || "davinci".equals(Build.DEVICE) || "raphaelin".equals(Build.DEVICE) || "davinciin".equals(Build.DEVICE);
+        return ("raphael".equals(Build.DEVICE) || "davinci".equals(Build.DEVICE) || "raphaelin".equals(Build.DEVICE) || "davinciin".equals(Build.DEVICE)) ? false : false;
     }
 
     public static final boolean hasFlipSupport() {

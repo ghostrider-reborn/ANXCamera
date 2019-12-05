@@ -16712,117 +16712,119 @@
 
 .method protected isParallelSessionEnable()Z
     .locals 5
-
-    invoke-static {}, Lcom/android/camera/CameraSettings;->isCameraParallelProcessEnable()Z
-
-    move-result v0
-
-    const/4 v1, 0x0
-
-    const/4 v2, 0x1
-
-    if-eqz v0, :cond_2
-
-    invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->getModuleIndex()I
-
-    move-result v0
-
-    const/16 v3, 0xad
-
-    if-eq v0, v3, :cond_2
-
-    invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->isUltraWideBackCamera()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_0
-
-    invoke-static {}, Lcom/mi/config/b;->isMTKPlatform()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_2
-
-    :cond_0
-    invoke-static {}, Lcom/mi/config/b;->isMTKPlatform()Z
-
-    move-result v0
-
-    if-nez v0, :cond_1
-
-    iget-boolean v0, p0, Lcom/android/camera/module/Camera2Module;->mIsImageCaptureIntent:Z
-
-    if-eqz v0, :cond_1
-
-    sget-boolean v0, Lcom/mi/config/b;->sQ:Z
-
-    if-eqz v0, :cond_2
-
-    :cond_1
-    move v0, v2
-
-    goto :goto_0
-
-    :cond_2
-    nop
-
-    move v0, v1
-
-    :goto_0
-    invoke-static {}, Lcom/mi/config/b;->isMTKPlatform()Z
-
-    move-result v3
-
-    if-nez v3, :cond_5
-
-    invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->isUltraWideBackCamera()Z
-
-    move-result v3
-
-    if-nez v3, :cond_4
-
-    invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->getModuleIndex()I
-
-    move-result v3
-
-    const/16 v4, 0xa7
-
-    if-eq v3, v4, :cond_4
-
-    invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->isStandaloneMacroCamera()Z
-
-    move-result v3
-
-    if-nez v3, :cond_4
-
-    invoke-static {}, Lcom/android/camera/data/DataRepository;->dataItemFeature()Lcom/mi/config/a;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Lcom/mi/config/a;->hu()Z
-
-    move-result v3
-
-    if-eqz v3, :cond_3
-
-    invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->getModuleIndex()I
-
-    move-result v3
-
-    const/16 v4, 0xaf
-
-    if-eq v3, v4, :cond_4
-
-    :cond_3
-    move v1, v2
-
-    nop
-
-    :cond_4
-    and-int/2addr v0, v1
-
-    :cond_5
+    const/4 v0, 0x0
     return v0
+
+    # invoke-static {}, Lcom/android/camera/CameraSettings;->isCameraParallelProcessEnable()Z
+
+    # move-result v0
+
+    # const/4 v1, 0x0
+
+    # const/4 v2, 0x1
+
+    # if-eqz v0, :cond_2
+
+    # invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->getModuleIndex()I
+
+    # move-result v0
+
+    # const/16 v3, 0xad
+
+    # if-eq v0, v3, :cond_2
+
+    # invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->isUltraWideBackCamera()Z
+
+    # move-result v0
+
+    # if-eqz v0, :cond_0
+
+    # invoke-static {}, Lcom/mi/config/b;->isMTKPlatform()Z
+
+    # move-result v0
+
+    # if-eqz v0, :cond_2
+
+    # :cond_0
+    # invoke-static {}, Lcom/mi/config/b;->isMTKPlatform()Z
+
+    # move-result v0
+
+    # if-nez v0, :cond_1
+
+    # iget-boolean v0, p0, Lcom/android/camera/module/Camera2Module;->mIsImageCaptureIntent:Z
+
+    # if-eqz v0, :cond_1
+
+    # sget-boolean v0, Lcom/mi/config/b;->sQ:Z
+
+    # if-eqz v0, :cond_2
+
+    # :cond_1
+    # move v0, v2
+
+    # goto :goto_0
+
+    # :cond_2
+    # nop
+
+    # move v0, v1
+
+    # :goto_0
+    # invoke-static {}, Lcom/mi/config/b;->isMTKPlatform()Z
+
+    # move-result v3
+
+    # if-nez v3, :cond_5
+
+    # invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->isUltraWideBackCamera()Z
+
+    # move-result v3
+
+    # if-nez v3, :cond_4
+
+    # invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->getModuleIndex()I
+
+    # move-result v3
+
+    # const/16 v4, 0xa7
+
+    # if-eq v3, v4, :cond_4
+
+    # invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->isStandaloneMacroCamera()Z
+
+    # move-result v3
+
+    # if-nez v3, :cond_4
+
+    # invoke-static {}, Lcom/android/camera/data/DataRepository;->dataItemFeature()Lcom/mi/config/a;
+
+    # move-result-object v3
+
+    # invoke-virtual {v3}, Lcom/mi/config/a;->hu()Z
+
+    # move-result v3
+
+    # if-eqz v3, :cond_3
+
+    # invoke-virtual {p0}, Lcom/android/camera/module/Camera2Module;->getModuleIndex()I
+
+    # move-result v3
+
+    # const/16 v4, 0xaf
+
+    # if-eq v3, v4, :cond_4
+
+    # :cond_3
+    # move v1, v2
+
+    # nop
+
+    # :cond_4
+    # and-int/2addr v0, v1
+
+    # :cond_5
+    # return v0
 .end method
 
 .method protected isRepeatingRequestInProgress()Z

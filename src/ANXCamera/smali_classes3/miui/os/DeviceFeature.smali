@@ -420,7 +420,7 @@
 
     :cond_2b
     :goto_2b
-    const/4 v0, 0x1
+    const/4 v0, 0x0
 
     .line 73
     :goto_2c

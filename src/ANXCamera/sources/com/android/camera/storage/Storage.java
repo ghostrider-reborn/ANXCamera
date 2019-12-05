@@ -36,7 +36,6 @@ import com.android.camera.LocationManager;
 import com.android.camera.R;
 import com.android.camera.ToastUtils;
 import com.android.camera.Util;
-import com.android.camera.data.DataRepository;
 import com.android.camera.lib.compatibility.util.CompatibilityUtils;
 import com.android.camera.log.Log;
 import com.android.gallery3d.exif.ExifInterface;
@@ -910,10 +909,7 @@ public class Storage {
     }
 
     public static boolean isUseDocumentMode() {
-        if (Build.VERSION.SDK_INT >= 28 && !isUsePhoneStorage()) {
-            return !DataRepository.dataItemFeature().hX() || !isDirectoryExistsAndCanWrite(sCurrentStoragePath);
-        }
-        return false;
+        return true;
     }
 
     public static boolean isUsePhoneStorage() {
