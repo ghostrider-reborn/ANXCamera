@@ -41,3 +41,12 @@ adb push ./out/ANXCameraUnity.zip /sdcard/zips
 # cp ./out/ANXMimoji.zip ./out/ANXMimoji_$ANXVERSION.zip
 
 # adb push ./out/ANXMimoji.zip  /sdcard/zips
+
+
+
+
+
+# rm ./out/ANXCameraLibs.zip
+# rm ./out/ANXCameraLibs_*.zip
+# zip ./out/ANXCameraLibs.zip ./src/ANXCameraLibs/*
+# cp ./out/ANXCameraLibs.zip ./out/ANXCameraLibs_$ANXVERSION.zip

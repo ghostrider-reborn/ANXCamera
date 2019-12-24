@@ -41,3 +41,12 @@ REM "C:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXMimoji.zip .\src\ANXMimoji\
 REM copy .\out\ANXMimoji.zip /B .\out\ANXMimoji_%anxversion%.zip
 
 REM adb push .\out\ANXMimoji.zip  /sdcard/zips
+
+
+
+
+del .\out\ANXVendorLibs.zip
+del .\out\ANXVendorLibs_*.zip
+"C:\Program Files\7-Zip\7z.exe" a -tzip .\out\ANXVendorLibs.zip .\src\ANXCameraLibs\*
+copy .\out\ANXVendorLibs.zip /B .\out\ANXVendorLibs_%anxversion%.zip
+adb push .\out\ANXVendorLibs.zip  /sdcard/zips

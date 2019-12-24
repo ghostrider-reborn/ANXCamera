@@ -1862,7 +1862,7 @@
 
     if-eqz v0, :cond_1
 
-    const/16 v0, 0xb4
+    const/16 v0, 0x0
 
     monitor-exit p0
 
@@ -1882,7 +1882,7 @@
 
     if-eqz v0, :cond_2
 
-    const/16 v0, 0x78
+    const/16 v0, 0x0
 
     monitor-exit p0
 
@@ -1991,7 +1991,7 @@
     return v0
 
     :cond_0
-    const/16 v0, 0x16
+    const/16 v0, 0x0
 
     monitor-exit p0
 
@@ -2032,7 +2032,7 @@
     return v0
 
     :cond_0
-    const/16 v0, 0x17
+    const/16 v0, 0x0
 
     monitor-exit p0
 
@@ -2073,7 +2073,7 @@
     return v0
 
     :cond_0
-    const/16 v0, 0x3f
+    const/16 v0, 0x0
 
     monitor-exit p0
 
@@ -2114,7 +2114,7 @@
     return v0
 
     :cond_0
-    const/16 v0, 0x15
+    const/16 v0, 0x0
 
     monitor-exit p0
 

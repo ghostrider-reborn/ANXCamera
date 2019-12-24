@@ -366,10 +366,10 @@ public class Camera2DataContainer {
             Log.d(TAG, "Warning: getSATCameraId(): #init() failed.");
             return -1;
         } else if (HybridZoomingSystem.IS_4_SAT && CameraSettings.isSupportedOpticalZoom()) {
-            return 180;
+            return 0;
         } else {
             if (HybridZoomingSystem.IS_3_SAT && CameraSettings.isSupportedOpticalZoom()) {
-                return 120;
+                return 0;
             }
             return this.mOrderedCameraIds[2];
         }
@@ -385,7 +385,7 @@ public class Camera2DataContainer {
 
     public synchronized int getStandaloneMacroCameraId() {
         if (isInitialized()) {
-            return 22;
+            return 0;
         }
         Log.d(TAG, "Warning: getStandaloneMacroCameraId(): #init() failed.");
         return -1;
@@ -393,7 +393,7 @@ public class Camera2DataContainer {
 
     public synchronized int getUltraTeleCameraId() {
         if (isInitialized()) {
-            return 23;
+            return 0;
         }
         Log.d(TAG, "Warning: getUltraWideCameraId(): #init() failed.");
         return -1;
@@ -401,7 +401,7 @@ public class Camera2DataContainer {
 
     public synchronized int getUltraWideBokehCameraId() {
         if (isInitialized()) {
-            return 63;
+            return 0;
         }
         Log.d(TAG, "Warning: getUltraWideBokehCameraId(): #init() failed.");
         return -1;
@@ -409,7 +409,7 @@ public class Camera2DataContainer {
 
     public synchronized int getUltraWideCameraId() {
         if (isInitialized()) {
-            return 21;
+            return 0;
         }
         Log.d(TAG, "Warning: getUltraWideCameraId(): #init() failed.");
         return -1;

@@ -1787,7 +1787,7 @@
 
     move-result-object v0
 
-    const/16 v1, 0x300
+    const/16 v1, 0x1000
 
     invoke-virtual {v0, v1}, Landroid/view/View;->setSystemUiVisibility(I)V
 

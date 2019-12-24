@@ -1205,7 +1205,7 @@
     :try_start_1
     iget-object v0, p0, Lcom/android/camera/module/loader/camera2/Camera2RoleContainer;->mCameraRoleIdMap:Ljava/util/HashMap;
 
-    const/16 v2, 0x15
+    const/16 v2, 0x0
 
     invoke-static {v2}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
 

@@ -184,7 +184,7 @@ public class Camera2RoleContainer extends Camera2DataContainer {
             Log.d(TAG, "Warning: getUltraWideCameraId(): #init() failed.");
             return -1;
         }
-        return this.mCameraRoleIdMap.getOrDefault(21, -1).intValue();
+        return this.mCameraRoleIdMap.getOrDefault(0, -1).intValue();
     }
 
     public synchronized int getVirtualBackCameraId() {
