@@ -48,10 +48,10 @@ public final class ObservableBlockingSubscribe {
             }
             if (!blockingObserver.isDisposed() && observableSource != BlockingObserver.TERMINATED) {
                 if (NotificationLite.acceptFull(poll, observer)) {
-                    break;
+                    return;
                 }
             } else {
-                break;
+                return;
             }
         }
     }

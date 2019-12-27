@@ -1,8 +1,8 @@
 package com.android.camera.data.provider;
 
 import android.support.v4.util.SimpleArrayMap;
-import com.android.camera.data.cloud.DataCloud.CloudItem;
-import com.android.camera.data.data.DataItemBase.ConcurrentEditor;
+import com.android.camera.data.cloud.DataCloud;
+import com.android.camera.data.data.DataItemBase;
 
 public interface DataProvider {
 
@@ -29,7 +29,7 @@ public interface DataProvider {
     public interface ProviderEvent {
         SimpleArrayMap cloneValues();
 
-        ConcurrentEditor concurrentEditor();
+        DataItemBase.ConcurrentEditor concurrentEditor();
 
         boolean contains(String str);
 
@@ -45,7 +45,7 @@ public interface DataProvider {
 
         String getString(String str, String str2);
 
-        void injectCloud(CloudItem cloudItem);
+        void injectCloud(DataCloud.CloudItem cloudItem);
 
         boolean isTransient();
 

@@ -10,10 +10,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,7 +22,7 @@ import com.android.camera.lib.compatibility.util.CompatibilityUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentLiveMusic extends DialogFragment implements OnClickListener {
+public class FragmentLiveMusic extends DialogFragment implements View.OnClickListener {
     public static final int LOCAL = 1;
     public static final int ONLINE = 0;
     public static final String TAG = "FragmentLiveMusic";
@@ -58,7 +56,7 @@ public class FragmentLiveMusic extends DialogFragment implements OnClickListener
         }
 
         public Fragment getItem(int i) {
-            return (Fragment) this.mFragmentList.get(i);
+            return this.mFragmentList.get(i);
         }
     }
 
@@ -97,10 +95,9 @@ public class FragmentLiveMusic extends DialogFragment implements OnClickListener
         this.mViewPager = (ViewPager) view.findViewById(R.id.music_item_viewpager);
         ArrayList arrayList = new ArrayList();
         FragmentLiveMusicPager fragmentLiveMusicPager = new FragmentLiveMusicPager();
-        String str = "ITEM_TYPE";
         if (!Util.isGlobalVersion()) {
             Bundle bundle = new Bundle();
-            bundle.putInt(str, 0);
+            bundle.putInt("ITEM_TYPE", 0);
             fragmentLiveMusicPager.setArguments(bundle);
             arrayList.add(fragmentLiveMusicPager);
             this.mHotMusicText.setOnClickListener(this);
@@ -109,13 +106,13 @@ public class FragmentLiveMusic extends DialogFragment implements OnClickListener
             view.findViewById(R.id.music_select_title).setVisibility(8);
         }
         Bundle bundle2 = new Bundle();
-        bundle2.putInt(str, 1);
+        bundle2.putInt("ITEM_TYPE", 1);
         FragmentLiveMusicPager fragmentLiveMusicPager2 = new FragmentLiveMusicPager();
         fragmentLiveMusicPager2.setArguments(bundle2);
         arrayList.add(fragmentLiveMusicPager2);
         this.mViewPager.setAdapter(new MusicPagerAdapter(getChildFragmentManager(), arrayList));
         this.mViewPager.setCurrentItem(0);
-        this.mViewPager.addOnPageChangeListener(new OnPageChangeListener() {
+        this.mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public void onPageScrollStateChanged(int i) {
             }
 
@@ -141,13 +138,13 @@ public class FragmentLiveMusic extends DialogFragment implements OnClickListener
 
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.music_hotmusic /*2131296462*/:
+            case R.id.music_hotmusic:
                 onClickOnline();
                 return;
-            case R.id.music_item_close /*2131296463*/:
+            case R.id.music_item_close:
                 FragmentUtils.removeFragmentByTag(getFragmentManager(), TAG);
                 return;
-            case R.id.music_localmusic /*2131296467*/:
+            case R.id.music_localmusic:
                 onClickLocal();
                 return;
             default:

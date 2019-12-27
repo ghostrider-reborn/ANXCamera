@@ -2,13 +2,10 @@ package com.android.camera.effect.renders;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.opengl.EGLContext;
 import android.opengl.GLES20;
 import android.os.ConditionVariable;
@@ -16,7 +13,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.util.Size;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -43,7 +40,7 @@ import com.arcsoft.supernight.SuperNightProcess;
 import com.mi.config.b;
 import com.ss.android.ttve.common.TEDefine;
 import com.xiaomi.camera.base.ImageUtil;
-import com.xiaomi.camera.core.FilterProcessor.YuvAttributeWrapper;
+import com.xiaomi.camera.core.FilterProcessor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,8 +77,7 @@ public class SnapshotRender {
     public CounterUtil mFrameCounter;
     /* access modifiers changed from: private */
     public Bitmap mFrontCameraWaterMarkBitmap;
-    /* access modifiers changed from: private */
-    public volatile int mImageQueueSize;
+    private volatile int mImageQueueSize;
     /* access modifiers changed from: private */
     public final Object mLock;
     /* access modifiers changed from: private */
@@ -115,18 +111,6 @@ public class SnapshotRender {
             super(looper);
         }
 
-        /* JADX WARNING: type inference failed for: r6v8 */
-        /* JADX WARNING: type inference failed for: r9v9 */
-        /* JADX WARNING: type inference failed for: r13v3 */
-        /* JADX WARNING: type inference failed for: r9v11 */
-        /* JADX WARNING: type inference failed for: r9v12 */
-        /* JADX WARNING: type inference failed for: r6v25 */
-        /* JADX WARNING: type inference failed for: r6v26 */
-        /* JADX WARNING: type inference failed for: r9v15 */
-        /* JADX WARNING: type inference failed for: r6v32 */
-        /* JADX WARNING: type inference failed for: r6v33 */
-        /* JADX WARNING: Multi-variable type inference failed */
-        /* JADX WARNING: Unknown variable types count: 6 */
         private byte[] applyEffect(DrawYuvAttribute drawYuvAttribute) {
             byte[] bArr;
             int[] iArr;
@@ -147,11 +131,11 @@ public class SnapshotRender {
             byte[] bArr3;
             int i9;
             int i10;
-            ? r6;
+            boolean z3;
             int i11;
             int i12;
-            boolean z3;
-            ? r9;
+            boolean z4;
+            char c2;
             Size size;
             DrawYuvAttribute drawYuvAttribute4 = drawYuvAttribute;
             PipeRender effectRender = getEffectRender(drawYuvAttribute);
@@ -162,17 +146,11 @@ public class SnapshotRender {
             int width = drawYuvAttribute4.mPictureSize.getWidth();
             int height = drawYuvAttribute4.mPictureSize.getHeight();
             long currentTimeMillis = System.currentTimeMillis();
-            Plane plane = drawYuvAttribute4.mImage.getPlanes()[0];
-            Plane plane2 = drawYuvAttribute4.mImage.getPlanes()[1];
+            Image.Plane plane = drawYuvAttribute4.mImage.getPlanes()[0];
+            Image.Plane plane2 = drawYuvAttribute4.mImage.getPlanes()[1];
             int rowStride = plane.getRowStride();
             int rowStride2 = plane2.getRowStride();
-            String access$400 = SnapshotRender.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("plane0 stride =  ");
-            sb.append(plane.getRowStride());
-            sb.append(", plane1 stride = ");
-            sb.append(plane2.getRowStride());
-            Log.d(access$400, sb.toString());
+            Log.d(SnapshotRender.TAG, "plane0 stride =  " + plane.getRowStride() + ", plane1 stride = " + plane2.getRowStride());
             boolean isOutputSquare = drawYuvAttribute.isOutputSquare();
             if (drawYuvAttribute4.mEffectIndex != FilterInfo.FILTER_ID_NONE || CameraSettings.isAgeGenderAndMagicMirrorWaterOpen() || isOutputSquare || CameraSettings.isGradienterOn() || CameraSettings.isTiltShiftOn() || (!drawYuvAttribute4.mApplyWaterMark && drawYuvAttribute4.mTimeWatermark == null)) {
                 iArr = null;
@@ -180,14 +158,10 @@ public class SnapshotRender {
                 drawYuvAttribute2 = drawYuvAttribute4;
                 z = false;
             } else {
-                iArr = Util.getWatermarkRange(drawYuvAttribute4.mPictureSize.getWidth(), drawYuvAttribute4.mPictureSize.getHeight(), (drawYuvAttribute4.mJpegRotation + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute4.mApplyWaterMark, drawYuvAttribute4.mTimeWatermark != null, 0.11f);
+                iArr = Util.getWatermarkRange(drawYuvAttribute4.mPictureSize.getWidth(), drawYuvAttribute4.mPictureSize.getHeight(), (drawYuvAttribute4.mJpegRotation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute4.mApplyWaterMark, drawYuvAttribute4.mTimeWatermark != null, 0.11f);
                 byte[] yuvData = ImageUtil.getYuvData(drawYuvAttribute4.mImage);
                 MiYuvImage subYuvImage = Util.getSubYuvImage(yuvData, width, height, rowStride, rowStride2, iArr);
-                String access$4002 = SnapshotRender.TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("get sub range data spend total tome =");
-                sb2.append(System.currentTimeMillis() - currentTimeMillis);
-                Log.d(access$4002, sb2.toString());
+                Log.d(SnapshotRender.TAG, "get sub range data spend total tome =" + (System.currentTimeMillis() - currentTimeMillis));
                 Image image = drawYuvAttribute4.mImage;
                 Size size2 = drawYuvAttribute4.mPreviewSize;
                 Size size3 = r5;
@@ -210,11 +184,7 @@ public class SnapshotRender {
             GLES20.glFlush();
             effectRender.setParentFrameBufferId(this.mFrameBuffer.getId());
             effectRender.draw(drawYuvAttribute2);
-            String access$4003 = SnapshotRender.TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("drawTime=");
-            sb3.append(System.currentTimeMillis() - currentTimeMillis2);
-            Log.d(access$4003, sb3.toString());
+            Log.d(SnapshotRender.TAG, "drawTime=" + (System.currentTimeMillis() - currentTimeMillis2));
             effectRender.deleteBuffer();
             drawYuvAttribute2.mOriginalSize = new Size(width, height);
             if (!isOutputSquare) {
@@ -235,25 +205,24 @@ public class SnapshotRender {
             }
             if (drawYuvAttribute2.mApplyWaterMark) {
                 if (z) {
+                    z3 = true;
                     i10 = -iArr[0];
                     i9 = -iArr[1];
-                    r6 = 1;
                 } else {
+                    z3 = true;
                     i10 = 0;
                     i9 = 0;
-                    r6 = 1;
                 }
                 long currentTimeMillis3 = System.currentTimeMillis();
                 if (!z) {
-                    z3 = z;
-                    ? r92 = r6;
-                    iArr = Util.getWatermarkRange(i4, i3, (drawYuvAttribute2.mJpegRotation + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute2.mApplyWaterMark, drawYuvAttribute2.mTimeWatermark != null ? r6 : 0, 0.11f);
+                    z4 = z;
+                    c2 = z3;
+                    iArr = Util.getWatermarkRange(i4, i3, (drawYuvAttribute2.mJpegRotation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawYuvAttribute2.mApplyWaterMark, drawYuvAttribute2.mTimeWatermark != null ? z3 : false, 0.11f);
                     i12 = iArr[0];
-                    i11 = iArr[r92];
-                    r9 = r92;
+                    i11 = iArr[c2];
                 } else {
-                    z3 = z;
-                    r9 = r6;
+                    z4 = z;
+                    c2 = z3;
                     i12 = 0;
                     i11 = 0;
                 }
@@ -262,23 +231,15 @@ public class SnapshotRender {
                 int i17 = i14;
                 int i18 = i13;
                 i5 = height;
-                z2 = z3;
+                z2 = z4;
                 i6 = width;
-                ? r13 = r9;
+                char c3 = c2;
                 drawYuvAttribute3 = drawYuvAttribute2;
                 drawAgeGenderAndMagicMirrorWater(drawYuvAttribute2.mWaterInfos, i10, i9, width, height, drawYuvAttribute2.mPreviewSize.getWidth(), drawYuvAttribute2.mPreviewSize.getHeight(), drawYuvAttribute2.mJpegRotation, false, false);
                 bArr2 = ShaderNativeUtil.getPicture(i12 + i2, i11 + i, iArr[2], iArr[3], i16);
-                String access$4004 = SnapshotRender.TAG;
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("for remove watermark spend more time = ");
-                sb4.append(System.currentTimeMillis() - currentTimeMillis3);
-                Log.d(access$4004, sb4.toString());
+                Log.d(SnapshotRender.TAG, "for remove watermark spend more time = " + (System.currentTimeMillis() - currentTimeMillis3));
                 drawWaterMark(i10 + i2, i9 + i, i4, i3, drawYuvAttribute3.mJpegRotation, drawYuvAttribute3.mTimeWatermark, false);
-                String access$4005 = SnapshotRender.TAG;
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("watermarkTime=");
-                sb5.append(System.currentTimeMillis() - currentTimeMillis3);
-                Log.d(access$4005, sb5.toString());
+                Log.d(SnapshotRender.TAG, "watermarkTime=" + (System.currentTimeMillis() - currentTimeMillis3));
                 this.mGLCanvas.endBindFrameBuffer();
                 if (z2) {
                     i8 = i17;
@@ -296,11 +257,7 @@ public class SnapshotRender {
                 updateRenderParameters(rgbToYuvRender, drawYuvAttribute3, false);
                 rgbToYuvRender.setParentFrameBufferId(this.mFrameBuffer.getId());
                 rgbToYuvRender.drawTexture(this.mFrameBuffer.getTexture().getId(), 0.0f, 0.0f, (float) size.getWidth(), (float) size.getHeight(), true);
-                String access$4006 = SnapshotRender.TAG;
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append("rgb2YuvTime=");
-                sb6.append(System.currentTimeMillis() - currentTimeMillis4);
-                Log.d(access$4006, sb6.toString());
+                Log.d(SnapshotRender.TAG, "rgb2YuvTime=" + (System.currentTimeMillis() - currentTimeMillis4));
                 iArr2 = iArr;
             } else {
                 i8 = i14;
@@ -324,31 +281,19 @@ public class SnapshotRender {
             GLES20.glReadPixels(0, 0, ceil, ceil2, 6408, 5121, allocate);
             allocate.rewind();
             Log.d(SnapshotRender.TAG, String.format(Locale.ENGLISH, "readSize=%dx%d imageSize=%dx%d", new Object[]{Integer.valueOf(ceil), Integer.valueOf(ceil2), Integer.valueOf(width2), Integer.valueOf(i8)}));
-            String access$4007 = SnapshotRender.TAG;
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append("readTime=");
-            sb7.append(System.currentTimeMillis() - currentTimeMillis5);
-            Log.d(access$4007, sb7.toString());
+            Log.d(SnapshotRender.TAG, "readTime=" + (System.currentTimeMillis() - currentTimeMillis5));
             byte[] array = allocate.array();
             if (z2) {
                 long currentTimeMillis6 = System.currentTimeMillis();
                 Util.coverSubYuvImage(bArr, i4, i3, rowStride, rowStride2, allocate.array(), iArr2);
-                String access$4008 = SnapshotRender.TAG;
-                StringBuilder sb8 = new StringBuilder();
-                sb8.append("cover sub range data spend total time =");
-                sb8.append(System.currentTimeMillis() - currentTimeMillis6);
-                Log.d(access$4008, sb8.toString());
+                Log.d(SnapshotRender.TAG, "cover sub range data spend total time =" + (System.currentTimeMillis() - currentTimeMillis6));
                 bArr3 = bArr;
             } else {
                 bArr3 = array;
             }
             long currentTimeMillis7 = System.currentTimeMillis();
             ImageUtil.updateYuvImage(drawYuvAttribute3.mImage, bArr3, z2);
-            String access$4009 = SnapshotRender.TAG;
-            StringBuilder sb9 = new StringBuilder();
-            sb9.append("updateImageTime=");
-            sb9.append(System.currentTimeMillis() - currentTimeMillis7);
-            Log.d(access$4009, sb9.toString());
+            Log.d(SnapshotRender.TAG, "updateImageTime=" + (System.currentTimeMillis() - currentTimeMillis7));
             this.mGLCanvas.endBindFrameBuffer();
             this.mGLCanvas.recycledResources();
             if (drawYuvAttribute4.mApplyWaterMark) {
@@ -378,7 +323,7 @@ public class SnapshotRender {
             PipeRender pipeRender;
             int i13;
             int[] iArr2;
-            List list;
+            List<Block> list;
             RectF rectF2;
             RectF rectF3;
             RectF rectF4;
@@ -405,24 +350,18 @@ public class SnapshotRender {
             }
             int width = drawYuvAttribute2.mPictureSize.getWidth();
             int height = drawYuvAttribute2.mPictureSize.getHeight();
-            Plane plane = drawYuvAttribute2.mImage.getPlanes()[0];
-            Plane plane2 = drawYuvAttribute2.mImage.getPlanes()[1];
+            Image.Plane plane = drawYuvAttribute2.mImage.getPlanes()[0];
+            Image.Plane plane2 = drawYuvAttribute2.mImage.getPlanes()[1];
             int rowStride = plane.getRowStride();
             int rowStride2 = plane2.getRowStride();
             SnapshotRender.this.mMemImage.mWidth = width;
             SnapshotRender.this.mMemImage.mHeight = height;
             SnapshotRender.this.mMemImage.parseImage(drawYuvAttribute2.mImage);
-            String access$400 = SnapshotRender.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("plane0 stride =  ");
-            sb.append(plane.getRowStride());
-            sb.append(", plane1 stride = ");
-            sb.append(plane2.getRowStride());
-            Log.d(access$400, sb.toString());
+            Log.d(SnapshotRender.TAG, "plane0 stride =  " + plane.getRowStride() + ", plane1 stride = " + plane2.getRowStride());
             updateRenderParameters(effectRender, drawYuvAttribute2, true);
             int i24 = rowStride2;
             int i25 = rowStride;
-            List split = SnapshotRender.this.mSplitter.split(width, height, SnapshotRender.this.mBlockWidth, SnapshotRender.this.mBlockHeight, SnapshotRender.this.mAdjWidth, SnapshotRender.this.mAdjHeight);
+            List<Block> split = SnapshotRender.this.mSplitter.split(width, height, SnapshotRender.this.mBlockWidth, SnapshotRender.this.mBlockHeight, SnapshotRender.this.mAdjWidth, SnapshotRender.this.mAdjHeight);
             boolean isOutputSquare = drawYuvAttribute.isOutputSquare();
             if (isOutputSquare) {
                 if (width > height) {
@@ -443,7 +382,7 @@ public class SnapshotRender {
             }
             boolean z = drawYuvAttribute2.mApplyWaterMark;
             if (z) {
-                int[] watermarkRange = Util.getWatermarkRange(i3, i4, (drawYuvAttribute2.mJpegRotation + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, z, drawYuvAttribute2.mTimeWatermark != null, 0.11f);
+                int[] watermarkRange = Util.getWatermarkRange(i3, i4, (drawYuvAttribute2.mJpegRotation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, z, drawYuvAttribute2.mTimeWatermark != null, 0.11f);
                 i5 = i25;
                 RectF rectF6 = new RectF((float) (watermarkRange[0] + i2), (float) (watermarkRange[1] + i), (float) (watermarkRange[0] + watermarkRange[2] + i2), (float) (watermarkRange[1] + watermarkRange[3] + i));
                 i6 = i4;
@@ -461,7 +400,7 @@ public class SnapshotRender {
             int i26 = 0;
             while (i26 < split.size()) {
                 SnapshotRender.this.mFrameCounter.reset(String.format("[loop%d/%d]begin", new Object[]{Integer.valueOf(i26), Integer.valueOf(split.size())}));
-                Block block2 = (Block) split.get(i26);
+                Block block2 = split.get(i26);
                 int i27 = block2.mWidth;
                 int i28 = block2.mHeight;
                 int[] offset = block2.getOffset(width, height);
@@ -553,29 +492,23 @@ public class SnapshotRender {
                 drawYuvAttribute2.mOriginalSize = new Size(i33, i32);
                 if (drawYuvAttribute2.mApplyWaterMark) {
                     CounterUtil counterUtil = new CounterUtil();
-                    String str3 = "drawWaterMark";
-                    counterUtil.reset(str3);
+                    counterUtil.reset("drawWaterMark");
                     int i34 = i2 - offset[i20];
                     int i35 = i - offset[1];
-                    List<WaterMarkData> list2 = drawYuvAttribute2.mWaterInfos;
-                    String str4 = str3;
-                    int i36 = -offset[i20];
-                    int i37 = -offset[1];
                     i9 = i17;
-                    String str5 = str4;
+                    String str3 = "drawWaterMark";
                     pipeRender = effectRender;
                     CounterUtil counterUtil2 = counterUtil;
                     i8 = i32;
                     i7 = i33;
-                    int i38 = i31;
-                    int width2 = drawYuvAttribute2.mPreviewSize.getWidth();
+                    int i36 = i31;
                     i11 = i29;
                     i12 = i30;
                     i21 = 0;
-                    int i39 = i18;
-                    i22 = i38;
+                    int i37 = i18;
+                    i22 = i36;
                     i10 = width;
-                    drawAgeGenderAndMagicMirrorWater(list2, i36, i37, width, i30, width2, drawYuvAttribute2.mPreviewSize.getHeight(), drawYuvAttribute2.mJpegRotation, false, false);
+                    drawAgeGenderAndMagicMirrorWater(drawYuvAttribute2.mWaterInfos, -offset[i20], -offset[1], width, i30, drawYuvAttribute2.mPreviewSize.getWidth(), drawYuvAttribute2.mPreviewSize.getHeight(), drawYuvAttribute2.mJpegRotation, false, false);
                     rectF3 = rectF5;
                     rectF2 = rectF4;
                     if (rectangle_collision(rectF3.left, rectF3.top, rectF3.width(), rectF3.height(), rectF2.left, rectF2.top, rectF2.width(), rectF2.height())) {
@@ -583,9 +516,9 @@ public class SnapshotRender {
                         ShaderNativeUtil.mergeWaterMarkRange((int) intersectRect[0], (int) intersectRect[1], (int) (intersectRect[2] - intersectRect[0]), (int) (intersectRect[3] - intersectRect[1]), offset[0], offset[1], 4);
                         drawWaterMark(i34, i35, i7, i8, drawYuvAttribute2.mJpegRotation, drawYuvAttribute2.mTimeWatermark, false);
                     }
-                    counterUtil2.tick(str5);
+                    counterUtil2.tick(str3);
                     this.mGLCanvas.endBindFrameBuffer();
-                    i23 = i39;
+                    i23 = i37;
                     Size size = new Size(i22, i23);
                     checkWatermarkFrameBuffer(size);
                     this.mGLCanvas.beginBindFrameBuffer(this.mWatermarkFrameBuffer);
@@ -629,7 +562,7 @@ public class SnapshotRender {
                 i3 = i7;
             }
             int[] iArr3 = iArr;
-            String str6 = str2;
+            String str4 = str2;
             effectRender.deleteBuffer();
             this.mGLCanvas.endBindFrameBuffer();
             this.mGLCanvas.recycledResources();
@@ -639,7 +572,7 @@ public class SnapshotRender {
                 drawYuvAttribute2.mDataOfTheRegionUnderWatermarks = waterMarkRange;
                 drawYuvAttribute2.mCoordinatesOfTheRegionUnderWatermarks = reverseCalculateRange;
             }
-            SnapshotRender.this.mTotalCounter.tick(str6);
+            SnapshotRender.this.mTotalCounter.tick(str4);
             return null;
         }
 
@@ -659,7 +592,7 @@ public class SnapshotRender {
 
         private byte[] compress(Bitmap bitmap) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            bitmap.compress(CompressFormat.JPEG, 100, byteArrayOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
             byte[] byteArray = byteArrayOutputStream.toByteArray();
             try {
                 byteArrayOutputStream.close();
@@ -696,7 +629,7 @@ public class SnapshotRender {
         private void drawWaterMark(WaterMark waterMark, int i, int i2, int i3, boolean z) {
             this.mGLCanvas.getState().pushState();
             if (z) {
-                int i4 = (i3 + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                int i4 = (i3 + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                 int i5 = waterMark.mPictureWidth;
                 if (i4 == 90 || i4 == 270) {
                     int i6 = waterMark.mPictureHeight;
@@ -751,10 +684,8 @@ public class SnapshotRender {
                     Render render = null;
                     if (ComponentRunningTiltValue.TILT_CIRCLE.equals(str)) {
                         render = fetchRender(FilterInfo.FILTER_ID_GAUSSIAN);
-                    } else {
-                        if (ComponentRunningTiltValue.TILT_PARALLEL.equals(drawYuvAttribute.mTiltShiftMode)) {
-                            render = fetchRender(FilterInfo.FILTER_ID_TILTSHIFT);
-                        }
+                    } else if (ComponentRunningTiltValue.TILT_PARALLEL.equals(drawYuvAttribute.mTiltShiftMode)) {
+                        render = fetchRender(FilterInfo.FILTER_ID_TILTSHIFT);
                     }
                     if (render != null) {
                         pipeRender.addRender(render);
@@ -786,25 +717,24 @@ public class SnapshotRender {
                 i6++;
                 i7 = i8;
             }
-            return Bitmap.createBitmap(iArr2, i3, i4, Config.ARGB_8888);
+            return Bitmap.createBitmap(iArr2, i3, i4, Bitmap.Config.ARGB_8888);
         }
 
         private Bitmap getGPUYYY(int i, int i2, int i3, int i4) {
             int i5 = i3 >> 1;
-            int i6 = i4 >> 1;
             byte[] bArr = new byte[(i5 * i5 * 4)];
-            int i7 = i3 * i4;
-            int[] iArr = new int[i7];
+            int i6 = i3 * i4;
+            int[] iArr = new int[i6];
             ByteBuffer wrap = ByteBuffer.wrap(bArr);
             wrap.position(0);
-            GLES20.glReadPixels(i, i2, i5, i6, 6408, 5121, wrap);
-            int i8 = 0;
-            for (int i9 = 0; i9 < i7; i9++) {
-                byte b2 = bArr[i9];
-                iArr[i8] = (b2 & 255) | ((b2 << 8) & 65280) | -16777216 | ((b2 << 16) & 16711680);
-                i8++;
+            GLES20.glReadPixels(i, i2, i5, i4 >> 1, 6408, 5121, wrap);
+            int i7 = 0;
+            for (int i8 = 0; i8 < i6; i8++) {
+                byte b2 = bArr[i8];
+                iArr[i7] = (b2 & 255) | ((b2 << 8) & 65280) | -16777216 | ((b2 << 16) & 16711680);
+                i7++;
             }
-            return Bitmap.createBitmap(iArr, i3, i4, Config.ARGB_8888);
+            return Bitmap.createBitmap(iArr, i3, i4, Bitmap.Config.ARGB_8888);
         }
 
         private float[] getIntersectRect(float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9) {
@@ -828,14 +758,14 @@ public class SnapshotRender {
 
         private void initEGL(EGLContext eGLContext, boolean z) {
             if (SnapshotRender.this.mEglCore == null) {
-                SnapshotRender.this.mEglCore = new EglCore(eGLContext, 2);
+                EglCore unused = SnapshotRender.this.mEglCore = new EglCore(eGLContext, 2);
             }
             if (z && SnapshotRender.this.mRenderSurface != null) {
                 SnapshotRender.this.mRenderSurface.release();
-                SnapshotRender.this.mRenderSurface = null;
+                PbufferSurface unused2 = SnapshotRender.this.mRenderSurface = null;
             }
             SnapshotRender snapshotRender = SnapshotRender.this;
-            snapshotRender.mRenderSurface = new PbufferSurface(snapshotRender.mEglCore, 1, 1);
+            PbufferSurface unused3 = snapshotRender.mRenderSurface = new PbufferSurface(snapshotRender.mEglCore, 1, 1);
             SnapshotRender.this.mRenderSurface.makeCurrent();
         }
 
@@ -866,17 +796,7 @@ public class SnapshotRender {
                 return iArr2;
             }
             String access$400 = SnapshotRender.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("orgin w:");
-            sb.append(i3);
-            sb.append(" origin h:");
-            sb.append(i4);
-            sb.append(" image w:");
-            sb.append(i);
-            sb.append(" image h:");
-            sb.append(i2);
-            sb.append(" in different ratio");
-            Log.e(access$400, sb.toString());
+            Log.e(access$400, "orgin w:" + i3 + " origin h:" + i4 + " image w:" + i + " image h:" + i2 + " in different ratio");
             return null;
         }
 
@@ -904,16 +824,16 @@ public class SnapshotRender {
                 bitmap = SnapshotRender.this.mFrontCameraWaterMarkBitmap;
             } else if (SnapshotRender.this.mDualCameraWaterMarkBitmap != null && SnapshotRender.this.mDeviceWaterMarkParam.isDualWatermarkEnable()) {
                 if (SnapshotRender.this.mCurrentCustomWaterMarkText != null && !SnapshotRender.this.mCurrentCustomWaterMarkText.equals(CameraSettings.getCustomWatermark())) {
-                    SnapshotRender.this.mCurrentCustomWaterMarkText = CameraSettings.getCustomWatermark();
+                    String unused = SnapshotRender.this.mCurrentCustomWaterMarkText = CameraSettings.getCustomWatermark();
                     SnapshotRender snapshotRender = SnapshotRender.this;
-                    snapshotRender.mDualCameraWaterMarkBitmap = snapshotRender.loadCameraWatermark(CameraAppImpl.getAndroidContext());
+                    Bitmap unused2 = snapshotRender.mDualCameraWaterMarkBitmap = snapshotRender.loadCameraWatermark(CameraAppImpl.getAndroidContext());
                 }
                 bitmap = SnapshotRender.this.mDualCameraWaterMarkBitmap;
                 boolean equals = CameraSettings.getCustomWatermark().equals(CameraSettings.getDefaultWatermarkStr());
                 if (SnapshotRender.this.mDeviceWaterMarkParam.isUltraWatermarkEnable() && equals) {
                     if (SnapshotRender.this.mUltraPixelCameraWaterMarkBitmap == null) {
                         SnapshotRender snapshotRender2 = SnapshotRender.this;
-                        snapshotRender2.mUltraPixelCameraWaterMarkBitmap = snapshotRender2.loadUltraWatermark(CameraAppImpl.getAndroidContext());
+                        Bitmap unused3 = snapshotRender2.mUltraPixelCameraWaterMarkBitmap = snapshotRender2.loadUltraWatermark(CameraAppImpl.getAndroidContext());
                     }
                     if (SnapshotRender.this.mUltraPixelCameraWaterMarkBitmap != null) {
                         bitmap = SnapshotRender.this.mUltraPixelCameraWaterMarkBitmap;
@@ -930,7 +850,7 @@ public class SnapshotRender {
         public void handleMessage(Message message) {
             int i = message.what;
             if (i == 0) {
-                initEGL(null, false);
+                initEGL((EGLContext) null, false);
                 this.mGLCanvas = new SnapshotCanvas();
             } else if (i == 1) {
                 drawImage((DrawYuvAttribute) message.obj, false);
@@ -939,10 +859,10 @@ public class SnapshotRender {
                     release();
                 }
                 synchronized (SnapshotRender.this.mLock) {
-                    SnapshotRender.this.mImageQueueSize = SnapshotRender.this.mImageQueueSize - 1;
+                    SnapshotRender.access$310(SnapshotRender.this);
                 }
             } else if (i == 2) {
-                YuvAttributeWrapper yuvAttributeWrapper = (YuvAttributeWrapper) message.obj;
+                FilterProcessor.YuvAttributeWrapper yuvAttributeWrapper = (FilterProcessor.YuvAttributeWrapper) message.obj;
                 DrawYuvAttribute drawYuvAttribute = yuvAttributeWrapper.mAttribute;
                 ConditionVariable conditionVariable = yuvAttributeWrapper.mBlocker;
                 if (drawYuvAttribute.mPictureSize.getWidth() == 0 || drawYuvAttribute.mPictureSize.getHeight() == 0) {
@@ -955,23 +875,23 @@ public class SnapshotRender {
                 }
                 this.mGLCanvas.setSize(drawYuvAttribute.mPictureSize.getWidth(), drawYuvAttribute.mPictureSize.getHeight());
                 int access$500 = SnapshotRender.this.calEachBlockHeight(drawYuvAttribute.mPictureSize.getWidth(), drawYuvAttribute.mPictureSize.getHeight());
-                SnapshotRender.this.mBlockWidth = drawYuvAttribute.mPictureSize.getWidth();
+                int unused = SnapshotRender.this.mBlockWidth = drawYuvAttribute.mPictureSize.getWidth();
                 IntBuffer allocate = IntBuffer.allocate(2);
                 GLES20.glGetIntegerv(3379, allocate);
                 boolean z = false;
                 while (SnapshotRender.this.mBlockWidth > allocate.get(0)) {
                     SnapshotRender snapshotRender = SnapshotRender.this;
-                    snapshotRender.mBlockWidth = snapshotRender.mBlockWidth / 2;
+                    int unused2 = snapshotRender.mBlockWidth = snapshotRender.mBlockWidth / 2;
                     access$500 /= 2;
-                    if ((drawYuvAttribute.mJpegRotation + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
+                    if ((drawYuvAttribute.mJpegRotation + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
                         z = true;
                     }
                 }
-                SnapshotRender.this.mBlockHeight = drawYuvAttribute.mPictureSize.getHeight() / access$500;
+                int unused3 = SnapshotRender.this.mBlockHeight = drawYuvAttribute.mPictureSize.getHeight() / access$500;
                 SnapshotRender snapshotRender2 = SnapshotRender.this;
-                snapshotRender2.mAdjWidth = snapshotRender2.mBlockWidth;
+                int unused4 = snapshotRender2.mAdjWidth = snapshotRender2.mBlockWidth;
                 SnapshotRender snapshotRender3 = SnapshotRender.this;
-                snapshotRender3.mAdjHeight = snapshotRender3.mBlockHeight;
+                int unused5 = snapshotRender3.mAdjHeight = snapshotRender3.mBlockHeight;
                 if (SnapshotRender.this.mBlockHeight % 4 != 0) {
                     SnapshotRender snapshotRender4 = SnapshotRender.this;
                     SnapshotRender.access$712(snapshotRender4, 4 - (snapshotRender4.mBlockHeight % 4));
@@ -1014,10 +934,7 @@ public class SnapshotRender {
         this.mImageQueueSize = 0;
         this.mLock = new Object();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SnapshotRender created ");
-        sb.append(this);
-        Log.d(str, sb.toString());
+        Log.d(str, "SnapshotRender created " + this);
         this.mEglThread = new HandlerThread(TAG);
         this.mEglThread.start();
         this.mEglHandler = new EGLHandler(this.mEglThread.getLooper());
@@ -1029,6 +946,12 @@ public class SnapshotRender {
         this.mSplitter = new Splitter();
         this.mEglHandler.sendEmptyMessage(0);
         this.mRelease = false;
+    }
+
+    static /* synthetic */ int access$310(SnapshotRender snapshotRender) {
+        int i = snapshotRender.mImageQueueSize;
+        snapshotRender.mImageQueueSize = i - 1;
+        return i;
     }
 
     static /* synthetic */ int access$712(SnapshotRender snapshotRender, int i) {
@@ -1079,10 +1002,7 @@ public class SnapshotRender {
         }
         System.gc();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SnapshotRender released ");
-        sb.append(this);
-        Log.d(str, sb.toString());
+        Log.d(str, "SnapshotRender released " + this);
     }
 
     public static SnapshotRender getRender() {
@@ -1100,7 +1020,7 @@ public class SnapshotRender {
         throw r0;
      */
     public Bitmap loadCameraWatermark(Context context) {
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         options.inPurgeable = true;
         options.inPremultiplied = false;
@@ -1113,8 +1033,8 @@ public class SnapshotRender {
         }
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
-            Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, null, options);
-            $closeResource(null, fileInputStream);
+            Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, (Rect) null, options);
+            $closeResource((Throwable) null, fileInputStream);
             return decodeStream;
         } catch (Exception e2) {
             Log.d(TAG, "Failed to load app camera watermark ", e2);
@@ -1133,7 +1053,7 @@ public class SnapshotRender {
         throw r0;
      */
     public Bitmap loadUltraWatermark(Context context) {
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         options.inPurgeable = true;
         options.inPremultiplied = false;
@@ -1144,8 +1064,8 @@ public class SnapshotRender {
             }
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
-                Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, null, options);
-                $closeResource(null, fileInputStream);
+                Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, (Rect) null, options);
+                $closeResource((Throwable) null, fileInputStream);
                 return decodeStream;
             } catch (Exception e2) {
                 Log.d(TAG, "Failed to load app camera watermark ", e2);
@@ -1172,11 +1092,7 @@ public class SnapshotRender {
     }
 
     public boolean processImageAsync(DrawYuvAttribute drawYuvAttribute) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("queueSize=");
-        sb.append(this.mImageQueueSize);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "queueSize=" + this.mImageQueueSize);
         if (this.mImageQueueSize >= 7) {
             Log.d(TAG, "queueSize is full");
             return false;
@@ -1188,7 +1104,7 @@ public class SnapshotRender {
         return true;
     }
 
-    public void processImageSync(YuvAttributeWrapper yuvAttributeWrapper) {
+    public void processImageSync(FilterProcessor.YuvAttributeWrapper yuvAttributeWrapper) {
         this.mEglHandler.obtainMessage(2, yuvAttributeWrapper).sendToTarget();
     }
 

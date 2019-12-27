@@ -30,19 +30,18 @@ import com.android.camera.data.data.config.ComponentManuallyFocus;
 import com.android.camera.data.data.config.ComponentManuallyISO;
 import com.android.camera.data.data.config.ComponentManuallyWB;
 import com.android.camera.data.data.runing.ComponentRunningShine;
-import com.android.camera.data.data.runing.ComponentRunningShine.ShineType;
 import com.android.camera.fragment.lifeCircle.BaseLifecycleListener;
 import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.fragment.mimoji.MimojiInfo;
 import com.android.camera.fragment.vv.VVItem;
 import com.android.camera.module.loader.StartControl;
-import com.android.camera.ui.FocusView.ExposureViewListener;
-import com.android.camera.ui.ObjectView.ObjectViewListener;
+import com.android.camera.ui.FocusView;
+import com.android.camera.ui.ObjectView;
 import com.android.camera.watermark.WaterMarkData;
-import com.android.camera2.Camera2Proxy.PreviewCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.CameraHardwareFace;
 import com.android.camera2.autozoom.AutoZoomCaptureResult;
-import com.ss.android.vesdk.TERecorder.OnConcatFinishedListener;
+import com.ss.android.vesdk.TERecorder;
 import com.ss.android.vesdk.VECommonCallback;
 import io.reactivex.Completable;
 import io.reactivex.disposables.Disposable;
@@ -759,7 +758,7 @@ public interface ModeProtocol {
 
         RectF getFocusRectInPreviewFrame();
 
-        void initializeFocusView(ExposureViewListener exposureViewListener);
+        void initializeFocusView(FocusView.ExposureViewListener exposureViewListener);
 
         boolean initializeObjectTrack(RectF rectF, boolean z);
 
@@ -815,7 +814,7 @@ public interface ModeProtocol {
 
         void setFocusViewType(boolean z);
 
-        void setObjectViewListener(ObjectViewListener objectViewListener);
+        void setObjectViewListener(ObjectView.ObjectViewListener objectViewListener);
 
         void setPreviewSize(int i, int i2);
 
@@ -878,7 +877,7 @@ public interface ModeProtocol {
 
         void onDeviceRotationChange(float[] fArr);
 
-        boolean onRecordConcat(OnConcatFinishedListener onConcatFinishedListener);
+        boolean onRecordConcat(TERecorder.OnConcatFinishedListener onConcatFinishedListener);
 
         void onRecordPause();
 
@@ -911,7 +910,7 @@ public interface ModeProtocol {
         void updateRotation(float f2, float f3, float f4);
     }
 
-    public interface LiveConfigVV extends BaseProtocol, LiveGenericControl, LiveRecordControl, LiveModuleSub, LiveVVExternal, PreviewCallback {
+    public interface LiveConfigVV extends BaseProtocol, LiveGenericControl, LiveRecordControl, LiveModuleSub, LiveVVExternal, Camera2Proxy.PreviewCallback {
         public static final int TYPE_TAG = 228;
     }
 
@@ -1165,7 +1164,7 @@ public interface ModeProtocol {
 
         void dismiss(int i);
 
-        List<TypeItem> getSupportedBeautyItems(@ShineType String str);
+        List<TypeItem> getSupportedBeautyItems(@ComponentRunningShine.ShineType String str);
 
         boolean isBeautyPanelShow();
 
@@ -1175,7 +1174,7 @@ public interface ModeProtocol {
 
         void show();
 
-        void switchShineType(@ShineType String str, boolean z);
+        void switchShineType(@ComponentRunningShine.ShineType String str, boolean z);
     }
 
     public interface MimojiAlert extends BaseProtocol {

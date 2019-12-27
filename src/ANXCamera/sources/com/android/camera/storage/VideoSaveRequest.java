@@ -5,7 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore.Video.Media;
+import android.provider.MediaStore;
 import com.android.camera.FileCompat;
 import com.android.camera.Thumbnail;
 import com.android.camera.Util;
@@ -32,21 +32,12 @@ public class VideoSaveRequest implements SaveRequest {
         long j;
         StringBuilder sb;
         ParcelFileDescriptor parcelFileDescriptor;
-        String str2 = "Current video URI: ";
-        boolean isUseDocumentMode = Storage.isUseDocumentMode();
-        String str3 = "delete invalid video: ";
         Uri uri = null;
-        String str4 = TAG;
-        if (!isUseDocumentMode) {
+        if (!Storage.isUseDocumentMode()) {
             j = Util.getDuration(str);
             if (0 == j) {
                 boolean delete = new File(str).delete();
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str3);
-                sb2.append(str);
-                sb2.append(", deleted : ");
-                sb2.append(delete);
-                Log.e(str4, sb2.toString());
+                Log.e(TAG, "delete invalid video: " + str + ", deleted : " + delete);
                 return null;
             }
         } else {
@@ -66,16 +57,12 @@ public class VideoSaveRequest implements SaveRequest {
                     contentValues.put("duration", Long.valueOf(j));
                     contentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
                     long currentTimeMillis = System.currentTimeMillis();
-                    uri = this.context.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, contentValues);
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("addVideoToMediaStore: insert video cost: ");
-                    sb3.append(System.currentTimeMillis() - currentTimeMillis);
-                    sb3.append("ms");
-                    Log.d(str4, sb3.toString());
+                    uri = this.context.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+                    Log.d(TAG, "addVideoToMediaStore: insert video cost: " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
                     sb = new StringBuilder();
-                    sb.append(str2);
+                    sb.append("Current video URI: ");
                     sb.append(uri);
-                    Log.d(str4, sb.toString());
+                    Log.d(TAG, sb.toString());
                     return uri;
                 } catch (Throwable th) {
                     th = th;
@@ -94,16 +81,12 @@ public class VideoSaveRequest implements SaveRequest {
                 contentValues.put("duration", Long.valueOf(j));
                 contentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
                 long currentTimeMillis2 = System.currentTimeMillis();
-                uri = this.context.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, contentValues);
-                StringBuilder sb32 = new StringBuilder();
-                sb32.append("addVideoToMediaStore: insert video cost: ");
-                sb32.append(System.currentTimeMillis() - currentTimeMillis2);
-                sb32.append("ms");
-                Log.d(str4, sb32.toString());
+                uri = this.context.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+                Log.d(TAG, "addVideoToMediaStore: insert video cost: " + (System.currentTimeMillis() - currentTimeMillis2) + "ms");
                 sb = new StringBuilder();
-                sb.append(str2);
+                sb.append("Current video URI: ");
                 sb.append(uri);
-                Log.d(str4, sb.toString());
+                Log.d(TAG, sb.toString());
                 return uri;
             } catch (Throwable th2) {
                 th = th2;
@@ -113,10 +96,7 @@ public class VideoSaveRequest implements SaveRequest {
                 throw th;
             }
             if (0 == j) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str3);
-                sb4.append(str);
-                Log.e(str4, sb4.toString());
+                Log.e(TAG, "delete invalid video: " + str);
                 FileCompat.deleteFile(str);
                 return null;
             }
@@ -126,26 +106,19 @@ public class VideoSaveRequest implements SaveRequest {
         contentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
         try {
             long currentTimeMillis22 = System.currentTimeMillis();
-            uri = this.context.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, contentValues);
-            StringBuilder sb322 = new StringBuilder();
-            sb322.append("addVideoToMediaStore: insert video cost: ");
-            sb322.append(System.currentTimeMillis() - currentTimeMillis22);
-            sb322.append("ms");
-            Log.d(str4, sb322.toString());
+            uri = this.context.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+            Log.d(TAG, "addVideoToMediaStore: insert video cost: " + (System.currentTimeMillis() - currentTimeMillis22) + "ms");
             sb = new StringBuilder();
         } catch (Exception e2) {
-            Log.e(str4, "failed to add video to media store", e2);
+            Log.e(TAG, "failed to add video to media store", e2);
             sb = new StringBuilder();
         } catch (Throwable th3) {
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append(str2);
-            sb5.append(uri);
-            Log.d(str4, sb5.toString());
+            Log.d(TAG, "Current video URI: " + uri);
             throw th3;
         }
-        sb.append(str2);
+        sb.append("Current video URI: ");
         sb.append(uri);
-        Log.d(str4, sb.toString());
+        Log.d(TAG, sb.toString());
         return uri;
     }
 
@@ -178,32 +151,22 @@ public class VideoSaveRequest implements SaveRequest {
     }
 
     public void save() {
-        String str = TAG;
-        Log.d(str, "save video: start");
-        String str2 = "_data";
-        String asString = this.mContentValues.getAsString(str2);
+        Log.d(TAG, "save video: start");
+        String asString = this.mContentValues.getAsString("_data");
         if (!asString.equals(this.mVideoPath)) {
             if (new File(this.mVideoPath).renameTo(new File(asString))) {
                 this.mVideoPath = asString;
             } else {
-                this.mContentValues.put(str2, this.mVideoPath);
+                this.mContentValues.put("_data", this.mVideoPath);
             }
         }
         boolean needThumbnail = this.saverCallback.needThumbnail(isFinal());
         this.mUri = addVideoToMediaStore(this.mVideoPath, this.mContentValues);
         if (this.mUri == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("insert MediaProvider failed, attempt to find uri by path, ");
-            sb.append(this.mVideoPath);
-            Log.w(str, sb.toString());
+            Log.w(TAG, "insert MediaProvider failed, attempt to find uri by path, " + this.mVideoPath);
             this.mUri = MediaProviderUtil.getContentUriFromPath(this.context, this.mVideoPath);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("save video: media has been stored, Uri: ");
-        sb2.append(this.mUri);
-        sb2.append(", has thumbnail: ");
-        sb2.append(needThumbnail);
-        Log.d(str, sb2.toString());
+        Log.d(TAG, "save video: media has been stored, Uri: " + this.mUri + ", has thumbnail: " + needThumbnail);
         if (this.mUri != null && checkExternalStorageThumbnailInterupt(this.mVideoPath)) {
             boolean z = false;
             if (needThumbnail) {
@@ -216,15 +179,15 @@ public class VideoSaveRequest implements SaveRequest {
             }
             this.saverCallback.notifyNewMediaData(this.mUri, this.mContentValues.getAsString("title"), 1);
             Context context2 = this.context;
-            String str3 = this.mVideoPath;
+            String str = this.mVideoPath;
             if (this.mContentValues.get("latitude") == null && this.mContentValues.get("longitude") == null) {
                 z = true;
             }
-            Storage.saveToCloudAlbum(context2, str3, -1, z);
+            Storage.saveToCloudAlbum(context2, str, -1, z);
         } else if (needThumbnail) {
             this.saverCallback.postHideThumbnailProgressing();
         }
-        Log.d(str, "save video: end");
+        Log.d(TAG, "save video: end");
     }
 
     public void setContextAndCallback(Context context2, SaverCallback saverCallback2) {

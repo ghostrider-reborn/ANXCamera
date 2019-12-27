@@ -1,8 +1,6 @@
 package com.miui.filtersdk.filter;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLES20;
 import android.os.Environment;
 import android.util.Log;
@@ -42,24 +40,14 @@ public class NewBeautificationFilter extends BaseBeautyFilter {
     /* JADX WARNING: Removed duplicated region for block: B:28:? A[RETURN, SYNTHETIC] */
     private static void dumpToBitmap(int i, int i2, ByteBuffer byteBuffer) {
         if (byteBuffer != null) {
-            Bitmap createBitmap = Bitmap.createBitmap(i, i2, Config.ARGB_8888);
+            Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
             createBitmap.copyPixelsFromBuffer(byteBuffer);
-            StringBuilder sb = new StringBuilder();
-            sb.append(Environment.getExternalStorageDirectory().getPath());
-            sb.append("/hehe/");
-            sb.append(System.currentTimeMillis());
-            sb.append(Storage.JPEG_SUFFIX);
-            String sb2 = sb.toString();
             FileOutputStream fileOutputStream = null;
             try {
-                FileOutputStream fileOutputStream2 = new FileOutputStream(new File(sb2));
+                FileOutputStream fileOutputStream2 = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getPath() + "/hehe/" + System.currentTimeMillis() + Storage.JPEG_SUFFIX));
                 try {
-                    createBitmap.compress(CompressFormat.JPEG, 100, fileOutputStream2);
-                    String str = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("dump to ");
-                    sb3.append(sb2);
-                    Log.d(str, sb3.toString());
+                    createBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream2);
+                    Log.d(TAG, "dump to " + r3);
                 } catch (FileNotFoundException e2) {
                     e = e2;
                     fileOutputStream = fileOutputStream2;
@@ -208,8 +196,8 @@ public class NewBeautificationFilter extends BaseBeautyFilter {
             runOnDraw(new Runnable() {
                 public void run() {
                     NewBeautificationFilter newBeautificationFilter = NewBeautificationFilter.this;
-                    newBeautificationFilter.mTextureId = newBeautificationFilter.mBeautyProcessor.beautify(bArr, i, i2);
-                    NewBeautificationFilter.this.mbGetValidTexureID = true;
+                    int unused = newBeautificationFilter.mTextureId = newBeautificationFilter.mBeautyProcessor.beautify(bArr, i, i2);
+                    boolean unused2 = NewBeautificationFilter.this.mbGetValidTexureID = true;
                 }
             });
         }

@@ -3,8 +3,7 @@ package com.android.camera.ui.drawable.snap;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -36,18 +35,16 @@ public class CameraSnapPaintCircle extends CameraPaintBase {
 
     private void drawElapsedArc(Canvas canvas, float f2, float f3) {
         RectF rectF = this.mArcRectF;
-        float f4 = -90.0f + f2;
-        float f5 = this.mSpaceAngle;
-        float f6 = f4 + f5;
-        float f7 = (f3 - f2) - f5;
-        canvas.drawArc(rectF, f6, f7, false, this.mPaint);
+        float f4 = this.mSpaceAngle;
+        float f5 = -90.0f + f2 + f4;
+        float f6 = (f3 - f2) - f4;
+        canvas.drawArc(rectF, f5, f6, false, this.mPaint);
     }
 
     private void drawOffset(Canvas canvas, float f2) {
         RectF rectF = this.mArcRectF;
-        float f3 = f2 - 0.049804688f;
-        float f4 = this.mSpaceAngle;
-        canvas.drawArc(rectF, f3 - f4, f4 * 2.0f, false, this.mOffsetPaint);
+        float f3 = this.mSpaceAngle;
+        canvas.drawArc(rectF, (f2 - 0.049804688f) - f3, f3 * 2.0f, false, this.mOffsetPaint);
     }
 
     public void addSegmentNow(long j) {
@@ -82,7 +79,7 @@ public class CameraSnapPaintCircle extends CameraPaintBase {
             float f7 = f3 + f2;
             float f8 = f5 + f2;
             if (this.mNeedProcessShader) {
-                this.mPaint.setShader(null);
+                this.mPaint.setShader((Shader) null);
             }
             this.mPaint.setAlpha(this.isInBeautyMode ? this.mCurrentAlpha : CameraPaintBase.ALPHA_HINT);
             this.mArcRectF.set(f4, f6, f7, f8);
@@ -128,15 +125,15 @@ public class CameraSnapPaintCircle extends CameraPaintBase {
     /* access modifiers changed from: protected */
     public void initPaint(Context context) {
         this.mPaint.setAntiAlias(true);
-        this.mPaint.setStyle(Style.STROKE);
+        this.mPaint.setStyle(Paint.Style.STROKE);
         this.mPaint.setStrokeWidth((float) Util.dpToPixel(1.0f));
         this.mArcRectF = new RectF();
         this.mOffsetPaint = new Paint();
         this.mOffsetPaint.setAntiAlias(true);
-        this.mOffsetPaint.setStyle(Style.STROKE);
+        this.mOffsetPaint.setStyle(Paint.Style.STROKE);
         this.mOffsetPaint.setStrokeWidth((float) Util.dpToPixel(1.0f));
         this.mOffsetPaint.setColor(ViewCompat.MEASURED_STATE_MASK);
-        this.mOffsetPaint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+        this.mOffsetPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
     }
 
     public void initVVProcessShader() {
@@ -155,12 +152,12 @@ public class CameraSnapPaintCircle extends CameraPaintBase {
             return 0;
         }
         List<Float> list3 = this.mSegmentRatios;
-        this.timeAngle = ((Float) list3.get(list3.size() - 1)).floatValue();
+        this.timeAngle = list3.get(list3.size() - 1).floatValue();
         if (this.mSegmentTimes.isEmpty()) {
             return 0;
         }
         List<Long> list4 = this.mSegmentTimes;
-        return ((Long) list4.get(list4.size() - 1)).longValue();
+        return list4.get(list4.size() - 1).longValue();
     }
 
     public void resetRecordingState() {
@@ -174,7 +171,7 @@ public class CameraSnapPaintCircle extends CameraPaintBase {
         if (z) {
             this.mProcessColor = -1417668;
         } else {
-            this.mPaint.setShader(null);
+            this.mPaint.setShader((Shader) null);
         }
     }
 

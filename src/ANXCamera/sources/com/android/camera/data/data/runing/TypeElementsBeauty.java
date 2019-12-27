@@ -5,7 +5,7 @@ import com.android.camera.constant.BeautyConstant;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.TypeElements;
 import com.android.camera.data.data.TypeItem;
-import com.android.camera.data.data.runing.ComponentRunningShine.ShineType;
+import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera2.CameraCapabilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class TypeElementsBeauty extends TypeElements {
         super(componentRunningShine);
     }
 
-    private TypeItem createTypeItem(@ShineType String str, String str2, boolean z, CameraCapabilities cameraCapabilities) {
+    private TypeItem createTypeItem(@ComponentRunningShine.ShineType String str, String str2, boolean z, CameraCapabilities cameraCapabilities) {
         if (z && !supportType(str2, cameraCapabilities)) {
             return null;
         }
@@ -250,7 +250,7 @@ public class TypeElementsBeauty extends TypeElements {
         }
     }
 
-    private void initItemsBySupportedTypes(@ShineType String str, String[] strArr, List<TypeItem> list, boolean z, CameraCapabilities cameraCapabilities) {
+    private void initItemsBySupportedTypes(@ComponentRunningShine.ShineType String str, String[] strArr, List<TypeItem> list, boolean z, CameraCapabilities cameraCapabilities) {
         for (String createTypeItem : strArr) {
             TypeItem createTypeItem2 = createTypeItem(str, createTypeItem, z, cameraCapabilities);
             if (createTypeItem2 != null) {
@@ -264,18 +264,16 @@ public class TypeElementsBeauty extends TypeElements {
     }
 
     private void initMakeUpItems(List<TypeItem> list, int i, CameraCapabilities cameraCapabilities, ComponentRunningShine componentRunningShine) {
-        String[] strArr;
         for (String str : BeautyConstant.BEAUTY_CATEGORY_FRONT_MAKEUP) {
             TypeItem typeItem = null;
             char c2 = 65535;
             if (str.hashCode() == 942822477 && str.equals("pref_eye_light_type_key")) {
                 c2 = 0;
             }
-            String str2 = "5";
             if (c2 != 0) {
-                typeItem = createTypeItem(str2, str, true, cameraCapabilities);
+                typeItem = createTypeItem("5", str, true, cameraCapabilities);
             } else if (i == 1 && DataRepository.dataItemFeature().Mc()) {
-                typeItem = createTypeItem(str2, str, false, cameraCapabilities);
+                typeItem = createTypeItem("5", str, false, cameraCapabilities);
             }
             if (typeItem != null) {
                 list.add(typeItem);
@@ -293,7 +291,7 @@ public class TypeElementsBeauty extends TypeElements {
             int i2 = -1;
             int i3 = -1;
             for (int i4 = 0; i4 < size; i4++) {
-                String str = ((TypeItem) list.get(i4)).mKeyOrType;
+                String str = list.get(i4).mKeyOrType;
                 int hashCode = str.hashCode();
                 if (hashCode != -39674120) {
                     if (hashCode == 1659922406 && str.equals("pref_beautify_hairline_ratio_key")) {
@@ -330,7 +328,7 @@ public class TypeElementsBeauty extends TypeElements {
         return cameraCapabilities.isSupportBeautyType(str);
     }
 
-    public List<TypeItem> initAndGetSupportItems(int i, CameraCapabilities cameraCapabilities, @ShineType String str) {
+    public List<TypeItem> initAndGetSupportItems(int i, CameraCapabilities cameraCapabilities, @ComponentRunningShine.ShineType String str) {
         ComponentRunningShine componentRunningShine = (ComponentRunningShine) this.mComponentData;
         ArrayList arrayList = new ArrayList();
         char c2 = 65535;

@@ -3,16 +3,17 @@ package com.bumptech.glide.load.engine;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.a;
 import com.bumptech.glide.load.a.d;
-import com.bumptech.glide.load.a.d.a;
 import com.bumptech.glide.load.c;
+import com.bumptech.glide.load.engine.f;
 import com.bumptech.glide.load.model.t;
 import com.bumptech.glide.util.e;
 import java.util.Collections;
 import java.util.List;
 
 /* compiled from: SourceGenerator */
-class E implements f, a<Object>, f.a {
+class E implements f, d.a<Object>, f.a {
     private static final String TAG = "SourceGenerator";
     private int Zf;
     private C0097c _f;
@@ -33,24 +34,14 @@ class E implements f, a<Object>, f.a {
 
     /* JADX INFO: finally extract failed */
     private void u(Object obj) {
-        String str = TAG;
         long Gh = e.Gh();
         try {
-            com.bumptech.glide.load.a l = this.ue.l(obj);
+            a<X> l = this.ue.l(obj);
             C0099e eVar = new C0099e(l, obj, this.ue.getOptions());
             this.bg = new C0098d(this.ze.we, this.ue.getSignature());
             this.ue.n().a(this.bg, eVar);
-            if (Log.isLoggable(str, 2)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Finished encoding source to cache, key: ");
-                sb.append(this.bg);
-                sb.append(", data: ");
-                sb.append(obj);
-                sb.append(", encoder: ");
-                sb.append(l);
-                sb.append(", duration: ");
-                sb.append(e.g(Gh));
-                Log.v(str, sb.toString());
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "Finished encoding source to cache, key: " + this.bg + ", data: " + obj + ", encoder: " + l + ", duration: " + e.g(Gh));
             }
             this.ze.bi.cleanup();
             this._f = new C0097c(Collections.singletonList(this.ze.we), this.ue, this);
@@ -107,11 +98,11 @@ class E implements f, a<Object>, f.a {
         this.ze = null;
         boolean z = false;
         while (!z && ek()) {
-            List fg = this.ue.fg();
+            List<t.a<?>> fg = this.ue.fg();
             int i = this.Zf;
             this.Zf = i + 1;
-            this.ze = (t.a) fg.get(i);
-            if (this.ze != null && (this.ue.eg().a(this.ze.bi.r()) || this.ue.e(this.ze.bi.M()))) {
+            this.ze = fg.get(i);
+            if (this.ze != null && (this.ue.eg().a(this.ze.bi.r()) || this.ue.e((Class<?>) this.ze.bi.M()))) {
                 this.ze.bi.a(this.ue.getPriority(), this);
                 z = true;
             }

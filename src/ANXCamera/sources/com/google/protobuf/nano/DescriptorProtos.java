@@ -1583,16 +1583,15 @@ public abstract class DescriptorProtos {
         }
 
         public FieldDescriptorProto clear() {
-            String str = "";
-            this.name = str;
+            this.name = "";
             this.number = 0;
             this.label = 1;
             this.type = 1;
-            this.typeName = str;
-            this.extendee = str;
-            this.defaultValue = str;
+            this.typeName = "";
+            this.extendee = "";
+            this.defaultValue = "";
             this.oneofIndex = 0;
-            this.jsonName = str;
+            this.jsonName = "";
             this.options = null;
             this.unknownFieldData = null;
             this.cachedSize = -1;
@@ -1603,12 +1602,11 @@ public abstract class DescriptorProtos {
         public int computeSerializedSize() {
             int computeSerializedSize = super.computeSerializedSize();
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.name);
             }
-            String str3 = this.extendee;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.extendee;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(2, this.extendee);
             }
             int i = this.number;
@@ -1623,12 +1621,12 @@ public abstract class DescriptorProtos {
             if (i3 != 1) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeInt32Size(5, i3);
             }
-            String str4 = this.typeName;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.typeName;
+            if (str3 != null && !str3.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(6, this.typeName);
             }
-            String str5 = this.defaultValue;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.defaultValue;
+            if (str4 != null && !str4.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(7, this.defaultValue);
             }
             FieldOptions fieldOptions = this.options;
@@ -1639,8 +1637,8 @@ public abstract class DescriptorProtos {
             if (i4 != 0) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeInt32Size(9, i4);
             }
-            String str6 = this.jsonName;
-            return (str6 == null || str6.equals(str2)) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(10, this.jsonName);
+            String str5 = this.jsonName;
+            return (str5 == null || str5.equals("")) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(10, this.jsonName);
         }
 
         public FieldDescriptorProto mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
@@ -1712,12 +1710,11 @@ public abstract class DescriptorProtos {
 
         public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(1, this.name);
             }
-            String str3 = this.extendee;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.extendee;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(2, this.extendee);
             }
             int i = this.number;
@@ -1732,12 +1729,12 @@ public abstract class DescriptorProtos {
             if (i3 != 1) {
                 codedOutputByteBufferNano.writeInt32(5, i3);
             }
-            String str4 = this.typeName;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.typeName;
+            if (str3 != null && !str3.equals("")) {
                 codedOutputByteBufferNano.writeString(6, this.typeName);
             }
-            String str5 = this.defaultValue;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.defaultValue;
+            if (str4 != null && !str4.equals("")) {
                 codedOutputByteBufferNano.writeString(7, this.defaultValue);
             }
             FieldOptions fieldOptions = this.options;
@@ -1748,8 +1745,8 @@ public abstract class DescriptorProtos {
             if (i4 != 0) {
                 codedOutputByteBufferNano.writeInt32(9, i4);
             }
-            String str6 = this.jsonName;
-            if (str6 != null && !str6.equals(str2)) {
+            String str5 = this.jsonName;
+            if (str5 != null && !str5.equals("")) {
                 codedOutputByteBufferNano.writeString(10, this.jsonName);
             }
             super.writeTo(codedOutputByteBufferNano);
@@ -1820,9 +1817,8 @@ public abstract class DescriptorProtos {
             }
 
             public UpgradedOption clear() {
-                String str = "";
-                this.name = str;
-                this.value = str;
+                this.name = "";
+                this.value = "";
                 this.unknownFieldData = null;
                 this.cachedSize = -1;
                 return this;
@@ -1832,12 +1828,11 @@ public abstract class DescriptorProtos {
             public int computeSerializedSize() {
                 int computeSerializedSize = super.computeSerializedSize();
                 String str = this.name;
-                String str2 = "";
-                if (str != null && !str.equals(str2)) {
+                if (str != null && !str.equals("")) {
                     computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.name);
                 }
-                String str3 = this.value;
-                return (str3 == null || str3.equals(str2)) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(2, this.value);
+                String str2 = this.value;
+                return (str2 == null || str2.equals("")) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(2, this.value);
             }
 
             public UpgradedOption mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
@@ -1858,12 +1853,11 @@ public abstract class DescriptorProtos {
 
             public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
                 String str = this.name;
-                String str2 = "";
-                if (str != null && !str.equals(str2)) {
+                if (str != null && !str.equals("")) {
                     codedOutputByteBufferNano.writeString(1, this.name);
                 }
-                String str3 = this.value;
-                if (str3 != null && !str3.equals(str2)) {
+                String str2 = this.value;
+                if (str2 != null && !str2.equals("")) {
                     codedOutputByteBufferNano.writeString(2, this.value);
                 }
                 super.writeTo(codedOutputByteBufferNano);
@@ -2223,9 +2217,8 @@ public abstract class DescriptorProtos {
         }
 
         public FileDescriptorProto clear() {
-            String str = "";
-            this.name = str;
-            this.package_ = str;
+            this.name = "";
+            this.package_ = "";
             this.dependency = WireFormatNano.EMPTY_STRING_ARRAY;
             int[] iArr = WireFormatNano.EMPTY_INT_ARRAY;
             this.publicDependency = iArr;
@@ -2236,7 +2229,7 @@ public abstract class DescriptorProtos {
             this.extension = FieldDescriptorProto.emptyArray();
             this.options = null;
             this.sourceCodeInfo = null;
-            this.syntax = str;
+            this.syntax = "";
             this.unknownFieldData = null;
             this.cachedSize = -1;
             return this;
@@ -2248,12 +2241,11 @@ public abstract class DescriptorProtos {
             int[] iArr2;
             int computeSerializedSize = super.computeSerializedSize();
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.name);
             }
-            String str3 = this.package_;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.package_;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(2, this.package_);
             }
             String[] strArr = this.dependency;
@@ -2267,10 +2259,10 @@ public abstract class DescriptorProtos {
                     if (i2 >= strArr2.length) {
                         break;
                     }
-                    String str4 = strArr2[i2];
-                    if (str4 != null) {
+                    String str3 = strArr2[i2];
+                    if (str3 != null) {
                         i4++;
-                        i3 += CodedOutputByteBufferNano.computeStringSizeNoTag(str4);
+                        i3 += CodedOutputByteBufferNano.computeStringSizeNoTag(str3);
                     }
                     i2++;
                 }
@@ -2379,8 +2371,8 @@ public abstract class DescriptorProtos {
                 }
                 computeSerializedSize = computeSerializedSize + i15 + (iArr.length * 1);
             }
-            String str5 = this.syntax;
-            return (str5 == null || str5.equals(str2)) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(12, this.syntax);
+            String str4 = this.syntax;
+            return (str4 == null || str4.equals("")) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(12, this.syntax);
         }
 
         public FileDescriptorProto mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
@@ -2586,12 +2578,11 @@ public abstract class DescriptorProtos {
 
         public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(1, this.name);
             }
-            String str3 = this.package_;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.package_;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(2, this.package_);
             }
             String[] strArr = this.dependency;
@@ -2603,9 +2594,9 @@ public abstract class DescriptorProtos {
                     if (i2 >= strArr2.length) {
                         break;
                     }
-                    String str4 = strArr2[i2];
-                    if (str4 != null) {
-                        codedOutputByteBufferNano.writeString(3, str4);
+                    String str3 = strArr2[i2];
+                    if (str3 != null) {
+                        codedOutputByteBufferNano.writeString(3, str3);
                     }
                     i2++;
                 }
@@ -2701,8 +2692,8 @@ public abstract class DescriptorProtos {
                     i++;
                 }
             }
-            String str5 = this.syntax;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.syntax;
+            if (str4 != null && !str4.equals("")) {
                 codedOutputByteBufferNano.writeString(12, this.syntax);
             }
             super.writeTo(codedOutputByteBufferNano);
@@ -2937,23 +2928,22 @@ public abstract class DescriptorProtos {
         public FileOptions clear() {
             this.ccApiVersion = 2;
             this.ccUtf8Verification = true;
-            String str = "";
-            this.javaPackage = str;
+            this.javaPackage = "";
             this.pyApiVersion = 2;
             this.javaApiVersion = 2;
             this.javaUseJavaproto2 = true;
             this.javaJava5Enums = true;
             this.javaUseJavastrings = false;
-            this.javaAltApiPackage = str;
+            this.javaAltApiPackage = "";
             this.javaEnableDualGenerateMutableApi = false;
-            this.javaOuterClassname = str;
+            this.javaOuterClassname = "";
             this.javaMultipleFiles = false;
             this.javaStringCheckUtf8 = false;
             this.javaMutableApi = false;
-            this.javaMultipleFilesMutablePackage = str;
+            this.javaMultipleFilesMutablePackage = "";
             this.optimizeFor = 1;
-            this.goPackage = str;
-            this.javascriptPackage = str;
+            this.goPackage = "";
+            this.javascriptPackage = "";
             this.szlApiVersion = 1;
             this.ccGenericServices = false;
             this.javaGenericServices = false;
@@ -2961,11 +2951,11 @@ public abstract class DescriptorProtos {
             this.phpGenericServices = false;
             this.deprecated = false;
             this.ccEnableArenas = false;
-            this.objcClassPrefix = str;
-            this.csharpNamespace = str;
-            this.swiftPrefix = str;
-            this.phpClassPrefix = str;
-            this.phpNamespace = str;
+            this.objcClassPrefix = "";
+            this.csharpNamespace = "";
+            this.swiftPrefix = "";
+            this.phpClassPrefix = "";
+            this.phpNamespace = "";
             this.uninterpretedOption = UninterpretedOption.emptyArray();
             this.unknownFieldData = null;
             this.cachedSize = -1;
@@ -2976,8 +2966,7 @@ public abstract class DescriptorProtos {
         public int computeSerializedSize() {
             int computeSerializedSize = super.computeSerializedSize();
             String str = this.javaPackage;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.javaPackage);
             }
             int i = this.ccApiVersion;
@@ -3000,8 +2989,8 @@ public abstract class DescriptorProtos {
             if (!z2) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBoolSize(7, z2);
             }
-            String str3 = this.javaOuterClassname;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.javaOuterClassname;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(8, this.javaOuterClassname);
             }
             int i4 = this.optimizeFor;
@@ -3012,12 +3001,12 @@ public abstract class DescriptorProtos {
             if (z3) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBoolSize(10, z3);
             }
-            String str4 = this.goPackage;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.goPackage;
+            if (str3 != null && !str3.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(11, this.goPackage);
             }
-            String str5 = this.javascriptPackage;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.javascriptPackage;
+            if (str4 != null && !str4.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(12, this.javascriptPackage);
             }
             int i5 = this.szlApiVersion;
@@ -3036,8 +3025,8 @@ public abstract class DescriptorProtos {
             if (z6) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBoolSize(18, z6);
             }
-            String str6 = this.javaAltApiPackage;
-            if (str6 != null && !str6.equals(str2)) {
+            String str5 = this.javaAltApiPackage;
+            if (str5 != null && !str5.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(19, this.javaAltApiPackage);
             }
             boolean z7 = this.javaUseJavastrings;
@@ -3064,32 +3053,32 @@ public abstract class DescriptorProtos {
             if (z12) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBoolSize(28, z12);
             }
-            String str7 = this.javaMultipleFilesMutablePackage;
-            if (str7 != null && !str7.equals(str2)) {
+            String str6 = this.javaMultipleFilesMutablePackage;
+            if (str6 != null && !str6.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(29, this.javaMultipleFilesMutablePackage);
             }
             boolean z13 = this.ccEnableArenas;
             if (z13) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBoolSize(31, z13);
             }
-            String str8 = this.objcClassPrefix;
-            if (str8 != null && !str8.equals(str2)) {
+            String str7 = this.objcClassPrefix;
+            if (str7 != null && !str7.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(36, this.objcClassPrefix);
             }
-            String str9 = this.csharpNamespace;
-            if (str9 != null && !str9.equals(str2)) {
+            String str8 = this.csharpNamespace;
+            if (str8 != null && !str8.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(37, this.csharpNamespace);
             }
-            String str10 = this.swiftPrefix;
-            if (str10 != null && !str10.equals(str2)) {
+            String str9 = this.swiftPrefix;
+            if (str9 != null && !str9.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(39, this.swiftPrefix);
             }
-            String str11 = this.phpClassPrefix;
-            if (str11 != null && !str11.equals(str2)) {
+            String str10 = this.phpClassPrefix;
+            if (str10 != null && !str10.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(40, this.phpClassPrefix);
             }
-            String str12 = this.phpNamespace;
-            if (str12 != null && !str12.equals(str2)) {
+            String str11 = this.phpNamespace;
+            if (str11 != null && !str11.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(41, this.phpNamespace);
             }
             boolean z14 = this.phpGenericServices;
@@ -3249,8 +3238,7 @@ public abstract class DescriptorProtos {
 
         public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
             String str = this.javaPackage;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(1, this.javaPackage);
             }
             int i = this.ccApiVersion;
@@ -3273,8 +3261,8 @@ public abstract class DescriptorProtos {
             if (!z2) {
                 codedOutputByteBufferNano.writeBool(7, z2);
             }
-            String str3 = this.javaOuterClassname;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.javaOuterClassname;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(8, this.javaOuterClassname);
             }
             int i4 = this.optimizeFor;
@@ -3285,12 +3273,12 @@ public abstract class DescriptorProtos {
             if (z3) {
                 codedOutputByteBufferNano.writeBool(10, z3);
             }
-            String str4 = this.goPackage;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.goPackage;
+            if (str3 != null && !str3.equals("")) {
                 codedOutputByteBufferNano.writeString(11, this.goPackage);
             }
-            String str5 = this.javascriptPackage;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.javascriptPackage;
+            if (str4 != null && !str4.equals("")) {
                 codedOutputByteBufferNano.writeString(12, this.javascriptPackage);
             }
             int i5 = this.szlApiVersion;
@@ -3309,8 +3297,8 @@ public abstract class DescriptorProtos {
             if (z6) {
                 codedOutputByteBufferNano.writeBool(18, z6);
             }
-            String str6 = this.javaAltApiPackage;
-            if (str6 != null && !str6.equals(str2)) {
+            String str5 = this.javaAltApiPackage;
+            if (str5 != null && !str5.equals("")) {
                 codedOutputByteBufferNano.writeString(19, this.javaAltApiPackage);
             }
             boolean z7 = this.javaUseJavastrings;
@@ -3337,32 +3325,32 @@ public abstract class DescriptorProtos {
             if (z12) {
                 codedOutputByteBufferNano.writeBool(28, z12);
             }
-            String str7 = this.javaMultipleFilesMutablePackage;
-            if (str7 != null && !str7.equals(str2)) {
+            String str6 = this.javaMultipleFilesMutablePackage;
+            if (str6 != null && !str6.equals("")) {
                 codedOutputByteBufferNano.writeString(29, this.javaMultipleFilesMutablePackage);
             }
             boolean z13 = this.ccEnableArenas;
             if (z13) {
                 codedOutputByteBufferNano.writeBool(31, z13);
             }
-            String str8 = this.objcClassPrefix;
-            if (str8 != null && !str8.equals(str2)) {
+            String str7 = this.objcClassPrefix;
+            if (str7 != null && !str7.equals("")) {
                 codedOutputByteBufferNano.writeString(36, this.objcClassPrefix);
             }
-            String str9 = this.csharpNamespace;
-            if (str9 != null && !str9.equals(str2)) {
+            String str8 = this.csharpNamespace;
+            if (str8 != null && !str8.equals("")) {
                 codedOutputByteBufferNano.writeString(37, this.csharpNamespace);
             }
-            String str10 = this.swiftPrefix;
-            if (str10 != null && !str10.equals(str2)) {
+            String str9 = this.swiftPrefix;
+            if (str9 != null && !str9.equals("")) {
                 codedOutputByteBufferNano.writeString(39, this.swiftPrefix);
             }
-            String str11 = this.phpClassPrefix;
-            if (str11 != null && !str11.equals(str2)) {
+            String str10 = this.phpClassPrefix;
+            if (str10 != null && !str10.equals("")) {
                 codedOutputByteBufferNano.writeString(40, this.phpClassPrefix);
             }
-            String str12 = this.phpNamespace;
-            if (str12 != null && !str12.equals(str2)) {
+            String str11 = this.phpNamespace;
+            if (str11 != null && !str11.equals("")) {
                 codedOutputByteBufferNano.writeString(41, this.phpNamespace);
             }
             boolean z14 = this.phpGenericServices;
@@ -4003,10 +3991,9 @@ public abstract class DescriptorProtos {
         }
 
         public MethodDescriptorProto clear() {
-            String str = "";
-            this.name = str;
-            this.inputType = str;
-            this.outputType = str;
+            this.name = "";
+            this.inputType = "";
+            this.outputType = "";
             this.options = null;
             this.clientStreaming = false;
             this.serverStreaming = false;
@@ -4019,16 +4006,15 @@ public abstract class DescriptorProtos {
         public int computeSerializedSize() {
             int computeSerializedSize = super.computeSerializedSize();
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.name);
             }
-            String str3 = this.inputType;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.inputType;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(2, this.inputType);
             }
-            String str4 = this.outputType;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.outputType;
+            if (str3 != null && !str3.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(3, this.outputType);
             }
             MethodOptions methodOptions = this.options;
@@ -4072,16 +4058,15 @@ public abstract class DescriptorProtos {
 
         public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(1, this.name);
             }
-            String str3 = this.inputType;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.inputType;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(2, this.inputType);
             }
-            String str4 = this.outputType;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.outputType;
+            if (str3 != null && !str3.equals("")) {
                 codedOutputByteBufferNano.writeString(3, this.outputType);
             }
             MethodOptions methodOptions = this.options;
@@ -4344,13 +4329,12 @@ public abstract class DescriptorProtos {
             this.securityLevel = 0;
             this.responseFormat = 0;
             this.requestFormat = 0;
-            String str = "";
-            this.streamType = str;
-            this.securityLabel = str;
+            this.streamType = "";
+            this.securityLabel = "";
             this.clientStreaming = false;
             this.serverStreaming = false;
-            this.legacyStreamType = str;
-            this.legacyResultType = str;
+            this.legacyStreamType = "";
+            this.legacyResultType = "";
             this.goLegacyChannelApi = false;
             this.legacyClientInitialTokens = -1;
             this.legacyServerInitialTokens = -1;
@@ -4403,12 +4387,11 @@ public abstract class DescriptorProtos {
                 computeSerializedSize += CodedOutputByteBufferNano.computeInt32Size(17, i6);
             }
             String str = this.streamType;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(18, this.streamType);
             }
-            String str3 = this.securityLabel;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.securityLabel;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(19, this.securityLabel);
             }
             boolean z3 = this.clientStreaming;
@@ -4419,12 +4402,12 @@ public abstract class DescriptorProtos {
             if (z4) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBoolSize(21, z4);
             }
-            String str4 = this.legacyStreamType;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.legacyStreamType;
+            if (str3 != null && !str3.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(22, this.legacyStreamType);
             }
-            String str5 = this.legacyResultType;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.legacyResultType;
+            if (str4 != null && !str4.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(23, this.legacyResultType);
             }
             long j = this.legacyClientInitialTokens;
@@ -4680,12 +4663,11 @@ public abstract class DescriptorProtos {
                 codedOutputByteBufferNano.writeInt32(17, i6);
             }
             String str = this.streamType;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(18, this.streamType);
             }
-            String str3 = this.securityLabel;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.securityLabel;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(19, this.securityLabel);
             }
             boolean z3 = this.clientStreaming;
@@ -4696,12 +4678,12 @@ public abstract class DescriptorProtos {
             if (z4) {
                 codedOutputByteBufferNano.writeBool(21, z4);
             }
-            String str4 = this.legacyStreamType;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.legacyStreamType;
+            if (str3 != null && !str3.equals("")) {
                 codedOutputByteBufferNano.writeString(22, this.legacyStreamType);
             }
-            String str5 = this.legacyResultType;
-            if (str5 != null && !str5.equals(str2)) {
+            String str4 = this.legacyResultType;
+            if (str4 != null && !str4.equals("")) {
                 codedOutputByteBufferNano.writeString(23, this.legacyResultType);
             }
             long j = this.legacyClientInitialTokens;
@@ -5307,9 +5289,8 @@ public abstract class DescriptorProtos {
                 int[] iArr = WireFormatNano.EMPTY_INT_ARRAY;
                 this.path = iArr;
                 this.span = iArr;
-                String str = "";
-                this.leadingComments = str;
-                this.trailingComments = str;
+                this.leadingComments = "";
+                this.trailingComments = "";
                 this.leadingDetachedComments = WireFormatNano.EMPTY_STRING_ARRAY;
                 this.unknownFieldData = null;
                 this.cachedSize = -1;
@@ -5349,12 +5330,11 @@ public abstract class DescriptorProtos {
                     computeSerializedSize = computeSerializedSize + i5 + 1 + CodedOutputByteBufferNano.computeRawVarint32Size(i5);
                 }
                 String str = this.leadingComments;
-                String str2 = "";
-                if (str != null && !str.equals(str2)) {
+                if (str != null && !str.equals("")) {
                     computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(3, this.leadingComments);
                 }
-                String str3 = this.trailingComments;
-                if (str3 != null && !str3.equals(str2)) {
+                String str2 = this.trailingComments;
+                if (str2 != null && !str2.equals("")) {
                     computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(4, this.trailingComments);
                 }
                 String[] strArr = this.leadingDetachedComments;
@@ -5368,10 +5348,10 @@ public abstract class DescriptorProtos {
                     if (i >= strArr2.length) {
                         return computeSerializedSize + i6 + (i7 * 1);
                     }
-                    String str4 = strArr2[i];
-                    if (str4 != null) {
+                    String str3 = strArr2[i];
+                    if (str3 != null) {
                         i7++;
-                        i6 += CodedOutputByteBufferNano.computeStringSizeNoTag(str4);
+                        i6 += CodedOutputByteBufferNano.computeStringSizeNoTag(str3);
                     }
                     i++;
                 }
@@ -5531,12 +5511,11 @@ public abstract class DescriptorProtos {
                     }
                 }
                 String str = this.leadingComments;
-                String str2 = "";
-                if (str != null && !str.equals(str2)) {
+                if (str != null && !str.equals("")) {
                     codedOutputByteBufferNano.writeString(3, this.leadingComments);
                 }
-                String str3 = this.trailingComments;
-                if (str3 != null && !str3.equals(str2)) {
+                String str2 = this.trailingComments;
+                if (str2 != null && !str2.equals("")) {
                     codedOutputByteBufferNano.writeString(4, this.trailingComments);
                 }
                 String[] strArr = this.leadingDetachedComments;
@@ -5546,9 +5525,9 @@ public abstract class DescriptorProtos {
                         if (i >= strArr2.length) {
                             break;
                         }
-                        String str4 = strArr2[i];
-                        if (str4 != null) {
-                            codedOutputByteBufferNano.writeString(6, str4);
+                        String str3 = strArr2[i];
+                        if (str3 != null) {
+                            codedOutputByteBufferNano.writeString(6, str3);
                         }
                         i++;
                     }
@@ -5692,10 +5671,9 @@ public abstract class DescriptorProtos {
         }
 
         public StreamDescriptorProto clear() {
-            String str = "";
-            this.name = str;
-            this.clientMessageType = str;
-            this.serverMessageType = str;
+            this.name = "";
+            this.clientMessageType = "";
+            this.serverMessageType = "";
             this.options = null;
             this.unknownFieldData = null;
             this.cachedSize = -1;
@@ -5706,16 +5684,15 @@ public abstract class DescriptorProtos {
         public int computeSerializedSize() {
             int computeSerializedSize = super.computeSerializedSize();
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.name);
             }
-            String str3 = this.clientMessageType;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.clientMessageType;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(2, this.clientMessageType);
             }
-            String str4 = this.serverMessageType;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.serverMessageType;
+            if (str3 != null && !str3.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(3, this.serverMessageType);
             }
             StreamOptions streamOptions = this.options;
@@ -5747,16 +5724,15 @@ public abstract class DescriptorProtos {
 
         public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
             String str = this.name;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(1, this.name);
             }
-            String str3 = this.clientMessageType;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.clientMessageType;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(2, this.clientMessageType);
             }
-            String str4 = this.serverMessageType;
-            if (str4 != null && !str4.equals(str2)) {
+            String str3 = this.serverMessageType;
+            if (str3 != null && !str3.equals("")) {
                 codedOutputByteBufferNano.writeString(3, this.serverMessageType);
             }
             StreamOptions streamOptions = this.options;
@@ -5775,10 +5751,10 @@ public abstract class DescriptorProtos {
         public boolean deprecated;
         public boolean endUserCredsRequested;
         public boolean failFast;
-        @NanoEnumValue(legacy = false, value = LogLevel.class)
+        @NanoEnumValue(legacy = false, value = MethodOptions.LogLevel.class)
         public int logLevel;
         public String securityLabel;
-        @NanoEnumValue(legacy = false, value = SecurityLevel.class)
+        @NanoEnumValue(legacy = false, value = MethodOptions.SecurityLevel.class)
         public int securityLevel;
         public long serverInitialTokens;
         public int serverLogging;
@@ -6192,13 +6168,12 @@ public abstract class DescriptorProtos {
 
         public UninterpretedOption clear() {
             this.name = NamePart.emptyArray();
-            String str = "";
-            this.identifierValue = str;
+            this.identifierValue = "";
             this.positiveIntValue = 0;
             this.negativeIntValue = 0;
             this.doubleValue = 0.0d;
             this.stringValue = WireFormatNano.EMPTY_BYTES;
-            this.aggregateValue = str;
+            this.aggregateValue = "";
             this.unknownFieldData = null;
             this.cachedSize = -1;
             return this;
@@ -6223,8 +6198,7 @@ public abstract class DescriptorProtos {
                 }
             }
             String str = this.identifierValue;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(3, this.identifierValue);
             }
             long j = this.positiveIntValue;
@@ -6241,8 +6215,8 @@ public abstract class DescriptorProtos {
             if (!Arrays.equals(this.stringValue, WireFormatNano.EMPTY_BYTES)) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeBytesSize(7, this.stringValue);
             }
-            String str3 = this.aggregateValue;
-            return (str3 == null || str3.equals(str2)) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(8, this.aggregateValue);
+            String str2 = this.aggregateValue;
+            return (str2 == null || str2.equals("")) ? computeSerializedSize : computeSerializedSize + CodedOutputByteBufferNano.computeStringSize(8, this.aggregateValue);
         }
 
         public UninterpretedOption mergeFrom(CodedInputByteBufferNano codedInputByteBufferNano) throws IOException {
@@ -6303,8 +6277,7 @@ public abstract class DescriptorProtos {
                 }
             }
             String str = this.identifierValue;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(3, this.identifierValue);
             }
             long j = this.positiveIntValue;
@@ -6321,8 +6294,8 @@ public abstract class DescriptorProtos {
             if (!Arrays.equals(this.stringValue, WireFormatNano.EMPTY_BYTES)) {
                 codedOutputByteBufferNano.writeBytes(7, this.stringValue);
             }
-            String str3 = this.aggregateValue;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.aggregateValue;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(8, this.aggregateValue);
             }
             super.writeTo(codedOutputByteBufferNano);

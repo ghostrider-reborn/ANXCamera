@@ -1,13 +1,13 @@
 package android.os.statistics;
 
 import android.os.Parcel;
-import android.os.Parcelable.Creator;
-import android.os.statistics.PerfEvent.DetailFields;
+import android.os.Parcelable;
+import android.os.statistics.PerfEvent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class E2EScenarioOnce extends MacroscopicEvent<E2EScenarioOnceDetails> {
-    public static final Creator<E2EScenarioOnce> CREATOR = new Creator<E2EScenarioOnce>() {
+    public static final Parcelable.Creator<E2EScenarioOnce> CREATOR = new Parcelable.Creator<E2EScenarioOnce>() {
         public E2EScenarioOnce createFromParcel(Parcel parcel) {
             E2EScenarioOnce e2EScenarioOnce = new E2EScenarioOnce();
             e2EScenarioOnce.readFromParcel(parcel);
@@ -19,7 +19,7 @@ public class E2EScenarioOnce extends MacroscopicEvent<E2EScenarioOnceDetails> {
         }
     };
 
-    public static class E2EScenarioOnceDetails extends DetailFields {
+    public static class E2EScenarioOnceDetails extends PerfEvent.DetailFields {
         public int batteryLevel;
         public int batteryTemperature;
         public String beginPackageName;
@@ -50,10 +50,10 @@ public class E2EScenarioOnce extends MacroscopicEvent<E2EScenarioOnceDetails> {
         public void readFromParcel(Parcel parcel) {
             E2EScenarioOnce.super.readFromParcel(parcel);
             this.scenarioOnceId = parcel.readLong();
-            this.scenario = (E2EScenario) parcel.readParcelable(null);
-            this.settings = (E2EScenarioSettings) parcel.readParcelable(null);
+            this.scenario = (E2EScenario) parcel.readParcelable((ClassLoader) null);
+            this.settings = (E2EScenarioSettings) parcel.readParcelable((ClassLoader) null);
             this.tag = parcel.readString();
-            this.payload = (E2EScenarioPayload) parcel.readParcelable(null);
+            this.payload = (E2EScenarioPayload) parcel.readParcelable((ClassLoader) null);
             boolean z = true;
             if (parcel.readInt() != 1) {
                 z = false;

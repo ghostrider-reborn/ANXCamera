@@ -50,20 +50,12 @@ class OptionalMethod<T> {
             try {
                 return method.invoke(t, objArr);
             } catch (IllegalAccessException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unexpectedly could not call: ");
-                sb.append(method);
-                AssertionError assertionError = new AssertionError(sb.toString());
+                AssertionError assertionError = new AssertionError("Unexpectedly could not call: " + method);
                 assertionError.initCause(e2);
                 throw assertionError;
             }
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Method ");
-            sb2.append(this.methodName);
-            sb2.append(" not supported for object ");
-            sb2.append(t);
-            throw new AssertionError(sb2.toString());
+            throw new AssertionError("Method " + this.methodName + " not supported for object " + t);
         }
     }
 

@@ -197,22 +197,19 @@ public abstract class CameraPaintBase {
     public void updateValue(@FloatRange(from = 0.0d, to = 1.0d) float f2) {
         float f3 = this.mDstMiddleX;
         float f4 = this.mSrcMiddleX;
-        float f5 = f3 - f4;
-        float f6 = this.mDstMiddleY;
-        float f7 = this.mSrcMiddleY;
-        float f8 = f6 - f7;
-        float f9 = this.mDstBaseRadius;
-        float f10 = this.mSrcBaseRadius;
-        float f11 = f9 - f10;
-        this.mMiddleX = f4 + (f5 * f2);
-        this.mMiddleY = f7 + (f8 * f2);
-        this.mBaseRadius = f10 + (f11 * f2);
-        float f12 = this.mDstWidthPercent;
-        float f13 = this.mSrcWidthPercent;
-        this.mCurrentWidthPercent = f13 + ((f12 - f13) * f2);
-        float f14 = this.mDstStrokeWidth;
-        float f15 = this.mSrcStrokeWidth;
-        this.mCurrentStrokeWidth = f15 + ((f14 - f15) * f2);
+        float f5 = this.mDstMiddleY;
+        float f6 = this.mSrcMiddleY;
+        float f7 = this.mDstBaseRadius;
+        float f8 = this.mSrcBaseRadius;
+        this.mMiddleX = f4 + ((f3 - f4) * f2);
+        this.mMiddleY = f6 + ((f5 - f6) * f2);
+        this.mBaseRadius = f8 + ((f7 - f8) * f2);
+        float f9 = this.mDstWidthPercent;
+        float f10 = this.mSrcWidthPercent;
+        this.mCurrentWidthPercent = f10 + ((f9 - f10) * f2);
+        float f11 = this.mDstStrokeWidth;
+        float f12 = this.mSrcStrokeWidth;
+        this.mCurrentStrokeWidth = f12 + ((f11 - f12) * f2);
         this.mPaint.setStrokeWidth(this.mCurrentStrokeWidth);
         if (this.mSrcColor != this.mDstColor) {
             this.mCurrentColor = ((Integer) new ArgbEvaluator().evaluate(f2, Integer.valueOf(this.mSrcColor), Integer.valueOf(this.mDstColor))).intValue();

@@ -19,11 +19,10 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import miui.util.Pools.Manager;
-import miui.util.Pools.Pool;
+import miui.util.Pools;
 
 public class IOUtils {
-    private static final Pool<ByteArrayOutputStream> BYTE_ARRAY_OUTPUT_STREAM_POOL = Pools.createSoftReferencePool(new Manager<ByteArrayOutputStream>() {
+    private static final Pools.Pool<ByteArrayOutputStream> BYTE_ARRAY_OUTPUT_STREAM_POOL = Pools.createSoftReferencePool(new Pools.Manager<ByteArrayOutputStream>() {
         public ByteArrayOutputStream createInstance() {
             return new ByteArrayOutputStream();
         }
@@ -32,7 +31,7 @@ public class IOUtils {
             byteArrayOutputStream.reset();
         }
     }, 2);
-    private static final Pool<CharArrayWriter> CHAR_ARRAY_WRITER_POOL = Pools.createSoftReferencePool(new Manager<CharArrayWriter>() {
+    private static final Pools.Pool<CharArrayWriter> CHAR_ARRAY_WRITER_POOL = Pools.createSoftReferencePool(new Pools.Manager<CharArrayWriter>() {
         public CharArrayWriter createInstance() {
             return new CharArrayWriter();
         }
@@ -43,7 +42,7 @@ public class IOUtils {
     }, 2);
     private static final int DEFAULT_BUFFER_SIZE = 4096;
     private static final String LINE_SEPARATOR;
-    private static final Pool<StringWriter> STRING_WRITER_POOL = Pools.createSoftReferencePool(new Manager<StringWriter>() {
+    private static final Pools.Pool<StringWriter> STRING_WRITER_POOL = Pools.createSoftReferencePool(new Pools.Manager<StringWriter>() {
         public StringWriter createInstance() {
             return new StringWriter();
         }
@@ -56,13 +55,13 @@ public class IOUtils {
     private static final ThreadLocal<SoftReference<char[]>> THREAD_LOCAL_CHAR_BUFFER = new ThreadLocal<>();
 
     static {
-        StringWriter stringWriter = (StringWriter) STRING_WRITER_POOL.acquire();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
+        StringWriter acquire = STRING_WRITER_POOL.acquire();
+        PrintWriter printWriter = new PrintWriter(acquire);
         printWriter.println();
         printWriter.flush();
-        LINE_SEPARATOR = stringWriter.toString();
+        LINE_SEPARATOR = acquire.toString();
         printWriter.close();
-        STRING_WRITER_POOL.release(stringWriter);
+        STRING_WRITER_POOL.release(acquire);
     }
 
     protected IOUtils() throws InstantiationException {
@@ -166,11 +165,14 @@ public class IOUtils {
         copy(reader, (Writer) (str == null || str.length() == 0) ? new OutputStreamWriter(outputStream) : new OutputStreamWriter(outputStream, str));
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: java.lang.Object} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v3, resolved type: byte[]} */
+    /* JADX WARNING: Multi-variable type inference failed */
     private static byte[] getByteArrayBuffer() {
         byte[] bArr = null;
-        SoftReference softReference = (SoftReference) THREAD_LOCAL_BYTE_BUFFER.get();
+        SoftReference softReference = THREAD_LOCAL_BYTE_BUFFER.get();
         if (softReference != null) {
-            bArr = (byte[]) softReference.get();
+            bArr = softReference.get();
         }
         if (bArr != null) {
             return bArr;
@@ -180,11 +182,14 @@ public class IOUtils {
         return bArr2;
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: java.lang.Object} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v3, resolved type: char[]} */
+    /* JADX WARNING: Multi-variable type inference failed */
     private static char[] getCharArrayBuffer() {
         char[] cArr = null;
-        SoftReference softReference = (SoftReference) THREAD_LOCAL_CHAR_BUFFER.get();
+        SoftReference softReference = THREAD_LOCAL_CHAR_BUFFER.get();
         if (softReference != null) {
-            cArr = (char[]) softReference.get();
+            cArr = softReference.get();
         }
         if (cArr != null) {
             return cArr;
@@ -212,50 +217,50 @@ public class IOUtils {
     }
 
     public static byte[] toByteArray(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) BYTE_ARRAY_OUTPUT_STREAM_POOL.acquire();
-        copy(inputStream, (OutputStream) byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        BYTE_ARRAY_OUTPUT_STREAM_POOL.release(byteArrayOutputStream);
+        ByteArrayOutputStream acquire = BYTE_ARRAY_OUTPUT_STREAM_POOL.acquire();
+        copy(inputStream, (OutputStream) acquire);
+        byte[] byteArray = acquire.toByteArray();
+        BYTE_ARRAY_OUTPUT_STREAM_POOL.release(acquire);
         return byteArray;
     }
 
     public static byte[] toByteArray(Reader reader) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) BYTE_ARRAY_OUTPUT_STREAM_POOL.acquire();
-        copy(reader, (OutputStream) byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        BYTE_ARRAY_OUTPUT_STREAM_POOL.release(byteArrayOutputStream);
+        ByteArrayOutputStream acquire = BYTE_ARRAY_OUTPUT_STREAM_POOL.acquire();
+        copy(reader, (OutputStream) acquire);
+        byte[] byteArray = acquire.toByteArray();
+        BYTE_ARRAY_OUTPUT_STREAM_POOL.release(acquire);
         return byteArray;
     }
 
     public static byte[] toByteArray(Reader reader, String str) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = (ByteArrayOutputStream) BYTE_ARRAY_OUTPUT_STREAM_POOL.acquire();
-        copy(reader, (OutputStream) byteArrayOutputStream, str);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        BYTE_ARRAY_OUTPUT_STREAM_POOL.release(byteArrayOutputStream);
+        ByteArrayOutputStream acquire = BYTE_ARRAY_OUTPUT_STREAM_POOL.acquire();
+        copy(reader, (OutputStream) acquire, str);
+        byte[] byteArray = acquire.toByteArray();
+        BYTE_ARRAY_OUTPUT_STREAM_POOL.release(acquire);
         return byteArray;
     }
 
     public static char[] toCharArray(InputStream inputStream) throws IOException {
-        CharArrayWriter charArrayWriter = (CharArrayWriter) CHAR_ARRAY_WRITER_POOL.acquire();
-        copy(inputStream, (Writer) charArrayWriter);
-        char[] charArray = charArrayWriter.toCharArray();
-        CHAR_ARRAY_WRITER_POOL.release(charArrayWriter);
+        CharArrayWriter acquire = CHAR_ARRAY_WRITER_POOL.acquire();
+        copy(inputStream, (Writer) acquire);
+        char[] charArray = acquire.toCharArray();
+        CHAR_ARRAY_WRITER_POOL.release(acquire);
         return charArray;
     }
 
     public static char[] toCharArray(InputStream inputStream, String str) throws IOException {
-        CharArrayWriter charArrayWriter = (CharArrayWriter) CHAR_ARRAY_WRITER_POOL.acquire();
-        copy(inputStream, (Writer) charArrayWriter, str);
-        char[] charArray = charArrayWriter.toCharArray();
-        CHAR_ARRAY_WRITER_POOL.release(charArrayWriter);
+        CharArrayWriter acquire = CHAR_ARRAY_WRITER_POOL.acquire();
+        copy(inputStream, (Writer) acquire, str);
+        char[] charArray = acquire.toCharArray();
+        CHAR_ARRAY_WRITER_POOL.release(acquire);
         return charArray;
     }
 
     public static char[] toCharArray(Reader reader) throws IOException {
-        CharArrayWriter charArrayWriter = (CharArrayWriter) CHAR_ARRAY_WRITER_POOL.acquire();
-        copy(reader, (Writer) charArrayWriter);
-        char[] charArray = charArrayWriter.toCharArray();
-        CHAR_ARRAY_WRITER_POOL.release(charArrayWriter);
+        CharArrayWriter acquire = CHAR_ARRAY_WRITER_POOL.acquire();
+        copy(reader, (Writer) acquire);
+        char[] charArray = acquire.toCharArray();
+        CHAR_ARRAY_WRITER_POOL.release(acquire);
         return charArray;
     }
 
@@ -268,27 +273,27 @@ public class IOUtils {
     }
 
     public static String toString(InputStream inputStream) throws IOException {
-        StringWriter stringWriter = (StringWriter) STRING_WRITER_POOL.acquire();
-        copy(inputStream, (Writer) stringWriter);
-        String stringWriter2 = stringWriter.toString();
-        STRING_WRITER_POOL.release(stringWriter);
-        return stringWriter2;
+        StringWriter acquire = STRING_WRITER_POOL.acquire();
+        copy(inputStream, (Writer) acquire);
+        String stringWriter = acquire.toString();
+        STRING_WRITER_POOL.release(acquire);
+        return stringWriter;
     }
 
     public static String toString(InputStream inputStream, String str) throws IOException {
-        StringWriter stringWriter = (StringWriter) STRING_WRITER_POOL.acquire();
-        copy(inputStream, (Writer) stringWriter, str);
-        String stringWriter2 = stringWriter.toString();
-        STRING_WRITER_POOL.release(stringWriter);
-        return stringWriter2;
+        StringWriter acquire = STRING_WRITER_POOL.acquire();
+        copy(inputStream, (Writer) acquire, str);
+        String stringWriter = acquire.toString();
+        STRING_WRITER_POOL.release(acquire);
+        return stringWriter;
     }
 
     public static String toString(Reader reader) throws IOException {
-        StringWriter stringWriter = (StringWriter) STRING_WRITER_POOL.acquire();
-        copy(reader, (Writer) stringWriter);
-        String stringWriter2 = stringWriter.toString();
-        STRING_WRITER_POOL.release(stringWriter);
-        return stringWriter2;
+        StringWriter acquire = STRING_WRITER_POOL.acquire();
+        copy(reader, (Writer) acquire);
+        String stringWriter = acquire.toString();
+        STRING_WRITER_POOL.release(acquire);
+        return stringWriter;
     }
 
     public static void write(OutputStream outputStream, String str) throws IOException {

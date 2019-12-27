@@ -50,10 +50,11 @@ public class FragmentUtils {
                 beginTransaction.remove(findFragmentByTag);
                 try {
                     beginTransaction.commitAllowingStateLoss();
+                    return true;
                 } catch (IllegalStateException e2) {
                     e2.printStackTrace();
+                    return true;
                 }
-                return true;
             }
         }
         return false;
@@ -67,10 +68,11 @@ public class FragmentUtils {
                 beginTransaction.remove(findFragmentByTag);
                 try {
                     beginTransaction.commitAllowingStateLoss();
+                    return true;
                 } catch (IllegalStateException e2) {
                     e2.printStackTrace();
+                    return true;
                 }
-                return true;
             }
         }
         return false;

@@ -53,7 +53,6 @@ public class HttpClientStack implements HttpStack {
     }
 
     static HttpUriRequest createHttpRequest(Request<?> request, Map<String, String> map) throws AuthFailureError {
-        String str = "Content-Type";
         switch (request.getMethod()) {
             case -1:
                 byte[] postBody = request.getPostBody();
@@ -61,19 +60,19 @@ public class HttpClientStack implements HttpStack {
                     return new HttpGet(request.getUrl());
                 }
                 HttpPost httpPost = new HttpPost(request.getUrl());
-                httpPost.addHeader(str, request.getPostBodyContentType());
+                httpPost.addHeader("Content-Type", request.getPostBodyContentType());
                 httpPost.setEntity(new ByteArrayEntity(postBody));
                 return httpPost;
             case 0:
                 return new HttpGet(request.getUrl());
             case 1:
                 HttpPost httpPost2 = new HttpPost(request.getUrl());
-                httpPost2.addHeader(str, request.getBodyContentType());
+                httpPost2.addHeader("Content-Type", request.getBodyContentType());
                 setEntityIfNonEmptyBody(httpPost2, request);
                 return httpPost2;
             case 2:
                 HttpPut httpPut = new HttpPut(request.getUrl());
-                httpPut.addHeader(str, request.getBodyContentType());
+                httpPut.addHeader("Content-Type", request.getBodyContentType());
                 setEntityIfNonEmptyBody(httpPut, request);
                 return httpPut;
             case 3:
@@ -86,7 +85,7 @@ public class HttpClientStack implements HttpStack {
                 return new HttpTrace(request.getUrl());
             case 7:
                 HttpPatch httpPatch = new HttpPatch(request.getUrl());
-                httpPatch.addHeader(str, request.getBodyContentType());
+                httpPatch.addHeader("Content-Type", request.getBodyContentType());
                 setEntityIfNonEmptyBody(httpPatch, request);
                 return httpPatch;
             default:
@@ -96,8 +95,8 @@ public class HttpClientStack implements HttpStack {
 
     private static List<NameValuePair> getPostParameterPairs(Map<String, String> map) {
         ArrayList arrayList = new ArrayList(map.size());
-        for (String str : map.keySet()) {
-            arrayList.add(new BasicNameValuePair(str, (String) map.get(str)));
+        for (String next : map.keySet()) {
+            arrayList.add(new BasicNameValuePair(next, map.get(next)));
         }
         return arrayList;
     }
@@ -110,8 +109,8 @@ public class HttpClientStack implements HttpStack {
     }
 
     private static void setHeaders(HttpUriRequest httpUriRequest, Map<String, String> map) {
-        for (String str : map.keySet()) {
-            httpUriRequest.setHeader(str, (String) map.get(str));
+        for (String next : map.keySet()) {
+            httpUriRequest.setHeader(next, map.get(next));
         }
     }
 

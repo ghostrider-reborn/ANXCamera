@@ -9,21 +9,20 @@ import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.containers.mp4.BoxFactory;
 import org.jcodec.containers.mp4.BoxUtil;
 import org.jcodec.containers.mp4.MP4Util;
-import org.jcodec.containers.mp4.MP4Util.Atom;
 import org.jcodec.containers.mp4.boxes.Box;
 import org.jcodec.containers.mp4.boxes.Header;
 import org.jcodec.containers.mp4.boxes.MovieBox;
 
 public class RelocateMP4Editor {
-    private ByteBuffer fetchBox(SeekableByteChannel seekableByteChannel, Atom atom) throws IOException {
+    private ByteBuffer fetchBox(SeekableByteChannel seekableByteChannel, MP4Util.Atom atom) throws IOException {
         seekableByteChannel.setPosition(atom.getOffset());
         return NIOUtils.fetchFromChannel(seekableByteChannel, (int) atom.getHeader().getSize());
     }
 
-    private Atom getMoov(SeekableByteChannel seekableByteChannel) throws IOException {
-        for (Atom atom : MP4Util.getRootAtoms(seekableByteChannel)) {
-            if ("moov".equals(atom.getHeader().getFourcc())) {
-                return atom;
+    private MP4Util.Atom getMoov(SeekableByteChannel seekableByteChannel) throws IOException {
+        for (MP4Util.Atom next : MP4Util.getRootAtoms(seekableByteChannel)) {
+            if ("moov".equals(next.getHeader().getFourcc())) {
+                return next;
             }
         }
         return null;
@@ -44,7 +43,7 @@ public class RelocateMP4Editor {
         try {
             fileChannelWrapper = NIOUtils.rwChannel(file);
             try {
-                Atom moov = getMoov(fileChannelWrapper);
+                MP4Util.Atom moov = getMoov(fileChannelWrapper);
                 MovieBox movieBox = (MovieBox) parseBox(fetchBox(fileChannelWrapper, moov));
                 mP4Edit.apply(movieBox);
                 if (moov.getOffset() + moov.getHeader().getSize() < fileChannelWrapper.size()) {

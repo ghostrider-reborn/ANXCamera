@@ -43,45 +43,40 @@ public class DefaultEffectFetcher implements EffectFetcher {
                             onFailed(this, new ExceptionResult((int) ErrorConstants.CODE_CANCEL_DOWNLOAD));
                             break;
                         } else {
-                            String str2 = (String) effectFetcherArguments.getDownloadUrl().get(i);
+                            String str2 = effectFetcherArguments.getDownloadUrl().get(i);
                             String str3 = null;
                             try {
                                 if (TextUtils.isEmpty(effect.getZipPath()) || TextUtils.isEmpty(effect.getUnzipPath())) {
+                                    effect.setZipPath(effectFetcherArguments.getEffectDir() + File.separator + effect.getId() + ".zip");
                                     StringBuilder sb = new StringBuilder();
                                     sb.append(effectFetcherArguments.getEffectDir());
                                     sb.append(File.separator);
                                     sb.append(effect.getId());
-                                    sb.append(".zip");
-                                    effect.setZipPath(sb.toString());
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append(effectFetcherArguments.getEffectDir());
-                                    sb2.append(File.separator);
-                                    sb2.append(effect.getId());
-                                    effect.setUnzipPath(sb2.toString());
+                                    effect.setUnzipPath(sb.toString());
                                 }
                                 try {
                                     str = InetAddress.getByName(new URL(str2).getHost()).getHostAddress();
                                 } catch (UnknownHostException e2) {
                                     e2.printStackTrace();
                                     str = null;
-                                    EffectUtils.download(DefaultEffectFetcher.this.mNetworker, (String) effectFetcherArguments.getDownloadUrl().get(i), effect.getZipPath());
+                                    EffectUtils.download(DefaultEffectFetcher.this.mNetworker, effectFetcherArguments.getDownloadUrl().get(i), effect.getZipPath());
                                     FileUtils.unZip(effect.getZipPath(), effect.getUnzipPath());
-                                    onResponse(this, new EffectTaskResult(effect, null));
+                                    onResponse(this, new EffectTaskResult(effect, (ExceptionResult) null));
                                     break;
                                     onFinally(this);
                                 } catch (MalformedURLException e3) {
                                     e3.printStackTrace();
                                     str = null;
-                                    EffectUtils.download(DefaultEffectFetcher.this.mNetworker, (String) effectFetcherArguments.getDownloadUrl().get(i), effect.getZipPath());
+                                    EffectUtils.download(DefaultEffectFetcher.this.mNetworker, effectFetcherArguments.getDownloadUrl().get(i), effect.getZipPath());
                                     FileUtils.unZip(effect.getZipPath(), effect.getUnzipPath());
-                                    onResponse(this, new EffectTaskResult(effect, null));
+                                    onResponse(this, new EffectTaskResult(effect, (ExceptionResult) null));
                                     break;
                                     onFinally(this);
                                 }
                                 try {
-                                    EffectUtils.download(DefaultEffectFetcher.this.mNetworker, (String) effectFetcherArguments.getDownloadUrl().get(i), effect.getZipPath());
+                                    EffectUtils.download(DefaultEffectFetcher.this.mNetworker, effectFetcherArguments.getDownloadUrl().get(i), effect.getZipPath());
                                     FileUtils.unZip(effect.getZipPath(), effect.getUnzipPath());
-                                    onResponse(this, new EffectTaskResult(effect, null));
+                                    onResponse(this, new EffectTaskResult(effect, (ExceptionResult) null));
                                     break;
                                 } catch (Exception e4) {
                                     String str4 = str;

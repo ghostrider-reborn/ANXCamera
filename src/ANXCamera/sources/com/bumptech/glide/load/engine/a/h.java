@@ -1,11 +1,11 @@
 package com.bumptech.glide.load.engine.a;
 
 import android.content.Context;
-import com.bumptech.glide.load.engine.a.f.a;
+import com.bumptech.glide.load.engine.a.f;
 import java.io.File;
 
 /* compiled from: ExternalCacheDiskCacheFactory */
-class h implements a {
+class h implements f.a {
     final /* synthetic */ String Eg;
     final /* synthetic */ Context val$context;
 

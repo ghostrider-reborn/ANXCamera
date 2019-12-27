@@ -48,24 +48,15 @@ public class FunctionParseAiScene implements Function<CaptureResult, Integer> {
 
     public Integer apply(CaptureResult captureResult) {
         int i;
+        int hdrDetectedScene;
         Face[] faceArr = (Face[]) captureResult.get(CaptureResult.STATISTICS_FACES);
-        int i2 = this.mModuleIndex;
-        String str = TAG;
-        if (i2 == 171 || CameraSettings.isFrontCamera() || faceArr == null || faceArr.length <= 0) {
+        if (this.mModuleIndex == 171 || CameraSettings.isFrontCamera() || faceArr == null || faceArr.length <= 0) {
             i = Integer.MIN_VALUE;
         } else {
             i = Integer.MIN_VALUE;
-            for (Face face : faceArr) {
-                if (face.getBounds().width() > 300) {
-                    int hdrDetectedScene = CaptureResultParser.getHdrDetectedScene(captureResult);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("parseAiSceneResult: AI_SCENE_MODE_HUMAN  face.length = ");
-                    sb.append(faceArr.length);
-                    sb.append(";face.width = ");
-                    sb.append(face.getBounds().width());
-                    sb.append(";hdrMode = ");
-                    sb.append(hdrDetectedScene);
-                    Log.c(str, sb.toString());
+            for (Face bounds : faceArr) {
+                if (bounds.getBounds().width() > 300) {
+                    Log.c(TAG, "parseAiSceneResult: AI_SCENE_MODE_HUMAN  face.length = " + faceArr.length + ";face.width = " + bounds.getBounds().width() + ";hdrMode = " + hdrDetectedScene);
                     if (hdrDetectedScene == 1) {
                         CameraCapabilities cameraCapabilities = this.mCameraCapabilities;
                         if (cameraCapabilities != null && cameraCapabilities.getMiAlgoASDVersion() < 2.0f) {
@@ -80,14 +71,11 @@ public class FunctionParseAiScene implements Function<CaptureResult, Integer> {
             if (i == Integer.MIN_VALUE) {
                 int asdDetectedModes = CaptureResultParser.getAsdDetectedModes(captureResult);
                 if (!this.mSupportMoonMode && asdDetectedModes == 35) {
-                    Log.w(str, "detected moon mode on unsupported device, set scene negative");
+                    Log.w(TAG, "detected moon mode on unsupported device, set scene negative");
                     asdDetectedModes = 0;
                 }
                 if (asdDetectedModes < 0) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("parseAiSceneResult: parse a error result: ");
-                    sb2.append(asdDetectedModes);
-                    Log.e(str, sb2.toString());
+                    Log.e(TAG, "parseAiSceneResult: parse a error result: " + asdDetectedModes);
                     this.mParsedAiScene = 0;
                 } else {
                     this.mParsedAiScene = asdDetectedModes;

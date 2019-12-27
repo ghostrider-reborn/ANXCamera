@@ -30,7 +30,7 @@ public final class SerializedSubscriber<T> implements FlowableSubscriber<T>, Sub
         this.subscription.cancel();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void emitLoop() {
         AppendOnlyLinkedArrayList<Object> appendOnlyLinkedArrayList;
         do {
@@ -42,7 +42,7 @@ public final class SerializedSubscriber<T> implements FlowableSubscriber<T>, Sub
                 }
                 this.queue = null;
             }
-        } while (!appendOnlyLinkedArrayList.accept(this.actual));
+        } while (!appendOnlyLinkedArrayList.accept((Subscriber<? super U>) this.actual));
     }
 
     public void onComplete() {

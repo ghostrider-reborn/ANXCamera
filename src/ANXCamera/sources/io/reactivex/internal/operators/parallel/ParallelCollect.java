@@ -84,7 +84,7 @@ public final class ParallelCollect<T, C> extends ParallelFlowable<C> {
         return this.source.parallelism();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void reportError(Subscriber<?>[] subscriberArr, Throwable th) {
         for (Subscriber<?> error : subscriberArr) {
             EmptySubscription.error(th, error);

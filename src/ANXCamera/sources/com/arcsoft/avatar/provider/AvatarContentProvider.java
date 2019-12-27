@@ -16,15 +16,15 @@ import com.arcsoft.avatar.util.LOG;
 
 public class AvatarContentProvider extends ContentProvider {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f91a = "AvatarContentProvider";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private DBHelper f92b;
 
     public class DBHelper extends SQLiteOpenHelper {
         public DBHelper(Context context) {
-            super(context, AvatarProfile.DATABASE_NAME, null, 2);
+            super(context, AvatarProfile.DATABASE_NAME, (SQLiteDatabase.CursorFactory) null, 2);
         }
 
         public void onCreate(SQLiteDatabase sQLiteDatabase) {
@@ -39,32 +39,20 @@ public class AvatarContentProvider extends ContentProvider {
 
     /* access modifiers changed from: protected */
     public String a(Uri uri, String str, String str2) {
-        StringBuilder sb = new StringBuilder();
+        String sb;
+        StringBuilder sb2 = new StringBuilder();
         String str3 = "";
-        sb.append(str3);
-        sb.append(ContentUris.parseId(uri));
-        String sb2 = sb.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str);
-        sb3.append(" = ");
-        sb3.append(sb2);
-        String sb4 = sb3.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(sb4);
+        sb2.append(str3);
+        sb2.append(ContentUris.parseId(uri));
+        String sb3 = sb2.toString();
+        StringBuilder sb4 = new StringBuilder();
+        sb4.append(str + " = " + sb3);
         if (!TextUtils.isEmpty(str2)) {
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append("and ( ");
-            sb6.append(str2);
-            sb6.append(" )");
-            str3 = sb6.toString();
+            str3 = "and ( " + str2 + " )";
         }
-        sb5.append(str3);
-        String sb7 = sb5.toString();
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append("newSelection : ");
-        sb8.append(sb7);
-        LOG.d("DELETE", sb8.toString());
-        return sb7;
+        sb4.append(str3);
+        LOG.d("DELETE", "newSelection : " + sb);
+        return sb;
     }
 
     public int delete(@NonNull Uri uri, @Nullable String str, @Nullable String[] strArr) {
@@ -77,11 +65,7 @@ public class AvatarContentProvider extends ContentProvider {
                 if (AvatarProfile.sUriMatcher.match(uri) != 1) {
                     i = -1;
                 } else {
-                    String str2 = AvatarProfile.TABLE_NAME;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("_id = ");
-                    sb.append(str);
-                    i = writableDatabase.delete(str2, sb.toString(), strArr);
+                    i = writableDatabase.delete(AvatarProfile.TABLE_NAME, "_id = " + str, strArr);
                 }
                 writableDatabase.setTransactionSuccessful();
                 if (writableDatabase.inTransaction()) {
@@ -94,11 +78,8 @@ public class AvatarContentProvider extends ContentProvider {
                 throw th;
             }
         }
-        String str3 = f91a;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("DELETE count = ");
-        sb2.append(i);
-        LOG.d(str3, sb2.toString());
+        String str2 = f91a;
+        LOG.d(str2, "DELETE count = " + i);
         return i;
     }
 
@@ -120,21 +101,13 @@ public class AvatarContentProvider extends ContentProvider {
                     sQLiteDatabase.beginTransaction();
                     long j = -1;
                     if (AvatarProfile.sUriMatcher.match(uri) == 1) {
-                        j = sQLiteDatabase.insert(AvatarProfile.TABLE_NAME, null, contentValues);
+                        j = sQLiteDatabase.insert(AvatarProfile.TABLE_NAME, (String) null, contentValues);
                     }
                     sQLiteDatabase.setTransactionSuccessful();
                     if (j < 0) {
-                        String str = f91a;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("insert err:rowId=");
-                        sb.append(j);
-                        Log.e(str, sb.toString());
+                        Log.e(f91a, "insert err:rowId=" + j);
                     } else {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(uri);
-                        sb2.append("/");
-                        sb2.append(String.valueOf(j));
-                        uri2 = Uri.parse(sb2.toString());
+                        uri2 = Uri.parse(uri + "/" + String.valueOf(j));
                     }
                     if (sQLiteDatabase.inTransaction()) {
                         sQLiteDatabase.endTransaction();
@@ -167,22 +140,16 @@ public class AvatarContentProvider extends ContentProvider {
         Cursor cursor;
         SQLiteDatabase sQLiteDatabase;
         Uri uri2 = uri;
-        StringBuilder sb = new StringBuilder();
-        sb.append("URI = ");
-        sb.append(uri);
-        LOG.d("DELETE", sb.toString());
+        LOG.d("DELETE", "URI = " + uri);
         synchronized (this.f92b) {
             cursor = null;
             try {
                 sQLiteDatabase = this.f92b.getReadableDatabase();
                 try {
                     sQLiteDatabase.beginTransaction();
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("URI = ");
-                    sb2.append(uri);
-                    LOG.d("DELETE", sb2.toString());
+                    LOG.d("DELETE", "URI = " + uri);
                     if (AvatarProfile.sUriMatcher.match(uri) == 1) {
-                        cursor = sQLiteDatabase.query(AvatarProfile.TABLE_NAME, strArr, str, strArr2, null, null, str2);
+                        cursor = sQLiteDatabase.query(AvatarProfile.TABLE_NAME, strArr, str, strArr2, (String) null, (String) null, str2);
                     }
                     sQLiteDatabase.setTransactionSuccessful();
                     if (cursor == null) {
@@ -222,11 +189,7 @@ public class AvatarContentProvider extends ContentProvider {
                 if (AvatarProfile.sUriMatcher.match(uri) != 1) {
                     i = -1;
                 } else {
-                    String str2 = AvatarProfile.TABLE_NAME;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("_id = ");
-                    sb.append(str);
-                    i = writableDatabase.update(str2, contentValues, sb.toString(), strArr);
+                    i = writableDatabase.update(AvatarProfile.TABLE_NAME, contentValues, "_id = " + str, strArr);
                 }
                 writableDatabase.setTransactionSuccessful();
                 if (writableDatabase.inTransaction()) {

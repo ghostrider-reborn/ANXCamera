@@ -33,10 +33,7 @@ public class Timeout {
 
     public final Timeout deadline(long j, TimeUnit timeUnit) {
         if (j <= 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("duration <= 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("duration <= 0: " + j);
         } else if (timeUnit != null) {
             return deadlineNanoTime(System.nanoTime() + timeUnit.toNanos(j));
         } else {
@@ -71,10 +68,7 @@ public class Timeout {
 
     public Timeout timeout(long j, TimeUnit timeUnit) {
         if (j < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("timeout < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("timeout < 0: " + j);
         } else if (timeUnit != null) {
             this.timeoutNanos = timeUnit.toNanos(j);
             return this;

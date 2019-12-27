@@ -78,7 +78,7 @@ public final class FlowableBufferExactBoundary<T, U extends Collection<? super T
             return this.cancelled;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void next() {
             try {
                 U call = this.bufferSupplier.call();
@@ -101,7 +101,10 @@ public final class FlowableBufferExactBoundary<T, U extends Collection<? super T
         /* JADX WARNING: Code restructure failed: missing block: B:10:0x0019, code lost:
             io.reactivex.internal.util.QueueDrainHelper.drainMaxLoop(r3.queue, r3.actual, false, r3, r3);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:11:0x0021, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:18:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:19:?, code lost:
             return;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:8:0x000b, code lost:
@@ -109,7 +112,7 @@ public final class FlowableBufferExactBoundary<T, U extends Collection<? super T
             r3.done = true;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:9:0x0017, code lost:
-            if (enter() == false) goto L_0x0021;
+            if (enter() == false) goto L_?;
          */
         public void onComplete() {
             synchronized (this) {
@@ -170,6 +173,6 @@ public final class FlowableBufferExactBoundary<T, U extends Collection<? super T
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super U> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new BufferExactBoundarySubscriber<Object>(new SerializedSubscriber(subscriber), this.bufferSupplier, this.boundary));
+        this.source.subscribe(new BufferExactBoundarySubscriber(new SerializedSubscriber(subscriber), this.bufferSupplier, this.boundary));
     }
 }

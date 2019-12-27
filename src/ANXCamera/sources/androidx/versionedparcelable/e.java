@@ -2,11 +2,10 @@ package androidx.versionedparcelable;
 
 import android.os.Parcelable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 /* compiled from: ParcelUtils */
 public class e {
     private e() {
@@ -24,12 +23,12 @@ public class e {
     }
 
     public static void a(i iVar, OutputStream outputStream) {
-        h hVar = new h(null, outputStream);
+        h hVar = new h((InputStream) null, outputStream);
         hVar.b(iVar);
         hVar.ja();
     }
 
     public static <T extends i> T b(InputStream inputStream) {
-        return new h(inputStream, null).sa();
+        return new h(inputStream, (OutputStream) null).sa();
     }
 }

@@ -5,7 +5,6 @@ import android.os.HwBinder;
 import android.os.HwBlob;
 import android.os.HwParcel;
 import android.os.IHwBinder;
-import android.os.IHwBinder.DeathRecipient;
 import android.os.IHwInterface;
 import android.os.NativeHandle;
 import android.os.RemoteException;
@@ -122,7 +121,7 @@ public interface b extends IHwInterface {
             }
         }
 
-        public boolean linkToDeath(DeathRecipient deathRecipient, long j) throws RemoteException {
+        public boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException {
             return this.mRemote.linkToDeath(deathRecipient, j);
         }
 
@@ -165,21 +164,18 @@ public interface b extends IHwInterface {
 
         public String toString() {
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append(interfaceDescriptor());
-                sb.append("@Proxy");
-                return sb.toString();
+                return interfaceDescriptor() + "@Proxy";
             } catch (RemoteException unused) {
                 return "[class or subclass of android.hidl.base@1.0::IBase]@Proxy";
             }
         }
 
-        public boolean unlinkToDeath(DeathRecipient deathRecipient) throws RemoteException {
+        public boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException {
             return this.mRemote.unlinkToDeath(deathRecipient);
         }
     }
 
-    /* renamed from: a.a.a.a.b$b reason: collision with other inner class name */
+    /* renamed from: a.a.a.a.b$b  reason: collision with other inner class name */
     /* compiled from: IBase */
     public static abstract class C0001b extends HwBinder implements b {
         public IHwBinder asBinder() {
@@ -209,7 +205,7 @@ public interface b extends IHwInterface {
             return b.kInterfaceName;
         }
 
-        public final boolean linkToDeath(DeathRecipient deathRecipient, long j) {
+        public final boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) {
             return true;
         }
 
@@ -218,7 +214,6 @@ public interface b extends IHwInterface {
         }
 
         public void onTransact(int i, HwParcel hwParcel, HwParcel hwParcel2, int i2) throws RemoteException {
-            String str = b.kInterfaceName;
             int i3 = 0;
             boolean z = true;
             switch (i) {
@@ -231,8 +226,8 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
-                    ArrayList interfaceChain = interfaceChain();
+                    hwParcel.enforceInterface(b.kInterfaceName);
+                    ArrayList<String> interfaceChain = interfaceChain();
                     hwParcel2.writeStatus(0);
                     hwParcel2.writeStringVector(interfaceChain);
                     hwParcel2.send();
@@ -246,7 +241,7 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     debug(hwParcel.readNativeHandle(), hwParcel.readStringVector());
                     hwParcel2.writeStatus(0);
                     hwParcel2.send();
@@ -260,7 +255,7 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     String interfaceDescriptor = interfaceDescriptor();
                     hwParcel2.writeStatus(0);
                     hwParcel2.writeString(interfaceDescriptor);
@@ -275,8 +270,8 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
-                    ArrayList hashChain = getHashChain();
+                    hwParcel.enforceInterface(b.kInterfaceName);
+                    ArrayList<byte[]> hashChain = getHashChain();
                     hwParcel2.writeStatus(0);
                     HwBlob hwBlob = new HwBlob(16);
                     int size = hashChain.size();
@@ -285,7 +280,7 @@ public interface b extends IHwInterface {
                     HwBlob hwBlob2 = new HwBlob(size * 32);
                     while (i3 < size) {
                         long j = (long) (i3 * 32);
-                        byte[] bArr = (byte[]) hashChain.get(i3);
+                        byte[] bArr = hashChain.get(i3);
                         if (bArr == null || bArr.length != 32) {
                             throw new IllegalArgumentException("Array element is not of the expected length");
                         }
@@ -305,7 +300,7 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     setHALInstrumentation();
                     return;
                 case 256660548:
@@ -327,7 +322,7 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     ping();
                     hwParcel2.writeStatus(0);
                     hwParcel2.send();
@@ -341,7 +336,7 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     a debugInfo = getDebugInfo();
                     hwParcel2.writeStatus(0);
                     debugInfo.writeToParcel(hwParcel2);
@@ -356,7 +351,7 @@ public interface b extends IHwInterface {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     notifySyspropsChanged();
                     return;
                 case 257250372:
@@ -392,13 +387,10 @@ public interface b extends IHwInterface {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(interfaceDescriptor());
-            sb.append("@Stub");
-            return sb.toString();
+            return interfaceDescriptor() + "@Stub";
         }
 
-        public final boolean unlinkToDeath(DeathRecipient deathRecipient) {
+        public final boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) {
             return true;
         }
     }
@@ -407,16 +399,15 @@ public interface b extends IHwInterface {
         if (iHwBinder == null) {
             return null;
         }
-        String str = kInterfaceName;
-        b queryLocalInterface = iHwBinder.queryLocalInterface(str);
+        b queryLocalInterface = iHwBinder.queryLocalInterface(kInterfaceName);
         if (queryLocalInterface != null && (queryLocalInterface instanceof b)) {
             return queryLocalInterface;
         }
         a aVar = new a(iHwBinder);
         try {
-            Iterator it = aVar.interfaceChain().iterator();
+            Iterator<String> it = aVar.interfaceChain().iterator();
             while (it.hasNext()) {
-                if (((String) it.next()).equals(str)) {
+                if (it.next().equals(kInterfaceName)) {
                     return aVar;
                 }
             }
@@ -460,7 +451,7 @@ public interface b extends IHwInterface {
 
     String interfaceDescriptor() throws RemoteException;
 
-    boolean linkToDeath(DeathRecipient deathRecipient, long j) throws RemoteException;
+    boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException;
 
     void notifySyspropsChanged() throws RemoteException;
 
@@ -468,5 +459,5 @@ public interface b extends IHwInterface {
 
     void setHALInstrumentation() throws RemoteException;
 
-    boolean unlinkToDeath(DeathRecipient deathRecipient) throws RemoteException;
+    boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException;
 }

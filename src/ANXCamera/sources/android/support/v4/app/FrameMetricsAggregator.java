@@ -1,18 +1,16 @@
 package android.support.v4.app;
 
 import android.app.Activity;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.SparseIntArray;
 import android.view.FrameMetrics;
 import android.view.Window;
-import android.view.Window.OnFrameMetricsAvailableListener;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -51,7 +49,7 @@ public class FrameMetricsAggregator {
         private static Handler sHandler;
         private static HandlerThread sHandlerThread;
         private ArrayList<WeakReference<Activity>> mActivities = new ArrayList<>();
-        OnFrameMetricsAvailableListener mListener = new OnFrameMetricsAvailableListener() {
+        Window.OnFrameMetricsAvailableListener mListener = new Window.OnFrameMetricsAvailableListener() {
             public void onFrameMetricsAvailable(Window window, FrameMetrics frameMetrics, int i) {
                 FrameMetricsApi24Impl frameMetricsApi24Impl = FrameMetricsApi24Impl.this;
                 if ((frameMetricsApi24Impl.mTrackingFlags & 1) != 0) {
@@ -115,7 +113,7 @@ public class FrameMetricsAggregator {
             this.mActivities.add(new WeakReference(activity));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void addDurationItem(SparseIntArray sparseIntArray, long j) {
             if (sparseIntArray != null) {
                 int i = (int) ((500000 + j) / 1000000);
@@ -130,14 +128,14 @@ public class FrameMetricsAggregator {
         }
 
         public SparseIntArray[] remove(Activity activity) {
-            Iterator it = this.mActivities.iterator();
+            Iterator<WeakReference<Activity>> it = this.mActivities.iterator();
             while (true) {
                 if (!it.hasNext()) {
                     break;
                 }
-                WeakReference weakReference = (WeakReference) it.next();
-                if (weakReference.get() == activity) {
-                    this.mActivities.remove(weakReference);
+                WeakReference next = it.next();
+                if (next.get() == activity) {
+                    this.mActivities.remove(next);
                     break;
                 }
             }
@@ -153,7 +151,7 @@ public class FrameMetricsAggregator {
 
         public SparseIntArray[] stop() {
             for (int size = this.mActivities.size() - 1; size >= 0; size--) {
-                WeakReference weakReference = (WeakReference) this.mActivities.get(size);
+                WeakReference weakReference = this.mActivities.get(size);
                 Activity activity = (Activity) weakReference.get();
                 if (weakReference.get() != null) {
                     activity.getWindow().removeOnFrameMetricsAvailableListener(this.mListener);
@@ -188,7 +186,7 @@ public class FrameMetricsAggregator {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MetricType {
     }
@@ -198,7 +196,7 @@ public class FrameMetricsAggregator {
     }
 
     public FrameMetricsAggregator(int i) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             this.mInstance = new FrameMetricsApi24Impl(i);
         } else {
             this.mInstance = new FrameMetricsBaseImpl();

@@ -17,7 +17,7 @@ public final class ParallelFilterTry<T> extends ParallelFlowable<T> {
     final Predicate<? super T> predicate;
     final ParallelFlowable<T> source;
 
-    /* renamed from: io.reactivex.internal.operators.parallel.ParallelFilterTry$1 reason: invalid class name */
+    /* renamed from: io.reactivex.internal.operators.parallel.ParallelFilterTry$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$io$reactivex$parallel$ParallelFailureHandling = new int[ParallelFailureHandling.values().length];
 
@@ -92,18 +92,14 @@ public final class ParallelFilterTry<T> extends ParallelFlowable<T> {
             }
         }
 
-        /* JADX WARNING: Removed duplicated region for block: B:18:0x0040  */
+        /* JADX WARNING: Removed duplicated region for block: B:17:0x0040  */
         public boolean tryOnNext(T t) {
             int i;
             if (!this.done) {
                 long j = 0;
                 do {
-                    boolean z = true;
                     try {
-                        if (!this.predicate.test(t) || !this.actual.tryOnNext(t)) {
-                            z = false;
-                        }
-                        return z;
+                        return this.predicate.test(t) && this.actual.tryOnNext(t);
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         cancel();

@@ -7,8 +7,7 @@ import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.provider.FontsContractCompat.FontInfo;
+import android.support.v4.provider.FontsContractCompat;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -17,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @RequiresApi(21)
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 class TypefaceCompatApi21Impl extends TypefaceCompatBaseImpl {
     private static final String TAG = "TypefaceCompatApi21Impl";
 
@@ -26,10 +25,7 @@ class TypefaceCompatApi21Impl extends TypefaceCompatBaseImpl {
 
     private File getFile(ParcelFileDescriptor parcelFileDescriptor) {
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("/proc/self/fd/");
-            sb.append(parcelFileDescriptor.getFd());
-            String readlink = Os.readlink(sb.toString());
+            String readlink = Os.readlink("/proc/self/fd/" + parcelFileDescriptor.getFd());
             if (OsConstants.S_ISREG(Os.stat(readlink).st_mode)) {
                 return new File(readlink);
             }
@@ -65,11 +61,11 @@ class TypefaceCompatApi21Impl extends TypefaceCompatBaseImpl {
     /* JADX WARNING: Code restructure failed: missing block: B:47:0x005e, code lost:
         throw r4;
      */
-    public Typeface createFromFontInfo(Context context, CancellationSignal cancellationSignal, @NonNull FontInfo[] fontInfoArr, int i) {
+    public Typeface createFromFontInfo(Context context, CancellationSignal cancellationSignal, @NonNull FontsContractCompat.FontInfo[] fontInfoArr, int i) {
         if (fontInfoArr.length < 1) {
             return null;
         }
-        FontInfo findBestInfo = findBestInfo(fontInfoArr, i);
+        FontsContractCompat.FontInfo findBestInfo = findBestInfo(fontInfoArr, i);
         try {
             ParcelFileDescriptor openFileDescriptor = context.getContentResolver().openFileDescriptor(findBestInfo.getUri(), "r", cancellationSignal);
             File file = getFile(openFileDescriptor);

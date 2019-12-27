@@ -18,51 +18,39 @@ public class OpenGlUtils {
     private static final String TAG = "OpenGlUtils";
 
     public static void checkGlError(String str) {
-        int glGetError = GLES20.glGetError();
-        if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": glError 0x");
-            sb.append(Integer.toHexString(glGetError));
-            String sb2 = sb.toString();
-            Log.e(TAG, sb2);
-            throw new RuntimeException(sb2);
+        if (GLES20.glGetError() != 0) {
+            String str2 = str + ": glError 0x" + Integer.toHexString(r0);
+            Log.e(TAG, str2);
+            throw new RuntimeException(str2);
         }
     }
 
-    /* JADX WARNING: type inference failed for: r0v0 */
-    /* JADX WARNING: type inference failed for: r2v3, types: [java.io.InputStream] */
-    /* JADX WARNING: type inference failed for: r0v1, types: [java.io.InputStream] */
-    /* JADX WARNING: type inference failed for: r2v6 */
-    /* JADX WARNING: type inference failed for: r0v2 */
-    /* JADX WARNING: type inference failed for: r1v0 */
-    /* JADX WARNING: type inference failed for: r0v3 */
-    /* JADX WARNING: type inference failed for: r0v4, types: [android.graphics.Bitmap] */
-    /* JADX WARNING: type inference failed for: r0v5 */
-    /* JADX WARNING: type inference failed for: r0v6 */
-    /* JADX WARNING: type inference failed for: r2v12 */
-    /* JADX WARNING: type inference failed for: r0v7 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v0, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v5, resolved type: android.graphics.Bitmap} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v1, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v7, resolved type: android.graphics.Bitmap} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v2, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v0, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v3, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v9, resolved type: android.graphics.Bitmap} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v4, resolved type: android.graphics.Bitmap} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v5, resolved type: java.io.InputStream} */
     /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:21:0x0031 A[SYNTHETIC, Splitter:B:21:0x0031] */
     /* JADX WARNING: Removed duplicated region for block: B:26:0x003c A[SYNTHETIC, Splitter:B:26:0x003c] */
     /* JADX WARNING: Removed duplicated region for block: B:33:? A[RETURN, SYNTHETIC] */
-    /* JADX WARNING: Unknown variable types count: 6 */
     public static Bitmap getImageFromAssetsFile(Context context, String str) {
-        ? r2;
         Bitmap bitmap;
-        ? r0;
-        ? r02;
-        ? r03 = 0;
+        InputStream inputStream = null;
         try {
-            InputStream open = context.getResources().getAssets().open(str);
+            InputStream inputStream2 = context.getResources().getAssets().open(str);
             try {
-                r02 = r03;
-                ? decodeStream = BitmapFactory.decodeStream(open);
-                open.close();
-                r02 = decodeStream;
-                if (open != 0) {
+                Bitmap decodeStream = BitmapFactory.decodeStream(inputStream2);
+                inputStream2.close();
+                inputStream = decodeStream;
+                if (inputStream2 != null) {
                     try {
-                        open.close();
+                        inputStream2.close();
                     } catch (IOException e2) {
                         e2.printStackTrace();
                     }
@@ -70,19 +58,19 @@ public class OpenGlUtils {
                 return decodeStream;
             } catch (IOException e3) {
                 e = e3;
-                ? r1 = r02;
-                r0 = open;
-                bitmap = r1;
+                InputStream inputStream3 = inputStream;
+                inputStream = inputStream2;
+                bitmap = inputStream3;
                 try {
                     e.printStackTrace();
-                    if (r0 != 0) {
+                    if (inputStream != null) {
                     }
                 } catch (Throwable th) {
                     th = th;
-                    r2 = r0;
-                    if (r2 != 0) {
+                    inputStream2 = inputStream;
+                    if (inputStream2 != null) {
                         try {
-                            r2.close();
+                            inputStream2.close();
                         } catch (IOException e4) {
                             e4.printStackTrace();
                         }
@@ -91,21 +79,19 @@ public class OpenGlUtils {
                 }
             } catch (Throwable th2) {
                 th = th2;
-                r2 = open;
-                if (r2 != 0) {
+                if (inputStream2 != null) {
                 }
                 throw th;
             }
         } catch (IOException e5) {
             e = e5;
-            bitmap = 0;
-            r0 = r03;
+            bitmap = null;
             e.printStackTrace();
-            if (r0 != 0) {
+            if (inputStream != null) {
                 return bitmap;
             }
             try {
-                r0.close();
+                inputStream.close();
                 return bitmap;
             } catch (IOException e6) {
                 e6.printStackTrace();
@@ -114,64 +100,36 @@ public class OpenGlUtils {
         }
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v3, resolved type: android.graphics.Bitmap} */
     /* JADX WARNING: type inference failed for: r0v0 */
     /* JADX WARNING: type inference failed for: r0v1, types: [java.io.FileInputStream] */
-    /* JADX WARNING: type inference failed for: r0v3, types: [android.graphics.Bitmap] */
-    /* JADX WARNING: type inference failed for: r1v0, types: [java.io.FileInputStream] */
     /* JADX WARNING: type inference failed for: r0v4 */
-    /* JADX WARNING: type inference failed for: r1v1 */
     /* JADX WARNING: type inference failed for: r0v5 */
-    /* JADX WARNING: type inference failed for: r1v2, types: [java.io.FileInputStream, java.io.InputStream] */
-    /* JADX WARNING: type inference failed for: r0v6, types: [android.graphics.Bitmap] */
     /* JADX WARNING: type inference failed for: r0v7 */
-    /* JADX WARNING: type inference failed for: r1v3 */
     /* JADX WARNING: type inference failed for: r0v8 */
     /* JADX WARNING: type inference failed for: r0v9 */
     /* JADX WARNING: type inference failed for: r0v10 */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r0v0
-  assigns: [?[int, float, boolean, short, byte, char, OBJECT, ARRAY], android.graphics.Bitmap, ?[OBJECT, ARRAY]]
-  uses: [android.graphics.Bitmap, ?[int, boolean, OBJECT, ARRAY, byte, short, char], java.io.FileInputStream]
-  mth insns count: 27
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
+    /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:16:0x001e A[SYNTHETIC, Splitter:B:16:0x001e] */
     /* JADX WARNING: Removed duplicated region for block: B:22:0x0026 A[SYNTHETIC, Splitter:B:22:0x0026] */
-    /* JADX WARNING: Unknown variable types count: 4 */
     public static Bitmap getImageFromPath(String str) {
-        ? r1;
-        ? decodeStream;
+        FileInputStream fileInputStream;
+        Bitmap decodeStream;
         ? r0 = 0;
         try {
-            ? fileInputStream = new FileInputStream(str);
+            fileInputStream = new FileInputStream(str);
             try {
                 decodeStream = BitmapFactory.decodeStream(fileInputStream);
             } catch (IOException e2) {
                 e = e2;
-                r1 = fileInputStream;
                 try {
                     e.printStackTrace();
-                    if (r1 != 0) {
+                    if (fileInputStream != null) {
                     }
                     return r0;
                 } catch (Throwable th) {
                     th = th;
-                    r0 = r1;
+                    r0 = fileInputStream;
                     if (r0 != 0) {
                         try {
                             r0.close();
@@ -193,10 +151,10 @@ public class OpenGlUtils {
             }
         } catch (IOException e5) {
             e = e5;
-            r1 = 0;
+            fileInputStream = null;
             e.printStackTrace();
-            if (r1 != 0) {
-                r1.close();
+            if (fileInputStream != null) {
+                fileInputStream.close();
             }
             return r0;
         } catch (Throwable th2) {
@@ -219,10 +177,10 @@ public class OpenGlUtils {
             GLES20.glTexParameterf(i3, 10241, 9729.0f);
             GLES20.glTexParameterf(i3, 10242, 33071.0f);
             GLES20.glTexParameterf(i3, 10243, 33071.0f);
-            GLES20.glTexImage2D(i3, 0, 6408, i, i2, 0, 6408, 5121, null);
+            GLES20.glTexImage2D(i3, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         } else {
             GLES20.glBindTexture(i3, iArr[0]);
-            GLES20.glTexImage2D(i3, 0, 6408, i, i2, 0, 6408, 5121, null);
+            GLES20.glTexImage2D(i3, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         }
         return iArr[0];
     }
@@ -230,14 +188,13 @@ public class OpenGlUtils {
     public static int loadProgram(String str, String str2) {
         int[] iArr = new int[1];
         int loadShader = loadShader(str, 35633);
-        String str3 = "Load Program";
         if (loadShader == 0) {
-            Log.d(str3, "Vertex Shader Failed");
+            Log.d("Load Program", "Vertex Shader Failed");
             return 0;
         }
         int loadShader2 = loadShader(str2, 35632);
         if (loadShader2 == 0) {
-            Log.d(str3, "Fragment Shader Failed");
+            Log.d("Load Program", "Fragment Shader Failed");
             return 0;
         }
         int glCreateProgram = GLES20.glCreateProgram();
@@ -246,7 +203,7 @@ public class OpenGlUtils {
         GLES20.glLinkProgram(glCreateProgram);
         GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
         if (iArr[0] <= 0) {
-            Log.d(str3, "Linking Failed");
+            Log.d("Load Program", "Linking Failed");
             return 0;
         }
         GLES20.glDeleteShader(loadShader);
@@ -263,10 +220,7 @@ public class OpenGlUtils {
         if (iArr[0] != 0) {
             return glCreateShader;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Compilation\n");
-        sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
-        Log.e("Load Shader Failed", sb.toString());
+        Log.e("Load Shader Failed", "Compilation\n" + GLES20.glGetShaderInfoLog(glCreateShader));
         return 0;
     }
 

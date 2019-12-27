@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.RectF;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLSurfaceView.Renderer;
 import android.util.AttributeSet;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -12,7 +11,7 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class StreamPreviewGL extends GLSurfaceView implements Renderer {
+public class StreamPreviewGL extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static final float[] s = {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
     private static final float[] t = {0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
     private static final float[] u = {1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
@@ -34,22 +33,22 @@ public class StreamPreviewGL extends GLSurfaceView implements Renderer {
     private boolean K = true;
     private boolean L;
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private Context f224a;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private boolean f225b = false;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private int f226c;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private int f227d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private int[] f228e;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private String f229f;
     private String g;
     private int h;

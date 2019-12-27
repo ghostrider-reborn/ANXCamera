@@ -1,18 +1,15 @@
 package com.android.camera.fragment.mimoji;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.ui.MimojiEditGLTextureView;
@@ -24,9 +21,9 @@ public class MimojiPageChangeAnimManager {
     private int heightEditLayout;
     private int heightEditParentLayout;
     private int heightSurfacePixelBuffer;
-    private LayoutParams layoutParamsEditLayout;
+    private RelativeLayout.LayoutParams layoutParamsEditLayout;
     /* access modifiers changed from: private */
-    public LayoutParams layoutParamsTextureView;
+    public RelativeLayout.LayoutParams layoutParamsTextureView;
     private Context mContext;
     public int[] mLocationAllEditContent = new int[3];
     public int[] mLocationTextureView = new int[3];
@@ -53,9 +50,8 @@ public class MimojiPageChangeAnimManager {
         this.mMimojiEditGLTextureView = mimojiEditGLTextureView;
         this.mRlAllEditContent = linearLayout;
         this.resources = this.mContext.getResources();
-        WindowManager windowManager = (WindowManager) this.mContext.getSystemService("window");
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        ((WindowManager) this.mContext.getSystemService("window")).getDefaultDisplay().getMetrics(displayMetrics);
         this.screenWidth = displayMetrics.widthPixels;
         this.screenHeight = displayMetrics.heightPixels;
         this.widthSurfacePixel = this.resources.getDimensionPixelSize(R.dimen.mimoji_edit_surface_width);
@@ -74,9 +70,9 @@ public class MimojiPageChangeAnimManager {
             int i2 = this.heightEditLayout;
             iArr[1] = i - i2;
             this.MOVE_TOP_DISPLACEMENT_OF_EDIT_LAYOUT = i2;
-            this.layoutParamsEditLayout = new LayoutParams(this.screenWidth, i2);
+            this.layoutParamsEditLayout = new RelativeLayout.LayoutParams(this.screenWidth, i2);
         }
-        LayoutParams layoutParams = this.layoutParamsEditLayout;
+        RelativeLayout.LayoutParams layoutParams = this.layoutParamsEditLayout;
         int[] iArr2 = this.mLocationAllEditContent;
         layoutParams.leftMargin = iArr2[0];
         layoutParams.topMargin = iArr2[1];
@@ -91,17 +87,16 @@ public class MimojiPageChangeAnimManager {
     public void resetTextureViewPosition(int i) {
         if (this.layoutParamsTextureView == null) {
             int i2 = this.widthSurfacePixel;
-            this.layoutParamsTextureView = new LayoutParams(i2, i2);
+            this.layoutParamsTextureView = new RelativeLayout.LayoutParams(i2, i2);
         }
         if (i == 1) {
             this.navigationBackHeight = this.resources.getDimensionPixelSize(R.dimen.mimoji_edit_back_height);
             this.resources.getDimensionPixelSize(R.dimen.mimoji_edit_back_top);
             this.xCoordinateStartTexture = (this.screenWidth / 2) - (this.widthSurfacePixel / 2);
             int i3 = this.xCoordinateStartTexture;
-            int i4 = this.heightSurfacePixelBuffer + i3;
             int[] iArr = this.mLocationTextureView;
             iArr[0] = i3;
-            iArr[1] = i4;
+            iArr[1] = this.heightSurfacePixelBuffer + i3;
         } else if (i == 4 || i == 2) {
             this.xCoordinateStartTexture = (this.screenWidth / 2) - (this.widthSurfacePixel / 2);
             int[] iArr2 = this.mLocationTextureView;
@@ -119,7 +114,7 @@ public class MimojiPageChangeAnimManager {
     public void translateYEditLayout() {
         TranslateAnimation translateAnimation = new TranslateAnimation(1, 0.0f, 1, 0.0f, 1, 1.0f, 1, 0.0f);
         translateAnimation.setDuration(500);
-        translateAnimation.setAnimationListener(new AnimationListener() {
+        translateAnimation.setAnimationListener(new Animation.AnimationListener() {
             public void onAnimationEnd(Animation animation) {
             }
 
@@ -135,20 +130,20 @@ public class MimojiPageChangeAnimManager {
 
     public void translateYTextureView() {
         final ValueAnimator ofFloat = ValueAnimator.ofFloat(new float[]{(float) this.mLocationTextureView[1], 0.0f});
-        ofFloat.addUpdateListener(new AnimatorUpdateListener() {
+        ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 MimojiPageChangeAnimManager.this.layoutParamsTextureView.topMargin = (int) ((Float) ofFloat.getAnimatedValue()).floatValue();
                 MimojiPageChangeAnimManager.this.mMimojiEditGLTextureView.setLayoutParams(MimojiPageChangeAnimManager.this.layoutParamsTextureView);
             }
         });
-        ofFloat.addListener(new AnimatorListener() {
+        ofFloat.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
             public void onAnimationEnd(Animator animator) {
                 MimojiPageChangeAnimManager mimojiPageChangeAnimManager = MimojiPageChangeAnimManager.this;
                 mimojiPageChangeAnimManager.mLocationTextureView[1] = 0;
-                LayoutParams access$000 = mimojiPageChangeAnimManager.layoutParamsTextureView;
+                RelativeLayout.LayoutParams access$000 = mimojiPageChangeAnimManager.layoutParamsTextureView;
                 MimojiPageChangeAnimManager mimojiPageChangeAnimManager2 = MimojiPageChangeAnimManager.this;
                 access$000.topMargin = mimojiPageChangeAnimManager2.mLocationTextureView[1];
                 mimojiPageChangeAnimManager2.mMimojiEditGLTextureView.setLayoutParams(MimojiPageChangeAnimManager.this.layoutParamsTextureView);
@@ -165,7 +160,7 @@ public class MimojiPageChangeAnimManager {
     }
 
     public void updateEditLayoutViewPosition() {
-        LayoutParams layoutParams = this.layoutParamsEditLayout;
+        RelativeLayout.LayoutParams layoutParams = this.layoutParamsEditLayout;
         int[] iArr = this.mLocationAllEditContent;
         layoutParams.leftMargin = iArr[0];
         layoutParams.topMargin = iArr[1];
@@ -185,7 +180,7 @@ public class MimojiPageChangeAnimManager {
     }
 
     public void updateTextureViewPosition() {
-        LayoutParams layoutParams = this.layoutParamsTextureView;
+        RelativeLayout.LayoutParams layoutParams = this.layoutParamsTextureView;
         int[] iArr = this.mLocationTextureView;
         layoutParams.leftMargin = iArr[0];
         layoutParams.topMargin = iArr[1];

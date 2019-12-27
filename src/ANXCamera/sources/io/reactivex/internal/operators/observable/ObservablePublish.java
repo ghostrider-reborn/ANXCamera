@@ -37,9 +37,9 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
             return get() == this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setParent(PublishObserver<T> publishObserver) {
-            if (!compareAndSet(null, publishObserver)) {
+            if (!compareAndSet((Object) null, publishObserver)) {
                 publishObserver.remove(this);
             }
         }
@@ -58,7 +58,7 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
             this.shouldConnect = new AtomicBoolean();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean add(InnerDisposable<T> innerDisposable) {
             InnerDisposable[] innerDisposableArr;
             InnerDisposable[] innerDisposableArr2;
@@ -76,10 +76,10 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
         }
 
         public void dispose() {
-            Object obj = this.observers.get();
-            Object obj2 = TERMINATED;
-            if (obj != obj2 && ((InnerDisposable[]) this.observers.getAndSet(obj2)) != TERMINATED) {
-                this.current.compareAndSet(this, null);
+            InnerDisposable<T>[] innerDisposableArr = this.observers.get();
+            InnerDisposable<T>[] innerDisposableArr2 = TERMINATED;
+            if (innerDisposableArr != innerDisposableArr2 && ((InnerDisposable[]) this.observers.getAndSet(innerDisposableArr2)) != TERMINATED) {
+                this.current.compareAndSet(this, (Object) null);
                 DisposableHelper.dispose(this.s);
             }
         }
@@ -89,14 +89,14 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
         }
 
         public void onComplete() {
-            this.current.compareAndSet(this, null);
+            this.current.compareAndSet(this, (Object) null);
             for (InnerDisposable innerDisposable : (InnerDisposable[]) this.observers.getAndSet(TERMINATED)) {
                 innerDisposable.child.onComplete();
             }
         }
 
         public void onError(Throwable th) {
-            this.current.compareAndSet(this, null);
+            this.current.compareAndSet(this, (Object) null);
             InnerDisposable[] innerDisposableArr = (InnerDisposable[]) this.observers.getAndSet(TERMINATED);
             if (innerDisposableArr.length != 0) {
                 for (InnerDisposable innerDisposable : innerDisposableArr) {
@@ -117,7 +117,7 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
             DisposableHelper.setOnce(this.s, disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void remove(InnerDisposable<T> innerDisposable) {
             InnerDisposable[] innerDisposableArr;
             InnerDisposable[] innerDisposableArr2;
@@ -167,7 +167,7 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
             InnerDisposable innerDisposable = new InnerDisposable(observer);
             observer.onSubscribe(innerDisposable);
             while (true) {
-                PublishObserver publishObserver = (PublishObserver) this.curr.get();
+                PublishObserver publishObserver = this.curr.get();
                 if (publishObserver == null || publishObserver.isDisposed()) {
                     PublishObserver publishObserver2 = new PublishObserver(this.curr);
                     if (!this.curr.compareAndSet(publishObserver, publishObserver2)) {
@@ -192,14 +192,14 @@ public final class ObservablePublish<T> extends ConnectableObservable<T> impleme
 
     public static <T> ConnectableObservable<T> create(ObservableSource<T> observableSource) {
         AtomicReference atomicReference = new AtomicReference();
-        return RxJavaPlugins.onAssembly((ConnectableObservable<T>) new ObservablePublish<T>(new PublishSource(atomicReference), observableSource, atomicReference));
+        return RxJavaPlugins.onAssembly(new ObservablePublish(new PublishSource(atomicReference), observableSource, atomicReference));
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
     public void connect(Consumer<? super Disposable> consumer) {
         PublishObserver publishObserver;
         while (true) {
-            publishObserver = (PublishObserver) this.current.get();
+            publishObserver = this.current.get();
             if (publishObserver != null && !publishObserver.isDisposed()) {
                 break;
             }

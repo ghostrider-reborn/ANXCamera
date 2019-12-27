@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.observers.SerializedObserver;
@@ -24,9 +23,9 @@ public final class ObservableThrottleFirstTimed<T> extends AbstractObservableWit
         Disposable s;
         final long timeout;
         final TimeUnit unit;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        DebounceTimedObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Worker worker2) {
+        DebounceTimedObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Scheduler.Worker worker2) {
             this.actual = observer;
             this.timeout = j;
             this.unit = timeUnit;

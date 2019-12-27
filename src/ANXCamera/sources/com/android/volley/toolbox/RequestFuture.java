@@ -2,15 +2,14 @@ package com.android.volley.toolbox;
 
 import android.os.SystemClock;
 import com.android.volley.Request;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class RequestFuture<T> implements Future<T>, Listener<T>, ErrorListener {
+public class RequestFuture<T> implements Future<T>, Response.Listener<T>, Response.ErrorListener {
     private VolleyError mException;
     private Request<?> mRequest;
     private T mResult;
@@ -64,7 +63,7 @@ public class RequestFuture<T> implements Future<T>, Listener<T>, ErrorListener {
 
     public T get() throws InterruptedException, ExecutionException {
         try {
-            return doGet(null);
+            return doGet((Long) null);
         } catch (TimeoutException e2) {
             throw new AssertionError(e2);
         }

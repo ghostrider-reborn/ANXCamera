@@ -34,10 +34,7 @@ public abstract class Decoder {
         }
         this.mLastDecodeTime = currentTimeMillis;
         this.mDecodingCount.getAndIncrement();
-        StringBuilder sb = new StringBuilder();
-        sb.append("preview frame buffer received... mDecodingCount = ");
-        sb.append(this.mDecodingCount.get());
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "preview frame buffer received... mDecodingCount = " + this.mDecodingCount.get());
         return true;
     }
 

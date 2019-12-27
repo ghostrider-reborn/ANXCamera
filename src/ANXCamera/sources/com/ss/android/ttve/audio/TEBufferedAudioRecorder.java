@@ -44,11 +44,8 @@ public class TEBufferedAudioRecorder {
 
     public void init(int i) {
         int i2;
-        String str = " ";
-        AudioRecord audioRecord = this.audio;
-        String str2 = TAG;
-        if (audioRecord != null) {
-            Log.e(str2, "second time audio init(), skip");
+        if (this.audio != null) {
+            Log.e(TAG, "second time audio init(), skip");
             return;
         }
         int i3 = -1;
@@ -57,18 +54,11 @@ public class TEBufferedAudioRecorder {
                 this.channelConfig = channelConfigSuggested[channelConfigOffset];
                 this.sampleRateInHz = sampleRateSuggested[sampleRateOffset];
                 this.bufferSizeInBytes = AudioRecord.getMinBufferSize(this.sampleRateInHz, this.channelConfig, this.audioFormat);
-                AudioRecord audioRecord2 = new AudioRecord(i, this.sampleRateInHz, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
-                this.audio = audioRecord2;
+                AudioRecord audioRecord = new AudioRecord(i, this.sampleRateInHz, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
+                this.audio = audioRecord;
             }
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("使用预设配置");
-            sb.append(channelConfigOffset);
-            sb.append(",");
-            sb.append(sampleRateOffset);
-            sb.append("实例化audio recorder失败，重新测试配置。");
-            sb.append(e2);
-            Log.e(str2, sb.toString());
+            Log.e(TAG, "使用预设配置" + channelConfigOffset + "," + sampleRateOffset + "实例化audio recorder失败，重新测试配置。" + e2);
         }
         if (this.audio == null) {
             channelConfigOffset = -1;
@@ -92,19 +82,11 @@ public class TEBufferedAudioRecorder {
                     sampleRateOffset += i5;
                     try {
                         this.bufferSizeInBytes = AudioRecord.getMinBufferSize(i7, this.channelConfig, this.audioFormat);
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("试用hz ");
-                        sb2.append(i7);
-                        sb2.append(str);
-                        sb2.append(this.channelConfig);
-                        sb2.append(str);
-                        sb2.append(this.audioFormat);
-                        Log.i(str2, sb2.toString());
+                        Log.i(TAG, "试用hz " + i7 + " " + this.channelConfig + " " + this.audioFormat);
                         if (this.bufferSizeInBytes > 0) {
                             this.sampleRateInHz = i7;
-                            int i8 = i;
-                            AudioRecord audioRecord3 = new AudioRecord(i8, this.sampleRateInHz, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
-                            this.audio = audioRecord3;
+                            AudioRecord audioRecord2 = new AudioRecord(i, this.sampleRateInHz, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
+                            this.audio = audioRecord2;
                             z = true;
                             break;
                         }
@@ -115,14 +97,9 @@ public class TEBufferedAudioRecorder {
                     } catch (Exception e3) {
                         this.sampleRateInHz = 0;
                         this.audio = null;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("apply audio record sample rate ");
-                        sb3.append(i7);
-                        sb3.append(" failed: ");
-                        sb3.append(e3.getMessage());
-                        Log.e(str2, sb3.toString());
+                        Log.e(TAG, "apply audio record sample rate " + i7 + " failed: " + e3.getMessage());
                         i2 = 1;
-                        sampleRateOffset++;
+                        sampleRateOffset = sampleRateOffset + 1;
                     }
                 }
                 if (z) {
@@ -133,20 +110,10 @@ public class TEBufferedAudioRecorder {
             }
         }
         if (this.sampleRateInHz <= 0) {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("!Init audio recorder failed, hz ");
-            sb4.append(this.sampleRateInHz);
-            Log.e(str2, sb4.toString());
+            Log.e(TAG, "!Init audio recorder failed, hz " + this.sampleRateInHz);
             return;
         }
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append("Init audio recorder succeed, apply audio record sample rate ");
-        sb5.append(this.sampleRateInHz);
-        sb5.append(" buffer ");
-        sb5.append(this.bufferSizeInBytes);
-        sb5.append(" state ");
-        sb5.append(this.audio.getState());
-        Log.i(str2, sb5.toString());
+        Log.i(TAG, "Init audio recorder succeed, apply audio record sample rate " + this.sampleRateInHz + " buffer " + this.bufferSizeInBytes + " state " + this.audio.getState());
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:10:0x0015, code lost:
@@ -156,10 +123,7 @@ public class TEBufferedAudioRecorder {
         if (r10 == 0) goto L_0x003b;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:12:0x0024, code lost:
-        r9 = new java.lang.StringBuilder();
-        r9.append("init wav file failed, ret = ");
-        r9.append(r10);
-        android.util.Log.e(TAG, r9.toString());
+        android.util.Log.e(TAG, "init wav file failed, ret = " + r10);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:13:0x003a, code lost:
         return;

@@ -7,18 +7,13 @@ import io.reactivex.annotations.NonNull;
 public final class OnErrorNotImplementedException extends RuntimeException {
     private static final long serialVersionUID = -6298857009889503852L;
 
+    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     public OnErrorNotImplementedException(String str, @NonNull Throwable th) {
-        if (th == null) {
-            th = new NullPointerException();
-        }
-        super(str, th);
+        super(str, th == null ? new NullPointerException() : th);
     }
 
+    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     public OnErrorNotImplementedException(@NonNull Throwable th) {
-        String message = th != null ? th.getMessage() : null;
-        if (th == null) {
-            th = new NullPointerException();
-        }
-        super(message, th);
+        super(th != null ? th.getMessage() : null, th == null ? new NullPointerException() : th);
     }
 }

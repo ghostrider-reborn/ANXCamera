@@ -20,7 +20,7 @@ public abstract class g {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void u(boolean z) {
             if (z) {
                 this.jm = new RuntimeException("Released");
@@ -59,6 +59,6 @@ public abstract class g {
 
     public abstract void Mh();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract void u(boolean z);
 }

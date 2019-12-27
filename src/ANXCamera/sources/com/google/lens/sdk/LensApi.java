@@ -2,17 +2,16 @@ package com.google.lens.sdk;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
-import android.app.KeyguardManager.KeyguardDismissCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.google.android.apps.lens.library.base.LensSdkParamsReader;
 import com.google.android.apps.lens.library.base.LensServiceBridge;
-import com.google.android.apps.lens.library.base.proto.nano.LensSdkParamsProto.LensSdkParams;
+import com.google.android.apps.lens.library.base.proto.nano.LensSdkParamsProto;
 
 public class LensApi {
     @VisibleForTesting
@@ -44,14 +43,14 @@ public class LensApi {
         public static final int LENS_CORE = 0;
     }
 
-    private static final class LensSdkParamsCallback implements com.google.android.apps.lens.library.base.LensSdkParamsReader.LensSdkParamsCallback {
+    private static final class LensSdkParamsCallback implements LensSdkParamsReader.LensSdkParamsCallback {
         private final LensAvailabilityCallback lensAvailabilityCallback;
 
         LensSdkParamsCallback(@NonNull LensAvailabilityCallback lensAvailabilityCallback2) {
             this.lensAvailabilityCallback = lensAvailabilityCallback2;
         }
 
-        public void onLensSdkParamsAvailable(LensSdkParams lensSdkParams) {
+        public void onLensSdkParamsAvailable(LensSdkParamsProto.LensSdkParams lensSdkParams) {
             this.lensAvailabilityCallback.onAvailabilityStatusFetched(LensApi.mapInternalLensAvailabilityToExternal(lensSdkParams.lensAvailabilityStatus));
         }
     }
@@ -63,10 +62,7 @@ public class LensApi {
     }
 
     private Uri appendBitmapUri(Uri uri, Uri uri2) {
-        if (uri == null || uri2 == null) {
-            return uri;
-        }
-        return uri.buildUpon().appendQueryParameter(LENS_BITMAP_URI_KEY, uri2.toString()).build();
+        return (uri == null || uri2 == null) ? uri : uri.buildUpon().appendQueryParameter(LENS_BITMAP_URI_KEY, uri2.toString()).build();
     }
 
     /* access modifiers changed from: private */
@@ -98,7 +94,7 @@ public class LensApi {
     }
 
     public void checkLensAvailability(LensAvailabilityCallback lensAvailabilityCallback) {
-        if (!((KeyguardManager) this.context.getSystemService("keyguard")).isKeyguardLocked() || VERSION.SDK_INT >= 26) {
+        if (!((KeyguardManager) this.context.getSystemService("keyguard")).isKeyguardLocked() || Build.VERSION.SDK_INT >= 26) {
             this.paramsReader.getParams(new LensSdkParamsCallback(lensAvailabilityCallback));
         } else {
             lensAvailabilityCallback.onAvailabilityStatusFetched(5);
@@ -108,9 +104,9 @@ public class LensApi {
     public void launchLensActivity(final Activity activity) {
         KeyguardManager keyguardManager = (KeyguardManager) activity.getSystemService("keyguard");
         if (keyguardManager.isKeyguardLocked()) {
-            int i = VERSION.SDK_INT;
+            int i = Build.VERSION.SDK_INT;
             if (i >= 26) {
-                keyguardManager.requestDismissKeyguard(activity, new KeyguardDismissCallback() {
+                keyguardManager.requestDismissKeyguard(activity, new KeyguardManager.KeyguardDismissCallback() {
                     public void onDismissCancelled() {
                         Log.d(LensApi.TAG, "Keyguard dismiss cancelled");
                     }

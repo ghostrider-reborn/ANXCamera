@@ -10,8 +10,7 @@ import android.hardware.camera2.params.MeteringRectangle;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.MiuiSettings.ScreenEffect;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
@@ -21,8 +20,6 @@ import android.util.Size;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.camera.CameraSettings;
@@ -37,25 +34,14 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.fragment.mimoji.MimojiHelper;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.AutoZoomModuleProtocol;
-import com.android.camera.protocol.ModeProtocol.AutoZoomViewProtocol;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.MimojiAvatarEngine;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.SnapShotIndicator;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
-import com.android.camera.protocol.ModeProtocol.VerticalProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.AfRegionsView;
 import com.android.camera.ui.FaceView;
 import com.android.camera.ui.FocusIndicator;
 import com.android.camera.ui.FocusView;
-import com.android.camera.ui.FocusView.ExposureViewListener;
 import com.android.camera.ui.LightingView;
 import com.android.camera.ui.ObjectView;
-import com.android.camera.ui.ObjectView.ObjectViewListener;
 import com.android.camera.ui.V6EffectCropView;
 import com.android.camera.ui.V6PreviewFrame;
 import com.android.camera.ui.V6PreviewPanel;
@@ -69,7 +55,7 @@ import io.reactivex.Completable;
 import java.util.List;
 import miui.view.animation.QuadraticEaseInOutInterpolator;
 
-public class FragmentMainContent extends BaseFragment implements MainContentProtocol, SnapShotIndicator, AutoZoomViewProtocol, HandleBackTrace {
+public class FragmentMainContent extends BaseFragment implements ModeProtocol.MainContentProtocol, ModeProtocol.SnapShotIndicator, ModeProtocol.AutoZoomViewProtocol, ModeProtocol.HandleBackTrace {
     public static final int FRAGMENT_INFO = 243;
     public static final int FRONT_CAMERA_ID = 1;
     private static final String TAG = "FragmentMainContent";
@@ -124,9 +110,9 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
             V6PreviewPanel v6PreviewPanel = this.mPreviewPanel;
             if (v6PreviewPanel != null) {
                 ViewGroup viewGroup = (ViewGroup) v6PreviewPanel.getParent();
-                MarginLayoutParams marginLayoutParams = (MarginLayoutParams) viewGroup.getLayoutParams();
-                MarginLayoutParams marginLayoutParams2 = (MarginLayoutParams) this.mPreviewPanel.getLayoutParams();
-                MarginLayoutParams marginLayoutParams3 = (MarginLayoutParams) this.mPreviewCenterHint.getLayoutParams();
+                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) viewGroup.getLayoutParams();
+                ViewGroup.MarginLayoutParams marginLayoutParams2 = (ViewGroup.MarginLayoutParams) this.mPreviewPanel.getLayoutParams();
+                ViewGroup.MarginLayoutParams marginLayoutParams3 = (ViewGroup.MarginLayoutParams) this.mPreviewCenterHint.getLayoutParams();
                 Rect previewRect = Util.getPreviewRect(getContext());
                 if (marginLayoutParams2.height != previewRect.height() || previewRect.top != this.mDisplayRectTopMargin) {
                     this.mDisplayRectTopMargin = previewRect.top;
@@ -146,10 +132,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     private void consumeResult(int i, boolean z) {
         if (System.currentTimeMillis() - this.lastConfirmTime >= ((long) (z ? 700 : 1000))) {
             this.lastConfirmTime = System.currentTimeMillis();
-            StringBuilder sb = new StringBuilder();
-            sb.append(i);
-            sb.append("");
-            Log.d("faceResult:", sb.toString());
+            Log.d("faceResult:", i + "");
             if (z) {
                 mimojiFaceDetectSync(161, i);
             } else if (this.lastFaceResult != i) {
@@ -157,11 +140,11 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
                 final LightingView lightingView = this.mLightingView;
                 lightingView.post(new Runnable() {
                     public void run() {
-                        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                         if (topAlert != null) {
                             topAlert.alertLightingHint(FragmentMainContent.this.lastFaceResult);
                         }
-                        VerticalProtocol verticalProtocol = (VerticalProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(198);
+                        ModeProtocol.VerticalProtocol verticalProtocol = (ModeProtocol.VerticalProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(198);
                         if (verticalProtocol != null) {
                             verticalProtocol.alertLightingHint(FragmentMainContent.this.lastFaceResult);
                         }
@@ -215,29 +198,11 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
         int tipsResIdFace = MimojiHelper.getTipsResIdFace(i2);
         int tipsResId = MimojiHelper.getTipsResId(i2);
         if (160 == i && tipsResId == -1 && i2 != 6) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("mimojiFaceDetectSync 0, faceResult = ");
-            sb.append(i2);
-            sb.append(", mimoji tips resId = ");
-            sb.append(tipsResId);
-            Log.c(str, sb.toString());
+            Log.c(TAG, "mimojiFaceDetectSync 0, faceResult = " + i2 + ", mimoji tips resId = " + tipsResId);
         } else if (161 == i && tipsResIdFace == -1 && i2 != 6) {
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("mimojiFaceDetectSync 1, faceResult = ");
-            sb2.append(i2);
-            sb2.append(", miface tips resId = ");
-            sb2.append(tipsResIdFace);
-            Log.c(str2, sb2.toString());
+            Log.c(TAG, "mimojiFaceDetectSync 1, faceResult = " + i2 + ", miface tips resId = " + tipsResIdFace);
         } else if (i2 == this.mMimojiFaceDetect && i == this.mMimojiDetectTipType) {
-            String str3 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("mimojiFaceDetectSync 2, faceResult = ");
-            sb3.append(i2);
-            sb3.append("type:");
-            sb3.append(i);
-            Log.c(str3, sb3.toString());
+            Log.c(TAG, "mimojiFaceDetectSync 2, faceResult = " + i2 + "type:" + i);
         } else {
             this.mMimojiDetectTipType = i;
             this.mMimojiFaceDetect = i2;
@@ -247,14 +212,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
             } else {
                 this.mLastFaceSuccess = false;
             }
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("face_detect_type:");
-            sb4.append(i);
-            sb4.append(",result:");
-            sb4.append(i2);
-            sb4.append(",is_face_location_ok:");
-            sb4.append(this.mLastFaceSuccess);
-            Log.d("mimojiFaceDetectSync", sb4.toString());
+            Log.d("mimojiFaceDetectSync", "face_detect_type:" + i + ",result:" + i2 + ",is_face_location_ok:" + this.mLastFaceSuccess);
         }
     }
 
@@ -295,7 +253,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     }
 
     public /* synthetic */ void f(boolean z) {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         boolean z2 = false;
         switch (this.mMimojiDetectTipType) {
             case 160:
@@ -331,10 +289,10 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
                 }
                 break;
         }
-        MimojiAvatarEngine mimojiAvatarEngine = (MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
+        ModeProtocol.MimojiAvatarEngine mimojiAvatarEngine = (ModeProtocol.MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
         if (mimojiAvatarEngine != null) {
             mimojiAvatarEngine.setDetectSuccess(this.mLastFaceSuccess);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (this.mLastFaceSuccess && !z) {
                 if (bottomPopupTips != null) {
                     bottomPopupTips.showTips(19, (int) R.string.mimoji_check_normal, 2);
@@ -381,11 +339,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
         if (i == 3) {
             return this.mObjectView.getFocusRect();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(getFragmentTag());
-        sb.append(": unexpected type ");
-        sb.append(i);
-        Log.w(TAG, sb.toString());
+        Log.w(TAG, getFragmentTag() + ": unexpected type " + i);
         return new RectF();
     }
 
@@ -446,15 +400,15 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
         this.mLightingView.setRotation(this.mDegree);
         adjustViewHeight();
         this.mCoverParent.getLayoutParams().height = Util.sWindowHeight - Util.getBottomHeight(getResources());
-        LayoutParams layoutParams = this.mBottomCover.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = this.mBottomCover.getLayoutParams();
         int i = Util.sWindowWidth;
         layoutParams.height = ((((int) (((float) i) / 0.75f)) - i) / 2) + getResources().getDimensionPixelSize(R.dimen.square_mode_bottom_cover_extra_margin);
         this.mTopCover.getLayoutParams().height = (this.mCoverParent.getLayoutParams().height - Util.sWindowWidth) - this.mBottomCover.getLayoutParams().height;
         this.mIsIntentAction = DataRepository.dataItemGlobal().isIntentAction();
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
     }
 
-    public void initializeFocusView(ExposureViewListener exposureViewListener) {
+    public void initializeFocusView(FocusView.ExposureViewListener exposureViewListener) {
         this.mFocusView.initialize(exposureViewListener);
     }
 
@@ -526,25 +480,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     }
 
     public boolean isIndicatorVisible(int i) {
-        boolean z = false;
-        if (i == 1) {
-            if (this.mFaceView.getVisibility() == 0) {
-                z = true;
-            }
-            return z;
-        } else if (i == 2) {
-            if (this.mFocusView.getVisibility() == 0) {
-                z = true;
-            }
-            return z;
-        } else if (i != 3) {
-            return false;
-        } else {
-            if (this.mObjectView.getVisibility() == 0) {
-                z = true;
-            }
-            return z;
-        }
+        return i != 1 ? i != 2 ? i == 3 && this.mObjectView.getVisibility() == 0 : this.mFocusView.getVisibility() == 0 : this.mFaceView.getVisibility() == 0;
     }
 
     public boolean isNeedExposure(int i) {
@@ -590,8 +526,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
                 float f4 = 0.2f * width3 * f3;
                 float f5 = width3 * 0.5f * f2;
                 if (width2 >= 0.5f * width) {
-                    int i2 = width2 < f4 ? 4 : (width2 >= f5 || width >= f5) ? 3 : 6;
-                    i = i2;
+                    i = width2 < f4 ? 4 : (width2 >= f5 || width >= f5) ? 3 : 6;
                 }
             }
             consumeResult(i, z);
@@ -624,7 +559,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     public void mimojiFaceDetect(final int i) {
         this.mMimojiLightingView.post(new Runnable() {
             public void run() {
-                FragmentMainContent.this.mCurrentMimojiFaceResult = i;
+                int unused = FragmentMainContent.this.mCurrentMimojiFaceResult = i;
                 FragmentMainContent.this.mimojiFaceDetectSync(160, i);
             }
         });
@@ -716,7 +651,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     public void onPause() {
         super.onPause();
         this.mLastFaceSuccess = false;
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
     }
 
     public void onStop() {
@@ -730,7 +665,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     }
 
     public void onTrackingStarted(RectF rectF) {
-        AutoZoomModuleProtocol autoZoomModuleProtocol = (AutoZoomModuleProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(215);
+        ModeProtocol.AutoZoomModuleProtocol autoZoomModuleProtocol = (ModeProtocol.AutoZoomModuleProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(215);
         if (autoZoomModuleProtocol != null) {
             autoZoomModuleProtocol.startTracking(rectF);
         }
@@ -790,10 +725,10 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
                 if (list == null) {
                     SlideInOnSubscribe.directSetResult(this.mTopCover, 48);
                     SlideInOnSubscribe.directSetResult(this.mBottomCover, 80);
-                } else {
-                    list.add(Completable.create(new SlideInOnSubscribe(this.mTopCover, 48)));
-                    list.add(Completable.create(new SlideInOnSubscribe(this.mBottomCover, 80)));
+                    return;
                 }
+                list.add(Completable.create(new SlideInOnSubscribe(this.mTopCover, 48)));
+                list.add(Completable.create(new SlideInOnSubscribe(this.mBottomCover, 80)));
             } else if (list == null) {
                 SlideOutOnSubscribe.directSetResult(this.mTopCover, 48);
                 SlideOutOnSubscribe.directSetResult(this.mBottomCover, 80);
@@ -806,7 +741,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
 
     public void provideRotateItem(List<View> list, int i) {
         super.provideRotateItem(list, i);
-        this.mFaceView.setOrientation((360 - i) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, false);
+        this.mFaceView.setOrientation((360 - i) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, false);
         this.mAfRegionsView.setOrientation(i, false);
         this.mLightingView.setOrientation(i, false);
         this.mFocusView.setOrientation(i, false);
@@ -820,7 +755,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(166, this);
         modeCoordinator.attachProtocol(214, this);
@@ -854,13 +789,12 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
         this.mHandler.removeCallbacksAndMessages(this.mPreviewCenterHint);
         if (i == 0) {
             this.mCenterHintText.setText(str);
-            String str3 = "";
-            if (str == null || str.equals(str3)) {
+            if (str == null || str.equals("")) {
                 this.mCenterHintText.setVisibility(8);
             } else {
                 this.mCenterHintText.setVisibility(0);
             }
-            if (str2 == null || str2.equals(str3)) {
+            if (str2 == null || str2.equals("")) {
                 this.mCenterHintIcon.setVisibility(8);
             } else {
                 c.b((Fragment) this).load(str2).a(this.mCenterHintIcon);
@@ -921,7 +855,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
         }
     }
 
-    public void setObjectViewListener(ObjectViewListener objectViewListener) {
+    public void setObjectViewListener(ObjectView.ObjectViewListener objectViewListener) {
         this.mObjectView.setObjectViewListener(objectViewListener);
     }
 
@@ -972,10 +906,10 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
                 AlphaInOnSubscribe.directSetResult(this.mMultiSnapNum);
                 setSnapNumValue(0);
                 this.mZoomInAnimator.start();
-            } else {
-                this.mZoomOutAnimator.start();
-                Completable.create(new AlphaOutOnSubscribe(this.mMultiSnapNum).setStartDelayTime(System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT)).subscribe();
+                return;
             }
+            this.mZoomOutAnimator.start();
+            Completable.create(new AlphaOutOnSubscribe(this.mMultiSnapNum).setStartDelayTime(MiuiSettings.System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT)).subscribe();
         }
     }
 
@@ -992,7 +926,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
                     i2 += dimensionPixelSize;
                 }
             }
-            ((MarginLayoutParams) this.mCaptureDelayNumber.getLayoutParams()).topMargin = i2;
+            ((ViewGroup.MarginLayoutParams) this.mCaptureDelayNumber.getLayoutParams()).topMargin = i2;
             int i3 = this.mDegree;
             if (i3 > 0) {
                 ViewCompat.setRotation(this.mCaptureDelayNumber, (float) i3);
@@ -1021,7 +955,7 @@ public class FragmentMainContent extends BaseFragment implements MainContentProt
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(166, this);
         unRegisterBackStack(modeCoordinator, this);

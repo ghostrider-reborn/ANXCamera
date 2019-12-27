@@ -24,7 +24,7 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
         }
 
         public void dispose() {
-            MaybeCache maybeCache = (MaybeCache) getAndSet(null);
+            MaybeCache maybeCache = (MaybeCache) getAndSet((Object) null);
             if (maybeCache != null) {
                 maybeCache.remove(this);
             }
@@ -39,7 +39,7 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
         this.source = new AtomicReference<>(maybeSource);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(CacheDisposable<T> cacheDisposable) {
         CacheDisposable[] cacheDisposableArr;
         CacheDisposable[] cacheDisposableArr2;
@@ -57,7 +57,6 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
     }
 
     public void onComplete() {
-        CacheDisposable[] cacheDisposableArr;
         for (CacheDisposable cacheDisposable : (CacheDisposable[]) this.observers.getAndSet(TERMINATED)) {
             if (!cacheDisposable.isDisposed()) {
                 cacheDisposable.actual.onComplete();
@@ -66,7 +65,6 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
     }
 
     public void onError(Throwable th) {
-        CacheDisposable[] cacheDisposableArr;
         this.error = th;
         for (CacheDisposable cacheDisposable : (CacheDisposable[]) this.observers.getAndSet(TERMINATED)) {
             if (!cacheDisposable.isDisposed()) {
@@ -79,7 +77,6 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
     }
 
     public void onSuccess(T t) {
-        CacheDisposable[] cacheDisposableArr;
         this.value = t;
         for (CacheDisposable cacheDisposable : (CacheDisposable[]) this.observers.getAndSet(TERMINATED)) {
             if (!cacheDisposable.isDisposed()) {
@@ -88,7 +85,7 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(CacheDisposable<T> cacheDisposable) {
         CacheDisposable<T>[] cacheDisposableArr;
         CacheDisposable[] cacheDisposableArr2;
@@ -130,26 +127,26 @@ public final class MaybeCache<T> extends Maybe<T> implements MaybeObserver<T> {
     public void subscribeActual(MaybeObserver<? super T> maybeObserver) {
         CacheDisposable cacheDisposable = new CacheDisposable(maybeObserver, this);
         maybeObserver.onSubscribe(cacheDisposable);
-        if (!add(cacheDisposable)) {
-            if (!cacheDisposable.isDisposed()) {
-                Throwable th = this.error;
-                if (th != null) {
-                    maybeObserver.onError(th);
-                } else {
-                    T t = this.value;
-                    if (t != null) {
-                        maybeObserver.onSuccess(t);
-                    } else {
-                        maybeObserver.onComplete();
-                    }
-                }
+        if (add(cacheDisposable)) {
+            if (cacheDisposable.isDisposed()) {
+                remove(cacheDisposable);
+                return;
             }
-        } else if (cacheDisposable.isDisposed()) {
-            remove(cacheDisposable);
-        } else {
-            MaybeSource maybeSource = (MaybeSource) this.source.getAndSet(null);
-            if (maybeSource != null) {
-                maybeSource.subscribe(this);
+            MaybeSource andSet = this.source.getAndSet((Object) null);
+            if (andSet != null) {
+                andSet.subscribe(this);
+            }
+        } else if (!cacheDisposable.isDisposed()) {
+            Throwable th = this.error;
+            if (th != null) {
+                maybeObserver.onError(th);
+                return;
+            }
+            T t = this.value;
+            if (t != null) {
+                maybeObserver.onSuccess(t);
+            } else {
+                maybeObserver.onComplete();
             }
         }
     }

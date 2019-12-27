@@ -2,22 +2,24 @@ package com.android.camera.animation;
 
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 
 public class FragmentAnimationFactory {
-    /* JADX WARNING: type inference failed for: r7v2, types: [android.view.animation.AlphaAnimation] */
-    /* JADX WARNING: type inference failed for: r7v3, types: [android.view.animation.AlphaAnimation] */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v1, resolved type: android.view.animation.TranslateAnimation} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v2, resolved type: android.view.animation.AlphaAnimation} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v3, resolved type: android.view.animation.AlphaAnimation} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v6, resolved type: android.view.animation.TranslateAnimation} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v7, resolved type: android.view.animation.TranslateAnimation} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r17v1, resolved type: android.view.animation.TranslateAnimation} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v8, resolved type: android.view.animation.TranslateAnimation} */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 2 */
-    public static Animation wrapperAnimation(AnimationListener animationListener, int... iArr) {
+    public static Animation wrapperAnimation(Animation.AnimationListener animationListener, int... iArr) {
         TranslateAnimation translateAnimation;
-        AnimationListener animationListener2 = animationListener;
-        int[] iArr2 = iArr;
+        Animation.AnimationListener animationListener2 = animationListener;
         AnimationSet animationSet = new AnimationSet(true);
         boolean z = false;
-        for (int i : iArr2) {
+        for (int i : iArr) {
             if (i == 161) {
                 translateAnimation = new AlphaAnimation(0.0f, 1.0f);
             } else if (i == 162) {
@@ -43,6 +45,6 @@ public class FragmentAnimationFactory {
     }
 
     public static Animation wrapperAnimation(int... iArr) {
-        return wrapperAnimation(null, iArr);
+        return wrapperAnimation((Animation.AnimationListener) null, iArr);
     }
 }

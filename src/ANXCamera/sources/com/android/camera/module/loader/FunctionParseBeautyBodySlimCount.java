@@ -3,7 +3,7 @@ package com.android.camera.module.loader;
 import android.hardware.camera2.CaptureResult;
 import com.android.camera.CameraSettings;
 import com.android.camera.log.Log;
-import com.android.camera2.Camera2Proxy.BeautyBodySlimCountCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.CaptureResultParser;
 import io.reactivex.functions.Function;
 import java.lang.ref.WeakReference;
@@ -12,13 +12,13 @@ public class FunctionParseBeautyBodySlimCount implements Function<CaptureResult,
     private static final String TAG = "FunctionParseBeautyBodySlimCount";
     public static final long TIP_INTERVAL_TIME = 10000;
     public static final long TIP_TIME = 4000;
-    private final WeakReference<BeautyBodySlimCountCallback> mCallbackRef;
+    private final WeakReference<Camera2Proxy.BeautyBodySlimCountCallback> mCallbackRef;
     private final boolean mIsSupportBeautyBody = CameraSettings.isSupportBeautyBody();
     private long mTipHideTime;
     private long mTipShowTime;
     private boolean mTipStatus;
 
-    public FunctionParseBeautyBodySlimCount(BeautyBodySlimCountCallback beautyBodySlimCountCallback) {
+    public FunctionParseBeautyBodySlimCount(Camera2Proxy.BeautyBodySlimCountCallback beautyBodySlimCountCallback) {
         this.mCallbackRef = new WeakReference<>(beautyBodySlimCountCallback);
     }
 
@@ -26,7 +26,7 @@ public class FunctionParseBeautyBodySlimCount implements Function<CaptureResult,
         if (!this.mIsSupportBeautyBody) {
             return captureResult;
         }
-        BeautyBodySlimCountCallback beautyBodySlimCountCallback = (BeautyBodySlimCountCallback) this.mCallbackRef.get();
+        Camera2Proxy.BeautyBodySlimCountCallback beautyBodySlimCountCallback = (Camera2Proxy.BeautyBodySlimCountCallback) this.mCallbackRef.get();
         if (beautyBodySlimCountCallback == null) {
             return captureResult;
         }
@@ -54,10 +54,7 @@ public class FunctionParseBeautyBodySlimCount implements Function<CaptureResult,
             return captureResult;
         }
         this.mTipStatus = z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Beauty body slim count:");
-        sb.append(beautyBodySlimCountResult);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "Beauty body slim count:" + beautyBodySlimCountResult);
         beautyBodySlimCountCallback.onBeautyBodySlimCountChange(z);
         if (z) {
             this.mTipShowTime = System.currentTimeMillis();

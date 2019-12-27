@@ -21,7 +21,7 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             super(observer, observableSource);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeMain() {
             this.done = true;
             if (this.wip.getAndIncrement() == 0) {
@@ -30,7 +30,7 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeOther() {
             this.done = true;
             if (this.wip.getAndIncrement() == 0) {
@@ -39,7 +39,7 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             if (this.wip.getAndIncrement() == 0) {
                 do {
@@ -61,17 +61,17 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             super(observer, observableSource);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeMain() {
             this.actual.onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeOther() {
             this.actual.onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             emit();
         }
@@ -94,10 +94,10 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             completeOther();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void completeMain();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void completeOther();
 
         public void dispose() {
@@ -105,9 +105,9 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             this.s.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit() {
-            Object andSet = getAndSet(null);
+            Object andSet = getAndSet((Object) null);
             if (andSet != null) {
                 this.actual.onNext(andSet);
             }
@@ -146,10 +146,10 @@ public final class ObservableSampleWithObservable<T> extends AbstractObservableW
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void run();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean setOther(Disposable disposable) {
             return DisposableHelper.setOnce(this.other, disposable);
         }

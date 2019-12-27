@@ -4,10 +4,12 @@ import android.media.AudioRecord;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.os.Process;
+import android.view.Surface;
 import com.android.camera.log.Log;
-import com.android.camera.module.encoder.MediaEncoder.MediaEncoderListener;
+import com.android.camera.module.encoder.MediaEncoder;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -94,7 +96,7 @@ public class MediaAudioEncoder extends MediaEncoder {
         }
     }
 
-    public MediaAudioEncoder(MediaMuxerWrapper mediaMuxerWrapper, MediaEncoderListener mediaEncoderListener) {
+    public MediaAudioEncoder(MediaMuxerWrapper mediaMuxerWrapper, MediaEncoder.MediaEncoderListener mediaEncoderListener) {
         super(mediaMuxerWrapper, mediaEncoderListener);
     }
 
@@ -143,31 +145,24 @@ public class MediaAudioEncoder extends MediaEncoder {
         this.mTrackIndex = -1;
         this.mMuxerStarted = false;
         this.mIsEOS = false;
-        String str = MIME_TYPE;
-        MediaCodecInfo selectAudioCodec = selectAudioCodec(str);
+        MediaCodecInfo selectAudioCodec = selectAudioCodec(MIME_TYPE);
         if (selectAudioCodec == null) {
             Log.e(TAG, "no appropriate codec for audio/mp4a-latm");
             return;
         }
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("selected codec: ");
-        sb.append(selectAudioCodec.getName());
-        Log.d(str2, sb.toString());
-        MediaFormat createAudioFormat = MediaFormat.createAudioFormat(str, SAMPLE_RATE, 1);
+        String str = TAG;
+        Log.d(str, "selected codec: " + selectAudioCodec.getName());
+        MediaFormat createAudioFormat = MediaFormat.createAudioFormat(MIME_TYPE, SAMPLE_RATE, 1);
         createAudioFormat.setInteger("aac-profile", 2);
         createAudioFormat.setInteger("channel-mask", 16);
         createAudioFormat.setInteger("bitrate", BIT_RATE);
         createAudioFormat.setInteger("channel-count", 1);
-        String str3 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("format: ");
-        sb2.append(createAudioFormat);
-        Log.d(str3, sb2.toString());
-        this.mMediaCodec = MediaCodec.createEncoderByType(str);
-        this.mMediaCodec.configure(createAudioFormat, null, null, 1);
+        String str2 = TAG;
+        Log.d(str2, "format: " + createAudioFormat);
+        this.mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
+        this.mMediaCodec.configure(createAudioFormat, (Surface) null, (MediaCrypto) null, 1);
         this.mMediaCodec.start();
-        MediaEncoderListener mediaEncoderListener = this.mListener;
+        MediaEncoder.MediaEncoderListener mediaEncoderListener = this.mListener;
         if (mediaEncoderListener != null) {
             mediaEncoderListener.onPrepared(this);
         }

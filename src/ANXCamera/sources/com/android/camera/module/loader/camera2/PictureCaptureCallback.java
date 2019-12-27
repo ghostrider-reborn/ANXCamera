@@ -2,14 +2,13 @@ package com.android.camera.module.loader.camera2;
 
 import android.annotation.TargetApi;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.support.annotation.NonNull;
 
 @TargetApi(21)
-public abstract class PictureCaptureCallback extends CaptureCallback {
+public abstract class PictureCaptureCallback extends CameraCaptureSession.CaptureCallback {
     static final int STATE_CAPTURING = 5;
     static final int STATE_LOCKED = 2;
     static final int STATE_LOCKING = 1;
@@ -63,7 +62,7 @@ public abstract class PictureCaptureCallback extends CaptureCallback {
 
     public abstract void onReady();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setState(int i) {
         this.mState = i;
     }

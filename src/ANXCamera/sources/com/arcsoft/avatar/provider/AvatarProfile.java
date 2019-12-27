@@ -16,7 +16,7 @@ public class AvatarProfile {
     public static final String THUMBNAIL = "thumbnail";
     public static final String _ID = "_id";
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     protected static final String f94a = "content://com.arcsoft.content.provider.avatar.content.provider/";
     public static final UriMatcher sUriMatcher = new UriMatcher(-1);
 

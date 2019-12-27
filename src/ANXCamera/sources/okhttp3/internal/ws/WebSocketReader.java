@@ -100,10 +100,7 @@ final class WebSocketReader {
                 this.frameCallback.onReadPong(buffer.readByteString());
                 return;
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown control opcode: ");
-                sb.append(Integer.toHexString(this.opcode));
-                throw new ProtocolException(sb.toString());
+                throw new ProtocolException("Unknown control opcode: " + Integer.toHexString(this.opcode));
         }
     }
 
@@ -143,11 +140,7 @@ final class WebSocketReader {
                     } else if (j == 127) {
                         this.frameLength = this.source.readLong();
                         if (this.frameLength < 0) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Frame length 0x");
-                            sb.append(Long.toHexString(this.frameLength));
-                            sb.append(" > 0x7FFFFFFFFFFFFFFF");
-                            throw new ProtocolException(sb.toString());
+                            throw new ProtocolException("Frame length 0x" + Long.toHexString(this.frameLength) + " > 0x7FFFFFFFFFFFFFFF");
                         }
                     }
                     this.frameBytesRead = 0;
@@ -175,10 +168,7 @@ final class WebSocketReader {
                 if (!this.isFinalFrame) {
                     readUntilNonControlFrame();
                     if (this.opcode != 0) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Expected continuation opcode. Got: ");
-                        sb.append(Integer.toHexString(this.opcode));
-                        throw new ProtocolException(sb.toString());
+                        throw new ProtocolException("Expected continuation opcode. Got: " + Integer.toHexString(this.opcode));
                     } else if (this.isFinalFrame && this.frameLength == 0) {
                         return;
                     }
@@ -217,14 +207,11 @@ final class WebSocketReader {
                 this.frameCallback.onReadMessage(buffer.readByteString());
             }
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unknown opcode: ");
-            sb.append(Integer.toHexString(i));
-            throw new ProtocolException(sb.toString());
+            throw new ProtocolException("Unknown opcode: " + Integer.toHexString(i));
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void processNextFrame() throws IOException {
         readHeader();
         if (this.isControlFrame) {
@@ -234,7 +221,7 @@ final class WebSocketReader {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void readUntilNonControlFrame() throws IOException {
         while (!this.closed) {
             readHeader();

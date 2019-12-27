@@ -55,22 +55,21 @@ public class ComponentConfigAi extends ComponentData {
         } else {
             list.clear();
         }
-        String str = "on";
         if (i == 163 || i == 165) {
             if (i2 == 0) {
                 if (DataRepository.dataItemFeature().Ab()) {
-                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, str));
+                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, "on"));
                 }
             } else if (DataRepository.dataItemFeature().Nc()) {
-                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, str));
+                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, "on"));
             }
         } else if (i == 171) {
             if (i2 == 0) {
                 if (DataRepository.dataItemFeature().Vc()) {
-                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, str));
+                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, "on"));
                 }
             } else if (DataRepository.dataItemFeature().Nc()) {
-                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, str));
+                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_ai_scene_off, (int) R.drawable.ic_new_ai_scene_on, (int) R.string.accessibility_ai_scene_on, "on"));
             }
         }
         return this.mItems;

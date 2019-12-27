@@ -15,15 +15,11 @@ public class TESizei {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (!(obj instanceof TESizei)) {
             return false;
         }
         TESizei tESizei = (TESizei) obj;
-        if (this.width == tESizei.width && this.height == tESizei.height) {
-            z = true;
-        }
-        return z;
+        return this.width == tESizei.width && this.height == tESizei.height;
     }
 
     public int hashCode() {
@@ -31,10 +27,6 @@ public class TESizei {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.width);
-        sb.append("x");
-        sb.append(this.height);
-        return sb.toString();
+        return this.width + "x" + this.height;
     }
 }

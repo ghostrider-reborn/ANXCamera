@@ -3,10 +3,9 @@ package android.arch.core.a;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.util.concurrent.Executor;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 /* compiled from: ArchTaskExecutor */
 public class c extends e {
     @NonNull

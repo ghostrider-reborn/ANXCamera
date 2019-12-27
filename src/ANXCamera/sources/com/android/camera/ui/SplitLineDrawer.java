@@ -3,7 +3,6 @@ package com.android.camera.ui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -38,8 +37,8 @@ public class SplitLineDrawer extends View {
         this.mFramePaint = new Paint();
         this.mLinePaint.setStrokeWidth(1.0f);
         this.mFramePaint.setStrokeWidth(1.0f);
-        this.mLinePaint.setStyle(Style.FILL);
-        this.mFramePaint.setStyle(Style.STROKE);
+        this.mLinePaint.setStyle(Paint.Style.FILL);
+        this.mFramePaint.setStyle(Paint.Style.STROKE);
         this.mLinePaint.setColor(this.mLineColor);
         this.mFramePaint.setColor(this.mFrameColor);
     }

@@ -3,7 +3,7 @@ package com.android.camera.animation;
 import android.os.SystemClock;
 import com.android.camera.log.Log;
 import java.util.ArrayList;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 public class AnimationMonitor {
@@ -24,9 +24,9 @@ public class AnimationMonitor {
         Log.d(TAG, "checkRunningAnimations");
         long elapsedRealtime = SystemClock.elapsedRealtime();
         ArrayList<Object> arrayList = new ArrayList<>();
-        for (Entry entry : this.mRunningAnimations.entrySet()) {
-            if (elapsedRealtime > ((Long) entry.getValue()).longValue()) {
-                arrayList.add(entry.getKey());
+        for (Map.Entry next : this.mRunningAnimations.entrySet()) {
+            if (elapsedRealtime > ((Long) next.getValue()).longValue()) {
+                arrayList.add(next.getKey());
             }
         }
         for (Object remove : arrayList) {
@@ -39,12 +39,7 @@ public class AnimationMonitor {
     }
 
     public void animationStart(Object obj, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("animationStart animationObject:");
-        sb.append(obj);
-        sb.append(" duration:");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "animationStart animationObject:" + obj + " duration:" + i);
         this.mRunningAnimations.put(obj, Long.valueOf(((long) i) + SystemClock.elapsedRealtime()));
     }
 

@@ -9,7 +9,7 @@ import java.util.List;
 public class a {
     private final List<C0005a<?>> tk = new ArrayList();
 
-    /* renamed from: com.bumptech.glide.d.a$a reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.d.a$a  reason: collision with other inner class name */
     /* compiled from: EncoderRegistry */
     private static final class C0005a<T> {
         private final Class<T> dataClass;
@@ -20,7 +20,7 @@ public class a {
             this.encoder = aVar;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean g(@NonNull Class<?> cls) {
             return this.dataClass.isAssignableFrom(cls);
         }
@@ -36,9 +36,9 @@ public class a {
 
     @Nullable
     public synchronized <T> com.bumptech.glide.load.a<T> i(@NonNull Class<T> cls) {
-        for (C0005a aVar : this.tk) {
-            if (aVar.g(cls)) {
-                return aVar.encoder;
+        for (C0005a next : this.tk) {
+            if (next.g(cls)) {
+                return next.encoder;
             }
         }
         return null;

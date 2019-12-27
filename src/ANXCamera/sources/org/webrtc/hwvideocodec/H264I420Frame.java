@@ -29,11 +29,6 @@ class H264I420Frame {
             byteBuffer2.position(0).limit(byteBuffer2.capacity());
             return this;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Mismatched dimensions!  Source: ");
-        sb.append(h264I420Frame.toString());
-        sb.append(", destination: ");
-        sb.append(toString());
-        throw new RuntimeException(sb.toString());
+        throw new RuntimeException("Mismatched dimensions!  Source: " + h264I420Frame.toString() + ", destination: " + toString());
     }
 }

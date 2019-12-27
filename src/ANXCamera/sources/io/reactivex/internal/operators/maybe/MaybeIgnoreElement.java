@@ -10,7 +10,7 @@ public final class MaybeIgnoreElement<T> extends AbstractMaybeWithUpstream<T, T>
     static final class IgnoreMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f294d;
 
         IgnoreMaybeObserver(MaybeObserver<? super T> maybeObserver) {

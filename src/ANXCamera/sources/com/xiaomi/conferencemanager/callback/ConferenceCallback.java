@@ -1,6 +1,6 @@
 package com.xiaomi.conferencemanager.callback;
 
-import com.xiaomi.conferencemanager.ConferenceManager.EngineErrorTypeT;
+import com.xiaomi.conferencemanager.ConferenceManager;
 
 public interface ConferenceCallback {
 
@@ -9,7 +9,7 @@ public interface ConferenceCallback {
         public int mVolume;
     }
 
-    void onError(String str, EngineErrorTypeT engineErrorTypeT);
+    void onError(String str, ConferenceManager.EngineErrorTypeT engineErrorTypeT);
 
     void onGetFirstAudioSample();
 
@@ -21,7 +21,7 @@ public interface ConferenceCallback {
 
     void onLocalUserJoined();
 
-    void onLocalUserLeaved(EngineErrorTypeT engineErrorTypeT);
+    void onLocalUserLeaved(ConferenceManager.EngineErrorTypeT engineErrorTypeT);
 
     void onParticipantsVolumeChanged(ParticipantVolume[] participantVolumeArr);
 

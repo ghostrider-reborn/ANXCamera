@@ -14,7 +14,7 @@ public final class CompletableDetach extends Completable {
     static final class DetachCompletableObserver implements CompletableObserver, Disposable {
         CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f271d;
 
         DetachCompletableObserver(CompletableObserver completableObserver) {

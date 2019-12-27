@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.Notification;
 import io.reactivex.internal.util.BlockingHelper;
 import io.reactivex.internal.util.ExceptionHelper;
@@ -36,9 +35,9 @@ public final class BlockingFlowableNext<T> implements Iterable<T> {
                 if (!this.started) {
                     this.started = true;
                     this.observer.setWaiting();
-                    Flowable.fromPublisher(this.items).materialize().subscribe((FlowableSubscriber<? super T>) this.observer);
+                    Flowable.fromPublisher(this.items).materialize().subscribe(this.observer);
                 }
-                Notification takeNext = this.observer.takeNext();
+                Notification<T> takeNext = this.observer.takeNext();
                 if (takeNext.isOnNext()) {
                     this.isNextConsumed = false;
                     this.next = takeNext.getValue();
@@ -62,17 +61,13 @@ public final class BlockingFlowableNext<T> implements Iterable<T> {
 
         public boolean hasNext() {
             Throwable th = this.error;
-            if (th == null) {
-                boolean z = false;
-                if (!this.hasNext) {
-                    return false;
-                }
-                if (!this.isNextConsumed || moveToNext()) {
-                    z = true;
-                }
-                return z;
+            if (th != null) {
+                throw ExceptionHelper.wrapOrThrow(th);
+            } else if (!this.hasNext) {
+                return false;
+            } else {
+                return !this.isNextConsumed || moveToNext();
             }
-            throw ExceptionHelper.wrapOrThrow(th);
         }
 
         public T next() {
@@ -117,7 +112,7 @@ public final class BlockingFlowableNext<T> implements Iterable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setWaiting() {
             this.waiting.set(1);
         }
@@ -125,7 +120,7 @@ public final class BlockingFlowableNext<T> implements Iterable<T> {
         public Notification<T> takeNext() throws InterruptedException {
             setWaiting();
             BlockingHelper.verifyNonBlocking();
-            return (Notification) this.buf.take();
+            return this.buf.take();
         }
     }
 

@@ -6,7 +6,7 @@ import com.android.camera.R;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.ComponentDataItem;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.log.Log;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +24,10 @@ public class ComponentManuallyDualLens extends ComponentData {
     }
 
     private int indexOf(String str) {
-        List items = getItems();
+        List<ComponentDataItem> items = getItems();
         if (items != null && !TextUtils.isEmpty(str)) {
             for (int i = 0; i < items.size(); i++) {
-                if (TextUtils.equals(((ComponentDataItem) items.get(i)).mValue, str)) {
+                if (TextUtils.equals(items.get(i).mValue, str)) {
                     return i;
                 }
             }
@@ -42,12 +42,10 @@ public class ComponentManuallyDualLens extends ComponentData {
         }
         arrayList.add(new ComponentDataItem(-1, -1, (int) R.string.pref_camera_zoom_mode_entry_wide, LENS_WIDE));
         if (CameraSettings.isSupportedOpticalZoom()) {
-            boolean ec = DataRepository.dataItemFeature().ec();
-            String str = LENS_TELE;
-            if (ec) {
-                arrayList.add(new ComponentDataItem(-1, -1, (int) R.string.pref_camera_zoom_mode_entry_tele_2X, str));
+            if (DataRepository.dataItemFeature().ec()) {
+                arrayList.add(new ComponentDataItem(-1, -1, (int) R.string.pref_camera_zoom_mode_entry_tele_2X, LENS_TELE));
             } else {
-                arrayList.add(new ComponentDataItem(-1, -1, (int) R.string.pref_camera_zoom_mode_entry_tele, str));
+                arrayList.add(new ComponentDataItem(-1, -1, (int) R.string.pref_camera_zoom_mode_entry_tele, LENS_TELE));
             }
         }
         if (DataRepository.dataItemFeature().ec()) {
@@ -66,10 +64,7 @@ public class ComponentManuallyDualLens extends ComponentData {
                 return true;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("checkValueValid: invalid value: ");
-        sb.append(str);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "checkValueValid: invalid value: " + str);
         return false;
     }
 
@@ -94,11 +89,11 @@ public class ComponentManuallyDualLens extends ComponentData {
 
     public String next(String str, int i) {
         int indexOf = indexOf(str);
-        List items = getItems();
+        List<ComponentDataItem> items = getItems();
         if (items == null) {
             return LENS_WIDE;
         }
-        return ((ComponentDataItem) items.get(indexOf == items.size() + -1 ? 0 : indexOf + 1)).mValue;
+        return items.get(indexOf == items.size() + -1 ? 0 : indexOf + 1).mValue;
     }
 
     /* access modifiers changed from: protected */
@@ -107,11 +102,10 @@ public class ComponentManuallyDualLens extends ComponentData {
         setComponentValue(i, getDefaultValue(i));
     }
 
-    public void resetLensType(ComponentConfigUltraWide componentConfigUltraWide, ProviderEditor providerEditor) {
+    public void resetLensType(ComponentConfigUltraWide componentConfigUltraWide, DataProvider.ProviderEditor providerEditor) {
         String componentValue = getComponentValue(167);
-        String str = LENS_WIDE;
-        if (!str.equals(componentValue)) {
-            providerEditor.putString(getKey(167), str);
+        if (!LENS_WIDE.equals(componentValue)) {
+            providerEditor.putString(getKey(167), LENS_WIDE);
             if (LENS_ULTRA.equals(componentValue)) {
                 providerEditor.putString(componentConfigUltraWide.getKey(167), "OFF");
             }

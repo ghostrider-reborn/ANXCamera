@@ -1,10 +1,9 @@
 package android.support.v13.view;
 
 import android.app.Activity;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.view.DragAndDropPermissions;
 import android.view.DragEvent;
 
@@ -16,19 +15,20 @@ public final class DragAndDropPermissionsCompat {
     }
 
     @Nullable
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static DragAndDropPermissionsCompat request(Activity activity, DragEvent dragEvent) {
-        if (VERSION.SDK_INT >= 24) {
-            DragAndDropPermissions requestDragAndDropPermissions = activity.requestDragAndDropPermissions(dragEvent);
-            if (requestDragAndDropPermissions != null) {
-                return new DragAndDropPermissionsCompat(requestDragAndDropPermissions);
-            }
+        if (Build.VERSION.SDK_INT < 24) {
+            return null;
+        }
+        DragAndDropPermissions requestDragAndDropPermissions = activity.requestDragAndDropPermissions(dragEvent);
+        if (requestDragAndDropPermissions != null) {
+            return new DragAndDropPermissionsCompat(requestDragAndDropPermissions);
         }
         return null;
     }
 
     public void release() {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             ((DragAndDropPermissions) this.mDragAndDropPermissions).release();
         }
     }

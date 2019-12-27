@@ -36,17 +36,11 @@ public class CountQuery<T> extends AbstractQuery<T> {
             if (!rawQuery.moveToNext()) {
                 throw new DaoException("No result for count");
             } else if (!rawQuery.isLast()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unexpected row count: ");
-                sb.append(rawQuery.getCount());
-                throw new DaoException(sb.toString());
+                throw new DaoException("Unexpected row count: " + rawQuery.getCount());
             } else if (rawQuery.getColumnCount() == 1) {
                 return rawQuery.getLong(0);
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Unexpected column count: ");
-                sb2.append(rawQuery.getColumnCount());
-                throw new DaoException(sb2.toString());
+                throw new DaoException("Unexpected column count: " + rawQuery.getColumnCount());
             }
         } finally {
             rawQuery.close();

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 public class NetworkResponse {
@@ -43,7 +42,7 @@ public class NetworkResponse {
     }
 
     public NetworkResponse(byte[] bArr) {
-        this(200, bArr, false, 0, Collections.emptyList());
+        this(200, bArr, false, 0, (List<Header>) Collections.emptyList());
     }
 
     @Deprecated
@@ -59,8 +58,8 @@ public class NetworkResponse {
             return Collections.emptyList();
         }
         ArrayList arrayList = new ArrayList(map.size());
-        for (Entry entry : map.entrySet()) {
-            arrayList.add(new Header((String) entry.getKey(), (String) entry.getValue()));
+        for (Map.Entry next : map.entrySet()) {
+            arrayList.add(new Header((String) next.getKey(), (String) next.getValue()));
         }
         return arrayList;
     }
@@ -73,8 +72,8 @@ public class NetworkResponse {
             return Collections.emptyMap();
         }
         TreeMap treeMap = new TreeMap(String.CASE_INSENSITIVE_ORDER);
-        for (Header header : list) {
-            treeMap.put(header.getName(), header.getValue());
+        for (Header next : list) {
+            treeMap.put(next.getName(), next.getValue());
         }
         return treeMap;
     }

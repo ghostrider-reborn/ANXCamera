@@ -1,7 +1,7 @@
 package com.android.camera.snap;
 
 import android.annotation.TargetApi;
-import android.app.job.JobInfo.Builder;
+import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
@@ -31,12 +31,9 @@ public class SnapService extends JobService {
     private JobParameters mJobParameters;
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (!"android.intent.action.KEYCODE_POWER_UP".equals(intent.getAction())) {
-                if (!"android.intent.action.SCREEN_ON".equals(intent.getAction())) {
-                    return;
-                }
+            if ("android.intent.action.KEYCODE_POWER_UP".equals(intent.getAction()) || "android.intent.action.SCREEN_ON".equals(intent.getAction())) {
+                SnapTrigger.getInstance().handleKeyEvent(26, 0, System.currentTimeMillis());
             }
-            SnapTrigger.getInstance().handleKeyEvent(26, 0, System.currentTimeMillis());
         }
     };
     private boolean mRegistered;
@@ -89,7 +86,7 @@ public class SnapService extends JobService {
     public static void startJob(Context context, Bundle bundle) {
         mScreenOn = false;
         mJobScheduler = (JobScheduler) context.getSystemService("jobscheduler");
-        Builder builder = new Builder(1, new ComponentName(context, SnapService.class));
+        JobInfo.Builder builder = new JobInfo.Builder(1, new ComponentName(context, SnapService.class));
         builder.setTransientExtras(bundle).setOverrideDeadline(0);
         mJobScheduler.schedule(builder.build());
     }
@@ -120,10 +117,11 @@ public class SnapService extends JobService {
         if (mScreenOn) {
             return false;
         }
-        if (SnapTrigger.getInstance().init(this, this.mHandler)) {
-            SnapTrigger.getInstance().handleKeyEvent(transientExtras.getInt(SnapKeyReceiver.KEY_CODE, 0), transientExtras.getInt(SnapKeyReceiver.KEY_ACTION, 0), transientExtras.getLong(SnapKeyReceiver.KEY_EVENT_TIME, 0));
-            registerPowerKeyReceiver();
+        if (!SnapTrigger.getInstance().init(this, this.mHandler)) {
+            return true;
         }
+        SnapTrigger.getInstance().handleKeyEvent(transientExtras.getInt(SnapKeyReceiver.KEY_CODE, 0), transientExtras.getInt(SnapKeyReceiver.KEY_ACTION, 0), transientExtras.getLong(SnapKeyReceiver.KEY_EVENT_TIME, 0));
+        registerPowerKeyReceiver();
         return true;
     }
 

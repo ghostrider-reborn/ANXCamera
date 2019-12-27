@@ -149,7 +149,6 @@ public class VEReverb2Params {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -157,100 +156,14 @@ public class VEReverb2Params {
             return false;
         }
         VEReverb2Params vEReverb2Params = (VEReverb2Params) obj;
-        if (!(this.enableExciter == vEReverb2Params.enableExciter && this.enable == vEReverb2Params.enable && this.rate == vEReverb2Params.rate && this.oversamplefactor == vEReverb2Params.oversamplefactor && Float.compare(vEReverb2Params.ertolate, this.ertolate) == 0 && Float.compare(vEReverb2Params.erefwet, this.erefwet) == 0 && Float.compare(vEReverb2Params.dry, this.dry) == 0 && Float.compare(vEReverb2Params.ereffactor, this.ereffactor) == 0 && Float.compare(vEReverb2Params.erefwidth, this.erefwidth) == 0 && Float.compare(vEReverb2Params.width, this.width) == 0 && Float.compare(vEReverb2Params.wet, this.wet) == 0 && Float.compare(vEReverb2Params.wander, this.wander) == 0 && Float.compare(vEReverb2Params.bassb, this.bassb) == 0 && Float.compare(vEReverb2Params.spin, this.spin) == 0 && Float.compare(vEReverb2Params.inputlpf, this.inputlpf) == 0 && Float.compare(vEReverb2Params.basslpf, this.basslpf) == 0 && Float.compare(vEReverb2Params.damplpf, this.damplpf) == 0 && Float.compare(vEReverb2Params.outputlpf, this.outputlpf) == 0 && Float.compare(vEReverb2Params.rt60, this.rt60) == 0 && Float.compare(vEReverb2Params.delay, this.delay) == 0)) {
-            z = false;
-        }
-        return z;
+        return this.enableExciter == vEReverb2Params.enableExciter && this.enable == vEReverb2Params.enable && this.rate == vEReverb2Params.rate && this.oversamplefactor == vEReverb2Params.oversamplefactor && Float.compare(vEReverb2Params.ertolate, this.ertolate) == 0 && Float.compare(vEReverb2Params.erefwet, this.erefwet) == 0 && Float.compare(vEReverb2Params.dry, this.dry) == 0 && Float.compare(vEReverb2Params.ereffactor, this.ereffactor) == 0 && Float.compare(vEReverb2Params.erefwidth, this.erefwidth) == 0 && Float.compare(vEReverb2Params.width, this.width) == 0 && Float.compare(vEReverb2Params.wet, this.wet) == 0 && Float.compare(vEReverb2Params.wander, this.wander) == 0 && Float.compare(vEReverb2Params.bassb, this.bassb) == 0 && Float.compare(vEReverb2Params.spin, this.spin) == 0 && Float.compare(vEReverb2Params.inputlpf, this.inputlpf) == 0 && Float.compare(vEReverb2Params.basslpf, this.basslpf) == 0 && Float.compare(vEReverb2Params.damplpf, this.damplpf) == 0 && Float.compare(vEReverb2Params.outputlpf, this.outputlpf) == 0 && Float.compare(vEReverb2Params.rt60, this.rt60) == 0 && Float.compare(vEReverb2Params.delay, this.delay) == 0;
     }
 
     public String getParamsAsString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.enableExciter ? 1 : 0);
-        String str = ",";
-        sb.append(str);
-        sb.append(this.enable ? 1 : 0);
-        sb.append(str);
-        sb.append(this.rate);
-        sb.append(str);
-        sb.append(this.oversamplefactor);
-        sb.append(str);
-        sb.append(this.ertolate);
-        sb.append(str);
-        sb.append(this.erefwet);
-        sb.append(str);
-        sb.append(this.dry);
-        sb.append(str);
-        sb.append(this.ereffactor);
-        sb.append(str);
-        sb.append(this.erefwidth);
-        sb.append(str);
-        sb.append(this.width);
-        sb.append(str);
-        sb.append(this.wet);
-        sb.append(str);
-        sb.append(this.wander);
-        sb.append(str);
-        sb.append(this.bassb);
-        sb.append(str);
-        sb.append(this.spin);
-        sb.append(str);
-        sb.append(this.inputlpf);
-        sb.append(str);
-        sb.append(this.basslpf);
-        sb.append(str);
-        sb.append(this.damplpf);
-        sb.append(str);
-        sb.append(this.outputlpf);
-        sb.append(str);
-        sb.append(this.rt60);
-        sb.append(str);
-        sb.append(this.delay);
-        return sb.toString();
+        return (this.enableExciter ? 1 : 0) + "," + (this.enable ? 1 : 0) + "," + this.rate + "," + this.oversamplefactor + "," + this.ertolate + "," + this.erefwet + "," + this.dry + "," + this.ereffactor + "," + this.erefwidth + "," + this.width + "," + this.wet + "," + this.wander + "," + this.bassb + "," + this.spin + "," + this.inputlpf + "," + this.basslpf + "," + this.damplpf + "," + this.outputlpf + "," + this.rt60 + "," + this.delay;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Reverb2Params{enableExciter=");
-        sb.append(this.enableExciter);
-        sb.append("enable=");
-        sb.append(this.enable);
-        sb.append("rate=");
-        sb.append(this.rate);
-        sb.append(", oversamplefactor=");
-        sb.append(this.oversamplefactor);
-        sb.append(", ertolate=");
-        sb.append(this.ertolate);
-        sb.append(", erefwet=");
-        sb.append(this.erefwet);
-        sb.append(", dry=");
-        sb.append(this.dry);
-        sb.append(", ereffactor=");
-        sb.append(this.ereffactor);
-        sb.append(", erefwidth=");
-        sb.append(this.erefwidth);
-        sb.append(", width=");
-        sb.append(this.width);
-        sb.append(", wet=");
-        sb.append(this.wet);
-        sb.append(", wander=");
-        sb.append(this.wander);
-        sb.append(", bassb=");
-        sb.append(this.bassb);
-        sb.append(", spin=");
-        sb.append(this.spin);
-        sb.append(", inputlpf=");
-        sb.append(this.inputlpf);
-        sb.append(", basslpf=");
-        sb.append(this.basslpf);
-        sb.append(", damplpf=");
-        sb.append(this.damplpf);
-        sb.append(", outputlpf=");
-        sb.append(this.outputlpf);
-        sb.append(", rt60=");
-        sb.append(this.rt60);
-        sb.append(", delay=");
-        sb.append(this.delay);
-        sb.append('}');
-        return sb.toString();
+        return "Reverb2Params{enableExciter=" + this.enableExciter + "enable=" + this.enable + "rate=" + this.rate + ", oversamplefactor=" + this.oversamplefactor + ", ertolate=" + this.ertolate + ", erefwet=" + this.erefwet + ", dry=" + this.dry + ", ereffactor=" + this.ereffactor + ", erefwidth=" + this.erefwidth + ", width=" + this.width + ", wet=" + this.wet + ", wander=" + this.wander + ", bassb=" + this.bassb + ", spin=" + this.spin + ", inputlpf=" + this.inputlpf + ", basslpf=" + this.basslpf + ", damplpf=" + this.damplpf + ", outputlpf=" + this.outputlpf + ", rt60=" + this.rt60 + ", delay=" + this.delay + '}';
     }
 }

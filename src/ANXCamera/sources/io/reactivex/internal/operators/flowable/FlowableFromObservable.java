@@ -12,7 +12,7 @@ public final class FlowableFromObservable<T> extends Flowable<T> {
 
     static class SubscriberObserver<T> implements Observer<T>, Subscription {
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         private Disposable f277d;
         private final Subscriber<? super T> s;
 
@@ -51,6 +51,6 @@ public final class FlowableFromObservable<T> extends Flowable<T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.upstream.subscribe((Observer<? super T>) new SubscriberObserver<Object>(subscriber));
+        this.upstream.subscribe(new SubscriberObserver(subscriber));
     }
 }

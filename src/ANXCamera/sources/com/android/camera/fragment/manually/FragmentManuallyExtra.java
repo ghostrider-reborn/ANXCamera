@@ -48,17 +48,17 @@ public class FragmentManuallyExtra extends BaseFragment {
 
     private void initAdapter(ComponentData componentData) {
         switch (componentData.getDisplayTitleString()) {
-            case R.string.pref_camera_iso_title /*2131690057*/:
-            case R.string.pref_manual_exposure_title /*2131690248*/:
+            case R.string.pref_camera_iso_title:
+            case R.string.pref_manual_exposure_title:
                 initHorizontalListView(componentData);
                 return;
-            case R.string.pref_camera_whitebalance_title /*2131690214*/:
+            case R.string.pref_camera_whitebalance_title:
                 initWBRecyclerView(componentData);
                 return;
-            case R.string.pref_camera_zoom_mode_title /*2131690222*/:
+            case R.string.pref_camera_zoom_mode_title:
                 initLensRecyclerView(componentData);
                 return;
-            case R.string.pref_qc_focus_position_title /*2131690264*/:
+            case R.string.pref_qc_focus_position_title:
                 initSlideFocusView(componentData);
                 return;
             default:
@@ -155,7 +155,7 @@ public class FragmentManuallyExtra extends BaseFragment {
         Completable.create(new SlideOutOnSubscribe(getView(), 80)).subscribe((Action) new Action() {
             public void run() throws Exception {
                 FragmentUtils.removeFragmentByTag(FragmentManuallyExtra.this.getFragmentManager(), FragmentManuallyExtra.this.getFragmentTag());
-                FragmentManuallyExtra.this.mIsAnimateIng = false;
+                boolean unused = FragmentManuallyExtra.this.mIsAnimateIng = false;
             }
         });
     }
@@ -201,7 +201,7 @@ public class FragmentManuallyExtra extends BaseFragment {
             this.mIsAnimateIng = true;
             Completable.create(new SlideInOnSubscribe(view, 80)).subscribe((Action) new Action() {
                 public void run() throws Exception {
-                    FragmentManuallyExtra.this.mIsAnimateIng = false;
+                    boolean unused = FragmentManuallyExtra.this.mIsAnimateIng = false;
                 }
             });
         }

@@ -56,7 +56,7 @@ public final class ObservableRetryBiPredicate<T> extends AbstractObservableWithU
             this.sa.update(disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             if (getAndIncrement() == 0) {
                 int i = 1;
@@ -64,6 +64,7 @@ public final class ObservableRetryBiPredicate<T> extends AbstractObservableWithU
                     this.source.subscribe(this);
                     i = addAndGet(-i);
                     if (i == 0) {
+                        return;
                     }
                 }
             }

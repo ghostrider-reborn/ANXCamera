@@ -1,6 +1,6 @@
 package com.android.camera.network.net;
 
-import com.android.camera.fragment.CtaNoticeFragment.CTA;
+import com.android.camera.fragment.CtaNoticeFragment;
 import com.android.camera.log.Log;
 import com.android.camera.network.net.base.ErrorCode;
 import com.android.camera.network.net.base.RequestError;
@@ -18,7 +18,7 @@ public class BaseGalleryRequest extends BaseJsonRequest<GalleryResponse> {
     private static final String TAG = "BaseGalleryRequest";
 
     public BaseGalleryRequest(int i) {
-        this(i, null);
+        this(i, (String) null);
     }
 
     public BaseGalleryRequest(int i, String str) {
@@ -26,13 +26,13 @@ public class BaseGalleryRequest extends BaseJsonRequest<GalleryResponse> {
     }
 
     private boolean checkExecuteCondition() {
-        if (!CTA.canConnectNetwork()) {
-            handleError(ErrorCode.NETWORK_NOT_CONNECTED, "CTA not confirmed.", null);
+        if (!CtaNoticeFragment.CTA.canConnectNetwork()) {
+            handleError(ErrorCode.NETWORK_NOT_CONNECTED, "CTA not confirmed.", (Object) null);
             return false;
         } else if (isUseCache() || NetworkUtils.isNetworkConnected()) {
             return true;
         } else {
-            handleError(ErrorCode.NETWORK_NOT_CONNECTED, "Network not connected.", null);
+            handleError(ErrorCode.NETWORK_NOT_CONNECTED, "Network not connected.", (Object) null);
             return false;
         }
     }
@@ -52,22 +52,20 @@ public class BaseGalleryRequest extends BaseJsonRequest<GalleryResponse> {
 
     /* access modifiers changed from: protected */
     public final void handleResponse(JSONObject jSONObject) {
-        String str = "data";
-        String str2 = RESPONSE_CODE_TAG;
         if (jSONObject != null) {
             try {
-                if (jSONObject.has(str2)) {
-                    if (jSONObject.getInt(str2) != ErrorCode.SUCCESS.CODE) {
+                if (jSONObject.has(RESPONSE_CODE_TAG)) {
+                    if (jSONObject.getInt(RESPONSE_CODE_TAG) != ErrorCode.SUCCESS.CODE) {
                         handleError(ErrorCode.SERVER_ERROR, jSONObject.optString(RESPONSE_DESCRIPTION_TAG), jSONObject);
                         return;
-                    } else if (jSONObject.isNull(str)) {
+                    } else if (jSONObject.isNull("data")) {
                         handleError(ErrorCode.BODY_EMPTY, "response empty data", jSONObject);
                         return;
                     } else {
                         GalleryResponse galleryResponse = new GalleryResponse();
-                        galleryResponse.data = jSONObject.optJSONObject(str);
-                        galleryResponse.syncTag = jSONObject.optString(RESPONSE_SYNC_TAG, null);
-                        galleryResponse.syncToken = jSONObject.optString("syncToken", null);
+                        galleryResponse.data = jSONObject.optJSONObject("data");
+                        galleryResponse.syncTag = jSONObject.optString(RESPONSE_SYNC_TAG, (String) null);
+                        galleryResponse.syncToken = jSONObject.optString("syncToken", (String) null);
                         galleryResponse.isLastPage = jSONObject.optBoolean("lastPage", true);
                         onRequestSuccess(galleryResponse);
                         return;
@@ -78,18 +76,16 @@ public class BaseGalleryRequest extends BaseJsonRequest<GalleryResponse> {
                 return;
             }
         }
-        handleError(ErrorCode.PARSE_ERROR, "response has no code", null);
+        handleError(ErrorCode.PARSE_ERROR, "response has no code", (Object) null);
     }
 
     public void onRequestError(ErrorCode errorCode, String str, Object obj) {
         deliverError(errorCode, str, obj);
-        String format = String.format("%s onRequestError:%s | %s ", new Object[]{getClass().getSimpleName(), errorCode, str});
-        String str2 = TAG;
-        Log.w(str2, format);
+        Log.w(TAG, String.format("%s onRequestError:%s | %s ", new Object[]{getClass().getSimpleName(), errorCode, str}));
         if (obj instanceof Throwable) {
-            Log.w(str2, (Throwable) obj);
+            Log.w(TAG, (Throwable) obj);
         } else if (obj != null) {
-            Log.d(str2, obj.toString());
+            Log.d(TAG, obj.toString());
         }
     }
 

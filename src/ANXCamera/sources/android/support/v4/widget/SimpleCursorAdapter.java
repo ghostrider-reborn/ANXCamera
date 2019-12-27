@@ -4,18 +4,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 public class SimpleCursorAdapter extends ResourceCursorAdapter {
     private CursorToStringConverter mCursorToStringConverter;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected int[] mFrom;
     String[] mOriginalFrom;
     private int mStringConversionColumn = -1;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected int[] mTo;
     private ViewBinder mViewBinder;
 
@@ -75,11 +74,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
                     } else if (findViewById instanceof ImageView) {
                         setViewImage((ImageView) findViewById, string);
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(findViewById.getClass().getName());
-                        sb.append(" is not a ");
-                        sb.append(" view that can be bounds by this SimpleCursorAdapter");
-                        throw new IllegalStateException(sb.toString());
+                        throw new IllegalStateException(findViewById.getClass().getName() + " is not a " + " view that can be bounds by this SimpleCursorAdapter");
                     }
                 } else {
                     continue;

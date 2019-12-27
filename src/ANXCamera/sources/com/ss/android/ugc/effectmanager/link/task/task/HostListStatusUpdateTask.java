@@ -2,6 +2,7 @@ package com.ss.android.ugc.effectmanager.link.task.task;
 
 import android.os.Handler;
 import com.ss.android.ugc.effectmanager.common.EffectConstants;
+import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.common.task.NormalTask;
 import com.ss.android.ugc.effectmanager.common.utils.LogUtils;
 import com.ss.android.ugc.effectmanager.link.LinkSelector;
@@ -31,9 +32,7 @@ public class HostListStatusUpdateTask extends NormalTask {
         this.mLinkSelector = linkSelector;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:39:0x0140, code lost:
-        if (r22 != null) goto L_0x01ac;
-     */
+    /* JADX WARNING: type inference failed for: r6v1, types: [java.net.URLConnection] */
     /* JADX WARNING: Code restructure failed: missing block: B:46:0x0154, code lost:
         r0 = move-exception;
      */
@@ -69,21 +68,17 @@ public class HostListStatusUpdateTask extends NormalTask {
         r5 = -1;
         r9 = null;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:62:0x01aa, code lost:
-        if (r22 == null) goto L_0x01af;
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:63:0x01ac, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:66:0x01b3, code lost:
         r22.disconnect();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:64:0x01af, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:70:?, code lost:
         return;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:67:0x01b3, code lost:
-        r22.disconnect();
-     */
     /* JADX WARNING: Failed to process nested try/catch */
+    /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:51:0x0169 A[ExcHandler: all (th java.lang.Throwable), Splitter:B:6:0x0047] */
-    /* JADX WARNING: Removed duplicated region for block: B:67:0x01b3  */
+    /* JADX WARNING: Removed duplicated region for block: B:66:0x01b3  */
+    /* JADX WARNING: Removed duplicated region for block: B:70:? A[RETURN, SYNTHETIC] */
     private void getHostStatus(Host host, long j) {
         HttpURLConnection httpURLConnection;
         Exception exc;
@@ -99,56 +94,46 @@ public class HostListStatusUpdateTask extends NormalTask {
         int i3;
         long j4;
         Host host2 = host;
-        String str2 = " ";
-        String str3 = TAG;
         if (host2 != null) {
             StringBuilder sb2 = new StringBuilder();
             sb2.append(host.getSchema());
-            String str4 = "://";
-            sb2.append(str4);
+            sb2.append("://");
             sb2.append(host.getHost());
             sb2.append(this.mSpeedApi);
             sb2.append(System.currentTimeMillis());
             long currentTimeMillis2 = System.currentTimeMillis();
             try {
                 URL url = new URL(sb2.toString());
-                HttpURLConnection httpURLConnection2 = (HttpURLConnection) url.openConnection();
+                HttpURLConnection openConnection = url.openConnection();
                 try {
-                    httpURLConnection2.setConnectTimeout(this.mLinkSelector.getSpeedTimeOut());
-                    httpURLConnection2.setReadTimeout(this.mLinkSelector.getSpeedTimeOut());
-                    httpURLConnection2.setRequestProperty("X-SS-No-Cookie", "true");
-                    responseCode = httpURLConnection2.getResponseCode();
+                    openConnection.setConnectTimeout(this.mLinkSelector.getSpeedTimeOut());
+                    openConnection.setReadTimeout(this.mLinkSelector.getSpeedTimeOut());
+                    openConnection.setRequestProperty("X-SS-No-Cookie", "true");
+                    responseCode = openConnection.getResponseCode();
                     currentTimeMillis = System.currentTimeMillis() - currentTimeMillis2;
-                    headerField = httpURLConnection2.getHeaderField("X-TT-LOGID");
+                    headerField = openConnection.getHeaderField("X-TT-LOGID");
                     if (responseCode == 200) {
                         host2.setSortTime(currentTimeMillis + j);
                         host.resetStatus();
                         String url2 = url.toString();
                         long j5 = currentTimeMillis;
                         long j6 = j5;
-                        httpURLConnection = httpURLConnection2;
+                        httpURLConnection = openConnection;
                         i3 = responseCode;
-                        String str5 = str4;
+                        String str2 = "://";
                         try {
-                            sendEvent(url2, host, responseCode, j5, currentTimeMillis2, headerField, null, true);
+                            sendEvent(url2, host, responseCode, j5, currentTimeMillis2, headerField, (Exception) null, true);
                             StringBuilder sb3 = new StringBuilder();
                             sb3.append("sort speed time = ");
                             j4 = j6;
                             try {
                                 sb3.append(j4);
-                                sb3.append(str2);
+                                sb3.append(" ");
                                 sb3.append(host.getSchema());
-                                sb3.append(str5);
+                                sb3.append(str2);
                                 sb3.append(host.getHost());
-                                LogUtils.d(str3, sb3.toString());
-                                StringBuilder sb4 = new StringBuilder();
-                                sb4.append("sort weight time = ");
-                                sb4.append(host.getWeightTime());
-                                sb4.append(str2);
-                                sb4.append(host.getSchema());
-                                sb4.append(str5);
-                                sb4.append(host.getHost());
-                                LogUtils.d(str3, sb4.toString());
+                                LogUtils.d(TAG, sb3.toString());
+                                LogUtils.d(TAG, "sort weight time = " + host.getWeightTime() + " " + host.getSchema() + str2 + host.getHost());
                             } catch (Exception e2) {
                                 e = e2;
                             }
@@ -160,13 +145,13 @@ public class HostListStatusUpdateTask extends NormalTask {
                             i = i3;
                             exc = e;
                             try {
-                                StringBuilder sb5 = new StringBuilder();
-                                sb5.append("sort speed error = ");
-                                sb5.append(exc);
-                                LogUtils.e(str3, sb5.toString());
+                                LogUtils.e(TAG, "sort speed error = " + exc);
                                 host2.setSortTime(MAX_SORT_TIME);
                                 exc.printStackTrace();
                                 sendEvent(sb2.toString(), host, i, j2, currentTimeMillis2, str, exc, false);
+                                if (httpURLConnection == null) {
+                                }
+                                httpURLConnection.disconnect();
                             } catch (Throwable th) {
                                 th = th;
                                 if (httpURLConnection != null) {
@@ -176,7 +161,7 @@ public class HostListStatusUpdateTask extends NormalTask {
                         }
                     } else {
                         long j7 = currentTimeMillis;
-                        httpURLConnection = httpURLConnection2;
+                        httpURLConnection = openConnection;
                         int i4 = responseCode;
                         try {
                             sb = new StringBuilder();
@@ -190,34 +175,34 @@ public class HostListStatusUpdateTask extends NormalTask {
                             i = i2;
                             str = headerField;
                             j2 = j3;
-                            StringBuilder sb52 = new StringBuilder();
-                            sb52.append("sort speed error = ");
-                            sb52.append(exc);
-                            LogUtils.e(str3, sb52.toString());
+                            LogUtils.e(TAG, "sort speed error = " + exc);
                             host2.setSortTime(MAX_SORT_TIME);
                             exc.printStackTrace();
                             sendEvent(sb2.toString(), host, i, j2, currentTimeMillis2, str, exc, false);
+                            if (httpURLConnection == null) {
+                            }
+                            httpURLConnection.disconnect();
                         }
                         try {
                             sb.append(i2);
-                            LogUtils.e(str3, sb.toString());
+                            LogUtils.e(TAG, sb.toString());
                             host2.setSortTime(MAX_SORT_TIME);
                             j3 = j7;
                             try {
-                                sendEvent(url.toString(), host, i2, j7, currentTimeMillis2, headerField, null, false);
+                                sendEvent(url.toString(), host, i2, j7, currentTimeMillis2, headerField, (Exception) null, false);
                             } catch (Exception e5) {
                                 e = e5;
                                 exc = e;
                                 i = i2;
                                 str = headerField;
                                 j2 = j3;
-                                StringBuilder sb522 = new StringBuilder();
-                                sb522.append("sort speed error = ");
-                                sb522.append(exc);
-                                LogUtils.e(str3, sb522.toString());
+                                LogUtils.e(TAG, "sort speed error = " + exc);
                                 host2.setSortTime(MAX_SORT_TIME);
                                 exc.printStackTrace();
                                 sendEvent(sb2.toString(), host, i, j2, currentTimeMillis2, str, exc, false);
+                                if (httpURLConnection == null) {
+                                }
+                                httpURLConnection.disconnect();
                             }
                         } catch (Exception e6) {
                             e = e6;
@@ -226,46 +211,49 @@ public class HostListStatusUpdateTask extends NormalTask {
                             i = i2;
                             str = headerField;
                             j2 = j3;
-                            StringBuilder sb5222 = new StringBuilder();
-                            sb5222.append("sort speed error = ");
-                            sb5222.append(exc);
-                            LogUtils.e(str3, sb5222.toString());
+                            LogUtils.e(TAG, "sort speed error = " + exc);
                             host2.setSortTime(MAX_SORT_TIME);
                             exc.printStackTrace();
                             sendEvent(sb2.toString(), host, i, j2, currentTimeMillis2, str, exc, false);
+                            if (httpURLConnection == null) {
+                            }
+                            httpURLConnection.disconnect();
                         }
+                    }
+                    if (httpURLConnection == null) {
+                        return;
                     }
                 } catch (Exception e7) {
                     e = e7;
                     j4 = currentTimeMillis;
-                    httpURLConnection = httpURLConnection2;
+                    httpURLConnection = openConnection;
                     i3 = responseCode;
                     j2 = j4;
                     str = headerField;
                     i = i3;
                     exc = e;
-                    StringBuilder sb52222 = new StringBuilder();
-                    sb52222.append("sort speed error = ");
-                    sb52222.append(exc);
-                    LogUtils.e(str3, sb52222.toString());
+                    LogUtils.e(TAG, "sort speed error = " + exc);
                     host2.setSortTime(MAX_SORT_TIME);
                     exc.printStackTrace();
                     sendEvent(sb2.toString(), host, i, j2, currentTimeMillis2, str, exc, false);
+                    if (httpURLConnection == null) {
+                    }
+                    httpURLConnection.disconnect();
                 } catch (Throwable th2) {
                 }
             } catch (Exception e8) {
                 Exception exc2 = e8;
                 j2 = -1;
-                String str6 = null;
-                HttpURLConnection httpURLConnection3 = null;
+                String str3 = null;
+                HttpURLConnection httpURLConnection2 = null;
                 i = -1;
-                StringBuilder sb522222 = new StringBuilder();
-                sb522222.append("sort speed error = ");
-                sb522222.append(exc);
-                LogUtils.e(str3, sb522222.toString());
+                LogUtils.e(TAG, "sort speed error = " + exc);
                 host2.setSortTime(MAX_SORT_TIME);
                 exc.printStackTrace();
                 sendEvent(sb2.toString(), host, i, j2, currentTimeMillis2, str, exc, false);
+                if (httpURLConnection == null) {
+                }
+                httpURLConnection.disconnect();
             } catch (Throwable th3) {
                 th = th3;
                 httpURLConnection = null;
@@ -273,16 +261,17 @@ public class HostListStatusUpdateTask extends NormalTask {
                 }
                 throw th;
             }
+            httpURLConnection.disconnect();
         }
     }
 
     private void sendEvent(String str, Host host, int i, long j, long j2, String str2, Exception exc, boolean z) {
         HostStatus hostStatus = new HostStatus(str, host, i, j, j2, str2, exc, z);
-        sendMessage(30, new HostStatusUpdateResult(hostStatus, null));
+        sendMessage(30, new HostStatusUpdateResult(hostStatus, (ExceptionResult) null));
     }
 
     private void sendResults() {
-        sendMessage(31, new HostListStatusUpdateTaskResult(this.mHosts, null));
+        sendMessage(31, new HostListStatusUpdateTaskResult(this.mHosts, (ExceptionResult) null));
     }
 
     private void sortHost() {
@@ -295,46 +284,27 @@ public class HostListStatusUpdateTask extends NormalTask {
         arrayList.clear();
         arrayList.addAll(this.mHosts);
         int i = 0;
-        while (true) {
-            int size = this.mHosts.size();
-            String str = TAG;
-            if (i < size) {
-                Host host = (Host) this.mHosts.get(i);
-                StringBuilder sb = new StringBuilder();
-                sb.append("weight sort = ");
-                sb.append(host.getSortTime());
-                sb.append(" ");
-                sb.append(host.getSchema());
-                sb.append("://");
-                sb.append(host.getHost());
-                sb.append(this.mSpeedApi);
-                LogUtils.d(str, sb.toString());
-                i++;
-                for (int i2 = i; i2 < this.mHosts.size(); i2++) {
-                    Host host2 = (Host) this.mHosts.get(i2);
-                    if (host.getHost().equals(host2.getHost())) {
-                        arrayList.remove(host2);
-                    }
+        while (i < this.mHosts.size()) {
+            Host host = this.mHosts.get(i);
+            LogUtils.d(TAG, "weight sort = " + host.getSortTime() + " " + host.getSchema() + "://" + host.getHost() + this.mSpeedApi);
+            i++;
+            for (int i2 = i; i2 < this.mHosts.size(); i2++) {
+                Host host2 = this.mHosts.get(i2);
+                if (host.getHost().equals(host2.getHost())) {
+                    arrayList.remove(host2);
                 }
-            } else {
-                this.mHosts.clear();
-                this.mHosts.addAll(arrayList);
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("speed distinct = ");
-                sb2.append(this.mHosts.size());
-                sb2.append(" thread = ");
-                sb2.append(Thread.currentThread());
-                LogUtils.d(str, sb2.toString());
-                return;
             }
         }
+        this.mHosts.clear();
+        this.mHosts.addAll(arrayList);
+        LogUtils.d(TAG, "speed distinct = " + this.mHosts.size() + " thread = " + Thread.currentThread());
     }
 
     private void speedMeasure() {
         for (int i = 0; i < this.mHosts.size(); i++) {
-            ((Host) this.mHosts.get(i)).setSortTime(0);
+            this.mHosts.get(i).setSortTime(0);
             for (int i2 = 0; i2 < this.mLinkSelector.getRepeatTime(); i2++) {
-                getHostStatus((Host) this.mHosts.get(i), ((Host) this.mHosts.get(i)).getSortTime());
+                getHostStatus(this.mHosts.get(i), this.mHosts.get(i).getSortTime());
             }
         }
     }

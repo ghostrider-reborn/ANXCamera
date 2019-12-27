@@ -1,12 +1,8 @@
 package com.android.camera;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnDismissListener;
-import android.content.DialogInterface.OnShowListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -19,8 +15,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ReplacementTransformationMethod;
+import android.text.method.TransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.android.camera.data.DataRepository;
@@ -149,13 +147,12 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
         if (!b.yj()) {
             removePreference(this.mPreferenceGroup, "pref_time_watermark_key");
         }
-        String str = "user_define_watermark_key";
         if (!CameraSettings.isSupportedDualCameraWaterMark()) {
             removePreference(this.mPreferenceGroup, "pref_dualcamera_watermark_key");
-            removePreference(this.mPreferenceGroup, str);
+            removePreference(this.mPreferenceGroup, "user_define_watermark_key");
         }
         if (CameraSettings.isSupportedDualCameraWaterMark() && !DataRepository.dataItemFeature().Db()) {
-            removePreference(this.mPreferenceGroup, str);
+            removePreference(this.mPreferenceGroup, "user_define_watermark_key");
         }
     }
 
@@ -212,11 +209,11 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
     public void release() {
         BackgroundHandler backgroundHandler = this.mBackgroundHandler;
         if (backgroundHandler != null) {
-            backgroundHandler.removeCallbacksAndMessages(null);
+            backgroundHandler.removeCallbacksAndMessages((Object) null);
         }
         UiHandler uiHandler = this.mUiHandler;
         if (uiHandler != null) {
-            uiHandler.removeCallbacksAndMessages(null);
+            uiHandler.removeCallbacksAndMessages((Object) null);
         }
         HandlerThread handlerThread = this.mThreadBg;
         if (handlerThread != null) {
@@ -227,20 +224,20 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
     private void showDialog() {
         AlertDialog alertDialog = this.mAlertDialog;
         if (alertDialog == null) {
-            Builder builder = new Builder(this, R.style.EditAlertDialog);
-            View inflate = LayoutInflater.from(this).inflate(R.layout.dialog_userdefine_watermark, null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.EditAlertDialog);
+            View inflate = LayoutInflater.from(this).inflate(R.layout.dialog_userdefine_watermark, (ViewGroup) null);
             this.mEtUserDefineWords = (EditText) inflate.findViewById(R.id.et_user_define_words);
             this.mEtUserDefineWords.addTextChangedListener(this);
             this.mEtUserDefineWords.setTransformationMethod(new AllCapTransformationMethod());
             builder.setTitle(getString(R.string.pref_userdefine_watermark_title)).setView(inflate);
-            builder.setNegativeButton(getString(R.string.user_define_watermark_cancel), null);
-            builder.setPositiveButton(getString(R.string.user_define_watermark_save), new OnClickListener() {
+            builder.setNegativeButton(getString(R.string.user_define_watermark_cancel), (DialogInterface.OnClickListener) null);
+            builder.setPositiveButton(getString(R.string.user_define_watermark_save), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     WatermarkActivity.this.onSave();
                 }
             });
             this.mAlertDialog = builder.create();
-            this.mAlertDialog.setOnShowListener(new OnShowListener() {
+            this.mAlertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                 public void onShow(DialogInterface dialogInterface) {
                     if (WatermarkActivity.this.getIntent().getBooleanExtra(CameraIntentManager.EXTRA_START_WHEN_LOCKED, false)) {
                         WatermarkActivity.this.mAlertDialog.getWindow().addFlags(524288);
@@ -254,7 +251,7 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
                         }
                     }
                     WatermarkActivity.this.mEtUserDefineWords.setSelection(WatermarkActivity.this.mEtUserDefineWords.getText().length());
-                    WatermarkActivity.this.mThreadBg = new HandlerThread(WatermarkActivity.TAG, 10);
+                    HandlerThread unused = WatermarkActivity.this.mThreadBg = new HandlerThread(WatermarkActivity.TAG, 10);
                     WatermarkActivity.this.mThreadBg.start();
                     WatermarkActivity watermarkActivity = WatermarkActivity.this;
                     watermarkActivity.mBackgroundHandler = new BackgroundHandler(watermarkActivity.mThreadBg.getLooper());
@@ -265,7 +262,7 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
                     WatermarkActivity.this.mEtUserDefineWords.requestFocus();
                 }
             });
-            this.mAlertDialog.setOnDismissListener(new OnDismissListener() {
+            this.mAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 public void onDismiss(DialogInterface dialogInterface) {
                     WatermarkActivity.this.release();
                 }
@@ -277,8 +274,7 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
     }
 
     private void updateEntries() {
-        String str = "pref_dualcamera_watermark_key";
-        CheckBoxPreference checkBoxPreference = (CheckBoxPreference) this.mPreferenceGroup.findPreference(str);
+        CheckBoxPreference checkBoxPreference = (CheckBoxPreference) this.mPreferenceGroup.findPreference("pref_dualcamera_watermark_key");
         if (checkBoxPreference != null) {
             checkBoxPreference.setDefaultValue(Boolean.valueOf(b.v(getResources().getBoolean(R.bool.pref_device_watermark_default))));
             checkBoxPreference.setChecked(b.v(getResources().getBoolean(R.bool.pref_device_watermark_default)));
@@ -286,7 +282,7 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
         if (this.mUserDefineWatermark != null) {
             this.mDefindWatermark = CameraSettings.getCustomWatermark();
             ((ValuePreference) this.mUserDefineWatermark).setValue(this.mDefindWatermark.equals(CameraSettings.getDefaultWatermarkStr()) ? "" : this.mDefindWatermark);
-            ((ValuePreference) this.mUserDefineWatermark).setEnabled(CameraSettings.isSupportedDualCameraWaterMark() && this.mPreferences.getBoolean(str, b.v(CameraSettings.getBool(R.bool.pref_device_watermark_default))));
+            ((ValuePreference) this.mUserDefineWatermark).setEnabled(CameraSettings.isSupportedDualCameraWaterMark() && this.mPreferences.getBoolean("pref_dualcamera_watermark_key", b.v(CameraSettings.getBool(R.bool.pref_device_watermark_default))));
         }
     }
 
@@ -366,7 +362,7 @@ public class WatermarkActivity extends BasePreferenceActivity implements TextWat
         EditText editText = this.mEtUserDefineWords;
         if (editText != null) {
             editText.removeTextChangedListener(this);
-            this.mEtUserDefineWords.setTransformationMethod(null);
+            this.mEtUserDefineWords.setTransformationMethod((TransformationMethod) null);
         }
         super.onDestroy();
         release();

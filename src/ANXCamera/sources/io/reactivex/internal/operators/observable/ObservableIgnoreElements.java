@@ -9,7 +9,7 @@ public final class ObservableIgnoreElements<T> extends AbstractObservableWithUps
     static final class IgnoreObservable<T> implements Observer<T>, Disposable {
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f318d;
 
         IgnoreObservable(Observer<? super T> observer) {

@@ -11,12 +11,10 @@ import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.BundleCompat;
-import android.support.v4.media.MediaController2.PlaybackInfo;
-import android.support.v4.media.MediaSession2.CommandButton;
-import android.support.v4.media.MediaSession2.ControllerInfo;
+import android.support.v4.media.MediaController2;
+import android.support.v4.media.MediaSession2;
 import android.support.v4.media.session.IMediaControllerCallback;
-import android.support.v4.media.session.IMediaControllerCallback.Stub;
-import android.support.v4.media.session.MediaSessionCompat.Callback;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
@@ -27,7 +25,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 @TargetApi(19)
-class MediaSessionLegacyStub extends Callback {
+class MediaSessionLegacyStub extends MediaSessionCompat.Callback {
     /* access modifiers changed from: private */
     public static final boolean DEBUG = Log.isLoggable(TAG, 3);
     private static final String TAG = "MediaSessionLegacyStub";
@@ -35,39 +33,39 @@ class MediaSessionLegacyStub extends Callback {
     public static final SparseArray<SessionCommand2> sCommandsForOnCommandRequest = new SparseArray<>();
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
-    public final ArrayMap<ControllerInfo, SessionCommandGroup2> mAllowedCommandGroupMap = new ArrayMap<>();
+    public final ArrayMap<MediaSession2.ControllerInfo, SessionCommandGroup2> mAllowedCommandGroupMap = new ArrayMap<>();
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
     public final Set<IBinder> mConnectingControllers = new HashSet();
     final Context mContext;
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
-    public final ArrayMap<IBinder, ControllerInfo> mControllers = new ArrayMap<>();
+    public final ArrayMap<IBinder, MediaSession2.ControllerInfo> mControllers = new ArrayMap<>();
     /* access modifiers changed from: private */
     public final Object mLock = new Object();
-    final SupportLibraryImpl mSession;
+    final MediaSession2.SupportLibraryImpl mSession;
 
-    final class ControllerLegacyCb extends ControllerCb {
+    final class ControllerLegacyCb extends MediaSession2.ControllerCb {
         private final IMediaControllerCallback mIControllerCallback;
 
         ControllerLegacyCb(@NonNull IMediaControllerCallback iMediaControllerCallback) {
             this.mIControllerCallback = iMediaControllerCallback;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public IBinder getId() {
             return this.mIControllerCallback.asBinder();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onAllowedCommandsChanged(SessionCommandGroup2 sessionCommandGroup2) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putBundle("android.support.v4.media.argument.ALLOWED_COMMANDS", sessionCommandGroup2.toBundle());
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_ALLOWED_COMMANDS_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onBufferingStateChanged(MediaItem2 mediaItem2, int i, long j) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putBundle("android.support.v4.media.argument.MEDIA_ITEM", mediaItem2.toBundle());
@@ -76,18 +74,18 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_BUFFERING_STATE_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onChildrenChanged(String str, int i, Bundle bundle) throws RemoteException {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onCurrentMediaItemChanged(MediaItem2 mediaItem2) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putBundle("android.support.v4.media.argument.MEDIA_ITEM", mediaItem2 == null ? null : mediaItem2.toBundle());
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_CURRENT_MEDIA_ITEM_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onCustomCommand(SessionCommand2 sessionCommand2, Bundle bundle, ResultReceiver resultReceiver) throws RemoteException {
             Bundle bundle2 = new Bundle();
             bundle2.putBundle("android.support.v4.media.argument.CUSTOM_COMMAND", sessionCommand2.toBundle());
@@ -96,19 +94,19 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.SEND_CUSTOM_COMMAND", bundle2);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void onCustomLayoutChanged(List<CommandButton> list) throws RemoteException {
+        /* access modifiers changed from: package-private */
+        public void onCustomLayoutChanged(List<MediaSession2.CommandButton> list) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putParcelableArray("android.support.v4.media.argument.COMMAND_BUTTONS", MediaUtils2.convertCommandButtonListToParcelableArray(list));
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.SET_CUSTOM_LAYOUT", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onDisconnected() throws RemoteException {
             this.mIControllerCallback.onSessionDestroyed();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onError(int i, Bundle bundle) throws RemoteException {
             Bundle bundle2 = new Bundle();
             bundle2.putInt("android.support.v4.media.argument.ERROR_CODE", i);
@@ -116,37 +114,37 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_ERROR", bundle2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetChildrenDone(String str, int i, int i2, List<MediaItem2> list, Bundle bundle) throws RemoteException {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetItemDone(String str, MediaItem2 mediaItem2) throws RemoteException {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetLibraryRootDone(Bundle bundle, String str, Bundle bundle2) throws RemoteException {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetSearchResultDone(String str, int i, int i2, List<MediaItem2> list, Bundle bundle) throws RemoteException {
         }
 
-        /* access modifiers changed from: 0000 */
-        public void onPlaybackInfoChanged(PlaybackInfo playbackInfo) throws RemoteException {
+        /* access modifiers changed from: package-private */
+        public void onPlaybackInfoChanged(MediaController2.PlaybackInfo playbackInfo) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putBundle("android.support.v4.media.argument.PLAYBACK_INFO", playbackInfo.toBundle());
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_PLAYBACK_INFO_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlaybackSpeedChanged(long j, long j2, float f2) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putParcelable("android.support.v4.media.argument.PLAYBACK_STATE_COMPAT", MediaSessionLegacyStub.this.mSession.getPlaybackStateCompat());
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_PLAYBACK_SPEED_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlayerStateChanged(long j, long j2, int i) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putInt("android.support.v4.media.argument.PLAYER_STATE", i);
@@ -154,7 +152,7 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_PLAYER_STATE_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlaylistChanged(List<MediaItem2> list, MediaMetadata2 mediaMetadata2) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putParcelableArray("android.support.v4.media.argument.PLAYLIST", MediaUtils2.convertMediaItem2ListToParcelableArray(list));
@@ -162,21 +160,21 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_PLAYLIST_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlaylistMetadataChanged(MediaMetadata2 mediaMetadata2) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putBundle("android.support.v4.media.argument.PLAYLIST_METADATA", mediaMetadata2 == null ? null : mediaMetadata2.toBundle());
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_PLAYLIST_METADATA_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRepeatModeChanged(int i) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putInt("android.support.v4.media.argument.REPEAT_MODE", i);
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_REPEAT_MODE_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRoutesInfoChanged(List<Bundle> list) throws RemoteException {
             Bundle bundle;
             if (list != null) {
@@ -188,11 +186,11 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_ROUTES_INFO_CHANGED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onSearchResultChanged(String str, int i, Bundle bundle) throws RemoteException {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onSeekCompleted(long j, long j2, long j3) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putLong("android.support.v4.media.argument.SEEK_POSITION", j3);
@@ -200,7 +198,7 @@ class MediaSessionLegacyStub extends Callback {
             this.mIControllerCallback.onEvent("android.support.v4.media.session.event.ON_SEEK_COMPLETED", bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onShuffleModeChanged(int i) throws RemoteException {
             Bundle bundle = new Bundle();
             bundle.putInt("android.support.v4.media.argument.SHUFFLE_MODE", i);
@@ -210,7 +208,7 @@ class MediaSessionLegacyStub extends Callback {
 
     @FunctionalInterface
     private interface Session2Runnable {
-        void run(ControllerInfo controllerInfo) throws RemoteException;
+        void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException;
     }
 
     static {
@@ -218,18 +216,18 @@ class MediaSessionLegacyStub extends Callback {
         sessionCommandGroup2.addAllPlaybackCommands();
         sessionCommandGroup2.addAllPlaylistCommands();
         sessionCommandGroup2.addAllVolumeCommands();
-        for (SessionCommand2 sessionCommand2 : sessionCommandGroup2.getCommands()) {
-            sCommandsForOnCommandRequest.append(sessionCommand2.getCommandCode(), sessionCommand2);
+        for (SessionCommand2 next : sessionCommandGroup2.getCommands()) {
+            sCommandsForOnCommandRequest.append(next.getCommandCode(), next);
         }
     }
 
-    MediaSessionLegacyStub(SupportLibraryImpl supportLibraryImpl) {
+    MediaSessionLegacyStub(MediaSession2.SupportLibraryImpl supportLibraryImpl) {
         this.mSession = supportLibraryImpl;
         this.mContext = this.mSession.getContext();
     }
 
     private void connect(Bundle bundle, final ResultReceiver resultReceiver) {
-        final ControllerInfo createControllerInfo = createControllerInfo(bundle);
+        final MediaSession2.ControllerInfo createControllerInfo = createControllerInfo(bundle);
         this.mSession.getCallbackExecutor().execute(new Runnable() {
             public void run() {
                 if (!MediaSessionLegacyStub.this.mSession.isClosed()) {
@@ -240,12 +238,7 @@ class MediaSessionLegacyStub extends Callback {
                     MediaItem2 mediaItem2 = null;
                     if (onConnect != null || createControllerInfo.isTrusted()) {
                         if (MediaSessionLegacyStub.DEBUG) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Accepting connection, controllerInfo=");
-                            sb.append(createControllerInfo);
-                            sb.append(" allowedCommands=");
-                            sb.append(onConnect);
-                            Log.d(MediaSessionLegacyStub.TAG, sb.toString());
+                            Log.d(MediaSessionLegacyStub.TAG, "Accepting connection, controllerInfo=" + createControllerInfo + " allowedCommands=" + onConnect);
                         }
                         if (onConnect == null) {
                             onConnect = new SessionCommandGroup2();
@@ -262,7 +255,7 @@ class MediaSessionLegacyStub extends Callback {
                         bundle.putParcelable("android.support.v4.media.argument.PLAYBACK_STATE_COMPAT", MediaSessionLegacyStub.this.mSession.getPlaybackStateCompat());
                         bundle.putInt("android.support.v4.media.argument.REPEAT_MODE", MediaSessionLegacyStub.this.mSession.getRepeatMode());
                         bundle.putInt("android.support.v4.media.argument.SHUFFLE_MODE", MediaSessionLegacyStub.this.mSession.getShuffleMode());
-                        List playlist = onConnect.hasCommand(18) ? MediaSessionLegacyStub.this.mSession.getPlaylist() : null;
+                        List<MediaItem2> playlist = onConnect.hasCommand(18) ? MediaSessionLegacyStub.this.mSession.getPlaylist() : null;
                         if (playlist != null) {
                             bundle.putParcelableArray("android.support.v4.media.argument.PLAYLIST", MediaUtils2.convertMediaItem2ListToParcelableArray(playlist));
                         }
@@ -279,31 +272,29 @@ class MediaSessionLegacyStub extends Callback {
                         }
                         if (!MediaSessionLegacyStub.this.mSession.isClosed()) {
                             resultReceiver.send(0, bundle);
+                            return;
                         }
-                    } else {
-                        synchronized (MediaSessionLegacyStub.this.mLock) {
-                            MediaSessionLegacyStub.this.mConnectingControllers.remove(createControllerInfo.getId());
-                        }
-                        if (MediaSessionLegacyStub.DEBUG) {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Rejecting connection, controllerInfo=");
-                            sb2.append(createControllerInfo);
-                            Log.d(MediaSessionLegacyStub.TAG, sb2.toString());
-                        }
-                        resultReceiver.send(-1, null);
+                        return;
                     }
+                    synchronized (MediaSessionLegacyStub.this.mLock) {
+                        MediaSessionLegacyStub.this.mConnectingControllers.remove(createControllerInfo.getId());
+                    }
+                    if (MediaSessionLegacyStub.DEBUG) {
+                        Log.d(MediaSessionLegacyStub.TAG, "Rejecting connection, controllerInfo=" + createControllerInfo);
+                    }
+                    resultReceiver.send(-1, (Bundle) null);
                 }
             }
         });
     }
 
-    private ControllerInfo createControllerInfo(Bundle bundle) {
-        IMediaControllerCallback asInterface = Stub.asInterface(BundleCompat.getBinder(bundle, "android.support.v4.media.argument.ICONTROLLER_CALLBACK"));
-        return new ControllerInfo(bundle.getString("android.support.v4.media.argument.PACKAGE_NAME"), bundle.getInt("android.support.v4.media.argument.PID"), bundle.getInt("android.support.v4.media.argument.UID"), new ControllerLegacyCb(asInterface));
+    private MediaSession2.ControllerInfo createControllerInfo(Bundle bundle) {
+        IMediaControllerCallback asInterface = IMediaControllerCallback.Stub.asInterface(BundleCompat.getBinder(bundle, "android.support.v4.media.argument.ICONTROLLER_CALLBACK"));
+        return new MediaSession2.ControllerInfo(bundle.getString("android.support.v4.media.argument.PACKAGE_NAME"), bundle.getInt("android.support.v4.media.argument.PID"), bundle.getInt("android.support.v4.media.argument.UID"), new ControllerLegacyCb(asInterface));
     }
 
     private void disconnect(Bundle bundle) {
-        final ControllerInfo createControllerInfo = createControllerInfo(bundle);
+        final MediaSession2.ControllerInfo createControllerInfo = createControllerInfo(bundle);
         this.mSession.getCallbackExecutor().execute(new Runnable() {
             public void run() {
                 if (!MediaSessionLegacyStub.this.mSession.isClosed()) {
@@ -314,25 +305,25 @@ class MediaSessionLegacyStub extends Callback {
     }
 
     /* access modifiers changed from: private */
-    public boolean isAllowedCommand(ControllerInfo controllerInfo, int i) {
+    public boolean isAllowedCommand(MediaSession2.ControllerInfo controllerInfo, int i) {
         SessionCommandGroup2 sessionCommandGroup2;
         synchronized (this.mLock) {
-            sessionCommandGroup2 = (SessionCommandGroup2) this.mAllowedCommandGroupMap.get(controllerInfo);
+            sessionCommandGroup2 = this.mAllowedCommandGroupMap.get(controllerInfo);
         }
         return sessionCommandGroup2 != null && sessionCommandGroup2.hasCommand(i);
     }
 
     /* access modifiers changed from: private */
-    public boolean isAllowedCommand(ControllerInfo controllerInfo, SessionCommand2 sessionCommand2) {
+    public boolean isAllowedCommand(MediaSession2.ControllerInfo controllerInfo, SessionCommand2 sessionCommand2) {
         SessionCommandGroup2 sessionCommandGroup2;
         synchronized (this.mLock) {
-            sessionCommandGroup2 = (SessionCommandGroup2) this.mAllowedCommandGroupMap.get(controllerInfo);
+            sessionCommandGroup2 = this.mAllowedCommandGroupMap.get(controllerInfo);
         }
         return sessionCommandGroup2 != null && sessionCommandGroup2.hasCommand(sessionCommand2);
     }
 
     private void onCommand2(@NonNull IBinder iBinder, int i, @NonNull Session2Runnable session2Runnable) {
-        onCommand2Internal(iBinder, null, i, session2Runnable);
+        onCommand2Internal(iBinder, (SessionCommand2) null, i, session2Runnable);
     }
 
     private void onCommand2(@NonNull IBinder iBinder, @NonNull SessionCommand2 sessionCommand2, @NonNull Session2Runnable session2Runnable) {
@@ -340,11 +331,11 @@ class MediaSessionLegacyStub extends Callback {
     }
 
     private void onCommand2Internal(@NonNull IBinder iBinder, @Nullable SessionCommand2 sessionCommand2, int i, @NonNull Session2Runnable session2Runnable) {
-        final ControllerInfo controllerInfo;
+        final MediaSession2.ControllerInfo controllerInfo;
         synchronized (this.mLock) {
-            controllerInfo = (ControllerInfo) this.mControllers.get(iBinder);
+            controllerInfo = this.mControllers.get(iBinder);
         }
-        SupportLibraryImpl supportLibraryImpl = this.mSession;
+        MediaSession2.SupportLibraryImpl supportLibraryImpl = this.mSession;
         if (supportLibraryImpl != null && controllerInfo != null) {
             Executor callbackExecutor = supportLibraryImpl.getCallbackExecutor();
             final SessionCommand2 sessionCommand22 = sessionCommand2;
@@ -365,27 +356,14 @@ class MediaSessionLegacyStub extends Callback {
                     } else {
                         return;
                     }
-                    String str = MediaSessionLegacyStub.TAG;
                     if (sessionCommand2 == null || MediaSessionLegacyStub.this.mSession.getCallback().onCommandRequest(MediaSessionLegacyStub.this.mSession.getInstance(), controllerInfo, sessionCommand2)) {
                         try {
                             session2Runnable2.run(controllerInfo);
                         } catch (RemoteException e2) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Exception in ");
-                            sb.append(controllerInfo.toString());
-                            Log.w(str, sb.toString(), e2);
+                            Log.w(MediaSessionLegacyStub.TAG, "Exception in " + controllerInfo.toString(), e2);
                         }
-                        return;
-                    }
-                    if (MediaSessionLegacyStub.DEBUG) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Command (");
-                        sb2.append(sessionCommand2);
-                        sb2.append(") from ");
-                        sb2.append(controllerInfo);
-                        sb2.append(" was rejected by ");
-                        sb2.append(MediaSessionLegacyStub.this.mSession);
-                        Log.d(str, sb2.toString());
+                    } else if (MediaSessionLegacyStub.DEBUG) {
+                        Log.d(MediaSessionLegacyStub.TAG, "Command (" + sessionCommand2 + ") from " + controllerInfo + " was rejected by " + MediaSessionLegacyStub.this.mSession);
                     }
                 }
             };
@@ -393,8 +371,8 @@ class MediaSessionLegacyStub extends Callback {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    public List<ControllerInfo> getConnectedControllers() {
+    /* access modifiers changed from: package-private */
+    public List<MediaSession2.ControllerInfo> getConnectedControllers() {
         ArrayList arrayList = new ArrayList();
         synchronized (this.mLock) {
             for (int i = 0; i < this.mControllers.size(); i++) {
@@ -454,22 +432,18 @@ class MediaSessionLegacyStub extends Callback {
         });
     }
 
-    /* access modifiers changed from: 0000 */
-    public void removeControllerInfo(ControllerInfo controllerInfo) {
+    /* access modifiers changed from: package-private */
+    public void removeControllerInfo(MediaSession2.ControllerInfo controllerInfo) {
         synchronized (this.mLock) {
-            ControllerInfo controllerInfo2 = (ControllerInfo) this.mControllers.remove(controllerInfo.getId());
+            MediaSession2.ControllerInfo remove = this.mControllers.remove(controllerInfo.getId());
             if (DEBUG) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("releasing ");
-                sb.append(controllerInfo2);
-                Log.d(str, sb.toString());
+                Log.d(TAG, "releasing " + remove);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    public void setAllowedCommands(ControllerInfo controllerInfo, SessionCommandGroup2 sessionCommandGroup2) {
+    /* access modifiers changed from: package-private */
+    public void setAllowedCommands(MediaSession2.ControllerInfo controllerInfo, SessionCommandGroup2 sessionCommandGroup2) {
         synchronized (this.mLock) {
             this.mAllowedCommandGroupMap.put(controllerInfo, sessionCommandGroup2);
         }

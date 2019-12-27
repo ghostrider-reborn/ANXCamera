@@ -2,9 +2,8 @@ package com.bumptech.glide.load.engine.a;
 
 import android.util.Log;
 import com.bumptech.glide.a.b;
-import com.bumptech.glide.a.b.C0003b;
-import com.bumptech.glide.a.b.d;
 import com.bumptech.glide.load.c;
+import com.bumptech.glide.load.engine.a.a;
 import java.io.File;
 import java.io.IOException;
 
@@ -55,18 +54,12 @@ public class g implements a {
     }
 
     public void a(c cVar, a.b bVar) {
-        C0003b edit;
-        String str = TAG;
+        b.C0003b edit;
         String f2 = this.Hg.f(cVar);
         this.Ig.r(f2);
         try {
-            if (Log.isLoggable(str, 2)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Put: Obtained: ");
-                sb.append(f2);
-                sb.append(" for for Key: ");
-                sb.append(cVar);
-                Log.v(str, sb.toString());
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "Put: Obtained: " + f2 + " for for Key: " + cVar);
             }
             try {
                 b n = n();
@@ -80,14 +73,11 @@ public class g implements a {
                         this.Ig.s(f2);
                         return;
                     }
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Had two simultaneous puts for: ");
-                    sb2.append(f2);
-                    throw new IllegalStateException(sb2.toString());
+                    throw new IllegalStateException("Had two simultaneous puts for: " + f2);
                 }
             } catch (IOException e2) {
-                if (Log.isLoggable(str, 5)) {
-                    Log.w(str, "Unable to put to disk cache", e2);
+                if (Log.isLoggable(TAG, 5)) {
+                    Log.w(TAG, "Unable to put to disk cache", e2);
                 }
             } catch (Throwable th) {
                 edit.abortUnlessCommitted();
@@ -100,26 +90,20 @@ public class g implements a {
 
     public File b(c cVar) {
         String f2 = this.Hg.f(cVar);
-        String str = TAG;
-        if (Log.isLoggable(str, 2)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Get: Obtained: ");
-            sb.append(f2);
-            sb.append(" for for Key: ");
-            sb.append(cVar);
-            Log.v(str, sb.toString());
+        if (Log.isLoggable(TAG, 2)) {
+            Log.v(TAG, "Get: Obtained: " + f2 + " for for Key: " + cVar);
         }
         try {
-            d dVar = n().get(f2);
+            b.d dVar = n().get(f2);
             if (dVar != null) {
                 return dVar.o(0);
             }
             return null;
         } catch (IOException e2) {
-            if (!Log.isLoggable(str, 5)) {
+            if (!Log.isLoggable(TAG, 5)) {
                 return null;
             }
-            Log.w(str, "Unable to get from disk cache", e2);
+            Log.w(TAG, "Unable to get from disk cache", e2);
             return null;
         }
     }
@@ -128,9 +112,8 @@ public class g implements a {
         try {
             n().remove(this.Hg.f(cVar));
         } catch (IOException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                Log.w(str, "Unable to delete from disk cache", e2);
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Unable to delete from disk cache", e2);
             }
         }
     }

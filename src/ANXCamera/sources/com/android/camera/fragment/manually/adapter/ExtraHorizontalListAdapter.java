@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import com.android.camera.R;
 import com.android.camera.constant.ColorConstant;
@@ -12,13 +11,12 @@ import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ColorActivateTextView;
 import com.android.camera.ui.ColorImageView;
 import com.android.camera.ui.HorizontalListView;
-import com.android.camera.ui.HorizontalListView.OnSingleTapDownListener;
 
-public class ExtraHorizontalListAdapter extends BaseAdapter implements OnItemClickListener, OnSingleTapDownListener {
+public class ExtraHorizontalListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener, HorizontalListView.OnSingleTapDownListener {
     private ComponentData mComponentData;
     private int mCurrentMode;
     private String mCurrentValue;
@@ -43,7 +41,7 @@ public class ExtraHorizontalListAdapter extends BaseAdapter implements OnItemCli
     }
 
     private void changeValue(int i) {
-        String str = ((ComponentDataItem) this.mComponentData.getItems().get(i)).mValue;
+        String str = this.mComponentData.getItems().get(i).mValue;
         if (str != null && !str.equals(this.mCurrentValue)) {
             this.mComponentData.setComponentValue(this.mCurrentMode, str);
             ManuallyListener manuallyListener = this.mManuallyListener;
@@ -69,7 +67,7 @@ public class ExtraHorizontalListAdapter extends BaseAdapter implements OnItemCli
     public int getValuePosition() {
         int count = getCount();
         for (int i = 0; i < count; i++) {
-            if (this.mCurrentValue.equals(((ComponentDataItem) this.mComponentData.getItems().get(i)).mValue)) {
+            if (this.mCurrentValue.equals(this.mComponentData.getItems().get(i).mValue)) {
                 return i;
             }
         }
@@ -80,17 +78,17 @@ public class ExtraHorizontalListAdapter extends BaseAdapter implements OnItemCli
         ViewHolder viewHolder;
         int i2 = ColorConstant.COLOR_COMMON_SELECTED;
         if (view == null) {
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_manually_extra_item, null);
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_manually_extra_item, (ViewGroup) null);
             viewHolder = new ViewHolder();
-            viewHolder.mColorImageView = (ColorImageView) view.findViewById(R.id.extra_item_image);
-            viewHolder.mText = (ColorActivateTextView) view.findViewById(R.id.extra_item_text);
+            ColorImageView unused = viewHolder.mColorImageView = (ColorImageView) view.findViewById(R.id.extra_item_image);
+            ColorActivateTextView unused2 = viewHolder.mText = (ColorActivateTextView) view.findViewById(R.id.extra_item_text);
             viewHolder.mText.setNormalCor(ColorConstant.COLOR_COMMON_NORMAL);
             viewHolder.mText.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
         }
-        ComponentDataItem componentDataItem = (ComponentDataItem) this.mComponentData.getItems().get(i);
+        ComponentDataItem componentDataItem = this.mComponentData.getItems().get(i);
         String str = componentDataItem.mValue;
         if (componentDataItem.mIconRes != -1) {
             viewHolder.mColorImageView.setVisibility(0);
@@ -118,7 +116,7 @@ public class ExtraHorizontalListAdapter extends BaseAdapter implements OnItemCli
     }
 
     public void onSingleTapDown(AdapterView<?> adapterView, View view, int i, long j) {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null || !cameraAction.isDoingAction()) {
             adapterView.setSelection(i);
             changeValue(i);

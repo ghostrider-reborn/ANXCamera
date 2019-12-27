@@ -51,14 +51,14 @@ public final class FlowableOnBackpressureDrop<T> extends AbstractFlowableWithUps
                 if (get() != 0) {
                     this.actual.onNext(t);
                     BackpressureHelper.produced(this, 1);
-                } else {
-                    try {
-                        this.onDrop.accept(t);
-                    } catch (Throwable th) {
-                        Exceptions.throwIfFatal(th);
-                        cancel();
-                        onError(th);
-                    }
+                    return;
+                }
+                try {
+                    this.onDrop.accept(t);
+                } catch (Throwable th) {
+                    Exceptions.throwIfFatal(th);
+                    cancel();
+                    onError(th);
                 }
             }
         }
@@ -93,6 +93,6 @@ public final class FlowableOnBackpressureDrop<T> extends AbstractFlowableWithUps
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new BackpressureDropSubscriber<Object>(subscriber, this.onDrop));
+        this.source.subscribe(new BackpressureDropSubscriber(subscriber, this.onDrop));
     }
 }

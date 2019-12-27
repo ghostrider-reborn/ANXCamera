@@ -30,16 +30,12 @@ public class MP4Utils {
     }
 
     public static boolean concateMP4Files(String[] strArr, String str) {
-        String str2 = TAG;
-        Log.i(str2, "concate MP4 files");
+        Log.i(TAG, "concate MP4 files");
         if (!concateMP4FilesJni(strArr, str)) {
-            Log.e(str2, "concate MP4 files failed");
+            Log.e(TAG, "concate MP4 files failed");
             return false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(" concate MP4 files succeed to: ");
-        sb.append(str);
-        Log.i(str2, sb.toString());
+        Log.i(TAG, " concate MP4 files succeed to: " + str);
         return true;
     }
 

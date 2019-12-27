@@ -5,27 +5,23 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Join;
-import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.support.annotation.RequiresApi;
 import android.support.mediacompat.R;
-import android.text.Layout.Alignment;
+import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
-import android.text.StaticLayout.Builder;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.MeasureSpec;
 
 @RequiresApi(28)
 class SubtitleView extends View {
     private static final int COLOR_BEVEL_DARK = Integer.MIN_VALUE;
     private static final int COLOR_BEVEL_LIGHT = -2130706433;
     private static final float INNER_PADDING_RATIO = 0.125f;
-    private Alignment mAlignment;
+    private Layout.Alignment mAlignment;
     private int mBackgroundColor;
     private final float mCornerRadius;
     private int mEdgeColor;
@@ -47,7 +43,7 @@ class SubtitleView extends View {
     private TextPaint mTextPaint;
 
     SubtitleView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     SubtitleView(Context context, AttributeSet attributeSet) {
@@ -89,7 +85,7 @@ class SubtitleView extends View {
         this.mHasMeasurements = true;
         this.mLastMeasuredWidth = paddingLeft;
         SpannableStringBuilder spannableStringBuilder = this.mText;
-        this.mLayout = Builder.obtain(spannableStringBuilder, 0, spannableStringBuilder.length(), this.mTextPaint, paddingLeft).setAlignment(this.mAlignment).setLineSpacing(this.mSpacingAdd, this.mSpacingMult).setUseLineSpacingFromFallbacks(true).build();
+        this.mLayout = StaticLayout.Builder.obtain(spannableStringBuilder, 0, spannableStringBuilder.length(), this.mTextPaint, paddingLeft).setAlignment(this.mAlignment).setLineSpacing(this.mSpacingAdd, this.mSpacingMult).setUseLineSpacingFromFallbacks(true).build();
         return true;
     }
 
@@ -106,27 +102,26 @@ class SubtitleView extends View {
             RectF rectF = this.mLineBounds;
             if (Color.alpha(this.mBackgroundColor) > 0) {
                 float f2 = this.mCornerRadius;
-                float lineTop = (float) staticLayout.getLineTop(0);
                 paint.setColor(this.mBackgroundColor);
-                paint.setStyle(Style.FILL);
-                float f3 = lineTop;
+                paint.setStyle(Paint.Style.FILL);
+                float lineTop = (float) staticLayout.getLineTop(0);
                 for (int i2 = 0; i2 < lineCount; i2++) {
-                    float f4 = (float) i;
-                    rectF.left = staticLayout.getLineLeft(i2) - f4;
-                    rectF.right = staticLayout.getLineRight(i2) + f4;
-                    rectF.top = f3;
+                    float f3 = (float) i;
+                    rectF.left = staticLayout.getLineLeft(i2) - f3;
+                    rectF.right = staticLayout.getLineRight(i2) + f3;
+                    rectF.top = lineTop;
                     rectF.bottom = (float) staticLayout.getLineBottom(i2);
-                    f3 = rectF.bottom;
+                    lineTop = rectF.bottom;
                     canvas.drawRoundRect(rectF, f2, f2, paint);
                 }
             }
             int i3 = this.mEdgeType;
             boolean z = true;
             if (i3 == 1) {
-                textPaint.setStrokeJoin(Join.ROUND);
+                textPaint.setStrokeJoin(Paint.Join.ROUND);
                 textPaint.setStrokeWidth(this.mOutlineWidth);
                 textPaint.setColor(this.mEdgeColor);
-                textPaint.setStyle(Style.FILL_AND_STROKE);
+                textPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 staticLayout.draw(canvas);
             } else if (i3 == 2) {
                 textPaint.setShadowLayer(this.mShadowRadius, this.mShadowOffsetX, this.mShadowOffsetY, this.mEdgeColor);
@@ -139,16 +134,16 @@ class SubtitleView extends View {
                 if (z) {
                     i4 = this.mEdgeColor;
                 }
-                float f5 = this.mShadowRadius / 2.0f;
+                float f4 = this.mShadowRadius / 2.0f;
                 textPaint.setColor(this.mForegroundColor);
-                textPaint.setStyle(Style.FILL);
-                float f6 = -f5;
-                textPaint.setShadowLayer(this.mShadowRadius, f6, f6, i5);
+                textPaint.setStyle(Paint.Style.FILL);
+                float f5 = -f4;
+                textPaint.setShadowLayer(this.mShadowRadius, f5, f5, i5);
                 staticLayout.draw(canvas);
-                textPaint.setShadowLayer(this.mShadowRadius, f5, f5, i4);
+                textPaint.setShadowLayer(this.mShadowRadius, f4, f4, i4);
             }
             textPaint.setColor(this.mForegroundColor);
-            textPaint.setStyle(Style.FILL);
+            textPaint.setStyle(Paint.Style.FILL);
             staticLayout.draw(canvas);
             textPaint.setShadowLayer(0.0f, 0.0f, 0.0f, 0);
             canvas.restoreToCount(save);
@@ -161,7 +156,7 @@ class SubtitleView extends View {
 
     /* access modifiers changed from: protected */
     public void onMeasure(int i, int i2) {
-        if (computeMeasurements(MeasureSpec.getSize(i))) {
+        if (computeMeasurements(View.MeasureSpec.getSize(i))) {
             StaticLayout staticLayout = this.mLayout;
             setMeasuredDimension(staticLayout.getWidth() + getPaddingLeft() + getPaddingRight() + (this.mInnerPaddingX * 2), staticLayout.getHeight() + getPaddingTop() + getPaddingBottom());
             return;
@@ -169,7 +164,7 @@ class SubtitleView extends View {
         setMeasuredDimension(16777216, 16777216);
     }
 
-    public void setAlignment(Alignment alignment) {
+    public void setAlignment(Layout.Alignment alignment) {
         if (this.mAlignment != alignment) {
             this.mAlignment = alignment;
             this.mHasMeasurements = false;

@@ -6,7 +6,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -37,10 +36,7 @@ abstract class ModernAsyncTask<Params, Progress, Result> {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
         public Thread newThread(Runnable runnable) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("ModernAsyncTask #");
-            sb.append(this.mCount.getAndIncrement());
-            return new Thread(runnable, sb.toString());
+            return new Thread(runnable, "ModernAsyncTask #" + this.mCount.getAndIncrement());
         }
     };
     /* access modifiers changed from: private */
@@ -48,17 +44,16 @@ abstract class ModernAsyncTask<Params, Progress, Result> {
     private final FutureTask<Result> mFuture = new FutureTask<Result>(this.mWorker) {
         /* access modifiers changed from: protected */
         public void done() {
-            String str = "An error occurred while executing doInBackground()";
             try {
                 ModernAsyncTask.this.postResultIfNotInvoked(get());
             } catch (InterruptedException e2) {
                 Log.w(ModernAsyncTask.LOG_TAG, e2);
             } catch (ExecutionException e3) {
-                throw new RuntimeException(str, e3.getCause());
+                throw new RuntimeException("An error occurred while executing doInBackground()", e3.getCause());
             } catch (CancellationException unused) {
                 ModernAsyncTask.this.postResultIfNotInvoked(null);
             } catch (Throwable th) {
-                throw new RuntimeException(str, th);
+                throw new RuntimeException("An error occurred while executing doInBackground()", th);
             }
         }
     };
@@ -82,7 +77,7 @@ abstract class ModernAsyncTask<Params, Progress, Result> {
         }
     };
 
-    /* renamed from: android.support.v4.content.ModernAsyncTask$4 reason: invalid class name */
+    /* renamed from: android.support.v4.content.ModernAsyncTask$4  reason: invalid class name */
     static /* synthetic */ class AnonymousClass4 {
         static final /* synthetic */ int[] $SwitchMap$androidx$loader$content$ModernAsyncTask$Status = new int[Status.values().length];
 
@@ -160,7 +155,7 @@ abstract class ModernAsyncTask<Params, Progress, Result> {
         return internalHandler;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static void setDefaultExecutor(Executor executor) {
         sDefaultExecutor = executor;
     }
@@ -196,7 +191,7 @@ abstract class ModernAsyncTask<Params, Progress, Result> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void finish(Result result) {
         if (isCancelled()) {
             onCancelled(result);
@@ -243,13 +238,13 @@ abstract class ModernAsyncTask<Params, Progress, Result> {
     public void onProgressUpdate(Progress... progressArr) {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Result postResult(Result result) {
         getHandler().obtainMessage(1, new AsyncTaskResult(this, result)).sendToTarget();
         return result;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void postResultIfNotInvoked(Result result) {
         if (!this.mTaskInvoked.get()) {
             postResult(result);

@@ -4,7 +4,6 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.Experimental;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
@@ -26,7 +25,7 @@ public class SchedulerWhen extends Scheduler implements Disposable {
     private final FlowableProcessor<Flowable<Completable>> workerProcessor = UnicastProcessor.create().toSerialized();
 
     static final class CreateWorkerFunction implements Function<ScheduledAction, Completable> {
-        final Worker actualWorker;
+        final Scheduler.Worker actualWorker;
 
         final class WorkerCompletable extends Completable {
             final ScheduledAction action;
@@ -42,7 +41,7 @@ public class SchedulerWhen extends Scheduler implements Disposable {
             }
         }
 
-        CreateWorkerFunction(Worker worker) {
+        CreateWorkerFunction(Scheduler.Worker worker) {
             this.actualWorker = worker;
         }
 
@@ -63,7 +62,7 @@ public class SchedulerWhen extends Scheduler implements Disposable {
         }
 
         /* access modifiers changed from: protected */
-        public Disposable callActual(Worker worker, CompletableObserver completableObserver) {
+        public Disposable callActual(Scheduler.Worker worker, CompletableObserver completableObserver) {
             return worker.schedule(new OnCompletedAction(this.action, completableObserver), this.delayTime, this.unit);
         }
     }
@@ -76,7 +75,7 @@ public class SchedulerWhen extends Scheduler implements Disposable {
         }
 
         /* access modifiers changed from: protected */
-        public Disposable callActual(Worker worker, CompletableObserver completableObserver) {
+        public Disposable callActual(Scheduler.Worker worker, CompletableObserver completableObserver) {
             return worker.schedule(new OnCompletedAction(this.action, completableObserver));
         }
     }
@@ -99,12 +98,12 @@ public class SchedulerWhen extends Scheduler implements Disposable {
         }
     }
 
-    static final class QueueWorker extends Worker {
+    static final class QueueWorker extends Scheduler.Worker {
         private final FlowableProcessor<ScheduledAction> actionProcessor;
-        private final Worker actualWorker;
+        private final Scheduler.Worker actualWorker;
         private final AtomicBoolean unsubscribed = new AtomicBoolean();
 
-        QueueWorker(FlowableProcessor<ScheduledAction> flowableProcessor, Worker worker) {
+        QueueWorker(FlowableProcessor<ScheduledAction> flowableProcessor, Scheduler.Worker worker) {
             this.actionProcessor = flowableProcessor;
             this.actualWorker = worker;
         }
@@ -140,8 +139,8 @@ public class SchedulerWhen extends Scheduler implements Disposable {
             super(SchedulerWhen.SUBSCRIBED);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void call(Worker worker, CompletableObserver completableObserver) {
+        /* access modifiers changed from: package-private */
+        public void call(Scheduler.Worker worker, CompletableObserver completableObserver) {
             Disposable disposable = (Disposable) get();
             if (disposable != SchedulerWhen.DISPOSED && disposable == SchedulerWhen.SUBSCRIBED) {
                 Disposable callActual = callActual(worker, completableObserver);
@@ -152,7 +151,7 @@ public class SchedulerWhen extends Scheduler implements Disposable {
         }
 
         /* access modifiers changed from: protected */
-        public abstract Disposable callActual(Worker worker, CompletableObserver completableObserver);
+        public abstract Disposable callActual(Scheduler.Worker worker, CompletableObserver completableObserver);
 
         public void dispose() {
             Disposable disposable;
@@ -188,7 +187,7 @@ public class SchedulerWhen extends Scheduler implements Disposable {
     public SchedulerWhen(Function<Flowable<Flowable<Completable>>, Completable> function, Scheduler scheduler) {
         this.actualScheduler = scheduler;
         try {
-            this.disposable = ((Completable) function.apply(this.workerProcessor)).subscribe();
+            this.disposable = function.apply(this.workerProcessor).subscribe();
         } catch (Throwable th) {
             Exceptions.propagate(th);
             throw null;
@@ -196,8 +195,8 @@ public class SchedulerWhen extends Scheduler implements Disposable {
     }
 
     @NonNull
-    public Worker createWorker() {
-        Worker createWorker = this.actualScheduler.createWorker();
+    public Scheduler.Worker createWorker() {
+        Scheduler.Worker createWorker = this.actualScheduler.createWorker();
         FlowableProcessor serialized = UnicastProcessor.create().toSerialized();
         Flowable map = serialized.map(new CreateWorkerFunction(createWorker));
         QueueWorker queueWorker = new QueueWorker(serialized, createWorker);

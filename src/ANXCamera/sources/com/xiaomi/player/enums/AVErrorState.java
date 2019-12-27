@@ -21,7 +21,6 @@ public enum AVErrorState {
     }
 
     public static AVErrorState int2enum(int i) {
-        AVErrorState[] values;
         AVErrorState aVErrorState = AVErrorStreamNotFound;
         for (AVErrorState aVErrorState2 : values()) {
             if (aVErrorState2.ordinal() == i) {

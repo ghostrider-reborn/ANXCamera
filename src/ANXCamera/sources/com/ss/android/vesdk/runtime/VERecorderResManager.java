@@ -11,18 +11,12 @@ public class VERecorderResManager {
     private String mConcatSegmentVideoPath;
     private String mConcatSementAudioVideoMixedVideoPath;
     private List<String> mSegmentAudioPathList = new ArrayList();
-    private String mSegmentDirPath;
+    private String mSegmentDirPath = (this.mWorkspace + File.separator + "segments" + File.separator);
     private List<String> mSegmentVideoPathList = new ArrayList();
     private String mWorkspace;
 
     public VERecorderResManager(String str) {
         this.mWorkspace = str;
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mWorkspace);
-        sb.append(File.separator);
-        sb.append("segments");
-        sb.append(File.separator);
-        this.mSegmentDirPath = sb.toString();
     }
 
     public void addSegmentAudioPath(String str) {
@@ -38,53 +32,31 @@ public class VERecorderResManager {
             return "";
         }
         List<String> list = this.mSegmentAudioPathList;
-        return (String) list.remove(list.size() - 1);
+        return list.remove(list.size() - 1);
     }
 
     public String delSegmentVideoPath() throws VEException {
         if (this.mSegmentVideoPathList.size() > 0) {
             List<String> list = this.mSegmentVideoPathList;
-            return (String) list.remove(list.size() - 1);
+            return list.remove(list.size() - 1);
         }
         throw new VEException(VEResult.TER_INVALID_STAT, "segment video list size is 0");
     }
 
     public void genConcatSegmentAudioPath() {
-        StringBuilder sb = new StringBuilder();
-        String str = "concat";
-        sb.append(VEResManager.getFolder(this.mWorkspace, str));
-        sb.append(File.separator);
-        sb.append(str);
-        sb.append(".wav");
-        this.mConcatSegmentAudioPath = sb.toString();
+        this.mConcatSegmentAudioPath = VEResManager.getFolder(this.mWorkspace, "concat") + File.separator + "concat" + ".wav";
     }
 
     public void genConcatSegmentVideoPath() {
-        StringBuilder sb = new StringBuilder();
-        String str = "concat";
-        sb.append(VEResManager.getFolder(this.mWorkspace, str));
-        sb.append(File.separator);
-        sb.append(str);
-        sb.append(".mp4");
-        this.mConcatSegmentVideoPath = sb.toString();
+        this.mConcatSegmentVideoPath = VEResManager.getFolder(this.mWorkspace, "concat") + File.separator + "concat" + ".mp4";
     }
 
     public String genSegmentAudioPath(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(VEResManager.getFolder(this.mWorkspace, "segments"));
-        sb.append(File.separator);
-        sb.append(i);
-        sb.append(".wav");
-        return sb.toString();
+        return VEResManager.getFolder(this.mWorkspace, "segments") + File.separator + i + ".wav";
     }
 
     public String genSegmentVideoPath(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(VEResManager.getFolder(this.mWorkspace, "segments"));
-        sb.append(File.separator);
-        sb.append(i);
-        sb.append(".mp4");
-        return sb.toString();
+        return VEResManager.getFolder(this.mWorkspace, "segments") + File.separator + i + ".mp4";
     }
 
     public String getConcatSegmentAudioPath() {

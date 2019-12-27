@@ -6,8 +6,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.text.Layout.Alignment;
+import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -66,10 +65,9 @@ public class DuoSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         this.mCurrentMode = i;
         this.mManuallyListener = manuallyListener;
         this.mCurrentValue = componentData.getComponentValue(this.mCurrentMode);
-        BaseModule baseModule = (BaseModule) ((ActivityBase) context).getCurrentModule();
         this.mZoomRatioWide = 1.0f;
         this.mZoomRatioTele = 2.0f;
-        this.mZoomRatioMax = baseModule.getMaxZoomRatio();
+        this.mZoomRatioMax = ((BaseModule) ((ActivityBase) context).getCurrentModule()).getMaxZoomRatio();
         float[] convertSplineXToEntryX = convertSplineXToEntryX(sX);
         float[] convertSplineYToZoomRatioY = convertSplineYToZoomRatioY(sY);
         this.mEntryToZoomRatioSpline = Spline.createMonotoneCubicSpline(convertSplineXToEntryX, convertSplineYToZoomRatioY);
@@ -84,7 +82,7 @@ public class DuoSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
                 break;
             }
             StaticLayout[] staticLayoutArr = this.mEntryLayouts;
-            StaticLayout staticLayout = new StaticLayout(charSequenceArr[i2], this.mTextPaint, Util.sWindowWidth, Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            StaticLayout staticLayout = new StaticLayout(charSequenceArr[i2], this.mTextPaint, Util.sWindowWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             staticLayoutArr[i2] = staticLayout;
             i2++;
         }
@@ -128,9 +126,8 @@ public class DuoSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
     }
 
     private void drawText(int i, Canvas canvas) {
-        float lineAscent = (float) (this.mEntryLayouts[i].getLineAscent(0) - this.mEntryLayouts[i].getLineDescent(0));
         canvas.save();
-        canvas.translate(0.0f, lineAscent / 2.0f);
+        canvas.translate(0.0f, ((float) (this.mEntryLayouts[i].getLineAscent(0) - this.mEntryLayouts[i].getLineDescent(0))) / 2.0f);
         this.mEntryLayouts[i].draw(canvas);
         canvas.restore();
     }
@@ -170,7 +167,7 @@ public class DuoSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         this.mPaint.setAntiAlias(true);
         this.mPaint.setStrokeWidth((float) this.mLineWidth);
         this.mPaint.setTextSize((float) this.mTextSize);
-        this.mPaint.setTextAlign(Align.LEFT);
+        this.mPaint.setTextAlign(Paint.Align.LEFT);
         this.mTextPaint = new TextPaint(this.mPaint);
         this.mDigitsTextStyle = new TextAppearanceSpan(context, R.style.ZoomPopupDigitsTextStyle);
         this.mXTextStyle = new TextAppearanceSpan(context, R.style.ZoomPopupXTextStyle);
@@ -193,8 +190,8 @@ public class DuoSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         }
     }
 
-    public Align getAlign(int i) {
-        return (i == 0 || i == 10 || i == 47) ? Align.LEFT : Align.CENTER;
+    public Paint.Align getAlign(int i) {
+        return (i == 0 || i == 10 || i == 47) ? Paint.Align.LEFT : Paint.Align.CENTER;
     }
 
     public int getCount() {

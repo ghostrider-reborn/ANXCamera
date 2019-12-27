@@ -1,6 +1,6 @@
 package com.arcsoft.avatar.recoder;
 
-import android.media.MediaCodec.BufferInfo;
+import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.support.annotation.NonNull;
@@ -15,31 +15,30 @@ import java.nio.ByteBuffer;
 
 public class MuxerWrapper {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f117a = "Arc_MuxerWrapper";
     private static final String g = "video";
     private static final String h = ".mp4";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private int f118b;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private volatile int f119c;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private volatile boolean f120d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private MediaMuxer f121e;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private String f122f;
     private long i;
     private long j;
     private RecordingListener k;
 
     public MuxerWrapper(@Nullable FileDescriptor fileDescriptor, int i2, RecordingListener recordingListener) {
-        String str = f117a;
         this.f122f = "";
         this.i = 0;
         this.j = 0;
@@ -51,17 +50,14 @@ public class MuxerWrapper {
         try {
             this.f121e = new MediaMuxer(fileDescriptor, 0);
             this.f121e.setOrientationHint(i2);
-            StringBuilder sb = new StringBuilder();
-            sb.append("MuxerWrapper()-> screenOrientation=");
-            sb.append(i2);
-            CodecLog.d(str, sb.toString());
+            CodecLog.d(f117a, "MuxerWrapper()-> screenOrientation=" + i2);
         } catch (IOException e2) {
-            CodecLog.e(str, "MuxerWrapper()-> create MediaMuxer failed.");
+            CodecLog.e(f117a, "MuxerWrapper()-> create MediaMuxer failed.");
             e2.printStackTrace();
             this.f121e = null;
             RecordingListener recordingListener2 = this.k;
             if (recordingListener2 != null) {
-                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_CREATE, Integer.valueOf(0));
+                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_CREATE, 0);
             }
         }
     }
@@ -80,26 +76,18 @@ public class MuxerWrapper {
         this.f118b = 0;
         this.f119c = 0;
         this.f120d = false;
-        StringBuilder sb = new StringBuilder();
-        sb.append("MuxerWrapper()-> video name=");
-        sb.append(this.f122f);
-        String sb2 = sb.toString();
-        String str2 = f117a;
-        CodecLog.d(str2, sb2);
+        CodecLog.d(f117a, "MuxerWrapper()-> video name=" + this.f122f);
         try {
             this.f121e = new MediaMuxer(this.f122f, 0);
             this.f121e.setOrientationHint(i2);
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("MuxerWrapper()-> screenOrientation=");
-            sb3.append(i2);
-            CodecLog.d(str2, sb3.toString());
+            CodecLog.d(f117a, "MuxerWrapper()-> screenOrientation=" + i2);
         } catch (IOException e2) {
-            CodecLog.e(str2, "MuxerWrapper()-> create MediaMuxer failed.");
+            CodecLog.e(f117a, "MuxerWrapper()-> create MediaMuxer failed.");
             e2.printStackTrace();
             this.f121e = null;
             RecordingListener recordingListener2 = this.k;
             if (recordingListener2 != null) {
-                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_CREATE, Integer.valueOf(0));
+                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_CREATE, 0);
             }
         }
     }
@@ -128,7 +116,7 @@ public class MuxerWrapper {
             i2 = this.f121e.addTrack(mediaFormat);
         } catch (Exception e2) {
             if (this.k != null) {
-                this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_ADD_TRACK, Integer.valueOf(0));
+                this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_ADD_TRACK, 0);
             }
             e2.printStackTrace();
         }
@@ -185,7 +173,7 @@ public class MuxerWrapper {
             } catch (Exception e2) {
                 CodecLog.e(f117a, "startMuxer()-> Muxer start failed");
                 if (this.k != null) {
-                    this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_START, Integer.valueOf(0));
+                    this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_START, 0);
                 }
                 e2.printStackTrace();
             }
@@ -201,36 +189,22 @@ public class MuxerWrapper {
     public synchronized void stopMuxer() {
         if (this.f121e != null) {
             this.f119c--;
-            String str = f117a;
-            StringBuilder sb = new StringBuilder();
-            sb.append("stopMuxer()-> mEncoderCount=");
-            sb.append(this.f119c);
-            sb.append(" ,maxCount=");
-            sb.append(this.f118b);
-            CodecLog.d(str, sb.toString());
+            CodecLog.d(f117a, "stopMuxer()-> mEncoderCount=" + this.f119c + " ,maxCount=" + this.f118b);
             if (this.f119c == 0) {
                 try {
                     this.f121e.stop();
                 } catch (Exception e2) {
-                    String str2 = f117a;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("stopMuxer()-> muxer.stop() error=");
-                    sb2.append(e2.getMessage());
-                    CodecLog.e(str2, sb2.toString());
+                    CodecLog.e(f117a, "stopMuxer()-> muxer.stop() error=" + e2.getMessage());
                     if (this.k != null) {
-                        this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_STOP, Integer.valueOf(0));
+                        this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_STOP, 0);
                     }
                 }
                 try {
                     this.f121e.release();
                 } catch (Exception e3) {
-                    String str3 = f117a;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("stopMuxer()-> muxer.release() error=");
-                    sb3.append(e3.getMessage());
-                    CodecLog.e(str3, sb3.toString());
+                    CodecLog.e(f117a, "stopMuxer()-> muxer.release() error=" + e3.getMessage());
                     if (this.k != null) {
-                        this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_RELEASE, Integer.valueOf(0));
+                        this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_RELEASE, 0);
                     }
                 }
                 this.f121e = null;
@@ -242,7 +216,7 @@ public class MuxerWrapper {
     /* JADX WARNING: Code restructure failed: missing block: B:16:0x0037, code lost:
         return;
      */
-    public synchronized void writeSampleData(int i2, @NonNull ByteBuffer byteBuffer, @NonNull BufferInfo bufferInfo) {
+    public synchronized void writeSampleData(int i2, @NonNull ByteBuffer byteBuffer, @NonNull MediaCodec.BufferInfo bufferInfo) {
         if (this.f121e == null) {
             CodecLog.e(f117a, "writeSampleData()-> mMuxer must be created , but it's null until now.");
             return;
@@ -254,7 +228,7 @@ public class MuxerWrapper {
             CodecLog.e(f117a, "writeSampleData()-> writeSampleData failed");
             e2.printStackTrace();
             if (this.k != null) {
-                this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_WRITE_SAMPLE_DATA, Integer.valueOf(0));
+                this.k.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER_WRITE_SAMPLE_DATA, 0);
             }
         }
     }

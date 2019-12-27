@@ -48,10 +48,7 @@ public abstract class FrameView extends View implements FocusIndicator, Rotatabl
 
     public void setCameraDisplayOrientation(int i) {
         this.mCameraDisplayOrientation = i;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mCameraDisplayOrientation=");
-        sb.append(i);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "mCameraDisplayOrientation=" + i);
     }
 
     public boolean setFaces(CameraHardwareFace[] cameraHardwareFaceArr) {
@@ -60,10 +57,7 @@ public abstract class FrameView extends View implements FocusIndicator, Rotatabl
 
     public void setMirror(boolean z) {
         this.mMirror = z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mMirror=");
-        sb.append(z);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "mMirror=" + z);
     }
 
     public void setOrientation(int i, boolean z) {

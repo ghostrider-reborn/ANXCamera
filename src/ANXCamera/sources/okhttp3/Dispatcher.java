@@ -11,6 +11,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import okhttp3.RealCall;
 import okhttp3.internal.Util;
 
 public final class Dispatcher {
@@ -20,8 +21,8 @@ public final class Dispatcher {
     private Runnable idleCallback;
     private int maxRequests = 64;
     private int maxRequestsPerHost = 5;
-    private final Deque<AsyncCall> readyAsyncCalls = new ArrayDeque();
-    private final Deque<AsyncCall> runningAsyncCalls = new ArrayDeque();
+    private final Deque<RealCall.AsyncCall> readyAsyncCalls = new ArrayDeque();
+    private final Deque<RealCall.AsyncCall> runningAsyncCalls = new ArrayDeque();
     private final Deque<RealCall> runningSyncCalls = new ArrayDeque();
 
     public Dispatcher() {
@@ -52,24 +53,24 @@ public final class Dispatcher {
 
     private void promoteCalls() {
         if (this.runningAsyncCalls.size() < this.maxRequests && !this.readyAsyncCalls.isEmpty()) {
-            Iterator it = this.readyAsyncCalls.iterator();
+            Iterator<RealCall.AsyncCall> it = this.readyAsyncCalls.iterator();
             while (it.hasNext()) {
-                AsyncCall asyncCall = (AsyncCall) it.next();
-                if (runningCallsForHost(asyncCall) < this.maxRequestsPerHost) {
+                RealCall.AsyncCall next = it.next();
+                if (runningCallsForHost(next) < this.maxRequestsPerHost) {
                     it.remove();
-                    this.runningAsyncCalls.add(asyncCall);
-                    executorService().execute(asyncCall);
+                    this.runningAsyncCalls.add(next);
+                    executorService().execute(next);
                 }
                 if (this.runningAsyncCalls.size() >= this.maxRequests) {
-                    break;
+                    return;
                 }
             }
         }
     }
 
-    private int runningCallsForHost(AsyncCall asyncCall) {
+    private int runningCallsForHost(RealCall.AsyncCall asyncCall) {
         int i = 0;
-        for (AsyncCall host : this.runningAsyncCalls) {
+        for (RealCall.AsyncCall host : this.runningAsyncCalls) {
             if (host.host().equals(asyncCall.host())) {
                 i++;
             }
@@ -78,10 +79,10 @@ public final class Dispatcher {
     }
 
     public synchronized void cancelAll() {
-        for (AsyncCall asyncCall : this.readyAsyncCalls) {
+        for (RealCall.AsyncCall asyncCall : this.readyAsyncCalls) {
             asyncCall.get().cancel();
         }
-        for (AsyncCall asyncCall2 : this.runningAsyncCalls) {
+        for (RealCall.AsyncCall asyncCall2 : this.runningAsyncCalls) {
             asyncCall2.get().cancel();
         }
         for (RealCall cancel : this.runningSyncCalls) {
@@ -89,8 +90,8 @@ public final class Dispatcher {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    public synchronized void enqueue(AsyncCall asyncCall) {
+    /* access modifiers changed from: package-private */
+    public synchronized void enqueue(RealCall.AsyncCall asyncCall) {
         if (this.runningAsyncCalls.size() >= this.maxRequests || runningCallsForHost(asyncCall) >= this.maxRequestsPerHost) {
             this.readyAsyncCalls.add(asyncCall);
         } else {
@@ -99,7 +100,7 @@ public final class Dispatcher {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void executed(RealCall realCall) {
         this.runningSyncCalls.add(realCall);
     }
@@ -112,12 +113,12 @@ public final class Dispatcher {
         return this.executorService;
     }
 
-    /* access modifiers changed from: 0000 */
-    public void finished(AsyncCall asyncCall) {
+    /* access modifiers changed from: package-private */
+    public void finished(RealCall.AsyncCall asyncCall) {
         finished(this.runningAsyncCalls, asyncCall, true);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void finished(RealCall realCall) {
         finished(this.runningSyncCalls, realCall, false);
     }
@@ -133,7 +134,7 @@ public final class Dispatcher {
     public synchronized List<Call> queuedCalls() {
         ArrayList arrayList;
         arrayList = new ArrayList();
-        for (AsyncCall asyncCall : this.readyAsyncCalls) {
+        for (RealCall.AsyncCall asyncCall : this.readyAsyncCalls) {
             arrayList.add(asyncCall.get());
         }
         return Collections.unmodifiableList(arrayList);
@@ -147,7 +148,7 @@ public final class Dispatcher {
         ArrayList arrayList;
         arrayList = new ArrayList();
         arrayList.addAll(this.runningSyncCalls);
-        for (AsyncCall asyncCall : this.runningAsyncCalls) {
+        for (RealCall.AsyncCall asyncCall : this.runningAsyncCalls) {
             arrayList.add(asyncCall.get());
         }
         return Collections.unmodifiableList(arrayList);
@@ -166,10 +167,7 @@ public final class Dispatcher {
             this.maxRequests = i;
             promoteCalls();
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("max < 1: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("max < 1: " + i);
         }
     }
 
@@ -178,10 +176,7 @@ public final class Dispatcher {
             this.maxRequestsPerHost = i;
             promoteCalls();
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("max < 1: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("max < 1: " + i);
         }
     }
 }

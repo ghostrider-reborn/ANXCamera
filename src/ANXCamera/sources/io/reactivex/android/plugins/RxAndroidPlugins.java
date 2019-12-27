@@ -22,8 +22,10 @@ public final class RxAndroidPlugins {
         }
     }
 
-    static Scheduler applyRequireNonNull(Function<Callable<Scheduler>, Scheduler> function, Callable<Scheduler> callable) {
-        Scheduler scheduler = (Scheduler) apply(function, callable);
+    /* JADX WARNING: type inference failed for: r0v0, types: [io.reactivex.functions.Function, io.reactivex.functions.Function<java.util.concurrent.Callable<io.reactivex.Scheduler>, io.reactivex.Scheduler>] */
+    /* JADX WARNING: Unknown variable types count: 1 */
+    static Scheduler applyRequireNonNull(Function<Callable<Scheduler>, Scheduler> r0, Callable<Scheduler> callable) {
+        Scheduler scheduler = (Scheduler) apply(r0, callable);
         if (scheduler != null) {
             return scheduler;
         }
@@ -32,9 +34,9 @@ public final class RxAndroidPlugins {
 
     static Scheduler callRequireNonNull(Callable<Scheduler> callable) {
         try {
-            Scheduler scheduler = (Scheduler) callable.call();
-            if (scheduler != null) {
-                return scheduler;
+            Scheduler call = callable.call();
+            if (call != null) {
+                return call;
             }
             throw new NullPointerException("Scheduler Callable returned null");
         } catch (Throwable th) {
@@ -53,15 +55,15 @@ public final class RxAndroidPlugins {
 
     public static Scheduler onMainThreadScheduler(Scheduler scheduler) {
         if (scheduler != null) {
-            Function<Scheduler, Scheduler> function = onMainThreadHandler;
+            Function function = onMainThreadHandler;
             return function == null ? scheduler : (Scheduler) apply(function, scheduler);
         }
         throw new NullPointerException("scheduler == null");
     }
 
     public static void reset() {
-        setInitMainThreadSchedulerHandler(null);
-        setMainThreadSchedulerHandler(null);
+        setInitMainThreadSchedulerHandler((Function<Callable<Scheduler>, Scheduler>) null);
+        setMainThreadSchedulerHandler((Function<Scheduler, Scheduler>) null);
     }
 
     public static void setInitMainThreadSchedulerHandler(Function<Callable<Scheduler>, Scheduler> function) {

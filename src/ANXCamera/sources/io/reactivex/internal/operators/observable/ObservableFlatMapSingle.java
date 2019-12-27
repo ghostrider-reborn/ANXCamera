@@ -27,7 +27,7 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
         final Observer<? super R> actual;
         volatile boolean cancelled;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f315d;
         final boolean delayErrors;
         final AtomicThrowable errors = new AtomicThrowable();
@@ -68,9 +68,9 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
             this.delayErrors = z;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
-            SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) this.queue.get();
+            SpscLinkedArrayQueue spscLinkedArrayQueue = this.queue.get();
             if (spscLinkedArrayQueue != null) {
                 spscLinkedArrayQueue.clear();
             }
@@ -82,14 +82,14 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
             this.set.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             Observer<? super R> observer = this.actual;
             AtomicInteger atomicInteger = this.active;
@@ -99,7 +99,7 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
                 if (this.delayErrors || ((Throwable) this.errors.get()) == null) {
                     boolean z = false;
                     boolean z2 = atomicInteger.get() == 0;
-                    SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) atomicReference.get();
+                    SpscLinkedArrayQueue spscLinkedArrayQueue = atomicReference.get();
                     Object poll = spscLinkedArrayQueue != null ? spscLinkedArrayQueue.poll() : null;
                     if (poll == null) {
                         z = true;
@@ -108,10 +108,11 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
                         Throwable terminate = this.errors.terminate();
                         if (terminate != null) {
                             observer.onError(terminate);
+                            return;
                         } else {
                             observer.onComplete();
+                            return;
                         }
-                        return;
                     } else if (z) {
                         i = addAndGet(-i);
                         if (i == 0) {
@@ -130,21 +131,21 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
             clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SpscLinkedArrayQueue<R> getOrCreateQueue() {
             SpscLinkedArrayQueue<R> spscLinkedArrayQueue;
             do {
-                SpscLinkedArrayQueue<R> spscLinkedArrayQueue2 = (SpscLinkedArrayQueue) this.queue.get();
+                SpscLinkedArrayQueue<R> spscLinkedArrayQueue2 = this.queue.get();
                 if (spscLinkedArrayQueue2 != null) {
                     return spscLinkedArrayQueue2;
                 }
                 spscLinkedArrayQueue = new SpscLinkedArrayQueue<>(Observable.bufferSize());
-            } while (!this.queue.compareAndSet(null, spscLinkedArrayQueue));
+            } while (!this.queue.compareAndSet((Object) null, spscLinkedArrayQueue));
             return spscLinkedArrayQueue;
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerError(InnerObserver innerObserver, Throwable th) {
+        /* access modifiers changed from: package-private */
+        public void innerError(FlatMapSingleObserver<T, R>.InnerObserver innerObserver, Throwable th) {
             this.set.delete(innerObserver);
             if (this.errors.addThrowable(th)) {
                 if (!this.delayErrors) {
@@ -158,8 +159,8 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
             RxJavaPlugins.onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerSuccess(InnerObserver innerObserver, R r) {
+        /* access modifiers changed from: package-private */
+        public void innerSuccess(FlatMapSingleObserver<T, R>.InnerObserver innerObserver, R r) {
             this.set.delete(innerObserver);
             if (get() == 0) {
                 boolean z = true;
@@ -168,7 +169,7 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
                     if (this.active.decrementAndGet() != 0) {
                         z = false;
                     }
-                    SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) this.queue.get();
+                    SpscLinkedArrayQueue spscLinkedArrayQueue = this.queue.get();
                     if (!z || (spscLinkedArrayQueue != null && !spscLinkedArrayQueue.isEmpty())) {
                         if (decrementAndGet() == 0) {
                             return;
@@ -178,10 +179,11 @@ public final class ObservableFlatMapSingle<T, R> extends AbstractObservableWithU
                     Throwable terminate = this.errors.terminate();
                     if (terminate != null) {
                         this.actual.onError(terminate);
+                        return;
                     } else {
                         this.actual.onComplete();
+                        return;
                     }
-                    return;
                 }
             }
             SpscLinkedArrayQueue orCreateQueue = getOrCreateQueue();

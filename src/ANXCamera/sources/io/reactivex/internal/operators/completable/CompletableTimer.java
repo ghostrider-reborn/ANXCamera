@@ -33,7 +33,7 @@ public final class CompletableTimer extends Completable {
             this.actual.onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setFuture(Disposable disposable) {
             DisposableHelper.replace(this, disposable);
         }

@@ -20,7 +20,7 @@ public class BaseFragmentLifecycle implements BaseLifeCycle {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onDestroy(String str) {
         this.mIsDestroyed = true;
         for (BaseLifecycleListener onLifeDestroy : this.mLifecycleListeners) {
@@ -28,7 +28,7 @@ public class BaseFragmentLifecycle implements BaseLifeCycle {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onStart(String str) {
         this.mIsStarted = true;
         for (BaseLifecycleListener onLifeStart : this.mLifecycleListeners) {
@@ -36,7 +36,7 @@ public class BaseFragmentLifecycle implements BaseLifeCycle {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onStop(String str) {
         this.mIsStarted = false;
         for (BaseLifecycleListener onLifeStop : this.mLifecycleListeners) {

@@ -3,13 +3,12 @@ package org.jcodec.containers.mp4;
 import java.nio.ByteBuffer;
 import org.jcodec.common.io.NIOUtils;
 import org.jcodec.containers.mp4.boxes.Box;
-import org.jcodec.containers.mp4.boxes.Box.LeafBox;
 import org.jcodec.containers.mp4.boxes.Header;
 import org.jcodec.containers.mp4.boxes.NodeBox;
 import org.jcodec.platform.Platform;
 
 public class BoxUtil {
-    public static <T extends Box> T as(Class<T> cls, LeafBox leafBox) {
+    public static <T extends Box> T as(Class<T> cls, Box.LeafBox leafBox) {
         try {
             T t = (Box) Platform.newInstance(cls, new Object[]{leafBox.getHeader()});
             t.parse(leafBox.getData().duplicate());
@@ -30,7 +29,7 @@ public class BoxUtil {
     public static Box parseBox(ByteBuffer byteBuffer, Header header, IBoxFactory iBoxFactory) {
         Box newBox = iBoxFactory.newBox(header);
         if (header.getBodySize() >= 134217728) {
-            return new LeafBox(Header.createHeader("free", 8));
+            return new Box.LeafBox(Header.createHeader("free", 8));
         }
         newBox.parse(byteBuffer);
         return newBox;

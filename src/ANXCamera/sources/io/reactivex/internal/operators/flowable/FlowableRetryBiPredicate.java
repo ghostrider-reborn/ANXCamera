@@ -59,7 +59,7 @@ public final class FlowableRetryBiPredicate<T> extends AbstractFlowableWithUpstr
             this.sa.setSubscription(subscription);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             if (getAndIncrement() == 0) {
                 int i = 1;
@@ -72,6 +72,7 @@ public final class FlowableRetryBiPredicate<T> extends AbstractFlowableWithUpstr
                     this.source.subscribe(this);
                     i = addAndGet(-i);
                     if (i == 0) {
+                        return;
                     }
                 }
             }

@@ -4,10 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Shader.TileMode;
+import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -17,7 +16,7 @@ import android.widget.HorizontalScrollView;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ModeChangeController;
+import com.android.camera.protocol.ModeProtocol;
 
 public class EdgeHorizonScrollView extends HorizontalScrollView {
     private float mDownX = -1.0f;
@@ -47,7 +46,7 @@ public class EdgeHorizonScrollView extends HorizontalScrollView {
         int width = getWidth();
         int height = getHeight();
         float f2 = (float) height;
-        int saveLayer = canvas.saveLayer(0.0f, 0.0f, (float) Math.max(width, view.getWidth()), f2, null, 31);
+        int saveLayer = canvas.saveLayer(0.0f, 0.0f, (float) Math.max(width, view.getWidth()), f2, (Paint) null, 31);
         boolean drawChild = super.drawChild(canvas, view, j);
         canvas2.translate(this.mIsRTL ? (float) Math.max(0, view.getWidth() - width) : 0.0f, 0.0f);
         float f3 = (float) width;
@@ -75,10 +74,10 @@ public class EdgeHorizonScrollView extends HorizontalScrollView {
         this.mEdgeWidth = getResources().getDimensionPixelSize(R.dimen.mode_select_layout_edge);
         this.mEdgePaint = new Paint();
         this.mEdgePaint.setAntiAlias(true);
-        this.mEdgePaint.setStyle(Style.FILL);
-        this.mEdgePaint.setXfermode(new PorterDuffXfermode(Mode.DST_OUT));
+        this.mEdgePaint.setStyle(Paint.Style.FILL);
+        this.mEdgePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
         Paint paint = this.mEdgePaint;
-        LinearGradient linearGradient = new LinearGradient(0.0f, 0.0f, 0.0f, (float) this.mEdgeWidth, new int[]{ViewCompat.MEASURED_STATE_MASK, -1728053248, 0}, new float[]{0.0f, 0.3f, 2.0f}, TileMode.CLAMP);
+        LinearGradient linearGradient = new LinearGradient(0.0f, 0.0f, 0.0f, (float) this.mEdgeWidth, new int[]{ViewCompat.MEASURED_STATE_MASK, -1728053248, 0}, new float[]{0.0f, 0.3f, 2.0f}, Shader.TileMode.CLAMP);
         paint.setShader(linearGradient);
         setFocusable(false);
     }
@@ -95,7 +94,7 @@ public class EdgeHorizonScrollView extends HorizontalScrollView {
                         this.mDownX = motionEvent.getX();
                     }
                     float x = motionEvent.getX() - this.mDownX;
-                    ModeChangeController modeChangeController = (ModeChangeController) ModeCoordinatorImpl.getInstance().getAttachProtocol(179);
+                    ModeProtocol.ModeChangeController modeChangeController = (ModeProtocol.ModeChangeController) ModeCoordinatorImpl.getInstance().getAttachProtocol(179);
                     if (!this.mScrolled && modeChangeController != null) {
                         if (x > ((float) Util.dpToPixel(17.0f)) && modeChangeController.canSwipeChangeMode()) {
                             modeChangeController.changeModeByGravity(3, 0);

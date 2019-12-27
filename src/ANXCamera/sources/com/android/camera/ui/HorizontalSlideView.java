@@ -2,27 +2,25 @@ package com.android.camera.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint.Align;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnGestureListener;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
+import com.android.camera.protocol.ModeProtocol;
 
 public class HorizontalSlideView extends View {
     private static final String TAG = "HSlideView";
     private HorizontalDrawAdapter mDrawAdapter;
     private GestureDetector mGestureDetector;
-    private OnGestureListener mGestureListener = new SimpleOnGestureListener() {
+    private GestureDetector.OnGestureListener mGestureListener = new GestureDetector.SimpleOnGestureListener() {
         public boolean onDown(MotionEvent motionEvent) {
             HorizontalSlideView.this.mScroller.forceFinished(true);
-            HorizontalSlideView.this.mNeedJustify = false;
+            boolean unused = HorizontalSlideView.this.mNeedJustify = false;
             return true;
         }
 
@@ -32,7 +30,7 @@ public class HorizontalSlideView extends View {
         }
 
         public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float f2, float f3) {
-            HorizontalSlideView.this.mIsScrollingPerformed = true;
+            boolean unused = HorizontalSlideView.this.mIsScrollingPerformed = true;
             HorizontalSlideView horizontalSlideView = HorizontalSlideView.this;
             if (horizontalSlideView.mPositionX == horizontalSlideView.mMinX && f2 < 0.0f) {
                 return false;
@@ -48,9 +46,10 @@ public class HorizontalSlideView extends View {
 
         public boolean onSingleTapUp(MotionEvent motionEvent) {
             HorizontalSlideView.this.scroll((int) (motionEvent.getX() - HorizontalSlideView.this.mOriginX));
-            if (HorizontalSlideView.this.mOnTabListener != null) {
-                HorizontalSlideView.this.mOnTabListener.onTab(HorizontalSlideView.this);
+            if (HorizontalSlideView.this.mOnTabListener == null) {
+                return true;
             }
+            HorizontalSlideView.this.mOnTabListener.onTab(HorizontalSlideView.this);
             return true;
         }
     };
@@ -76,7 +75,7 @@ public class HorizontalSlideView extends View {
     public static abstract class HorizontalDrawAdapter {
         public abstract void draw(int i, Canvas canvas, boolean z);
 
-        public abstract Align getAlign(int i);
+        public abstract Paint.Align getAlign(int i);
 
         public abstract int getCount();
 
@@ -185,7 +184,7 @@ public class HorizontalSlideView extends View {
     }
 
     private void select(int i) {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null || !cameraAction.isDoingAction()) {
             if (this.mSelectedItemIndex != i || !isScrolling()) {
                 this.mSelectedItemIndex = i;
@@ -202,6 +201,7 @@ public class HorizontalSlideView extends View {
                     f2 = 1.0f - f2;
                 }
                 onPositionSelectListener.onPositionSelect(this, i2, f2);
+                return;
             }
             return;
         }
@@ -313,9 +313,9 @@ public class HorizontalSlideView extends View {
                 float f14 = f8 + itemWidth2;
                 if (f14 >= f5 && f8 <= ((float) getWidth())) {
                     canvas.save();
-                    if (this.mDrawAdapter.getAlign(i5) == Align.LEFT) {
+                    if (this.mDrawAdapter.getAlign(i5) == Paint.Align.LEFT) {
                         canvas2.translate(f8, height);
-                    } else if (this.mDrawAdapter.getAlign(i5) == Align.CENTER) {
+                    } else if (this.mDrawAdapter.getAlign(i5) == Paint.Align.CENTER) {
                         canvas2.translate(f13, height);
                     } else {
                         canvas2.translate(f14, height);

@@ -128,7 +128,7 @@ public final class ConnectionSpec {
         return new Builder(this).cipherSuites(intersect).tlsVersions(intersect2).build();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void apply(SSLSocket sSLSocket, boolean z) {
         ConnectionSpec supportedSpec = supportedSpec(sSLSocket, z);
         String[] strArr = supportedSpec.tlsVersions;
@@ -210,14 +210,6 @@ public final class ConnectionSpec {
         if (this.tlsVersions != null) {
             str = tlsVersions().toString();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConnectionSpec(cipherSuites=");
-        sb.append(obj);
-        sb.append(", tlsVersions=");
-        sb.append(str);
-        sb.append(", supportsTlsExtensions=");
-        sb.append(this.supportsTlsExtensions);
-        sb.append(")");
-        return sb.toString();
+        return "ConnectionSpec(cipherSuites=" + obj + ", tlsVersions=" + str + ", supportsTlsExtensions=" + this.supportsTlsExtensions + ")";
     }
 }

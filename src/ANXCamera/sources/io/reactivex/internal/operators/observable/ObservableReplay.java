@@ -38,19 +38,19 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
         Node tail;
 
         BoundedReplayBuffer() {
-            Node node = new Node(null);
+            Node node = new Node((Object) null);
             this.tail = node;
             set(node);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void addLast(Node node) {
             this.tail.set(node);
             this.tail = node;
             this.size++;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void collect(Collection<? super T> collection) {
             Node head = getHead();
             while (true) {
@@ -74,7 +74,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             truncateFinal();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object enterTransform(Object obj) {
             return obj;
         }
@@ -84,24 +84,24 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             truncateFinal();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Node getHead() {
             return (Node) get();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasCompleted() {
             Object obj = this.tail.value;
             return obj != null && NotificationLite.isComplete(leaveTransform(obj));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasError() {
             Object obj = this.tail.value;
             return obj != null && NotificationLite.isError(leaveTransform(obj));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object leaveTransform(Object obj) {
             return obj;
         }
@@ -112,14 +112,13 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             truncate();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void removeFirst() {
-            Node node = (Node) ((Node) get()).get();
             this.size--;
-            setFirst(node);
+            setFirst((Node) ((Node) get()).get());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void removeSome(int i) {
             Node node = (Node) get();
             while (i > 0) {
@@ -156,15 +155,15 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void setFirst(Node node) {
             set(node);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void truncate();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncateFinal() {
         }
     }
@@ -204,7 +203,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public <U> U index() {
             return this.index;
         }
@@ -237,7 +236,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
                 connectableObservable.connect(new DisposeConsumer(observerResourceWrapper));
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, observer);
+                EmptyDisposable.error(th, (Observer<?>) observer);
             }
         }
     }
@@ -305,12 +304,12 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             this.buffer = replayBuffer;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean add(InnerDisposable<T> innerDisposable) {
             InnerDisposable[] innerDisposableArr;
             InnerDisposable[] innerDisposableArr2;
             do {
-                innerDisposableArr = (InnerDisposable[]) this.observers.get();
+                innerDisposableArr = this.observers.get();
                 if (innerDisposableArr == TERMINATED) {
                     return false;
                 }
@@ -362,12 +361,12 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void remove(InnerDisposable<T> innerDisposable) {
             InnerDisposable[] innerDisposableArr;
             InnerDisposable[] innerDisposableArr2;
             do {
-                innerDisposableArr = (InnerDisposable[]) this.observers.get();
+                innerDisposableArr = this.observers.get();
                 int length = innerDisposableArr.length;
                 if (length != 0) {
                     int i = -1;
@@ -400,16 +399,16 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             } while (!this.observers.compareAndSet(innerDisposableArr, innerDisposableArr2));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void replay() {
-            for (InnerDisposable replay : (InnerDisposable[]) this.observers.get()) {
+            for (InnerDisposable replay : this.observers.get()) {
                 this.buffer.replay(replay);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void replayFinal() {
-            for (InnerDisposable replay : (InnerDisposable[]) this.observers.getAndSet(TERMINATED)) {
+            for (InnerDisposable replay : this.observers.getAndSet(TERMINATED)) {
                 this.buffer.replay(replay);
             }
         }
@@ -424,16 +423,16 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             this.bufferFactory = bufferSupplier;
         }
 
-        /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+        /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
         public void subscribe(Observer<? super T> observer) {
             ReplayObserver replayObserver;
             while (true) {
-                replayObserver = (ReplayObserver) this.curr.get();
+                replayObserver = this.curr.get();
                 if (replayObserver != null) {
                     break;
                 }
                 ReplayObserver replayObserver2 = new ReplayObserver(this.bufferFactory.call());
-                if (this.curr.compareAndSet(null, replayObserver2)) {
+                if (this.curr.compareAndSet((Object) null, replayObserver2)) {
                     replayObserver = replayObserver2;
                     break;
                 }
@@ -482,12 +481,12 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             this.unit = timeUnit;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object enterTransform(Object obj) {
             return new Timed(obj, this.scheduler.now(this.unit), this.unit);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Node getHead() {
             Node node;
             long now = this.scheduler.now(this.unit) - this.maxAge;
@@ -510,12 +509,12 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             return node;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object leaveTransform(Object obj) {
             return ((Timed) obj).value();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncate() {
             Node node;
             long now = this.scheduler.now(this.unit) - this.maxAge;
@@ -529,8 +528,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
                 if (node2 == null) {
                     break;
                 }
-                int i2 = this.size;
-                if (i2 <= this.limit) {
+                if (this.size <= this.limit) {
                     if (((Timed) node2.value).time() > now) {
                         break;
                     }
@@ -539,7 +537,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
                     node3 = (Node) node2.get();
                 } else {
                     i++;
-                    this.size = i2 - 1;
+                    this.size = r5 - 1;
                     node3 = (Node) node2.get();
                 }
             }
@@ -548,7 +546,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Removed duplicated region for block: B:14:? A[RETURN, SYNTHETIC] */
         /* JADX WARNING: Removed duplicated region for block: B:9:0x003e  */
         public void truncateFinal() {
@@ -584,7 +582,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
             this.limit = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncate() {
             if (this.size > this.limit) {
                 removeFirst();
@@ -658,7 +656,7 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
     }
 
     public static <T> ConnectableObservable<T> create(ObservableSource<T> observableSource, int i) {
-        return i == Integer.MAX_VALUE ? createFrom(observableSource) : create(observableSource, (BufferSupplier<T>) new ReplayBufferSupplier<T>(i));
+        return i == Integer.MAX_VALUE ? createFrom(observableSource) : create(observableSource, new ReplayBufferSupplier(i));
     }
 
     public static <T> ConnectableObservable<T> create(ObservableSource<T> observableSource, long j, TimeUnit timeUnit, Scheduler scheduler) {
@@ -667,12 +665,12 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
 
     public static <T> ConnectableObservable<T> create(ObservableSource<T> observableSource, long j, TimeUnit timeUnit, Scheduler scheduler, int i) {
         ScheduledReplaySupplier scheduledReplaySupplier = new ScheduledReplaySupplier(i, j, timeUnit, scheduler);
-        return create(observableSource, (BufferSupplier<T>) scheduledReplaySupplier);
+        return create(observableSource, scheduledReplaySupplier);
     }
 
     static <T> ConnectableObservable<T> create(ObservableSource<T> observableSource, BufferSupplier<T> bufferSupplier) {
         AtomicReference atomicReference = new AtomicReference();
-        return RxJavaPlugins.onAssembly((ConnectableObservable<T>) new ObservableReplay<T>(new ReplaySource(atomicReference, bufferSupplier), observableSource, atomicReference, bufferSupplier));
+        return RxJavaPlugins.onAssembly(new ObservableReplay(new ReplaySource(atomicReference, bufferSupplier), observableSource, atomicReference, bufferSupplier));
     }
 
     public static <T> ConnectableObservable<T> createFrom(ObservableSource<? extends T> observableSource) {
@@ -680,18 +678,18 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
     }
 
     public static <U, R> Observable<R> multicastSelector(Callable<? extends ConnectableObservable<U>> callable, Function<? super Observable<U>, ? extends ObservableSource<R>> function) {
-        return RxJavaPlugins.onAssembly((Observable<T>) new MulticastReplay<T>(callable, function));
+        return RxJavaPlugins.onAssembly(new MulticastReplay(callable, function));
     }
 
     public static <T> ConnectableObservable<T> observeOn(ConnectableObservable<T> connectableObservable, Scheduler scheduler) {
-        return RxJavaPlugins.onAssembly((ConnectableObservable<T>) new Replay<T>(connectableObservable, connectableObservable.observeOn(scheduler)));
+        return RxJavaPlugins.onAssembly(new Replay(connectableObservable, connectableObservable.observeOn(scheduler)));
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
     public void connect(Consumer<? super Disposable> consumer) {
         ReplayObserver replayObserver;
         while (true) {
-            replayObserver = (ReplayObserver) this.current.get();
+            replayObserver = this.current.get();
             if (replayObserver != null && !replayObserver.isDisposed()) {
                 break;
             }
@@ -717,11 +715,11 @@ public final class ObservableReplay<T> extends ConnectableObservable<T> implemen
     }
 
     public void dispose() {
-        this.current.lazySet(null);
+        this.current.lazySet((Object) null);
     }
 
     public boolean isDisposed() {
-        Disposable disposable = (Disposable) this.current.get();
+        Disposable disposable = this.current.get();
         return disposable == null || disposable.isDisposed();
     }
 

@@ -1,7 +1,6 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
@@ -67,7 +66,7 @@ public final class TrampolineScheduler extends Scheduler {
         }
     }
 
-    static final class TrampolineWorker extends Worker implements Disposable {
+    static final class TrampolineWorker extends Scheduler.Worker implements Disposable {
         final AtomicInteger counter = new AtomicInteger();
         volatile boolean disposed;
         final PriorityBlockingQueue<TimedRunnable> queue = new PriorityBlockingQueue<>();
@@ -94,7 +93,7 @@ public final class TrampolineScheduler extends Scheduler {
             this.disposed = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Disposable enqueue(Runnable runnable, long j) {
             if (this.disposed) {
                 return EmptyDisposable.INSTANCE;
@@ -106,14 +105,14 @@ public final class TrampolineScheduler extends Scheduler {
             }
             int i = 1;
             while (!this.disposed) {
-                TimedRunnable timedRunnable2 = (TimedRunnable) this.queue.poll();
-                if (timedRunnable2 == null) {
+                TimedRunnable poll = this.queue.poll();
+                if (poll == null) {
                     i = this.wip.addAndGet(-i);
                     if (i == 0) {
                         return EmptyDisposable.INSTANCE;
                     }
-                } else if (!timedRunnable2.disposed) {
-                    timedRunnable2.run.run();
+                } else if (!poll.disposed) {
+                    poll.run.run();
                 }
             }
             this.queue.clear();
@@ -144,7 +143,7 @@ public final class TrampolineScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
+    public Scheduler.Worker createWorker() {
         return new TrampolineWorker();
     }
 

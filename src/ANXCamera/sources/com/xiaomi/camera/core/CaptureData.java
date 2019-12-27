@@ -3,7 +3,7 @@ package com.xiaomi.camera.core;
 import android.media.Image;
 import android.support.annotation.NonNull;
 import com.android.camera.log.Log;
-import com.xiaomi.camera.core.ParallelDataZipper.DataListener;
+import com.xiaomi.camera.core.ParallelDataZipper;
 import com.xiaomi.protocol.ICustomCaptureResult;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class CaptureData {
     private CaptureDataListener mCaptureDataListener;
     private long mCaptureTimestamp;
     private boolean mCapturedByFrontCamera;
-    private DataListener mDataListener;
+    private ParallelDataZipper.DataListener mDataListener;
     private ImageProcessor mImageProcessor;
     private boolean mIsAbandoned;
     private CaptureDataBean mMultiFrameProcessResult;
@@ -68,17 +68,7 @@ public class CaptureData {
 
         public boolean isDataReady() {
             int i = this.mStreamNum;
-            boolean z = false;
-            if (2 == i) {
-                if (!(this.mResult == null || this.mMainImage == null || this.mSubImage == null)) {
-                    z = true;
-                }
-                return z;
-            }
-            if (!(1 != i || this.mResult == null || this.mMainImage == null)) {
-                z = true;
-            }
-            return z;
+            return 2 == i ? (this.mResult == null || this.mMainImage == null || this.mSubImage == null) ? false : true : (1 != i || this.mResult == null || this.mMainImage == null) ? false : true;
         }
 
         public boolean isFirstResult() {
@@ -97,10 +87,7 @@ public class CaptureData {
                 this.mSubImage = image;
             } else {
                 String access$000 = CaptureData.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("setImage: unknown imageFlag: ");
-                sb.append(i);
-                Log.e(access$000, sb.toString());
+                Log.e(access$000, "setImage: unknown imageFlag: " + i);
             }
         }
 
@@ -142,7 +129,7 @@ public class CaptureData {
         return this.mCaptureTimestamp;
     }
 
-    public DataListener getDataListener() {
+    public ParallelDataZipper.DataListener getDataListener() {
         return this.mDataListener;
     }
 
@@ -183,7 +170,7 @@ public class CaptureData {
         this.mCapturedByFrontCamera = z;
     }
 
-    public void setDataListener(DataListener dataListener) {
+    public void setDataListener(ParallelDataZipper.DataListener dataListener) {
         this.mDataListener = dataListener;
     }
 

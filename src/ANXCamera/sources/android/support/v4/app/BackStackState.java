@@ -2,14 +2,14 @@ package android.support.v4.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
+import android.support.v4.app.BackStackRecord;
 import android.text.TextUtils;
 import android.util.Log;
 import java.util.ArrayList;
 
 /* compiled from: BackStackRecord */
 final class BackStackState implements Parcelable {
-    public static final Creator<BackStackState> CREATOR = new Creator<BackStackState>() {
+    public static final Parcelable.Creator<BackStackState> CREATOR = new Parcelable.Creator<BackStackState>() {
         public BackStackState createFromParcel(Parcel parcel) {
             return new BackStackState(parcel);
         }
@@ -52,7 +52,7 @@ final class BackStackState implements Parcelable {
         if (backStackRecord.mAddToBackStack) {
             int i = 0;
             for (int i2 = 0; i2 < size; i2++) {
-                Op op = (Op) backStackRecord.mOps.get(i2);
+                BackStackRecord.Op op = backStackRecord.mOps.get(i2);
                 int[] iArr = this.mOps;
                 int i3 = i + 1;
                 iArr[i] = op.cmd;
@@ -94,23 +94,16 @@ final class BackStackState implements Parcelable {
         int i = 0;
         int i2 = 0;
         while (i < this.mOps.length) {
-            Op op = new Op();
+            BackStackRecord.Op op = new BackStackRecord.Op();
             int i3 = i + 1;
             op.cmd = this.mOps[i];
             if (FragmentManagerImpl.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Instantiate ");
-                sb.append(backStackRecord);
-                sb.append(" op #");
-                sb.append(i2);
-                sb.append(" base fragment #");
-                sb.append(this.mOps[i3]);
-                Log.v("FragmentManager", sb.toString());
+                Log.v("FragmentManager", "Instantiate " + backStackRecord + " op #" + i2 + " base fragment #" + this.mOps[i3]);
             }
             int i4 = i3 + 1;
             int i5 = this.mOps[i3];
             if (i5 >= 0) {
-                op.fragment = (Fragment) fragmentManagerImpl.mActive.get(i5);
+                op.fragment = fragmentManagerImpl.mActive.get(i5);
             } else {
                 op.fragment = null;
             }
@@ -121,7 +114,6 @@ final class BackStackState implements Parcelable {
             op.exitAnim = iArr[i6];
             int i8 = i7 + 1;
             op.popEnterAnim = iArr[i7];
-            int i9 = i8 + 1;
             op.popExitAnim = iArr[i8];
             backStackRecord.mEnterAnim = op.enterAnim;
             backStackRecord.mExitAnim = op.exitAnim;
@@ -129,7 +121,7 @@ final class BackStackState implements Parcelable {
             backStackRecord.mPopExitAnim = op.popExitAnim;
             backStackRecord.addOp(op);
             i2++;
-            i = i9;
+            i = i8 + 1;
         }
         backStackRecord.mTransition = this.mTransition;
         backStackRecord.mTransitionStyle = this.mTransitionStyle;

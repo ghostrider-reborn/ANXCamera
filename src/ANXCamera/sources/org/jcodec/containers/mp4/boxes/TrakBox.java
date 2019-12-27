@@ -3,7 +3,7 @@ package org.jcodec.containers.mp4.boxes;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import org.jcodec.containers.mp4.boxes.TimeToSampleBox.TimeToSampleEntry;
+import org.jcodec.containers.mp4.boxes.TimeToSampleBox;
 
 public class TrakBox extends NodeBox {
     public TrakBox(Header header) {
@@ -39,12 +39,12 @@ public class TrakBox extends NodeBox {
         mediaHeaderBox.setDuration((mediaHeaderBox.getDuration() * j) / j2);
         List<Edit> edits = getEdits();
         if (edits != null) {
-            for (Edit edit : edits) {
-                edit.setMediaTime((edit.getMediaTime() * j) / j2);
+            for (Edit next : edits) {
+                next.setMediaTime((next.getMediaTime() * j) / j2);
             }
         }
-        TimeToSampleEntry[] entries = ((TimeToSampleBox) NodeBox.findFirstPath(this, TimeToSampleBox.class, Box.path("mdia.minf.stbl.stts"))).getEntries();
-        for (TimeToSampleEntry timeToSampleEntry : entries) {
+        TimeToSampleBox.TimeToSampleEntry[] entries = ((TimeToSampleBox) NodeBox.findFirstPath(this, TimeToSampleBox.class, Box.path("mdia.minf.stbl.stts"))).getEntries();
+        for (TimeToSampleBox.TimeToSampleEntry timeToSampleEntry : entries) {
             timeToSampleEntry.setSampleDuration((timeToSampleEntry.getSampleDuration() * i) / timescale);
         }
     }
@@ -143,7 +143,7 @@ public class TrakBox extends NodeBox {
         if (dref == null) {
             return false;
         }
-        Iterator it = dref.boxes.iterator();
+        Iterator<Box> it = dref.boxes.iterator();
         boolean z = false;
         while (it.hasNext()) {
             boolean z2 = true;
@@ -168,7 +168,7 @@ public class TrakBox extends NodeBox {
         if (dref == null) {
             return false;
         }
-        Iterator it = dref.boxes.iterator();
+        Iterator<Box> it = dref.boxes.iterator();
         while (it.hasNext()) {
             if ((((FullBox) it.next()).getFlags() & 1) != 0) {
                 return false;
@@ -204,7 +204,7 @@ public class TrakBox extends NodeBox {
             createDataRefBox.add(createUrlBox);
             return;
         }
-        ListIterator listIterator = dref.boxes.listIterator();
+        ListIterator<Box> listIterator = dref.boxes.listIterator();
         while (listIterator.hasNext()) {
             if ((((FullBox) listIterator.next()).getFlags() & 1) != 0) {
                 listIterator.set(createUrlBox);
@@ -217,10 +217,9 @@ public class TrakBox extends NodeBox {
     }
 
     public void setEdits(List<Edit> list) {
-        String str = "edts";
-        NodeBox nodeBox = (NodeBox) NodeBox.findFirst(this, NodeBox.class, str);
+        NodeBox nodeBox = (NodeBox) NodeBox.findFirst(this, NodeBox.class, "edts");
         if (nodeBox == null) {
-            nodeBox = new NodeBox(new Header(str));
+            nodeBox = new NodeBox(new Header("edts"));
             add(nodeBox);
         }
         nodeBox.removeChildren(new String[]{"elst"});
@@ -229,10 +228,9 @@ public class TrakBox extends NodeBox {
     }
 
     public void setName(String str) {
-        String str2 = "udta";
-        NodeBox nodeBox = (NodeBox) NodeBox.findFirst(this, NodeBox.class, str2);
+        NodeBox nodeBox = (NodeBox) NodeBox.findFirst(this, NodeBox.class, "udta");
         if (nodeBox == null) {
-            nodeBox = new NodeBox(new Header(str2));
+            nodeBox = new NodeBox(new Header("udta"));
             add(nodeBox);
         }
         nodeBox.removeChildren(new String[]{"name"});

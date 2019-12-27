@@ -75,7 +75,7 @@ public final class Http2Stream {
          */
         /* JADX WARNING: Code restructure failed: missing block: B:15:0x002d, code lost:
             r0 = r8.this$0;
-            r0.connection.writeData(r0.id, true, null, 0);
+            r0.connection.writeData(r0.id, true, (okio.Buffer) null, 0);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:16:0x003a, code lost:
             r2 = r8.this$0;
@@ -209,14 +209,11 @@ public final class Http2Stream {
                     }
                 }
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("byteCount < 0: ");
-                sb.append(j);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("byteCount < 0: " + j);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void receive(BufferedSource bufferedSource, long j) throws IOException {
             boolean z;
             boolean z2;
@@ -265,7 +262,7 @@ public final class Http2Stream {
 
         public void exitAndThrowIfTimedOut() throws IOException {
             if (exit()) {
-                throw newTimeoutException(null);
+                throw newTimeoutException((IOException) null);
             }
         }
 
@@ -316,7 +313,7 @@ public final class Http2Stream {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addBytesToWriteWindow(long j) {
         this.bytesLeftInWriteWindow += j;
         if (j > 0) {
@@ -324,7 +321,7 @@ public final class Http2Stream {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void cancelStreamIfNecessary() throws IOException {
         boolean z;
         boolean isOpen;
@@ -339,7 +336,7 @@ public final class Http2Stream {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void checkOutNotClosed() throws IOException {
         FramingSink framingSink = this.sink;
         if (framingSink.closed) {
@@ -412,12 +409,12 @@ public final class Http2Stream {
         return this.readTimeout;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void receiveData(BufferedSource bufferedSource, int i) throws IOException {
         this.source.receive(bufferedSource, (long) i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void receiveFin() {
         boolean isOpen;
         synchronized (this) {
@@ -430,7 +427,7 @@ public final class Http2Stream {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void receiveHeaders(List<Header> list) {
         boolean z;
         synchronized (this) {
@@ -443,7 +440,7 @@ public final class Http2Stream {
             } else {
                 ArrayList arrayList = new ArrayList();
                 arrayList.addAll(this.responseHeaders);
-                arrayList.add(null);
+                arrayList.add((Object) null);
                 arrayList.addAll(list);
                 this.responseHeaders = arrayList;
             }
@@ -453,7 +450,7 @@ public final class Http2Stream {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void receiveRstStream(ErrorCode errorCode2) {
         if (this.errorCode == null) {
             this.errorCode = errorCode2;
@@ -481,18 +478,22 @@ public final class Http2Stream {
         throw new NullPointerException("responseHeaders == null");
     }
 
-    /* JADX INFO: finally extract failed */
+    /* JADX WARNING: Code restructure failed: missing block: B:20:0x002e, code lost:
+        r0 = move-exception;
+     */
+    /* JADX WARNING: Code restructure failed: missing block: B:21:0x002f, code lost:
+        r2.readTimeout.exitAndThrowIfTimedOut();
+     */
+    /* JADX WARNING: Code restructure failed: missing block: B:22:0x0034, code lost:
+        throw r0;
+     */
+    /* JADX WARNING: Exception block dominator not found, dom blocks: [] */
     public synchronized List<Header> takeResponseHeaders() throws IOException {
         List<Header> list;
         if (isLocallyInitiated()) {
             this.readTimeout.enter();
             while (this.responseHeaders == null && this.errorCode == null) {
-                try {
-                    waitForIo();
-                } catch (Throwable th) {
-                    this.readTimeout.exitAndThrowIfTimedOut();
-                    throw th;
-                }
+                waitForIo();
             }
             this.readTimeout.exitAndThrowIfTimedOut();
             list = this.responseHeaders;
@@ -507,7 +508,7 @@ public final class Http2Stream {
         return list;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void waitForIo() throws InterruptedIOException {
         try {
             wait();

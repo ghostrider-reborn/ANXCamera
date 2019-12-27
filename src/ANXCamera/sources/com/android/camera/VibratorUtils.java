@@ -19,12 +19,12 @@ public class VibratorUtils {
     public static VibratorUtils getInstance(Context context) {
         VibratorUtils vibratorUtils;
         do {
-            VibratorUtils vibratorUtils2 = (VibratorUtils) INSTANCE.get();
+            VibratorUtils vibratorUtils2 = INSTANCE.get();
             if (vibratorUtils2 != null) {
                 return vibratorUtils2;
             }
             vibratorUtils = new VibratorUtils(context);
-        } while (!INSTANCE.compareAndSet(null, vibratorUtils));
+        } while (!INSTANCE.compareAndSet((Object) null, vibratorUtils));
         return vibratorUtils;
     }
 

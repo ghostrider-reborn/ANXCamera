@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.R;
@@ -12,7 +11,7 @@ import com.android.camera.constant.ColorConstant;
 import com.android.camera.fragment.beauty.MenuItem;
 import com.android.camera.ui.ColorActivateTextView;
 
-public class LiveStickerMenu extends AbBottomMenu implements OnClickListener {
+public class LiveStickerMenu extends AbBottomMenu implements View.OnClickListener {
     private static final int LIVE_STICKER_TYPE = 0;
     private SparseArray<MenuItem> mLiveStickerMenuTabList;
     private SparseArray<ColorActivateTextView> mMenuTextViewList;
@@ -21,40 +20,40 @@ public class LiveStickerMenu extends AbBottomMenu implements OnClickListener {
         super(context, linearLayout, beautyMenuAnimator);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addAllView() {
         this.mMenuTextViewList = new SparseArray<>();
-        SparseArray menuData = getMenuData();
+        SparseArray<MenuItem> menuData = getMenuData();
         for (int i = 0; i < menuData.size(); i++) {
-            MenuItem menuItem = (MenuItem) menuData.valueAt(i);
+            MenuItem valueAt = menuData.valueAt(i);
             ColorActivateTextView colorActivateTextView = (ColorActivateTextView) LayoutInflater.from(this.mContext).inflate(R.layout.beauty_menu_select_item, this.mContainerView, false);
             colorActivateTextView.setNormalCor(ColorConstant.WHITE_ALPHA_99);
             colorActivateTextView.setActivateColor(ColorConstant.COLOR_COMMON_NORMAL);
-            colorActivateTextView.setText(menuItem.text);
-            colorActivateTextView.setTag(Integer.valueOf(menuItem.type));
+            colorActivateTextView.setText(valueAt.text);
+            colorActivateTextView.setTag(Integer.valueOf(valueAt.type));
             colorActivateTextView.setOnClickListener(this);
-            if (menuItem.type == 0) {
+            if (valueAt.type == 0) {
                 colorActivateTextView.setActivated(true);
                 this.mCurrentBeautyTextView = colorActivateTextView;
             } else {
                 colorActivateTextView.setActivated(false);
             }
-            this.mMenuTextViewList.put(menuItem.type, colorActivateTextView);
+            this.mMenuTextViewList.put(valueAt.type, colorActivateTextView);
             this.mContainerView.addView(colorActivateTextView);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SparseArray<ColorActivateTextView> getChildMenuViewList() {
         return this.mMenuTextViewList;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getDefaultType() {
         return 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SparseArray<MenuItem> getMenuData() {
         SparseArray<MenuItem> sparseArray = this.mLiveStickerMenuTabList;
         if (sparseArray != null) {
@@ -69,7 +68,7 @@ public class LiveStickerMenu extends AbBottomMenu implements OnClickListener {
         return this.mLiveStickerMenuTabList;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isRefreshUI() {
         return true;
     }
@@ -77,7 +76,7 @@ public class LiveStickerMenu extends AbBottomMenu implements OnClickListener {
     public void onClick(View view) {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void switchMenu() {
         this.mContainerView.removeAllViews();
         addAllView();

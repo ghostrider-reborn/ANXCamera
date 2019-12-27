@@ -1,11 +1,9 @@
 package com.android.camera.preferences;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import com.android.camera.CameraSettings;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,10 +13,10 @@ public class CameraSettingPreferences implements SharedPreferences {
     public static final String FILE_NAME_SIMPLE_MODE_GLOBAL = "camera_settings_simple_mode_global";
     private static CameraSettingPreferences sPreferences = new CameraSettingPreferences();
 
-    private class MyEditor implements Editor {
-        private ProviderEditor mEditorConfig = DataRepository.dataItemConfig().editor();
-        private ProviderEditor mEditorGlobal = DataRepository.dataItemGlobal().editor();
-        private ProviderEditor mEditorRunning = DataRepository.dataItemRunning().editor();
+    private class MyEditor implements SharedPreferences.Editor {
+        private DataProvider.ProviderEditor mEditorConfig = DataRepository.dataItemConfig().editor();
+        private DataProvider.ProviderEditor mEditorGlobal = DataRepository.dataItemGlobal().editor();
+        private DataProvider.ProviderEditor mEditorRunning = DataRepository.dataItemRunning().editor();
 
         MyEditor() {
         }
@@ -28,7 +26,7 @@ public class CameraSettingPreferences implements SharedPreferences {
             this.mEditorConfig.apply();
         }
 
-        public Editor clear() {
+        public SharedPreferences.Editor clear() {
             this.mEditorGlobal.clear();
             this.mEditorConfig.clear();
             this.mEditorRunning.clear();
@@ -39,7 +37,7 @@ public class CameraSettingPreferences implements SharedPreferences {
             return this.mEditorGlobal.commit() && this.mEditorConfig.commit();
         }
 
-        public Editor putBoolean(String str, boolean z) {
+        public SharedPreferences.Editor putBoolean(String str, boolean z) {
             if (CameraSettings.isCameraSpecific(str)) {
                 this.mEditorConfig.putBoolean(str, z);
             } else if (CameraSettings.isTransient(str)) {
@@ -50,7 +48,7 @@ public class CameraSettingPreferences implements SharedPreferences {
             return this;
         }
 
-        public Editor putFloat(String str, float f2) {
+        public SharedPreferences.Editor putFloat(String str, float f2) {
             if (CameraSettings.isCameraSpecific(str)) {
                 this.mEditorConfig.putFloat(str, f2);
             } else if (CameraSettings.isTransient(str)) {
@@ -61,7 +59,7 @@ public class CameraSettingPreferences implements SharedPreferences {
             return this;
         }
 
-        public Editor putInt(String str, int i) {
+        public SharedPreferences.Editor putInt(String str, int i) {
             if (CameraSettings.isCameraSpecific(str)) {
                 this.mEditorConfig.putInt(str, i);
             } else if (CameraSettings.isTransient(str)) {
@@ -72,7 +70,7 @@ public class CameraSettingPreferences implements SharedPreferences {
             return this;
         }
 
-        public Editor putLong(String str, long j) {
+        public SharedPreferences.Editor putLong(String str, long j) {
             if (CameraSettings.isCameraSpecific(str)) {
                 this.mEditorConfig.putLong(str, j);
             } else if (CameraSettings.isTransient(str)) {
@@ -83,7 +81,7 @@ public class CameraSettingPreferences implements SharedPreferences {
             return this;
         }
 
-        public Editor putString(String str, String str2) {
+        public SharedPreferences.Editor putString(String str, String str2) {
             if (CameraSettings.isCameraSpecific(str)) {
                 this.mEditorConfig.putString(str, str2);
             } else if (CameraSettings.isTransient(str)) {
@@ -94,11 +92,11 @@ public class CameraSettingPreferences implements SharedPreferences {
             return this;
         }
 
-        public Editor putStringSet(String str, Set<String> set) {
+        public SharedPreferences.Editor putStringSet(String str, Set<String> set) {
             throw new UnsupportedOperationException();
         }
 
-        public Editor remove(String str) {
+        public SharedPreferences.Editor remove(String str) {
             this.mEditorGlobal.remove(str);
             this.mEditorConfig.remove(str);
             this.mEditorRunning.remove(str);
@@ -121,7 +119,7 @@ public class CameraSettingPreferences implements SharedPreferences {
         return CameraSettings.isCameraSpecific(str) ? DataRepository.dataItemConfig().contains(str) : CameraSettings.isTransient(str) ? DataRepository.dataItemRunning().contains(str) : DataRepository.dataItemGlobal().contains(str);
     }
 
-    public Editor edit() {
+    public SharedPreferences.Editor edit() {
         return new MyEditor();
     }
 
@@ -153,9 +151,9 @@ public class CameraSettingPreferences implements SharedPreferences {
         throw new UnsupportedOperationException();
     }
 
-    public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener onSharedPreferenceChangeListener) {
+    public void registerOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener) {
     }
 
-    public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener onSharedPreferenceChangeListener) {
+    public void unregisterOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener) {
     }
 }

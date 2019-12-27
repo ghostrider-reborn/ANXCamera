@@ -15,39 +15,39 @@ class MediaDescriptionCompatApi21 {
         }
 
         public static Object build(Object obj) {
-            return ((android.media.MediaDescription.Builder) obj).build();
+            return ((MediaDescription.Builder) obj).build();
         }
 
         public static Object newInstance() {
-            return new android.media.MediaDescription.Builder();
+            return new MediaDescription.Builder();
         }
 
         public static void setDescription(Object obj, CharSequence charSequence) {
-            ((android.media.MediaDescription.Builder) obj).setDescription(charSequence);
+            ((MediaDescription.Builder) obj).setDescription(charSequence);
         }
 
         public static void setExtras(Object obj, Bundle bundle) {
-            ((android.media.MediaDescription.Builder) obj).setExtras(bundle);
+            ((MediaDescription.Builder) obj).setExtras(bundle);
         }
 
         public static void setIconBitmap(Object obj, Bitmap bitmap) {
-            ((android.media.MediaDescription.Builder) obj).setIconBitmap(bitmap);
+            ((MediaDescription.Builder) obj).setIconBitmap(bitmap);
         }
 
         public static void setIconUri(Object obj, Uri uri) {
-            ((android.media.MediaDescription.Builder) obj).setIconUri(uri);
+            ((MediaDescription.Builder) obj).setIconUri(uri);
         }
 
         public static void setMediaId(Object obj, String str) {
-            ((android.media.MediaDescription.Builder) obj).setMediaId(str);
+            ((MediaDescription.Builder) obj).setMediaId(str);
         }
 
         public static void setSubtitle(Object obj, CharSequence charSequence) {
-            ((android.media.MediaDescription.Builder) obj).setSubtitle(charSequence);
+            ((MediaDescription.Builder) obj).setSubtitle(charSequence);
         }
 
         public static void setTitle(Object obj, CharSequence charSequence) {
-            ((android.media.MediaDescription.Builder) obj).setTitle(charSequence);
+            ((MediaDescription.Builder) obj).setTitle(charSequence);
         }
     }
 

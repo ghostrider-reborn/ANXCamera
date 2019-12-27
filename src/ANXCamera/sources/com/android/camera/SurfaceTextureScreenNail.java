@@ -3,9 +3,8 @@ package com.android.camera;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.opengl.Matrix;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -22,7 +21,7 @@ import com.android.gallery3d.ui.RawTexture;
 import com.android.gallery3d.ui.ScreenNail;
 import com.mi.config.b;
 
-public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAvailableListener, Rotatable {
+public abstract class SurfaceTextureScreenNail implements ScreenNail, SurfaceTexture.OnFrameAvailableListener, Rotatable {
     private static final float MOVIE_SOLID_CROPPED_X = (b.yi() ? 0.9f : 0.8f);
     private static final float MOVIE_SOLID_CROPPED_Y;
     private static final String TAG = "STScreenNail";
@@ -260,20 +259,13 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
             this.mSurfaceTexture = new SurfaceTexture(this.mExtTexture.getId());
         }
         this.mSurfaceCreatedTimestamp = System.currentTimeMillis();
-        StringBuilder sb = new StringBuilder();
-        sb.append("acquireSurfaceTexture: setDefaultBufferSize ");
-        sb.append(this.mWidth);
-        sb.append("x");
-        sb.append(this.mHeight);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "acquireSurfaceTexture: setDefaultBufferSize " + this.mWidth + "x" + this.mHeight);
         this.mSurfaceTexture.setDefaultBufferSize(this.mWidth, this.mHeight);
-        if (VERSION.SDK_INT < 21 || !b.Ei()) {
+        if (Build.VERSION.SDK_INT < 21 || !b.Ei()) {
             this.mSurfaceTexture.setOnFrameAvailableListener(this);
         } else {
             CompatibilityUtils.setSurfaceTextureOnFrameAvailableListener(this.mSurfaceTexture, this, new Handler(sFrameListener.getLooper()));
-            Log.i(str, "fullHandlerCapacity:set urgent display");
+            Log.i(TAG, "fullHandlerCapacity:set urgent display");
             Process.setThreadPriority(sFrameListener.getThreadId(), -8);
             this.currentFrameCount = 0;
         }
@@ -295,10 +287,7 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
     }
 
     public void acquireSurfaceTexture() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("acquireSurfaceTexture: mHasTexture = ");
-        sb.append(this.mHasTexture);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "acquireSurfaceTexture: mHasTexture = " + this.mHasTexture);
         synchronized (this) {
             if (!this.mHasTexture) {
                 initializePreviewTexture();
@@ -334,9 +323,9 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
         gLCanvas.clearBuffer();
         if (!this.mIsFullScreen || b.Vh() || Util.isNotchDevice || Util.isLongRatioScreen || Util.sIsnotchScreenHidden) {
             draw(gLCanvas, this.mTx, this.mTy, this.mTwidth, this.mTheight);
-        } else {
-            draw(gLCanvas, 0, 0, this.mSurfaceWidth, this.mSurfaceHeight);
+            return;
         }
+        draw(gLCanvas, 0, 0, this.mSurfaceWidth, this.mSurfaceHeight);
     }
 
     public void draw(GLCanvas gLCanvas, int i, int i2, int i3, int i4) {
@@ -368,11 +357,7 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
 
     public void enableDraw(boolean z) {
         synchronized (this.mLock) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("enableScreeNailDraw: ");
-            sb.append(z);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "enableScreeNailDraw: " + z);
             this.mDrawEnabled = z;
         }
     }
@@ -434,10 +419,7 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
     public abstract void releaseBitmapIfNeeded();
 
     public void releaseSurfaceTexture() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("releaseSurfaceTexture: mHasTexture = ");
-        sb.append(this.mHasTexture);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "releaseSurfaceTexture: mHasTexture = " + this.mHasTexture);
         synchronized (this) {
             this.mHasTexture = false;
         }
@@ -449,7 +431,7 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
         SurfaceTexture surfaceTexture = this.mSurfaceTexture;
         if (surfaceTexture != null) {
             surfaceTexture.release();
-            this.mSurfaceTexture.setOnFrameAvailableListener(null);
+            this.mSurfaceTexture.setOnFrameAvailableListener((SurfaceTexture.OnFrameAvailableListener) null);
             this.mSurfaceTexture = null;
             this.mSurfaceCreatedTimestamp = 0;
         }
@@ -499,12 +481,7 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
         this.mTargetRatio = CameraSettings.getRenderAspectRatio(i, i2);
         computeRatio();
         if (this.mSurfaceTexture != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("setDefaultBufferSize: ");
-            sb.append(i);
-            sb.append(" | ");
-            sb.append(i2);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "setDefaultBufferSize: " + i + " | " + i2);
             this.mSurfaceTexture.setDefaultBufferSize(i, i2);
         }
     }
@@ -541,15 +518,14 @@ public abstract class SurfaceTextureScreenNail implements ScreenNail, OnFrameAva
             int i7 = this.mRenderOffsetX;
             int i8 = this.mRenderHeight;
             int i9 = this.mRenderWidth;
-            int i10 = (i8 - i9) / 2;
-            int i11 = this.mRenderOffsetY;
-            rect.set(i7, i10 + i11, i9 + i7, ((i8 - i9) / 2) + i11 + i9);
+            int i10 = this.mRenderOffsetY;
+            rect.set(i7, ((i8 - i9) / 2) + i10, i9 + i7, ((i8 - i9) / 2) + i10 + i9);
             return;
         }
-        int i12 = this.mRenderWidth;
-        this.mTx = i12 == 0 ? 0 : (this.mRenderOffsetX * this.mSurfaceWidth) / i12;
-        int i13 = this.mRenderHeight;
-        this.mTy = i13 == 0 ? 0 : (this.mRenderOffsetY * this.mSurfaceHeight) / i13;
+        int i11 = this.mRenderWidth;
+        this.mTx = i11 == 0 ? 0 : (this.mRenderOffsetX * this.mSurfaceWidth) / i11;
+        int i12 = this.mRenderHeight;
+        this.mTy = i12 == 0 ? 0 : (this.mRenderOffsetY * this.mSurfaceHeight) / i12;
         this.mTwidth = this.mSurfaceWidth;
         this.mTheight = this.mSurfaceHeight;
         this.mRenderLayoutRect.set(0, 0, this.mRenderWidth, this.mRenderHeight);

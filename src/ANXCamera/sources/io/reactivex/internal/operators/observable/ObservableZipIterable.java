@@ -33,7 +33,7 @@ public final class ObservableZipIterable<T, U, V> extends Observable<V> {
             this.s.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void error(Throwable th) {
             this.done = true;
             this.s.dispose();
@@ -63,7 +63,7 @@ public final class ObservableZipIterable<T, U, V> extends Observable<V> {
         public void onNext(T t) {
             if (!this.done) {
                 try {
-                    Object next = this.iterator.next();
+                    U next = this.iterator.next();
                     ObjectHelper.requireNonNull(next, "The iterator returned a null value");
                     try {
                         Object apply = this.zipper.apply(t, next);
@@ -106,22 +106,22 @@ public final class ObservableZipIterable<T, U, V> extends Observable<V> {
 
     public void subscribeActual(Observer<? super V> observer) {
         try {
-            Iterator it = this.other.iterator();
+            Iterator<U> it = this.other.iterator();
             ObjectHelper.requireNonNull(it, "The iterator returned by other is null");
             Iterator it2 = it;
             try {
                 if (!it2.hasNext()) {
-                    EmptyDisposable.complete(observer);
+                    EmptyDisposable.complete((Observer<?>) observer);
                 } else {
-                    this.source.subscribe((Observer<? super T>) new ZipIterableObserver<Object>(observer, it2, this.zipper));
+                    this.source.subscribe(new ZipIterableObserver(observer, it2, this.zipper));
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, observer);
+                EmptyDisposable.error(th, (Observer<?>) observer);
             }
         } catch (Throwable th2) {
             Exceptions.throwIfFatal(th2);
-            EmptyDisposable.error(th2, observer);
+            EmptyDisposable.error(th2, (Observer<?>) observer);
         }
     }
 }

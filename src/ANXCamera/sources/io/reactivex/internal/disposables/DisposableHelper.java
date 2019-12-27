@@ -10,18 +10,20 @@ public enum DisposableHelper implements Disposable {
     DISPOSED;
 
     public static boolean dispose(AtomicReference<Disposable> atomicReference) {
-        Disposable disposable = (Disposable) atomicReference.get();
+        Disposable disposable = atomicReference.get();
         DisposableHelper disposableHelper = DISPOSED;
-        if (disposable != disposableHelper) {
-            Disposable disposable2 = (Disposable) atomicReference.getAndSet(disposableHelper);
-            if (disposable2 != disposableHelper) {
-                if (disposable2 != null) {
-                    disposable2.dispose();
-                }
-                return true;
-            }
+        if (disposable == disposableHelper) {
+            return false;
         }
-        return false;
+        Disposable andSet = atomicReference.getAndSet(disposableHelper);
+        if (andSet == disposableHelper) {
+            return false;
+        }
+        if (andSet == null) {
+            return true;
+        }
+        andSet.dispose();
+        return true;
     }
 
     public static boolean isDisposed(Disposable disposable) {
@@ -31,11 +33,12 @@ public enum DisposableHelper implements Disposable {
     public static boolean replace(AtomicReference<Disposable> atomicReference, Disposable disposable) {
         Disposable disposable2;
         do {
-            disposable2 = (Disposable) atomicReference.get();
+            disposable2 = atomicReference.get();
             if (disposable2 == DISPOSED) {
-                if (disposable != null) {
-                    disposable.dispose();
+                if (disposable == null) {
+                    return false;
                 }
+                disposable.dispose();
                 return false;
             }
         } while (!atomicReference.compareAndSet(disposable2, disposable));
@@ -49,39 +52,43 @@ public enum DisposableHelper implements Disposable {
     public static boolean set(AtomicReference<Disposable> atomicReference, Disposable disposable) {
         Disposable disposable2;
         do {
-            disposable2 = (Disposable) atomicReference.get();
+            disposable2 = atomicReference.get();
             if (disposable2 == DISPOSED) {
-                if (disposable != null) {
-                    disposable.dispose();
+                if (disposable == null) {
+                    return false;
                 }
+                disposable.dispose();
                 return false;
             }
         } while (!atomicReference.compareAndSet(disposable2, disposable));
-        if (disposable2 != null) {
-            disposable2.dispose();
+        if (disposable2 == null) {
+            return true;
         }
+        disposable2.dispose();
         return true;
     }
 
     public static boolean setOnce(AtomicReference<Disposable> atomicReference, Disposable disposable) {
         ObjectHelper.requireNonNull(disposable, "d is null");
-        if (atomicReference.compareAndSet(null, disposable)) {
+        if (atomicReference.compareAndSet((Object) null, disposable)) {
             return true;
         }
         disposable.dispose();
-        if (atomicReference.get() != DISPOSED) {
-            reportDisposableSet();
+        if (atomicReference.get() == DISPOSED) {
+            return false;
         }
+        reportDisposableSet();
         return false;
     }
 
     public static boolean trySet(AtomicReference<Disposable> atomicReference, Disposable disposable) {
-        if (atomicReference.compareAndSet(null, disposable)) {
+        if (atomicReference.compareAndSet((Object) null, disposable)) {
             return true;
         }
-        if (atomicReference.get() == DISPOSED) {
-            disposable.dispose();
+        if (atomicReference.get() != DISPOSED) {
+            return false;
         }
+        disposable.dispose();
         return false;
     }
 

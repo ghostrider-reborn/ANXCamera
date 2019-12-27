@@ -1,7 +1,6 @@
 package android.support.v7.widget;
 
-import android.support.v7.widget.RecyclerView.Recycler;
-import android.support.v7.widget.RecyclerView.State;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 class LayoutState {
@@ -24,34 +23,20 @@ class LayoutState {
     LayoutState() {
     }
 
-    /* access modifiers changed from: 0000 */
-    public boolean hasMore(State state) {
+    /* access modifiers changed from: package-private */
+    public boolean hasMore(RecyclerView.State state) {
         int i = this.mCurrentPosition;
         return i >= 0 && i < state.getItemCount();
     }
 
-    /* access modifiers changed from: 0000 */
-    public View next(Recycler recycler) {
+    /* access modifiers changed from: package-private */
+    public View next(RecyclerView.Recycler recycler) {
         View viewForPosition = recycler.getViewForPosition(this.mCurrentPosition);
         this.mCurrentPosition += this.mItemDirection;
         return viewForPosition;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("LayoutState{mAvailable=");
-        sb.append(this.mAvailable);
-        sb.append(", mCurrentPosition=");
-        sb.append(this.mCurrentPosition);
-        sb.append(", mItemDirection=");
-        sb.append(this.mItemDirection);
-        sb.append(", mLayoutDirection=");
-        sb.append(this.mLayoutDirection);
-        sb.append(", mStartLine=");
-        sb.append(this.mStartLine);
-        sb.append(", mEndLine=");
-        sb.append(this.mEndLine);
-        sb.append('}');
-        return sb.toString();
+        return "LayoutState{mAvailable=" + this.mAvailable + ", mCurrentPosition=" + this.mCurrentPosition + ", mItemDirection=" + this.mItemDirection + ", mLayoutDirection=" + this.mLayoutDirection + ", mStartLine=" + this.mStartLine + ", mEndLine=" + this.mEndLine + '}';
     }
 }

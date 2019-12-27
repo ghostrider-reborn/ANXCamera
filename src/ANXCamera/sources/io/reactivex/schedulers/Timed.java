@@ -26,9 +26,9 @@ public final class Timed<T> {
 
     public int hashCode() {
         T t = this.value;
-        int hashCode = (t != null ? t.hashCode() : 0) * 31;
+        int hashCode = t != null ? t.hashCode() : 0;
         long j = this.time;
-        return ((hashCode + ((int) (j ^ (j >>> 31)))) * 31) + this.unit.hashCode();
+        return (((hashCode * 31) + ((int) (j ^ (j >>> 31)))) * 31) + this.unit.hashCode();
     }
 
     public long time() {
@@ -40,15 +40,7 @@ public final class Timed<T> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Timed[time=");
-        sb.append(this.time);
-        sb.append(", unit=");
-        sb.append(this.unit);
-        sb.append(", value=");
-        sb.append(this.value);
-        sb.append("]");
-        return sb.toString();
+        return "Timed[time=" + this.time + ", unit=" + this.unit + ", value=" + this.value + "]";
     }
 
     @NonNull

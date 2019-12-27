@@ -6,13 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Path;
-import android.graphics.Path.FillType;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader.TileMode;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.cardview.R;
@@ -49,7 +47,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         this.mPaint = new Paint(5);
         setBackground(colorStateList);
         this.mCornerShadowPaint = new Paint(5);
-        this.mCornerShadowPaint.setStyle(Style.FILL);
+        this.mCornerShadowPaint.setStyle(Paint.Style.FILL);
         this.mCornerRadius = (float) ((int) (f2 + 0.5f));
         this.mCardBounds = new RectF();
         this.mEdgeShadowPaint = new Paint(this.mCornerShadowPaint);
@@ -76,7 +74,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         } else {
             path.reset();
         }
-        this.mCornerShadowPath.setFillType(FillType.EVEN_ODD);
+        this.mCornerShadowPath.setFillType(Path.FillType.EVEN_ODD);
         this.mCornerShadowPath.moveTo(-this.mCornerRadius, 0.0f);
         this.mCornerShadowPath.rLineTo(-this.mShadowSize, 0.0f);
         this.mCornerShadowPath.arcTo(rectF2, 180.0f, 90.0f, false);
@@ -84,20 +82,16 @@ class RoundRectDrawableWithShadow extends Drawable {
         this.mCornerShadowPath.close();
         float f4 = this.mCornerRadius;
         float f5 = this.mShadowSize;
-        float f6 = f4 / (f4 + f5);
         Paint paint = this.mCornerShadowPaint;
-        float f7 = f4 + f5;
+        float f6 = f4 + f5;
         int i = this.mShadowStartColor;
-        RadialGradient radialGradient = new RadialGradient(0.0f, 0.0f, f7, new int[]{i, i, this.mShadowEndColor}, new float[]{0.0f, f6, 1.0f}, TileMode.CLAMP);
+        RadialGradient radialGradient = new RadialGradient(0.0f, 0.0f, f6, new int[]{i, i, this.mShadowEndColor}, new float[]{0.0f, f4 / (f4 + f5), 1.0f}, Shader.TileMode.CLAMP);
         paint.setShader(radialGradient);
         Paint paint2 = this.mEdgeShadowPaint;
-        float f8 = this.mCornerRadius;
-        float f9 = -f8;
-        float f10 = this.mShadowSize;
-        float f11 = f9 + f10;
-        float f12 = (-f8) - f10;
+        float f7 = this.mCornerRadius;
+        float f8 = this.mShadowSize;
         int i2 = this.mShadowStartColor;
-        LinearGradient linearGradient = new LinearGradient(0.0f, f11, 0.0f, f12, new int[]{i2, i2, this.mShadowEndColor}, new float[]{0.0f, 0.5f, 1.0f}, TileMode.CLAMP);
+        LinearGradient linearGradient = new LinearGradient(0.0f, (-f7) + f8, 0.0f, (-f7) - f8, new int[]{i2, i2, this.mShadowEndColor}, new float[]{0.0f, 0.5f, 1.0f}, Shader.TileMode.CLAMP);
         paint2.setShader(linearGradient);
         this.mEdgeShadowPaint.setAntiAlias(false);
     }
@@ -163,13 +157,8 @@ class RoundRectDrawableWithShadow extends Drawable {
     }
 
     private void setShadowSize(float f2, float f3) {
-        String str = ". Must be >= 0";
         if (f2 < 0.0f) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid shadow size ");
-            sb.append(f2);
-            sb.append(str);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Invalid shadow size " + f2 + ". Must be >= 0");
         } else if (f3 >= 0.0f) {
             float even = (float) toEven(f2);
             float even2 = (float) toEven(f3);
@@ -187,11 +176,7 @@ class RoundRectDrawableWithShadow extends Drawable {
                 invalidateSelf();
             }
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Invalid max shadow size ");
-            sb2.append(f3);
-            sb2.append(str);
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("Invalid max shadow size " + f3 + ". Must be >= 0");
         }
     }
 
@@ -211,33 +196,33 @@ class RoundRectDrawableWithShadow extends Drawable {
         sRoundRectHelper.drawRoundRect(canvas, this.mCardBounds, this.mCornerRadius, this.mPaint);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public ColorStateList getColor() {
         return this.mBackground;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public float getCornerRadius() {
         return this.mCornerRadius;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void getMaxShadowAndCornerPadding(Rect rect) {
         getPadding(rect);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public float getMaxShadowSize() {
         return this.mRawMaxShadowSize;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public float getMinHeight() {
         float f2 = this.mRawMaxShadowSize;
         return (Math.max(f2, this.mCornerRadius + ((float) this.mInsetShadow) + ((f2 * SHADOW_MULTIPLIER) / 2.0f)) * 2.0f) + (((this.mRawMaxShadowSize * SHADOW_MULTIPLIER) + ((float) this.mInsetShadow)) * 2.0f);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public float getMinWidth() {
         float f2 = this.mRawMaxShadowSize;
         return (Math.max(f2, this.mCornerRadius + ((float) this.mInsetShadow) + (f2 / 2.0f)) * 2.0f) + ((this.mRawMaxShadowSize + ((float) this.mInsetShadow)) * 2.0f);
@@ -254,7 +239,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public float getShadowSize() {
         return this.mRawShadowSize;
     }
@@ -283,7 +268,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setAddPaddingForCorners(boolean z) {
         this.mAddPaddingForCorners = z;
         invalidateSelf();
@@ -295,7 +280,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         this.mEdgeShadowPaint.setAlpha(i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setColor(@Nullable ColorStateList colorStateList) {
         setBackground(colorStateList);
         invalidateSelf();
@@ -305,7 +290,7 @@ class RoundRectDrawableWithShadow extends Drawable {
         this.mPaint.setColorFilter(colorFilter);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setCornerRadius(float f2) {
         if (f2 >= 0.0f) {
             float f3 = (float) ((int) (f2 + 0.5f));
@@ -317,19 +302,15 @@ class RoundRectDrawableWithShadow extends Drawable {
             }
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Invalid radius ");
-        sb.append(f2);
-        sb.append(". Must be >= 0");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Invalid radius " + f2 + ". Must be >= 0");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setMaxShadowSize(float f2) {
         setShadowSize(this.mRawShadowSize, f2);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setShadowSize(float f2) {
         setShadowSize(f2, this.mRawMaxShadowSize);
     }

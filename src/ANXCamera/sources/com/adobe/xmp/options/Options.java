@@ -22,11 +22,7 @@ public abstract class Options {
             assertConsistency(i);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("The option bit(s) 0x");
-        sb.append(Integer.toHexString(i2));
-        sb.append(" are invalid!");
-        throw new XMPException(sb.toString(), 103);
+        throw new XMPException("The option bit(s) 0x" + Integer.toHexString(i2) + " are invalid!", 103);
     }
 
     private String getOptionName(int i) {
@@ -127,9 +123,6 @@ public abstract class Options {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("0x");
-        sb.append(Integer.toHexString(this.options));
-        return sb.toString();
+        return "0x" + Integer.toHexString(this.options);
     }
 }

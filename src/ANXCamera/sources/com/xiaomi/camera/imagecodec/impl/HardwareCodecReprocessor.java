@@ -3,24 +3,19 @@ package com.xiaomi.camera.imagecodec.impl;
 import android.content.Context;
 import android.hardware.camera2.params.InputConfiguration;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import com.xiaomi.camera.imagecodec.ImagePool;
-import com.xiaomi.camera.imagecodec.ImagePool.ImageFormat;
 import com.xiaomi.camera.imagecodec.OutputConfiguration;
 import com.xiaomi.camera.imagecodec.ReprocessData;
 import com.xiaomi.camera.imagecodec.Reprocessor;
-import com.xiaomi.camera.imagecodec.Reprocessor.Singleton;
 import com.xiaomi.media.imagecodec.ImageCodec;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -29,7 +24,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
     private static final int MAX_IMAGE_BUFFER_SIZE = 2;
     /* access modifiers changed from: private */
     public static final String TAG = "HardwareCodecReprocessor";
-    public static final Singleton<HardwareCodecReprocessor> sInstance = new Singleton<HardwareCodecReprocessor>() {
+    public static final Reprocessor.Singleton<HardwareCodecReprocessor> sInstance = new Reprocessor.Singleton<HardwareCodecReprocessor>() {
         /* access modifiers changed from: protected */
         public HardwareCodecReprocessor create() {
             return new HardwareCodecReprocessor();
@@ -53,7 +48,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
     private Handler mRequestDispatchHandler;
     private HandlerThread mRequestDispatchThread;
     private LinkedList<ReprocessData> mTaskDataList;
-    private WakeLock mWakeLock;
+    private PowerManager.WakeLock mWakeLock;
 
     private class ReprocessHandler extends Handler {
         private static final int MSG_DESTROY_ENCODER = 2;
@@ -77,12 +72,9 @@ public class HardwareCodecReprocessor implements Reprocessor {
                 synchronized (HardwareCodecReprocessor.this.mCodecLock) {
                     if (HardwareCodecReprocessor.this.mHardwareImageEncoder != null) {
                         String access$100 = HardwareCodecReprocessor.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("release current codec: ");
-                        sb.append(HardwareCodecReprocessor.this.mHardwareImageEncoder);
-                        Log.d(access$100, sb.toString());
+                        Log.d(access$100, "release current codec: " + HardwareCodecReprocessor.this.mHardwareImageEncoder);
                         HardwareCodecReprocessor.this.mHardwareImageEncoder.release();
-                        HardwareCodecReprocessor.this.mHardwareImageEncoder = null;
+                        ImageCodec unused = HardwareCodecReprocessor.this.mHardwareImageEncoder = null;
                     }
                 }
                 HardwareCodecReprocessor.this.releaseWakeLock();
@@ -123,7 +115,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
                 Log.d(TAG, "checkConditionIsReady: processor is busy!");
                 return false;
             }
-            ReprocessData reprocessData = (ReprocessData) this.mTaskDataList.peek();
+            ReprocessData peek = this.mTaskDataList.peek();
         }
     }
 
@@ -133,15 +125,9 @@ public class HardwareCodecReprocessor implements Reprocessor {
         InputConfiguration inputConfiguration = new InputConfiguration(yuvImage.getWidth(), yuvImage.getHeight(), yuvImage.getFormat());
         OutputConfiguration outputConfiguration = new OutputConfiguration(reprocessData.getOutputWidth(), reprocessData.getOutputHeight(), reprocessData.getOutputFormat());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append(" YUV  INPUT: ");
-        sb.append(inputConfiguration);
-        Log.d(str, sb.toString());
+        Log.d(str, " YUV  INPUT: " + inputConfiguration);
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(" YUV OUTPUT: ");
-        sb2.append(outputConfiguration);
-        Log.d(str2, sb2.toString());
+        Log.d(str2, " YUV OUTPUT: " + outputConfiguration);
         synchronized (this.mCodecLock) {
             if (256 == outputConfiguration.getFormat()) {
                 initImageReaderAndImageCodec(inputConfiguration, outputConfiguration);
@@ -152,7 +138,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
 
     /* access modifiers changed from: private */
     public static byte[] getJpegData(Image image) {
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         if (planes.length <= 0) {
             return null;
         }
@@ -179,7 +165,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
         if (this.mJpegImageReader == null) {
             Log.d(TAG, "initImageReader: create new one");
             this.mJpegImageReader = ImageReader.newInstance(outputConfiguration.getWidth(), outputConfiguration.getHeight(), 256, 2);
-            this.mJpegImageReader.setOnImageAvailableListener(new OnImageAvailableListener() {
+            this.mJpegImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
                 public void onImageAvailable(ImageReader imageReader) {
                     Image acquireNextImage = imageReader.acquireNextImage();
                     byte[] access$700 = HardwareCodecReprocessor.getJpegData(acquireNextImage);
@@ -194,7 +180,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
                     synchronized (HardwareCodecReprocessor.this.mDataLock) {
                         HardwareCodecReprocessor.this.mCurrentProcessingData.getResultListener().onJpegAvailable(access$700, HardwareCodecReprocessor.this.mCurrentProcessingData.getImageTag());
                         Log.d(HardwareCodecReprocessor.TAG, String.format("jpeg return for %s. cost=%d", new Object[]{HardwareCodecReprocessor.this.mCurrentProcessingData.getImageTag(), Long.valueOf(System.currentTimeMillis() - HardwareCodecReprocessor.this.mReprocessStartTime)}));
-                        HardwareCodecReprocessor.this.mCurrentProcessingData = null;
+                        ReprocessData unused = HardwareCodecReprocessor.this.mCurrentProcessingData = null;
                     }
                     HardwareCodecReprocessor.this.sendReprocessRequest();
                 }
@@ -248,16 +234,13 @@ public class HardwareCodecReprocessor implements Reprocessor {
     public void reprocessImage() {
         Log.d(TAG, "reprocessImage: E");
         synchronized (this.mDataLock) {
-            this.mCurrentProcessingData = (ReprocessData) this.mTaskDataList.poll();
+            this.mCurrentProcessingData = this.mTaskDataList.poll();
             if (this.mCurrentProcessingData.getTotalCaptureResult() == null) {
                 Log.wtf(TAG, "reprocessImage: null metadata!");
                 return;
             }
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("reprocessImage: tag=");
-            sb.append(this.mCurrentProcessingData.getImageTag());
-            Log.d(str, sb.toString());
+            Log.d(str, "reprocessImage: tag=" + this.mCurrentProcessingData.getImageTag());
             final byte jpegQuality = (byte) this.mCurrentProcessingData.getJpegQuality();
             final int outputFormat = this.mCurrentProcessingData.getOutputFormat();
             final Image yuvImage = this.mCurrentProcessingData.getYuvImage();
@@ -275,7 +258,10 @@ public class HardwareCodecReprocessor implements Reprocessor {
         android.util.Log.d(TAG, "sendReprocessRequest: send MSG_REPROCESS_IMAGE");
         r5.mRequestDispatchHandler.sendEmptyMessageDelayed(1, 0);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:20:0x005c, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:27:?, code lost:
+        return;
+     */
+    /* JADX WARNING: Code restructure failed: missing block: B:28:?, code lost:
         return;
      */
     public void sendReprocessRequest() {
@@ -379,12 +365,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
     public void setJpegOutputSize(int i, int i2) {
         if (this.mJpegOutputConfiguration == null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setJpegOutputSize: ");
-            sb.append(i);
-            sb.append("x");
-            sb.append(i2);
-            Log.d(str, sb.toString());
+            Log.d(str, "setJpegOutputSize: " + i + "x" + i2);
             this.mJpegOutputConfiguration = new OutputConfiguration(i, i2, 256);
         }
     }
@@ -395,17 +376,14 @@ public class HardwareCodecReprocessor implements Reprocessor {
 
     public void submit(ReprocessData reprocessData) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("submit: ");
-        sb.append(reprocessData.getImageTag());
-        Log.d(str, sb.toString());
+        Log.d(str, "submit: " + reprocessData.getImageTag());
         if (reprocessData.getResultListener() == null) {
             Log.d(TAG, "submit: drop this request due to no callback was provided!");
         } else if (this.mInitialized) {
             acquireWakeLock();
             if (!reprocessData.isImageFromPool()) {
                 Image yuvImage = reprocessData.getYuvImage();
-                ImageFormat imageQueueKey = ImagePool.getInstance().toImageQueueKey(yuvImage);
+                ImagePool.ImageFormat imageQueueKey = ImagePool.getInstance().toImageQueueKey(yuvImage);
                 if (ImagePool.getInstance().isImageQueueFull(imageQueueKey, 2)) {
                     Log.w(TAG, "submit: wait image pool>>");
                     ImagePool.getInstance().waitIfImageQueueFull(imageQueueKey, 2, 0);
@@ -415,12 +393,7 @@ public class HardwareCodecReprocessor implements Reprocessor {
                 ImagePool.getInstance().queueImage(yuvImage);
                 Image image = ImagePool.getInstance().getImage(timestamp);
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("submit: image: ");
-                sb2.append(image);
-                sb2.append(" | ");
-                sb2.append(timestamp);
-                Log.d(str2, sb2.toString());
+                Log.d(str2, "submit: image: " + image + " | " + timestamp);
                 reprocessData.setYuvImage(image);
                 ImagePool.getInstance().holdImage(image);
             }

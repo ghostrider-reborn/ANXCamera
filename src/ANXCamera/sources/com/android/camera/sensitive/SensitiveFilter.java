@@ -29,18 +29,22 @@ public class SensitiveFilter implements Serializable {
     private static final long serialVersionUID = 1;
     protected SensitiveNode[] nodes = new SensitiveNode[8388608];
 
-    /* JADX WARNING: type inference failed for: r5v0, types: [java.io.InputStreamReader] */
-    /* JADX WARNING: type inference failed for: r5v1, types: [java.io.InputStreamReader] */
-    /* JADX WARNING: type inference failed for: r4v2 */
-    /* JADX WARNING: type inference failed for: r5v2 */
-    /* JADX WARNING: type inference failed for: r4v4 */
-    /* JADX WARNING: type inference failed for: r5v3 */
-    /* JADX WARNING: type inference failed for: r5v6 */
-    /* JADX WARNING: type inference failed for: r5v7 */
-    /* JADX WARNING: type inference failed for: r5v9 */
-    /* JADX WARNING: type inference failed for: r5v10 */
-    /* JADX WARNING: type inference failed for: r5v11 */
-    /* JADX WARNING: type inference failed for: r5v12 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v0, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v1, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v2, resolved type: java.io.InputStreamReader} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v3, resolved type: java.io.InputStreamReader} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v4, resolved type: java.io.InputStreamReader} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v5, resolved type: java.io.InputStreamReader} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v8, resolved type: java.io.InputStreamReader} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v9, resolved type: java.io.InputStreamReader} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v15, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v16, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v17, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v18, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v19, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v20, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v21, resolved type: java.io.ByteArrayInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v22, resolved type: java.io.ByteArrayInputStream} */
     /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:44:0x009c A[SYNTHETIC, Splitter:B:44:0x009c] */
     /* JADX WARNING: Removed duplicated region for block: B:49:0x00a4 A[Catch:{ IOException -> 0x00a0 }] */
@@ -51,37 +55,31 @@ public class SensitiveFilter implements Serializable {
     /* JADX WARNING: Removed duplicated region for block: B:64:0x00c6 A[Catch:{ IOException -> 0x00bd }] */
     /* JADX WARNING: Removed duplicated region for block: B:66:0x00cb A[Catch:{ IOException -> 0x00bd }] */
     /* JADX WARNING: Removed duplicated region for block: B:72:? A[RETURN, SYNTHETIC] */
-    /* JADX WARNING: Unknown variable types count: 4 */
     private SensitiveFilter() {
-        ? r5;
+        InputStreamReader inputStreamReader;
         ByteArrayInputStream byteArrayInputStream;
         InputStream inputStream;
-        ? r52;
         ByteArrayInputStream byteArrayInputStream2;
-        ? r4;
+        InputStreamReader inputStreamReader2;
+        InputStreamReader inputStreamReader3;
         ByteArrayInputStream byteArrayInputStream3;
-        ? r42;
-        ByteArrayInputStream byteArrayInputStream4;
-        ByteArrayInputStream byteArrayInputStream5;
         BufferedReader bufferedReader;
-        String str = "IOException in SensitiveFilter constructor finally";
-        String str2 = "SensitiveFilter";
         BufferedReader bufferedReader2 = null;
         try {
             File file = new File(CLOUD_FILE_PATH);
             inputStream = file.exists() ? new FileInputStream(file) : getClass().getResourceAsStream("/assets/sensi/sensi_words.txt");
             try {
-                byteArrayInputStream5 = new ByteArrayInputStream(new String(Base64.decode(IOUtils.toString(inputStream), 0)).getBytes());
+                byteArrayInputStream3 = new ByteArrayInputStream(new String(Base64.decode(IOUtils.toString(inputStream), 0)).getBytes());
             } catch (IOException e2) {
                 e = e2;
-                byteArrayInputStream3 = 0;
-                r52 = r4;
-                byteArrayInputStream2 = r4;
+                inputStreamReader2 = null;
+                inputStreamReader = inputStreamReader2;
+                byteArrayInputStream2 = inputStreamReader2;
                 try {
-                    Log.e(str2, "IOException in SensitiveFilter constructor", e);
+                    Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor", e);
                     if (bufferedReader2 != null) {
                     }
-                    if (r52 != 0) {
+                    if (inputStreamReader != null) {
                     }
                     if (byteArrayInputStream2 != 0) {
                     }
@@ -89,20 +87,19 @@ public class SensitiveFilter implements Serializable {
                     }
                 } catch (Throwable th) {
                     th = th;
-                    r5 = r52;
                     byteArrayInputStream = byteArrayInputStream2;
                     if (bufferedReader2 != null) {
                         try {
                             bufferedReader2.close();
                         } catch (IOException e3) {
-                            Log.e(str2, str, e3);
+                            Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor finally", e3);
                             throw th;
                         }
                     }
-                    if (r5 != 0) {
-                        r5.close();
+                    if (inputStreamReader != null) {
+                        inputStreamReader.close();
                     }
-                    if (byteArrayInputStream != 0) {
+                    if (byteArrayInputStream != null) {
                         byteArrayInputStream.close();
                     }
                     if (inputStream != null) {
@@ -112,21 +109,21 @@ public class SensitiveFilter implements Serializable {
                 }
             } catch (Throwable th2) {
                 th = th2;
-                byteArrayInputStream4 = 0;
-                r5 = r42;
-                byteArrayInputStream = r42;
+                inputStreamReader3 = null;
+                inputStreamReader = inputStreamReader3;
+                byteArrayInputStream = inputStreamReader3;
                 if (bufferedReader2 != null) {
                 }
-                if (r5 != 0) {
+                if (inputStreamReader != null) {
                 }
-                if (byteArrayInputStream != 0) {
+                if (byteArrayInputStream != null) {
                 }
                 if (inputStream != null) {
                 }
                 throw th;
             }
             try {
-                InputStreamReader inputStreamReader = new InputStreamReader(byteArrayInputStream5, StandardCharsets.UTF_8);
+                inputStreamReader = new InputStreamReader(byteArrayInputStream3, StandardCharsets.UTF_8);
                 try {
                     bufferedReader = new BufferedReader(inputStreamReader);
                     try {
@@ -137,17 +134,16 @@ public class SensitiveFilter implements Serializable {
                         }
                         bufferedReader.close();
                         inputStreamReader.close();
-                        byteArrayInputStream5.close();
+                        byteArrayInputStream3.close();
                         inputStream.close();
                     } catch (IOException e4) {
                         e = e4;
                         bufferedReader2 = bufferedReader;
-                        byteArrayInputStream2 = byteArrayInputStream5;
-                        r52 = inputStreamReader;
-                        Log.e(str2, "IOException in SensitiveFilter constructor", e);
+                        byteArrayInputStream2 = byteArrayInputStream3;
+                        Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor", e);
                         if (bufferedReader2 != null) {
                         }
-                        if (r52 != 0) {
+                        if (inputStreamReader != null) {
                         }
                         if (byteArrayInputStream2 != 0) {
                         }
@@ -156,13 +152,12 @@ public class SensitiveFilter implements Serializable {
                     } catch (Throwable th3) {
                         th = th3;
                         bufferedReader2 = bufferedReader;
-                        byteArrayInputStream = byteArrayInputStream5;
-                        r5 = inputStreamReader;
+                        byteArrayInputStream = byteArrayInputStream3;
                         if (bufferedReader2 != null) {
                         }
-                        if (r5 != 0) {
+                        if (inputStreamReader != null) {
                         }
-                        if (byteArrayInputStream != 0) {
+                        if (byteArrayInputStream != null) {
                         }
                         if (inputStream != null) {
                         }
@@ -170,12 +165,11 @@ public class SensitiveFilter implements Serializable {
                     }
                 } catch (IOException e5) {
                     e = e5;
-                    byteArrayInputStream2 = byteArrayInputStream5;
-                    r52 = inputStreamReader;
-                    Log.e(str2, "IOException in SensitiveFilter constructor", e);
+                    byteArrayInputStream2 = byteArrayInputStream3;
+                    Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor", e);
                     if (bufferedReader2 != null) {
                     }
-                    if (r52 != 0) {
+                    if (inputStreamReader != null) {
                     }
                     if (byteArrayInputStream2 != 0) {
                     }
@@ -185,21 +179,21 @@ public class SensitiveFilter implements Serializable {
                 try {
                     bufferedReader.close();
                     inputStreamReader.close();
-                    byteArrayInputStream5.close();
+                    byteArrayInputStream3.close();
                     if (inputStream != null) {
                         inputStream.close();
                     }
                 } catch (IOException e6) {
-                    Log.e(str2, str, e6);
+                    Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor finally", e6);
                 }
             } catch (IOException e7) {
                 e = e7;
-                r52 = 0;
-                byteArrayInputStream2 = byteArrayInputStream5;
-                Log.e(str2, "IOException in SensitiveFilter constructor", e);
+                inputStreamReader = null;
+                byteArrayInputStream2 = byteArrayInputStream3;
+                Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor", e);
                 if (bufferedReader2 != null) {
                 }
-                if (r52 != 0) {
+                if (inputStreamReader != null) {
                 }
                 if (byteArrayInputStream2 != 0) {
                 }
@@ -207,13 +201,13 @@ public class SensitiveFilter implements Serializable {
                 }
             } catch (Throwable th4) {
                 th = th4;
-                r5 = 0;
-                byteArrayInputStream = byteArrayInputStream5;
+                inputStreamReader = null;
+                byteArrayInputStream = byteArrayInputStream3;
                 if (bufferedReader2 != null) {
                 }
-                if (r5 != 0) {
+                if (inputStreamReader != null) {
                 }
-                if (byteArrayInputStream != 0) {
+                if (byteArrayInputStream != null) {
                 }
                 if (inputStream != null) {
                 }
@@ -222,15 +216,15 @@ public class SensitiveFilter implements Serializable {
         } catch (IOException e8) {
             e = e8;
             inputStream = null;
-            byteArrayInputStream3 = 0;
-            r52 = r4;
-            byteArrayInputStream2 = r4;
-            Log.e(str2, "IOException in SensitiveFilter constructor", e);
+            inputStreamReader2 = null;
+            inputStreamReader = inputStreamReader2;
+            byteArrayInputStream2 = inputStreamReader2;
+            Log.e("SensitiveFilter", "IOException in SensitiveFilter constructor", e);
             if (bufferedReader2 != null) {
                 bufferedReader2.close();
             }
-            if (r52 != 0) {
-                r52.close();
+            if (inputStreamReader != null) {
+                inputStreamReader.close();
             }
             if (byteArrayInputStream2 != 0) {
                 byteArrayInputStream2.close();
@@ -241,14 +235,14 @@ public class SensitiveFilter implements Serializable {
         } catch (Throwable th5) {
             th = th5;
             inputStream = null;
-            byteArrayInputStream4 = 0;
-            r5 = r42;
-            byteArrayInputStream = r42;
+            inputStreamReader3 = null;
+            inputStreamReader = inputStreamReader3;
+            byteArrayInputStream = inputStreamReader3;
             if (bufferedReader2 != null) {
             }
-            if (r5 != 0) {
+            if (inputStreamReader != null) {
             }
-            if (byteArrayInputStream != 0) {
+            if (byteArrayInputStream != null) {
             }
             if (inputStream != null) {
             }
@@ -512,12 +506,12 @@ public class SensitiveFilter implements Serializable {
                         break;
                     }
                     if (sensitiveNode.headTwoCharMix == nextTwoCharMix) {
-                        NavigableSet headSet = sensitiveNode.words.headSet(stringPointer.substring(i), true);
+                        NavigableSet<StringPointer> headSet = sensitiveNode.words.headSet(stringPointer.substring(i), true);
                         if (headSet != null) {
-                            for (StringPointer stringPointer2 : headSet.descendingSet()) {
-                                if (stringPointer.nextStartsWith(i, stringPointer2)) {
-                                    str2 = new String(stringPointer2.value);
-                                    i2 = stringPointer2.length;
+                            for (StringPointer next : headSet.descendingSet()) {
+                                if (stringPointer.nextStartsWith(i, next)) {
+                                    str2 = new String(next.value);
+                                    i2 = next.length;
                                     break;
                                 }
                             }
@@ -584,12 +578,12 @@ public class SensitiveFilter implements Serializable {
                         break;
                     }
                     if (sensitiveNode.headTwoCharMix == nextTwoCharMix) {
-                        NavigableSet headSet = sensitiveNode.words.headSet(stringPointer.substring(i2), true);
+                        NavigableSet<StringPointer> headSet = sensitiveNode.words.headSet(stringPointer.substring(i2), true);
                         if (headSet != null) {
-                            for (StringPointer stringPointer2 : headSet.descendingSet()) {
-                                if (stringPointer.nextStartsWith(i2, stringPointer2)) {
-                                    stringPointer.fill(i2, stringPointer2.length + i2, c2);
-                                    i = stringPointer2.length;
+                            for (StringPointer next : headSet.descendingSet()) {
+                                if (stringPointer.nextStartsWith(i2, next)) {
+                                    stringPointer.fill(i2, next.length + i2, c2);
+                                    i = next.length;
                                     break;
                                 }
                             }

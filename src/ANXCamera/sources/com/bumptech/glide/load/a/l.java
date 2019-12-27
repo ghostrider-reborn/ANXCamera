@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.a;
 
 import android.support.annotation.NonNull;
+import com.bumptech.glide.load.a.e;
 import com.bumptech.glide.load.engine.bitmap_recycle.b;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
 import java.io.IOException;
@@ -12,7 +13,7 @@ public final class l implements e<InputStream> {
     private final RecyclableBufferedInputStream Zd;
 
     /* compiled from: InputStreamRewinder */
-    public static final class a implements com.bumptech.glide.load.a.e.a<InputStream> {
+    public static final class a implements e.a<InputStream> {
         private final b Yd;
 
         public a(b bVar) {

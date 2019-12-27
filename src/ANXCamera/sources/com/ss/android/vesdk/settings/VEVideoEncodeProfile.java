@@ -2,7 +2,6 @@ package com.ss.android.vesdk.settings;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 
 public enum VEVideoEncodeProfile implements Parcelable {
@@ -11,10 +10,10 @@ public enum VEVideoEncodeProfile implements Parcelable {
     ENCODE_PROFILE_MAIN,
     ENCODE_PROFILE_HIGH;
     
-    public static final Creator<VEVideoEncodeProfile> CREATOR = null;
+    public static final Parcelable.Creator<VEVideoEncodeProfile> CREATOR = null;
 
     static {
-        CREATOR = new Creator<VEVideoEncodeProfile>() {
+        CREATOR = new Parcelable.Creator<VEVideoEncodeProfile>() {
             public VEVideoEncodeProfile createFromParcel(Parcel parcel) {
                 return VEVideoEncodeProfile.values()[parcel.readInt()];
             }

@@ -23,7 +23,7 @@ public final class MaybeOnErrorNext<T> extends AbstractMaybeWithUpstream<T, T> {
         static final class NextMaybeObserver<T> implements MaybeObserver<T> {
             final MaybeObserver<? super T> actual;
 
-            /* renamed from: d reason: collision with root package name */
+            /* renamed from: d  reason: collision with root package name */
             final AtomicReference<Disposable> f300d;
 
             NextMaybeObserver(MaybeObserver<? super T> maybeObserver, AtomicReference<Disposable> atomicReference) {
@@ -72,7 +72,7 @@ public final class MaybeOnErrorNext<T> extends AbstractMaybeWithUpstream<T, T> {
                     Object apply = this.resumeFunction.apply(th);
                     ObjectHelper.requireNonNull(apply, "The resumeFunction returned a null MaybeSource");
                     MaybeSource maybeSource = (MaybeSource) apply;
-                    DisposableHelper.replace(this, null);
+                    DisposableHelper.replace(this, (Disposable) null);
                     maybeSource.subscribe(new NextMaybeObserver(this.actual, this));
                 } catch (Throwable th2) {
                     Exceptions.throwIfFatal(th2);

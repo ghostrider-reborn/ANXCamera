@@ -8,22 +8,19 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewPager.DecorView;
-import android.support.v4.view.ViewPager.OnAdapterChangeListener;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.TextViewCompat;
-import android.text.TextUtils.TruncateAt;
+import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
-@DecorView
+@ViewPager.DecorView
 public class PagerTitleStrip extends ViewGroup {
     private static final int[] ATTRS = {16842804, 16842901, 16842904, 16842927};
     private static final float SIDE_ALPHA = 0.6f;
@@ -44,7 +41,7 @@ public class PagerTitleStrip extends ViewGroup {
     private boolean mUpdatingText;
     private WeakReference<PagerAdapter> mWatchingAdapter;
 
-    private class PageListener extends DataSetObserver implements OnPageChangeListener, OnAdapterChangeListener {
+    private class PageListener extends DataSetObserver implements ViewPager.OnPageChangeListener, ViewPager.OnAdapterChangeListener {
         private int mScrollState;
 
         PageListener() {
@@ -107,7 +104,7 @@ public class PagerTitleStrip extends ViewGroup {
     }
 
     public PagerTitleStrip(@NonNull Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public PagerTitleStrip(@NonNull Context context, @Nullable AttributeSet attributeSet) {
@@ -146,9 +143,9 @@ public class PagerTitleStrip extends ViewGroup {
         obtainStyledAttributes.recycle();
         this.mTextColor = this.mCurrText.getTextColors().getDefaultColor();
         setNonPrimaryAlpha(0.6f);
-        this.mPrevText.setEllipsize(TruncateAt.END);
-        this.mCurrText.setEllipsize(TruncateAt.END);
-        this.mNextText.setEllipsize(TruncateAt.END);
+        this.mPrevText.setEllipsize(TextUtils.TruncateAt.END);
+        this.mCurrText.setEllipsize(TextUtils.TruncateAt.END);
+        this.mNextText.setEllipsize(TextUtils.TruncateAt.END);
         if (resourceId != 0) {
             TypedArray obtainStyledAttributes2 = context.obtainStyledAttributes(resourceId, TEXT_ATTRS);
             z = obtainStyledAttributes2.getBoolean(0, false);
@@ -170,7 +167,7 @@ public class PagerTitleStrip extends ViewGroup {
         textView.setTransformationMethod(new SingleLineAllCapsTransform(textView.getContext()));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getMinHeight() {
         Drawable background = getBackground();
         if (background != null) {
@@ -205,8 +202,8 @@ public class PagerTitleStrip extends ViewGroup {
         super.onDetachedFromWindow();
         ViewPager viewPager = this.mPager;
         if (viewPager != null) {
-            updateAdapter(viewPager.getAdapter(), null);
-            this.mPager.setInternalPageChangeListener(null);
+            updateAdapter(viewPager.getAdapter(), (PagerAdapter) null);
+            this.mPager.setInternalPageChangeListener((ViewPager.OnPageChangeListener) null);
             this.mPager.removeOnAdapterChangeListener(this.mPageListener);
             this.mPager = null;
         }
@@ -226,16 +223,16 @@ public class PagerTitleStrip extends ViewGroup {
     /* access modifiers changed from: protected */
     public void onMeasure(int i, int i2) {
         int i3;
-        if (MeasureSpec.getMode(i) == 1073741824) {
+        if (View.MeasureSpec.getMode(i) == 1073741824) {
             int paddingTop = getPaddingTop() + getPaddingBottom();
             int childMeasureSpec = ViewGroup.getChildMeasureSpec(i2, paddingTop, -2);
-            int size = MeasureSpec.getSize(i);
+            int size = View.MeasureSpec.getSize(i);
             int childMeasureSpec2 = ViewGroup.getChildMeasureSpec(i, (int) (((float) size) * 0.2f), -2);
             this.mPrevText.measure(childMeasureSpec2, childMeasureSpec);
             this.mCurrText.measure(childMeasureSpec2, childMeasureSpec);
             this.mNextText.measure(childMeasureSpec2, childMeasureSpec);
-            if (MeasureSpec.getMode(i2) == 1073741824) {
-                i3 = MeasureSpec.getSize(i2);
+            if (View.MeasureSpec.getMode(i2) == 1073741824) {
+                i3 = View.MeasureSpec.getSize(i2);
             } else {
                 i3 = Math.max(getMinHeight(), this.mCurrText.getMeasuredHeight() + paddingTop);
             }
@@ -282,7 +279,7 @@ public class PagerTitleStrip extends ViewGroup {
         requestLayout();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void updateAdapter(PagerAdapter pagerAdapter, PagerAdapter pagerAdapter2) {
         if (pagerAdapter != null) {
             pagerAdapter.unregisterDataSetObserver(this.mPageListener);
@@ -301,7 +298,7 @@ public class PagerTitleStrip extends ViewGroup {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void updateText(int i, PagerAdapter pagerAdapter) {
         int count = pagerAdapter != null ? pagerAdapter.getCount() : 0;
         this.mUpdatingText = true;
@@ -313,8 +310,8 @@ public class PagerTitleStrip extends ViewGroup {
             charSequence = pagerAdapter.getPageTitle(i2);
         }
         this.mNextText.setText(charSequence);
-        int makeMeasureSpec = MeasureSpec.makeMeasureSpec(Math.max(0, (int) (((float) ((getWidth() - getPaddingLeft()) - getPaddingRight())) * 0.8f)), Integer.MIN_VALUE);
-        int makeMeasureSpec2 = MeasureSpec.makeMeasureSpec(Math.max(0, (getHeight() - getPaddingTop()) - getPaddingBottom()), Integer.MIN_VALUE);
+        int makeMeasureSpec = View.MeasureSpec.makeMeasureSpec(Math.max(0, (int) (((float) ((getWidth() - getPaddingLeft()) - getPaddingRight())) * 0.8f)), Integer.MIN_VALUE);
+        int makeMeasureSpec2 = View.MeasureSpec.makeMeasureSpec(Math.max(0, (getHeight() - getPaddingTop()) - getPaddingBottom()), Integer.MIN_VALUE);
         this.mPrevText.measure(makeMeasureSpec, makeMeasureSpec2);
         this.mCurrText.measure(makeMeasureSpec, makeMeasureSpec2);
         this.mNextText.measure(makeMeasureSpec, makeMeasureSpec2);
@@ -325,7 +322,7 @@ public class PagerTitleStrip extends ViewGroup {
         this.mUpdatingText = false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void updateTextPositions(int i, float f2, boolean z) {
         int i2;
         int i3;
@@ -365,8 +362,7 @@ public class PagerTitleStrip extends ViewGroup {
         int i13 = max - baseline2;
         int i14 = max - baseline3;
         int i15 = measuredWidth3;
-        int measuredHeight = this.mNextText.getMeasuredHeight() + i14;
-        int max2 = Math.max(Math.max(this.mPrevText.getMeasuredHeight() + i12, this.mCurrText.getMeasuredHeight() + i13), measuredHeight);
+        int max2 = Math.max(Math.max(this.mPrevText.getMeasuredHeight() + i12, this.mCurrText.getMeasuredHeight() + i13), this.mNextText.getMeasuredHeight() + i14);
         int i16 = this.mGravity & 112;
         if (i16 == 16) {
             i5 = (((height - paddingTop) - paddingBottom) - max2) / 2;

@@ -39,7 +39,7 @@ public abstract class ResponseBody implements Closeable {
             if (!this.closed) {
                 Reader reader = this.delegate;
                 if (reader == null) {
-                    Reader inputStreamReader = new InputStreamReader(this.source.inputStream(), Util.bomAwareCharset(this.source, this.charset));
+                    InputStreamReader inputStreamReader = new InputStreamReader(this.source.inputStream(), Util.bomAwareCharset(this.source, this.charset));
                     this.delegate = inputStreamReader;
                     reader = inputStreamReader;
                 }
@@ -80,10 +80,7 @@ public abstract class ResponseBody implements Closeable {
             charset = mediaType.charset();
             if (charset == null) {
                 charset = Util.UTF_8;
-                StringBuilder sb = new StringBuilder();
-                sb.append(mediaType);
-                sb.append("; charset=utf-8");
-                mediaType = MediaType.parse(sb.toString());
+                mediaType = MediaType.parse(mediaType + "; charset=utf-8");
             }
         }
         Buffer writeString = new Buffer().writeString(str, charset);
@@ -109,22 +106,13 @@ public abstract class ResponseBody implements Closeable {
                 if (contentLength == -1 || contentLength == ((long) readByteArray.length)) {
                     return readByteArray;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Content-Length (");
-                sb.append(contentLength);
-                sb.append(") and stream length (");
-                sb.append(readByteArray.length);
-                sb.append(") disagree");
-                throw new IOException(sb.toString());
+                throw new IOException("Content-Length (" + contentLength + ") and stream length (" + readByteArray.length + ") disagree");
             } catch (Throwable th) {
                 Util.closeQuietly((Closeable) source);
                 throw th;
             }
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Cannot buffer entire body for content length: ");
-            sb2.append(contentLength);
-            throw new IOException(sb2.toString());
+            throw new IOException("Cannot buffer entire body for content length: " + contentLength);
         }
     }
 

@@ -52,17 +52,17 @@ public final class FlowableScan<T> extends AbstractFlowableWithUpstream<T, T> {
                 if (t2 == null) {
                     this.value = t;
                     subscriber.onNext(t);
-                } else {
-                    try {
-                        T apply = this.accumulator.apply(t2, t);
-                        ObjectHelper.requireNonNull(apply, "The value returned by the accumulator is null");
-                        this.value = apply;
-                        subscriber.onNext(apply);
-                    } catch (Throwable th) {
-                        Exceptions.throwIfFatal(th);
-                        this.s.cancel();
-                        onError(th);
-                    }
+                    return;
+                }
+                try {
+                    T apply = this.accumulator.apply(t2, t);
+                    ObjectHelper.requireNonNull(apply, "The value returned by the accumulator is null");
+                    this.value = apply;
+                    subscriber.onNext(apply);
+                } catch (Throwable th) {
+                    Exceptions.throwIfFatal(th);
+                    this.s.cancel();
+                    onError(th);
                 }
             }
         }
@@ -86,6 +86,6 @@ public final class FlowableScan<T> extends AbstractFlowableWithUpstream<T, T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new ScanSubscriber<Object>(subscriber, this.accumulator));
+        this.source.subscribe(new ScanSubscriber(subscriber, this.accumulator));
     }
 }

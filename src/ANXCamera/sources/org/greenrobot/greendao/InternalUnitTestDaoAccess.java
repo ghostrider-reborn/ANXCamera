@@ -11,7 +11,7 @@ public class InternalUnitTestDaoAccess<T, K> {
     public InternalUnitTestDaoAccess(Database database, Class<AbstractDao<T, K>> cls, IdentityScope<?, ?> identityScope) throws Exception {
         DaoConfig daoConfig = new DaoConfig(database, cls);
         daoConfig.setIdentityScope(identityScope);
-        this.dao = (AbstractDao) cls.getConstructor(new Class[]{DaoConfig.class}).newInstance(new Object[]{daoConfig});
+        this.dao = cls.getConstructor(new Class[]{DaoConfig.class}).newInstance(new Object[]{daoConfig});
     }
 
     public AbstractDao<T, K> getDao() {

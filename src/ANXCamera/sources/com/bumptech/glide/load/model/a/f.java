@@ -28,7 +28,7 @@ public class f implements t<URL, InputStream> {
         this.oi = tVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<InputStream> a(@NonNull URL url, int i, int i2, @NonNull g gVar) {
+    public t.a<InputStream> a(@NonNull URL url, int i, int i2, @NonNull g gVar) {
         return this.oi.a(new l(url), i, i2, gVar);
     }
 

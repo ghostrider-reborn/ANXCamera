@@ -18,27 +18,13 @@ public final class PerformanceTracker {
     public static synchronized void trackAlgorithmProcess(String str, int i) {
         synchronized (PerformanceTracker.class) {
             if (i == 0) {
-                String str2 = TAG;
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("[AlgorithmProcess][START]");
-                    sb.append(str);
-                    sb.append("[");
-                    sb.append(System.currentTimeMillis());
-                    sb.append("]");
-                    Log.i(str2, sb.toString());
+                    Log.i(TAG, "[AlgorithmProcess][START]" + str + "[" + System.currentTimeMillis() + "]");
                 } catch (Throwable th) {
                     throw th;
                 }
             } else if (i == 1) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("[AlgorithmProcess][  END]");
-                sb2.append(str);
-                sb2.append("[");
-                sb2.append(System.currentTimeMillis());
-                sb2.append("]");
-                Log.i(str3, sb2.toString());
+                Log.i(TAG, "[AlgorithmProcess][  END]" + str + "[" + System.currentTimeMillis() + "]");
             }
         }
     }
@@ -46,27 +32,13 @@ public final class PerformanceTracker {
     public static synchronized void trackClearShotProcess(String str, int i) {
         synchronized (PerformanceTracker.class) {
             if (i == 0) {
-                String str2 = TAG;
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("[       ClearShot][START]");
-                    sb.append(str);
-                    sb.append("[");
-                    sb.append(System.currentTimeMillis());
-                    sb.append("]");
-                    Log.i(str2, sb.toString());
+                    Log.i(TAG, "[       ClearShot][START]" + str + "[" + System.currentTimeMillis() + "]");
                 } catch (Throwable th) {
                     throw th;
                 }
             } else if (i == 1) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("[       ClearShot][  END]");
-                sb2.append(str);
-                sb2.append("[");
-                sb2.append(System.currentTimeMillis());
-                sb2.append("]");
-                Log.i(str3, sb2.toString());
+                Log.i(TAG, "[       ClearShot][  END]" + str + "[" + System.currentTimeMillis() + "]");
             }
         }
     }
@@ -74,27 +46,13 @@ public final class PerformanceTracker {
     public static synchronized void trackImageSaver(Object obj, int i) {
         synchronized (PerformanceTracker.class) {
             if (i == 0) {
-                String str = TAG;
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("[      ImageSaver][START][");
-                    sb.append(obj);
-                    sb.append("][");
-                    sb.append(System.currentTimeMillis());
-                    sb.append("]");
-                    Log.i(str, sb.toString());
+                    Log.i(TAG, "[      ImageSaver][START][" + obj + "][" + System.currentTimeMillis() + "]");
                 } catch (Throwable th) {
                     throw th;
                 }
             } else if (i == 1) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("[      ImageSaver][  END][");
-                sb2.append(obj);
-                sb2.append("][");
-                sb2.append(System.currentTimeMillis());
-                sb2.append("]");
-                Log.i(str2, sb2.toString());
+                Log.i(TAG, "[      ImageSaver][  END][" + obj + "][" + System.currentTimeMillis() + "]");
             }
         }
     }
@@ -110,23 +68,9 @@ public final class PerformanceTracker {
                 str = "[ DEPTH]";
             }
             if (i2 == 0) {
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("[   JpegReprocess][START]");
-                sb.append(str);
-                sb.append("[");
-                sb.append(System.currentTimeMillis());
-                sb.append("]");
-                Log.i(str2, sb.toString());
+                Log.i(TAG, "[   JpegReprocess][START]" + str + "[" + System.currentTimeMillis() + "]");
             } else if (i2 == 1) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("[   JpegReprocess][  END]");
-                sb2.append(str);
-                sb2.append("[");
-                sb2.append(System.currentTimeMillis());
-                sb2.append("]");
-                Log.i(str3, sb2.toString());
+                Log.i(TAG, "[   JpegReprocess][  END]" + str + "[" + System.currentTimeMillis() + "]");
             }
         }
     }
@@ -134,23 +78,13 @@ public final class PerformanceTracker {
     public static synchronized void trackPictureCapture(int i) {
         synchronized (PerformanceTracker.class) {
             if (i == 0) {
-                String str = TAG;
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("[    PictureTaken][START][");
-                    sb.append(System.currentTimeMillis());
-                    sb.append("]");
-                    Log.i(str, sb.toString());
+                    Log.i(TAG, "[    PictureTaken][START][" + System.currentTimeMillis() + "]");
                 } catch (Throwable th) {
                     throw th;
                 }
             } else if (i == 1) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("[    PictureTaken][  END][");
-                sb2.append(System.currentTimeMillis());
-                sb2.append("]");
-                Log.i(str2, sb2.toString());
+                Log.i(TAG, "[    PictureTaken][  END][" + System.currentTimeMillis() + "]");
             }
         }
     }

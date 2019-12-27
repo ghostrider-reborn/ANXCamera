@@ -3,15 +3,10 @@ package com.android.camera.fragment.live;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.State;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
@@ -19,7 +14,7 @@ import com.android.camera.Util;
 import com.android.camera.fragment.CommonRecyclerViewHolder;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,15 +40,15 @@ public class FragmentLiveSpeed extends FragmentLiveBase {
         }
     }
 
-    private static class SpeedItemAdapter extends Adapter<SpeedItemHolder> {
+    private static class SpeedItemAdapter extends RecyclerView.Adapter<SpeedItemHolder> {
         int mColorNormal;
         int mColorSelected;
         LayoutInflater mLayoutInflater;
-        OnItemClickListener mListener;
+        AdapterView.OnItemClickListener mListener;
         int mSelectIndex;
         List<LiveSpeedItem> mSpeedItemList;
 
-        class SpeedItemHolder extends CommonRecyclerViewHolder implements OnClickListener {
+        class SpeedItemHolder extends CommonRecyclerViewHolder implements View.OnClickListener {
             public SpeedItemHolder(View view) {
                 super(view);
                 view.setOnClickListener(this);
@@ -65,14 +60,14 @@ public class FragmentLiveSpeed extends FragmentLiveBase {
                 int i = speedItemAdapter.mSelectIndex;
                 if (adapterPosition != i) {
                     speedItemAdapter.mSelectIndex = adapterPosition;
-                    speedItemAdapter.mListener.onItemClick(null, view, adapterPosition, getItemId());
+                    speedItemAdapter.mListener.onItemClick((AdapterView) null, view, adapterPosition, getItemId());
                     SpeedItemAdapter.this.notifyItemChanged(i);
                     SpeedItemAdapter.this.notifyItemChanged(adapterPosition);
                 }
             }
         }
 
-        public SpeedItemAdapter(Context context, List<LiveSpeedItem> list, int i, OnItemClickListener onItemClickListener) {
+        public SpeedItemAdapter(Context context, List<LiveSpeedItem> list, int i, AdapterView.OnItemClickListener onItemClickListener) {
             this.mSpeedItemList = list;
             this.mSelectIndex = i;
             this.mLayoutInflater = LayoutInflater.from(context);
@@ -86,11 +81,11 @@ public class FragmentLiveSpeed extends FragmentLiveBase {
         }
 
         public LiveSpeedItem getSticker(int i) {
-            return (LiveSpeedItem) this.mSpeedItemList.get(i);
+            return this.mSpeedItemList.get(i);
         }
 
         public void onBindViewHolder(SpeedItemHolder speedItemHolder, int i) {
-            LiveSpeedItem liveSpeedItem = (LiveSpeedItem) this.mSpeedItemList.get(i);
+            LiveSpeedItem liveSpeedItem = this.mSpeedItemList.get(i);
             speedItemHolder.itemView.setTag(liveSpeedItem);
             TextView textView = (TextView) speedItemHolder.getView(R.id.item_text);
             if (i == this.mSelectIndex) {
@@ -132,7 +127,7 @@ public class FragmentLiveSpeed extends FragmentLiveBase {
         final boolean isLayoutRTL = Util.isLayoutRTL(getContext());
         this.mSpeedListView = (RecyclerView) this.mRootView.findViewById(R.id.live_speed_list);
         this.mSelectIndex = Integer.valueOf(CameraSettings.getCurrentLiveSpeed()).intValue();
-        this.mAdapter = new SpeedItemAdapter(getContext(), getSpeedItemList(), this.mSelectIndex, new OnItemClickListener() {
+        this.mAdapter = new SpeedItemAdapter(getContext(), getSpeedItemList(), this.mSelectIndex, new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
                 FragmentLiveSpeed.this.onItemSelected(i);
             }
@@ -140,10 +135,10 @@ public class FragmentLiveSpeed extends FragmentLiveBase {
         this.mLayoutManager = new LinearLayoutManagerWrapper(getContext(), "live_speed_list");
         this.mLayoutManager.setOrientation(0);
         this.mSpeedListView.setLayoutManager(this.mLayoutManager);
-        this.mSpeedListView.addItemDecoration(new ItemDecoration() {
+        this.mSpeedListView.addItemDecoration(new RecyclerView.ItemDecoration() {
             final int mListMargin = FragmentLiveSpeed.this.getResources().getDimensionPixelSize(R.dimen.live_speed_list_margin);
 
-            public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+            public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
                 int itemCount = ((FragmentLiveSpeed.this.getResources().getDisplayMetrics().widthPixels - (this.mListMargin * 2)) - (recyclerView.getAdapter().getItemCount() * FragmentLiveSpeed.this.getResources().getDimensionPixelSize(R.dimen.live_speed_item_width))) / (recyclerView.getAdapter().getItemCount() - 1);
                 int childAdapterPosition = recyclerView.getChildAdapterPosition(view);
                 if (isLayoutRTL) {
@@ -169,7 +164,7 @@ public class FragmentLiveSpeed extends FragmentLiveBase {
     /* access modifiers changed from: protected */
     public void onItemSelected(int i) {
         CameraSettings.setCurrentLiveSpeed(String.valueOf(i));
-        LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+        ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
         if (liveConfigChanges != null) {
             liveConfigChanges.setRecordSpeed(i);
         }

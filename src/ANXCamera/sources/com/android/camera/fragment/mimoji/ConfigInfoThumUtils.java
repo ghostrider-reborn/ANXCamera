@@ -1,9 +1,7 @@
 package com.android.camera.fragment.mimoji;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigValue;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.AvatarEngine;
 import com.arcsoft.avatar.util.AvatarConfigUtils;
 import com.arcsoft.avatar.util.LOG;
@@ -17,12 +15,12 @@ public class ConfigInfoThumUtils {
     private final float[] mEarShapeRegion = {1031.0f, 1240.0f, 179.0f, 543.0f, 200.0f, 200.0f, 1.0f};
     private final float[] mEyeBrowSharpRegion = {528.0f, 635.0f, 164.0f, 209.0f, 200.0f, 200.0f, 1.0f};
     private final float[] mEyeSharpRegion = {528.0f, 635.0f, 164.0f, 209.0f, 200.0f, 200.0f, 1.0f};
-    private ArrayList<ASAvatarConfigInfo> mEyeWearList;
+    private ArrayList<AvatarConfig.ASAvatarConfigInfo> mEyeWearList;
     private final float[] mEyeWearStyleRegin = {261.0f, 314.0f, 35.0f, 40.0f, 200.0f, 200.0f, 1.0f};
     private final float[] mEyelashStyleRegion = {1306.0f, 1570.0f, 389.0f, 668.0f, 200.0f, 200.0f, 1.0f};
     private final float[] mFaceSharpRegion = {261.0f, 314.0f, 35.0f, 40.0f, 200.0f, 200.0f, 1.0f};
     private final float[] mFrecklesRegion = {601.0f, 723.0f, 201.0f, 274.0f, 200.0f, 200.0f, 1.0f};
-    private ArrayList<ASAvatarConfigInfo> mHairList;
+    private ArrayList<AvatarConfig.ASAvatarConfigInfo> mHairList;
     private final float[] mHairStyleRegion = {270.0f, 325.0f, 23.0f, 37.0f, 220.0f, 220.0f, 1.0f};
     private final String mHat = "Hat";
     private final float[] mHatStyleRegion = {270.0f, 325.0f, 23.0f, 20.0f, 220.0f, 220.0f, 1.0f};
@@ -36,16 +34,13 @@ public class ConfigInfoThumUtils {
     private float[] mTempRegion = new float[7];
     private final float[] mnNormalRegion = {200.0f, 200.0f, 0.0f, 0.0f, 200.0f, 200.0f, 1.0f};
 
-    public void renderThumb(AvatarEngine avatarEngine, ASAvatarConfigInfo aSAvatarConfigInfo, int i, float[] fArr) {
+    public void renderThumb(AvatarEngine avatarEngine, AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo, int i, float[] fArr) {
         AvatarEngine avatarEngine2 = avatarEngine;
-        ASAvatarConfigInfo aSAvatarConfigInfo2 = aSAvatarConfigInfo;
+        AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo2 = aSAvatarConfigInfo;
         int i2 = i;
         this.mNoHair = false;
         this.mNoEyeWear = false;
-        StringBuilder sb = new StringBuilder();
-        sb.append("configType : ");
-        sb.append(aSAvatarConfigInfo2.configType);
-        LOG.d(TAG, sb.toString());
+        LOG.d(TAG, "configType : " + aSAvatarConfigInfo2.configType);
         int i3 = aSAvatarConfigInfo2.configType;
         if (i3 == 1) {
             this.mTempRegion = this.mHairStyleRegion;
@@ -99,8 +94,8 @@ public class ConfigInfoThumUtils {
                 this.mHairList = avatarEngine2.getConfig(1, i2);
             }
             if (this.mHairList.size() > 0) {
-                ArrayList<ASAvatarConfigInfo> arrayList = this.mHairList;
-                avatarEngine2.setConfig((ASAvatarConfigInfo) arrayList.get(arrayList.size() - 1));
+                ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList = this.mHairList;
+                avatarEngine2.setConfig(arrayList.get(arrayList.size() - 1));
             }
         }
         if (this.mNoEyeWear) {
@@ -108,7 +103,7 @@ public class ConfigInfoThumUtils {
                 this.mEyeWearList = avatarEngine2.getConfig(9, i2);
             }
             if (this.mEyeWearList.size() > 0) {
-                avatarEngine2.setConfig((ASAvatarConfigInfo) this.mEyeWearList.get(0));
+                avatarEngine2.setConfig(this.mEyeWearList.get(0));
             }
         }
         avatarEngine.setConfig(aSAvatarConfigInfo);
@@ -117,26 +112,26 @@ public class ConfigInfoThumUtils {
         int i5 = (int) fArr2[5];
         byte[] bArr = new byte[(i4 * i5 * 4)];
         avatarEngine.renderThumb((int) fArr2[0], (int) fArr2[1], (int) fArr2[2], (int) fArr2[3], bArr, i4, i5, i4 * 4, fArr, fArr2[6]);
-        Bitmap createBitmap = Bitmap.createBitmap(i4, i5, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(i4, i5, Bitmap.Config.ARGB_8888);
         createBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(bArr));
         aSAvatarConfigInfo2.thum = createBitmap;
     }
 
-    public void reset(AvatarEngine avatarEngine, ASAvatarConfigValue aSAvatarConfigValue) {
-        ASAvatarConfigInfo aSAvatarConfigInfo;
-        ASAvatarConfigInfo aSAvatarConfigInfo2;
+    public void reset(AvatarEngine avatarEngine, AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
+        AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo;
+        AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo2;
         if (this.mNoHair) {
             int currentConfigIdWithType = AvatarConfigUtils.getCurrentConfigIdWithType(1, aSAvatarConfigValue);
             if (currentConfigIdWithType == -1) {
                 currentConfigIdWithType = 0;
             }
-            Iterator it = this.mHairList.iterator();
+            Iterator<AvatarConfig.ASAvatarConfigInfo> it = this.mHairList.iterator();
             while (true) {
                 if (!it.hasNext()) {
                     aSAvatarConfigInfo2 = null;
                     break;
                 }
-                aSAvatarConfigInfo2 = (ASAvatarConfigInfo) it.next();
+                aSAvatarConfigInfo2 = it.next();
                 if (aSAvatarConfigInfo2.configID == currentConfigIdWithType) {
                     break;
                 }
@@ -150,13 +145,13 @@ public class ConfigInfoThumUtils {
             if (currentConfigIdWithType2 == -1) {
                 currentConfigIdWithType2 = 0;
             }
-            Iterator it2 = this.mEyeWearList.iterator();
+            Iterator<AvatarConfig.ASAvatarConfigInfo> it2 = this.mEyeWearList.iterator();
             while (true) {
                 if (!it2.hasNext()) {
                     aSAvatarConfigInfo = null;
                     break;
                 }
-                aSAvatarConfigInfo = (ASAvatarConfigInfo) it2.next();
+                aSAvatarConfigInfo = it2.next();
                 if (aSAvatarConfigInfo.configID == currentConfigIdWithType2) {
                     break;
                 }

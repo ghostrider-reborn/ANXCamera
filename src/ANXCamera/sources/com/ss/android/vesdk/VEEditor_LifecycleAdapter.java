@@ -1,7 +1,7 @@
 package com.ss.android.vesdk;
 
 import android.arch.lifecycle.GeneratedAdapter;
-import android.arch.lifecycle.Lifecycle.Event;
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MethodCallsLogger;
 
@@ -12,9 +12,12 @@ public class VEEditor_LifecycleAdapter implements GeneratedAdapter {
         this.mReceiver = vEEditor;
     }
 
-    public void callMethods(LifecycleOwner lifecycleOwner, Event event, boolean z, MethodCallsLogger methodCallsLogger) {
+    public void callMethods(LifecycleOwner lifecycleOwner, Lifecycle.Event event, boolean z, MethodCallsLogger methodCallsLogger) {
         boolean z2 = methodCallsLogger != null;
-        if (!z && event == Event.ON_DESTROY && (!z2 || methodCallsLogger.approveCall("destroy", 1))) {
+        if (z || event != Lifecycle.Event.ON_DESTROY) {
+            return;
+        }
+        if (!z2 || methodCallsLogger.approveCall("destroy", 1)) {
             this.mReceiver.destroy();
         }
     }

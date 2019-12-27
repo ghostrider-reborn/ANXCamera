@@ -86,26 +86,6 @@ public class HostStatus {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HostStatus{url='");
-        sb.append(this.url);
-        sb.append('\'');
-        sb.append(", host=");
-        sb.append(this.host.toString());
-        sb.append(", status=");
-        sb.append(this.status);
-        sb.append(", duration=");
-        sb.append(this.duration);
-        sb.append(", sendTime=");
-        sb.append(this.sendTime);
-        sb.append(", traceCode='");
-        sb.append(this.traceCode);
-        sb.append('\'');
-        sb.append(", exception=");
-        sb.append(this.exception);
-        sb.append(", isSuccess=");
-        sb.append(this.isSuccess);
-        sb.append('}');
-        return sb.toString();
+        return "HostStatus{url='" + this.url + '\'' + ", host=" + this.host.toString() + ", status=" + this.status + ", duration=" + this.duration + ", sendTime=" + this.sendTime + ", traceCode='" + this.traceCode + '\'' + ", exception=" + this.exception + ", isSuccess=" + this.isSuccess + '}';
     }
 }

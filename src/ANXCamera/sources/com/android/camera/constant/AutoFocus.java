@@ -17,6 +17,7 @@ public class AutoFocus {
     public @interface FocusMode {
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public static int convertToFocusMode(String str) {
         char c2;
         switch (str.hashCode()) {

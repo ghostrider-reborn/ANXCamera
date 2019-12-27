@@ -1,8 +1,10 @@
 package org.greenrobot.greendao.async;
 
 import java.util.concurrent.Callable;
+import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.AbstractDaoSession;
-import org.greenrobot.greendao.async.AsyncOperation.OperationType;
+import org.greenrobot.greendao.async.AsyncOperation;
+import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.Query;
 
 public class AsyncSession {
@@ -14,19 +16,19 @@ public class AsyncSession {
         this.daoSession = abstractDaoSession;
     }
 
-    private <E> AsyncOperation enqueEntityOperation(OperationType operationType, Class<E> cls, Object obj, int i) {
-        AsyncOperation asyncOperation = new AsyncOperation(operationType, this.daoSession.getDao(cls), null, obj, i | this.sessionFlags);
+    private <E> AsyncOperation enqueEntityOperation(AsyncOperation.OperationType operationType, Class<E> cls, Object obj, int i) {
+        AsyncOperation asyncOperation = new AsyncOperation(operationType, this.daoSession.getDao(cls), (Database) null, obj, i | this.sessionFlags);
         this.executor.enqueue(asyncOperation);
         return asyncOperation;
     }
 
-    private AsyncOperation enqueueDatabaseOperation(OperationType operationType, Object obj, int i) {
-        AsyncOperation asyncOperation = new AsyncOperation(operationType, null, this.daoSession.getDatabase(), obj, i | this.sessionFlags);
+    private AsyncOperation enqueueDatabaseOperation(AsyncOperation.OperationType operationType, Object obj, int i) {
+        AsyncOperation asyncOperation = new AsyncOperation(operationType, (AbstractDao<?, ?>) null, this.daoSession.getDatabase(), obj, i | this.sessionFlags);
         this.executor.enqueue(asyncOperation);
         return asyncOperation;
     }
 
-    private AsyncOperation enqueueEntityOperation(OperationType operationType, Object obj, int i) {
+    private AsyncOperation enqueueEntityOperation(AsyncOperation.OperationType operationType, Object obj, int i) {
         return enqueEntityOperation(operationType, obj.getClass(), obj, i);
     }
 
@@ -35,7 +37,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation callInTx(Callable<?> callable, int i) {
-        return enqueueDatabaseOperation(OperationType.TransactionCallable, callable, i);
+        return enqueueDatabaseOperation(AsyncOperation.OperationType.TransactionCallable, callable, i);
     }
 
     public AsyncOperation count(Class<?> cls) {
@@ -43,7 +45,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation count(Class<?> cls, int i) {
-        return enqueEntityOperation(OperationType.Count, cls, null, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.Count, cls, (Object) null, i);
     }
 
     public AsyncOperation delete(Object obj) {
@@ -51,7 +53,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation delete(Object obj, int i) {
-        return enqueueEntityOperation(OperationType.Delete, obj, i);
+        return enqueueEntityOperation(AsyncOperation.OperationType.Delete, obj, i);
     }
 
     public <E> AsyncOperation deleteAll(Class<E> cls) {
@@ -59,7 +61,7 @@ public class AsyncSession {
     }
 
     public <E> AsyncOperation deleteAll(Class<E> cls, int i) {
-        return enqueEntityOperation(OperationType.DeleteAll, cls, null, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.DeleteAll, cls, (Object) null, i);
     }
 
     public AsyncOperation deleteByKey(Object obj) {
@@ -67,11 +69,11 @@ public class AsyncSession {
     }
 
     public AsyncOperation deleteByKey(Object obj, int i) {
-        return enqueueEntityOperation(OperationType.DeleteByKey, obj, i);
+        return enqueueEntityOperation(AsyncOperation.OperationType.DeleteByKey, obj, i);
     }
 
     public <E> AsyncOperation deleteInTx(Class<E> cls, int i, E... eArr) {
-        return enqueEntityOperation(OperationType.DeleteInTxArray, cls, eArr, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.DeleteInTxArray, cls, eArr, i);
     }
 
     public <E> AsyncOperation deleteInTx(Class<E> cls, Iterable<E> iterable) {
@@ -79,7 +81,7 @@ public class AsyncSession {
     }
 
     public <E> AsyncOperation deleteInTx(Class<E> cls, Iterable<E> iterable, int i) {
-        return enqueEntityOperation(OperationType.DeleteInTxIterable, cls, iterable, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.DeleteInTxIterable, cls, iterable, i);
     }
 
     public <E> AsyncOperation deleteInTx(Class<E> cls, E... eArr) {
@@ -111,11 +113,11 @@ public class AsyncSession {
     }
 
     public AsyncOperation insert(Object obj, int i) {
-        return enqueueEntityOperation(OperationType.Insert, obj, i);
+        return enqueueEntityOperation(AsyncOperation.OperationType.Insert, obj, i);
     }
 
     public <E> AsyncOperation insertInTx(Class<E> cls, int i, E... eArr) {
-        return enqueEntityOperation(OperationType.InsertInTxArray, cls, eArr, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.InsertInTxArray, cls, eArr, i);
     }
 
     public <E> AsyncOperation insertInTx(Class<E> cls, Iterable<E> iterable) {
@@ -123,7 +125,7 @@ public class AsyncSession {
     }
 
     public <E> AsyncOperation insertInTx(Class<E> cls, Iterable<E> iterable, int i) {
-        return enqueEntityOperation(OperationType.InsertInTxIterable, cls, iterable, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.InsertInTxIterable, cls, iterable, i);
     }
 
     public <E> AsyncOperation insertInTx(Class<E> cls, E... eArr) {
@@ -135,11 +137,11 @@ public class AsyncSession {
     }
 
     public AsyncOperation insertOrReplace(Object obj, int i) {
-        return enqueueEntityOperation(OperationType.InsertOrReplace, obj, i);
+        return enqueueEntityOperation(AsyncOperation.OperationType.InsertOrReplace, obj, i);
     }
 
     public <E> AsyncOperation insertOrReplaceInTx(Class<E> cls, int i, E... eArr) {
-        return enqueEntityOperation(OperationType.InsertOrReplaceInTxArray, cls, eArr, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.InsertOrReplaceInTxArray, cls, eArr, i);
     }
 
     public <E> AsyncOperation insertOrReplaceInTx(Class<E> cls, Iterable<E> iterable) {
@@ -147,7 +149,7 @@ public class AsyncSession {
     }
 
     public <E> AsyncOperation insertOrReplaceInTx(Class<E> cls, Iterable<E> iterable, int i) {
-        return enqueEntityOperation(OperationType.InsertOrReplaceInTxIterable, cls, iterable, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.InsertOrReplaceInTxIterable, cls, iterable, i);
     }
 
     public <E> AsyncOperation insertOrReplaceInTx(Class<E> cls, E... eArr) {
@@ -163,7 +165,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation load(Class<?> cls, Object obj, int i) {
-        return enqueEntityOperation(OperationType.Load, cls, obj, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.Load, cls, obj, i);
     }
 
     public AsyncOperation loadAll(Class<?> cls) {
@@ -171,7 +173,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation loadAll(Class<?> cls, int i) {
-        return enqueEntityOperation(OperationType.LoadAll, cls, null, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.LoadAll, cls, (Object) null, i);
     }
 
     public AsyncOperation queryList(Query<?> query) {
@@ -179,7 +181,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation queryList(Query<?> query, int i) {
-        return enqueueDatabaseOperation(OperationType.QueryList, query, i);
+        return enqueueDatabaseOperation(AsyncOperation.OperationType.QueryList, query, i);
     }
 
     public AsyncOperation queryUnique(Query<?> query) {
@@ -187,7 +189,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation queryUnique(Query<?> query, int i) {
-        return enqueueDatabaseOperation(OperationType.QueryUnique, query, i);
+        return enqueueDatabaseOperation(AsyncOperation.OperationType.QueryUnique, query, i);
     }
 
     public AsyncOperation refresh(Object obj) {
@@ -195,7 +197,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation refresh(Object obj, int i) {
-        return enqueueEntityOperation(OperationType.Refresh, obj, i);
+        return enqueueEntityOperation(AsyncOperation.OperationType.Refresh, obj, i);
     }
 
     public AsyncOperation runInTx(Runnable runnable) {
@@ -203,7 +205,7 @@ public class AsyncSession {
     }
 
     public AsyncOperation runInTx(Runnable runnable, int i) {
-        return enqueueDatabaseOperation(OperationType.TransactionRunnable, runnable, i);
+        return enqueueDatabaseOperation(AsyncOperation.OperationType.TransactionRunnable, runnable, i);
     }
 
     public void setListener(AsyncOperationListener asyncOperationListener) {
@@ -231,11 +233,11 @@ public class AsyncSession {
     }
 
     public AsyncOperation update(Object obj, int i) {
-        return enqueueEntityOperation(OperationType.Update, obj, i);
+        return enqueueEntityOperation(AsyncOperation.OperationType.Update, obj, i);
     }
 
     public <E> AsyncOperation updateInTx(Class<E> cls, int i, E... eArr) {
-        return enqueEntityOperation(OperationType.UpdateInTxArray, cls, eArr, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.UpdateInTxArray, cls, eArr, i);
     }
 
     public <E> AsyncOperation updateInTx(Class<E> cls, Iterable<E> iterable) {
@@ -243,7 +245,7 @@ public class AsyncSession {
     }
 
     public <E> AsyncOperation updateInTx(Class<E> cls, Iterable<E> iterable, int i) {
-        return enqueEntityOperation(OperationType.UpdateInTxIterable, cls, iterable, i);
+        return enqueEntityOperation(AsyncOperation.OperationType.UpdateInTxIterable, cls, iterable, i);
     }
 
     public <E> AsyncOperation updateInTx(Class<E> cls, E... eArr) {

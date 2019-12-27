@@ -1,8 +1,7 @@
 package com.bumptech.glide.load.engine.b;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.StrictMode;
-import android.os.StrictMode.ThreadPolicy;
 import java.io.File;
 import java.util.regex.Pattern;
 
@@ -17,14 +16,13 @@ final class g {
 
     static int availableProcessors() {
         int availableProcessors = Runtime.getRuntime().availableProcessors();
-        return VERSION.SDK_INT < 17 ? Math.max(wk(), availableProcessors) : availableProcessors;
+        return Build.VERSION.SDK_INT < 17 ? Math.max(wk(), availableProcessors) : availableProcessors;
     }
 
     /* JADX INFO: finally extract failed */
     private static int wk() {
         File[] fileArr;
-        String str = TAG;
-        ThreadPolicy allowThreadDiskReads = StrictMode.allowThreadDiskReads();
+        StrictMode.ThreadPolicy allowThreadDiskReads = StrictMode.allowThreadDiskReads();
         try {
             fileArr = new File(th).listFiles(new f(Pattern.compile(sh)));
             StrictMode.setThreadPolicy(allowThreadDiskReads);

@@ -24,7 +24,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
     final Function<? super T, ? extends Publisher<? extends R>> mapper;
     final int prefetch;
 
-    /* renamed from: io.reactivex.internal.operators.flowable.FlowableConcatMap$1 reason: invalid class name */
+    /* renamed from: io.reactivex.internal.operators.flowable.FlowableConcatMap$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$io$reactivex$internal$util$ErrorMode = new int[ErrorMode.values().length];
 
@@ -61,7 +61,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
             this.limit = i - (i >> 2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void drain();
 
         public final void innerComplete() {
@@ -110,7 +110,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void subscribeActual();
     }
 
@@ -133,7 +133,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 while (!this.cancelled) {
@@ -141,16 +141,17 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
                         boolean z = this.done;
                         if (!z || this.veryEnd || ((Throwable) this.errors.get()) == null) {
                             try {
-                                Object poll = this.queue.poll();
+                                T poll = this.queue.poll();
                                 boolean z2 = poll == null;
                                 if (z && z2) {
                                     Throwable terminate = this.errors.terminate();
                                     if (terminate != null) {
                                         this.actual.onError(terminate);
+                                        return;
                                     } else {
                                         this.actual.onComplete();
+                                        return;
                                     }
-                                    return;
                                 } else if (!z2) {
                                     try {
                                         Object apply = this.mapper.apply(poll);
@@ -209,6 +210,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
                         }
                     }
                     if (decrementAndGet() == 0) {
+                        return;
                     }
                 }
             }
@@ -244,7 +246,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
             this.inner.request(j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeActual() {
             this.actual.onSubscribe(this);
         }
@@ -268,14 +270,14 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (this.wip.getAndIncrement() == 0) {
                 while (!this.cancelled) {
                     if (!this.active) {
                         boolean z = this.done;
                         try {
-                            Object poll = this.queue.poll();
+                            T poll = this.queue.poll();
                             boolean z2 = poll == null;
                             if (z && z2) {
                                 this.actual.onComplete();
@@ -338,6 +340,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
                         }
                     }
                     if (this.wip.decrementAndGet() == 0) {
+                        return;
                     }
                 }
             }
@@ -380,7 +383,7 @@ public final class FlowableConcatMap<T, R> extends AbstractFlowableWithUpstream<
             this.inner.request(j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeActual() {
             this.actual.onSubscribe(this);
         }

@@ -265,45 +265,42 @@ public final class CodedInputByteBufferNano {
     }
 
     public int readRawVarint32() throws IOException {
-        byte b2;
         int i;
         byte readRawByte = readRawByte();
         if (readRawByte >= 0) {
             return readRawByte;
         }
-        byte b3 = readRawByte & Byte.MAX_VALUE;
+        byte b2 = readRawByte & Byte.MAX_VALUE;
         byte readRawByte2 = readRawByte();
         if (readRawByte2 >= 0) {
             i = readRawByte2 << 7;
         } else {
-            b3 |= (readRawByte2 & Byte.MAX_VALUE) << 7;
+            b2 |= (readRawByte2 & Byte.MAX_VALUE) << 7;
             byte readRawByte3 = readRawByte();
             if (readRawByte3 >= 0) {
                 i = readRawByte3 << 14;
             } else {
-                b3 |= (readRawByte3 & Byte.MAX_VALUE) << 14;
+                b2 |= (readRawByte3 & Byte.MAX_VALUE) << 14;
                 byte readRawByte4 = readRawByte();
                 if (readRawByte4 >= 0) {
                     i = readRawByte4 << 21;
                 } else {
-                    byte b4 = b3 | ((readRawByte4 & Byte.MAX_VALUE) << 21);
+                    byte b3 = b2 | ((readRawByte4 & Byte.MAX_VALUE) << 21);
                     byte readRawByte5 = readRawByte();
-                    byte b5 = b4 | (readRawByte5 << 28);
-                    if (readRawByte5 < 0) {
-                        for (int i2 = 0; i2 < 5; i2++) {
-                            if (readRawByte() >= 0) {
-                                return b5;
-                            }
-                        }
-                        throw InvalidProtocolBufferNanoException.malformedVarint();
+                    byte b4 = b3 | (readRawByte5 << 28);
+                    if (readRawByte5 >= 0) {
+                        return b4;
                     }
-                    b2 = b5;
-                    return b2;
+                    for (int i2 = 0; i2 < 5; i2++) {
+                        if (readRawByte() >= 0) {
+                            return b4;
+                        }
+                    }
+                    throw InvalidProtocolBufferNanoException.malformedVarint();
                 }
             }
         }
-        b2 = i | b3;
-        return b2;
+        return i | b2;
     }
 
     public long readRawVarint64() throws IOException {
@@ -377,7 +374,7 @@ public final class CodedInputByteBufferNano {
         rewindToPositionAndTag(i, this.lastTag);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void rewindToPositionAndTag(int i, int i2) {
         int i3 = this.bufferPos;
         int i4 = this.bufferStart;

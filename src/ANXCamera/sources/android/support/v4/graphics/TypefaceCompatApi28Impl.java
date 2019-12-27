@@ -3,13 +3,12 @@ package android.support.v4.graphics;
 import android.graphics.Typeface;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @RequiresApi(28)
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class TypefaceCompatApi28Impl extends TypefaceCompatApi26Impl {
     private static final String CREATE_FROM_FAMILIES_WITH_DEFAULT_METHOD = "createFromFamiliesWithDefault";
     private static final String DEFAULT_FAMILY = "sans-serif";
@@ -21,7 +20,7 @@ public class TypefaceCompatApi28Impl extends TypefaceCompatApi26Impl {
         try {
             Object newInstance = Array.newInstance(this.mFontFamily, 1);
             Array.set(newInstance, 0, obj);
-            return (Typeface) this.mCreateFromFamiliesWithDefault.invoke(null, new Object[]{newInstance, DEFAULT_FAMILY, Integer.valueOf(-1), Integer.valueOf(-1)});
+            return (Typeface) this.mCreateFromFamiliesWithDefault.invoke((Object) null, new Object[]{newInstance, DEFAULT_FAMILY, -1, -1});
         } catch (IllegalAccessException | InvocationTargetException e2) {
             throw new RuntimeException(e2);
         }

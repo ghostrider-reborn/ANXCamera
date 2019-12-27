@@ -79,10 +79,7 @@ public class VideoRecorderRender extends RenderGroup {
             return drawPreview(drawAttribute);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unsupported target ");
-        sb.append(drawAttribute.getTarget());
-        Log.e(str, sb.toString());
+        Log.e(str, "unsupported target " + drawAttribute.getTarget());
         return false;
     }
 

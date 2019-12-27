@@ -6,9 +6,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import com.android.camera.log.Log;
-import com.xiaomi.camera.core.CaptureData.CaptureDataBean;
+import com.xiaomi.camera.core.CaptureData;
 import com.xiaomi.camera.imagecodec.ReprocessData;
-import com.xiaomi.camera.imagecodec.ReprocessData.OnDataAvailableListener;
 import com.xiaomi.camera.imagecodec.ReprocessorFactory;
 import com.xiaomi.camera.processor.ClearShotProcessor;
 import com.xiaomi.camera.processor.GroupShotProcessor;
@@ -46,10 +45,7 @@ public class MultiFrameProcessor {
         public void handleMessage(Message message) {
             if (message.what != 1) {
                 String access$100 = MultiFrameProcessor.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected message ");
-                sb.append(message.what);
-                Log.w(access$100, sb.toString());
+                Log.w(access$100, "unexpected message " + message.what);
                 return;
             }
             MultiFrameProcessor.this.doProcess((CaptureData) message.obj);
@@ -61,20 +57,17 @@ public class MultiFrameProcessor {
         this.mProcessResultListener = new ProcessResultListener() {
             public void onProcessFinished(CaptureData captureData, boolean z) {
                 String access$100 = MultiFrameProcessor.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onProcessFinished: doReprocess = ");
-                sb.append(z);
-                Log.d(access$100, sb.toString());
+                Log.d(access$100, "onProcessFinished: doReprocess = " + z);
                 CaptureDataListener captureDataListener = captureData.getCaptureDataListener();
                 if (captureDataListener == null) {
                     Log.w(MultiFrameProcessor.TAG, "onProcessFinished: null CaptureDataListener!");
-                    CaptureDataBean multiFrameProcessResult = captureData.getMultiFrameProcessResult();
+                    CaptureData.CaptureDataBean multiFrameProcessResult = captureData.getMultiFrameProcessResult();
                     if (multiFrameProcessResult != null) {
                         multiFrameProcessResult.close();
                     }
-                    for (CaptureDataBean captureDataBean : captureData.getCaptureDataBeanList()) {
-                        if (captureDataBean != null) {
-                            captureDataBean.close();
+                    for (CaptureData.CaptureDataBean next : captureData.getCaptureDataBeanList()) {
+                        if (next != null) {
+                            next.close();
                         }
                     }
                     return;
@@ -95,20 +88,14 @@ public class MultiFrameProcessor {
     /* access modifiers changed from: private */
     public void doProcess(CaptureData captureData) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("doProcess: start process task: ");
-        sb.append(captureData.getCaptureTimestamp());
-        Log.d(str, sb.toString());
+        Log.d(str, "doProcess: start process task: " + captureData.getCaptureTimestamp());
         int algoType = captureData.getAlgoType();
         if (algoType == 2) {
             new ClearShotProcessor().doProcess(captureData, this.mProcessResultListener);
         } else if (algoType == 5) {
             new GroupShotProcessor().doProcess(captureData, this.mProcessResultListener);
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("unknown multi-frame process algorithm type: ");
-            sb2.append(algoType);
-            throw new RuntimeException(sb2.toString());
+            throw new RuntimeException("unknown multi-frame process algorithm type: " + algoType);
         }
     }
 
@@ -117,32 +104,19 @@ public class MultiFrameProcessor {
     }
 
     /* access modifiers changed from: private */
-    public void reprocessImage(final CaptureDataBean captureDataBean, boolean z) {
-        AnonymousClass2 r8 = new OnDataAvailableListener() {
+    public void reprocessImage(final CaptureData.CaptureDataBean captureDataBean, boolean z) {
+        AnonymousClass2 r8 = new ReprocessData.OnDataAvailableListener() {
             public void onError(String str, String str2) {
                 synchronized (MultiFrameProcessor.this.mObjLock) {
                     String access$100 = MultiFrameProcessor.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onError>>tag=");
-                    sb.append(str2);
-                    sb.append(" reason=");
-                    sb.append(str);
-                    Log.v(access$100, sb.toString());
+                    Log.v(access$100, "onError>>tag=" + str2 + " reason=" + str);
                     if (!Build.IS_DEBUGGABLE) {
-                        MultiFrameProcessor.this.mReprocessing = false;
+                        boolean unused = MultiFrameProcessor.this.mReprocessing = false;
                         MultiFrameProcessor.this.mObjLock.notify();
                         String access$1002 = MultiFrameProcessor.TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("onError<<cost=");
-                        sb2.append(System.currentTimeMillis() - MultiFrameProcessor.this.mReprocessStartTime);
-                        Log.v(access$1002, sb2.toString());
+                        Log.v(access$1002, "onError<<cost=" + (System.currentTimeMillis() - MultiFrameProcessor.this.mReprocessStartTime));
                     } else {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("reprocessImage failed image = ");
-                        sb3.append(str2);
-                        sb3.append(" reason = ");
-                        sb3.append(str);
-                        throw new RuntimeException(sb3.toString());
+                        throw new RuntimeException("reprocessImage failed image = " + str2 + " reason = " + str);
                     }
                 }
             }
@@ -153,38 +127,24 @@ public class MultiFrameProcessor {
             public void onYuvAvailable(Image image, String str) {
                 synchronized (MultiFrameProcessor.this.mObjLock) {
                     String access$100 = MultiFrameProcessor.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onYuvAvailable>>tag=");
-                    sb.append(str);
-                    Log.v(access$100, sb.toString());
-                    MultiFrameProcessor.this.mReprocessing = false;
+                    Log.v(access$100, "onYuvAvailable>>tag=" + str);
+                    boolean unused = MultiFrameProcessor.this.mReprocessing = false;
                     captureDataBean.setMainImage(image);
                     MultiFrameProcessor.this.mObjLock.notify();
                     String access$1002 = MultiFrameProcessor.TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("onYuvAvailable<<cost=");
-                    sb2.append(System.currentTimeMillis() - MultiFrameProcessor.this.mReprocessStartTime);
-                    Log.v(access$1002, sb2.toString());
+                    Log.v(access$1002, "onYuvAvailable<<cost=" + (System.currentTimeMillis() - MultiFrameProcessor.this.mReprocessStartTime));
                 }
             }
         };
         Image mainImage = captureDataBean.getMainImage();
-        StringBuilder sb = new StringBuilder();
-        sb.append(captureDataBean.getResult().getTimeStamp());
-        sb.append(File.separator);
-        sb.append(0);
-        String sb2 = sb.toString();
+        String str = captureDataBean.getResult().getTimeStamp() + File.separator + 0;
         int width = mainImage.getWidth();
         int height = mainImage.getHeight();
-        String str = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("reprocessImage: timestamp = ");
-        sb3.append(mainImage.getTimestamp());
-        Log.d(str, sb3.toString());
+        Log.d(TAG, "reprocessImage: timestamp = " + mainImage.getTimestamp());
         synchronized (this.mObjLock) {
             this.mReprocessStartTime = System.currentTimeMillis();
             this.mReprocessing = true;
-            ReprocessData reprocessData = new ReprocessData(mainImage, sb2, captureDataBean.getResult(), z, width, height, 35, r8);
+            ReprocessData reprocessData = new ReprocessData(mainImage, str, captureDataBean.getResult(), z, width, height, 35, r8);
             reprocessData.setImageFromPool(true);
             ReprocessorFactory.getReprocessor().submit(reprocessData);
             while (this.mReprocessing) {
@@ -201,21 +161,13 @@ public class MultiFrameProcessor {
 
     public void processData(CaptureData captureData) {
         if (captureData.getBurstNum() != captureData.getCaptureDataBeanList().size()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Loss some capture data, burstNum is: ");
-            sb.append(captureData.getBurstNum());
-            sb.append("; but data bean list size is: ");
-            sb.append(captureData.getCaptureDataBeanList().size());
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException("Loss some capture data, burstNum is: " + captureData.getBurstNum() + "; but data bean list size is: " + captureData.getCaptureDataBeanList().size());
         } else if (!this.mWorkThread.isAlive() || this.mHandler == null) {
             Log.w(TAG, "processData: sync mode");
             doProcess(captureData);
         } else {
             String str = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("processData: queue task: ");
-            sb2.append(captureData.getCaptureTimestamp());
-            Log.v(str, sb2.toString());
+            Log.v(str, "processData: queue task: " + captureData.getCaptureTimestamp());
             this.mHandler.obtainMessage(1, captureData).sendToTarget();
         }
     }

@@ -2,12 +2,11 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.Keep;
 
 @Keep
 public class VEWatermarkParam implements Parcelable {
-    public static final Creator<VEWatermarkParam> CREATOR = new Creator<VEWatermarkParam>() {
+    public static final Parcelable.Creator<VEWatermarkParam> CREATOR = new Parcelable.Creator<VEWatermarkParam>() {
         public VEWatermarkParam createFromParcel(Parcel parcel) {
             return new VEWatermarkParam(parcel);
         }
@@ -31,7 +30,7 @@ public class VEWatermarkParam implements Parcelable {
 
     @Keep
     public static class VEWatermarkMask implements Parcelable {
-        public static final Creator<VEWatermarkMask> CREATOR = new Creator<VEWatermarkMask>() {
+        public static final Parcelable.Creator<VEWatermarkMask> CREATOR = new Parcelable.Creator<VEWatermarkMask>() {
             public VEWatermarkMask createFromParcel(Parcel parcel) {
                 return new VEWatermarkMask(parcel);
             }

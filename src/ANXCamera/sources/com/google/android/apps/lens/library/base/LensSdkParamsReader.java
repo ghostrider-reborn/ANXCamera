@@ -4,22 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-import com.google.android.apps.lens.library.base.proto.nano.LensSdkParamsProto.LensSdkParams;
+import com.google.android.apps.lens.library.base.proto.nano.LensSdkParamsProto;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LensSdkParamsReader {
     public static final String AGSA_AUTHORITY = "com.google.android.googlequicksearchbox.GsaPublicContentProvider";
-    private static final LensSdkParams DEFAULT_PARAMS = new LensSdkParams();
+    private static final LensSdkParamsProto.LensSdkParams DEFAULT_PARAMS = new LensSdkParamsProto.LensSdkParams();
     public static final String LENS_AR_STICKERS_ACTIVITY = "com.google.vr.apps.ornament.app.MainActivity";
     public static final String LENS_AR_STICKERS_PACKAGE = "com.google.ar.lens";
     public static final String LENS_AVAILABILITY_PROVIDER_URI = String.format("content://%s/publicvalue/lens_oem_availability", new Object[]{AGSA_AUTHORITY});
@@ -31,13 +30,13 @@ public class LensSdkParamsReader {
     /* access modifiers changed from: private */
     public final Context context;
     /* access modifiers changed from: private */
-    public LensSdkParams lensSdkParams;
+    public LensSdkParamsProto.LensSdkParams lensSdkParams;
     /* access modifiers changed from: private */
     public boolean lensSdkParamsReady;
     private final PackageManager packageManager;
 
     public interface LensSdkParamsCallback {
-        void onLensSdkParamsAvailable(LensSdkParams lensSdkParams);
+        void onLensSdkParamsAvailable(LensSdkParamsProto.LensSdkParams lensSdkParams);
     }
 
     private static class QueryGsaTask extends AsyncTask<Void, Void, Integer> {
@@ -59,7 +58,7 @@ public class LensSdkParamsReader {
             r7 = move-exception;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:23:?, code lost:
-            r7 = java.lang.Integer.valueOf(4);
+            r7 = 4;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:24:0x005a, code lost:
             if (r0 == null) goto L_0x005d;
@@ -80,13 +79,13 @@ public class LensSdkParamsReader {
         /* JADX WARNING: Missing exception handler attribute for start block: B:22:0x0056 */
         public Integer doInBackground(Void... voidArr) {
             Cursor cursor = null;
-            LensSdkParamsReader lensSdkParamsReader = (LensSdkParamsReader) this.mLensSdkParamsReaderRef.get();
+            LensSdkParamsReader lensSdkParamsReader = this.mLensSdkParamsReaderRef.get();
             if (lensSdkParamsReader == null) {
-                return Integer.valueOf(-1);
+                return -1;
             }
-            cursor = lensSdkParamsReader.context.getContentResolver().query(Uri.parse(LensSdkParamsReader.LENS_AVAILABILITY_PROVIDER_URI), null, null, null, null);
+            cursor = lensSdkParamsReader.context.getContentResolver().query(Uri.parse(LensSdkParamsReader.LENS_AVAILABILITY_PROVIDER_URI), (String[]) null, (String) null, (String[]) null, (String) null);
             if (cursor == null || cursor.getCount() == 0) {
-                Integer num = Integer.valueOf(4);
+                int i = 4;
             } else {
                 cursor.moveToFirst();
                 int parseInt = Integer.parseInt(cursor.getString(0));
@@ -104,14 +103,14 @@ public class LensSdkParamsReader {
         /* access modifiers changed from: protected */
         public void onPostExecute(Integer num) {
             String valueOf = String.valueOf(num);
-            LensSdkParamsReader lensSdkParamsReader = (LensSdkParamsReader) this.mLensSdkParamsReaderRef.get();
+            LensSdkParamsReader lensSdkParamsReader = this.mLensSdkParamsReaderRef.get();
             if (lensSdkParamsReader != null) {
                 StringBuilder sb = new StringBuilder(valueOf.length() + 25);
                 sb.append("Lens availability result:");
                 sb.append(valueOf);
                 Log.i(LensSdkParamsReader.TAG, sb.toString());
                 lensSdkParamsReader.lensSdkParams.lensAvailabilityStatus = num.intValue();
-                lensSdkParamsReader.lensSdkParamsReady = true;
+                boolean unused = lensSdkParamsReader.lensSdkParamsReady = true;
                 for (LensSdkParamsCallback lensSdkParamsCallback : lensSdkParamsReader.callbacks) {
                     if (lensSdkParamsCallback != null) {
                         lensSdkParamsCallback.onLensSdkParamsAvailable(lensSdkParamsReader.lensSdkParams);
@@ -123,7 +122,7 @@ public class LensSdkParamsReader {
     }
 
     static {
-        LensSdkParams lensSdkParams2 = DEFAULT_PARAMS;
+        LensSdkParamsProto.LensSdkParams lensSdkParams2 = DEFAULT_PARAMS;
         lensSdkParams2.lensSdkVersion = LENS_SDK_VERSION;
         lensSdkParams2.agsaVersionName = "";
         lensSdkParams2.lensAvailabilityStatus = -1;
@@ -150,11 +149,11 @@ public class LensSdkParamsReader {
             if (packageInfo != null) {
                 this.lensSdkParams.agsaVersionName = packageInfo.versionName;
             }
-        } catch (NameNotFoundException unused) {
+        } catch (PackageManager.NameNotFoundException unused) {
             Log.e(TAG, "Unable to find agsa package: com.google.android.googlequicksearchbox");
         }
         this.lensSdkParams.arStickersAvailabilityStatus = 1;
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             Intent intent = new Intent();
             intent.setClassName("com.google.ar.lens", LENS_AR_STICKERS_ACTIVITY);
             if (this.packageManager.resolveActivity(intent, 0) != null) {

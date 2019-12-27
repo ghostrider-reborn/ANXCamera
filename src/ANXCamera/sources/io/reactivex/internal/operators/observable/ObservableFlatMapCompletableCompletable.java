@@ -27,7 +27,7 @@ public final class ObservableFlatMapCompletableCompletable<T> extends Completabl
         private static final long serialVersionUID = 8443155186132538303L;
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f313d;
         final boolean delayErrors;
         volatile boolean disposed;
@@ -75,14 +75,14 @@ public final class ObservableFlatMapCompletableCompletable<T> extends Completabl
             this.set.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerComplete(InnerObserver innerObserver) {
+        /* access modifiers changed from: package-private */
+        public void innerComplete(FlatMapCompletableMainObserver<T>.InnerObserver innerObserver) {
             this.set.delete(innerObserver);
             onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerError(InnerObserver innerObserver, Throwable th) {
+        /* access modifiers changed from: package-private */
+        public void innerError(FlatMapCompletableMainObserver<T>.InnerObserver innerObserver, Throwable th) {
             this.set.delete(innerObserver);
             onError(th);
         }
@@ -147,7 +147,7 @@ public final class ObservableFlatMapCompletableCompletable<T> extends Completabl
     }
 
     public Observable<T> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableFlatMapCompletable<T>(this.source, this.mapper, this.delayErrors));
+        return RxJavaPlugins.onAssembly(new ObservableFlatMapCompletable(this.source, this.mapper, this.delayErrors));
     }
 
     /* access modifiers changed from: protected */

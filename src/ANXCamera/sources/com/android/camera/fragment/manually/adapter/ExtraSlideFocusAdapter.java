@@ -6,17 +6,14 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.HorizontalSlideView;
-import com.android.camera.ui.HorizontalSlideView.HorizontalDrawAdapter;
-import com.android.camera.ui.HorizontalSlideView.OnItemSelectListener;
 
-public class ExtraSlideFocusAdapter extends HorizontalDrawAdapter implements OnItemSelectListener {
+public class ExtraSlideFocusAdapter extends HorizontalSlideView.HorizontalDrawAdapter implements HorizontalSlideView.OnItemSelectListener {
     private static final int ENTRY_GAP = 10;
     private static final int MAX_ENTRY_SECTION = 10;
     private static final int MAX_POSITION = 1000;
@@ -81,7 +78,7 @@ public class ExtraSlideFocusAdapter extends HorizontalDrawAdapter implements OnI
         this.mPaint.setAntiAlias(true);
         this.mPaint.setStrokeWidth((float) this.mLineWidth);
         this.mPaint.setTextSize((float) this.mTextSize);
-        this.mPaint.setTextAlign(Align.LEFT);
+        this.mPaint.setTextAlign(Paint.Align.LEFT);
     }
 
     private int mapIndexToFocus(int i) {
@@ -99,8 +96,8 @@ public class ExtraSlideFocusAdapter extends HorizontalDrawAdapter implements OnI
         canvas.drawLine(0.0f, -f2, 0.0f, f2, this.mPaint);
     }
 
-    public Align getAlign(int i) {
-        return Align.LEFT;
+    public Paint.Align getAlign(int i) {
+        return Paint.Align.LEFT;
     }
 
     public int getCount() {

@@ -7,9 +7,10 @@ import java.io.UnsupportedEncodingException;
 class c extends ByteArrayOutputStream {
     final /* synthetic */ d this$0;
 
+    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
     c(d dVar, int i) {
-        this.this$0 = dVar;
         super(i);
+        this.this$0 = dVar;
     }
 
     public String toString() {

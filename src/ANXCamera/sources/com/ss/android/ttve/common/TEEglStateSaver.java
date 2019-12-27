@@ -28,31 +28,29 @@ public class TEEglStateSaver {
     }
 
     public void logState() {
-        boolean equals = this.mSavedContext.equals(EGL14.eglGetCurrentContext());
-        String str = TAG;
-        if (!equals) {
-            Log.i(str, "Saved context DOES NOT equal current.");
+        if (!this.mSavedContext.equals(EGL14.eglGetCurrentContext())) {
+            Log.i(TAG, "Saved context DOES NOT equal current.");
         } else {
-            Log.i(str, "Saved context DOES equal current.");
+            Log.i(TAG, "Saved context DOES equal current.");
         }
         if (this.mSavedReadSurface.equals(EGL14.eglGetCurrentSurface(12378))) {
-            Log.i(str, "Saved read surface DOES equal current.");
+            Log.i(TAG, "Saved read surface DOES equal current.");
         } else if (this.mSavedReadSurface.equals(EGL14.EGL_NO_SURFACE)) {
-            Log.i(str, "Saved read surface is EGL_NO_SURFACE");
+            Log.i(TAG, "Saved read surface is EGL_NO_SURFACE");
         } else {
-            Log.i(str, "Saved read surface DOES NOT equal current.");
+            Log.i(TAG, "Saved read surface DOES NOT equal current.");
         }
         if (this.mSavedDrawSurface.equals(EGL14.eglGetCurrentSurface(12377))) {
-            Log.i(str, "Saved draw surface DOES equal current.");
+            Log.i(TAG, "Saved draw surface DOES equal current.");
         } else if (this.mSavedDrawSurface.equals(EGL14.EGL_NO_SURFACE)) {
-            Log.i(str, "Saved draw surface is EGL_NO_SURFACE");
+            Log.i(TAG, "Saved draw surface is EGL_NO_SURFACE");
         } else {
-            Log.i(str, "Saved draw surface DOES NOT equal current.");
+            Log.i(TAG, "Saved draw surface DOES NOT equal current.");
         }
         if (!this.mSavedDisplay.equals(EGL14.eglGetCurrentDisplay())) {
-            Log.i(str, "Saved display DOES NOT equal current.");
+            Log.i(TAG, "Saved display DOES NOT equal current.");
         } else {
-            Log.i(str, "Saved display DOES equal current.");
+            Log.i(TAG, "Saved display DOES equal current.");
         }
     }
 
@@ -68,23 +66,20 @@ public class TEEglStateSaver {
 
     public void saveEGLState() {
         this.mSavedContext = EGL14.eglGetCurrentContext();
-        boolean equals = this.mSavedContext.equals(EGL14.EGL_NO_CONTEXT);
-        String str = TAG;
-        if (equals) {
-            Log.e(str, "Saved EGL_NO_CONTEXT");
+        if (this.mSavedContext.equals(EGL14.EGL_NO_CONTEXT)) {
+            Log.e(TAG, "Saved EGL_NO_CONTEXT");
         }
         this.mSavedReadSurface = EGL14.eglGetCurrentSurface(12378);
-        String str2 = "Saved EGL_NO_SURFACE";
         if (this.mSavedReadSurface.equals(EGL14.EGL_NO_SURFACE)) {
-            Log.e(str, str2);
+            Log.e(TAG, "Saved EGL_NO_SURFACE");
         }
         this.mSavedDrawSurface = EGL14.eglGetCurrentSurface(12377);
         if (this.mSavedDrawSurface.equals(EGL14.EGL_NO_SURFACE)) {
-            Log.e(str, str2);
+            Log.e(TAG, "Saved EGL_NO_SURFACE");
         }
         this.mSavedDisplay = EGL14.eglGetCurrentDisplay();
         if (this.mSavedDisplay.equals(EGL14.EGL_NO_DISPLAY)) {
-            Log.e(str, "Saved EGL_NO_DISPLAY");
+            Log.e(TAG, "Saved EGL_NO_DISPLAY");
         }
     }
 }

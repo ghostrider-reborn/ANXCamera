@@ -23,7 +23,7 @@ public class PopupManager {
     }
 
     public static PopupManager getInstance(Context context) {
-        PopupManager popupManager = (PopupManager) sMap.get(context);
+        PopupManager popupManager = sMap.get(context);
         if (popupManager != null) {
             return popupManager;
         }
@@ -33,7 +33,7 @@ public class PopupManager {
     }
 
     public static void removeInstance(Context context) {
-        if (((PopupManager) sMap.get(context)) != null) {
+        if (sMap.get(context) != null) {
             sMap.remove(context);
         }
     }
@@ -56,12 +56,15 @@ public class PopupManager {
         }
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v2, resolved type: com.android.camera.ui.PopupManager$OnOtherPopupShowedListener} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v0, resolved type: android.view.View} */
+    /* JADX WARNING: Multi-variable type inference failed */
     public void notifyShowPopup(View view, int i) {
-        Iterator it = this.mListeners.iterator();
+        Iterator<OnOtherPopupShowedListener> it = this.mListeners.iterator();
         while (it.hasNext()) {
-            OnOtherPopupShowedListener onOtherPopupShowedListener = (OnOtherPopupShowedListener) it.next();
-            if (((View) onOtherPopupShowedListener) != view && onOtherPopupShowedListener.onOtherPopupShowed(i)) {
-                this.mLastListener = onOtherPopupShowedListener;
+            OnOtherPopupShowedListener next = it.next();
+            if (next != view && next.onOtherPopupShowed(i)) {
+                this.mLastListener = next;
             }
         }
     }

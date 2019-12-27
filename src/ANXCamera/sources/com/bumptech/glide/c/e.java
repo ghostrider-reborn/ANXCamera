@@ -2,7 +2,7 @@ package com.bumptech.glide.c;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.util.Log;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -21,16 +21,13 @@ public final class e {
 
     private static c C(String str) {
         try {
-            Class cls = Class.forName(str);
+            Class<?> cls = Class.forName(str);
             try {
                 Object newInstance = cls.getDeclaredConstructor(new Class[0]).newInstance(new Object[0]);
                 if (newInstance instanceof c) {
                     return (c) newInstance;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Expected instanceof GlideModule, but found: ");
-                sb.append(newInstance);
-                throw new RuntimeException(sb.toString());
+                throw new RuntimeException("Expected instanceof GlideModule, but found: " + newInstance);
             } catch (InstantiationException e2) {
                 a(cls, e2);
                 throw null;
@@ -50,48 +47,38 @@ public final class e {
     }
 
     private static void a(Class<?> cls, Exception exc) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unable to instantiate GlideModule implementation for ");
-        sb.append(cls);
-        throw new RuntimeException(sb.toString(), exc);
+        throw new RuntimeException("Unable to instantiate GlideModule implementation for " + cls, exc);
     }
 
     public List<c> parse() {
-        String str = TAG;
-        if (Log.isLoggable(str, 3)) {
-            Log.d(str, "Loading Glide modules");
+        if (Log.isLoggable(TAG, 3)) {
+            Log.d(TAG, "Loading Glide modules");
         }
         ArrayList arrayList = new ArrayList();
         try {
             ApplicationInfo applicationInfo = this.context.getPackageManager().getApplicationInfo(this.context.getPackageName(), 128);
             if (applicationInfo.metaData == null) {
-                if (Log.isLoggable(str, 3)) {
-                    Log.d(str, "Got null app info metadata");
+                if (Log.isLoggable(TAG, 3)) {
+                    Log.d(TAG, "Got null app info metadata");
                 }
                 return arrayList;
             }
-            if (Log.isLoggable(str, 2)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Got app info metadata: ");
-                sb.append(applicationInfo.metaData);
-                Log.v(str, sb.toString());
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "Got app info metadata: " + applicationInfo.metaData);
             }
-            for (String str2 : applicationInfo.metaData.keySet()) {
-                if (sk.equals(applicationInfo.metaData.get(str2))) {
-                    arrayList.add(C(str2));
-                    if (Log.isLoggable(str, 3)) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Loaded Glide module: ");
-                        sb2.append(str2);
-                        Log.d(str, sb2.toString());
+            for (String str : applicationInfo.metaData.keySet()) {
+                if (sk.equals(applicationInfo.metaData.get(str))) {
+                    arrayList.add(C(str));
+                    if (Log.isLoggable(TAG, 3)) {
+                        Log.d(TAG, "Loaded Glide module: " + str);
                     }
                 }
             }
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Finished loading Glide modules");
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Finished loading Glide modules");
             }
             return arrayList;
-        } catch (NameNotFoundException e2) {
+        } catch (PackageManager.NameNotFoundException e2) {
             throw new RuntimeException("Unable to find metadata to parse GlideModules", e2);
         }
     }

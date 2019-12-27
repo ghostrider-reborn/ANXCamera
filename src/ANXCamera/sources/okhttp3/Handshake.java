@@ -60,15 +60,11 @@ public final class Handshake {
     }
 
     public boolean equals(@Nullable Object obj) {
-        boolean z = false;
         if (!(obj instanceof Handshake)) {
             return false;
         }
         Handshake handshake = (Handshake) obj;
-        if (this.tlsVersion.equals(handshake.tlsVersion) && this.cipherSuite.equals(handshake.cipherSuite) && this.peerCertificates.equals(handshake.peerCertificates) && this.localCertificates.equals(handshake.localCertificates)) {
-            z = true;
-        }
-        return z;
+        return this.tlsVersion.equals(handshake.tlsVersion) && this.cipherSuite.equals(handshake.cipherSuite) && this.peerCertificates.equals(handshake.peerCertificates) && this.localCertificates.equals(handshake.localCertificates);
     }
 
     public int hashCode() {

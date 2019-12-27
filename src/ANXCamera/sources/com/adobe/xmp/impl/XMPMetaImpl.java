@@ -31,7 +31,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
 
     public XMPMetaImpl() {
         this.packetHeader = null;
-        this.tree = new XMPNode(null, null, null);
+        this.tree = new XMPNode((String) null, (String) null, (PropertyOptions) null);
     }
 
     public XMPMetaImpl(XMPNode xMPNode) {
@@ -40,7 +40,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     private void doSetArrayItem(XMPNode xMPNode, int i, String str, PropertyOptions propertyOptions, boolean z) throws XMPException {
-        XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, null);
+        XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, (PropertyOptions) null);
         PropertyOptions verifySetOptions = XMPNodeUtils.verifySetOptions(propertyOptions, str);
         int childrenLength = xMPNode.getChildrenLength();
         if (z) {
@@ -94,9 +94,9 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
             propertyOptions = new PropertyOptions();
         }
         if (propertyOptions.isOnlyArrayOptions()) {
-            PropertyOptions verifySetOptions = XMPNodeUtils.verifySetOptions(propertyOptions, null);
+            PropertyOptions verifySetOptions = XMPNodeUtils.verifySetOptions(propertyOptions, (Object) null);
             XMPPath expandXPath = XMPPathParser.expandXPath(str, str2);
-            XMPNode findNode = XMPNodeUtils.findNode(this.tree, expandXPath, false, null);
+            XMPNode findNode = XMPNodeUtils.findNode(this.tree, expandXPath, false, (PropertyOptions) null);
             if (findNode != null) {
                 if (!findNode.getOptions().isArray()) {
                     throw new XMPException("The named property is not an array", 102);
@@ -116,7 +116,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void appendArrayItem(String str, String str2, String str3) throws XMPException {
-        appendArrayItem(str, str2, null, str3, null);
+        appendArrayItem(str, str2, (PropertyOptions) null, str3, (PropertyOptions) null);
     }
 
     public Object clone() {
@@ -126,7 +126,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     public int countArrayItems(String str, String str2) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertArrayName(str2);
-        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode == null) {
             return 0;
         }
@@ -149,7 +149,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         try {
             ParameterAsserts.assertSchemaNS(str);
             ParameterAsserts.assertPropName(str2);
-            XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+            XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
             if (findNode != null) {
                 XMPNodeUtils.deleteNode(findNode);
             }
@@ -161,10 +161,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         try {
             ParameterAsserts.assertSchemaNS(str);
             ParameterAsserts.assertPropName(str2);
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(XMPPathFactory.composeQualifierPath(str3, str4));
-            deleteProperty(str, sb.toString());
+            deleteProperty(str, str2 + XMPPathFactory.composeQualifierPath(str3, str4));
         } catch (XMPException unused) {
         }
     }
@@ -173,10 +170,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         try {
             ParameterAsserts.assertSchemaNS(str);
             ParameterAsserts.assertStructName(str2);
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(XMPPathFactory.composeStructFieldPath(str3, str4));
-            deleteProperty(str, sb.toString());
+            deleteProperty(str, str2 + XMPPathFactory.composeStructFieldPath(str3, str4));
         } catch (XMPException unused) {
         }
     }
@@ -195,7 +189,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         try {
             ParameterAsserts.assertSchemaNS(str);
             ParameterAsserts.assertPropName(str2);
-            return XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null) != null;
+            return XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null) != null;
         } catch (XMPException unused) {
             return false;
         }
@@ -206,10 +200,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
             ParameterAsserts.assertSchemaNS(str);
             ParameterAsserts.assertPropName(str2);
             String composeQualifierPath = XMPPathFactory.composeQualifierPath(str3, str4);
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(composeQualifierPath);
-            return doesPropertyExist(str, sb.toString());
+            return doesPropertyExist(str, str2 + composeQualifierPath);
         } catch (XMPException unused) {
             return false;
         }
@@ -220,10 +211,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
             ParameterAsserts.assertSchemaNS(str);
             ParameterAsserts.assertStructName(str2);
             String composeStructFieldPath = XMPPathFactory.composeStructFieldPath(str3, str4);
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(composeStructFieldPath);
-            return doesPropertyExist(str, sb.toString());
+            return doesPropertyExist(str, str2 + composeStructFieldPath);
         } catch (XMPException unused) {
             return false;
         }
@@ -245,7 +233,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         ParameterAsserts.assertSpecificLang(str4);
         String normalizeLangValue = str3 != null ? Utils.normalizeLangValue(str3) : null;
         String normalizeLangValue2 = Utils.normalizeLangValue(str4);
-        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode == null) {
             return null;
         }
@@ -290,7 +278,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     public XMPProperty getProperty(String str, String str2, int i) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertPropName(str2);
-        final XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+        final XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode == null) {
             return null;
         }
@@ -349,7 +337,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     public Object getPropertyObject(String str, String str2, int i) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertPropName(str2);
-        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode == null) {
             return null;
         }
@@ -366,10 +354,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     public XMPProperty getQualifier(String str, String str2, String str3, String str4) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertPropName(str2);
-        StringBuilder sb = new StringBuilder();
-        sb.append(str2);
-        sb.append(XMPPathFactory.composeQualifierPath(str3, str4));
-        return getProperty(str, sb.toString());
+        return getProperty(str, str2 + XMPPathFactory.composeQualifierPath(str3, str4));
     }
 
     public XMPNode getRoot() {
@@ -379,20 +364,17 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     public XMPProperty getStructField(String str, String str2, String str3, String str4) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertStructName(str2);
-        StringBuilder sb = new StringBuilder();
-        sb.append(str2);
-        sb.append(XMPPathFactory.composeStructFieldPath(str3, str4));
-        return getProperty(str, sb.toString());
+        return getProperty(str, str2 + XMPPathFactory.composeStructFieldPath(str3, str4));
     }
 
     public void insertArrayItem(String str, String str2, int i, String str3) throws XMPException {
-        insertArrayItem(str, str2, i, str3, null);
+        insertArrayItem(str, str2, i, str3, (PropertyOptions) null);
     }
 
     public void insertArrayItem(String str, String str2, int i, String str3, PropertyOptions propertyOptions) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertArrayName(str2);
-        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode != null) {
             doSetArrayItem(findNode, i, str3, propertyOptions, true);
             return;
@@ -401,11 +383,11 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public XMPIterator iterator() throws XMPException {
-        return iterator(null, null, null);
+        return iterator((String) null, (String) null, (IteratorOptions) null);
     }
 
     public XMPIterator iterator(IteratorOptions iteratorOptions) throws XMPException {
-        return iterator(null, null, iteratorOptions);
+        return iterator((String) null, (String) null, iteratorOptions);
     }
 
     public XMPIterator iterator(String str, String str2, IteratorOptions iteratorOptions) throws XMPException {
@@ -420,13 +402,13 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setArrayItem(String str, String str2, int i, String str3) throws XMPException {
-        setArrayItem(str, str2, i, str3, null);
+        setArrayItem(str, str2, i, str3, (PropertyOptions) null);
     }
 
     public void setArrayItem(String str, String str2, int i, String str3, PropertyOptions propertyOptions) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertArrayName(str2);
-        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, null);
+        XMPNode findNode = XMPNodeUtils.findNode(this.tree, XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode != null) {
             doSetArrayItem(findNode, i, str3, propertyOptions, false);
             return;
@@ -435,10 +417,9 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setLocalizedText(String str, String str2, String str3, String str4, String str5) throws XMPException {
-        setLocalizedText(str, str2, str3, str4, str5, null);
+        setLocalizedText(str, str2, str3, str4, str5, (PropertyOptions) null);
     }
 
-    /* JADX INFO: used method not loaded: com.adobe.xmp.impl.XMPNode.removeChild(com.adobe.xmp.impl.XMPNode):null, types can be incorrect */
     /* JADX WARNING: Code restructure failed: missing block: B:102:?, code lost:
         return;
      */
@@ -462,7 +443,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         r8 = com.adobe.xmp.impl.XMPNodeUtils.chooseLocalizedText(r6, r9, r10);
         r9 = ((java.lang.Integer) r8[0]).intValue();
         r8 = (com.adobe.xmp.impl.XMPNode) r8[1];
-        r2 = r3.equals(r10);
+        r2 = com.adobe.xmp.XMPConst.X_DEFAULT.equals(r10);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:33:0x00bb, code lost:
         if (r9 == 0) goto L_0x015a;
@@ -585,7 +566,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         r1.setValue(r11);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:83:0x015a, code lost:
-        com.adobe.xmp.impl.XMPNodeUtils.appendLangItem(r6, r3, r11);
+        com.adobe.xmp.impl.XMPNodeUtils.appendLangItem(r6, com.adobe.xmp.XMPConst.X_DEFAULT, r11);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:84:0x015d, code lost:
         if (r2 != false) goto L_0x0162;
@@ -603,7 +584,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         if (r6.getChildrenLength() != 1) goto L_?;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:90:0x016b, code lost:
-        com.adobe.xmp.impl.XMPNodeUtils.appendLangItem(r6, r3, r11);
+        com.adobe.xmp.impl.XMPNodeUtils.appendLangItem(r6, com.adobe.xmp.XMPConst.X_DEFAULT, r11);
      */
     public void setLocalizedText(String str, String str2, String str3, String str4, String str5, PropertyOptions propertyOptions) throws XMPException {
         XMPNode xMPNode;
@@ -623,24 +604,17 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
             }
             Iterator iterateChildren = findNode.iterateChildren();
             while (true) {
-                boolean hasNext = iterateChildren.hasNext();
-                String str6 = XMPConst.X_DEFAULT;
-                if (!hasNext) {
+                if (!iterateChildren.hasNext()) {
                     xMPNode = null;
                     z = false;
                     break;
                 }
                 xMPNode = (XMPNode) iterateChildren.next();
-                if (!xMPNode.hasQualifier()) {
-                    break;
-                }
-                if (XMPConst.XML_LANG.equals(xMPNode.getQualifier(1).getName())) {
-                    if (str6.equals(xMPNode.getQualifier(1).getValue())) {
+                if (xMPNode.hasQualifier() && XMPConst.XML_LANG.equals(xMPNode.getQualifier(1).getName())) {
+                    if (XMPConst.X_DEFAULT.equals(xMPNode.getQualifier(1).getValue())) {
                         z = true;
                         break;
                     }
-                } else {
-                    break;
                 }
             }
             throw new XMPException("Language qualifier must be first", 102);
@@ -648,7 +622,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
         throw new XMPException("Failed to find or create array node", 102);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setNode(XMPNode xMPNode, Object obj, PropertyOptions propertyOptions, boolean z) throws XMPException {
         if (z) {
             xMPNode.clear();
@@ -672,7 +646,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setProperty(String str, String str2, Object obj) throws XMPException {
-        setProperty(str, str2, obj, null);
+        setProperty(str, str2, obj, (PropertyOptions) null);
     }
 
     public void setProperty(String str, String str2, Object obj, PropertyOptions propertyOptions) throws XMPException {
@@ -688,7 +662,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyBase64(String str, String str2, byte[] bArr) throws XMPException {
-        setProperty(str, str2, bArr, null);
+        setProperty(str, str2, bArr, (PropertyOptions) null);
     }
 
     public void setPropertyBase64(String str, String str2, byte[] bArr, PropertyOptions propertyOptions) throws XMPException {
@@ -696,7 +670,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyBoolean(String str, String str2, boolean z) throws XMPException {
-        setProperty(str, str2, z ? XMPConst.TRUESTR : XMPConst.FALSESTR, null);
+        setProperty(str, str2, z ? XMPConst.TRUESTR : XMPConst.FALSESTR, (PropertyOptions) null);
     }
 
     public void setPropertyBoolean(String str, String str2, boolean z, PropertyOptions propertyOptions) throws XMPException {
@@ -704,7 +678,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyCalendar(String str, String str2, Calendar calendar) throws XMPException {
-        setProperty(str, str2, calendar, null);
+        setProperty(str, str2, calendar, (PropertyOptions) null);
     }
 
     public void setPropertyCalendar(String str, String str2, Calendar calendar, PropertyOptions propertyOptions) throws XMPException {
@@ -712,7 +686,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyDate(String str, String str2, XMPDateTime xMPDateTime) throws XMPException {
-        setProperty(str, str2, xMPDateTime, null);
+        setProperty(str, str2, xMPDateTime, (PropertyOptions) null);
     }
 
     public void setPropertyDate(String str, String str2, XMPDateTime xMPDateTime, PropertyOptions propertyOptions) throws XMPException {
@@ -720,7 +694,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyDouble(String str, String str2, double d2) throws XMPException {
-        setProperty(str, str2, new Double(d2), null);
+        setProperty(str, str2, new Double(d2), (PropertyOptions) null);
     }
 
     public void setPropertyDouble(String str, String str2, double d2, PropertyOptions propertyOptions) throws XMPException {
@@ -728,7 +702,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyInteger(String str, String str2, int i) throws XMPException {
-        setProperty(str, str2, new Integer(i), null);
+        setProperty(str, str2, new Integer(i), (PropertyOptions) null);
     }
 
     public void setPropertyInteger(String str, String str2, int i, PropertyOptions propertyOptions) throws XMPException {
@@ -736,7 +710,7 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setPropertyLong(String str, String str2, long j) throws XMPException {
-        setProperty(str, str2, new Long(j), null);
+        setProperty(str, str2, new Long(j), (PropertyOptions) null);
     }
 
     public void setPropertyLong(String str, String str2, long j, PropertyOptions propertyOptions) throws XMPException {
@@ -744,33 +718,27 @@ public class XMPMetaImpl implements XMPMeta, XMPConst {
     }
 
     public void setQualifier(String str, String str2, String str3, String str4, String str5) throws XMPException {
-        setQualifier(str, str2, str3, str4, str5, null);
+        setQualifier(str, str2, str3, str4, str5, (PropertyOptions) null);
     }
 
     public void setQualifier(String str, String str2, String str3, String str4, String str5, PropertyOptions propertyOptions) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertPropName(str2);
         if (doesPropertyExist(str, str2)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(XMPPathFactory.composeQualifierPath(str3, str4));
-            setProperty(str, sb.toString(), str5, propertyOptions);
+            setProperty(str, str2 + XMPPathFactory.composeQualifierPath(str3, str4), str5, propertyOptions);
             return;
         }
         throw new XMPException("Specified property does not exist!", 102);
     }
 
     public void setStructField(String str, String str2, String str3, String str4, String str5) throws XMPException {
-        setStructField(str, str2, str3, str4, str5, null);
+        setStructField(str, str2, str3, str4, str5, (PropertyOptions) null);
     }
 
     public void setStructField(String str, String str2, String str3, String str4, String str5, PropertyOptions propertyOptions) throws XMPException {
         ParameterAsserts.assertSchemaNS(str);
         ParameterAsserts.assertStructName(str2);
-        StringBuilder sb = new StringBuilder();
-        sb.append(str2);
-        sb.append(XMPPathFactory.composeStructFieldPath(str3, str4));
-        setProperty(str, sb.toString(), str5, propertyOptions);
+        setProperty(str, str2 + XMPPathFactory.composeStructFieldPath(str3, str4), str5, propertyOptions);
     }
 
     public void sort() {

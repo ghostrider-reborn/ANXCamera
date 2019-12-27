@@ -2,28 +2,26 @@ package com.android.camera.fragment.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnKeyListener;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager;
 import com.android.camera.Camera;
 import com.android.camera.Util;
 import com.android.camera.lib.compatibility.util.CompatibilityUtils;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
+import com.android.camera.protocol.ModeProtocol;
 
-public class BaseDialogFragment extends DialogFragment implements OnKeyListener, HandleBackTrace {
+public class BaseDialogFragment extends DialogFragment implements DialogInterface.OnKeyListener, ModeProtocol.HandleBackTrace {
     private GestureDetector gesture;
 
-    private class MyOnGestureListener extends SimpleOnGestureListener {
+    private class MyOnGestureListener extends GestureDetector.SimpleOnGestureListener {
         private MyOnGestureListener() {
         }
 
@@ -49,7 +47,7 @@ public class BaseDialogFragment extends DialogFragment implements OnKeyListener,
     /* access modifiers changed from: protected */
     public void adjustViewHeight(View view) {
         Rect displayRect = Util.getDisplayRect(getContext(), 0);
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) view.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
         marginLayoutParams.width = displayRect.width();
         marginLayoutParams.height = displayRect.height();
         marginLayoutParams.topMargin = displayRect.top;
@@ -72,7 +70,7 @@ public class BaseDialogFragment extends DialogFragment implements OnKeyListener,
             Window window = dialog.getWindow();
             window.setGravity(48);
             window.setLayout(-1, -1);
-            LayoutParams attributes = window.getAttributes();
+            WindowManager.LayoutParams attributes = window.getAttributes();
             attributes.type = 1;
             window.setAttributes(attributes);
             if (Util.isNotchDevice) {

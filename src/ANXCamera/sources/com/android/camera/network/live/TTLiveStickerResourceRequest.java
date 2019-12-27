@@ -79,14 +79,13 @@ public class TTLiveStickerResourceRequest extends BaseJsonRequest<List<LiveStick
         }
         long liveStickerLastCacheTime = CameraSettings.getLiveStickerLastCacheTime();
         long currentTimeMillis = System.currentTimeMillis();
-        String str = "BaseRequest";
         if (liveStickerLastCacheTime <= 0 || currentTimeMillis - liveStickerLastCacheTime > MAX_CACHE_TIME) {
-            Log.v(str, "TT sticker directly request");
+            Log.v("BaseRequest", "TT sticker directly request");
             super.execute(r0);
             return;
         }
         try {
-            Log.v(str, "TT sticker load from cache");
+            Log.v("BaseRequest", "TT sticker load from cache");
             responseListener.onResponse(loadFromCache());
         } catch (BaseRequestException e2) {
             responseListener.onResponseError(e2.getErrorCode(), e2.getMessage(), e2);
@@ -105,43 +104,36 @@ public class TTLiveStickerResourceRequest extends BaseJsonRequest<List<LiveStick
 
     /* access modifiers changed from: protected */
     public List<LiveStickerInfo> processJson(JSONObject jSONObject) throws BaseRequestException, JSONException {
-        if (jSONObject != null) {
-            String str = "status_code";
-            if (jSONObject.has(str)) {
-                if (jSONObject.getInt(str) == 0) {
-                    String str2 = PhotosOemApi.PATH_SPECIAL_TYPE_DATA;
-                    if (!jSONObject.isNull(str2)) {
-                        String jSONObject2 = jSONObject.toString();
-                        hasUpdate(jSONObject2);
-                        JSONObject optJSONObject = jSONObject.optJSONObject(str2);
-                        ArrayList arrayList = new ArrayList();
-                        JSONArray jSONArray = optJSONObject.getJSONArray("effects");
-                        if (jSONArray != null) {
-                            arrayList.ensureCapacity(jSONArray.length());
-                            for (int i = 0; i < jSONArray.length(); i++) {
-                                JSONObject jSONObject3 = jSONArray.getJSONObject(i);
-                                LiveStickerInfo liveStickerInfo = new LiveStickerInfo();
-                                liveStickerInfo.id = jSONObject3.optString("id");
-                                liveStickerInfo.name = jSONObject3.optString("name");
-                                String str3 = "url_list";
-                                liveStickerInfo.icon = jSONObject3.getJSONObject("icon_url").getJSONArray(str3).optString(0);
-                                String str4 = "file_url";
-                                liveStickerInfo.url = jSONObject3.getJSONObject(str4).getJSONArray(str3).optString(0);
-                                liveStickerInfo.hash = jSONObject3.getJSONObject(str4).optString("uri");
-                                liveStickerInfo.hint = jSONObject3.optString("hint");
-                                liveStickerInfo.hintIcon = jSONObject3.getJSONObject("hint_icon").getJSONArray(str3).optString(0);
-                                arrayList.add(liveStickerInfo);
-                            }
-                        }
-                        CameraSettings.setTTLiveStickerJsonCache(jSONObject2);
-                        CameraSettings.setLiveStickerLastCacheTime(System.currentTimeMillis());
-                        return arrayList;
-                    }
-                    throw new BaseRequestException(ErrorCode.BODY_EMPTY, "response empty data");
+        if (jSONObject == null || !jSONObject.has("status_code")) {
+            throw new BaseRequestException(ErrorCode.PARSE_ERROR, "response has no status_code");
+        } else if (jSONObject.getInt("status_code") != 0) {
+            throw new BaseRequestException(ErrorCode.SERVER_ERROR, jSONObject.optString("message"));
+        } else if (!jSONObject.isNull(PhotosOemApi.PATH_SPECIAL_TYPE_DATA)) {
+            String jSONObject2 = jSONObject.toString();
+            hasUpdate(jSONObject2);
+            JSONObject optJSONObject = jSONObject.optJSONObject(PhotosOemApi.PATH_SPECIAL_TYPE_DATA);
+            ArrayList arrayList = new ArrayList();
+            JSONArray jSONArray = optJSONObject.getJSONArray("effects");
+            if (jSONArray != null) {
+                arrayList.ensureCapacity(jSONArray.length());
+                for (int i = 0; i < jSONArray.length(); i++) {
+                    JSONObject jSONObject3 = jSONArray.getJSONObject(i);
+                    LiveStickerInfo liveStickerInfo = new LiveStickerInfo();
+                    liveStickerInfo.id = jSONObject3.optString("id");
+                    liveStickerInfo.name = jSONObject3.optString("name");
+                    liveStickerInfo.icon = jSONObject3.getJSONObject("icon_url").getJSONArray("url_list").optString(0);
+                    liveStickerInfo.url = jSONObject3.getJSONObject("file_url").getJSONArray("url_list").optString(0);
+                    liveStickerInfo.hash = jSONObject3.getJSONObject("file_url").optString("uri");
+                    liveStickerInfo.hint = jSONObject3.optString("hint");
+                    liveStickerInfo.hintIcon = jSONObject3.getJSONObject("hint_icon").getJSONArray("url_list").optString(0);
+                    arrayList.add(liveStickerInfo);
                 }
-                throw new BaseRequestException(ErrorCode.SERVER_ERROR, jSONObject.optString("message"));
             }
+            CameraSettings.setTTLiveStickerJsonCache(jSONObject2);
+            CameraSettings.setLiveStickerLastCacheTime(System.currentTimeMillis());
+            return arrayList;
+        } else {
+            throw new BaseRequestException(ErrorCode.BODY_EMPTY, "response empty data");
         }
-        throw new BaseRequestException(ErrorCode.PARSE_ERROR, "response has no status_code");
     }
 }

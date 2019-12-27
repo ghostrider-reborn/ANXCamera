@@ -20,17 +20,18 @@ public class FetchFavoriteListResponse extends BaseNetResponse {
     }
 
     public boolean checkValued() {
-        if (this.data == null) {
-            this.data = new ArrayList();
+        if (this.data != null) {
+            return true;
         }
+        this.data = new ArrayList();
         return true;
     }
 
     public List<Effect> getEffects() {
-        return ((Data) this.data.get(0)).effects;
+        return this.data.get(0).effects;
     }
 
     public String getType() {
-        return ((Data) this.data.get(0)).type;
+        return this.data.get(0).type;
     }
 }

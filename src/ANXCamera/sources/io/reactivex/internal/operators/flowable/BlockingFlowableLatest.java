@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.Notification;
 import io.reactivex.internal.util.BlockingHelper;
 import io.reactivex.internal.util.ExceptionHelper;
@@ -32,10 +31,10 @@ public final class BlockingFlowableLatest<T> implements Iterable<T> {
                     try {
                         BlockingHelper.verifyNonBlocking();
                         this.notify.acquire();
-                        Notification<T> notification3 = (Notification) this.value.getAndSet(null);
-                        this.iteratorNotification = notification3;
-                        if (notification3.isOnError()) {
-                            throw ExceptionHelper.wrapOrThrow(notification3.getError());
+                        Notification<T> andSet = this.value.getAndSet((Object) null);
+                        this.iteratorNotification = andSet;
+                        if (andSet.isOnError()) {
+                            throw ExceptionHelper.wrapOrThrow(andSet.getError());
                         }
                     } catch (InterruptedException e2) {
                         dispose();
@@ -81,7 +80,7 @@ public final class BlockingFlowableLatest<T> implements Iterable<T> {
 
     public Iterator<T> iterator() {
         LatestSubscriberIterator latestSubscriberIterator = new LatestSubscriberIterator();
-        Flowable.fromPublisher(this.source).materialize().subscribe((FlowableSubscriber<? super T>) latestSubscriberIterator);
+        Flowable.fromPublisher(this.source).materialize().subscribe(latestSubscriberIterator);
         return latestSubscriberIterator;
     }
 }

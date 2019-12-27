@@ -3,8 +3,6 @@ package com.android.camera.ui;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLSurfaceView.EGLConfigChooser;
-import android.opengl.GLSurfaceView.Renderer;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.media.MediaPlayer2;
@@ -13,7 +11,7 @@ import android.view.SurfaceHolder;
 import com.android.camera.Util;
 import com.android.camera.fragment.mimoji.AvatarEngineManager;
 import com.android.camera.log.Log;
-import com.android.gallery3d.exif.ExifInterface.GpsStatus;
+import com.android.gallery3d.exif.ExifInterface;
 import com.arcsoft.avatar.AvatarEngine;
 import com.mi.config.b;
 import javax.microedition.khronos.egl.EGL10;
@@ -22,7 +20,7 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 import miui.reflect.Field;
 
-public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
+public class MimojiEditGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static float[] BACKGROUND_COLOR = {0.0f, 0.0f, 0.0f, 0.0f};
     private static final boolean DEBUG_FPS = false;
     public static final int DO_DRAW = 6;
@@ -42,7 +40,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
     private boolean mNeedRenderBG;
     private boolean mSaveConfigThum;
 
-    private class MyEGLConfigChooser implements EGLConfigChooser {
+    private class MyEGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
         private final int[] ATTR_ID;
         private final String[] ATTR_NAME;
         private final int[] mConfigSpec;
@@ -64,7 +62,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
             iArr[12] = 12344;
             this.mConfigSpec = iArr;
             this.ATTR_ID = new int[]{12324, 12323, 12322, 12321, 12325, 12326, 12328, 12327};
-            this.ATTR_NAME = new String[]{"R", "G", Field.BYTE_SIGNATURE_PRIMITIVE, GpsStatus.IN_PROGRESS, Field.DOUBLE_SIGNATURE_PRIMITIVE, "S", "ID", "CAVEAT"};
+            this.ATTR_NAME = new String[]{"R", "G", Field.BYTE_SIGNATURE_PRIMITIVE, ExifInterface.GpsStatus.IN_PROGRESS, Field.DOUBLE_SIGNATURE_PRIMITIVE, "S", "ID", "CAVEAT"};
         }
 
         private EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay, EGLConfig[] eGLConfigArr) {
@@ -75,13 +73,9 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
             for (int i2 = 0; i2 < length; i2++) {
                 if (!egl10.eglGetConfigAttrib(eGLDisplay, eGLConfigArr[i2], 12324, iArr) || iArr[0] != 8) {
                     if (!egl10.eglGetConfigAttrib(eGLDisplay, eGLConfigArr[i2], 12326, iArr)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("eglGetConfigAttrib error: ");
-                        sb.append(egl10.eglGetError());
-                        throw new RuntimeException(sb.toString());
+                        throw new RuntimeException("eglGetConfigAttrib error: " + egl10.eglGetError());
                     } else if (iArr[0] != 0 && iArr[0] < i) {
-                        int i3 = iArr[0];
-                        i = i3;
+                        i = iArr[0];
                         eGLConfig = eGLConfigArr[i2];
                     }
                 }
@@ -107,11 +101,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
                     sb.append(" ");
                     i++;
                 } else {
-                    String access$100 = MimojiEditGLSurfaceView.TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Config chosen: ");
-                    sb2.append(sb.toString());
-                    Log.i(access$100, sb2.toString());
+                    Log.i(MimojiEditGLSurfaceView.TAG, "Config chosen: " + sb.toString());
                     return;
                 }
             }
@@ -119,7 +109,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
 
         public EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay) {
             int[] iArr = new int[1];
-            if (!egl10.eglChooseConfig(eGLDisplay, this.mConfigSpec, null, 0, iArr)) {
+            if (!egl10.eglChooseConfig(eGLDisplay, this.mConfigSpec, (EGLConfig[]) null, 0, iArr)) {
                 throw new RuntimeException("eglChooseConfig failed");
             } else if (iArr[0] > 0) {
                 EGLConfig[] eGLConfigArr = new EGLConfig[iArr[0]];
@@ -134,7 +124,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
     }
 
     public MimojiEditGLSurfaceView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public MimojiEditGLSurfaceView(Context context, AttributeSet attributeSet) {
@@ -164,11 +154,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
         if (j == 0) {
             this.mFrameCountingStart = nanoTime;
         } else if (nanoTime - j > 1000000000) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("fps: ");
-            sb.append((((double) this.mFrameCount) * 1.0E9d) / ((double) (nanoTime - this.mFrameCountingStart)));
-            Log.d(str, sb.toString());
+            Log.d(TAG, "fps: " + ((((double) this.mFrameCount) * 1.0E9d) / ((double) (nanoTime - this.mFrameCountingStart))));
             this.mFrameCountingStart = nanoTime;
             this.mFrameCount = 0;
         }
@@ -184,7 +170,7 @@ public class MimojiEditGLSurfaceView extends GLSurfaceView implements Renderer {
         GLES20.glEnable(2929);
         GLES20.glClear(16640);
         if (!this.mIsStopRender) {
-            AvatarEngineManager.getInstance().queryAvatar().avatarRender(this.mDeviceRotation, getWidth(), getHeight(), 0, false, null);
+            AvatarEngineManager.getInstance().queryAvatar().avatarRender(this.mDeviceRotation, getWidth(), getHeight(), 0, false, (int[]) null);
             if (this.mSaveConfigThum) {
                 this.mSaveConfigThum = false;
                 byte[] bArr = new byte[160000];

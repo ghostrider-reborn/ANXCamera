@@ -21,7 +21,7 @@ public final class MpscLinkedQueue<T> implements SimplePlainQueue<T> {
 
         public E getAndNullValue() {
             E lpValue = lpValue();
-            spValue(null);
+            spValue((Object) null);
             return lpValue;
         }
 
@@ -60,19 +60,19 @@ public final class MpscLinkedQueue<T> implements SimplePlainQueue<T> {
         return lvConsumerNode() == lvProducerNode();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public LinkedQueueNode<T> lpConsumerNode() {
-        return (LinkedQueueNode) this.consumerNode.get();
+        return this.consumerNode.get();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public LinkedQueueNode<T> lvConsumerNode() {
-        return (LinkedQueueNode) this.consumerNode.get();
+        return this.consumerNode.get();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public LinkedQueueNode<T> lvProducerNode() {
-        return (LinkedQueueNode) this.producerNode.get();
+        return this.producerNode.get();
     }
 
     public boolean offer(T t) {
@@ -111,13 +111,13 @@ public final class MpscLinkedQueue<T> implements SimplePlainQueue<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void spConsumerNode(LinkedQueueNode<T> linkedQueueNode) {
         this.consumerNode.lazySet(linkedQueueNode);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public LinkedQueueNode<T> xchgProducerNode(LinkedQueueNode<T> linkedQueueNode) {
-        return (LinkedQueueNode) this.producerNode.getAndSet(linkedQueueNode);
+        return this.producerNode.getAndSet(linkedQueueNode);
     }
 }

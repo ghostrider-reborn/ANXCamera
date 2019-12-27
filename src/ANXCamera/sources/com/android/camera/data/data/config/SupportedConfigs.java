@@ -34,11 +34,11 @@ public class SupportedConfigs {
     }
 
     public int getConfig(int i) {
-        return ((Integer) this.mSupportedConfigs.get(i)).intValue();
+        return this.mSupportedConfigs.get(i).intValue();
     }
 
     public TopConfigItem getConfigItem(int i) {
-        return (TopConfigItem) this.mConfigs.get(i);
+        return this.mConfigs.get(i);
     }
 
     public int getConfigsSize() {
@@ -46,7 +46,7 @@ public class SupportedConfigs {
             return 0;
         }
         List<TopConfigItem> list = this.mConfigs;
-        return ((TopConfigItem) list.get(list.size() - 1)).index + 1;
+        return list.get(list.size() - 1).index + 1;
     }
 
     public int getLength() {

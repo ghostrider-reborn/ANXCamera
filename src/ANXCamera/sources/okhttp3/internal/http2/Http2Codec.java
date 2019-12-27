@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
-import okhttp3.Interceptor.Chain;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.Response.Builder;
 import okhttp3.ResponseBody;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
@@ -41,7 +40,7 @@ public final class Http2Codec implements HttpCodec {
     private static final ByteString TE = ByteString.encodeUtf8("te");
     private static final ByteString TRANSFER_ENCODING = ByteString.encodeUtf8("transfer-encoding");
     private static final ByteString UPGRADE = ByteString.encodeUtf8("upgrade");
-    private final Chain chain;
+    private final Interceptor.Chain chain;
     private final OkHttpClient client;
     private final Http2Connection connection;
     private Http2Stream stream;
@@ -65,7 +64,7 @@ public final class Http2Codec implements HttpCodec {
 
         public void close() throws IOException {
             super.close();
-            endOfInput(null);
+            endOfInput((IOException) null);
         }
 
         public long read(Buffer buffer, long j) throws IOException {
@@ -82,7 +81,7 @@ public final class Http2Codec implements HttpCodec {
         }
     }
 
-    public Http2Codec(OkHttpClient okHttpClient, Chain chain2, StreamAllocation streamAllocation2, Http2Connection http2Connection) {
+    public Http2Codec(OkHttpClient okHttpClient, Interceptor.Chain chain2, StreamAllocation streamAllocation2, Http2Connection http2Connection) {
         this.client = okHttpClient;
         this.chain = chain2;
         this.streamAllocation = streamAllocation2;
@@ -109,21 +108,18 @@ public final class Http2Codec implements HttpCodec {
         return arrayList;
     }
 
-    public static Builder readHttp2HeadersList(List<Header> list) throws IOException {
+    public static Response.Builder readHttp2HeadersList(List<Header> list) throws IOException {
         Headers.Builder builder = new Headers.Builder();
         int size = list.size();
         Headers.Builder builder2 = builder;
         StatusLine statusLine = null;
         for (int i = 0; i < size; i++) {
-            Header header = (Header) list.get(i);
+            Header header = list.get(i);
             if (header != null) {
                 ByteString byteString = header.name;
                 String utf8 = header.value.utf8();
                 if (byteString.equals(Header.RESPONSE_STATUS)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("HTTP/1.1 ");
-                    sb.append(utf8);
-                    statusLine = StatusLine.parse(sb.toString());
+                    statusLine = StatusLine.parse("HTTP/1.1 " + utf8);
                 } else if (!HTTP_2_SKIPPED_RESPONSE_HEADERS.contains(byteString)) {
                     Internal.instance.addLenient(builder2, byteString.utf8(), utf8);
                 }
@@ -133,7 +129,7 @@ public final class Http2Codec implements HttpCodec {
             }
         }
         if (statusLine != null) {
-            return new Builder().protocol(Protocol.HTTP_2).code(statusLine.code).message(statusLine.message).headers(builder2.build());
+            return new Response.Builder().protocol(Protocol.HTTP_2).code(statusLine.code).message(statusLine.message).headers(builder2.build());
         }
         throw new ProtocolException("Expected ':status' header not present");
     }
@@ -163,8 +159,8 @@ public final class Http2Codec implements HttpCodec {
         return new RealResponseBody(response.header("Content-Type"), HttpHeaders.contentLength(response), Okio.buffer((Source) new StreamFinishingSource(this.stream.getSource())));
     }
 
-    public Builder readResponseHeaders(boolean z) throws IOException {
-        Builder readHttp2HeadersList = readHttp2HeadersList(this.stream.takeResponseHeaders());
+    public Response.Builder readResponseHeaders(boolean z) throws IOException {
+        Response.Builder readHttp2HeadersList = readHttp2HeadersList(this.stream.takeResponseHeaders());
         if (!z || Internal.instance.code(readHttp2HeadersList) != 100) {
             return readHttp2HeadersList;
         }

@@ -1,15 +1,14 @@
 package com.miui.extravideo.common;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
-import android.media.MediaCodec.Callback;
-import android.media.MediaCodec.CodecException;
+import android.media.MediaCrypto;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.Surface;
 import java.nio.ByteBuffer;
 
 public class MediaDecoderAsync {
@@ -28,11 +27,11 @@ public class MediaDecoderAsync {
     public int mSkipFrameTimes;
     private final String mTargetFile;
 
-    private class CustomCallback extends Callback {
+    private class CustomCallback extends MediaCodec.Callback {
         private CustomCallback() {
         }
 
-        public void onError(@NonNull MediaCodec mediaCodec, @NonNull CodecException codecException) {
+        public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException codecException) {
             Log.d(MediaDecoderAsync.TAG, "onError", codecException);
             if (MediaDecoderAsync.this.mListener != null) {
                 MediaDecoderAsync.this.mListener.onError();
@@ -40,12 +39,11 @@ public class MediaDecoderAsync {
         }
 
         public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
-            String str = MediaDecoderAsync.TAG;
             try {
                 int readSampleData = MediaDecoderAsync.this.mMediaExtractor.readSampleData(mediaCodec.getInputBuffer(i), 0);
                 long sampleTime = MediaDecoderAsync.this.mMediaExtractor.getSampleTime();
-                MediaDecoderAsync.this.mDecodeFrameIndex = MediaDecoderAsync.this.mDecodeFrameIndex + 1;
-                Log.d(str, String.format("input  decode index : %d time : %d simple size : %d", new Object[]{Integer.valueOf(MediaDecoderAsync.this.mDecodeFrameIndex), Long.valueOf(sampleTime), Integer.valueOf(readSampleData)}));
+                int unused = MediaDecoderAsync.this.mDecodeFrameIndex = MediaDecoderAsync.this.mDecodeFrameIndex + 1;
+                Log.d(MediaDecoderAsync.TAG, String.format("input  decode index : %d time : %d simple size : %d", new Object[]{Integer.valueOf(MediaDecoderAsync.this.mDecodeFrameIndex), Long.valueOf(sampleTime), Integer.valueOf(readSampleData)}));
                 if (MediaDecoderAsync.this.mListener != null) {
                     MediaDecoderAsync.this.mListener.onFrameDecodeBegin(MediaDecoderAsync.this.mDecodeFrameIndex, sampleTime);
                 }
@@ -58,28 +56,27 @@ public class MediaDecoderAsync {
                     MediaDecoderAsync.this.mMediaExtractor.advance();
                 }
             } catch (Exception e2) {
-                Log.d(str, "onInputBufferAvailable exception", e2);
+                Log.d(MediaDecoderAsync.TAG, "onInputBufferAvailable exception", e2);
             }
         }
 
-        public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull BufferInfo bufferInfo) {
-            String str = MediaDecoderAsync.TAG;
+        public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
             try {
                 boolean z = (bufferInfo.flags & 4) != 0;
                 ByteBuffer outputBuffer = mediaCodec.getOutputBuffer(i);
                 if (!z) {
                     if (MediaDecoderAsync.this.mListener != null) {
                         MediaDecoderAsync.this.mListener.onDecodeBuffer(outputBuffer, bufferInfo);
-                        Log.d(str, String.format("output decode presentation time : %d", new Object[]{Long.valueOf(bufferInfo.presentationTimeUs)}));
+                        Log.d(MediaDecoderAsync.TAG, String.format("output decode presentation time : %d", new Object[]{Long.valueOf(bufferInfo.presentationTimeUs)}));
                         outputBuffer.clear();
                         mediaCodec.releaseOutputBuffer(i, false);
                     }
                 } else if (MediaDecoderAsync.this.mListener != null) {
                     MediaDecoderAsync.this.mListener.onDecodeStop(true);
-                    Log.d(str, "OutputBuffer BUFFER_FLAG_END_OF_STREAM");
+                    Log.d(MediaDecoderAsync.TAG, "OutputBuffer BUFFER_FLAG_END_OF_STREAM");
                 }
             } catch (Exception e2) {
-                Log.d(str, "onOutputBufferAvailable exception", e2);
+                Log.d(MediaDecoderAsync.TAG, "onOutputBufferAvailable exception", e2);
             }
         }
 
@@ -92,7 +89,7 @@ public class MediaDecoderAsync {
     }
 
     public interface DecodeUpdateListener {
-        void onDecodeBuffer(ByteBuffer byteBuffer, BufferInfo bufferInfo);
+        void onDecodeBuffer(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo);
 
         void onDecodeStop(boolean z);
 
@@ -104,7 +101,7 @@ public class MediaDecoderAsync {
     }
 
     public MediaDecoderAsync(String str) {
-        this(str, null);
+        this(str, (Handler) null);
     }
 
     public MediaDecoderAsync(String str, Handler handler) {
@@ -127,7 +124,7 @@ public class MediaDecoderAsync {
                     this.mMediaExtractor.selectTrack(i);
                     this.mDecoder = MediaCodec.createDecoderByType(string);
                     this.mDecoder.setCallback(new CustomCallback(), handler);
-                    this.mDecoder.configure(trackFormat, null, null, 0);
+                    this.mDecoder.configure(trackFormat, (Surface) null, (MediaCrypto) null, 0);
                     return;
                 }
             }

@@ -25,19 +25,13 @@ public class MediaComposeFile {
 
     public void BeginComposeFile() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("begin mComposefile:");
-        sb.append(this.mComposeFile);
-        Log.d(str, sb.toString());
+        Log.d(str, "begin mComposefile:" + this.mComposeFile);
         BeginComposeFileJni();
     }
 
     public void CancelComposeFile() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("cancel mComposefile:");
-        sb.append(this.mComposeFile);
-        Log.d(str, sb.toString());
+        Log.d(str, "cancel mComposefile:" + this.mComposeFile);
         CancelComposeFileJni();
     }
 
@@ -49,37 +43,25 @@ public class MediaComposeFile {
         }
         ConstructMediaComposeFileJni(mediaEffectGraph.GetGraphLine(), i, i2, i3, i4);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("construct compose file: ");
-        sb.append(this.mComposeFile);
-        Log.d(str, sb.toString());
+        Log.d(str, "construct compose file: " + this.mComposeFile);
         return true;
     }
 
     public void DestructMediaComposeFile() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("destruct mComposefile:");
-        sb.append(this.mComposeFile);
-        Log.d(str, sb.toString());
+        Log.d(str, "destruct mComposefile:" + this.mComposeFile);
         DestructMediaComposeFileJni();
     }
 
     public void SetComposeFileName(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SetComposeFileName ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "SetComposeFileName " + str);
         SetComposeFileNameJni(str);
     }
 
     public void SetComposeNotify(EffectNotifier effectNotifier) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SetComposeNotify mComposefile:");
-        sb.append(this.mComposeFile);
-        Log.d(str, sb.toString());
+        Log.d(str, "SetComposeNotify mComposefile:" + this.mComposeFile);
         SetComposeNotifyJni(effectNotifier);
     }
 

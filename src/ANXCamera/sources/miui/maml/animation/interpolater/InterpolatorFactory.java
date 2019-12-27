@@ -34,31 +34,25 @@ public class InterpolatorFactory {
                     f3 = Float.parseFloat(str3);
                 }
             } catch (NumberFormatException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("parse error:");
-                sb.append(substring);
-                Log.d(LOG_TAG, sb.toString());
+                Log.d(LOG_TAG, "parse error:" + substring);
             }
         }
-        String str4 = "BackEaseIn";
-        if (str4.equalsIgnoreCase(str)) {
+        if ("BackEaseIn".equalsIgnoreCase(str)) {
             return new BackEaseInInterpolater();
         }
-        String str5 = "BackEaseOut";
-        if (str5.equalsIgnoreCase(str)) {
+        if ("BackEaseOut".equalsIgnoreCase(str)) {
             return new BackEaseOutInterpolater();
         }
-        String str6 = "BackEaseInOut";
-        if (str6.equalsIgnoreCase(str)) {
+        if ("BackEaseInOut".equalsIgnoreCase(str)) {
             return new BackEaseInOutInterpolater();
         }
-        if (str.startsWith(str4) && z) {
+        if (str.startsWith("BackEaseIn") && z) {
             return new BackEaseInInterpolater(f2);
         }
-        if (str.startsWith(str5) && z) {
+        if (str.startsWith("BackEaseOut") && z) {
             return new BackEaseOutInterpolater(f2);
         }
-        if (str.startsWith(str6) && z) {
+        if (str.startsWith("BackEaseInOut") && z) {
             return new BackEaseInOutInterpolater(f2);
         }
         if ("BounceEaseIn".equalsIgnoreCase(str)) {
@@ -88,25 +82,22 @@ public class InterpolatorFactory {
         if ("CubicEaseInOut".equalsIgnoreCase(str)) {
             return new CubicEaseInOutInterpolater();
         }
-        String str7 = "ElasticEaseIn";
-        if (str7.equalsIgnoreCase(str)) {
+        if ("ElasticEaseIn".equalsIgnoreCase(str)) {
             return new ElasticEaseInInterpolater();
         }
-        String str8 = "ElasticEaseOut";
-        if (str8.equalsIgnoreCase(str)) {
+        if ("ElasticEaseOut".equalsIgnoreCase(str)) {
             return new ElasticEaseOutInterpolater();
         }
-        String str9 = "ElasticEaseInOut";
-        if (str9.equalsIgnoreCase(str)) {
+        if ("ElasticEaseInOut".equalsIgnoreCase(str)) {
             return new ElasticEaseInOutInterpolater();
         }
-        if (str.startsWith(str7) && z2) {
+        if (str.startsWith("ElasticEaseIn") && z2) {
             return new ElasticEaseInInterpolater(f2, f3);
         }
-        if (str.startsWith(str8) && z2) {
+        if (str.startsWith("ElasticEaseOut") && z2) {
             return new ElasticEaseOutInterpolater(f2, f3);
         }
-        if (str.startsWith(str9) && z2) {
+        if (str.startsWith("ElasticEaseInOut") && z2) {
             return new ElasticEaseInOutInterpolater(f2, f3);
         }
         if ("ExpoEaseIn".equalsIgnoreCase(str)) {
@@ -157,11 +148,10 @@ public class InterpolatorFactory {
         if ("Linear".equalsIgnoreCase(str)) {
             return new LinearInterpolater();
         }
-        String str10 = "PhysicBased";
-        if (str10.equalsIgnoreCase(str)) {
+        if ("PhysicBased".equalsIgnoreCase(str)) {
             return new PhysicBasedInterpolator();
         }
-        if (!str.startsWith(str10) || !z2) {
+        if (!str.startsWith("PhysicBased") || !z2) {
             return null;
         }
         return new PhysicBasedInterpolator(f2, f3);

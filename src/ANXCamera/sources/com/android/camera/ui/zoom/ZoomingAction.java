@@ -30,9 +30,6 @@ public class ZoomingAction {
         if (i == 3) {
             return "ZOOMING_BY_SLIDER_BAR";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unknown zooming action: ");
-        sb.append(i);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Unknown zooming action: " + i);
     }
 }

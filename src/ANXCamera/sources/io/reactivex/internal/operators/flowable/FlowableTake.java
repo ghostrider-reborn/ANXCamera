@@ -90,6 +90,6 @@ public final class FlowableTake<T> extends AbstractFlowableWithUpstream<T, T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new TakeSubscriber<Object>(subscriber, this.limit));
+        this.source.subscribe(new TakeSubscriber(subscriber, this.limit));
     }
 }

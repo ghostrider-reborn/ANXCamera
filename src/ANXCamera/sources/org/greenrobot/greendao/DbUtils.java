@@ -31,13 +31,7 @@ public class DbUtils {
     public static int executeSqlScript(Context context, Database database, String str, boolean z) throws IOException {
         String[] split = new String(readAsset(context, str), "UTF-8").split(";(\\s)*[\n\r]");
         int executeSqlStatementsInTx = z ? executeSqlStatementsInTx(database, split) : executeSqlStatements(database, split);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Executed ");
-        sb.append(executeSqlStatementsInTx);
-        sb.append(" statements from SQL script '");
-        sb.append(str);
-        sb.append("'");
-        DaoLog.i(sb.toString());
+        DaoLog.i("Executed " + executeSqlStatementsInTx + " statements from SQL script '" + str + "'");
         return executeSqlStatementsInTx;
     }
 
@@ -65,7 +59,7 @@ public class DbUtils {
     }
 
     public static void logTableDump(SQLiteDatabase sQLiteDatabase, String str) {
-        Cursor query = sQLiteDatabase.query(str, null, null, null, null, null, null);
+        Cursor query = sQLiteDatabase.query(str, (String[]) null, (String) null, (String[]) null, (String) null, (String) null, (String) null);
         try {
             DaoLog.d(DatabaseUtils.dumpCursorToString(query));
         } finally {

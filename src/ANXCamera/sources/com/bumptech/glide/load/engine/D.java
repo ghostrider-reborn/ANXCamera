@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import com.bumptech.glide.util.l;
@@ -12,7 +11,7 @@ class D {
     private final Handler handler = new Handler(Looper.getMainLooper(), new a());
 
     /* compiled from: ResourceRecycler */
-    private static final class a implements Callback {
+    private static final class a implements Handler.Callback {
         static final int Xf = 1;
 
         a() {
@@ -30,7 +29,7 @@ class D {
     D() {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void g(A<?> a2) {
         l.Ih();
         if (this.Yf) {

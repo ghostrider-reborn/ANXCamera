@@ -84,12 +84,12 @@ public final class ObservableScanSeed<T, R> extends AbstractObservableWithUpstre
 
     public void subscribeActual(Observer<? super R> observer) {
         try {
-            Object call = this.seedSupplier.call();
+            R call = this.seedSupplier.call();
             ObjectHelper.requireNonNull(call, "The seed supplied is null");
             this.source.subscribe(new ScanSeedObserver(observer, this.accumulator, call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

@@ -16,7 +16,7 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.FunctionParseBeautyBodySlimCount;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera2.CameraCapabilities;
 import com.mi.config.b;
 import io.reactivex.Observable;
@@ -121,26 +121,26 @@ public class FocusManager2 extends FocusManagerAbstract {
         /* JADX WARNING: Code restructure failed: missing block: B:37:0x00ff, code lost:
             com.android.camera.module.loader.camera2.FocusManager2.access$1800(r4.this$0);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:38:0x0104, code lost:
-            return;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:39:0x0105, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:38:0x0105, code lost:
             com.android.camera.module.loader.camera2.FocusManager2.access$900(r4.this$0, r5.isFocusing(), r5.isSuccess());
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:40:0x0112, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:39:0x0112, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:47:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:48:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:49:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:50:?, code lost:
             return;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:8:0x0012, code lost:
-            r0 = new java.lang.StringBuilder();
-            r0.append("focusResult: ");
-            r0.append(r5.getFocusTrigger());
-            r0.append("|");
-            r0.append(r5.isSuccess());
-            r0.append("|");
-            r0.append(r5.isFocusing());
-            r0.append("|");
-            r0.append(com.android.camera.module.loader.camera2.FocusManager2.access$800(r4.this$0));
-            com.android.camera.log.Log.v(com.android.camera.module.loader.camera2.FocusManager2.TAG, r0.toString());
+            com.android.camera.log.Log.v(com.android.camera.module.loader.camera2.FocusManager2.TAG, "focusResult: " + r5.getFocusTrigger() + "|" + r5.isSuccess() + "|" + r5.isFocusing() + "|" + com.android.camera.module.loader.camera2.FocusManager2.access$800(r4.this$0));
          */
         /* JADX WARNING: Code restructure failed: missing block: B:9:0x0057, code lost:
             if (r5.getFocusTrigger() == 2) goto L_0x0105;
@@ -204,7 +204,7 @@ public class FocusManager2 extends FocusManagerAbstract {
         public void handleMessage(Message message) {
             int i = message.what;
             if (i == 0 || i == 1) {
-                MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+                ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
                 if (mainContentProtocol != null) {
                     mainContentProtocol.reShowFaceRect();
                 }
@@ -233,7 +233,7 @@ public class FocusManager2 extends FocusManagerAbstract {
         setMirror(z);
         this.mFocusResultDisposable = Observable.create(new ObservableOnSubscribe<FocusTask>() {
             public void subscribe(ObservableEmitter<FocusTask> observableEmitter) throws Exception {
-                FocusManager2.this.mFocusResultEmitter = observableEmitter;
+                ObservableEmitter unused = FocusManager2.this.mFocusResultEmitter = observableEmitter;
             }
         }).observeOn(AndroidSchedulers.mainThread()).subscribe(this.mFocusResultConsumer);
     }
@@ -246,12 +246,10 @@ public class FocusManager2 extends FocusManagerAbstract {
         matrix.mapRect(rectF);
         float width = ((float) rect2.width()) / ((float) rect3.width());
         float height = ((float) rect2.height()) / ((float) rect3.height());
-        float f2 = rectF.left * width;
         int i = rect2.left;
-        rectF.left = f2 + ((float) i);
-        float f3 = rectF.top * height;
+        rectF.left = (rectF.left * width) + ((float) i);
         int i2 = rect2.top;
-        rectF.top = f3 + ((float) i2);
+        rectF.top = (rectF.top * height) + ((float) i2);
         rectF.right = (rectF.right * width) + ((float) i);
         rectF.bottom = (rectF.bottom * height) + ((float) i2);
         Rect rect4 = new Rect();
@@ -319,14 +317,14 @@ public class FocusManager2 extends FocusManagerAbstract {
     }
 
     private void initializeFocusIndicator(int i, int i2, int i3) {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (mainContentProtocol != null) {
             mainContentProtocol.setFocusViewPosition(i, i2, i3);
         }
     }
 
     private void initializeMeteringAreas(int i, int i2, int i3, int i4, int i5, int i6, int i7) {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (i7 != 1 || mainContentProtocol == null || mainContentProtocol.isNeedExposure(1)) {
             if (this.mCameraMeteringArea == null) {
                 this.mCameraMeteringArea = new Rect();
@@ -353,11 +351,8 @@ public class FocusManager2 extends FocusManagerAbstract {
     private boolean isFocusEnabled() {
         if (this.mInitialized) {
             int i = this.mState;
-            if (!(i == 2 || i == 1 || !needAutoFocusCall())) {
-                return true;
-            }
+            return (i == 2 || i == 1 || !needAutoFocusCall()) ? false : true;
         }
-        return false;
     }
 
     private boolean isFocusValid(int i) {
@@ -367,11 +362,12 @@ public class FocusManager2 extends FocusManagerAbstract {
         if (i >= 3 || i >= this.mLastFocusFrom || Util.isTimeout(currentTimeMillis, this.mLatestFocusTime, j)) {
             this.mLatestFocusTime = System.currentTimeMillis();
             return true;
-        }
-        if (this.mLastFocusFrom == 1) {
+        } else if (this.mLastFocusFrom != 1) {
+            return false;
+        } else {
             resetTouchFocus(7);
+            return false;
         }
-        return false;
     }
 
     private void lockAeAwbIfNeeded() {
@@ -397,68 +393,57 @@ public class FocusManager2 extends FocusManagerAbstract {
     /* access modifiers changed from: private */
     public void onAutoFocusMoving(boolean z, boolean z2) {
         boolean z3;
-        boolean z4 = this.mInitialized;
-        String str = TAG;
-        if (!z4) {
-            Log.d(str, "onAutoFocusMoving");
+        if (!this.mInitialized) {
+            Log.d(TAG, "onAutoFocusMoving");
             return;
         }
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (mainContentProtocol == null || !mainContentProtocol.isFaceExists(mainContentProtocol.getActiveIndicator())) {
             z3 = true;
         } else {
             mainContentProtocol.clearFocusView(3);
             z3 = false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("onAutoFocusMoving: mode=");
-        sb.append(getFocusMode());
-        sb.append(" show=");
-        sb.append(z3);
-        Log.d(str, sb.toString());
-        if (this.mCameraFocusArea == null) {
-            if (!"auto".equals(getFocusMode())) {
-                if (mainContentProtocol != null) {
-                    mainContentProtocol.setFocusViewType(false);
-                }
-                if (z) {
-                    if (this.mState != 2) {
-                        setFocusState(1);
-                        this.mHandler.removeMessages(0);
-                        this.mHandler.removeMessages(1);
-                        this.mHandler.sendEmptyMessageDelayed(1, (long) FORCE_RESET_TOUCH_FOCUS_DELAY);
-                    }
-                    Log.v(str, "Camera KPI: CAF start");
-                    this.mCafStartTime = System.currentTimeMillis();
-                    if (z3 && mainContentProtocol != null) {
-                        mainContentProtocol.showIndicator(2, 1);
-                    }
-                } else {
-                    int i = this.mState;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Camera KPI: CAF stop: Focus time: ");
-                    sb2.append(System.currentTimeMillis() - this.mCafStartTime);
-                    Log.v(str, sb2.toString());
-                    if (z2) {
-                        setFocusState(3);
-                        setLastFocusState(3);
-                    } else {
-                        setFocusState(4);
-                        setLastFocusState(4);
-                    }
+        Log.d(TAG, "onAutoFocusMoving: mode=" + getFocusMode() + " show=" + z3);
+        if (this.mCameraFocusArea == null && !"auto".equals(getFocusMode())) {
+            if (mainContentProtocol != null) {
+                mainContentProtocol.setFocusViewType(false);
+            }
+            if (z) {
+                if (this.mState != 2) {
+                    setFocusState(1);
                     this.mHandler.removeMessages(0);
                     this.mHandler.removeMessages(1);
-                    if (z3 && mainContentProtocol != null) {
-                        mainContentProtocol.showIndicator(2, z2 ? 2 : 3);
-                    }
-                    if (i == 2) {
-                        setFocusState(3);
-                        if (this.mPendingMultiCapture) {
-                            multiCapture();
-                        } else {
-                            capture();
-                        }
-                    }
+                    this.mHandler.sendEmptyMessageDelayed(1, (long) FORCE_RESET_TOUCH_FOCUS_DELAY);
+                }
+                Log.v(TAG, "Camera KPI: CAF start");
+                this.mCafStartTime = System.currentTimeMillis();
+                if (z3 && mainContentProtocol != null) {
+                    mainContentProtocol.showIndicator(2, 1);
+                    return;
+                }
+                return;
+            }
+            int i = this.mState;
+            Log.v(TAG, "Camera KPI: CAF stop: Focus time: " + (System.currentTimeMillis() - this.mCafStartTime));
+            if (z2) {
+                setFocusState(3);
+                setLastFocusState(3);
+            } else {
+                setFocusState(4);
+                setLastFocusState(4);
+            }
+            this.mHandler.removeMessages(0);
+            this.mHandler.removeMessages(1);
+            if (z3 && mainContentProtocol != null) {
+                mainContentProtocol.showIndicator(2, z2 ? 2 : 3);
+            }
+            if (i == 2) {
+                setFocusState(3);
+                if (this.mPendingMultiCapture) {
+                    multiCapture();
+                } else {
+                    capture();
                 }
             }
         }
@@ -472,31 +457,28 @@ public class FocusManager2 extends FocusManagerAbstract {
         int i = this.FOCUS_AREA_WIDTH;
         int i2 = this.FOCUS_AREA_HEIGHT;
         int i3 = this.mPreviewWidth;
-        int i4 = i3 / 2;
-        int i5 = this.mPreviewHeight;
-        initializeFocusAreas(i, i2, i4, i5 / 2, i3, i5);
+        int i4 = this.mPreviewHeight;
+        initializeFocusAreas(i, i2, i3 / 2, i4 / 2, i3, i4);
         initializeFocusIndicator(5, this.mPreviewWidth / 2, this.mPreviewHeight / 2);
     }
 
     private boolean resetFocusAreaToFaceArea() {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
-        if (mainContentProtocol != null && mainContentProtocol.isFaceExists(mainContentProtocol.getActiveIndicator())) {
-            RectF focusRect = mainContentProtocol.getFocusRect(mainContentProtocol.getActiveIndicator());
-            if (focusRect != null) {
-                this.mLatestFocusFace = focusRect;
-                initializeFocusAreas(this.FOCUS_AREA_WIDTH, this.FOCUS_AREA_HEIGHT, (int) ((focusRect.left + focusRect.right) / 2.0f), (int) ((focusRect.top + focusRect.bottom) / 2.0f), this.mPreviewWidth, this.mPreviewHeight);
-                return true;
-            }
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        if (mainContentProtocol == null || !mainContentProtocol.isFaceExists(mainContentProtocol.getActiveIndicator())) {
+            return false;
         }
-        return false;
+        RectF focusRect = mainContentProtocol.getFocusRect(mainContentProtocol.getActiveIndicator());
+        if (focusRect == null) {
+            return false;
+        }
+        this.mLatestFocusFace = focusRect;
+        initializeFocusAreas(this.FOCUS_AREA_WIDTH, this.FOCUS_AREA_HEIGHT, (int) ((focusRect.left + focusRect.right) / 2.0f), (int) ((focusRect.top + focusRect.bottom) / 2.0f), this.mPreviewWidth, this.mPreviewHeight);
+        return true;
     }
 
     /* access modifiers changed from: private */
     public void setFocusState(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFocusState: ");
-        sb.append(i);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "setFocusState: " + i);
         this.mState = i;
     }
 
@@ -506,13 +488,10 @@ public class FocusManager2 extends FocusManagerAbstract {
     }
 
     private void startFocus(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("startFocus: ");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "startFocus: " + i);
         setFocusMode("auto");
         this.mLastFocusFrom = i;
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (i != 1 || (mainContentProtocol != null && 1 == mainContentProtocol.getActiveIndicator())) {
             this.mListener.stopObjectTracking(false);
         }
@@ -547,18 +526,16 @@ public class FocusManager2 extends FocusManagerAbstract {
         } else {
             this.mListener.notifyFocusAreaUpdate();
         }
-        int i = this.mState;
-        String str = TAG;
-        if (2 != i) {
+        if (2 != this.mState) {
             setFocusState(0);
         } else {
-            Log.e(str, "waiting focus timeout!");
+            Log.e(TAG, "waiting focus timeout!");
         }
         updateFocusUI();
         this.mCancelAutoFocusIfMove = false;
         this.mHandler.removeMessages(0);
         this.mHandler.removeMessages(1);
-        Log.d(str, "cancelFocus");
+        Log.d(TAG, "cancelFocus");
     }
 
     public void cancelLongPressedAutoFocus() {
@@ -592,14 +569,14 @@ public class FocusManager2 extends FocusManagerAbstract {
             int i = this.mState;
             if (i == 3 || i == 4 || !needAutoFocusCall()) {
                 multiCapture();
-            } else {
-                int i2 = this.mState;
-                if (i2 == 1) {
-                    setFocusState(2);
-                    this.mPendingMultiCapture = true;
-                } else if (i2 == 0) {
-                    multiCapture();
-                }
+                return;
+            }
+            int i2 = this.mState;
+            if (i2 == 1) {
+                setFocusState(2);
+                this.mPendingMultiCapture = true;
+            } else if (i2 == 0) {
+                multiCapture();
             }
         }
     }
@@ -609,23 +586,23 @@ public class FocusManager2 extends FocusManagerAbstract {
             int i = this.mState;
             if (i == 3 || i == 4 || !needAutoFocusCall()) {
                 capture();
-            } else {
-                int i2 = this.mState;
-                if (i2 == 1) {
-                    if (this.mListener.shouldCaptureDirectly()) {
-                        capture();
-                    } else {
-                        setFocusState(2);
-                    }
-                } else if (i2 == 0) {
+                return;
+            }
+            int i2 = this.mState;
+            if (i2 == 1) {
+                if (this.mListener.shouldCaptureDirectly()) {
                     capture();
+                } else {
+                    setFocusState(2);
                 }
+            } else if (i2 == 0) {
+                capture();
             }
         }
     }
 
     public boolean focusFaceArea() {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (isAutoFocusMode(getFocusMode()) && (mainContentProtocol == null || 2 != mainContentProtocol.getActiveIndicator())) {
             RectF focusRect = mainContentProtocol != null ? mainContentProtocol.getFocusRect(mainContentProtocol.getActiveIndicator()) : null;
             if (focusRect != null && !focusRect.isEmpty()) {
@@ -669,10 +646,7 @@ public class FocusManager2 extends FocusManagerAbstract {
         if (this.mFocusMode == null) {
             this.mFocusMode = CameraSettings.getFocusMode();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("getFocusMode=");
-        sb.append(this.mFocusMode);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "getFocusMode=" + this.mFocusMode);
         return this.mFocusMode;
     }
 
@@ -766,20 +740,12 @@ public class FocusManager2 extends FocusManagerAbstract {
             String focusMode = getFocusMode();
             boolean z2 = false;
             boolean z3 = i != 2 || (!"auto".equals(focusMode) && !"macro".equals(focusMode)) || (this.mLastState != 3 && z);
-            StringBuilder sb = new StringBuilder();
-            sb.append("prepareCapture: ");
-            sb.append(z);
-            String str = "|";
-            sb.append(str);
-            sb.append(i);
-            sb.append(str);
-            sb.append(focusMode);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "prepareCapture: " + z + "|" + i + "|" + focusMode);
             boolean equals = AutoFocus.LEGACY_CONTINUOUS_PICTURE.equals(focusMode);
             if (isFocusEnabled() && !equals && z3) {
                 int i2 = this.mState;
                 if (i2 != 3 && i2 != 4) {
-                    MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+                    ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
                     if (mainContentProtocol == null || !mainContentProtocol.isFaceExists(mainContentProtocol.getActiveIndicator())) {
                         resetFocusAreaToCenter();
                         startFocus(0);
@@ -810,7 +776,7 @@ public class FocusManager2 extends FocusManagerAbstract {
 
     public void requestAutoFocus() {
         if (needAutoFocusCall() && this.mInitialized && this.mState != 2) {
-            MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+            ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
             int i = 4;
             if (isNeedCancelAutoFocus()) {
                 this.mListener.cancelFocus(false);
@@ -852,7 +818,7 @@ public class FocusManager2 extends FocusManagerAbstract {
     }
 
     public void resetFocusIndicator(int i) {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (mainContentProtocol != null) {
             mainContentProtocol.clearFocusView(i);
         }
@@ -897,31 +863,22 @@ public class FocusManager2 extends FocusManagerAbstract {
             z = true;
         }
         this.mAELockOnlySupported = z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setCharacteristics: mFocusAreaSupported = ");
-        sb.append(this.mFocusAreaSupported);
-        sb.append(", mAELockOnlySupported = ");
-        sb.append(this.mAELockOnlySupported);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setCharacteristics: mFocusAreaSupported = " + this.mFocusAreaSupported + ", mAELockOnlySupported = " + this.mAELockOnlySupported);
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:12:0x0036, code lost:
-        if (com.android.camera.constant.AutoFocus.LEGACY_CONTINUOUS_VIDEO.equals(r2.mFocusMode) != false) goto L_0x0038;
-     */
     public String setFocusMode(String str) {
         if (str == null) {
             Log.e(TAG, "setFocusMode: null focus mode", new RuntimeException());
             return str;
         }
-        String str2 = "auto";
-        if (str2.equals(str) || !Util.isSupported(str, this.mSupportedFocusModes)) {
-            this.mFocusMode = str2;
+        if ("auto".equals(str) || !Util.isSupported(str, this.mSupportedFocusModes)) {
+            this.mFocusMode = "auto";
         } else {
             this.mFocusMode = str;
         }
-        if (!AutoFocus.LEGACY_CONTINUOUS_PICTURE.equals(this.mFocusMode)) {
+        if (AutoFocus.LEGACY_CONTINUOUS_PICTURE.equals(this.mFocusMode) || AutoFocus.LEGACY_CONTINUOUS_VIDEO.equals(this.mFocusMode)) {
+            this.mLastFocusFrom = -1;
         }
-        this.mLastFocusFrom = -1;
         return this.mFocusMode;
     }
 
@@ -929,21 +886,13 @@ public class FocusManager2 extends FocusManagerAbstract {
         if (this.mPreviewWidth != i || this.mPreviewHeight != i2) {
             this.mPreviewWidth = i;
             this.mPreviewHeight = i2;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setPreviewSize: ");
-            sb.append(this.mPreviewWidth);
-            sb.append("x");
-            sb.append(this.mPreviewHeight);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "setPreviewSize: " + this.mPreviewWidth + "x" + this.mPreviewHeight);
             setMatrix();
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:20:0x0044, code lost:
-        if (com.android.camera.constant.AutoFocus.LEGACY_CONTINUOUS_VIDEO.equals(r6.mFocusMode) != false) goto L_0x0046;
-     */
     public void updateFocusUI() {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (this.mInitialized && !this.mKeepFocusUIState && mainContentProtocol != null) {
             int activeIndicator = 1 == this.mLastFocusFrom ? mainContentProtocol.getActiveIndicator() : 2;
             int i = this.mState;
@@ -956,9 +905,9 @@ public class FocusManager2 extends FocusManagerAbstract {
                 if (i == 3) {
                     mainContentProtocol.showIndicator(activeIndicator, 2);
                 } else if (i == 4) {
-                    if (!AutoFocus.LEGACY_CONTINUOUS_PICTURE.equals(this.mFocusMode)) {
+                    if (AutoFocus.LEGACY_CONTINUOUS_PICTURE.equals(this.mFocusMode) || AutoFocus.LEGACY_CONTINUOUS_VIDEO.equals(this.mFocusMode)) {
+                        i2 = 2;
                     }
-                    i2 = 2;
                     mainContentProtocol.showIndicator(activeIndicator, i2);
                 }
             } else if (activeIndicator == 2) {

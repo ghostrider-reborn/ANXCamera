@@ -9,9 +9,8 @@ import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.mediacompat.Rating2;
-import android.support.v4.media.MediaSession2.CommandButton;
+import android.support.v4.media.MediaSession2;
 import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,7 +38,7 @@ public class MediaController2 implements AutoCloseable {
         public void onCustomCommand(@NonNull MediaController2 mediaController2, @NonNull SessionCommand2 sessionCommand2, @Nullable Bundle bundle, @Nullable ResultReceiver resultReceiver) {
         }
 
-        public void onCustomLayoutChanged(@NonNull MediaController2 mediaController2, @NonNull List<CommandButton> list) {
+        public void onCustomLayoutChanged(@NonNull MediaController2 mediaController2, @NonNull List<MediaSession2.CommandButton> list) {
         }
 
         public void onDisconnected(@NonNull MediaController2 mediaController2) {
@@ -130,7 +129,7 @@ public class MediaController2 implements AutoCloseable {
             return this.mPlaybackType;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Bundle toBundle() {
             Bundle bundle = new Bundle();
             bundle.putInt(KEY_PLAYBACK_TYPE, this.mPlaybackType);
@@ -262,12 +261,12 @@ public class MediaController2 implements AutoCloseable {
         void updatePlaylistMetadata(@Nullable MediaMetadata2 mediaMetadata2);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface VolumeDirection {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface VolumeFlags {
     }
@@ -307,7 +306,7 @@ public class MediaController2 implements AutoCloseable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SupportLibraryImpl createImpl(@NonNull Context context, @NonNull SessionToken2 sessionToken2, @NonNull Executor executor, @NonNull ControllerCallback controllerCallback) {
         if (sessionToken2.isLegacySession()) {
             MediaController2ImplLegacy mediaController2ImplLegacy = new MediaController2ImplLegacy(context, this, sessionToken2, executor, controllerCallback);
@@ -321,7 +320,7 @@ public class MediaController2 implements AutoCloseable {
         this.mImpl.fastForward();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
     public MediaBrowserCompat getBrowserCompat() {
         return this.mImpl.getBrowserCompat();
@@ -335,19 +334,19 @@ public class MediaController2 implements AutoCloseable {
         return this.mImpl.getBufferingState();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public ControllerCallback getCallback() {
         return this.mImpl.getCallback();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public Executor getCallbackExecutor() {
         return this.mImpl.getCallbackExecutor();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public Context getContext() {
         return this.mImpl.getContext();
@@ -365,7 +364,7 @@ public class MediaController2 implements AutoCloseable {
         return this.mImpl.getDuration();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SupportLibraryImpl getImpl() {
         return this.mImpl;
     }
@@ -551,7 +550,7 @@ public class MediaController2 implements AutoCloseable {
         this.mImpl.setShuffleMode(i);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void setTimeDiff(Long l) {
         this.mTimeDiff = l;
     }
@@ -560,12 +559,12 @@ public class MediaController2 implements AutoCloseable {
         this.mImpl.setVolumeTo(i, i2);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void skipBackward() {
         this.mImpl.skipBackward();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void skipForward() {
         this.mImpl.skipForward();
     }

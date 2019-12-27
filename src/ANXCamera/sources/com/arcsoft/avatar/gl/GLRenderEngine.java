@@ -16,22 +16,22 @@ public class GLRenderEngine {
     public static final int VERTEX_NO_FLIP_Y = 0;
     public static String VERTEX_SHADER = "#version 310 es\nlayout(location = 0) in vec3 a_position;\nlayout(location = 1) in vec2 a_texCoord;\nuniform int needFlipY;\nuniform float depth_value;\nlayout (location = 0) out vec2 v_texCoord;\nvoid main() {vec3 newPos = a_position;\nif(1==needFlipY){ newPos = vec3(a_position.x,a_position.y * -1.0,a_position.z);\n}gl_Position = vec4(newPos.xy,depth_value,1.0);\nv_texCoord = a_texCoord;\n}";
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f83a = "GLRenderEngine";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static final String f84b = "y_sampler";
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private static final String f85c = "uv_sampler";
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private static final String f86d = "rgba_sampler";
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private static final String f87e = "needFlipY";
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private static final String f88f = "depth_value";
     private static final float g = 1.0f;
     private int A;

@@ -1,7 +1,6 @@
 package com.android.camera.groupshot;
 
 import android.media.Image;
-import android.media.Image.Plane;
 import com.android.camera.log.Log;
 import java.io.FileDescriptor;
 import java.lang.reflect.Field;
@@ -21,10 +20,7 @@ public class GroupShot {
             System.loadLibrary("morpho_groupshot");
         } catch (UnsatisfiedLinkError e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("can't loadLibrary, ");
-            sb.append(e2.getMessage());
-            Log.e(str, sb.toString());
+            Log.e(str, "can't loadLibrary, " + e2.getMessage());
         }
     }
 
@@ -112,15 +108,12 @@ public class GroupShot {
             return -1;
         }
         if (35 == image.getFormat()) {
-            Plane[] planes = image.getPlanes();
+            Image.Plane[] planes = image.getPlanes();
             Log.d(TAG, String.format(Locale.ENGLISH, "attach: size=%dx%d stride=%dx%d", new Object[]{Integer.valueOf(image.getWidth()), Integer.valueOf(image.getHeight()), Integer.valueOf(planes[0].getRowStride()), Integer.valueOf(planes[1].getRowStride())}));
             return attachYuv(this.mNative, planes[0].getBuffer(), planes[1].getBuffer(), planes[0].getRowStride(), planes[1].getRowStride());
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unexpected image format ");
-        sb.append(image.getFormat());
-        Log.e(str, sb.toString());
+        Log.e(str, "unexpected image format " + image.getFormat());
         return -1;
     }
 
@@ -191,7 +184,7 @@ public class GroupShot {
         if (fd < 0) {
             return -1;
         }
-        return getImageAndSaveJpeg(this.mNative, null, fd);
+        return getImageAndSaveJpeg(this.mNative, (String) null, fd);
     }
 
     public int getImageAndSaveJpeg(String str) {
@@ -297,19 +290,13 @@ public class GroupShot {
     public int getYuvImage(Image image) {
         if (image == null || 35 != image.getFormat()) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("getYuvImage: invalid image ");
-            sb.append(image);
-            Log.e(str, sb.toString());
+            Log.e(str, "getYuvImage: invalid image " + image);
             return -1;
         }
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         int yuvImage = getYuvImage(this.mNative, planes[0].getBuffer(), planes[1].getBuffer(), planes[0].getRowStride(), planes[1].getRowStride());
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("getYuvImage: result=");
-        sb2.append(yuvImage);
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "getYuvImage: result=" + yuvImage);
         return yuvImage;
     }
 

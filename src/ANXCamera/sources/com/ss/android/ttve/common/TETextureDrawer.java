@@ -96,8 +96,7 @@ public class TETextureDrawer {
         double d2 = (double) f2;
         float cos = (float) Math.cos(d2);
         float sin = (float) Math.sin(d2);
-        float[] fArr = {cos, sin, -sin, cos};
         this.mProgram.bind();
-        GLES20.glUniformMatrix2fv(this.mRotLoc, 1, false, fArr, 0);
+        GLES20.glUniformMatrix2fv(this.mRotLoc, 1, false, new float[]{cos, sin, -sin, cos}, 0);
     }
 }

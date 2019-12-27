@@ -1,11 +1,11 @@
 package com.bumptech.glide.load;
 
 import android.support.annotation.NonNull;
-import com.bumptech.glide.load.f.a;
+import com.bumptech.glide.load.f;
 import java.security.MessageDigest;
 
 /* compiled from: Option */
-class e implements a<Object> {
+class e implements f.a<Object> {
     e() {
     }
 

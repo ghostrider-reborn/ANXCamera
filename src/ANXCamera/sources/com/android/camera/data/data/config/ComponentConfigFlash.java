@@ -34,6 +34,7 @@ public class ComponentConfigFlash extends ComponentData {
 
     public ComponentConfigFlash(DataItemConfig dataItemConfig) {
         super(dataItemConfig);
+        this.mItems = new ArrayList();
         this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, "0"));
     }
 
@@ -47,15 +48,12 @@ public class ComponentConfigFlash extends ComponentData {
         }
         String defaultValue = getDefaultValue(i);
         String string = this.mParentDataItem.getString(getKey(i), defaultValue);
-        if (string != null && !string.equals(defaultValue) && !checkValueValid(string)) {
-            String simpleName = ComponentConfigFlash.class.getSimpleName();
-            StringBuilder sb = new StringBuilder();
-            sb.append("reset invalid value ");
-            sb.append(string);
-            Log.e(simpleName, sb.toString());
-            string = defaultValue;
+        if (string == null || string.equals(defaultValue) || checkValueValid(string)) {
+            return string;
         }
-        return string;
+        String simpleName = ComponentConfigFlash.class.getSimpleName();
+        Log.e(simpleName, "reset invalid value " + string);
+        return defaultValue;
     }
 
     private int getFlashAutoRes() {
@@ -90,10 +88,7 @@ public class ComponentConfigFlash extends ComponentData {
             }
         }
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("checkValueValid: invalid value: ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "checkValueValid: invalid value: " + str);
         return false;
     }
 
@@ -106,8 +101,7 @@ public class ComponentConfigFlash extends ComponentData {
     }
 
     public String getComponentValue(int i) {
-        String str = "0";
-        return (!isClosed() && !isEmpty()) ? getComponentValueInternal(i) : str;
+        return (!isClosed() && !isEmpty()) ? getComponentValueInternal(i) : "0";
     }
 
     public String getDefaultValue(int i) {
@@ -127,18 +121,18 @@ public class ComponentConfigFlash extends ComponentData {
     }
 
     public String getKey(int i) {
-        if (!(i == 169 || i == 172 || i == 174 || i == 179)) {
-            switch (i) {
-                case 160:
-                    throw new RuntimeException("unspecified flash");
-                case 161:
-                case 162:
-                    break;
-                default:
-                    return CameraSettings.KEY_FLASH_MODE;
-            }
+        if (i == 169 || i == 172 || i == 174 || i == 179) {
+            return CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE;
         }
-        return CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE;
+        switch (i) {
+            case 160:
+                throw new RuntimeException("unspecified flash");
+            case 161:
+            case 162:
+                return CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE;
+            default:
+                return CameraSettings.KEY_FLASH_MODE;
+        }
     }
 
     public int getValueSelectedDrawableIgnoreClose(int i) {
@@ -154,24 +148,22 @@ public class ComponentConfigFlash extends ComponentData {
         }
         if ("2".equals(componentValue)) {
             return CameraSettings.isFrontCamera() ? getFlashOnRes() : getFlashTorchRes();
-        } else if (FLASH_VALUE_SCREEN_LIGHT_AUTO.equals(componentValue)) {
-            return getFlashAutoRes();
-        } else {
-            if (FLASH_VALUE_SCREEN_LIGHT_ON.equals(componentValue)) {
-                return getFlashOnRes();
-            }
-            if ("5".equals(componentValue)) {
-                return getFlashBackSoftLightSelectedRes();
-            }
-            return -1;
         }
+        if (FLASH_VALUE_SCREEN_LIGHT_AUTO.equals(componentValue)) {
+            return getFlashAutoRes();
+        }
+        if (FLASH_VALUE_SCREEN_LIGHT_ON.equals(componentValue)) {
+            return getFlashOnRes();
+        }
+        if ("5".equals(componentValue)) {
+            return getFlashBackSoftLightSelectedRes();
+        }
+        return -1;
     }
 
     public int getValueSelectedStringIdIgnoreClose(int i) {
         String componentValue = getComponentValue(i);
-        boolean equals = "1".equals(componentValue);
-        int i2 = R.string.accessibility_flash_on;
-        if (equals) {
+        if ("1".equals(componentValue)) {
             return R.string.accessibility_flash_on;
         }
         if ("3".equals(componentValue)) {
@@ -181,21 +173,18 @@ public class ComponentConfigFlash extends ComponentData {
             return R.string.accessibility_flash_off;
         }
         if ("2".equals(componentValue)) {
-            if (!CameraSettings.isFrontCamera()) {
-                i2 = R.string.accessibility_flash_torch;
-            }
-            return i2;
-        } else if (FLASH_VALUE_SCREEN_LIGHT_AUTO.equals(componentValue)) {
-            return R.string.accessibility_flash_auto;
-        } else {
-            if (FLASH_VALUE_SCREEN_LIGHT_ON.equals(componentValue)) {
-                return R.string.accessibility_flash_on;
-            }
-            if ("5".equals(componentValue)) {
-                return R.string.accessibility_flash_back_soft_light;
-            }
-            return -1;
+            return CameraSettings.isFrontCamera() ? R.string.accessibility_flash_on : R.string.accessibility_flash_torch;
         }
+        if (FLASH_VALUE_SCREEN_LIGHT_AUTO.equals(componentValue)) {
+            return R.string.accessibility_flash_auto;
+        }
+        if (FLASH_VALUE_SCREEN_LIGHT_ON.equals(componentValue)) {
+            return R.string.accessibility_flash_on;
+        }
+        if ("5".equals(componentValue)) {
+            return R.string.accessibility_flash_back_soft_light;
+        }
+        return -1;
     }
 
     public boolean isClosed() {
@@ -226,13 +215,11 @@ public class ComponentConfigFlash extends ComponentData {
             z = true;
         }
         this.mIsBackSoftLightSupported = z;
-        String str = "5";
-        String str2 = "0";
         if (i != 166) {
             if (i == 171) {
                 if (this.mIsHardwareSupported && this.mIsBackSoftLightSupported) {
-                    this.mItems.add(new ComponentDataItem(getFlashBackSoftLightRes(), getFlashBackSoftLightRes(), (int) R.string.pref_camera_flashmode_entry_off, str2));
-                    this.mItems.add(new ComponentDataItem(getFlashBackSoftLightSelectedRes(), getFlashBackSoftLightSelectedRes(), (int) R.string.pref_camera_flashmode_entry_back_soft_light, str));
+                    this.mItems.add(new ComponentDataItem(getFlashBackSoftLightRes(), getFlashBackSoftLightRes(), (int) R.string.pref_camera_flashmode_entry_off, "0"));
+                    this.mItems.add(new ComponentDataItem(getFlashBackSoftLightSelectedRes(), getFlashBackSoftLightSelectedRes(), (int) R.string.pref_camera_flashmode_entry_back_soft_light, "5"));
                     return this.mItems;
                 }
             }
@@ -242,51 +229,48 @@ public class ComponentConfigFlash extends ComponentData {
         }
         if (!this.mIsHardwareSupported) {
             if (i2 == 1 && b.Si()) {
-                String str3 = FLASH_VALUE_SCREEN_LIGHT_ON;
                 if (i == 163 || i == 165 || i == 171) {
-                    this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, str2));
+                    this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, "0"));
                     this.mItems.add(new ComponentDataItem(getFlashAutoRes(), getFlashAutoRes(), (int) R.string.pref_camera_flashmode_entry_auto, FLASH_VALUE_SCREEN_LIGHT_AUTO));
-                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, str3));
+                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, FLASH_VALUE_SCREEN_LIGHT_ON));
                 }
                 if (i == 177) {
-                    this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, str2));
-                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, str3));
+                    this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, "0"));
+                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, FLASH_VALUE_SCREEN_LIGHT_ON));
                 }
             }
             return this.mItems;
         }
-        this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, str2));
-        String str4 = "2";
+        this.mItems.add(new ComponentDataItem(getFlashOffRes(), getFlashOffRes(), (int) R.string.pref_camera_flashmode_entry_off, "0"));
         if (!(i == 161 || i == 162 || i == 169 || i == 172 || i == 174)) {
-            String str5 = "1";
             if (i == 177) {
                 if (CameraSettings.isBackCamera()) {
-                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, str5));
+                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, "1"));
                 }
                 if (CameraSettings.isFrontCamera() && b.Ki()) {
-                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, str4));
+                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, "2"));
                 } else if (b.zj()) {
-                    this.mItems.add(new ComponentDataItem(getFlashTorchRes(), getFlashTorchRes(), (int) R.string.pref_camera_flashmode_entry_torch, str4));
+                    this.mItems.add(new ComponentDataItem(getFlashTorchRes(), getFlashTorchRes(), (int) R.string.pref_camera_flashmode_entry_torch, "2"));
                 }
             } else if (i != 179) {
                 this.mItems.add(new ComponentDataItem(getFlashAutoRes(), getFlashAutoRes(), (int) R.string.pref_camera_flashmode_entry_auto, "3"));
                 if (CameraSettings.isBackCamera()) {
-                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, str5));
+                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, "1"));
                 }
                 if (CameraSettings.isFrontCamera() && b.Ki()) {
-                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, str4));
+                    this.mItems.add(new ComponentDataItem(getFlashOnRes(), getFlashOnRes(), (int) R.string.pref_camera_flashmode_entry_on, "2"));
                 } else if (b.zj()) {
-                    this.mItems.add(new ComponentDataItem(getFlashTorchRes(), getFlashTorchRes(), (int) R.string.pref_camera_flashmode_entry_torch, str4));
+                    this.mItems.add(new ComponentDataItem(getFlashTorchRes(), getFlashTorchRes(), (int) R.string.pref_camera_flashmode_entry_torch, "2"));
                 }
                 if (this.mIsBackSoftLightSupported) {
-                    this.mItems.add(new ComponentDataItem(getFlashBackSoftLightSelectedRes(), getFlashBackSoftLightSelectedRes(), (int) R.string.pref_camera_flashmode_entry_back_soft_light, str));
+                    this.mItems.add(new ComponentDataItem(getFlashBackSoftLightSelectedRes(), getFlashBackSoftLightSelectedRes(), (int) R.string.pref_camera_flashmode_entry_back_soft_light, "5"));
                 }
             }
             return this.mItems;
         }
-        this.mItems.add(new ComponentDataItem(getFlashTorchRes(), getFlashTorchRes(), (int) R.string.pref_camera_flashmode_entry_torch, str4));
+        this.mItems.add(new ComponentDataItem(getFlashTorchRes(), getFlashTorchRes(), (int) R.string.pref_camera_flashmode_entry_torch, "2"));
         if (this.mIsBackSoftLightSupported) {
-            this.mItems.add(new ComponentDataItem(getFlashBackSoftLightSelectedRes(), getFlashBackSoftLightSelectedRes(), (int) R.string.pref_camera_flashmode_entry_back_soft_light, str));
+            this.mItems.add(new ComponentDataItem(getFlashBackSoftLightSelectedRes(), getFlashBackSoftLightSelectedRes(), (int) R.string.pref_camera_flashmode_entry_back_soft_light, "5"));
         }
         return this.mItems;
     }

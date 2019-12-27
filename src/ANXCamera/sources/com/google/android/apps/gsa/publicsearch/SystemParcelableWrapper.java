@@ -2,12 +2,11 @@ package com.google.android.apps.gsa.publicsearch;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public final class SystemParcelableWrapper implements Parcelable {
-    public static final Creator<SystemParcelableWrapper> CREATOR = new Creator<SystemParcelableWrapper>() {
+    public static final Parcelable.Creator<SystemParcelableWrapper> CREATOR = new Parcelable.Creator<SystemParcelableWrapper>() {
         public SystemParcelableWrapper createFromParcel(Parcel parcel) {
-            return new SystemParcelableWrapper(parcel.readParcelable(null));
+            return new SystemParcelableWrapper(parcel.readParcelable((ClassLoader) null));
         }
 
         public SystemParcelableWrapper[] newArray(int i) {

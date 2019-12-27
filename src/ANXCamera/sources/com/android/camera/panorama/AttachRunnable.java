@@ -1,7 +1,6 @@
 package com.android.camera.panorama;
 
 import android.media.Image;
-import android.media.Image.Plane;
 import java.nio.ByteBuffer;
 
 public abstract class AttachRunnable implements Runnable {
@@ -18,7 +17,7 @@ public abstract class AttachRunnable implements Runnable {
         return allocateBuffer;
     }
 
-    private void setPlane(Plane plane, int i) {
+    private void setPlane(Image.Plane plane, int i) {
         this.byteBuffer[i] = plane.getBuffer();
         this.rowStride[i] = plane.getRowStride();
         this.pixelStride[i] = plane.getPixelStride();
@@ -43,7 +42,7 @@ public abstract class AttachRunnable implements Runnable {
     public void setImage(CaptureImage captureImage) {
         Image image = captureImage.image();
         if (image != null) {
-            Plane[] planes = image.getPlanes();
+            Image.Plane[] planes = image.getPlanes();
             setPlane(planes[0], 0);
             setPlane(planes[1], 1);
             setPlane(planes[2], 2);

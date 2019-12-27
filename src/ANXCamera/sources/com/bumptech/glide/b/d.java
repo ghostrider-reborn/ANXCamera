@@ -133,16 +133,8 @@ public class d {
                     this.Xc.get(this.block, i, i2);
                     i += i2;
                 } catch (Exception e2) {
-                    String str = TAG;
-                    if (Log.isLoggable(str, 3)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Error Reading Block n: ");
-                        sb.append(i);
-                        sb.append(" count: ");
-                        sb.append(i2);
-                        sb.append(" blockSize: ");
-                        sb.append(this.blockSize);
-                        Log.d(str, sb.toString(), e2);
+                    if (Log.isLoggable(TAG, 3)) {
+                        Log.d(TAG, "Error Reading Block n: " + i + " count: " + i2 + " blockSize: " + this.blockSize, e2);
                     }
                     this.header.status = 1;
                     return;
@@ -170,9 +162,8 @@ public class d {
                 i2 = i7;
             }
         } catch (BufferUnderflowException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Format Error Reading Color Table", e2);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Format Error Reading Color Table", e2);
             }
             this.header.status = 1;
         }
@@ -254,7 +245,7 @@ public class d {
 
     private void reset() {
         this.Xc = null;
-        Arrays.fill(this.block, 0);
+        Arrays.fill(this.block, (byte) 0);
         this.header = new c();
         this.blockSize = 0;
     }

@@ -47,28 +47,15 @@ public class MediaEffectGraph {
 
     public long AddAudioTrack(String str, boolean z) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("add video source: ");
-        sb.append(str);
-        sb.append(" play loop: ");
-        sb.append(z);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "add video source: " + str + " play loop: " + z);
         if (this.mGraphLine == 0) {
             String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("GraphLine is null, failed add audio source: ");
-            sb2.append(str);
-            Log.e(str3, sb2.toString());
+            Log.e(str3, "GraphLine is null, failed add audio source: " + str);
             return 0;
         }
         long AddAudioTrackJni = AddAudioTrackJni(str, z);
         String str4 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("add audio source: ");
-        sb3.append(AddAudioTrackJni);
-        sb3.append("--");
-        sb3.append(str);
-        Log.d(str4, sb3.toString());
+        Log.d(str4, "add audio source: " + AddAudioTrackJni + "--" + str);
         return AddAudioTrackJni;
     }
 
@@ -78,12 +65,7 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("add effect: ");
-        sb.append(j);
-        sb.append(", ");
-        sb.append(j2);
-        Log.d(str, sb.toString());
+        Log.d(str, "add effect: " + j + ", " + j2);
         return AddEffectJni(j, j2);
     }
 
@@ -93,15 +75,7 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("add effect: ");
-        sb.append(j);
-        String str2 = ", ";
-        sb.append(str2);
-        sb.append(j2);
-        sb.append(str2);
-        sb.append(j3);
-        Log.d(str, sb.toString());
+        Log.d(str, "add effect: " + j + ", " + j2 + ", " + j3);
         return AddTransitionEffectJni(j, j2, j3);
     }
 
@@ -111,44 +85,26 @@ public class MediaEffectGraph {
 
     public boolean AddVideoBackGroud(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("add video backgroud: ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "add video backgroud: " + str);
         if (this.mGraphLine != 0) {
             return AddVideoBackGroudJni(str);
         }
         String str3 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("GraphLine is null, failed add video backgroud: ");
-        sb2.append(str);
-        Log.e(str3, sb2.toString());
+        Log.e(str3, "GraphLine is null, failed add video backgroud: " + str);
         return false;
     }
 
     public long AddVideoSource(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        String str3 = "add video source: ";
-        sb.append(str3);
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "add video source: " + str);
         if (this.mGraphLine == 0) {
-            String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("GraphLine is null, failed add video source: ");
-            sb2.append(str);
-            Log.e(str4, sb2.toString());
+            String str3 = TAG;
+            Log.e(str3, "GraphLine is null, failed add video source: " + str);
             return 0;
         }
         long AddVideoSourceJni = AddVideoSourceJni(str);
-        String str5 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str3);
-        sb3.append(AddVideoSourceJni);
-        sb3.append("--");
-        sb3.append(str);
-        Log.d(str5, sb3.toString());
+        String str4 = TAG;
+        Log.d(str4, "add video source: " + AddVideoSourceJni + "--" + str);
         return AddVideoSourceJni;
     }
 
@@ -173,10 +129,7 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("remove video source: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "remove video source: " + j);
         return RemoveAudioTrackJni(j);
     }
 
@@ -186,12 +139,7 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("remove effect: ");
-        sb.append(j);
-        sb.append(", ");
-        sb.append(j2);
-        Log.d(str, sb.toString());
+        Log.d(str, "remove effect: " + j + ", " + j2);
         return RemoveEffectJni(j, j2);
     }
 
@@ -201,15 +149,7 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("remove effect: ");
-        sb.append(j);
-        String str2 = ", ";
-        sb.append(str2);
-        sb.append(j2);
-        sb.append(str2);
-        sb.append(j3);
-        Log.d(str, sb.toString());
+        Log.d(str, "remove effect: " + j + ", " + j2 + ", " + j3);
         return RemoveTransitionEffectJni(j, j2, j3);
     }
 
@@ -228,56 +168,38 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("remove video source: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "remove video source: " + j);
         return RemoveVideoSourceJni(j);
     }
 
     public void SetAudioMute(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SetAudioMute: ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "SetAudioMute: " + z);
         SetAudioMuteJni(z);
     }
 
     public void SetCurrentSource(long j) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("set current source id: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "set current source id: " + j);
         SetCurrentSourceJni(j);
     }
 
     public boolean SetParamsForVideoSource(long j, Map<String, String> map) {
         String[] strArr;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("set param for source, source id: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "set param for source, source id: " + j);
         int i = 0;
         if (map == null || map.size() == 0) {
             Log.d(TAG, "Param Map: <null, null>");
             strArr = new String[0];
         } else {
             strArr = new String[(map.size() * 2)];
-            for (String str2 : map.keySet()) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Param Map: <");
-                sb2.append(str2);
-                sb2.append(", ");
-                sb2.append((String) map.get(str2));
-                sb2.append(">");
-                Log.d(str3, sb2.toString());
+            for (String next : map.keySet()) {
+                String str2 = TAG;
+                Log.d(str2, "Param Map: <" + next + ", " + map.get(next) + ">");
                 int i2 = i * 2;
-                strArr[i2] = str2.toLowerCase();
-                strArr[i2 + 1] = (String) map.get(str2);
+                strArr[i2] = next.toLowerCase();
+                strArr[i2 + 1] = map.get(next);
                 i++;
             }
         }
@@ -290,12 +212,7 @@ public class MediaEffectGraph {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Swap video source: ");
-        sb.append(j);
-        sb.append(", ");
-        sb.append(j2);
-        Log.d(str, sb.toString());
+        Log.d(str, "Swap video source: " + j + ", " + j2);
         return SwapVideoSourceJni(j, j2);
     }
 }

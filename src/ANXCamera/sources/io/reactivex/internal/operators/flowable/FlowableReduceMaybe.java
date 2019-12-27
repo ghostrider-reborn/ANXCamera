@@ -66,16 +66,16 @@ public final class FlowableReduceMaybe<T> extends Maybe<T> implements HasUpstrea
                 T t2 = this.value;
                 if (t2 == null) {
                     this.value = t;
-                } else {
-                    try {
-                        T apply = this.reducer.apply(t2, t);
-                        ObjectHelper.requireNonNull(apply, "The reducer returned a null value");
-                        this.value = apply;
-                    } catch (Throwable th) {
-                        Exceptions.throwIfFatal(th);
-                        this.s.cancel();
-                        onError(th);
-                    }
+                    return;
+                }
+                try {
+                    T apply = this.reducer.apply(t2, t);
+                    ObjectHelper.requireNonNull(apply, "The reducer returned a null value");
+                    this.value = apply;
+                } catch (Throwable th) {
+                    Exceptions.throwIfFatal(th);
+                    this.s.cancel();
+                    onError(th);
                 }
             }
         }
@@ -95,7 +95,7 @@ public final class FlowableReduceMaybe<T> extends Maybe<T> implements HasUpstrea
     }
 
     public Flowable<T> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableReduce<T>(this.source, this.reducer));
+        return RxJavaPlugins.onAssembly(new FlowableReduce(this.source, this.reducer));
     }
 
     public Publisher<T> source() {
@@ -104,6 +104,6 @@ public final class FlowableReduceMaybe<T> extends Maybe<T> implements HasUpstrea
 
     /* access modifiers changed from: protected */
     public void subscribeActual(MaybeObserver<? super T> maybeObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new ReduceSubscriber<Object>(maybeObserver, this.reducer));
+        this.source.subscribe(new ReduceSubscriber(maybeObserver, this.reducer));
     }
 }

@@ -2,7 +2,7 @@ package com.android.camera.ui.drawable.focus;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint.Style;
+import android.graphics.Paint;
 import com.android.camera.Util;
 import com.android.camera.ui.drawable.CameraPaintBase;
 
@@ -21,7 +21,7 @@ public class CameraFocusPaintBigCircle extends CameraPaintBase {
     public void initPaint(Context context) {
         this.mPaint.setAntiAlias(true);
         this.mPaint.setStrokeWidth((float) Util.dpToPixel(1.0f));
-        this.mPaint.setStyle(Style.STROKE);
+        this.mPaint.setStyle(Paint.Style.STROKE);
         this.mPaint.setAlpha(this.mCurrentAlpha);
     }
 }

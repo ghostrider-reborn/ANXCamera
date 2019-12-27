@@ -4,7 +4,6 @@ import android.os.SystemClock;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import com.android.volley.Cache;
-import com.android.volley.Cache.Entry;
 import com.android.volley.Header;
 import com.android.volley.VolleyLog;
 import java.io.BufferedInputStream;
@@ -45,17 +44,14 @@ public class DiskBasedCache implements Cache {
         final long softTtl;
         final long ttl;
 
-        CacheHeader(String str, Entry entry) {
+        CacheHeader(String str, Cache.Entry entry) {
             this(str, entry.etag, entry.serverDate, entry.lastModified, entry.ttl, entry.softTtl, getAllResponseHeaders(entry));
             this.size = (long) entry.data.length;
         }
 
         private CacheHeader(String str, String str2, long j, long j2, long j3, long j4, List<Header> list) {
             this.key = str;
-            if ("".equals(str2)) {
-                str2 = null;
-            }
-            this.etag = str2;
+            this.etag = "".equals(str2) ? null : str2;
             this.serverDate = j;
             this.lastModified = j2;
             this.ttl = j3;
@@ -63,7 +59,7 @@ public class DiskBasedCache implements Cache {
             this.allResponseHeaders = list;
         }
 
-        private static List<Header> getAllResponseHeaders(Entry entry) {
+        private static List<Header> getAllResponseHeaders(Cache.Entry entry) {
             List<Header> list = entry.allResponseHeaders;
             return list != null ? list : HttpHeaderParser.toAllHeaderList(entry.responseHeaders);
         }
@@ -76,9 +72,9 @@ public class DiskBasedCache implements Cache {
             throw new IOException();
         }
 
-        /* access modifiers changed from: 0000 */
-        public Entry toCacheEntry(byte[] bArr) {
-            Entry entry = new Entry();
+        /* access modifiers changed from: package-private */
+        public Cache.Entry toCacheEntry(byte[] bArr) {
+            Cache.Entry entry = new Cache.Entry();
             entry.data = bArr;
             entry.etag = this.etag;
             entry.serverDate = this.serverDate;
@@ -90,7 +86,7 @@ public class DiskBasedCache implements Cache {
             return entry;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean writeHeader(OutputStream outputStream) {
             try {
                 DiskBasedCache.writeInt(outputStream, DiskBasedCache.CACHE_MAGIC);
@@ -120,13 +116,13 @@ public class DiskBasedCache implements Cache {
             this.length = j;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @VisibleForTesting
         public long bytesRead() {
             return this.bytesRead;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public long bytesRemaining() {
             return this.length - this.bytesRead;
         }
@@ -162,10 +158,7 @@ public class DiskBasedCache implements Cache {
     private String getFilenameForKey(String str) {
         int length = str.length() / 2;
         String valueOf = String.valueOf(str.substring(0, length).hashCode());
-        StringBuilder sb = new StringBuilder();
-        sb.append(valueOf);
-        sb.append(String.valueOf(str.substring(length).hashCode()));
-        return sb.toString();
+        return valueOf + String.valueOf(str.substring(length).hashCode());
     }
 
     private void pruneIfNeeded(int i) {
@@ -177,10 +170,10 @@ public class DiskBasedCache implements Cache {
             }
             long j3 = this.mTotalSize;
             long elapsedRealtime = SystemClock.elapsedRealtime();
-            Iterator it = this.mEntries.entrySet().iterator();
+            Iterator<Map.Entry<String, CacheHeader>> it = this.mEntries.entrySet().iterator();
             int i2 = 0;
             while (it.hasNext()) {
-                CacheHeader cacheHeader = (CacheHeader) ((Map.Entry) it.next()).getValue();
+                CacheHeader cacheHeader = (CacheHeader) it.next().getValue();
                 if (getFileForKey(cacheHeader.key).delete()) {
                     j = j2;
                     this.mTotalSize -= cacheHeader.size;
@@ -206,7 +199,7 @@ public class DiskBasedCache implements Cache {
         if (!this.mEntries.containsKey(str)) {
             this.mTotalSize += cacheHeader.size;
         } else {
-            this.mTotalSize += cacheHeader.size - ((CacheHeader) this.mEntries.get(str)).size;
+            this.mTotalSize += cacheHeader.size - this.mEntries.get(str).size;
         }
         this.mEntries.put(str, cacheHeader);
     }
@@ -228,10 +221,7 @@ public class DiskBasedCache implements Cache {
             }
             return emptyList;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("readHeaderList size=");
-        sb.append(readInt);
-        throw new IOException(sb.toString());
+        throw new IOException("readHeaderList size=" + readInt);
     }
 
     static int readInt(InputStream inputStream) throws IOException {
@@ -247,9 +237,9 @@ public class DiskBasedCache implements Cache {
     }
 
     private void removeEntry(String str) {
-        CacheHeader cacheHeader = (CacheHeader) this.mEntries.remove(str);
-        if (cacheHeader != null) {
-            this.mTotalSize -= cacheHeader.size;
+        CacheHeader remove = this.mEntries.remove(str);
+        if (remove != null) {
+            this.mTotalSize -= remove.size;
         }
     }
 
@@ -263,20 +253,15 @@ public class DiskBasedCache implements Cache {
                 return bArr;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("streamToBytes length=");
-        sb.append(j);
-        sb.append(", maxLength=");
-        sb.append(bytesRemaining);
-        throw new IOException(sb.toString());
+        throw new IOException("streamToBytes length=" + j + ", maxLength=" + bytesRemaining);
     }
 
     static void writeHeaderList(List<Header> list, OutputStream outputStream) throws IOException {
         if (list != null) {
             writeInt(outputStream, list.size());
-            for (Header header : list) {
-                writeString(outputStream, header.getName());
-                writeString(outputStream, header.getValue());
+            for (Header next : list) {
+                writeString(outputStream, next.getName());
+                writeString(outputStream, next.getValue());
             }
             return;
         }
@@ -319,19 +304,19 @@ public class DiskBasedCache implements Cache {
         VolleyLog.d("Cache cleared.", new Object[0]);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public InputStream createInputStream(File file) throws FileNotFoundException {
         return new FileInputStream(file);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public OutputStream createOutputStream(File file) throws FileNotFoundException {
         return new FileOutputStream(file);
     }
 
-    public synchronized Entry get(String str) {
+    public synchronized Cache.Entry get(String str) {
         CountingInputStream countingInputStream;
-        CacheHeader cacheHeader = (CacheHeader) this.mEntries.get(str);
+        CacheHeader cacheHeader = this.mEntries.get(str);
         if (cacheHeader == null) {
             return null;
         }
@@ -345,7 +330,7 @@ public class DiskBasedCache implements Cache {
                 countingInputStream.close();
                 return null;
             }
-            Entry cacheEntry = cacheHeader.toCacheEntry(streamToBytes(countingInputStream, countingInputStream.bytesRemaining()));
+            Cache.Entry cacheEntry = cacheHeader.toCacheEntry(streamToBytes(countingInputStream, countingInputStream.bytesRemaining()));
             countingInputStream.close();
             return cacheEntry;
         } catch (IOException e2) {
@@ -392,7 +377,7 @@ public class DiskBasedCache implements Cache {
     }
 
     public synchronized void invalidate(String str, boolean z) {
-        Entry entry = get(str);
+        Cache.Entry entry = get(str);
         if (entry != null) {
             entry.softTtl = 0;
             if (z) {
@@ -413,7 +398,7 @@ public class DiskBasedCache implements Cache {
         return;
      */
     /* JADX WARNING: Missing exception handler attribute for start block: B:13:0x0044 */
-    public synchronized void put(String str, Entry entry) {
+    public synchronized void put(String str, Cache.Entry entry) {
         pruneIfNeeded(entry.data.length);
         File fileForKey = getFileForKey(str);
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(createOutputStream(fileForKey));

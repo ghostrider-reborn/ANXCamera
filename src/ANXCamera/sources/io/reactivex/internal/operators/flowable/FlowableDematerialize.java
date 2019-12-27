@@ -44,9 +44,7 @@ public final class FlowableDematerialize<T> extends AbstractFlowableWithUpstream
                 if (notification.isOnError()) {
                     RxJavaPlugins.onError(notification.getError());
                 }
-                return;
-            }
-            if (notification.isOnError()) {
+            } else if (notification.isOnError()) {
                 this.s.cancel();
                 onError(notification.getError());
             } else if (notification.isOnComplete()) {
@@ -75,6 +73,6 @@ public final class FlowableDematerialize<T> extends AbstractFlowableWithUpstream
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new DematerializeSubscriber<Object>(subscriber));
+        this.source.subscribe(new DematerializeSubscriber(subscriber));
     }
 }

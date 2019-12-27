@@ -6,7 +6,6 @@ import io.reactivex.exceptions.MissingBackpressureException;
 import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.internal.util.AppendOnlyLinkedArrayList;
-import io.reactivex.internal.util.AppendOnlyLinkedArrayList.NonThrowingPredicate;
 import io.reactivex.internal.util.BackpressureHelper;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.internal.util.NotificationLite;
@@ -32,7 +31,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
     final AtomicReference<Object> value;
     final Lock writeLock;
 
-    static final class BehaviorSubscription<T> extends AtomicLong implements Subscription, NonThrowingPredicate<Object> {
+    static final class BehaviorSubscription<T> extends AtomicLong implements Subscription, AppendOnlyLinkedArrayList.NonThrowingPredicate<Object> {
         private static final long serialVersionUID = 3293175281126227086L;
         final Subscriber<? super T> actual;
         volatile boolean cancelled;
@@ -55,9 +54,9 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:19:0x0031, code lost:
-            if (r0 == null) goto L_0x003d;
+            if (r0 == null) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:21:0x0037, code lost:
             if (test(r0) == false) goto L_0x003a;
@@ -68,7 +67,10 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
         /* JADX WARNING: Code restructure failed: missing block: B:23:0x003a, code lost:
             emitLoop();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:24:0x003d, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:31:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:32:?, code lost:
             return;
          */
         public void emitFirst() {
@@ -90,7 +92,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:12:0x0013, code lost:
             r0.forEachWhile(r2);
          */
@@ -107,7 +109,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:25:0x0031, code lost:
             r2.fastPath = true;
          */
@@ -165,9 +167,10 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
                     Subscriber<? super T> subscriber = this.actual;
                     NotificationLite.getValue(obj);
                     subscriber.onNext(obj);
-                    if (j != Long.MAX_VALUE) {
-                        decrementAndGet();
+                    if (j == Long.MAX_VALUE) {
+                        return false;
                     }
+                    decrementAndGet();
                     return false;
                 }
                 cancel();
@@ -204,7 +207,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
         return new BehaviorProcessor<>(t);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(BehaviorSubscription<T> behaviorSubscription) {
         BehaviorSubscription[] behaviorSubscriptionArr;
         BehaviorSubscription[] behaviorSubscriptionArr2;
@@ -254,14 +257,15 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
         NotificationLite.getValue(t);
         if (tArr.length != 0) {
             tArr[0] = t;
-            if (tArr.length != 1) {
-                tArr[1] = null;
+            if (tArr.length == 1) {
+                return tArr;
             }
-        } else {
-            tArr = (Object[]) Array.newInstance(tArr.getClass().getComponentType(), 1);
-            tArr[0] = t;
+            tArr[1] = null;
+            return tArr;
         }
-        return tArr;
+        T[] tArr2 = (Object[]) Array.newInstance(tArr.getClass().getComponentType(), 1);
+        tArr2[0] = t;
+        return tArr2;
     }
 
     public boolean hasComplete() {
@@ -302,7 +306,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
     }
 
     public void onComplete() {
-        if (this.terminalEvent.compareAndSet(null, ExceptionHelper.TERMINATED)) {
+        if (this.terminalEvent.compareAndSet((Object) null, ExceptionHelper.TERMINATED)) {
             Object complete = NotificationLite.complete();
             for (BehaviorSubscription emitNext : terminate(complete)) {
                 emitNext.emitNext(complete, this.index);
@@ -312,7 +316,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
 
     public void onError(Throwable th) {
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
-        if (!this.terminalEvent.compareAndSet(null, th)) {
+        if (!this.terminalEvent.compareAndSet((Object) null, th)) {
             RxJavaPlugins.onError(th);
             return;
         }
@@ -341,7 +345,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(BehaviorSubscription<T> behaviorSubscription) {
         BehaviorSubscription<T>[] behaviorSubscriptionArr;
         BehaviorSubscription[] behaviorSubscriptionArr2;
@@ -373,11 +377,13 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
                 } else {
                     return;
                 }
+            } else {
+                return;
             }
         } while (!this.subscribers.compareAndSet(behaviorSubscriptionArr, behaviorSubscriptionArr2));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setCurrent(Object obj) {
         Lock lock2 = this.writeLock;
         lock2.lock();
@@ -391,7 +397,7 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
         BehaviorSubscription behaviorSubscription = new BehaviorSubscription(subscriber, this);
         subscriber.onSubscribe(behaviorSubscription);
         if (!add(behaviorSubscription)) {
-            Throwable th = (Throwable) this.terminalEvent.get();
+            Throwable th = this.terminalEvent.get();
             if (th == ExceptionHelper.TERMINATED) {
                 subscriber.onComplete();
             } else {
@@ -404,12 +410,12 @@ public final class BehaviorProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int subscriberCount() {
         return ((BehaviorSubscription[]) this.subscribers.get()).length;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public BehaviorSubscription<T>[] terminate(Object obj) {
         BehaviorSubscription<T>[] behaviorSubscriptionArr = (BehaviorSubscription[]) this.subscribers.get();
         BehaviorSubscription<T>[] behaviorSubscriptionArr2 = TERMINATED;

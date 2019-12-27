@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.engine.prefill;
 
-import android.graphics.Bitmap.Config;
+import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.i;
@@ -8,15 +8,15 @@ import com.bumptech.glide.util.i;
 /* compiled from: PreFillType */
 public final class c {
     @VisibleForTesting
-    static final Config DEFAULT_CONFIG = Config.RGB_565;
-    private final Config config;
+    static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.RGB_565;
+    private final Bitmap.Config config;
     private final int height;
     private final int weight;
     private final int width;
 
     /* compiled from: PreFillType */
     public static class a {
-        private Config config;
+        private Bitmap.Config config;
         private final int height;
         private int weight;
         private final int width;
@@ -37,17 +37,17 @@ public final class c {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public c build() {
             return new c(this.width, this.height, this.config, this.weight);
         }
 
-        /* access modifiers changed from: 0000 */
-        public Config getConfig() {
+        /* access modifiers changed from: package-private */
+        public Bitmap.Config getConfig() {
             return this.config;
         }
 
-        public a setConfig(@Nullable Config config2) {
+        public a setConfig(@Nullable Bitmap.Config config2) {
             this.config = config2;
             return this;
         }
@@ -61,7 +61,7 @@ public final class c {
         }
     }
 
-    c(int i, int i2, Config config2, int i3) {
+    c(int i, int i2, Bitmap.Config config2, int i3) {
         i.a(config2, "Config must not be null");
         this.config = config2;
         this.width = i;
@@ -77,22 +77,22 @@ public final class c {
         return this.height == cVar.height && this.width == cVar.width && this.weight == cVar.weight && this.config == cVar.config;
     }
 
-    /* access modifiers changed from: 0000 */
-    public Config getConfig() {
+    /* access modifiers changed from: package-private */
+    public Bitmap.Config getConfig() {
         return this.config;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getHeight() {
         return this.height;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getWeight() {
         return this.weight;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getWidth() {
         return this.width;
     }
@@ -102,16 +102,6 @@ public final class c {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("PreFillSize{width=");
-        sb.append(this.width);
-        sb.append(", height=");
-        sb.append(this.height);
-        sb.append(", config=");
-        sb.append(this.config);
-        sb.append(", weight=");
-        sb.append(this.weight);
-        sb.append('}');
-        return sb.toString();
+        return "PreFillSize{width=" + this.width + ", height=" + this.height + ", config=" + this.config + ", weight=" + this.weight + '}';
     }
 }

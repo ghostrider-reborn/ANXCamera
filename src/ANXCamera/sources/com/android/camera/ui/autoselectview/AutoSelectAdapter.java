@@ -2,13 +2,12 @@ package com.android.camera.ui.autoselectview;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.widget.TextView;
-import com.android.camera.fragment.mimoji.MimojiTypeAdapter.TypeViewHolder;
+import com.android.camera.fragment.mimoji.MimojiTypeAdapter;
 import com.android.camera.ui.autoselectview.SelectItemBean;
 import java.util.ArrayList;
 
-public abstract class AutoSelectAdapter<T extends SelectItemBean> extends Adapter<AutoSelectViewHolder> implements OnPositionChangedListener {
+public abstract class AutoSelectAdapter<T extends SelectItemBean> extends RecyclerView.Adapter<AutoSelectViewHolder> implements OnPositionChangedListener {
     private ArrayList<T> mDdataList;
     private int mLastMiddlePosition = 0;
     private int mLastSelectPosition = -1;
@@ -133,7 +132,7 @@ public abstract class AutoSelectAdapter<T extends SelectItemBean> extends Adapte
                 if (this.recyclerView != null) {
                     long j = (long) i;
                     if (this.recyclerView.findViewHolderForItemId(j) != null) {
-                        TypeViewHolder typeViewHolder = (TypeViewHolder) this.recyclerView.findViewHolderForItemId(j);
+                        MimojiTypeAdapter.TypeViewHolder typeViewHolder = (MimojiTypeAdapter.TypeViewHolder) this.recyclerView.findViewHolderForItemId(j);
                         TextView typeView = typeViewHolder.getTypeView();
                         if (i2 != 1) {
                             z = false;

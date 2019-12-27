@@ -3,7 +3,6 @@ package com.android.camera2;
 import android.annotation.TargetApi;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -87,10 +86,10 @@ public class CameraCapabilities {
             put(Integer.valueOf(CameraCapabilities.ULTRA_PIXEL_FRONT_32M), new Size(6560, 4920));
             put(Integer.valueOf(CameraCapabilities.ULTRA_PIXEL_REAR_48M), new Size(BaseModule.LENS_DIRTY_DETECT_HINT_DURATION, DurationConstant.DURATION_LANDSCAPE_HINT));
             put(Integer.valueOf(CameraCapabilities.ULTRA_PIXEL_REAR_64M), new Size(9248, 6936));
-            put(Integer.valueOf(3), DataRepository.dataItemFeature().Oa());
+            put(3, DataRepository.dataItemFeature().Oa());
         }
     };
-    private static final List<VendorTag<Key<StreamConfiguration[]>>> ULTRA_PIXEL_STREAM_CONFIGURATIONS_VENDOR_KEYS = new ArrayList<VendorTag<Key<StreamConfiguration[]>>>(3) {
+    private static final List<VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>>> ULTRA_PIXEL_STREAM_CONFIGURATIONS_VENDOR_KEYS = new ArrayList<VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>>>(3) {
         {
             add(CameraCharacteristicsVendorTags.QCFA_STREAM_CONFIGURATIONS);
             add(CameraCharacteristicsVendorTags.SCALER_AVAILABLE_LIMIT_STREAM_CONFIGURATIONS);
@@ -125,30 +124,20 @@ public class CameraCapabilities {
         throw new IllegalArgumentException("Null CameraCharacteristics");
     }
 
-    private void addStreamConfigurationToList(List<StreamConfiguration> list, VendorTag<Key<StreamConfiguration[]>> vendorTag) {
+    private void addStreamConfigurationToList(List<StreamConfiguration> list, VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>> vendorTag) {
         if (vendorTag == null) {
             Log.w(TAG, "addStreamConfigurationToList: but the key is null!");
             return;
         }
         StreamConfiguration[] streamConfigurationArr = (StreamConfiguration[]) VendorTagHelper.getValueSafely(this.mCharacteristics, vendorTag);
-        String str = "addStreamConfigurationToList: ";
         if (streamConfigurationArr != null) {
             list.addAll(Arrays.asList(streamConfigurationArr));
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(vendorTag.getName());
-            sb.append(": size = ");
-            sb.append(streamConfigurationArr.length);
-            Log.d(str2, sb.toString());
-        } else {
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(vendorTag.getName());
-            sb2.append("'s configurations is null!");
-            Log.w(str3, sb2.toString());
+            String str = TAG;
+            Log.d(str, "addStreamConfigurationToList: " + vendorTag.getName() + ": size = " + streamConfigurationArr.length);
+            return;
         }
+        String str2 = TAG;
+        Log.w(str2, "addStreamConfigurationToList: " + vendorTag.getName() + "'s configurations is null!");
     }
 
     private static boolean contains(int[] iArr, int i) {
@@ -204,14 +193,14 @@ public class CameraCapabilities {
             this.mStreamConfigurationMap = new SparseArray<>(5);
         }
         if (this.mStreamConfigurationMap.get(this.mOperatingMode) == null) {
-            List streamConfigurations = getStreamConfigurations();
+            List<StreamConfiguration> streamConfigurations = getStreamConfigurations();
             if (streamConfigurations.size() == 0) {
                 this.mStreamConfigurationMap.put(this.mOperatingMode, (StreamConfigurationMap) this.mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP));
             } else {
                 this.mStreamConfigurationMap.put(this.mOperatingMode, CompatibilityUtils.createStreamConfigMap(streamConfigurations, this.mCharacteristics));
             }
         }
-        return (StreamConfigurationMap) this.mStreamConfigurationMap.get(this.mOperatingMode);
+        return this.mStreamConfigurationMap.get(this.mOperatingMode);
     }
 
     private List<StreamConfiguration> getStreamConfigurations() {
@@ -319,11 +308,11 @@ public class CameraCapabilities {
     }
 
     public int getMaxExposureCompensation() {
-        Range exposureCompensationRange = getExposureCompensationRange();
+        Range<Integer> exposureCompensationRange = getExposureCompensationRange();
         if (exposureCompensationRange == null) {
             return 0;
         }
-        return ((Integer) exposureCompensationRange.getUpper()).intValue();
+        return exposureCompensationRange.getUpper().intValue();
     }
 
     public int getMaxFaceCount() {
@@ -335,11 +324,11 @@ public class CameraCapabilities {
     }
 
     public int getMaxIso() {
-        Range isoRange = getIsoRange();
+        Range<Integer> isoRange = getIsoRange();
         if (isoRange == null) {
             return 0;
         }
-        return ((Integer) isoRange.getUpper()).intValue();
+        return isoRange.getUpper().intValue();
     }
 
     public float getMaxZoomRatio() {
@@ -376,10 +365,7 @@ public class CameraCapabilities {
     public int getScreenLightBrightness() {
         Integer num = isTagDefined(CameraCharacteristicsVendorTags.SCREEN_LIGHT_BRIGHTNESS.getName()) ? (Integer) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.SCREEN_LIGHT_BRIGHTNESS) : null;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Screen light brightness: ");
-        sb.append(num);
-        Log.d(str, sb.toString());
+        Log.d(str, "Screen light brightness: " + num);
         if (num != null) {
             return num.intValue();
         }
@@ -430,7 +416,6 @@ public class CameraCapabilities {
     }
 
     public List<Integer> getSupportedHFRVideoFPSList(Size size) {
-        Range[] supportedHighSpeedVideoFPSRange;
         ArrayList arrayList = new ArrayList();
         for (Range range : getSupportedHighSpeedVideoFPSRange(size)) {
             if (((Integer) range.getUpper()).equals(range.getLower()) && !arrayList.contains(range.getUpper())) {
@@ -472,9 +457,9 @@ public class CameraCapabilities {
             if (extraHighSpeedVideoConfiguration == null) {
                 return highSpeedVideoFpsRangesFor;
             }
-            for (MiHighSpeedVideoConfiguration miHighSpeedVideoConfiguration : extraHighSpeedVideoConfiguration) {
-                if (size != null && size.equals(miHighSpeedVideoConfiguration.getSize())) {
-                    arrayList.add(miHighSpeedVideoConfiguration.getFpsRange());
+            for (MiHighSpeedVideoConfiguration next : extraHighSpeedVideoConfiguration) {
+                if (size != null && size.equals(next.getSize())) {
+                    arrayList.add(next.getFpsRange());
                 }
             }
         }
@@ -551,7 +536,6 @@ public class CameraCapabilities {
     public float getViewAngle(boolean z) {
         float[] fArr = (float[]) this.mCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
         String str = "vertical";
-        String str2 = "horizontal";
         if (fArr != null && fArr.length > 0) {
             float f2 = fArr[0];
             SizeF sizeF = (SizeF) this.mCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
@@ -559,29 +543,29 @@ public class CameraCapabilities {
                 float height = z ? sizeF.getHeight() : sizeF.getWidth();
                 if (height > 0.0f) {
                     float degrees = (float) (Math.toDegrees(Math.atan((((double) height) * 0.5d) / ((double) f2))) * 2.0d);
-                    String str3 = TAG;
+                    String str2 = TAG;
                     Locale locale = Locale.US;
                     Object[] objArr = new Object[4];
                     if (!z) {
-                        str = str2;
+                        str = "horizontal";
                     }
                     objArr[0] = str;
                     objArr[1] = Float.valueOf(degrees);
                     objArr[2] = sizeF;
                     objArr[3] = Float.valueOf(f2);
-                    Log.d(str3, String.format(locale, "%s view angle: %.2f, size = %s, focalLength = %.4f", objArr));
+                    Log.d(str2, String.format(locale, "%s view angle: %.2f, size = %s, focalLength = %.4f", objArr));
                     return degrees;
                 }
             }
         }
-        String str4 = TAG;
+        String str3 = TAG;
         Locale locale2 = Locale.US;
         Object[] objArr2 = new Object[1];
         if (!z) {
-            str = str2;
+            str = "horizontal";
         }
         objArr2[0] = str;
-        Log.e(str4, String.format(locale2, "failed to get %s view angle", objArr2));
+        Log.e(str3, String.format(locale2, "failed to get %s view angle", objArr2));
         return DEFAULT_VIEW_ANGLE;
     }
 
@@ -612,24 +596,20 @@ public class CameraCapabilities {
     }
 
     public boolean isAdaptiveSnapshotSizeInSatModeSupported() {
-        String str = "isAdaptiveSnapshotSizeInSatModeSupported(): false";
         boolean z = false;
         if (this.mCameraId != Camera2DataContainer.getInstance().getSATCameraId()) {
-            Log.d(TAG, str);
+            Log.d(TAG, "isAdaptiveSnapshotSizeInSatModeSupported(): false");
             return false;
         } else if (!isTagDefined(CameraCharacteristicsVendorTags.ADAPTIVE_SNAPSHOT_SIZE_IN_SAT_MODE_SUPPORTED.getName())) {
-            Log.d(TAG, str);
+            Log.d(TAG, "isAdaptiveSnapshotSizeInSatModeSupported(): false");
             return false;
         } else {
             Boolean bool = (Boolean) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.ADAPTIVE_SNAPSHOT_SIZE_IN_SAT_MODE_SUPPORTED);
             if (bool != null && bool.booleanValue()) {
                 z = true;
             }
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("isAdaptiveSnapshotSizeInSatModeSupported(): ");
-            sb.append(z);
-            Log.d(str2, sb.toString());
+            String str = TAG;
+            Log.d(str, "isAdaptiveSnapshotSizeInSatModeSupported(): " + z);
             return z;
         }
     }
@@ -652,15 +632,8 @@ public class CameraCapabilities {
         }
         Byte b2 = (Byte) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.EIS_PREVIEW_SUPPORTED);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isEISPreviewSupported: ");
-        sb.append(b2);
-        Log.d(str, sb.toString());
-        boolean z = true;
-        if (b2 == null || b2.byteValue() != 1) {
-            z = false;
-        }
-        return z;
+        Log.d(str, "isEISPreviewSupported: " + b2);
+        return b2 != null && b2.byteValue() == 1;
     }
 
     public boolean isFaceDetectionSupported() {
@@ -687,20 +660,14 @@ public class CameraCapabilities {
     public boolean isFovcSupported() {
         Byte b2 = isTagDefined(CameraCharacteristicsVendorTags.FOVC_SUPPORTED.getName()) ? (Byte) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.FOVC_SUPPORTED) : null;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isFovcSupported: ");
-        sb.append(b2);
-        Log.d(str, sb.toString());
+        Log.d(str, "isFovcSupported: " + b2);
         return b2 != null && b2.byteValue() == 1;
     }
 
     public boolean isMFNRBokehSupported() {
         Byte b2 = isTagDefined(CameraCharacteristicsVendorTags.MFNR_BOKEH_SUPPORTED.getName()) ? (Byte) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.MFNR_BOKEH_SUPPORTED) : null;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isMFNRBokehSupported: ");
-        sb.append(b2);
-        Log.d(str, sb.toString());
+        Log.d(str, "isMFNRBokehSupported: " + b2);
         return b2 != null && b2.byteValue() == 1;
     }
 
@@ -753,7 +720,7 @@ public class CameraCapabilities {
 
     public boolean isSupportBeautyType(String str) {
         if (BeautyConstant.BEAUTY_TYPE_VENDOR_TAG_MAP.containsKey(str)) {
-            return isTagDefined(((VendorTag) BeautyConstant.BEAUTY_TYPE_VENDOR_TAG_MAP.get(str)).getName());
+            return isTagDefined(BeautyConstant.BEAUTY_TYPE_VENDOR_TAG_MAP.get(str).getName());
         }
         return false;
     }
@@ -925,11 +892,7 @@ public class CameraCapabilities {
             return false;
         }
         Byte b2 = (Byte) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.IS_QCFA_SENSOR);
-        boolean z = true;
-        if (b2 == null || b2.byteValue() != 1) {
-            z = false;
-        }
-        return z;
+        return b2 != null && b2.byteValue() == 1;
     }
 
     public boolean isTagDefined(String str) {
@@ -940,21 +903,18 @@ public class CameraCapabilities {
     public boolean isTeleOISSupported() {
         Byte b2 = isTagDefined(CameraCharacteristicsVendorTags.TELE_OIS_SUPPORTED.getName()) ? (Byte) VendorTagHelper.getValue(this.mCharacteristics, CameraCharacteristicsVendorTags.TELE_OIS_SUPPORTED) : null;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isTeleOISSupported: ");
-        sb.append(b2);
-        Log.d(str, sb.toString());
+        Log.d(str, "isTeleOISSupported: " + b2);
         return b2 != null && b2.byteValue() == 1;
     }
 
     public boolean isUltraPixelPhotographySupported(int i) {
-        Size size = (Size) ULTRA_PIXEL_SIZE_LIST.get(Integer.valueOf(i));
+        Size size = ULTRA_PIXEL_SIZE_LIST.get(Integer.valueOf(i));
         if (size == null || !isSupportedQcfa()) {
             return false;
         }
-        for (VendorTag vendorTag : ULTRA_PIXEL_STREAM_CONFIGURATIONS_VENDOR_KEYS) {
-            if (isTagDefined(vendorTag.getName())) {
-                StreamConfiguration[] streamConfigurationArr = (StreamConfiguration[]) VendorTagHelper.getValue(this.mCharacteristics, vendorTag);
+        for (VendorTag next : ULTRA_PIXEL_STREAM_CONFIGURATIONS_VENDOR_KEYS) {
+            if (isTagDefined(next.getName())) {
+                StreamConfiguration[] streamConfigurationArr = (StreamConfiguration[]) VendorTagHelper.getValue(this.mCharacteristics, next);
                 if (streamConfigurationArr != null && streamConfigurationArr.length > 0) {
                     for (StreamConfiguration streamConfiguration : streamConfigurationArr) {
                         if (streamConfiguration.getFormat() == 33 && streamConfiguration.getWidth() == size.getWidth() && streamConfiguration.getHeight() == size.getHeight()) {

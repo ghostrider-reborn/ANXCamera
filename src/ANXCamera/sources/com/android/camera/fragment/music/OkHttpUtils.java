@@ -1,17 +1,16 @@
 package com.android.camera.fragment.music;
 
-import com.android.camera.fragment.music.FragmentLiveMusic.Mp3DownloadCallback;
+import com.android.camera.fragment.music.FragmentLiveMusic;
 import com.android.camera.log.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request.Builder;
+import okhttp3.Request;
 import okhttp3.Response;
 
 public class OkHttpUtils {
@@ -24,36 +23,29 @@ public class OkHttpUtils {
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        for (Entry entry : map.entrySet()) {
+        for (Map.Entry next : map.entrySet()) {
             if (sb.length() > 0) {
                 sb.append("&");
             }
-            sb.append((String) entry.getKey());
+            sb.append((String) next.getKey());
             sb.append("=");
-            sb.append((String) entry.getValue());
+            sb.append((String) next.getValue());
         }
         return sb.toString();
     }
 
     private static Call createGetCall(String str, Map<String, String> map) {
         String buildUrlParams = buildUrlParams(map);
-        Builder builder = new Builder().get();
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append('?');
-        sb.append(buildUrlParams);
-        return client.newCall(builder.url(sb.toString()).build());
+        Request.Builder builder = new Request.Builder().get();
+        return client.newCall(builder.url(str + '?' + buildUrlParams).build());
     }
 
-    public static void downloadMp3Async(String str, final String str2, final Mp3DownloadCallback mp3DownloadCallback) {
-        new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS).build().newCall(new Builder().url(str).build()).enqueue(new Callback() {
+    public static void downloadMp3Async(String str, final String str2, final FragmentLiveMusic.Mp3DownloadCallback mp3DownloadCallback) {
+        new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS).build().newCall(new Request.Builder().url(str).build()).enqueue(new Callback() {
             public void onFailure(Call call, IOException iOException) {
                 String access$000 = OkHttpUtils.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("download mp3 async failed with exception ");
-                sb.append(iOException.getMessage());
-                Log.e(access$000, sb.toString());
-                Mp3DownloadCallback.this.onFailed();
+                Log.e(access$000, "download mp3 async failed with exception " + iOException.getMessage());
+                FragmentLiveMusic.Mp3DownloadCallback.this.onFailed();
             }
 
             public void onResponse(Call call, Response response) {
@@ -63,18 +55,15 @@ public class OkHttpUtils {
                     PrintStream printStream = new PrintStream(str2);
                     printStream.write(bytes, 0, bytes.length);
                     printStream.close();
-                    Mp3DownloadCallback.this.onCompleted();
+                    FragmentLiveMusic.Mp3DownloadCallback.this.onCompleted();
                 } catch (IOException e2) {
                     String access$000 = OkHttpUtils.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("download mp3 async failed with exception ");
-                    sb.append(e2.getMessage());
-                    Log.e(access$000, sb.toString());
+                    Log.e(access$000, "download mp3 async failed with exception " + e2.getMessage());
                     File file = new File(str2);
                     if (file.exists()) {
                         file.delete();
                     }
-                    Mp3DownloadCallback.this.onFailed();
+                    FragmentLiveMusic.Mp3DownloadCallback.this.onFailed();
                 }
             }
         });

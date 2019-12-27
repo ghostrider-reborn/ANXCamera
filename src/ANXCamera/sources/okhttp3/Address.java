@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
-import okhttp3.HttpUrl.Builder;
+import okhttp3.HttpUrl;
 import okhttp3.internal.Util;
 
 public final class Address {
@@ -28,7 +28,7 @@ public final class Address {
     final HttpUrl url;
 
     public Address(String str, int i, Dns dns2, SocketFactory socketFactory2, @Nullable SSLSocketFactory sSLSocketFactory, @Nullable HostnameVerifier hostnameVerifier2, @Nullable CertificatePinner certificatePinner2, Authenticator authenticator, @Nullable Proxy proxy2, List<Protocol> list, List<ConnectionSpec> list2, ProxySelector proxySelector2) {
-        this.url = new Builder().scheme(sSLSocketFactory != null ? "https" : "http").host(str).port(i).build();
+        this.url = new HttpUrl.Builder().scheme(sSLSocketFactory != null ? "https" : "http").host(str).port(i).build();
         if (dns2 != null) {
             this.dns = dns2;
             if (socketFactory2 != null) {
@@ -76,14 +76,11 @@ public final class Address {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Address) {
             Address address = (Address) obj;
-            if (this.url.equals(address.url) && equalsNonHost(address)) {
-                return true;
-            }
+            return this.url.equals(address.url) && equalsNonHost(address);
         }
-        return false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean equalsNonHost(Address address) {
         return this.dns.equals(address.dns) && this.proxyAuthenticator.equals(address.proxyAuthenticator) && this.protocols.equals(address.protocols) && this.connectionSpecs.equals(address.connectionSpecs) && this.proxySelector.equals(address.proxySelector) && Util.equal(this.proxy, address.proxy) && Util.equal(this.sslSocketFactory, address.sslSocketFactory) && Util.equal(this.hostnameVerifier, address.hostnameVerifier) && Util.equal(this.certificatePinner, address.certificatePinner) && url().port() == address.url().port();
     }

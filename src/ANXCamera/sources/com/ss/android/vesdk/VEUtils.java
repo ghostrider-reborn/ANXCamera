@@ -1,6 +1,6 @@
 package com.ss.android.vesdk;
 
-import android.graphics.Bitmap.Config;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -8,13 +8,12 @@ import com.ss.android.ttve.model.VEMusicWaveBean;
 import com.ss.android.ttve.model.VEWaveformVisualizer;
 import com.ss.android.ttve.monitor.MonitorUtils;
 import com.ss.android.ttve.nativePort.TEEffectUtils;
-import com.ss.android.ttve.nativePort.TEEffectUtils.ImageListener;
 import com.ss.android.ttve.nativePort.TEVideoUtils;
-import com.ss.android.ttve.nativePort.TEVideoUtils.ExecuteCommandListener;
 import com.ss.android.ttve.nativePort.TEVideoUtilsCallback;
-import com.ss.android.vesdk.VEListener.VEImageListener;
+import com.ss.android.vesdk.VEListener;
 import com.ss.android.vesdk.keyvaluepair.VEKeyValue;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class VEUtils {
 
@@ -55,9 +54,8 @@ public class VEUtils {
                 i2 = Math.min(i5, i);
                 i3 = (int) (((float) i2) / f2);
             }
-            int i9 = ((i2 + 16) - 1) & -16;
             vESize.width = ((i3 + 16) - 1) & -16;
-            vESize.height = i9;
+            vESize.height = ((i2 + 16) - 1) & -16;
         }
         return vESize;
     }
@@ -67,7 +65,7 @@ public class VEUtils {
     }
 
     public static int execFFmpegCommand(@NonNull String str, @Nullable final VEExecFFmpegCommandCallback vEExecFFmpegCommandCallback) {
-        return TEVideoUtils.executeFFmpegCommand(str, new ExecuteCommandListener() {
+        return TEVideoUtils.executeFFmpegCommand(str, new TEVideoUtils.ExecuteCommandListener() {
             public void onProgressChanged(int i) {
                 VEExecFFmpegCommandCallback vEExecFFmpegCommandCallback = vEExecFFmpegCommandCallback;
                 if (vEExecFFmpegCommandCallback != null) {
@@ -82,7 +80,7 @@ public class VEUtils {
     }
 
     public static int getAudioFileInfo(@NonNull String str, @NonNull int[] iArr) {
-        MonitorUtils.monitorStatistics("iesve_veutils_get_audio_info", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_get_audio_info", 1, (VEKeyValue) null);
         return TEVideoUtils.getAudioFileInfo(str, iArr);
     }
 
@@ -100,19 +98,19 @@ public class VEUtils {
         if (audioWaveData == null) {
             return null;
         }
-        ArrayList waveBean = audioWaveData.getWaveBean();
+        ArrayList<Float> waveBean = audioWaveData.getWaveBean();
         if (waveBean == null || waveBean.size() == 0) {
             return null;
         }
         return audioWaveData;
     }
 
-    public static int getQREncodedData(String str, final VEImageListener vEImageListener) {
-        return TEEffectUtils.getQREncodedData(str, null, new ImageListener() {
+    public static int getQREncodedData(String str, final VEListener.VEImageListener vEImageListener) {
+        return TEEffectUtils.getQREncodedData(str, (Map<Integer, Integer>) null, new TEEffectUtils.ImageListener() {
             public void onData(int[] iArr, int i, int i2, int i3) {
-                VEImageListener vEImageListener = vEImageListener;
+                VEListener.VEImageListener vEImageListener = vEImageListener;
                 if (vEImageListener != null) {
-                    vEImageListener.onImage(iArr, i, i2, Config.ARGB_8888);
+                    vEImageListener.onImage(iArr, i, i2, Bitmap.Config.ARGB_8888);
                 }
             }
         });
@@ -125,27 +123,27 @@ public class VEUtils {
         }
         float[] fArr = new float[arrayList.size()];
         for (int i3 = 0; i3 < arrayList.size(); i3++) {
-            fArr[i3] = ((Float) arrayList.get(i3)).floatValue();
+            fArr[i3] = arrayList.get(i3).floatValue();
         }
         return TEVideoUtils.getResampleMusicWaveData(fArr, i, i2);
     }
 
     public static int getVideoFileInfo(@NonNull String str, @NonNull int[] iArr) {
-        MonitorUtils.monitorStatistics("iesve_veutils_get_video_info", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_get_video_info", 1, (VEKeyValue) null);
         return TEVideoUtils.getVideoFileInfo(str, iArr);
     }
 
     public static int getVideoFrames(@NonNull String str, @NonNull int[] iArr, int i, int i2, boolean z, @NonNull VEFrameAvailableListener vEFrameAvailableListener) {
         TEVideoUtilsCallback tEVideoUtilsCallback = new TEVideoUtilsCallback();
         tEVideoUtilsCallback.setListener(vEFrameAvailableListener);
-        MonitorUtils.monitorStatistics("iesve_veutils_extract_video_frames", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_extract_video_frames", 1, (VEKeyValue) null);
         return TEVideoUtils.getVideoFrames(str, iArr, i, i2, z, tEVideoUtilsCallback);
     }
 
     public static int getVideoFrames(@NonNull String str, @NonNull int[] iArr, @NonNull VEFrameAvailableListener vEFrameAvailableListener) {
         TEVideoUtilsCallback tEVideoUtilsCallback = new TEVideoUtilsCallback();
         tEVideoUtilsCallback.setListener(vEFrameAvailableListener);
-        MonitorUtils.monitorStatistics("iesve_veutils_extract_video_frames", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_extract_video_frames", 1, (VEKeyValue) null);
         return TEVideoUtils.getVideoFrames(str, iArr, 0, 0, false, tEVideoUtilsCallback);
     }
 
@@ -153,12 +151,12 @@ public class VEUtils {
         TEVideoUtilsCallback tEVideoUtilsCallback = new TEVideoUtilsCallback();
         VEFrameAvailableListener vEFrameAvailableListener2 = vEFrameAvailableListener;
         tEVideoUtilsCallback.setListener(vEFrameAvailableListener);
-        MonitorUtils.monitorStatistics("iesve_veutils_extract_video_thumb", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_extract_video_thumb", 1, (VEKeyValue) null);
         return TEVideoUtils.getVideoThumb(str, i, tEVideoUtilsCallback, z, i2, i3, j, i4);
     }
 
     public static int isCanImport(String str) {
-        MonitorUtils.monitorStatistics("iesve_veutils_if_video_support_import", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_if_video_support_import", 1, (VEKeyValue) null);
         return TEVideoUtils.isCanImport(str);
     }
 
@@ -170,7 +168,7 @@ public class VEUtils {
         if (TextUtils.isEmpty(str) || TextUtils.isEmpty(str2) || TextUtils.isEmpty(str3)) {
             return -100;
         }
-        MonitorUtils.monitorStatistics("iesve_veutils_combine_audio_and_video_start", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veutils_combine_audio_and_video_start", 1, (VEKeyValue) null);
         int mux = TEVideoUtils.mux(str, str2, str3);
         VEKeyValue vEKeyValue = new VEKeyValue();
         vEKeyValue.add("iesve_veutils_combine_audio_and_video_finish_result", mux == 0 ? "succ" : "fail");

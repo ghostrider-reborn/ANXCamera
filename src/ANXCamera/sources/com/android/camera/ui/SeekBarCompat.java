@@ -3,21 +3,18 @@ package com.android.camera.ui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.android.camera.R;
 import com.android.camera.log.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class SeekBarCompat extends SeekBar implements OnSeekBarChangeListener, OnTouchListener {
+public class SeekBarCompat extends SeekBar implements SeekBar.OnSeekBarChangeListener, View.OnTouchListener {
     public static final int CENTER_SEEKBAR = 2;
     public static final int NORMAL_SEEKBAR = 1;
     private static final String TAG = "SeekBarCompat";
@@ -51,7 +48,7 @@ public class SeekBarCompat extends SeekBar implements OnSeekBarChangeListener, O
     }
 
     public SeekBarCompat(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public SeekBarCompat(Context context, AttributeSet attributeSet) {
@@ -102,10 +99,7 @@ public class SeekBarCompat extends SeekBar implements OnSeekBarChangeListener, O
             this.mPinProgressRectF.left = (((float) this.mPinProgress) / ((float) getMax())) * width;
             int progress = getProgress();
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("current progress:");
-            sb.append(progress);
-            Log.d(str, sb.toString());
+            Log.d(str, "current progress:" + progress);
             if (progress == this.mPinProgress) {
                 this.mPinProgressRectF.right = width / 2.0f;
             } else {
@@ -195,7 +189,7 @@ public class SeekBarCompat extends SeekBar implements OnSeekBarChangeListener, O
             this.mPinProgressPaint.setColor(this.mPinProgressColor);
             this.mPinProgressPaint.setAntiAlias(true);
             this.mPinPointPaint = new Paint();
-            this.mPinPointPaint.setStyle(Style.FILL);
+            this.mPinPointPaint.setStyle(Paint.Style.FILL);
             this.mPinPointPaint.setColor(-1);
             this.mPinPointPaint.setAntiAlias(true);
             this.mPinRadius = getResources().getDimensionPixelSize(R.dimen.beauty_seek_bar_point_radius);

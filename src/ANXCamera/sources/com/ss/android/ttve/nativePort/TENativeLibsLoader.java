@@ -20,14 +20,10 @@ public class TENativeLibsLoader {
 
     public static class DefaultLibraryLoader implements ILibraryLoader {
         public void onLoadNativeLibs(List<String> list) {
-            for (String str : list) {
-                if (!VESafelyLibsLoader.loadLibrary(str, TENativeLibsLoader.sContext)) {
+            for (String next : list) {
+                if (!VESafelyLibsLoader.loadLibrary(next, TENativeLibsLoader.sContext)) {
                     String access$100 = TENativeLibsLoader.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("loadLibrary ");
-                    sb.append(str);
-                    sb.append(" failed");
-                    Log.e(access$100, sb.toString());
+                    Log.e(access$100, "loadLibrary " + next + " failed");
                 }
             }
         }

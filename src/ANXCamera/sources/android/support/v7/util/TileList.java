@@ -18,13 +18,13 @@ class TileList<T> {
             this.mItems = (Object[]) Array.newInstance(cls, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean containsPosition(int i) {
             int i2 = this.mStartPosition;
             return i2 <= i && i < i2 + this.mItemCount;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public T getByPosition(int i) {
             return this.mItems[i - this.mStartPosition];
         }
@@ -40,12 +40,12 @@ class TileList<T> {
             this.mTiles.put(tile.mStartPosition, tile);
             return null;
         }
-        Tile<T> tile2 = (Tile) this.mTiles.valueAt(indexOfKey);
+        Tile<T> valueAt = this.mTiles.valueAt(indexOfKey);
         this.mTiles.setValueAt(indexOfKey, tile);
-        if (this.mLastAccessedTile == tile2) {
+        if (this.mLastAccessedTile == valueAt) {
             this.mLastAccessedTile = tile;
         }
-        return tile2;
+        return valueAt;
     }
 
     public void clear() {
@@ -53,7 +53,7 @@ class TileList<T> {
     }
 
     public Tile<T> getAtIndex(int i) {
-        return (Tile) this.mTiles.valueAt(i);
+        return this.mTiles.valueAt(i);
     }
 
     public T getItemAt(int i) {
@@ -63,13 +63,13 @@ class TileList<T> {
             if (indexOfKey < 0) {
                 return null;
             }
-            this.mLastAccessedTile = (Tile) this.mTiles.valueAt(indexOfKey);
+            this.mLastAccessedTile = this.mTiles.valueAt(indexOfKey);
         }
         return this.mLastAccessedTile.getByPosition(i);
     }
 
     public Tile<T> removeAtPos(int i) {
-        Tile<T> tile = (Tile) this.mTiles.get(i);
+        Tile<T> tile = this.mTiles.get(i);
         if (this.mLastAccessedTile == tile) {
             this.mLastAccessedTile = null;
         }

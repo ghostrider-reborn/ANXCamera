@@ -1,14 +1,13 @@
 package android.support.v4.internal.view;
 
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.view.ActionProvider;
 import android.view.MenuItem;
 import android.view.View;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public interface SupportMenuItem extends MenuItem {
     public static final int SHOW_AS_ACTION_ALWAYS = 2;
     public static final int SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW = 8;
@@ -28,7 +27,7 @@ public interface SupportMenuItem extends MenuItem {
 
     ColorStateList getIconTintList();
 
-    Mode getIconTintMode();
+    PorterDuff.Mode getIconTintMode();
 
     int getNumericModifiers();
 
@@ -48,7 +47,7 @@ public interface SupportMenuItem extends MenuItem {
 
     MenuItem setIconTintList(ColorStateList colorStateList);
 
-    MenuItem setIconTintMode(Mode mode);
+    MenuItem setIconTintMode(PorterDuff.Mode mode);
 
     MenuItem setNumericShortcut(char c2, int i);
 

@@ -21,7 +21,7 @@ final class Hpack {
     private static final int PREFIX_5_BITS = 31;
     private static final int PREFIX_6_BITS = 63;
     private static final int PREFIX_7_BITS = 127;
-    static final Header[] STATIC_HEADER_TABLE;
+    static final Header[] STATIC_HEADER_TABLE = {new Header(Header.TARGET_AUTHORITY, ""), new Header(Header.TARGET_METHOD, "GET"), new Header(Header.TARGET_METHOD, "POST"), new Header(Header.TARGET_PATH, "/"), new Header(Header.TARGET_PATH, "/index.html"), new Header(Header.TARGET_SCHEME, "http"), new Header(Header.TARGET_SCHEME, "https"), new Header(Header.RESPONSE_STATUS, ComponentConfigFlash.FLASH_VALUE_MANUAL_OFF), new Header(Header.RESPONSE_STATUS, "204"), new Header(Header.RESPONSE_STATUS, "206"), new Header(Header.RESPONSE_STATUS, "304"), new Header(Header.RESPONSE_STATUS, "400"), new Header(Header.RESPONSE_STATUS, "404"), new Header(Header.RESPONSE_STATUS, "500"), new Header("accept-charset", ""), new Header("accept-encoding", "gzip, deflate"), new Header("accept-language", ""), new Header("accept-ranges", ""), new Header("accept", ""), new Header("access-control-allow-origin", ""), new Header("age", ""), new Header("allow", ""), new Header("authorization", ""), new Header("cache-control", ""), new Header("content-disposition", ""), new Header("content-encoding", ""), new Header("content-language", ""), new Header("content-length", ""), new Header("content-location", ""), new Header("content-range", ""), new Header("content-type", ""), new Header("cookie", ""), new Header("date", ""), new Header("etag", ""), new Header("expect", ""), new Header("expires", ""), new Header("from", ""), new Header("host", ""), new Header("if-match", ""), new Header("if-modified-since", ""), new Header("if-none-match", ""), new Header("if-range", ""), new Header("if-unmodified-since", ""), new Header("last-modified", ""), new Header("link", ""), new Header("location", ""), new Header("max-forwards", ""), new Header("proxy-authenticate", ""), new Header("proxy-authorization", ""), new Header("range", ""), new Header("referer", ""), new Header("refresh", ""), new Header("retry-after", ""), new Header("server", ""), new Header("set-cookie", ""), new Header("strict-transport-security", ""), new Header("transfer-encoding", ""), new Header("user-agent", ""), new Header("vary", ""), new Header("via", ""), new Header("www-authenticate", "")};
 
     static final class Reader {
         Header[] dynamicTable;
@@ -62,7 +62,7 @@ final class Hpack {
         }
 
         private void clearDynamicTable() {
-            Arrays.fill(this.dynamicTable, null);
+            Arrays.fill(this.dynamicTable, (Object) null);
             this.nextHeaderIndex = this.dynamicTable.length - 1;
             this.headerCount = 0;
             this.dynamicTableByteCount = 0;
@@ -104,34 +104,34 @@ final class Hpack {
         }
 
         private void insertIntoDynamicTable(int i, Header header) {
+            int i2;
             this.headerList.add(header);
-            int i2 = header.hpackSize;
+            int i3 = header.hpackSize;
             if (i != -1) {
-                i2 -= this.dynamicTable[dynamicTableIndex(i)].hpackSize;
+                i3 -= this.dynamicTable[dynamicTableIndex(i)].hpackSize;
             }
-            int i3 = this.maxDynamicTableByteCount;
-            if (i2 > i3) {
+            int i4 = this.maxDynamicTableByteCount;
+            if (i3 > i4) {
                 clearDynamicTable();
                 return;
             }
-            int evictToRecoverBytes = evictToRecoverBytes((this.dynamicTableByteCount + i2) - i3);
+            int evictToRecoverBytes = evictToRecoverBytes((this.dynamicTableByteCount + i3) - i4);
             if (i == -1) {
-                int i4 = this.headerCount + 1;
+                int i5 = this.headerCount + 1;
                 Header[] headerArr = this.dynamicTable;
-                if (i4 > headerArr.length) {
+                if (i5 > headerArr.length) {
                     Header[] headerArr2 = new Header[(headerArr.length * 2)];
                     System.arraycopy(headerArr, 0, headerArr2, headerArr.length, headerArr.length);
                     this.nextHeaderIndex = this.dynamicTable.length - 1;
                     this.dynamicTable = headerArr2;
                 }
-                int i5 = this.nextHeaderIndex;
-                this.nextHeaderIndex = i5 - 1;
-                this.dynamicTable[i5] = header;
+                this.nextHeaderIndex = this.nextHeaderIndex - 1;
+                this.dynamicTable[i2] = header;
                 this.headerCount++;
             } else {
                 this.dynamicTable[i + dynamicTableIndex(i) + evictToRecoverBytes] = header;
             }
-            this.dynamicTableByteCount += i2;
+            this.dynamicTableByteCount += i3;
         }
 
         private boolean isStaticHeader(int i) {
@@ -155,10 +155,7 @@ final class Hpack {
                     return;
                 }
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Header index too large ");
-            sb.append(i + 1);
-            throw new IOException(sb.toString());
+            throw new IOException("Header index too large " + (i + 1));
         }
 
         private void readLiteralHeaderWithIncrementalIndexingIndexedName(int i) throws IOException {
@@ -187,12 +184,12 @@ final class Hpack {
             return arrayList;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int maxDynamicTableByteCount() {
             return this.maxDynamicTableByteCount;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public ByteString readByteString() throws IOException {
             int readByte = readByte();
             boolean z = (readByte & 128) == 128;
@@ -200,7 +197,7 @@ final class Hpack {
             return z ? ByteString.of(Huffman.get().decode(this.source.readByteArray((long) readInt))) : this.source.readByteString((long) readInt);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void readHeaders() throws IOException {
             while (!this.source.exhausted()) {
                 byte readByte = this.source.readByte() & 255;
@@ -216,10 +213,7 @@ final class Hpack {
                     this.maxDynamicTableByteCount = readInt(readByte, 31);
                     int i = this.maxDynamicTableByteCount;
                     if (i < 0 || i > this.headerTableSizeSetting) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Invalid dynamic table size update ");
-                        sb.append(this.maxDynamicTableByteCount);
-                        throw new IOException(sb.toString());
+                        throw new IOException("Invalid dynamic table size update " + this.maxDynamicTableByteCount);
                     }
                     adjustDynamicTableByteCount();
                 } else if (readByte == 16 || readByte == 0) {
@@ -230,7 +224,7 @@ final class Hpack {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int readInt(int i, int i2) throws IOException {
             int i3 = i & i2;
             if (i3 < i2) {
@@ -292,7 +286,7 @@ final class Hpack {
         }
 
         private void clearDynamicTable() {
-            Arrays.fill(this.dynamicTable, null);
+            Arrays.fill(this.dynamicTable, (Object) null);
             this.nextHeaderIndex = this.dynamicTable.length - 1;
             this.headerCount = 0;
             this.dynamicTableByteCount = 0;
@@ -310,7 +304,7 @@ final class Hpack {
                         System.arraycopy(headerArr, i3 + 1, headerArr, i3 + 1 + i2, this.headerCount);
                         Header[] headerArr2 = this.dynamicTable;
                         int i4 = this.nextHeaderIndex;
-                        Arrays.fill(headerArr2, i4 + 1, i4 + 1 + i2, null);
+                        Arrays.fill(headerArr2, i4 + 1, i4 + 1 + i2, (Object) null);
                         this.nextHeaderIndex += i2;
                     } else {
                         Header[] headerArr3 = this.dynamicTable;
@@ -325,36 +319,36 @@ final class Hpack {
                 System.arraycopy(headerArr4, i32 + 1, headerArr4, i32 + 1 + i2, this.headerCount);
                 Header[] headerArr22 = this.dynamicTable;
                 int i42 = this.nextHeaderIndex;
-                Arrays.fill(headerArr22, i42 + 1, i42 + 1 + i2, null);
+                Arrays.fill(headerArr22, i42 + 1, i42 + 1 + i2, (Object) null);
                 this.nextHeaderIndex += i2;
             }
             return i2;
         }
 
         private void insertIntoDynamicTable(Header header) {
-            int i = header.hpackSize;
-            int i2 = this.maxDynamicTableByteCount;
-            if (i > i2) {
+            int i;
+            int i2 = header.hpackSize;
+            int i3 = this.maxDynamicTableByteCount;
+            if (i2 > i3) {
                 clearDynamicTable();
                 return;
             }
-            evictToRecoverBytes((this.dynamicTableByteCount + i) - i2);
-            int i3 = this.headerCount + 1;
+            evictToRecoverBytes((this.dynamicTableByteCount + i2) - i3);
+            int i4 = this.headerCount + 1;
             Header[] headerArr = this.dynamicTable;
-            if (i3 > headerArr.length) {
+            if (i4 > headerArr.length) {
                 Header[] headerArr2 = new Header[(headerArr.length * 2)];
                 System.arraycopy(headerArr, 0, headerArr2, headerArr.length, headerArr.length);
                 this.nextHeaderIndex = this.dynamicTable.length - 1;
                 this.dynamicTable = headerArr2;
             }
-            int i4 = this.nextHeaderIndex;
-            this.nextHeaderIndex = i4 - 1;
-            this.dynamicTable[i4] = header;
+            this.nextHeaderIndex = this.nextHeaderIndex - 1;
+            this.dynamicTable[i] = header;
             this.headerCount++;
-            this.dynamicTableByteCount += i;
+            this.dynamicTableByteCount += i2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setHeaderTableSizeSetting(int i) {
             this.headerTableSizeSetting = i;
             int min = Math.min(i, 16384);
@@ -369,7 +363,7 @@ final class Hpack {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void writeByteString(ByteString byteString) throws IOException {
             if (!this.useCompression || Huffman.get().encodedLength(byteString) >= byteString.size()) {
                 writeInt(byteString.size(), 127, 0);
@@ -383,7 +377,7 @@ final class Hpack {
             this.out.write(readByteString);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Removed duplicated region for block: B:23:0x0072  */
         /* JADX WARNING: Removed duplicated region for block: B:34:0x00a9  */
         /* JADX WARNING: Removed duplicated region for block: B:35:0x00b1  */
@@ -401,10 +395,10 @@ final class Hpack {
             }
             int size = list.size();
             for (int i4 = 0; i4 < size; i4++) {
-                Header header = (Header) list.get(i4);
+                Header header = list.get(i4);
                 ByteString asciiLowercase = header.name.toAsciiLowercase();
                 ByteString byteString = header.value;
-                Integer num = (Integer) Hpack.NAME_TO_FIRST_INDEX.get(asciiLowercase);
+                Integer num = Hpack.NAME_TO_FIRST_INDEX.get(asciiLowercase);
                 if (num != null) {
                     i2 = num.intValue() + 1;
                     if (i2 > 1 && i2 < 8) {
@@ -465,7 +459,7 @@ final class Hpack {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void writeInt(int i, int i2, int i3) {
             if (i < i2) {
                 this.out.writeByte(i | i3);
@@ -481,11 +475,6 @@ final class Hpack {
         }
     }
 
-    static {
-        String str = "";
-        STATIC_HEADER_TABLE = new Header[]{new Header(Header.TARGET_AUTHORITY, str), new Header(Header.TARGET_METHOD, "GET"), new Header(Header.TARGET_METHOD, "POST"), new Header(Header.TARGET_PATH, "/"), new Header(Header.TARGET_PATH, "/index.html"), new Header(Header.TARGET_SCHEME, "http"), new Header(Header.TARGET_SCHEME, "https"), new Header(Header.RESPONSE_STATUS, ComponentConfigFlash.FLASH_VALUE_MANUAL_OFF), new Header(Header.RESPONSE_STATUS, "204"), new Header(Header.RESPONSE_STATUS, "206"), new Header(Header.RESPONSE_STATUS, "304"), new Header(Header.RESPONSE_STATUS, "400"), new Header(Header.RESPONSE_STATUS, "404"), new Header(Header.RESPONSE_STATUS, "500"), new Header("accept-charset", str), new Header("accept-encoding", "gzip, deflate"), new Header("accept-language", str), new Header("accept-ranges", str), new Header("accept", str), new Header("access-control-allow-origin", str), new Header("age", str), new Header("allow", str), new Header("authorization", str), new Header("cache-control", str), new Header("content-disposition", str), new Header("content-encoding", str), new Header("content-language", str), new Header("content-length", str), new Header("content-location", str), new Header("content-range", str), new Header("content-type", str), new Header("cookie", str), new Header("date", str), new Header("etag", str), new Header("expect", str), new Header("expires", str), new Header("from", str), new Header("host", str), new Header("if-match", str), new Header("if-modified-since", str), new Header("if-none-match", str), new Header("if-range", str), new Header("if-unmodified-since", str), new Header("last-modified", str), new Header("link", str), new Header("location", str), new Header("max-forwards", str), new Header("proxy-authenticate", str), new Header("proxy-authorization", str), new Header("range", str), new Header("referer", str), new Header("refresh", str), new Header("retry-after", str), new Header("server", str), new Header("set-cookie", str), new Header("strict-transport-security", str), new Header("transfer-encoding", str), new Header("user-agent", str), new Header("vary", str), new Header("via", str), new Header("www-authenticate", str)};
-    }
-
     private Hpack() {
     }
 
@@ -497,10 +486,7 @@ final class Hpack {
             if (b2 < 65 || b2 > 90) {
                 i++;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("PROTOCOL_ERROR response malformed: mixed case name: ");
-                sb.append(byteString.utf8());
-                throw new IOException(sb.toString());
+                throw new IOException("PROTOCOL_ERROR response malformed: mixed case name: " + byteString.utf8());
             }
         }
         return byteString;

@@ -3,8 +3,7 @@ package com.android.zxing;
 import android.text.TextUtils;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.MultiFormatReader;
@@ -12,7 +11,6 @@ import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import java.util.ArrayList;
@@ -20,16 +18,18 @@ import java.util.HashMap;
 
 public class QrDecoder extends Decoder {
     public static final String TAG = "QrDecoder";
-    private final MultiFormatReader mMultiFormatReader = new MultiFormatReader();
+    private final MultiFormatReader mMultiFormatReader;
     private String mScanResult = "";
 
     QrDecoder() {
+        this.mSubjects = PublishSubject.create();
+        this.mMultiFormatReader = new MultiFormatReader();
         HashMap hashMap = new HashMap(1);
         ArrayList arrayList = new ArrayList();
         arrayList.addAll(DecodeFormats.QR_CODE_FORMATS);
         hashMap.put(DecodeHintType.POSSIBLE_FORMATS, arrayList);
         this.mMultiFormatReader.setHints(hashMap);
-        this.mDecodeDisposable = this.mSubjects.toFlowable(BackpressureStrategy.LATEST).observeOn(Schedulers.computation()).map(new c(this)).observeOn(AndroidSchedulers.mainThread()).subscribe((Consumer<? super T>) new d<Object>(this));
+        this.mDecodeDisposable = this.mSubjects.toFlowable(BackpressureStrategy.LATEST).observeOn(Schedulers.computation()).map(new c(this)).observeOn(AndroidSchedulers.mainThread()).subscribe(new d(this));
         this.mEnable = true;
     }
 
@@ -84,10 +84,7 @@ public class QrDecoder extends Decoder {
 
     public /* synthetic */ void m(String str) throws Exception {
         boolean z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("decode X: result = ");
-        sb.append(str);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "decode X: result = " + str);
         if (TextUtils.isEmpty(str)) {
             this.mDecoding = true;
             z = this.mScanResult.isEmpty();
@@ -97,16 +94,16 @@ public class QrDecoder extends Decoder {
         }
         if (!z) {
             this.mScanResult = str;
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (!this.mDecoding) {
                 if (topAlert != null) {
                     topAlert.alertAiDetectTipHint(8, 0, 0);
                 }
                 bottomPopupTips.showQrCodeTip();
-            } else {
-                bottomPopupTips.hideQrCodeTip();
+                return;
             }
+            bottomPopupTips.hideQrCodeTip();
         }
     }
 

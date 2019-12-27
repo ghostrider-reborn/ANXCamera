@@ -1,14 +1,13 @@
 package android.support.v4.widget;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public interface AutoSizeableTextView {
-    @RestrictTo({Scope.LIBRARY_GROUP})
-    public static final boolean PLATFORM_SUPPORTS_AUTOSIZE = (VERSION.SDK_INT >= 27);
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
+    public static final boolean PLATFORM_SUPPORTS_AUTOSIZE = (Build.VERSION.SDK_INT >= 27);
 
     int getAutoSizeMaxTextSize();
 

@@ -14,7 +14,7 @@ public final class SingleDetach<T> extends Single<T> {
     static final class DetachSingleObserver<T> implements SingleObserver<T>, Disposable {
         SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f329d;
 
         DetachSingleObserver(SingleObserver<? super T> singleObserver) {

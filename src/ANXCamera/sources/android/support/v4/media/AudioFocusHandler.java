@@ -5,17 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.support.annotation.GuardedBy;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.ObjectsCompat;
 import android.util.Log;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 
 @VisibleForTesting(otherwise = 3)
-@RestrictTo({Scope.LIBRARY})
+@RestrictTo({RestrictTo.Scope.LIBRARY})
 public class AudioFocusHandler {
     private static final boolean DEBUG = false;
     private static final String TAG = "AudioFocusHandler";
@@ -38,7 +36,7 @@ public class AudioFocusHandler {
         /* access modifiers changed from: private */
         @GuardedBy("mLock")
         public AudioAttributesCompat mAudioAttributes;
-        private final OnAudioFocusChangeListener mAudioFocusListener = new AudioFocusListener();
+        private final AudioManager.OnAudioFocusChangeListener mAudioFocusListener = new AudioFocusListener();
         private final AudioManager mAudioManager;
         private final BroadcastReceiver mBecomingNoisyIntentReceiver = new NoisyIntentReceiver();
         @GuardedBy("mLock")
@@ -55,7 +53,7 @@ public class AudioFocusHandler {
         /* access modifiers changed from: private */
         public final MediaSession2 mSession;
 
-        private class AudioFocusListener implements OnAudioFocusChangeListener {
+        private class AudioFocusListener implements AudioManager.OnAudioFocusChangeListener {
             private float mPlayerDuckingVolume;
             private float mPlayerVolumeBeforeDucking;
 
@@ -65,7 +63,6 @@ public class AudioFocusHandler {
             /* JADX WARNING: Code restructure failed: missing block: B:92:?, code lost:
                 return;
              */
-            /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
             public void onAudioFocusChange(int i) {
                 if (i == -3) {
                     synchronized (AudioFocusHandlerImplBase.this.mLock) {
@@ -89,12 +86,12 @@ public class AudioFocusHandler {
                 } else if (i == -2) {
                     AudioFocusHandlerImplBase.this.mSession.pause();
                     synchronized (AudioFocusHandlerImplBase.this.mLock) {
-                        AudioFocusHandlerImplBase.this.mResumeWhenAudioFocusGain = true;
+                        boolean unused = AudioFocusHandlerImplBase.this.mResumeWhenAudioFocusGain = true;
                     }
                 } else if (i == -1) {
                     AudioFocusHandlerImplBase.this.mSession.pause();
                     synchronized (AudioFocusHandlerImplBase.this.mLock) {
-                        AudioFocusHandlerImplBase.this.mResumeWhenAudioFocusGain = false;
+                        boolean unused2 = AudioFocusHandlerImplBase.this.mResumeWhenAudioFocusGain = false;
                     }
                 } else if (i == 1) {
                     if (AudioFocusHandlerImplBase.this.mSession.getPlayerState() == 1) {
@@ -155,7 +152,7 @@ public class AudioFocusHandler {
                 r1 = android.support.v4.media.AudioFocusHandler.AudioFocusHandlerImplBase.access$500(r1.this$0).getPlayer();
              */
             /* JADX WARNING: Code restructure failed: missing block: B:24:0x004c, code lost:
-                if (r1 == null) goto L_0x0067;
+                if (r1 == null) goto L_?;
              */
             /* JADX WARNING: Code restructure failed: missing block: B:25:0x004e, code lost:
                 r1.setPlayerVolume(r1.getPlayerVolume() * android.support.v4.media.AudioFocusHandler.AudioFocusHandlerImplBase.VOLUME_DUCK_FACTOR);
@@ -163,11 +160,23 @@ public class AudioFocusHandler {
             /* JADX WARNING: Code restructure failed: missing block: B:26:0x005a, code lost:
                 android.support.v4.media.AudioFocusHandler.AudioFocusHandlerImplBase.access$500(r1.this$0).pause();
              */
-            /* JADX WARNING: Code restructure failed: missing block: B:31:0x0067, code lost:
+            /* JADX WARNING: Code restructure failed: missing block: B:41:?, code lost:
+                return;
+             */
+            /* JADX WARNING: Code restructure failed: missing block: B:42:?, code lost:
+                return;
+             */
+            /* JADX WARNING: Code restructure failed: missing block: B:43:?, code lost:
+                return;
+             */
+            /* JADX WARNING: Code restructure failed: missing block: B:44:?, code lost:
+                return;
+             */
+            /* JADX WARNING: Code restructure failed: missing block: B:45:?, code lost:
                 return;
              */
             /* JADX WARNING: Code restructure failed: missing block: B:9:0x001c, code lost:
-                if ("android.media.AUDIO_BECOMING_NOISY".equals(r3.getAction()) == false) goto L_0x0067;
+                if ("android.media.AUDIO_BECOMING_NOISY".equals(r3.getAction()) == false) goto L_?;
              */
             public void onReceive(Context context, Intent intent) {
                 synchronized (AudioFocusHandlerImplBase.this.mLock) {
@@ -179,7 +188,7 @@ public class AudioFocusHandler {
 
         AudioFocusHandlerImplBase(Context context, MediaSession2 mediaSession2) {
             this.mSession = mediaSession2;
-            this.mAudioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+            this.mAudioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
         }
 
         @GuardedBy("mLock")
@@ -240,13 +249,7 @@ public class AudioFocusHandler {
             if (requestAudioFocus == 1) {
                 this.mHasAudioFocus = true;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("requestAudioFocus(");
-                sb.append(convertAudioAttributesToFocusGainLocked);
-                sb.append(") failed (return=");
-                sb.append(requestAudioFocus);
-                sb.append(") playback wouldn't start.");
-                Log.w(AudioFocusHandler.TAG, sb.toString());
+                Log.w(AudioFocusHandler.TAG, "requestAudioFocus(" + convertAudioAttributesToFocusGainLocked + ") failed (return=" + requestAudioFocus + ") playback wouldn't start.");
                 this.mHasAudioFocus = false;
             }
             this.mResumeWhenAudioFocusGain = false;

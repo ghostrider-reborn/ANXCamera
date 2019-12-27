@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import com.android.camera.log.Log;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.AvatarEngine;
 import com.arcsoft.avatar.util.AvatarConfigUtils;
 import java.lang.ref.WeakReference;
@@ -61,7 +61,7 @@ public final class MimojiThumbnailRenderThread extends Thread {
                 } else if (i == 64) {
                     mimojiThumbnailRenderThread.doQuit();
                 } else if (i == 80) {
-                    mimojiThumbnailRenderThread.doSetConfig((ASAvatarConfigInfo) message.obj);
+                    mimojiThumbnailRenderThread.doSetConfig((AvatarConfig.ASAvatarConfigInfo) message.obj);
                 } else if (i == 96) {
                     mimojiThumbnailRenderThread.doReset();
                 }
@@ -123,7 +123,7 @@ public final class MimojiThumbnailRenderThread extends Thread {
     }
 
     /* access modifiers changed from: private */
-    public void doSetConfig(ASAvatarConfigInfo aSAvatarConfigInfo) {
+    public void doSetConfig(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo) {
         AvatarEngine avatarEngine = this.mAvatar;
         if (avatarEngine != null) {
             avatarEngine.setConfig(aSAvatarConfigInfo);
@@ -155,22 +155,22 @@ public final class MimojiThumbnailRenderThread extends Thread {
         }
     }
 
-    private void resetConfig(ArrayList<ASAvatarConfigInfo> arrayList) {
+    private void resetConfig(ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList) {
         this.mConfigInfoThumUtils.reset(this.mAvatar, AvatarEngineManager.getInstance().getASAvatarConfigValue());
         int i = 0;
-        int currentConfigIdWithType = AvatarConfigUtils.getCurrentConfigIdWithType(((ASAvatarConfigInfo) arrayList.get(0)).configType, AvatarEngineManager.getInstance().getASAvatarConfigValue());
+        int currentConfigIdWithType = AvatarConfigUtils.getCurrentConfigIdWithType(arrayList.get(0).configType, AvatarEngineManager.getInstance().getASAvatarConfigValue());
         if (currentConfigIdWithType != -1) {
             i = currentConfigIdWithType;
         }
-        ASAvatarConfigInfo aSAvatarConfigInfo = null;
-        Iterator it = arrayList.iterator();
+        AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo = null;
+        Iterator<AvatarConfig.ASAvatarConfigInfo> it = arrayList.iterator();
         while (true) {
             if (!it.hasNext()) {
                 break;
             }
-            ASAvatarConfigInfo aSAvatarConfigInfo2 = (ASAvatarConfigInfo) it.next();
-            if (aSAvatarConfigInfo2.configID == i) {
-                aSAvatarConfigInfo = aSAvatarConfigInfo2;
+            AvatarConfig.ASAvatarConfigInfo next = it.next();
+            if (next.configID == i) {
+                aSAvatarConfigInfo = next;
                 break;
             }
         }
@@ -196,11 +196,7 @@ public final class MimojiThumbnailRenderThread extends Thread {
     }
 
     public void drawThumbnail(boolean z) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("fmoji  drawThumbnail reset :");
-        sb.append(z);
-        Log.i(str, sb.toString());
+        Log.i(TAG, "fmoji  drawThumbnail reset :" + z);
         AvatarEngine avatarEngine = this.mAvatar;
         if (avatarEngine != null) {
             if (z) {
@@ -209,37 +205,21 @@ public final class MimojiThumbnailRenderThread extends Thread {
             }
             this.mIsRendering = true;
             int selectType = AvatarEngineManager.getInstance().getSelectType();
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("select  Type : ");
-            sb2.append(selectType);
-            Log.i(str2, sb2.toString());
-            CopyOnWriteArrayList subConfigList = AvatarEngineManager.getInstance().getSubConfigList(this.mContext, selectType);
-            String str3 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("mimojiLevelBeans.size   :");
-            sb3.append(subConfigList.size());
-            Log.i(str3, sb3.toString());
+            Log.i(TAG, "select  Type : " + selectType);
+            CopyOnWriteArrayList<MimojiLevelBean> subConfigList = AvatarEngineManager.getInstance().getSubConfigList(this.mContext, selectType);
+            Log.i(TAG, "mimojiLevelBeans.size   :" + subConfigList.size());
             for (int i = 0; i < subConfigList.size(); i++) {
-                MimojiLevelBean mimojiLevelBean = (MimojiLevelBean) subConfigList.get(i);
+                MimojiLevelBean mimojiLevelBean = subConfigList.get(i);
                 if (mimojiLevelBean != null) {
-                    String str4 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("tempMimojiLevelBeans configTypeName : ");
-                    sb4.append(mimojiLevelBean.configTypeName);
-                    Log.i(str4, sb4.toString());
-                    ArrayList<ASAvatarConfigInfo> arrayList = mimojiLevelBean.thumnails;
+                    Log.i(TAG, "tempMimojiLevelBeans configTypeName : " + mimojiLevelBean.configTypeName);
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList = mimojiLevelBean.thumnails;
                     if (arrayList == null) {
                         continue;
                     } else {
                         for (int i2 = 0; i2 < arrayList.size(); i2++) {
-                            ASAvatarConfigInfo aSAvatarConfigInfo = (ASAvatarConfigInfo) arrayList.get(i2);
+                            AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo = arrayList.get(i2);
                             if (aSAvatarConfigInfo == null) {
-                                String str5 = TAG;
-                                StringBuilder sb5 = new StringBuilder();
-                                sb5.append("asainfo is null   curIndex : ");
-                                sb5.append(i2);
-                                Log.i(str5, sb5.toString());
+                                Log.i(TAG, "asainfo is null   curIndex : " + i2);
                             } else {
                                 this.mAvatar.setConfig(aSAvatarConfigInfo);
                                 this.mConfigInfoThumUtils.renderThumb(this.mAvatar, aSAvatarConfigInfo, AvatarEngineManager.getInstance().getASAvatarConfigValue().gender, BACKGROUND_COLOR);
@@ -347,7 +327,7 @@ public final class MimojiThumbnailRenderThread extends Thread {
         Log.d(TAG, "prepare render thread: X");
     }
 
-    public void setConfig(ASAvatarConfigInfo aSAvatarConfigInfo) {
+    public void setConfig(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo) {
         RenderHandler renderHandler = this.mHandler;
         if (renderHandler != null) {
             Message obtainMessage = renderHandler.obtainMessage();
@@ -380,10 +360,7 @@ public final class MimojiThumbnailRenderThread extends Thread {
                     this.mLock.wait();
                 } catch (InterruptedException e2) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("waitUntilReady() interrupted: ");
-                    sb.append(e2);
-                    Log.e(str, sb.toString());
+                    Log.e(str, "waitUntilReady() interrupted: " + e2);
                 }
             }
         }

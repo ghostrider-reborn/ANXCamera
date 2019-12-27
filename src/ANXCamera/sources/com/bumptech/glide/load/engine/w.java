@@ -18,25 +18,25 @@ final class w {
         return z ? this.Of : this.of;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public EngineJob<?> a(c cVar, boolean z) {
-        return (EngineJob) x(z).get(cVar);
+        return x(z).get(cVar);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(c cVar, EngineJob<?> engineJob) {
         x(engineJob.sg()).put(cVar, engineJob);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void b(c cVar, EngineJob<?> engineJob) {
-        Map x = x(engineJob.sg());
+        Map<c, EngineJob<?>> x = x(engineJob.sg());
         if (engineJob.equals(x.get(cVar))) {
             x.remove(cVar);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public Map<c, EngineJob<?>> getAll() {
         return Collections.unmodifiableMap(this.of);

@@ -2,26 +2,26 @@ package com.arcsoft.camera.wideselfie;
 
 public class AwsInitParameter {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private int f200a;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private int f201b;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private int f202c;
     public float cameraViewAngleForHeight;
     public float cameraViewAngleForWidth;
     public int changeDirectionThumbThreshold;
     public boolean convertNV21;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private int f203d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private int f204e;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private int f205f;
     public int guideStableBarThumbHeight;
     public int guideStopBarThumbHeight;

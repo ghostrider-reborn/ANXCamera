@@ -60,16 +60,16 @@ public final class FlowableReduce<T> extends AbstractFlowableWithUpstream<T, T> 
                 T t2 = this.value;
                 if (t2 == null) {
                     this.value = t;
-                } else {
-                    try {
-                        T apply = this.reducer.apply(t2, t);
-                        ObjectHelper.requireNonNull(apply, "The reducer returned a null value");
-                        this.value = apply;
-                    } catch (Throwable th) {
-                        Exceptions.throwIfFatal(th);
-                        this.s.cancel();
-                        onError(th);
-                    }
+                    return;
+                }
+                try {
+                    T apply = this.reducer.apply(t2, t);
+                    ObjectHelper.requireNonNull(apply, "The reducer returned a null value");
+                    this.value = apply;
+                } catch (Throwable th) {
+                    Exceptions.throwIfFatal(th);
+                    this.s.cancel();
+                    onError(th);
                 }
             }
         }
@@ -90,6 +90,6 @@ public final class FlowableReduce<T> extends AbstractFlowableWithUpstream<T, T> 
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new ReduceSubscriber<Object>(subscriber, this.reducer));
+        this.source.subscribe(new ReduceSubscriber(subscriber, this.reducer));
     }
 }

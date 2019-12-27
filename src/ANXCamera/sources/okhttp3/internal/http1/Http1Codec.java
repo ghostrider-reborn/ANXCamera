@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
-import okhttp3.Headers.Builder;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -66,13 +65,11 @@ public final class Http1Codec implements HttpCodec {
                     StreamAllocation streamAllocation = http1Codec2.streamAllocation;
                     if (streamAllocation != null) {
                         streamAllocation.streamFinished(!z, http1Codec2, this.bytesRead, iOException);
+                        return;
                     }
                     return;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("state: ");
-                sb.append(Http1Codec.this.state);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("state: " + Http1Codec.this.state);
             }
         }
 
@@ -125,10 +122,9 @@ public final class Http1Codec implements HttpCodec {
                 throw new IllegalStateException("closed");
             } else if (j != 0) {
                 Http1Codec.this.sink.writeHexadecimalUnsignedLong(j);
-                String str = "\r\n";
-                Http1Codec.this.sink.writeUtf8(str);
+                Http1Codec.this.sink.writeUtf8("\r\n");
                 Http1Codec.this.sink.write(buffer, j);
-                Http1Codec.this.sink.writeUtf8(str);
+                Http1Codec.this.sink.writeUtf8("\r\n");
             }
         }
     }
@@ -152,16 +148,11 @@ public final class Http1Codec implements HttpCodec {
                 this.bytesRemainingInChunk = Http1Codec.this.source.readHexadecimalUnsignedLong();
                 String trim = Http1Codec.this.source.readUtf8LineStrict().trim();
                 if (this.bytesRemainingInChunk < 0 || (!trim.isEmpty() && !trim.startsWith(";"))) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("expected chunk size and optional extensions but was \"");
-                    sb.append(this.bytesRemainingInChunk);
-                    sb.append(trim);
-                    sb.append("\"");
-                    throw new ProtocolException(sb.toString());
+                    throw new ProtocolException("expected chunk size and optional extensions but was \"" + this.bytesRemainingInChunk + trim + "\"");
                 } else if (this.bytesRemainingInChunk == 0) {
                     this.hasMoreChunks = false;
                     HttpHeaders.receiveHeaders(Http1Codec.this.client.cookieJar(), this.url, Http1Codec.this.readHeaders());
-                    endOfInput(true, null);
+                    endOfInput(true, (IOException) null);
                 }
             } catch (NumberFormatException e2) {
                 throw new ProtocolException(e2.getMessage());
@@ -171,7 +162,7 @@ public final class Http1Codec implements HttpCodec {
         public void close() throws IOException {
             if (!this.closed) {
                 if (this.hasMoreChunks && !Util.discard(this, 100, TimeUnit.MILLISECONDS)) {
-                    endOfInput(false, null);
+                    endOfInput(false, (IOException) null);
                 }
                 this.closed = true;
             }
@@ -179,10 +170,7 @@ public final class Http1Codec implements HttpCodec {
 
         public long read(Buffer buffer, long j) throws IOException {
             if (j < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("byteCount < 0: ");
-                sb.append(j);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("byteCount < 0: " + j);
             } else if (this.closed) {
                 throw new IllegalStateException("closed");
             } else if (!this.hasMoreChunks) {
@@ -246,12 +234,7 @@ public final class Http1Codec implements HttpCodec {
                     this.bytesRemaining -= j;
                     return;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("expected ");
-                sb.append(this.bytesRemaining);
-                sb.append(" bytes but received ");
-                sb.append(j);
-                throw new ProtocolException(sb.toString());
+                throw new ProtocolException("expected " + this.bytesRemaining + " bytes but received " + j);
             }
             throw new IllegalStateException("closed");
         }
@@ -264,14 +247,14 @@ public final class Http1Codec implements HttpCodec {
             super();
             this.bytesRemaining = j;
             if (this.bytesRemaining == 0) {
-                endOfInput(true, null);
+                endOfInput(true, (IOException) null);
             }
         }
 
         public void close() throws IOException {
             if (!this.closed) {
                 if (this.bytesRemaining != 0 && !Util.discard(this, 100, TimeUnit.MILLISECONDS)) {
-                    endOfInput(false, null);
+                    endOfInput(false, (IOException) null);
                 }
                 this.closed = true;
             }
@@ -279,10 +262,7 @@ public final class Http1Codec implements HttpCodec {
 
         public long read(Buffer buffer, long j) throws IOException {
             if (j < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("byteCount < 0: ");
-                sb.append(j);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("byteCount < 0: " + j);
             } else if (!this.closed) {
                 long j2 = this.bytesRemaining;
                 if (j2 == 0) {
@@ -292,7 +272,7 @@ public final class Http1Codec implements HttpCodec {
                 if (read != -1) {
                     this.bytesRemaining -= read;
                     if (this.bytesRemaining == 0) {
-                        endOfInput(true, null);
+                        endOfInput(true, (IOException) null);
                     }
                     return read;
                 }
@@ -315,7 +295,7 @@ public final class Http1Codec implements HttpCodec {
         public void close() throws IOException {
             if (!this.closed) {
                 if (!this.inputExhausted) {
-                    endOfInput(false, null);
+                    endOfInput(false, (IOException) null);
                 }
                 this.closed = true;
             }
@@ -323,10 +303,7 @@ public final class Http1Codec implements HttpCodec {
 
         public long read(Buffer buffer, long j) throws IOException {
             if (j < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("byteCount < 0: ");
-                sb.append(j);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("byteCount < 0: " + j);
             } else if (this.closed) {
                 throw new IllegalStateException("closed");
             } else if (this.inputExhausted) {
@@ -337,7 +314,7 @@ public final class Http1Codec implements HttpCodec {
                     return read;
                 }
                 this.inputExhausted = true;
-                endOfInput(true, null);
+                endOfInput(true, (IOException) null);
                 return -1;
             }
         }
@@ -367,7 +344,7 @@ public final class Http1Codec implements HttpCodec {
         throw new IllegalStateException("Cannot stream a request body without chunked encoding or a known content length!");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void detachTimeout(ForwardingTimeout forwardingTimeout) {
         Timeout delegate = forwardingTimeout.delegate();
         forwardingTimeout.setDelegate(Timeout.NONE);
@@ -392,10 +369,7 @@ public final class Http1Codec implements HttpCodec {
             this.state = 2;
             return new ChunkedSink();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("state: ");
-        sb.append(this.state);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("state: " + this.state);
     }
 
     public Source newChunkedSource(HttpUrl httpUrl) throws IOException {
@@ -403,10 +377,7 @@ public final class Http1Codec implements HttpCodec {
             this.state = 5;
             return new ChunkedSource(httpUrl);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("state: ");
-        sb.append(this.state);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("state: " + this.state);
     }
 
     public Sink newFixedLengthSink(long j) {
@@ -414,10 +385,7 @@ public final class Http1Codec implements HttpCodec {
             this.state = 2;
             return new FixedLengthSink(j);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("state: ");
-        sb.append(this.state);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("state: " + this.state);
     }
 
     public Source newFixedLengthSource(long j) throws IOException {
@@ -425,10 +393,7 @@ public final class Http1Codec implements HttpCodec {
             this.state = 5;
             return new FixedLengthSource(j);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("state: ");
-        sb.append(this.state);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("state: " + this.state);
     }
 
     public Source newUnknownLengthSource() throws IOException {
@@ -441,10 +406,7 @@ public final class Http1Codec implements HttpCodec {
             }
             throw new IllegalStateException("streamAllocation == null");
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("state: ");
-        sb.append(this.state);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("state: " + this.state);
     }
 
     public ResponseBody openResponseBody(Response response) throws IOException {
@@ -462,7 +424,7 @@ public final class Http1Codec implements HttpCodec {
     }
 
     public Headers readHeaders() throws IOException {
-        Builder builder = new Builder();
+        Headers.Builder builder = new Headers.Builder();
         while (true) {
             String readUtf8LineStrict = this.source.readUtf8LineStrict();
             if (readUtf8LineStrict.length() == 0) {
@@ -484,37 +446,27 @@ public final class Http1Codec implements HttpCodec {
                 this.state = 4;
                 return headers;
             } catch (EOFException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected end of stream on ");
-                sb.append(this.streamAllocation);
-                IOException iOException = new IOException(sb.toString());
+                IOException iOException = new IOException("unexpected end of stream on " + this.streamAllocation);
                 iOException.initCause(e2);
                 throw iOException;
             }
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("state: ");
-            sb2.append(this.state);
-            throw new IllegalStateException(sb2.toString());
+            throw new IllegalStateException("state: " + this.state);
         }
     }
 
     public void writeRequest(Headers headers, String str) throws IOException {
         if (this.state == 0) {
-            String str2 = "\r\n";
-            this.sink.writeUtf8(str).writeUtf8(str2);
+            this.sink.writeUtf8(str).writeUtf8("\r\n");
             int size = headers.size();
             for (int i = 0; i < size; i++) {
-                this.sink.writeUtf8(headers.name(i)).writeUtf8(": ").writeUtf8(headers.value(i)).writeUtf8(str2);
+                this.sink.writeUtf8(headers.name(i)).writeUtf8(": ").writeUtf8(headers.value(i)).writeUtf8("\r\n");
             }
-            this.sink.writeUtf8(str2);
+            this.sink.writeUtf8("\r\n");
             this.state = 1;
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("state: ");
-        sb.append(this.state);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("state: " + this.state);
     }
 
     public void writeRequestHeaders(Request request) throws IOException {

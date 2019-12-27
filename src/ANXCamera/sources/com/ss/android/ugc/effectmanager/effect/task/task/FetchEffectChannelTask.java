@@ -101,11 +101,7 @@ public class FetchEffectChannelTask extends NormalTask {
             hashMap.put(EffectConfiguration.KEY_CITY_CODE, this.mConfiguration.getCityCode());
         }
         this.mSelectedHost = this.mEffectContext.getLinkSelector().getBestHostUrl();
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mSelectedHost);
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_EFFECT_LIST);
-        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, sb.toString());
+        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, this.mSelectedHost + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_EFFECT_LIST);
         this.mRequestedUrl = buildRequestUrl;
         try {
             this.mRemoteIp = InetAddress.getByName(new URL(buildRequestUrl).getHost()).getHostAddress();
@@ -137,27 +133,19 @@ public class FetchEffectChannelTask extends NormalTask {
         if (EffectUtils.isEffectValid(effect)) {
             this.mFileCache.remove(effect.getId());
             ICache iCache = this.mFileCache;
-            StringBuilder sb = new StringBuilder();
-            sb.append(effect.getId());
-            sb.append(".zip");
-            iCache.remove(sb.toString());
+            iCache.remove(effect.getId() + ".zip");
         }
     }
 
     private void fillEffectPath(List<Effect> list) {
         if (list != null && !list.isEmpty()) {
-            for (Effect effect : list) {
+            for (Effect next : list) {
+                next.setZipPath(this.mConfiguration.getEffectDir() + File.separator + next.getId() + ".zip");
                 StringBuilder sb = new StringBuilder();
                 sb.append(this.mConfiguration.getEffectDir());
                 sb.append(File.separator);
-                sb.append(effect.getId());
-                sb.append(".zip");
-                effect.setZipPath(sb.toString());
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(this.mConfiguration.getEffectDir());
-                sb2.append(File.separator);
-                sb2.append(effect.getId());
-                effect.setUnzipPath(sb2.toString());
+                sb.append(next.getId());
+                next.setUnzipPath(sb.toString());
             }
         }
     }
@@ -169,14 +157,14 @@ public class FetchEffectChannelTask extends NormalTask {
         ArrayList arrayList = new ArrayList();
         while (true) {
             boolean z = true;
-            for (Effect effect : list2) {
+            for (Effect next : list2) {
                 for (Effect equals : list) {
-                    if (effect.equals(equals)) {
+                    if (next.equals(equals)) {
                         z = false;
                     }
                 }
                 if (z) {
-                    arrayList.add(effect);
+                    arrayList.add(next);
                 }
             }
             return arrayList;
@@ -186,7 +174,7 @@ public class FetchEffectChannelTask extends NormalTask {
     private List<Effect> getCategoryAllEffects(EffectCategoryModel effectCategoryModel, Map<String, Effect> map) {
         ArrayList arrayList = new ArrayList();
         for (String str : effectCategoryModel.getEffects()) {
-            Effect effect = (Effect) map.get(str);
+            Effect effect = map.get(str);
             if (effect != null) {
                 arrayList.add(effect);
             }
@@ -200,14 +188,14 @@ public class FetchEffectChannelTask extends NormalTask {
             loop0:
             while (true) {
                 boolean z = true;
-                for (Effect effect : list) {
+                for (Effect next : list) {
                     for (Effect equals : list2) {
-                        if (effect.equals(equals)) {
+                        if (next.equals(equals)) {
                             z = false;
                         }
                     }
                     if (z) {
-                        arrayList.add(effect);
+                        arrayList.add(next);
                     }
                 }
                 break loop0;
@@ -218,9 +206,9 @@ public class FetchEffectChannelTask extends NormalTask {
 
     private Effect getEffect(String str, EffectChannelModel effectChannelModel) {
         Effect effect = null;
-        for (Effect effect2 : effectChannelModel.getEffects()) {
-            if (TextUtils.equals(str, effect2.getEffectId())) {
-                effect = effect2;
+        for (Effect next : effectChannelModel.getEffects()) {
+            if (TextUtils.equals(str, next.getEffectId())) {
+                effect = next;
             }
         }
         return effect;
@@ -229,23 +217,23 @@ public class FetchEffectChannelTask extends NormalTask {
     private List<EffectCategoryResponse> initCategory(EffectChannelModel effectChannelModel) {
         ArrayList arrayList = new ArrayList();
         HashMap hashMap = new HashMap();
-        for (Effect effect : effectChannelModel.getEffects()) {
-            hashMap.put(effect.getEffectId(), effect);
+        for (Effect next : effectChannelModel.getEffects()) {
+            hashMap.put(next.getEffectId(), next);
         }
         if (!effectChannelModel.getCategory().isEmpty()) {
-            for (EffectCategoryModel effectCategoryModel : effectChannelModel.getCategory()) {
+            for (EffectCategoryModel next2 : effectChannelModel.getCategory()) {
                 EffectCategoryResponse effectCategoryResponse = new EffectCategoryResponse();
-                effectCategoryResponse.setId(effectCategoryModel.getId());
-                effectCategoryResponse.setName(effectCategoryModel.getName());
-                if (!effectCategoryModel.getIcon().getUrl_list().isEmpty()) {
-                    effectCategoryResponse.setIcon_normal_url((String) effectCategoryModel.getIcon().getUrl_list().get(0));
+                effectCategoryResponse.setId(next2.getId());
+                effectCategoryResponse.setName(next2.getName());
+                if (!next2.getIcon().getUrl_list().isEmpty()) {
+                    effectCategoryResponse.setIcon_normal_url(next2.getIcon().getUrl_list().get(0));
                 }
-                if (!effectCategoryModel.getIcon_selected().getUrl_list().isEmpty()) {
-                    effectCategoryResponse.setIcon_selected_url((String) effectCategoryModel.getIcon_selected().getUrl_list().get(0));
+                if (!next2.getIcon_selected().getUrl_list().isEmpty()) {
+                    effectCategoryResponse.setIcon_selected_url(next2.getIcon_selected().getUrl_list().get(0));
                 }
-                effectCategoryResponse.setTotalEffects(getCategoryAllEffects(effectCategoryModel, hashMap));
-                effectCategoryResponse.setTags(effectCategoryModel.getTags());
-                effectCategoryResponse.setTagsUpdateTime(effectCategoryModel.getTagsUpdateTime());
+                effectCategoryResponse.setTotalEffects(getCategoryAllEffects(next2, hashMap));
+                effectCategoryResponse.setTags(next2.getTags());
+                effectCategoryResponse.setTagsUpdateTime(next2.getTagsUpdateTime());
                 effectCategoryResponse.setCollectionEffect(effectChannelModel.getCollection());
                 arrayList.add(effectCategoryResponse);
             }
@@ -259,10 +247,7 @@ public class FetchEffectChannelTask extends NormalTask {
         try {
             jSONObject.put("version", effectChannelModel.getVersion());
             ICache iCache = this.mFileCache;
-            StringBuilder sb = new StringBuilder();
-            sb.append("effect_version");
-            sb.append(this.panel);
-            iCache.save(sb.toString(), jSONObject.toString());
+            iCache.save("effect_version" + this.panel, jSONObject.toString());
         } catch (JSONException e2) {
             e2.printStackTrace();
         }
@@ -286,7 +271,7 @@ public class FetchEffectChannelTask extends NormalTask {
                         EffectChannelModel data = effectNetListResponse.getData();
                         EffectChannelResponse buildChannelResponse = new BuildEffectChannelResponse(this.panel, this.mEffectContext.getEffectConfiguration().getEffectDir().getAbsolutePath(), false).buildChannelResponse(data);
                         saveEffectList(data);
-                        sendMessage(14, new EffectChannelTaskResult(buildChannelResponse, null));
+                        sendMessage(14, new EffectChannelTaskResult(buildChannelResponse, (ExceptionResult) null));
                         return;
                     } else if (this.mCurCnt == 0) {
                         ExceptionResult exceptionResult2 = new ExceptionResult((int) ErrorConstants.CODE_DOWNLOAD_ERROR);

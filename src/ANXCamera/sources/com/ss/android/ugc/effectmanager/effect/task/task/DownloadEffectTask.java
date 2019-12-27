@@ -31,7 +31,7 @@ public class DownloadEffectTask extends NormalTask {
     }
 
     public void execute() {
-        SyncTask fetchEffect = this.mEffectContext.getEffectConfiguration().getEffectFetcher().fetchEffect(new EffectFetcherArguments(this.mEffect, this.mDownLoadUrl, this.mConfiguration.getEffectDir().getPath()));
+        SyncTask<EffectTaskResult> fetchEffect = this.mEffectContext.getEffectConfiguration().getEffectFetcher().fetchEffect(new EffectFetcherArguments(this.mEffect, this.mDownLoadUrl, this.mConfiguration.getEffectDir().getPath()));
         fetchEffect.setListener(new SyncTaskListener<EffectTaskResult>() {
             public void onFailed(SyncTask<EffectTaskResult> syncTask, ExceptionResult exceptionResult) {
                 DownloadEffectTask downloadEffectTask = DownloadEffectTask.this;
@@ -42,12 +42,12 @@ public class DownloadEffectTask extends NormalTask {
             }
 
             public void onResponse(SyncTask<EffectTaskResult> syncTask, EffectTaskResult effectTaskResult) {
-                DownloadEffectTask.this.sendMessage(15, new EffectTaskResult(effectTaskResult.getEffect(), null));
+                DownloadEffectTask.this.sendMessage(15, new EffectTaskResult(effectTaskResult.getEffect(), (ExceptionResult) null));
             }
 
             public void onStart(SyncTask<EffectTaskResult> syncTask) {
                 DownloadEffectTask downloadEffectTask = DownloadEffectTask.this;
-                downloadEffectTask.sendMessage(42, new EffectTaskResult(downloadEffectTask.mEffect, null));
+                downloadEffectTask.sendMessage(42, new EffectTaskResult(downloadEffectTask.mEffect, (ExceptionResult) null));
             }
         });
         fetchEffect.execute();

@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.functions.Predicate;
 import io.reactivex.internal.fuseable.ConditionalSubscriber;
@@ -56,12 +55,8 @@ public final class FlowableFilter<T> extends AbstractFlowableWithUpstream<T, T> 
             if (this.sourceMode != 0) {
                 return this.actual.tryOnNext(null);
             }
-            boolean z = true;
             try {
-                if (!this.filter.test(t) || !this.actual.tryOnNext(t)) {
-                    z = false;
-                }
-                return z;
+                return this.filter.test(t) && this.actual.tryOnNext(t);
             } catch (Throwable th) {
                 fail(th);
                 return true;
@@ -134,9 +129,9 @@ public final class FlowableFilter<T> extends AbstractFlowableWithUpstream<T, T> 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
         if (subscriber instanceof ConditionalSubscriber) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new FilterConditionalSubscriber<Object>((ConditionalSubscriber) subscriber, this.predicate));
+            this.source.subscribe(new FilterConditionalSubscriber((ConditionalSubscriber) subscriber, this.predicate));
         } else {
-            this.source.subscribe((FlowableSubscriber<? super T>) new FilterSubscriber<Object>(subscriber, this.predicate));
+            this.source.subscribe(new FilterSubscriber(subscriber, this.predicate));
         }
     }
 }

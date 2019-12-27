@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.android.camera.R;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
+import com.android.camera.protocol.ModeProtocol;
 
 public class AiSceneNewbieDialogFragment extends BaseDialogFragment {
     public static final String TAG = "AiSceneHint";
@@ -33,7 +33,7 @@ public class AiSceneNewbieDialogFragment extends BaseDialogFragment {
     }
 
     public void onDestroyView() {
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.removeBackStack(this);
         }
@@ -55,7 +55,7 @@ public class AiSceneNewbieDialogFragment extends BaseDialogFragment {
 
     public void onViewCreated(View view, @Nullable Bundle bundle) {
         super.onViewCreated(view, bundle);
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.addInBackStack(this);
         }

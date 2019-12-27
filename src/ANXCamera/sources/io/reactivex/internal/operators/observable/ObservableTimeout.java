@@ -130,7 +130,7 @@ public final class ObservableTimeout<T, U, V> extends AbstractObservableWithUpst
                 ObservableSource<U> observableSource = this.firstTimeoutIndicator;
                 if (observableSource != null) {
                     TimeoutInnerObserver timeoutInnerObserver = new TimeoutInnerObserver(this, 0);
-                    if (compareAndSet(null, timeoutInnerObserver)) {
+                    if (compareAndSet((Object) null, timeoutInnerObserver)) {
                         observer.onSubscribe(this);
                         observableSource.subscribe(timeoutInnerObserver);
                         return;
@@ -234,7 +234,7 @@ public final class ObservableTimeout<T, U, V> extends AbstractObservableWithUpst
                 ObservableSource<U> observableSource = this.firstTimeoutIndicator;
                 if (observableSource != null) {
                     TimeoutInnerObserver timeoutInnerObserver = new TimeoutInnerObserver(this, 0);
-                    if (compareAndSet(null, timeoutInnerObserver)) {
+                    if (compareAndSet((Object) null, timeoutInnerObserver)) {
                         observer.onSubscribe(this.arbiter);
                         observableSource.subscribe(timeoutInnerObserver);
                         return;

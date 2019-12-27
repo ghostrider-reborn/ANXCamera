@@ -57,26 +57,23 @@ public class SwitchAnimManager {
 
     private void drawCopiedTexture(GLCanvas gLCanvas, int i, int i2, RawTexture rawTexture, float f2) {
         if (this.mMoveBack) {
-            float f3 = (float) this.mReviewDrawingX;
             int i3 = this.mReviewDrawingWidth;
-            float f4 = f3 + (((float) i3) / 2.0f);
-            float f5 = (float) this.mReviewDrawingY;
+            float f3 = ((float) this.mReviewDrawingX) + (((float) i3) / 2.0f);
             int i4 = this.mReviewDrawingHeight;
-            float f6 = f5 + (((float) i4) / 2.0f);
-            float f7 = 1.0f - (ZOOM_DELTA_PREVIEW * f2);
-            float f8 = ((float) i3) * f7;
-            float f9 = ((float) i4) * f7;
-            rawTexture.draw(gLCanvas, Math.round(f4 - (f8 / 2.0f)), Math.round(f6 - (f9 / 2.0f)), Math.round(f8), Math.round(f9));
+            float f4 = 1.0f - (ZOOM_DELTA_PREVIEW * f2);
+            float f5 = ((float) i3) * f4;
+            float f6 = ((float) i4) * f4;
+            rawTexture.draw(gLCanvas, Math.round(f3 - (f5 / 2.0f)), Math.round((((float) this.mReviewDrawingY) + (((float) i4) / 2.0f)) - (f6 / 2.0f)), Math.round(f5), Math.round(f6));
             return;
         }
         float width = (float) rawTexture.getWidth();
-        float f10 = width / 2.0f;
+        float f7 = width / 2.0f;
         float height = (float) rawTexture.getHeight();
-        float f11 = height / 2.0f;
-        float f12 = 1.0f - (ZOOM_DELTA_PREVIEW * f2);
-        float f13 = width * f12;
-        float f14 = height * f12;
-        rawTexture.draw(gLCanvas, Math.round(f10 - (f13 / 2.0f)), Math.round(f11 - (f14 / 2.0f)), Math.round(f13), Math.round(f14), this.mReviewDrawingX, this.mReviewDrawingY, this.mReviewDrawingWidth, this.mReviewDrawingHeight);
+        float f8 = height / 2.0f;
+        float f9 = 1.0f - (ZOOM_DELTA_PREVIEW * f2);
+        float f10 = width * f9;
+        float f11 = height * f9;
+        rawTexture.draw(gLCanvas, Math.round(f7 - (f10 / 2.0f)), Math.round(f8 - (f11 / 2.0f)), Math.round(f10), Math.round(f11), this.mReviewDrawingX, this.mReviewDrawingY, this.mReviewDrawingWidth, this.mReviewDrawingHeight);
     }
 
     private void drawRealTimeTexture(GLCanvas gLCanvas, int i, int i2, int i3, int i4, CameraScreenNail cameraScreenNail, float f2) {
@@ -145,11 +142,10 @@ public class SwitchAnimManager {
     }
 
     public void startAnimation(boolean z) {
-        String str = TAG;
         if (z) {
-            Log.v(str, "startAnimation with alpha animation");
+            Log.v(TAG, "startAnimation with alpha animation");
         } else {
-            Log.v(str, "startAnimation");
+            Log.v(TAG, "startAnimation");
         }
         this.mAnimStartTime = SystemClock.uptimeMillis();
         this.mRecurBlur = true;

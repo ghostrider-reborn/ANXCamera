@@ -79,7 +79,7 @@ public final class RenderThread extends Thread {
                     this.mRequestDraw--;
                 }
             }
-            if (!(!z || this.mEglCore == null || this.mDrawExtTexAttribute == null)) {
+            if (z && this.mEglCore != null && this.mDrawExtTexAttribute != null) {
                 this.mEglSurfaceBase.makeCurrent();
                 this.mCanvas.draw(this.mDrawExtTexAttribute);
                 this.mEglSurfaceBase.swapBuffers();
@@ -191,10 +191,7 @@ public final class RenderThread extends Thread {
                     this.mLock.wait();
                 } catch (InterruptedException e2) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("waitUntilReady() interrupted: ");
-                    sb.append(e2);
-                    Log.e(str, sb.toString());
+                    Log.e(str, "waitUntilReady() interrupted: " + e2);
                 }
             }
         }

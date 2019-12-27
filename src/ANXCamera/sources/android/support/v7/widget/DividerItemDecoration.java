@@ -6,12 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.State;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
-public class DividerItemDecoration extends ItemDecoration {
+public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     private static final int[] ATTRS = {16843284};
     public static final int HORIZONTAL = 0;
     private static final String TAG = "DividerItem";
@@ -76,20 +75,18 @@ public class DividerItemDecoration extends ItemDecoration {
         canvas.restore();
     }
 
-    public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+    public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
         Drawable drawable = this.mDivider;
         if (drawable == null) {
             rect.set(0, 0, 0, 0);
-            return;
-        }
-        if (this.mOrientation == 1) {
+        } else if (this.mOrientation == 1) {
             rect.set(0, 0, 0, drawable.getIntrinsicHeight());
         } else {
             rect.set(0, 0, drawable.getIntrinsicWidth(), 0);
         }
     }
 
-    public void onDraw(Canvas canvas, RecyclerView recyclerView, State state) {
+    public void onDraw(Canvas canvas, RecyclerView recyclerView, RecyclerView.State state) {
         if (recyclerView.getLayoutManager() != null && this.mDivider != null) {
             if (this.mOrientation == 1) {
                 drawVertical(canvas, recyclerView);

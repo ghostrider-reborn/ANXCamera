@@ -4,10 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Shader.TileMode;
+import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -42,7 +41,7 @@ public class MimojiTypeHorizonScrollView extends HorizontalScrollView {
         int width = getWidth();
         int height = getHeight();
         float f2 = (float) height;
-        int saveLayer = canvas.saveLayer(0.0f, 0.0f, (float) Math.max(width, view.getWidth()), f2, null, 31);
+        int saveLayer = canvas.saveLayer(0.0f, 0.0f, (float) Math.max(width, view.getWidth()), f2, (Paint) null, 31);
         boolean drawChild = super.drawChild(canvas, view, j);
         canvas2.translate((float) computeHorizontalScrollOffset(), 0.0f);
         float f3 = (float) width;
@@ -70,10 +69,10 @@ public class MimojiTypeHorizonScrollView extends HorizontalScrollView {
         this.mWidth = getResources().getDimensionPixelSize(R.dimen.mode_select_layout_edge);
         this.mPaint = new Paint();
         this.mPaint.setAntiAlias(true);
-        this.mPaint.setStyle(Style.FILL);
-        this.mPaint.setXfermode(new PorterDuffXfermode(Mode.DST_OUT));
+        this.mPaint.setStyle(Paint.Style.FILL);
+        this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
         Paint paint = this.mPaint;
-        LinearGradient linearGradient = new LinearGradient(0.0f, 0.0f, 0.0f, (float) this.mWidth, new int[]{ViewCompat.MEASURED_STATE_MASK, -939524096, 0}, new float[]{0.0f, 0.2f, 1.0f}, TileMode.CLAMP);
+        LinearGradient linearGradient = new LinearGradient(0.0f, 0.0f, 0.0f, (float) this.mWidth, new int[]{ViewCompat.MEASURED_STATE_MASK, -939524096, 0}, new float[]{0.0f, 0.2f, 1.0f}, Shader.TileMode.CLAMP);
         paint.setShader(linearGradient);
         setFocusable(false);
     }

@@ -32,12 +32,12 @@ public class StrictSubscriber<T> extends AtomicInteger implements FlowableSubscr
 
     public void onComplete() {
         this.done = true;
-        HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+        HalfSerializer.onComplete((Subscriber<?>) this.actual, (AtomicInteger) this, this.error);
     }
 
     public void onError(Throwable th) {
         this.done = true;
-        HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+        HalfSerializer.onError((Subscriber<?>) this.actual, th, (AtomicInteger) this, this.error);
     }
 
     public void onNext(T t) {
@@ -58,10 +58,7 @@ public class StrictSubscriber<T> extends AtomicInteger implements FlowableSubscr
     public void request(long j) {
         if (j <= 0) {
             cancel();
-            StringBuilder sb = new StringBuilder();
-            sb.append("§3.9 violated: positive request amount required but it was ");
-            sb.append(j);
-            onError(new IllegalArgumentException(sb.toString()));
+            onError(new IllegalArgumentException("§3.9 violated: positive request amount required but it was " + j));
             return;
         }
         SubscriptionHelper.deferredRequest(this.s, this.requested, j);

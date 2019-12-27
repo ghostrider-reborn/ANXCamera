@@ -1,7 +1,7 @@
 package org.greenrobot.greendao.query;
 
 import android.database.sqlite.SQLiteDatabase;
-import com.android.gallery3d.exif.ExifInterface.GpsTrackRef;
+import com.android.gallery3d.exif.ExifInterface;
 import java.util.ArrayList;
 import java.util.List;
 import miui.reflect.Field;
@@ -26,7 +26,7 @@ public class QueryBuilder<T> {
     private final WhereCollector<T> whereCollector;
 
     protected QueryBuilder(AbstractDao<T, ?> abstractDao) {
-        this(abstractDao, GpsTrackRef.TRUE_DIRECTION);
+        this(abstractDao, ExifInterface.GpsTrackRef.TRUE_DIRECTION);
     }
 
     protected QueryBuilder(AbstractDao<T, ?> abstractDao, String str) {
@@ -39,43 +39,39 @@ public class QueryBuilder<T> {
     }
 
     private <J> Join<T, J> addJoin(String str, Property property, AbstractDao<J, ?> abstractDao, Property property2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Field.LONG_SIGNATURE_PRIMITIVE);
-        sb.append(this.joins.size() + 1);
-        Join join = new Join(str, property, abstractDao, property2, sb.toString());
+        Join join = new Join(str, property, abstractDao, property2, Field.LONG_SIGNATURE_PRIMITIVE + (this.joins.size() + 1));
         this.joins.add(join);
         return join;
     }
 
     private void appendJoinsAndWheres(StringBuilder sb, String str) {
         this.values.clear();
-        for (Join join : this.joins) {
+        for (Join next : this.joins) {
             sb.append(" JOIN ");
             sb.append('\"');
-            sb.append(join.daoDestination.getTablename());
+            sb.append(next.daoDestination.getTablename());
             sb.append('\"');
             sb.append(' ');
-            sb.append(join.tablePrefix);
+            sb.append(next.tablePrefix);
             sb.append(" ON ");
-            SqlUtils.appendProperty(sb, join.sourceTablePrefix, join.joinPropertySource);
+            SqlUtils.appendProperty(sb, next.sourceTablePrefix, next.joinPropertySource);
             sb.append('=');
-            SqlUtils.appendProperty(sb, join.tablePrefix, join.joinPropertyDestination);
+            SqlUtils.appendProperty(sb, next.tablePrefix, next.joinPropertyDestination);
         }
         boolean z = !this.whereCollector.isEmpty();
-        String str2 = " WHERE ";
         if (z) {
-            sb.append(str2);
+            sb.append(" WHERE ");
             this.whereCollector.appendWhereClause(sb, str, this.values);
         }
-        for (Join join2 : this.joins) {
-            if (!join2.whereCollector.isEmpty()) {
+        for (Join next2 : this.joins) {
+            if (!next2.whereCollector.isEmpty()) {
                 if (!z) {
-                    sb.append(str2);
+                    sb.append(" WHERE ");
                     z = true;
                 } else {
                     sb.append(" AND ");
                 }
-                join2.whereCollector.appendWhereClause(sb, join2.tablePrefix, this.values);
+                next2.whereCollector.appendWhereClause(sb, next2.tablePrefix, this.values);
             }
         }
     }
@@ -103,16 +99,10 @@ public class QueryBuilder<T> {
 
     private void checkLog(String str) {
         if (LOG_SQL) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Built SQL for query: ");
-            sb.append(str);
-            DaoLog.d(sb.toString());
+            DaoLog.d("Built SQL for query: " + str);
         }
         if (LOG_VALUES) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Values for query: ");
-            sb2.append(this.values);
-            DaoLog.d(sb2.toString());
+            DaoLog.d("Values for query: " + this.values);
         }
     }
 
@@ -197,19 +187,9 @@ public class QueryBuilder<T> {
 
     public DeleteQuery<T> buildDelete() {
         if (this.joins.isEmpty()) {
-            String tablename = this.dao.getTablename();
-            StringBuilder sb = new StringBuilder(SqlUtils.createSqlDelete(tablename, null));
+            StringBuilder sb = new StringBuilder(SqlUtils.createSqlDelete(this.dao.getTablename(), (String[]) null));
             appendJoinsAndWheres(sb, this.tablePrefix);
-            String sb2 = sb.toString();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(this.tablePrefix);
-            sb3.append(".\"");
-            String sb4 = sb3.toString();
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append('\"');
-            sb5.append(tablename);
-            sb5.append("\".\"");
-            String replace = sb2.replace(sb4, sb5.toString());
+            String replace = sb.toString().replace(this.tablePrefix + ".\"", '\"' + r0 + "\".\"");
             checkLog(replace);
             return DeleteQuery.create(this.dao, replace, this.values.toArray());
         }
@@ -230,7 +210,7 @@ public class QueryBuilder<T> {
     }
 
     public <J> Join<T, J> join(Property property, Class<J> cls) {
-        AbstractDao dao2 = this.dao.getSession().getDao(cls);
+        AbstractDao<?, ?> dao2 = this.dao.getSession().getDao(cls);
         return addJoin(this.tablePrefix, property, dao2, dao2.getPkProperty());
     }
 
@@ -303,14 +283,8 @@ public class QueryBuilder<T> {
     }
 
     public QueryBuilder<T> stringOrderCollation(String str) {
-        if (str != null) {
-            String str2 = " ";
-            if (!str.startsWith(str2)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(str);
-                str = sb.toString();
-            }
+        if (str != null && !str.startsWith(" ")) {
+            str = " " + str;
         }
         this.stringOrderCollation = str;
         return this;

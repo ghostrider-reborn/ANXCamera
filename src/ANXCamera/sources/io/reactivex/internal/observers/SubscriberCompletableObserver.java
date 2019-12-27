@@ -8,7 +8,7 @@ import org.reactivestreams.Subscription;
 
 public final class SubscriberCompletableObserver<T> implements CompletableObserver, Subscription {
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     Disposable f269d;
     final Subscriber<? super T> subscriber;
 

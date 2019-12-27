@@ -33,7 +33,7 @@ public final class FlowableTakeLast<T> extends AbstractFlowableWithUpstream<T, T
             this.s.cancel();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (this.wip.getAndIncrement() == 0) {
                 Subscriber<? super T> subscriber = this.actual;
@@ -60,6 +60,7 @@ public final class FlowableTakeLast<T> extends AbstractFlowableWithUpstream<T, T
                         }
                     }
                     if (this.wip.decrementAndGet() == 0) {
+                        return;
                     }
                 }
             }
@@ -104,6 +105,6 @@ public final class FlowableTakeLast<T> extends AbstractFlowableWithUpstream<T, T
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new TakeLastSubscriber<Object>(subscriber, this.count));
+        this.source.subscribe(new TakeLastSubscriber(subscriber, this.count));
     }
 }

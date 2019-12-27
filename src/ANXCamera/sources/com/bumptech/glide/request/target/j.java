@@ -33,7 +33,7 @@ public class j extends m<Bitmap> {
     }
 
     public j(Context context2, int i, RemoteViews remoteViews2, Notification notification2, int i2) {
-        this(context2, i, remoteViews2, notification2, i2, null);
+        this(context2, i, remoteViews2, notification2, i2, (String) null);
     }
 
     public j(Context context2, int i, RemoteViews remoteViews2, Notification notification2, int i2, String str) {

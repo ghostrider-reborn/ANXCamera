@@ -4,6 +4,7 @@ import android.os.Handler;
 import com.ss.android.ugc.effectmanager.common.EffectConstants;
 import com.ss.android.ugc.effectmanager.common.listener.ICache;
 import com.ss.android.ugc.effectmanager.common.listener.IJsonConverter;
+import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.common.task.NormalTask;
 import com.ss.android.ugc.effectmanager.context.EffectContext;
 import com.ss.android.ugc.effectmanager.effect.task.result.WriteTagTaskResult;
@@ -25,6 +26,6 @@ public class WriteUpdateTagTask extends NormalTask {
 
     public void execute() {
         this.mCache.save(EffectConstants.KEY_EFFECT_UPDATE_TIME, this.mJsonConverter.convertObjToJson(this.mTagsCachedMap));
-        sendMessage(51, new WriteTagTaskResult(this.mTaskId, null));
+        sendMessage(51, new WriteTagTaskResult(this.mTaskId, (ExceptionResult) null));
     }
 }

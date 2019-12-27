@@ -10,7 +10,7 @@ public final class MaybeDetach<T> extends AbstractMaybeWithUpstream<T, T> {
     static final class DetachMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f281d;
 
         DetachMaybeObserver(MaybeObserver<? super T> maybeObserver) {

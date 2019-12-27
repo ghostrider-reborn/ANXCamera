@@ -12,7 +12,7 @@ public final class HttpResponse {
     private final int mStatusCode;
 
     public HttpResponse(int i, List<Header> list) {
-        this(i, list, -1, null);
+        this(i, list, -1, (InputStream) null);
     }
 
     public HttpResponse(int i, List<Header> list, int i2, InputStream inputStream) {

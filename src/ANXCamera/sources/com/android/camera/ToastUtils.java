@@ -21,24 +21,24 @@ public class ToastUtils {
         if (context != null) {
             Resources resources = context.getResources();
             if (resources != null) {
-                showToast(new WeakReference<>(context), resources.getString(i), 17, 0, 0);
+                showToast((WeakReference<Context>) new WeakReference(context), resources.getString(i), 17, 0, 0);
             }
         }
     }
 
     public static void showToast(Context context, String str) {
-        showToast(new WeakReference<>(context), str, 17, 0, 0);
+        showToast((WeakReference<Context>) new WeakReference(context), str, 17, 0, 0);
     }
 
     public static void showToast(Context context, String str, int i) {
         if (context != null && context.getResources() != null) {
-            showToast(new WeakReference<>(context), str, i, 0, 0);
+            showToast((WeakReference<Context>) new WeakReference(context), str, i, 0, 0);
         }
     }
 
     public static void showToast(Context context, String str, int i, int i2, int i3) {
         if (context != null && context.getResources() != null) {
-            showToast(new WeakReference<>(context), str, i, i2, i3);
+            showToast((WeakReference<Context>) new WeakReference(context), str, i, i2, i3);
         }
     }
 

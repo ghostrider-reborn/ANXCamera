@@ -14,39 +14,39 @@ public class WideSelfieEngine {
     public static final int MPAF_RGBA_BASE = 805306368;
     public static final int MPAF_RGB_BASE = 268435456;
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f206a = "com.arcsoft.camera.wideselfie.WideSelfieEngine";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static WideSelfieEngine f207b;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private AwsInitParameter f208c = null;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private WideSelfieCallback f209d = null;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private boolean f210e = false;
 
     private static final class a {
 
-        /* renamed from: a reason: collision with root package name */
+        /* renamed from: a  reason: collision with root package name */
         int f211a;
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         int f212b;
 
-        /* renamed from: c reason: collision with root package name */
+        /* renamed from: c  reason: collision with root package name */
         int f213c;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         int f214d;
 
-        /* renamed from: e reason: collision with root package name */
+        /* renamed from: e  reason: collision with root package name */
         String f215e;
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         String f216f;
         String g;
 

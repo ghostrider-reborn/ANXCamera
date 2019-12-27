@@ -177,10 +177,7 @@ public final class e {
             i2 |= 1024;
         }
         if (i != i2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("0x");
-            sb.append(Integer.toHexString(i & (~i2)));
-            arrayList.add(sb.toString());
+            arrayList.add("0x" + Integer.toHexString(i & (~i2)));
         }
         return String.join(" | ", arrayList);
     }
@@ -288,9 +285,6 @@ public final class e {
         if (i == 1024) {
             return "MISYS_UNKNOWN";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("0x");
-        sb.append(Integer.toHexString(i));
-        return sb.toString();
+        return "0x" + Integer.toHexString(i);
     }
 }

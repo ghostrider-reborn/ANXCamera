@@ -18,10 +18,7 @@ public class RgbToYuvRender extends PixelEffectRender {
     public boolean draw(DrawAttribute drawAttribute) {
         long currentTimeMillis = System.currentTimeMillis();
         boolean draw = super.draw(drawAttribute);
-        StringBuilder sb = new StringBuilder();
-        sb.append("drawTime=");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        Log.d("RgbToYuvRender", sb.toString());
+        Log.d("RgbToYuvRender", "drawTime=" + (System.currentTimeMillis() - currentTimeMillis));
         return draw;
     }
 

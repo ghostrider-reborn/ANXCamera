@@ -6,9 +6,8 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.StringRes;
-import android.support.v4.app.Fragment.SavedState;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -121,7 +120,7 @@ public abstract class FragmentManager {
 
     public abstract boolean isStateSaved();
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Deprecated
     public FragmentTransaction openTransaction() {
         return beginTransaction();
@@ -146,7 +145,7 @@ public abstract class FragmentManager {
     public abstract void removeOnBackStackChangedListener(@NonNull OnBackStackChangedListener onBackStackChangedListener);
 
     @Nullable
-    public abstract SavedState saveFragmentInstanceState(Fragment fragment);
+    public abstract Fragment.SavedState saveFragmentInstanceState(Fragment fragment);
 
     public abstract void unregisterFragmentLifecycleCallbacks(@NonNull FragmentLifecycleCallbacks fragmentLifecycleCallbacks);
 }

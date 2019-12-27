@@ -19,7 +19,7 @@ public final class ObservableReduceSeedSingle<T, R> extends Single<R> {
     static final class ReduceSeedObserver<T, R> implements Observer<T>, Disposable {
         final SingleObserver<? super R> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f322d;
         final BiFunction<R, ? super T, R> reducer;
         R value;

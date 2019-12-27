@@ -124,25 +124,24 @@ public abstract class Scheduler {
                 if (!this.sd.isDisposed()) {
                     long now = Worker.this.now(TimeUnit.NANOSECONDS);
                     long j2 = Scheduler.CLOCK_DRIFT_TOLERANCE_NANOSECONDS;
-                    long j3 = now + j2;
-                    long j4 = this.lastNowNanoseconds;
-                    if (j3 >= j4) {
-                        long j5 = this.periodInNanoseconds;
-                        if (now < j4 + j5 + j2) {
-                            long j6 = this.startInNanoseconds;
-                            long j7 = this.count + 1;
-                            this.count = j7;
-                            j = j6 + (j7 * j5);
+                    long j3 = this.lastNowNanoseconds;
+                    if (now + j2 >= j3) {
+                        long j4 = this.periodInNanoseconds;
+                        if (now < j3 + j4 + j2) {
+                            long j5 = this.startInNanoseconds;
+                            long j6 = this.count + 1;
+                            this.count = j6;
+                            j = j5 + (j6 * j4);
                             this.lastNowNanoseconds = now;
                             this.sd.replace(Worker.this.schedule(this, j - now, TimeUnit.NANOSECONDS));
                         }
                     }
-                    long j8 = this.periodInNanoseconds;
-                    long j9 = now + j8;
-                    long j10 = this.count + 1;
-                    this.count = j10;
-                    this.startInNanoseconds = j9 - (j8 * j10);
-                    j = j9;
+                    long j7 = this.periodInNanoseconds;
+                    long j8 = now + j7;
+                    long j9 = this.count + 1;
+                    this.count = j9;
+                    this.startInNanoseconds = j8 - (j7 * j9);
+                    j = j8;
                     this.lastNowNanoseconds = now;
                     this.sd.replace(Worker.this.schedule(this, j - now, TimeUnit.NANOSECONDS));
                 }

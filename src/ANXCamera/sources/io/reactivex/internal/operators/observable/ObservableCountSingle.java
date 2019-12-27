@@ -17,7 +17,7 @@ public final class ObservableCountSingle<T> extends Single<Long> implements Fuse
         final SingleObserver<? super Long> actual;
         long count;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f310d;
 
         CountObserver(SingleObserver<? super Long> singleObserver) {
@@ -60,7 +60,7 @@ public final class ObservableCountSingle<T> extends Single<Long> implements Fuse
     }
 
     public Observable<Long> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableCount<T>(this.source));
+        return RxJavaPlugins.onAssembly(new ObservableCount(this.source));
     }
 
     public void subscribeActual(SingleObserver<? super Long> singleObserver) {

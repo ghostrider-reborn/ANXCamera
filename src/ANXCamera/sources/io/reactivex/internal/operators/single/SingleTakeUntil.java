@@ -58,7 +58,7 @@ public final class SingleTakeUntil<T, U> extends Single<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void otherError(Throwable th) {
             Disposable disposable = (Disposable) get();
             DisposableHelper disposableHelper = DisposableHelper.DISPOSED;

@@ -1,6 +1,6 @@
 package android.support.v4.view;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.compat.R;
 import android.view.View;
@@ -15,14 +15,14 @@ public final class ViewGroupCompat {
     }
 
     public static int getLayoutMode(@NonNull ViewGroup viewGroup) {
-        if (VERSION.SDK_INT >= 18) {
+        if (Build.VERSION.SDK_INT >= 18) {
             return viewGroup.getLayoutMode();
         }
         return 0;
     }
 
     public static int getNestedScrollAxes(@NonNull ViewGroup viewGroup) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return viewGroup.getNestedScrollAxes();
         }
         if (viewGroup instanceof NestedScrollingParent) {
@@ -32,7 +32,7 @@ public final class ViewGroupCompat {
     }
 
     public static boolean isTransitionGroup(@NonNull ViewGroup viewGroup) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return viewGroup.isTransitionGroup();
         }
         Boolean bool = (Boolean) viewGroup.getTag(R.id.tag_transition_group);
@@ -45,7 +45,7 @@ public final class ViewGroupCompat {
     }
 
     public static void setLayoutMode(@NonNull ViewGroup viewGroup, int i) {
-        if (VERSION.SDK_INT >= 18) {
+        if (Build.VERSION.SDK_INT >= 18) {
             viewGroup.setLayoutMode(i);
         }
     }
@@ -56,7 +56,7 @@ public final class ViewGroupCompat {
     }
 
     public static void setTransitionGroup(@NonNull ViewGroup viewGroup, boolean z) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             viewGroup.setTransitionGroup(z);
         } else {
             viewGroup.setTag(R.id.tag_transition_group, Boolean.valueOf(z));

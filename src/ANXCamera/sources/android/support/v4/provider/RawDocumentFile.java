@@ -27,10 +27,7 @@ class RawDocumentFile extends DocumentFile {
                 z &= deleteContents(file2);
             }
             if (!file2.delete()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to delete ");
-                sb.append(file2);
-                Log.w("DocumentFile", sb.toString());
+                Log.w("DocumentFile", "Failed to delete " + file2);
                 z = false;
             }
         }
@@ -39,13 +36,11 @@ class RawDocumentFile extends DocumentFile {
 
     private static String getTypeForName(String str) {
         int lastIndexOf = str.lastIndexOf(46);
-        if (lastIndexOf >= 0) {
-            String mimeTypeFromExtension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(str.substring(lastIndexOf + 1).toLowerCase());
-            if (mimeTypeFromExtension != null) {
-                return mimeTypeFromExtension;
-            }
+        if (lastIndexOf < 0) {
+            return "application/octet-stream";
         }
-        return "application/octet-stream";
+        String mimeTypeFromExtension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(str.substring(lastIndexOf + 1).toLowerCase());
+        return mimeTypeFromExtension != null ? mimeTypeFromExtension : "application/octet-stream";
     }
 
     public boolean canRead() {
@@ -67,23 +62,15 @@ class RawDocumentFile extends DocumentFile {
 
     @Nullable
     public DocumentFile createFile(String str, String str2) {
-        String extensionFromMimeType = MimeTypeMap.getSingleton().getExtensionFromMimeType(str);
-        if (extensionFromMimeType != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(".");
-            sb.append(extensionFromMimeType);
-            str2 = sb.toString();
+        if (MimeTypeMap.getSingleton().getExtensionFromMimeType(str) != null) {
+            str2 = str2 + "." + r2;
         }
         File file = new File(this.mFile, str2);
         try {
             file.createNewFile();
             return new RawDocumentFile(this, file);
         } catch (IOException e2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Failed to createFile: ");
-            sb2.append(e2);
-            Log.w("DocumentFile", sb2.toString());
+            Log.w("DocumentFile", "Failed to createFile: " + e2);
             return null;
         }
     }

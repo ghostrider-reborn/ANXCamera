@@ -1,9 +1,8 @@
 package com.google.android.apps.gsa.search.shared.service.proto;
 
-import com.google.protobuf.Internal.EnumLite;
-import com.google.protobuf.Internal.EnumLiteMap;
+import com.google.protobuf.Internal;
 
-public enum ServiceEventId implements EnumLite {
+public enum ServiceEventId implements Internal.EnumLite {
     ATTACH_WEBVIEW(1),
     SHOW_WEBVIEW(63),
     HIDE_WEBVIEW(64),
@@ -427,11 +426,11 @@ public enum ServiceEventId implements EnumLite {
     public static final int WEB_ANSWER_HISTORY_RESPONSE_VALUE = 232;
     public static final int WERNICKE_PLAYBACK_STATE_CHANGED_VALUE = 156;
     public static final int WORKER_UNLOADING_FINISHED_VALUE = 127;
-    private static final EnumLiteMap<ServiceEventId> internalValueMap = null;
+    private static final Internal.EnumLiteMap<ServiceEventId> internalValueMap = null;
     private final int value;
 
     static {
-        internalValueMap = new EnumLiteMap<ServiceEventId>() {
+        internalValueMap = new Internal.EnumLiteMap<ServiceEventId>() {
             public ServiceEventId findValueByNumber(int i) {
                 return ServiceEventId.forNumber(i);
             }
@@ -871,7 +870,7 @@ public enum ServiceEventId implements EnumLite {
         }
     }
 
-    public static EnumLiteMap<ServiceEventId> internalGetValueMap() {
+    public static Internal.EnumLiteMap<ServiceEventId> internalGetValueMap() {
         return internalValueMap;
     }
 

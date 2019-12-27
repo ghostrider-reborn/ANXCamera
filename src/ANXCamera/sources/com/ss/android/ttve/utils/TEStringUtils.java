@@ -6,10 +6,7 @@ public class TEStringUtils {
             return null;
         }
         int lastIndexOf = str.lastIndexOf("/");
-        if (lastIndexOf != -1) {
-            str = str.substring(lastIndexOf + 1, str.length());
-        }
-        return str;
+        return lastIndexOf == -1 ? str : str.substring(lastIndexOf + 1, str.length());
     }
 
     public static String getFilenameWithoutSuffix(String str) {
@@ -18,12 +15,7 @@ public class TEStringUtils {
         }
         int lastIndexOf = str.lastIndexOf("/") + 1;
         int lastIndexOf2 = str.lastIndexOf(".");
-        if (lastIndexOf2 == -1) {
-            str = str.substring(0, lastIndexOf - 1);
-        } else if (lastIndexOf2 > lastIndexOf) {
-            str = str.substring(lastIndexOf, lastIndexOf2);
-        }
-        return str;
+        return lastIndexOf2 == -1 ? str.substring(0, lastIndexOf - 1) : lastIndexOf2 > lastIndexOf ? str.substring(lastIndexOf, lastIndexOf2) : str;
     }
 
     public static String getFolderPath(String str) {
@@ -31,10 +23,7 @@ public class TEStringUtils {
             return null;
         }
         int lastIndexOf = str.lastIndexOf("/");
-        if (lastIndexOf != -1) {
-            str = str.substring(0, lastIndexOf + 1);
-        }
-        return str;
+        return lastIndexOf == -1 ? str : str.substring(0, lastIndexOf + 1);
     }
 
     public static boolean isEmpty(String str) {

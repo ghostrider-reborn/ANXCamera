@@ -2,14 +2,11 @@ package android.support.v7.recyclerview.extensions;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.recyclerview.extensions.AsyncDifferConfig.Builder;
+import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
 import android.support.v7.util.AdapterListUpdateCallback;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.util.DiffUtil.Callback;
-import android.support.v7.util.DiffUtil.DiffResult;
-import android.support.v7.util.DiffUtil.ItemCallback;
 import android.support.v7.util.ListUpdateCallback;
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,13 +26,13 @@ public class AsyncListDiffer<T> {
         this.mConfig = asyncDifferConfig;
     }
 
-    public AsyncListDiffer(@NonNull Adapter adapter, @NonNull ItemCallback<T> itemCallback) {
+    public AsyncListDiffer(@NonNull RecyclerView.Adapter adapter, @NonNull DiffUtil.ItemCallback<T> itemCallback) {
         this.mUpdateCallback = new AdapterListUpdateCallback(adapter);
-        this.mConfig = new Builder(itemCallback).build();
+        this.mConfig = new AsyncDifferConfig.Builder(itemCallback).build();
     }
 
     /* access modifiers changed from: private */
-    public void latchList(@NonNull List<T> list, @NonNull DiffResult diffResult) {
+    public void latchList(@NonNull List<T> list, @NonNull DiffUtil.DiffResult diffResult) {
         this.mList = list;
         this.mReadOnlyList = Collections.unmodifiableList(list);
         diffResult.dispatchUpdatesTo(this.mUpdateCallback);
@@ -63,7 +60,7 @@ public class AsyncListDiffer<T> {
             } else {
                 this.mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
                     public void run() {
-                        final DiffResult calculateDiff = DiffUtil.calculateDiff(new Callback() {
+                        final DiffUtil.DiffResult calculateDiff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                             public boolean areContentsTheSame(int i, int i2) {
                                 Object obj = list2.get(i);
                                 Object obj2 = list.get(i2);
@@ -79,10 +76,7 @@ public class AsyncListDiffer<T> {
                             public boolean areItemsTheSame(int i, int i2) {
                                 Object obj = list2.get(i);
                                 Object obj2 = list.get(i2);
-                                if (obj != null && obj2 != null) {
-                                    return AsyncListDiffer.this.mConfig.getDiffCallback().areItemsTheSame(obj, obj2);
-                                }
-                                return obj == null && obj2 == null;
+                                return (obj == null || obj2 == null) ? obj == null && obj2 == null : AsyncListDiffer.this.mConfig.getDiffCallback().areItemsTheSame(obj, obj2);
                             }
 
                             @Nullable

@@ -1,16 +1,16 @@
 package com.android.camera.fragment.mimoji;
 
 import com.android.camera.ui.autoselectview.SelectItemBean;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
+import com.arcsoft.avatar.AvatarConfig;
 
 public class MimojiTypeBean extends SelectItemBean {
-    private ASAvatarConfigType ASAvatarConfigType;
+    private AvatarConfig.ASAvatarConfigType ASAvatarConfigType;
 
-    public ASAvatarConfigType getASAvatarConfigType() {
+    public AvatarConfig.ASAvatarConfigType getASAvatarConfigType() {
         return this.ASAvatarConfigType;
     }
 
-    public void setASAvatarConfigType(ASAvatarConfigType aSAvatarConfigType) {
+    public void setASAvatarConfigType(AvatarConfig.ASAvatarConfigType aSAvatarConfigType) {
         this.ASAvatarConfigType = aSAvatarConfigType;
     }
 }

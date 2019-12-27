@@ -17,9 +17,8 @@ public class e implements a<ByteBuffer> {
             com.bumptech.glide.util.a.a(byteBuffer, file);
             return true;
         } catch (IOException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Failed to write data", e2);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to write data", e2);
             }
             return false;
         }

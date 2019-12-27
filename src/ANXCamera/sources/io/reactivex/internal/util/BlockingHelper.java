@@ -28,11 +28,7 @@ public final class BlockingHelper {
             return;
         }
         if ((Thread.currentThread() instanceof NonBlockingThread) || RxJavaPlugins.onBeforeBlocking()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Attempt to block on a Scheduler ");
-            sb.append(Thread.currentThread().getName());
-            sb.append(" that doesn't support blocking operators as they may lead to deadlock");
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Attempt to block on a Scheduler " + Thread.currentThread().getName() + " that doesn't support blocking operators as they may lead to deadlock");
         }
     }
 }

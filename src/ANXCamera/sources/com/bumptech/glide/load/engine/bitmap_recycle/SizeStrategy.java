@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
@@ -25,10 +24,7 @@ final class SizeStrategy implements k {
         }
 
         public boolean equals(Object obj) {
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            return this.size == ((Key) obj).size;
+            return (obj instanceof Key) && this.size == ((Key) obj).size;
         }
 
         public int hashCode() {
@@ -82,11 +78,7 @@ final class SizeStrategy implements k {
     }
 
     static String r(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append(i);
-        sb.append("]");
-        return sb.toString();
+        return "[" + i + "]";
     }
 
     public void a(Bitmap bitmap) {
@@ -102,7 +94,7 @@ final class SizeStrategy implements k {
         navigableMap.put(valueOf, Integer.valueOf(i));
     }
 
-    public String b(int i, int i2, Config config) {
+    public String b(int i, int i2, Bitmap.Config config) {
         return r(l.g(i, i2, config));
     }
 
@@ -111,20 +103,20 @@ final class SizeStrategy implements k {
     }
 
     @Nullable
-    public Bitmap d(int i, int i2, Config config) {
+    public Bitmap d(int i, int i2, Bitmap.Config config) {
         int g = l.g(i, i2, config);
         Key key = this.cg.get(g);
-        Integer num = (Integer) this.gg.ceilingKey(Integer.valueOf(g));
-        if (!(num == null || num.intValue() == g || num.intValue() > g * 8)) {
+        Integer ceilingKey = this.gg.ceilingKey(Integer.valueOf(g));
+        if (!(ceilingKey == null || ceilingKey.intValue() == g || ceilingKey.intValue() > g * 8)) {
             this.cg.a(key);
-            key = this.cg.get(num.intValue());
+            key = this.cg.get(ceilingKey.intValue());
         }
-        Bitmap bitmap = (Bitmap) this.dg.b(key);
-        if (bitmap != null) {
-            bitmap.reconfigure(i, i2, config);
-            d(num);
+        Bitmap b2 = this.dg.b(key);
+        if (b2 != null) {
+            b2.reconfigure(i, i2, config);
+            d(ceilingKey);
         }
-        return bitmap;
+        return b2;
     }
 
     public String e(Bitmap bitmap) {
@@ -133,19 +125,14 @@ final class SizeStrategy implements k {
 
     @Nullable
     public Bitmap removeLast() {
-        Bitmap bitmap = (Bitmap) this.dg.removeLast();
-        if (bitmap != null) {
-            d(Integer.valueOf(l.j(bitmap)));
+        Bitmap removeLast = this.dg.removeLast();
+        if (removeLast != null) {
+            d(Integer.valueOf(l.j(removeLast)));
         }
-        return bitmap;
+        return removeLast;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SizeStrategy:\n  ");
-        sb.append(this.dg);
-        sb.append("\n  SortedSizes");
-        sb.append(this.gg);
-        return sb.toString();
+        return "SizeStrategy:\n  " + this.dg + "\n  SortedSizes" + this.gg;
     }
 }

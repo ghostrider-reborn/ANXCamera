@@ -13,8 +13,6 @@ public final class CommonUtil {
     }
 
     private static boolean saveCameraCalibrationToFile(Context context, byte[] bArr, String str) {
-        String str2 = "saveCameraCalibrationToFile: failed!";
-        String str3 = TAG;
         boolean z = false;
         if (!(bArr == null || context == null)) {
             FileOutputStream fileOutputStream = null;
@@ -23,20 +21,27 @@ public final class CommonUtil {
                 fileOutputStream.write(bArr);
                 z = true;
                 try {
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
                 } catch (Exception e2) {
-                    Log.w(str3, str2, e2);
+                    Log.w(TAG, "saveCameraCalibrationToFile: failed!", e2);
                 }
             } catch (FileNotFoundException e3) {
-                Log.w(str3, "saveCameraCalibrationToFile: FileNotFoundException", e3);
+                Log.w(TAG, "saveCameraCalibrationToFile: FileNotFoundException", e3);
+                fileOutputStream.flush();
+                fileOutputStream.close();
             } catch (IOException e4) {
-                Log.w(str3, "saveCameraCalibrationToFile: IOException", e4);
-            } finally {
+                Log.w(TAG, "saveCameraCalibrationToFile: IOException", e4);
+                fileOutputStream.flush();
+                fileOutputStream.close();
+            } catch (Throwable th) {
                 try {
                     fileOutputStream.flush();
                     fileOutputStream.close();
                 } catch (Exception e5) {
-                    Log.w(str3, str2, e5);
+                    Log.w(TAG, "saveCameraCalibrationToFile: failed!", e5);
                 }
+                throw th;
             }
         }
         return z;

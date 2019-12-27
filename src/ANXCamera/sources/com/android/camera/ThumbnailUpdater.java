@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import com.android.camera.log.Log;
 import com.android.camera.module.Module;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
+import com.android.camera.protocol.ModeProtocol;
 import java.io.File;
 
 public class ThumbnailUpdater {
@@ -29,12 +29,7 @@ public class ThumbnailUpdater {
         /* access modifiers changed from: protected */
         public Thumbnail doInBackground(Void... voidArr) {
             int i;
-            StringBuilder sb = new StringBuilder();
-            sb.append("LoadThumbnailTask execute, lookatcache=");
-            sb.append(this.mLookAtCache);
-            String sb2 = sb.toString();
-            String str = ThumbnailUpdater.TAG;
-            Log.d(str, sb2);
+            Log.d(ThumbnailUpdater.TAG, "LoadThumbnailTask execute, lookatcache=" + this.mLookAtCache);
             if (isCancelled()) {
                 return null;
             }
@@ -56,16 +51,10 @@ public class ThumbnailUpdater {
             Thumbnail[] thumbnailArr = new Thumbnail[1];
             if (ThumbnailUpdater.this.mActivityBase.startFromSecureKeyguard() || ThumbnailUpdater.this.mActivityBase.isGalleryLocked()) {
                 i = Thumbnail.getLastThumbnailFromUriList(ThumbnailUpdater.this.mContentResolver, thumbnailArr, ThumbnailUpdater.this.mActivityBase.getSecureUriList(), uri2);
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("get last thumbnail from uri list, code is ");
-                sb3.append(i);
-                Log.d(str, sb3.toString());
+                Log.d(ThumbnailUpdater.TAG, "get last thumbnail from uri list, code is " + i);
             } else {
                 i = Thumbnail.getLastThumbnailFromContentResolver(ThumbnailUpdater.this.mContentResolver, thumbnailArr, uri2);
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("get last thumbnail from provider, code is ");
-                sb4.append(i);
-                Log.d(str, sb4.toString());
+                Log.d(ThumbnailUpdater.TAG, "get last thumbnail from provider, code is " + i);
             }
             if (i == -1) {
                 return lastThumbnailFromFile;
@@ -125,10 +114,7 @@ public class ThumbnailUpdater {
     }
 
     public void getLastThumbnail() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("getLastThumbnail, current thumbnailtask is ");
-        sb.append(this.mLoadThumbnailTask);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "getLastThumbnail, current thumbnailtask is " + this.mLoadThumbnailTask);
         AsyncTask<Void, Void, Thumbnail> asyncTask = this.mLoadThumbnailTask;
         if (asyncTask != null) {
             asyncTask.cancel(true);
@@ -172,12 +158,12 @@ public class ThumbnailUpdater {
     public void updateThumbnailView(final boolean z) {
         this.mActivityBase.runOnUiThread(new Runnable() {
             public void run() {
-                ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+                ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
                 if (actionProcessing == null) {
                     Log.e(ThumbnailUpdater.TAG, "won't update thumbnail", new RuntimeException());
-                    return;
+                } else {
+                    actionProcessing.updateThumbnail(ThumbnailUpdater.this.mThumbnail, z, ThumbnailUpdater.this.mActivityBase.hashCode());
                 }
-                actionProcessing.updateThumbnail(ThumbnailUpdater.this.mThumbnail, z, ThumbnailUpdater.this.mActivityBase.hashCode());
             }
         });
     }

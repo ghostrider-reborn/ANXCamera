@@ -2,7 +2,6 @@ package com.ss.android.vesdk.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.support.annotation.Keep;
@@ -16,7 +15,7 @@ public class BitmapLoader {
         if (i == -1 || i2 == -1) {
             return 1;
         }
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(str, options);
         int i3 = options.outHeight;
@@ -32,7 +31,7 @@ public class BitmapLoader {
     public static Bitmap loadBitmap(String str, int i, int i2) {
         ExifInterface exifInterface;
         Bitmap bitmap;
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         if (i > 0 && i2 > 0) {
             options.inSampleSize = calculateInSampleSize(str, i, i2);
         }

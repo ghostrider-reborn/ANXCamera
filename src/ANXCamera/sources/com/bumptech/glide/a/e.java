@@ -39,18 +39,12 @@ final class e {
                 if (file2.delete()) {
                     i++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("failed to delete file: ");
-                    sb.append(file2);
-                    throw new IOException(sb.toString());
+                    throw new IOException("failed to delete file: " + file2);
                 }
             }
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("not a readable directory: ");
-        sb2.append(file);
-        throw new IOException(sb2.toString());
+        throw new IOException("not a readable directory: " + file);
     }
 
     static String readFully(Reader reader) throws IOException {

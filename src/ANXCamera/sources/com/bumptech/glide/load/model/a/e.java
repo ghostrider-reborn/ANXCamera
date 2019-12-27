@@ -45,11 +45,11 @@ public class e implements t<Uri, InputStream> {
     }
 
     @Nullable
-    public com.bumptech.glide.load.model.t.a<InputStream> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
+    public t.a<InputStream> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
         if (!b.k(i, i2) || !c(gVar)) {
             return null;
         }
-        return new com.bumptech.glide.load.model.t.a<>(new d(uri), c.c(this.context, uri));
+        return new t.a<>(new d(uri), c.c(this.context, uri));
     }
 
     /* renamed from: i */

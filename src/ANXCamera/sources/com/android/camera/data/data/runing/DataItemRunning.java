@@ -215,10 +215,7 @@ public class DataItemRunning extends DataItemBase {
     }
 
     public void setUiStyle(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setUiStyle: ");
-        sb.append(i);
-        Log.d("DataItemRunning", sb.toString());
+        Log.d("DataItemRunning", "setUiStyle: " + i);
         this.mLastUiStyle = this.mUiStyle;
         this.mUiStyle = i;
     }

@@ -12,27 +12,29 @@ public enum SubscriptionHelper implements Subscription {
     CANCELLED;
 
     public static boolean cancel(AtomicReference<Subscription> atomicReference) {
-        Subscription subscription = (Subscription) atomicReference.get();
+        Subscription subscription = atomicReference.get();
         SubscriptionHelper subscriptionHelper = CANCELLED;
-        if (subscription != subscriptionHelper) {
-            Subscription subscription2 = (Subscription) atomicReference.getAndSet(subscriptionHelper);
-            if (subscription2 != CANCELLED) {
-                if (subscription2 != null) {
-                    subscription2.cancel();
-                }
-                return true;
-            }
+        if (subscription == subscriptionHelper) {
+            return false;
         }
-        return false;
+        Subscription andSet = atomicReference.getAndSet(subscriptionHelper);
+        if (andSet == CANCELLED) {
+            return false;
+        }
+        if (andSet == null) {
+            return true;
+        }
+        andSet.cancel();
+        return true;
     }
 
     public static void deferredRequest(AtomicReference<Subscription> atomicReference, AtomicLong atomicLong, long j) {
-        Subscription subscription = (Subscription) atomicReference.get();
+        Subscription subscription = atomicReference.get();
         if (subscription != null) {
             subscription.request(j);
         } else if (validate(j)) {
             BackpressureHelper.add(atomicLong, j);
-            Subscription subscription2 = (Subscription) atomicReference.get();
+            Subscription subscription2 = atomicReference.get();
             if (subscription2 != null) {
                 long andSet = atomicLong.getAndSet(0);
                 if (andSet != 0) {
@@ -47,9 +49,10 @@ public enum SubscriptionHelper implements Subscription {
             return false;
         }
         long andSet = atomicLong.getAndSet(0);
-        if (andSet != 0) {
-            subscription.request(andSet);
+        if (andSet == 0) {
+            return true;
         }
+        subscription.request(andSet);
         return true;
     }
 
@@ -60,11 +63,12 @@ public enum SubscriptionHelper implements Subscription {
     public static boolean replace(AtomicReference<Subscription> atomicReference, Subscription subscription) {
         Subscription subscription2;
         do {
-            subscription2 = (Subscription) atomicReference.get();
+            subscription2 = atomicReference.get();
             if (subscription2 == CANCELLED) {
-                if (subscription != null) {
-                    subscription.cancel();
+                if (subscription == null) {
+                    return false;
                 }
+                subscription.cancel();
                 return false;
             }
         } while (!atomicReference.compareAndSet(subscription2, subscription));
@@ -72,10 +76,7 @@ public enum SubscriptionHelper implements Subscription {
     }
 
     public static void reportMoreProduced(long j) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("More produced than requested: ");
-        sb.append(j);
-        RxJavaPlugins.onError(new ProtocolViolationException(sb.toString()));
+        RxJavaPlugins.onError(new ProtocolViolationException("More produced than requested: " + j));
     }
 
     public static void reportSubscriptionSet() {
@@ -85,29 +86,32 @@ public enum SubscriptionHelper implements Subscription {
     public static boolean set(AtomicReference<Subscription> atomicReference, Subscription subscription) {
         Subscription subscription2;
         do {
-            subscription2 = (Subscription) atomicReference.get();
+            subscription2 = atomicReference.get();
             if (subscription2 == CANCELLED) {
-                if (subscription != null) {
-                    subscription.cancel();
+                if (subscription == null) {
+                    return false;
                 }
+                subscription.cancel();
                 return false;
             }
         } while (!atomicReference.compareAndSet(subscription2, subscription));
-        if (subscription2 != null) {
-            subscription2.cancel();
+        if (subscription2 == null) {
+            return true;
         }
+        subscription2.cancel();
         return true;
     }
 
     public static boolean setOnce(AtomicReference<Subscription> atomicReference, Subscription subscription) {
         ObjectHelper.requireNonNull(subscription, "s is null");
-        if (atomicReference.compareAndSet(null, subscription)) {
+        if (atomicReference.compareAndSet((Object) null, subscription)) {
             return true;
         }
         subscription.cancel();
-        if (atomicReference.get() != CANCELLED) {
-            reportSubscriptionSet();
+        if (atomicReference.get() == CANCELLED) {
+            return false;
         }
+        reportSubscriptionSet();
         return false;
     }
 
@@ -115,10 +119,7 @@ public enum SubscriptionHelper implements Subscription {
         if (j > 0) {
             return true;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("n > 0 required but it was ");
-        sb.append(j);
-        RxJavaPlugins.onError(new IllegalArgumentException(sb.toString()));
+        RxJavaPlugins.onError(new IllegalArgumentException("n > 0 required but it was " + j));
         return false;
     }
 

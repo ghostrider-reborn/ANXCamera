@@ -27,13 +27,13 @@ class u<Z> implements A<Z> {
         this.Kf = z2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(c cVar, a aVar) {
         this.key = cVar;
         this.listener = aVar;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void acquire() {
         if (this.za) {
             throw new IllegalStateException("Cannot acquire a recycled resource");
@@ -66,7 +66,7 @@ class u<Z> implements A<Z> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void release() {
         if (this.Lf <= 0) {
             throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
@@ -81,30 +81,16 @@ class u<Z> implements A<Z> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public A<Z> tg() {
         return this.resource;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("EngineResource{isCacheable=");
-        sb.append(this.yf);
-        sb.append(", listener=");
-        sb.append(this.listener);
-        sb.append(", key=");
-        sb.append(this.key);
-        sb.append(", acquired=");
-        sb.append(this.Lf);
-        sb.append(", isRecycled=");
-        sb.append(this.za);
-        sb.append(", resource=");
-        sb.append(this.resource);
-        sb.append('}');
-        return sb.toString();
+        return "EngineResource{isCacheable=" + this.yf + ", listener=" + this.listener + ", key=" + this.key + ", acquired=" + this.Lf + ", isRecycled=" + this.za + ", resource=" + this.resource + '}';
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean ug() {
         return this.yf;
     }

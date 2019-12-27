@@ -1,10 +1,9 @@
 package com.android.camera.fragment.top;
 
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.LayoutParams;
+import android.graphics.drawable.Drawable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,7 +17,7 @@ import com.android.camera.fragment.CommonRecyclerViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpandAdapter extends Adapter<CommonRecyclerViewHolder> implements OnClickListener {
+public class ExpandAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> implements View.OnClickListener {
     private ComponentData mComponentData;
     private int mCurrentMode = ((DataItemGlobal) DataRepository.provider().dataGlobal()).getCurrentMode();
     private String mCurrentValue = this.mComponentData.getComponentValue(this.mCurrentMode);
@@ -53,7 +52,7 @@ public class ExpandAdapter extends Adapter<CommonRecyclerViewHolder> implements 
     }
 
     public void onBindViewHolder(CommonRecyclerViewHolder commonRecyclerViewHolder, int i) {
-        ComponentDataItem componentDataItem = (ComponentDataItem) this.mDatas.get(i);
+        ComponentDataItem componentDataItem = this.mDatas.get(i);
         String str = componentDataItem.mValue;
         commonRecyclerViewHolder.itemView.setOnClickListener(this);
         commonRecyclerViewHolder.itemView.setTag(str);
@@ -67,11 +66,7 @@ public class ExpandAdapter extends Adapter<CommonRecyclerViewHolder> implements 
                 textView.postDelayed(new Runnable() {
                     public void run() {
                         TextView textView = textView;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(textView.getText());
-                        sb.append(", ");
-                        sb.append(string);
-                        textView.setContentDescription(sb.toString());
+                        textView.setContentDescription(textView.getText() + ", " + string);
                         textView.sendAccessibilityEvent(128);
                     }
                 }, 100);
@@ -80,7 +75,7 @@ public class ExpandAdapter extends Adapter<CommonRecyclerViewHolder> implements 
             return;
         }
         textView.setShadowLayer(4.0f, 0.0f, 0.0f, -1073741824);
-        textView.setBackground(null);
+        textView.setBackground((Drawable) null);
     }
 
     public void onClick(View view) {
@@ -99,7 +94,7 @@ public class ExpandAdapter extends Adapter<CommonRecyclerViewHolder> implements 
 
     public CommonRecyclerViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.grid_setting_expanded_text_item, viewGroup, false);
-        LayoutParams layoutParams = (LayoutParams) inflate.getLayoutParams();
+        RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) inflate.getLayoutParams();
         if (i == R.string.pref_camera_autoexposure_title) {
             layoutParams.width = viewGroup.getContext().getResources().getDimensionPixelSize(R.dimen.expanded_meter_text_item_width);
         } else {

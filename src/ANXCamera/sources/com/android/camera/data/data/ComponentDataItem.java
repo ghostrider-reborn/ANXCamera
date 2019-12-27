@@ -35,14 +35,6 @@ public final class ComponentDataItem {
 
     public String toString() {
         String string = TextUtils.isEmpty(this.mDisplayNameStr) ? CameraAppImpl.getAndroidContext().getString(this.mDisplayNameRes) : this.mDisplayNameStr;
-        StringBuilder sb = new StringBuilder();
-        sb.append("ComponentDataItem{mDisplayName='");
-        sb.append(string);
-        sb.append('\'');
-        sb.append("mValue='");
-        sb.append(this.mValue);
-        sb.append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "ComponentDataItem{mDisplayName='" + string + '\'' + "mValue='" + this.mValue + '\'' + '}';
     }
 }

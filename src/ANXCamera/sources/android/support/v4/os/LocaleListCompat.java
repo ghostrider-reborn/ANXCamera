@@ -1,6 +1,6 @@
 package android.support.v4.os;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.LocaleList;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
@@ -131,7 +131,7 @@ public final class LocaleListCompat {
     }
 
     static {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             IMPL = new LocaleListCompatApi24Impl();
         } else {
             IMPL = new LocaleListCompatBaseImpl();
@@ -155,7 +155,7 @@ public final class LocaleListCompat {
         String[] split = str.split(",", -1);
         Locale[] localeArr = new Locale[split.length];
         for (int i = 0; i < localeArr.length; i++) {
-            localeArr[i] = VERSION.SDK_INT >= 21 ? Locale.forLanguageTag(split[i]) : LocaleHelper.forLanguageTag(split[i]);
+            localeArr[i] = Build.VERSION.SDK_INT >= 21 ? Locale.forLanguageTag(split[i]) : LocaleHelper.forLanguageTag(split[i]);
         }
         LocaleListCompat localeListCompat = new LocaleListCompat();
         localeListCompat.setLocaleListArray(localeArr);
@@ -165,7 +165,7 @@ public final class LocaleListCompat {
     @Size(min = 1)
     @NonNull
     public static LocaleListCompat getAdjustedDefault() {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return wrap(LocaleList.getAdjustedDefault());
         }
         return create(Locale.getDefault());
@@ -174,7 +174,7 @@ public final class LocaleListCompat {
     @Size(min = 1)
     @NonNull
     public static LocaleListCompat getDefault() {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return wrap(LocaleList.getDefault());
         }
         return create(Locale.getDefault());

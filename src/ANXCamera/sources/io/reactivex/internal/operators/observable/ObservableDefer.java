@@ -22,7 +22,7 @@ public final class ObservableDefer<T> extends Observable<T> {
             ((ObservableSource) call).subscribe(observer);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

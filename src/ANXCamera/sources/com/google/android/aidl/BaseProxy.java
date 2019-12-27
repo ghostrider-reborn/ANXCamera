@@ -54,7 +54,7 @@ public abstract class BaseProxy implements IInterface {
     /* access modifiers changed from: protected */
     public void transactOneway(int i, Parcel parcel) throws RemoteException {
         try {
-            this.mRemote.transact(i, parcel, null, 1);
+            this.mRemote.transact(i, parcel, (Parcel) null, 1);
         } finally {
             parcel.recycle();
         }

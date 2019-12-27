@@ -1,15 +1,16 @@
 package android.support.v4.view;
 
 import android.graphics.Rect;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.view.DisplayCutout;
 import java.util.List;
 
 public final class DisplayCutoutCompat {
     private final Object mDisplayCutout;
 
+    /* JADX INFO: this call moved to the top of the method (can break code semantics) */
     public DisplayCutoutCompat(Rect rect, List<Rect> list) {
-        this(VERSION.SDK_INT >= 28 ? new DisplayCutout(rect, list) : null);
+        this(Build.VERSION.SDK_INT >= 28 ? new DisplayCutout(rect, list) : null);
     }
 
     private DisplayCutoutCompat(Object obj) {
@@ -24,7 +25,6 @@ public final class DisplayCutoutCompat {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -33,44 +33,39 @@ public final class DisplayCutoutCompat {
         }
         DisplayCutoutCompat displayCutoutCompat = (DisplayCutoutCompat) obj;
         Object obj2 = this.mDisplayCutout;
-        if (obj2 != null) {
-            z = obj2.equals(displayCutoutCompat.mDisplayCutout);
-        } else if (displayCutoutCompat.mDisplayCutout != null) {
-            z = false;
-        }
-        return z;
+        return obj2 == null ? displayCutoutCompat.mDisplayCutout == null : obj2.equals(displayCutoutCompat.mDisplayCutout);
     }
 
     public List<Rect> getBoundingRects() {
-        if (VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             return ((DisplayCutout) this.mDisplayCutout).getBoundingRects();
         }
         return null;
     }
 
     public int getSafeInsetBottom() {
-        if (VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             return ((DisplayCutout) this.mDisplayCutout).getSafeInsetBottom();
         }
         return 0;
     }
 
     public int getSafeInsetLeft() {
-        if (VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             return ((DisplayCutout) this.mDisplayCutout).getSafeInsetLeft();
         }
         return 0;
     }
 
     public int getSafeInsetRight() {
-        if (VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             return ((DisplayCutout) this.mDisplayCutout).getSafeInsetRight();
         }
         return 0;
     }
 
     public int getSafeInsetTop() {
-        if (VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             return ((DisplayCutout) this.mDisplayCutout).getSafeInsetTop();
         }
         return 0;
@@ -85,10 +80,6 @@ public final class DisplayCutoutCompat {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DisplayCutoutCompat{");
-        sb.append(this.mDisplayCutout);
-        sb.append("}");
-        return sb.toString();
+        return "DisplayCutoutCompat{" + this.mDisplayCutout + "}";
     }
 }

@@ -1,22 +1,24 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import android.util.Log;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.Registry.NoResultEncoderAvailableException;
+import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
-import com.bumptech.glide.load.i;
+import com.bumptech.glide.load.engine.f;
+import com.bumptech.glide.load.engine.i;
 import com.bumptech.glide.load.j;
 import com.bumptech.glide.load.resource.bitmap.o;
+import com.bumptech.glide.util.a.d;
 import com.bumptech.glide.util.a.g;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comparable<DecodeJob<?>>, com.bumptech.glide.util.a.d.c {
+class DecodeJob<R> implements f.a, Runnable, Comparable<DecodeJob<?>>, d.c {
     private static final String TAG = "DecodeJob";
     private final d Ce;
     private com.bumptech.glide.e Eb;
@@ -45,7 +47,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
     private Object model;
     private com.bumptech.glide.load.g options;
     private int order;
-    private final Pool<DecodeJob<?>> pool;
+    private final Pools.Pool<DecodeJob<?>> pool;
     private Priority priority;
     private com.bumptech.glide.load.c signature;
     private int width;
@@ -73,7 +75,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         void a(GlideException glideException);
     }
 
-    private final class b<Z> implements a<Z> {
+    private final class b<Z> implements i.a<Z> {
         private final DataSource dataSource;
 
         b(DataSource dataSource2) {
@@ -88,20 +90,20 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
 
     private static class c<Z> {
         private z<Z> Le;
-        private i<Z> encoder;
+        private com.bumptech.glide.load.i<Z> encoder;
         private com.bumptech.glide.load.c key;
 
         c() {
         }
 
-        /* access modifiers changed from: 0000 */
-        public <X> void a(com.bumptech.glide.load.c cVar, i<X> iVar, z<X> zVar) {
+        /* access modifiers changed from: package-private */
+        public <X> void a(com.bumptech.glide.load.c cVar, com.bumptech.glide.load.i<X> iVar, z<X> zVar) {
             this.key = cVar;
             this.encoder = iVar;
             this.Le = zVar;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void a(d dVar, com.bumptech.glide.load.g gVar) {
             try {
                 dVar.n().a(this.key, new C0099e(this.encoder, this.Le, gVar));
@@ -110,14 +112,14 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
             this.key = null;
             this.encoder = null;
             this.Le = null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean kg() {
             return this.Le != null;
         }
@@ -139,25 +141,25 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
             return (this.Oe || z || this.Ne) && this.Me;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public synchronized boolean lg() {
             this.Ne = true;
             return w(false);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public synchronized boolean onFailed() {
             this.Oe = true;
             return w(false);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public synchronized boolean release(boolean z) {
             this.Me = true;
             return w(z);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public synchronized void reset() {
             this.Ne = false;
             this.Me = false;
@@ -165,7 +167,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         }
     }
 
-    DecodeJob(d dVar, Pool<DecodeJob<?>> pool2) {
+    DecodeJob(d dVar, Pools.Pool<DecodeJob<?>> pool2) {
         this.Ce = dVar;
         this.pool = pool2;
     }
@@ -179,10 +181,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
             long Gh = com.bumptech.glide.util.e.Gh();
             A<R> a2 = a(data, dataSource);
             if (Log.isLoggable(TAG, 2)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Decoded result ");
-                sb.append(a2);
-                a(sb.toString(), Gh);
+                a("Decoded result " + a2, Gh);
             }
             return a2;
         } finally {
@@ -208,19 +207,17 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         int i = h.Je[stage.ordinal()];
         if (i == 1) {
             return this.Fe.ng() ? Stage.DATA_CACHE : a(Stage.DATA_CACHE);
-        } else if (i == 2) {
-            return this.Ye ? Stage.FINISHED : Stage.SOURCE;
-        } else if (i == 3 || i == 4) {
-            return Stage.FINISHED;
-        } else {
-            if (i == 5) {
-                return this.Fe.og() ? Stage.RESOURCE_CACHE : a(Stage.RESOURCE_CACHE);
-            }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unrecognized stage: ");
-            sb.append(stage);
-            throw new IllegalArgumentException(sb.toString());
         }
+        if (i == 2) {
+            return this.Ye ? Stage.FINISHED : Stage.SOURCE;
+        }
+        if (i == 3 || i == 4) {
+            return Stage.FINISHED;
+        }
+        if (i == 5) {
+            return this.Fe.og() ? Stage.RESOURCE_CACHE : a(Stage.RESOURCE_CACHE);
+        }
+        throw new IllegalArgumentException("Unrecognized stage: " + stage);
     }
 
     private void a(String str, long j) {
@@ -236,10 +233,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         sb.append(", load key: ");
         sb.append(this.Ue);
         if (str2 != null) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(", ");
-            sb2.append(str2);
-            str3 = sb2.toString();
+            str3 = ", " + str2;
         } else {
             str3 = "";
         }
@@ -252,15 +246,16 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
     @NonNull
     private com.bumptech.glide.load.g b(DataSource dataSource) {
         com.bumptech.glide.load.g gVar = this.options;
-        if (VERSION.SDK_INT < 26 || gVar.a(o.aj) != null) {
+        if (Build.VERSION.SDK_INT < 26 || gVar.a(o.aj) != null) {
             return gVar;
         }
-        if (dataSource == DataSource.RESOURCE_DISK_CACHE || this.Pe.jg()) {
-            gVar = new com.bumptech.glide.load.g();
-            gVar.b(this.options);
-            gVar.a(o.aj, Boolean.valueOf(true));
+        if (dataSource != DataSource.RESOURCE_DISK_CACHE && !this.Pe.jg()) {
+            return gVar;
         }
-        return gVar;
+        com.bumptech.glide.load.g gVar2 = new com.bumptech.glide.load.g();
+        gVar2.b(this.options);
+        gVar2.a(o.aj, true);
+        return gVar2;
     }
 
     private void b(A<R> a2, DataSource dataSource) {
@@ -268,55 +263,39 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         this.callback.a(a2, dataSource);
     }
 
-    /* JADX INFO: finally extract failed */
-    /* JADX WARNING: type inference failed for: r3v1, types: [com.bumptech.glide.load.engine.A] */
-    /* JADX WARNING: type inference failed for: r3v6, types: [com.bumptech.glide.load.engine.z] */
-    /* JADX WARNING: type inference failed for: r3v7 */
-    /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 1 */
     private void c(A<R> a2, DataSource dataSource) {
         if (a2 instanceof v) {
             ((v) a2).initialize();
         }
-        z zVar = 0;
+        z<R> zVar = null;
+        z<R> zVar2 = a2;
         if (this.Se.kg()) {
-            r3 = z.f(a2);
-            zVar = r3;
-            a2 = r3;
+            z<R> f2 = z.f(a2);
+            zVar = f2;
+            zVar2 = f2;
         }
-        b(a2, dataSource);
+        b(zVar2, dataSource);
         this.Ve = Stage.ENCODE;
         try {
             if (this.Se.kg()) {
                 this.Se.a(this.Ce, this.options);
             }
-            if (zVar != 0) {
-                zVar.unlock();
-            }
             lg();
-        } catch (Throwable th) {
-            if (zVar != 0) {
+        } finally {
+            if (zVar != null) {
                 zVar.unlock();
             }
-            throw th;
         }
     }
 
     private void fk() {
         if (Log.isLoggable(TAG, 2)) {
             long j = this.Xe;
-            StringBuilder sb = new StringBuilder();
-            sb.append("data: ");
-            sb.append(this.bf);
-            sb.append(", cache key: ");
-            sb.append(this._e);
-            sb.append(", fetcher: ");
-            sb.append(this.df);
-            a("Retrieved data", j, sb.toString());
+            a("Retrieved data", j, "data: " + this.bf + ", cache key: " + this._e + ", fetcher: " + this.df);
         }
-        A a2 = null;
+        A<R> a2 = null;
         try {
-            a2 = a(this.df, (Data) this.bf, this.cf);
+            a2 = a(this.df, this.bf, this.cf);
         } catch (GlideException e2) {
             e2.a(this.af, this.cf);
             this.Qe.add(e2);
@@ -346,10 +325,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         if (i == 4) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unrecognized stage: ");
-        sb.append(this.Ve);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Unrecognized stage: " + this.Ve);
     }
 
     private void hk() {
@@ -415,10 +391,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         } else if (i == 3) {
             fk();
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unrecognized run reason: ");
-            sb.append(this.We);
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Unrecognized run reason: " + this.We);
         }
     }
 
@@ -439,30 +412,31 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
 
     private void notifyFailed() {
         lk();
-        this.callback.a(new GlideException("Failed to load resource", (List<Throwable>) new ArrayList<Throwable>(this.Qe)));
+        this.callback.a(new GlideException("Failed to load resource", (List<Throwable>) new ArrayList(this.Qe)));
         hk();
     }
 
     public void K() {
         this.We = RunReason.SWITCH_TO_SOURCE_SERVICE;
-        this.callback.a(this);
+        this.callback.a((DecodeJob<?>) this);
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r12v7, resolved type: com.bumptech.glide.load.engine.d} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r12v11, resolved type: com.bumptech.glide.load.engine.C} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v10, resolved type: com.bumptech.glide.load.engine.C} */
     /* JADX WARNING: type inference failed for: r12v6, types: [com.bumptech.glide.load.c] */
-    /* JADX WARNING: type inference failed for: r12v7, types: [com.bumptech.glide.load.engine.d] */
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 1 */
     @NonNull
     public <Z> A<Z> a(DataSource dataSource, @NonNull A<Z> a2) {
-        j jVar;
+        j<Z> jVar;
         A<Z> a3;
         EncodeStrategy encodeStrategy;
         C c2;
-        Class cls = a2.get().getClass();
-        i iVar = null;
+        Class<?> cls = a2.get().getClass();
+        com.bumptech.glide.load.i<Z> iVar = null;
         if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
-            j d2 = this.Pe.d(cls);
+            j<Z> d2 = this.Pe.d(cls);
             jVar = d2;
             a3 = d2.transform(this.Eb, a2, this.width, this.height);
         } else {
@@ -472,13 +446,13 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         if (!a2.equals(a3)) {
             a2.recycle();
         }
-        if (this.Pe.d(a3)) {
+        if (this.Pe.d((A<?>) a3)) {
             iVar = this.Pe.c(a3);
             encodeStrategy = iVar.a(this.options);
         } else {
             encodeStrategy = EncodeStrategy.NONE;
         }
-        i iVar2 = iVar;
+        com.bumptech.glide.load.i<Z> iVar2 = iVar;
         if (!this.Fe.a(!this.Pe.e(this._e), dataSource, encodeStrategy)) {
             return a3;
         }
@@ -490,19 +464,16 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
                 C c3 = new C(this.Pe.V(), this._e, this.signature, this.width, this.height, jVar, cls, this.options);
                 c2 = c3;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown strategy: ");
-                sb.append(encodeStrategy);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
             }
-            z f2 = z.f(a3);
+            z<Z> f2 = z.f(a3);
             this.Se.a(c2, iVar2, f2);
             return f2;
         }
-        throw new NoResultEncoderAvailableException(a3.get().getClass());
+        throw new Registry.NoResultEncoderAvailableException(a3.get().getClass());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public DecodeJob<R> a(com.bumptech.glide.e eVar, Object obj, s sVar, com.bumptech.glide.load.c cVar, int i, int i2, Class<?> cls, Class<R> cls2, Priority priority2, o oVar, Map<Class<?>, j<?>> map, boolean z, boolean z2, boolean z3, com.bumptech.glide.load.g gVar, a<R> aVar, int i3) {
         this.Pe.a(eVar, obj, cVar, i, i2, oVar, cls, cls2, priority2, gVar, map, z, z2, this.Ce);
         this.Eb = eVar;
@@ -528,7 +499,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         this.Qe.add(glideException);
         if (Thread.currentThread() != this.Ze) {
             this.We = RunReason.SWITCH_TO_SOURCE_SERVICE;
-            this.callback.a(this);
+            this.callback.a((DecodeJob<?>) this);
             return;
         }
         jk();
@@ -542,7 +513,7 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         this.af = cVar2;
         if (Thread.currentThread() != this.Ze) {
             this.We = RunReason.DECODE_DATA;
-            this.callback.a(this);
+            this.callback.a((DecodeJob<?>) this);
             return;
         }
         fk();
@@ -567,34 +538,36 @@ class DecodeJob<R> implements com.bumptech.glide.load.engine.f.a, Runnable, Comp
         return this.Re;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean mg() {
         Stage a2 = a(Stage.INITIALIZE);
         return a2 == Stage.RESOURCE_CACHE || a2 == Stage.DATA_CACHE;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void release(boolean z) {
         if (this.Te.release(z)) {
             ik();
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:10:0x0014, code lost:
-        if (r1 != null) goto L_0x0016;
-     */
+    /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
     public void run() {
-        String str = TAG;
         com.bumptech.glide.load.a.d<?> dVar = this.df;
         try {
             if (this.Vd) {
                 notifyFailed();
                 if (dVar != null) {
                     dVar.cleanup();
+                    return;
                 }
                 return;
             }
             kk();
+            if (dVar == null) {
+                return;
+            }
+            dVar.cleanup();
         } catch (Throwable th) {
             if (dVar != null) {
                 dVar.cleanup();

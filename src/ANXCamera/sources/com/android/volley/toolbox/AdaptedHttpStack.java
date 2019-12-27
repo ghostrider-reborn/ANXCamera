@@ -33,10 +33,7 @@ class AdaptedHttpStack extends BaseHttpStack {
             if (((long) ((int) contentLength)) == contentLength) {
                 return new HttpResponse(statusCode, arrayList, (int) performRequest.getEntity().getContentLength(), performRequest.getEntity().getContent());
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Response too large: ");
-            sb.append(contentLength);
-            throw new IOException(sb.toString());
+            throw new IOException("Response too large: " + contentLength);
         } catch (ConnectTimeoutException e2) {
             throw new SocketTimeoutException(e2.getMessage());
         }

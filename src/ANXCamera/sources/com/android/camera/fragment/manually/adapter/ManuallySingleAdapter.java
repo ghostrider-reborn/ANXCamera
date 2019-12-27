@@ -1,9 +1,8 @@
 package com.android.camera.fragment.manually.adapter;
 
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.android.camera.R;
@@ -13,7 +12,7 @@ import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.fragment.CommonRecyclerViewHolder;
 import com.android.camera.fragment.manually.ManuallyListener;
 
-public class ManuallySingleAdapter extends Adapter<CommonRecyclerViewHolder> implements OnClickListener {
+public class ManuallySingleAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> implements View.OnClickListener {
     private ComponentData mComponentData;
     private int mCurrentMode;
     private String mCurrentValue;
@@ -33,7 +32,7 @@ public class ManuallySingleAdapter extends Adapter<CommonRecyclerViewHolder> imp
     public int getValuePosition() {
         int itemCount = getItemCount();
         for (int i = 0; i < itemCount; i++) {
-            if (this.mCurrentValue.equals(((ComponentDataItem) this.mComponentData.getItems().get(i)).mValue)) {
+            if (this.mCurrentValue.equals(this.mComponentData.getItems().get(i).mValue)) {
                 return i;
             }
         }
@@ -41,7 +40,7 @@ public class ManuallySingleAdapter extends Adapter<CommonRecyclerViewHolder> imp
     }
 
     public void onBindViewHolder(CommonRecyclerViewHolder commonRecyclerViewHolder, int i) {
-        ComponentDataItem componentDataItem = (ComponentDataItem) this.mComponentData.getItems().get(i);
+        ComponentDataItem componentDataItem = this.mComponentData.getItems().get(i);
         String str = componentDataItem.mValue;
         commonRecyclerViewHolder.itemView.setOnClickListener(this);
         commonRecyclerViewHolder.itemView.setTag(str);

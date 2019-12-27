@@ -37,19 +37,19 @@ public final class FlowableSkipWhile<T> extends AbstractFlowableWithUpstream<T, 
         public void onNext(T t) {
             if (this.notSkipping) {
                 this.actual.onNext(t);
-            } else {
-                try {
-                    if (this.predicate.test(t)) {
-                        this.s.request(1);
-                    } else {
-                        this.notSkipping = true;
-                        this.actual.onNext(t);
-                    }
-                } catch (Throwable th) {
-                    Exceptions.throwIfFatal(th);
-                    this.s.cancel();
-                    this.actual.onError(th);
+                return;
+            }
+            try {
+                if (this.predicate.test(t)) {
+                    this.s.request(1);
+                    return;
                 }
+                this.notSkipping = true;
+                this.actual.onNext(t);
+            } catch (Throwable th) {
+                Exceptions.throwIfFatal(th);
+                this.s.cancel();
+                this.actual.onError(th);
             }
         }
 
@@ -72,6 +72,6 @@ public final class FlowableSkipWhile<T> extends AbstractFlowableWithUpstream<T, 
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new SkipWhileSubscriber<Object>(subscriber, this.predicate));
+        this.source.subscribe(new SkipWhileSubscriber(subscriber, this.predicate));
     }
 }

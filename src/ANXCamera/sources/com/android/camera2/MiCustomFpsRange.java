@@ -36,17 +36,13 @@ public class MiCustomFpsRange {
             while (i < length) {
                 int i3 = i2 + 1;
                 int i4 = i3 + 1;
-                int i5 = i4 + 1;
                 arrayList.add(new MiCustomFpsRange(iArr[i2], iArr[i3], iArr[i4]));
                 i++;
-                i2 = i5;
+                i2 = i4 + 1;
             }
             return arrayList;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("invalid buffer length ");
-            sb.append(iArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("invalid buffer length " + iArr.length);
         }
     }
 
@@ -63,14 +59,6 @@ public class MiCustomFpsRange {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("MiCustomFpsRange{mWidth=");
-        sb.append(this.mWidth);
-        sb.append(", mHeight=");
-        sb.append(this.mHeight);
-        sb.append(", mFpsMax=");
-        sb.append(this.mFpsMax);
-        sb.append('}');
-        return sb.toString();
+        return "MiCustomFpsRange{mWidth=" + this.mWidth + ", mHeight=" + this.mHeight + ", mFpsMax=" + this.mFpsMax + '}';
     }
 }

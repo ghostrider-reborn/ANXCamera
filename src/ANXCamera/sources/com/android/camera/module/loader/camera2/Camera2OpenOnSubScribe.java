@@ -47,10 +47,7 @@ public class Camera2OpenOnSubScribe implements SingleOnSubscribe<Camera2Result>,
     }
 
     public void onGlSurfaceCreated() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onGlSurfaceCreated: mSingleEmitter = ");
-        sb.append(this.mSingleEmitter);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "onGlSurfaceCreated: mSingleEmitter = " + this.mSingleEmitter);
         SingleEmitter<Camera2Result> singleEmitter = this.mSingleEmitter;
         if (singleEmitter != null && !singleEmitter.isDisposed()) {
             Camera2Result camera2Result = this.mCamera2Result;
@@ -61,10 +58,7 @@ public class Camera2OpenOnSubScribe implements SingleOnSubscribe<Camera2Result>,
     }
 
     public void onNext(Camera2Result camera2Result) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onNext: hasSurface = ");
-        sb.append(this.mSurfaceStateListener.hasSurface());
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "onNext: hasSurface = " + this.mSurfaceStateListener.hasSurface());
         this.mCamera2Result = camera2Result;
         if (ModuleManager.isCapture() || this.mSurfaceStateListener.hasSurface()) {
             submitResult(camera2Result);

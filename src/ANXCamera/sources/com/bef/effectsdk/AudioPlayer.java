@@ -1,10 +1,6 @@
 package com.bef.effectsdk;
 
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnErrorListener;
-import android.media.MediaPlayer.OnInfoListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.support.annotation.Keep;
 import android.util.Log;
 
@@ -72,57 +68,42 @@ public class AudioPlayer {
             this.mMediaPlayer.release();
         }
         this.mMediaPlayer = new MediaPlayer();
-        this.mMediaPlayer.setOnInfoListener(new OnInfoListener() {
+        this.mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
             public boolean onInfo(MediaPlayer mediaPlayer, int i, int i2) {
                 String str = AudioPlayer.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer onInfo: [what, extra] = [");
-                sb.append(i);
-                sb.append(", ");
-                sb.append(i2);
-                sb.append("]");
-                Log.i(str, sb.toString());
+                Log.i(str, "MediaPlayer onInfo: [what, extra] = [" + i + ", " + i2 + "]");
                 AudioPlayer audioPlayer = AudioPlayer.this;
                 audioPlayer.nativeOnInfo(audioPlayer.mNativePtr, i, i2);
                 return false;
             }
         });
-        this.mMediaPlayer.setOnErrorListener(new OnErrorListener() {
+        this.mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             public boolean onError(MediaPlayer mediaPlayer, int i, int i2) {
                 String str = AudioPlayer.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer onError: [what, extra] = [");
-                sb.append(i);
-                sb.append(", ");
-                sb.append(i2);
-                sb.append("]");
-                Log.d(str, sb.toString());
+                Log.d(str, "MediaPlayer onError: [what, extra] = [" + i + ", " + i2 + "]");
                 try {
                     AudioPlayer.this.mMediaPlayer.stop();
                     AudioPlayer.this.mMediaPlayer.release();
                 } catch (Exception e2) {
                     e2.printStackTrace();
                     String str2 = AudioPlayer.TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("MediaPlayer stop exception on error ");
-                    sb2.append(e2.toString());
-                    Log.e(str2, sb2.toString());
+                    Log.e(str2, "MediaPlayer stop exception on error " + e2.toString());
                 }
-                AudioPlayer.this.mMediaPlayer = null;
+                MediaPlayer unused = AudioPlayer.this.mMediaPlayer = null;
                 AudioPlayer audioPlayer = AudioPlayer.this;
                 audioPlayer.nativeOnError(audioPlayer.mNativePtr, i, i2);
                 return false;
             }
         });
-        this.mMediaPlayer.setOnPreparedListener(new OnPreparedListener() {
+        this.mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             public void onPrepared(MediaPlayer mediaPlayer) {
                 Log.i(AudioPlayer.TAG, "MediaPlayer onPrepared...");
-                AudioPlayer.this.mIsPrepared = true;
+                boolean unused = AudioPlayer.this.mIsPrepared = true;
                 AudioPlayer audioPlayer = AudioPlayer.this;
                 audioPlayer.nativeOnPrepared(audioPlayer.mNativePtr);
             }
         });
-        this.mMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+        this.mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             public void onCompletion(MediaPlayer mediaPlayer) {
                 Log.i(AudioPlayer.TAG, "MediaPlayer onCompletion...");
                 AudioPlayer audioPlayer = AudioPlayer.this;
@@ -135,38 +116,32 @@ public class AudioPlayer {
     @Keep
     public boolean isPlaying() {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
-        String str = "MediaPlayer is null!";
-        boolean z = false;
         if (mediaPlayer == null) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else if (!this.mIsPrepared) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else {
             try {
-                z = mediaPlayer.isPlaying();
+                return mediaPlayer.isPlaying();
             } catch (Exception e2) {
                 e2.printStackTrace();
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer isPlaying exception. ");
-                sb.append(e2.toString());
-                Log.e(str2, sb.toString());
+                String str = TAG;
+                Log.e(str, "MediaPlayer isPlaying exception. " + e2.toString());
+                return false;
             }
-            return z;
         }
     }
 
     @Keep
     public boolean pause() {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
-        String str = "MediaPlayer is null!";
         if (mediaPlayer == null) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else if (!this.mIsPrepared) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else {
             mediaPlayer.pause();
@@ -177,32 +152,29 @@ public class AudioPlayer {
     @Keep
     public int release() {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
-        if (mediaPlayer != null) {
-            try {
-                mediaPlayer.stop();
-                this.mMediaPlayer.release();
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer stop exception on release ");
-                sb.append(e2.toString());
-                Log.e(str, sb.toString());
-            }
-            this.mMediaPlayer = null;
+        if (mediaPlayer == null) {
+            return 0;
         }
+        try {
+            mediaPlayer.stop();
+            this.mMediaPlayer.release();
+        } catch (Exception e2) {
+            e2.printStackTrace();
+            String str = TAG;
+            Log.e(str, "MediaPlayer stop exception on release " + e2.toString());
+        }
+        this.mMediaPlayer = null;
         return 0;
     }
 
     @Keep
     public boolean resume() {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
-        String str = "MediaPlayer is null!";
         if (mediaPlayer == null) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else if (!this.mIsPrepared) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else {
             mediaPlayer.start();
@@ -213,25 +185,22 @@ public class AudioPlayer {
     @Keep
     public boolean seek(int i) {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
-        String str = "MediaPlayer is null!";
         if (mediaPlayer == null) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else if (!this.mIsPrepared) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else {
             try {
                 mediaPlayer.seekTo(i);
+                return true;
             } catch (Exception e2) {
                 e2.printStackTrace();
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer seek exception. ");
-                sb.append(e2.toString());
-                Log.e(str2, sb.toString());
+                String str = TAG;
+                Log.e(str, "MediaPlayer seek exception. " + e2.toString());
+                return true;
             }
-            return true;
         }
     }
 
@@ -247,10 +216,7 @@ public class AudioPlayer {
             } catch (Exception e2) {
                 e2.printStackTrace();
                 String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer setDataSource exception. ");
-                sb.append(e2.toString());
-                Log.e(str2, sb.toString());
+                Log.e(str2, "MediaPlayer setDataSource exception. " + e2.toString());
             }
             this.mFilename = str;
         }
@@ -263,10 +229,7 @@ public class AudioPlayer {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("set isLoop ");
-        sb.append(z);
-        Log.i(str, sb.toString());
+        Log.i(str, "set isLoop " + z);
         this.mMediaPlayer.setLooping(z);
         return true;
     }
@@ -279,12 +242,11 @@ public class AudioPlayer {
     @Keep
     public boolean setVolume(float f2) {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
-        String str = "MediaPlayer is null!";
         if (mediaPlayer == null) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else if (!this.mIsPrepared) {
-            Log.e(TAG, str);
+            Log.e(TAG, "MediaPlayer is null!");
             return false;
         } else {
             mediaPlayer.setVolume(f2, f2);
@@ -305,10 +267,7 @@ public class AudioPlayer {
             } catch (Exception e2) {
                 e2.printStackTrace();
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer setDataSource exception. ");
-                sb.append(e2.toString());
-                Log.e(str, sb.toString());
+                Log.e(str, "MediaPlayer setDataSource exception. " + e2.toString());
             }
         }
     }
@@ -318,19 +277,14 @@ public class AudioPlayer {
         MediaPlayer mediaPlayer = this.mMediaPlayer;
         if (mediaPlayer == null) {
             Log.e(TAG, "MediaPlayer is null!");
-            return;
-        }
-        if (this.mIsPrepared) {
+        } else if (this.mIsPrepared) {
             try {
                 mediaPlayer.stop();
                 this.mMediaPlayer.release();
             } catch (Exception e2) {
                 e2.printStackTrace();
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MediaPlayer stop exception on stop ");
-                sb.append(e2.toString());
-                Log.e(str, sb.toString());
+                Log.e(str, "MediaPlayer stop exception on stop " + e2.toString());
             }
             this.mMediaPlayer = null;
             this.mIsPrepared = false;

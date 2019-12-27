@@ -14,6 +14,6 @@ public class GenericsUtils {
             return Object.class;
         }
         Type[] actualTypeArguments = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
-        return (i >= actualTypeArguments.length || i < 0) ? Object.class : !(actualTypeArguments[i] instanceof Class) ? Object.class : (Class) actualTypeArguments[i];
+        return (i >= actualTypeArguments.length || i < 0 || !(actualTypeArguments[i] instanceof Class)) ? Object.class : (Class) actualTypeArguments[i];
     }
 }

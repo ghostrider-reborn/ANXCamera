@@ -1,20 +1,20 @@
 package com.android.camera.module.loader;
 
 import android.hardware.camera2.CaptureResult;
-import com.android.camera2.Camera2Proxy.HdrCheckerCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.CaptureResultParser;
 import io.reactivex.functions.Function;
 import java.lang.ref.WeakReference;
 
 public class FunctionParseAsdHdr implements Function<CaptureResult, CaptureResult> {
-    private WeakReference<HdrCheckerCallback> mHdrCheckerCallback;
+    private WeakReference<Camera2Proxy.HdrCheckerCallback> mHdrCheckerCallback;
 
-    public FunctionParseAsdHdr(HdrCheckerCallback hdrCheckerCallback) {
+    public FunctionParseAsdHdr(Camera2Proxy.HdrCheckerCallback hdrCheckerCallback) {
         this.mHdrCheckerCallback = new WeakReference<>(hdrCheckerCallback);
     }
 
     public CaptureResult apply(CaptureResult captureResult) throws Exception {
-        HdrCheckerCallback hdrCheckerCallback = (HdrCheckerCallback) this.mHdrCheckerCallback.get();
+        Camera2Proxy.HdrCheckerCallback hdrCheckerCallback = (Camera2Proxy.HdrCheckerCallback) this.mHdrCheckerCallback.get();
         if (hdrCheckerCallback == null) {
             return captureResult;
         }

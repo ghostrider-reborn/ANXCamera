@@ -1,7 +1,6 @@
 package com.android.camera2;
 
-import android.hardware.camera2.CaptureRequest.Builder;
-import android.hardware.camera2.CaptureRequest.Key;
+import android.hardware.camera2.CaptureRequest;
 import com.android.camera2.vendortag.VendorTag;
 import com.android.camera2.vendortag.VendorTagHelper;
 import java.util.HashMap;
@@ -15,23 +14,23 @@ public class CaptureSessionConfigurations {
         this.mCapabilities = cameraCapabilities;
     }
 
-    static /* synthetic */ void a(Builder builder, Object obj, Object obj2) {
+    static /* synthetic */ void a(CaptureRequest.Builder builder, Object obj, Object obj2) {
         if (obj instanceof VendorTag) {
             VendorTagHelper.setValueSafely(builder, (VendorTag) obj, obj2);
-        } else if (obj instanceof Key) {
-            builder.set((Key) obj, obj2);
+        } else if (obj instanceof CaptureRequest.Key) {
+            builder.set((CaptureRequest.Key) obj, obj2);
         }
     }
 
-    public synchronized void apply(Builder builder) {
+    public synchronized void apply(CaptureRequest.Builder builder) {
         this.mSessionParameters.forEach(new a(builder));
     }
 
-    public synchronized <T> T get(Key<T> key) {
+    public synchronized <T> T get(CaptureRequest.Key<T> key) {
         return this.mSessionParameters.get(key);
     }
 
-    public synchronized <T> T get(VendorTag<Key<T>> vendorTag) {
+    public synchronized <T> T get(VendorTag<CaptureRequest.Key<T>> vendorTag) {
         return this.mSessionParameters.get(vendorTag);
     }
 
@@ -39,7 +38,7 @@ public class CaptureSessionConfigurations {
         this.mSessionParameters.clear();
     }
 
-    public synchronized <T> void set(Key<T> key, T t) {
+    public synchronized <T> void set(CaptureRequest.Key<T> key, T t) {
         if (key == null || t == null) {
             throw new IllegalArgumentException("Both key and value are must not be null");
         } else if (this.mCapabilities != null && this.mCapabilities.isTagDefined(key.getName())) {
@@ -47,7 +46,7 @@ public class CaptureSessionConfigurations {
         }
     }
 
-    public synchronized <T> void set(VendorTag<Key<T>> vendorTag, T t) {
+    public synchronized <T> void set(VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
         if (vendorTag == null || t == null) {
             throw new IllegalArgumentException("Both key and value are must not be null");
         } else if (this.mCapabilities != null && this.mCapabilities.isTagDefined(vendorTag.getName())) {

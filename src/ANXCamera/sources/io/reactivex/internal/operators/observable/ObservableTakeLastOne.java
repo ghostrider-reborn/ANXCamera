@@ -21,7 +21,7 @@ public final class ObservableTakeLastOne<T> extends AbstractObservableWithUpstre
             this.s.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit() {
             T t = this.value;
             if (t != null) {

@@ -1,9 +1,7 @@
 package com.ss.android.ttve.nativePort;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.media.ExifInterface;
 import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
@@ -44,20 +42,20 @@ public class TEImageFactory {
     }
 
     public static ImageInfo decodeFile(@NonNull String str) {
-        return decodeFile(str, null);
+        return decodeFile(str, (BitmapFactory.Options) null);
     }
 
-    public static ImageInfo decodeFile(@NonNull String str, @Nullable Options options) {
+    public static ImageInfo decodeFile(@NonNull String str, @Nullable BitmapFactory.Options options) {
         if (options == null) {
-            options = new Options();
+            options = new BitmapFactory.Options();
         }
-        options.inPreferredConfig = Config.ARGB_8888;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap decodeFile = BitmapFactory.decodeFile(str, options);
         if (decodeFile == null) {
             return null;
         }
-        Config config = decodeFile.getConfig();
-        Config config2 = Config.ARGB_8888;
+        Bitmap.Config config = decodeFile.getConfig();
+        Bitmap.Config config2 = Bitmap.Config.ARGB_8888;
         if (config != config2) {
             Bitmap copy = decodeFile.copy(config2, false);
             recycleBitmap(decodeFile);
@@ -73,7 +71,7 @@ public class TEImageFactory {
     }
 
     public static ImageInfo getImageInfo(@NonNull String str) {
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(str, options);
         ImageInfo imageInfo = new ImageInfo();
@@ -91,18 +89,17 @@ public class TEImageFactory {
             e2.printStackTrace();
             exifInterface = null;
         }
-        int i = 0;
-        if (exifInterface != null) {
-            int attributeInt = exifInterface.getAttributeInt("Orientation", 0);
-            if (attributeInt == 3) {
-                i = 180;
-            } else if (attributeInt != 6) {
-                return attributeInt != 8 ? 0 : 270;
-            } else {
-                return 90;
-            }
+        if (exifInterface == null) {
+            return 0;
         }
-        return i;
+        int attributeInt = exifInterface.getAttributeInt("Orientation", 0);
+        if (attributeInt == 3) {
+            return 180;
+        }
+        if (attributeInt != 6) {
+            return attributeInt != 8 ? 0 : 270;
+        }
+        return 90;
     }
 
     public static void recycleBitmap(Bitmap bitmap) {

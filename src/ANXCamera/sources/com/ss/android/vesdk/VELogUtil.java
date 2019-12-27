@@ -41,51 +41,31 @@ public class VELogUtil {
 
     public static void d(Class<?> cls, String str) {
         if ((DEBUG_LEVEL & LOGD) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            TELogcat.Log(LOGD, sb.toString(), str);
+            TELogcat.Log(LOGD, APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void d(@NonNull String str, @NonNull String str2) {
         if ((DEBUG_LEVEL & LOGD) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            TELogcat.Log(LOGD, sb.toString(), str2);
+            TELogcat.Log(LOGD, APPNAME + str, str2);
         }
     }
 
     public static void e(Class<?> cls, String str) {
         if ((DEBUG_LEVEL & 1) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            TELogcat.Log(1, sb.toString(), str);
+            TELogcat.Log((byte) 1, APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void e(Class<?> cls, String str, Throwable th) {
         if ((DEBUG_LEVEL & 1) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            String sb2 = sb.toString();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str);
-            sb3.append(" Throwable msg is : ");
-            sb3.append(th.getMessage());
-            TELogcat.Log(1, sb2, sb3.toString());
+            TELogcat.Log((byte) 1, APPNAME + cls.getSimpleName(), str + " Throwable msg is : " + th.getMessage());
         }
     }
 
     public static void e(String str, String str2) {
         if ((DEBUG_LEVEL & 1) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            TELogcat.Log(1, sb.toString(), str2);
+            TELogcat.Log((byte) 1, APPNAME + str, str2);
         }
     }
 
@@ -110,29 +90,19 @@ public class VELogUtil {
 
     public static void i(Class<?> cls, String str) {
         if ((DEBUG_LEVEL & LOGI) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            TELogcat.Log(LOGI, sb.toString(), str);
+            TELogcat.Log(LOGI, APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void i(@NonNull String str, @NonNull String str2) {
         if ((DEBUG_LEVEL & LOGI) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            TELogcat.Log(LOGI, sb.toString(), str2);
+            TELogcat.Log(LOGI, APPNAME + str, str2);
         }
     }
 
     public static void setUp(@Nullable String str, byte b2) {
         if (!TextUtils.isEmpty(str)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            sb.append("-");
-            APPNAME = sb.toString();
+            APPNAME += str + "-";
         }
         DEBUG_LEVEL = b2;
         TELogcat.setLogLevel(getLogLevel(b2));
@@ -140,65 +110,37 @@ public class VELogUtil {
 
     public static void v(Class<?> cls, String str) {
         if ((DEBUG_LEVEL & LOGV) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            TELogcat.Log(LOGV, sb.toString(), str);
+            TELogcat.Log(LOGV, APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void v(String str, String str2) {
         if ((DEBUG_LEVEL & LOGV) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            TELogcat.Log(LOGV, sb.toString(), str2);
+            TELogcat.Log(LOGV, APPNAME + str, str2);
         }
     }
 
     public static void w(Class<?> cls, String str) {
         if ((DEBUG_LEVEL & 2) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            TELogcat.Log(2, sb.toString(), str);
+            TELogcat.Log((byte) 2, APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void w(Class<?> cls, String str, Throwable th) {
         if ((DEBUG_LEVEL & 2) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            String sb2 = sb.toString();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str);
-            sb3.append(" Throwable msg is : ");
-            sb3.append(th.getMessage());
-            TELogcat.Log(2, sb2, sb3.toString());
+            TELogcat.Log((byte) 2, APPNAME + cls.getSimpleName(), str + " Throwable msg is : " + th.getMessage());
         }
     }
 
     public static void w(String str, String str2) {
         if ((DEBUG_LEVEL & 2) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            TELogcat.Log(2, sb.toString(), str2);
+            TELogcat.Log((byte) 2, APPNAME + str, str2);
         }
     }
 
     public static void w(String str, String str2, Throwable th) {
         if ((DEBUG_LEVEL & 2) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            String sb2 = sb.toString();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str2);
-            sb3.append(" Throwable msg is : ");
-            sb3.append(th.getMessage());
-            TELogcat.Log(2, sb2, sb3.toString());
+            TELogcat.Log((byte) 2, APPNAME + str, str2 + " Throwable msg is : " + th.getMessage());
         }
     }
 }

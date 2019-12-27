@@ -13,5 +13,6 @@ public class FillRectAttribute extends DrawAttribute {
         this.mWidth = f4;
         this.mHeight = f5;
         this.mColor = i;
+        this.mTarget = 4;
     }
 }

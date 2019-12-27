@@ -1,6 +1,6 @@
 package android.support.v4.os;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import java.io.File;
@@ -14,19 +14,14 @@ public final class EnvironmentCompat {
     }
 
     public static String getStorageState(File file) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return Environment.getStorageState(file);
         }
         try {
-            if (file.getCanonicalPath().startsWith(Environment.getExternalStorageDirectory().getCanonicalPath())) {
-                return Environment.getExternalStorageState();
-            }
+            return file.getCanonicalPath().startsWith(Environment.getExternalStorageDirectory().getCanonicalPath()) ? Environment.getExternalStorageState() : MEDIA_UNKNOWN;
         } catch (IOException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to resolve canonical path: ");
-            sb.append(e2);
-            Log.w(TAG, sb.toString());
+            Log.w(TAG, "Failed to resolve canonical path: " + e2);
+            return MEDIA_UNKNOWN;
         }
-        return MEDIA_UNKNOWN;
     }
 }

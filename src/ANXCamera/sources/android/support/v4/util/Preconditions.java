@@ -3,12 +3,11 @@ package android.support.v4.util;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.text.TextUtils;
 import java.util.Collection;
 import java.util.Locale;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class Preconditions {
     private Preconditions() {
     }
@@ -27,26 +26,17 @@ public class Preconditions {
 
     public static float checkArgumentFinite(float f2, String str) {
         if (Float.isNaN(f2)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(" must not be NaN");
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException(str + " must not be NaN");
         } else if (!Float.isInfinite(f2)) {
             return f2;
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(" must not be infinite");
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException(str + " must not be infinite");
         }
     }
 
     public static float checkArgumentInRange(float f2, float f3, float f4, String str) {
         if (Float.isNaN(f2)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(" must not be NaN");
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException(str + " must not be NaN");
         } else if (f2 < f3) {
             throw new IllegalArgumentException(String.format(Locale.US, "%s is out of range of [%f, %f] (too low)", new Object[]{str, Float.valueOf(f3), Float.valueOf(f4)}));
         } else if (f2 <= f4) {
@@ -114,20 +104,12 @@ public class Preconditions {
     }
 
     public static float[] checkArrayElementsInRange(float[] fArr, float f2, float f3, String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" must not be null");
-        checkNotNull(fArr, sb.toString());
+        checkNotNull(fArr, str + " must not be null");
         int i = 0;
         while (i < fArr.length) {
             float f4 = fArr[i];
             if (Float.isNaN(f4)) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append("[");
-                sb2.append(i);
-                sb2.append("] must not be NaN");
-                throw new IllegalArgumentException(sb2.toString());
+                throw new IllegalArgumentException(str + "[" + i + "] must not be NaN");
             } else if (f4 < f2) {
                 throw new IllegalArgumentException(String.format(Locale.US, "%s[%d] is out of range of [%f, %f] (too low)", new Object[]{str, Integer.valueOf(i), Float.valueOf(f2), Float.valueOf(f3)}));
             } else if (f4 <= f3) {
@@ -151,15 +133,11 @@ public class Preconditions {
             }
             return tArr;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" must not be null");
-        throw new NullPointerException(sb.toString());
+        throw new NullPointerException(str + " must not be null");
     }
 
-    /* JADX WARNING: Incorrect type for immutable var: ssa=C, code=C<java.lang.Object>, for r5v0, types: [C, C<java.lang.Object>, java.util.Collection] */
     @NonNull
-    public static <C extends Collection<T>, T> C checkCollectionElementsNotNull(C<Object> c2, String str) {
+    public static <C extends Collection<T>, T> C checkCollectionElementsNotNull(C c2, String str) {
         if (c2 != null) {
             long j = 0;
             for (Object obj : c2) {
@@ -171,25 +149,16 @@ public class Preconditions {
             }
             return c2;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" must not be null");
-        throw new NullPointerException(sb.toString());
+        throw new NullPointerException(str + " must not be null");
     }
 
     public static <T> Collection<T> checkCollectionNotEmpty(Collection<T> collection, String str) {
         if (collection == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(" must not be null");
-            throw new NullPointerException(sb.toString());
+            throw new NullPointerException(str + " must not be null");
         } else if (!collection.isEmpty()) {
             return collection;
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(" is empty");
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException(str + " is empty");
         }
     }
 
@@ -197,13 +166,7 @@ public class Preconditions {
         if ((i & i2) == i) {
             return i;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Requested flags 0x");
-        sb.append(Integer.toHexString(i));
-        sb.append(", but only 0x");
-        sb.append(Integer.toHexString(i2));
-        sb.append(" are allowed");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Requested flags 0x" + Integer.toHexString(i) + ", but only 0x" + Integer.toHexString(i2) + " are allowed");
     }
 
     @NonNull
@@ -223,7 +186,7 @@ public class Preconditions {
     }
 
     public static void checkState(boolean z) {
-        checkState(z, null);
+        checkState(z, (String) null);
     }
 
     public static void checkState(boolean z, String str) {

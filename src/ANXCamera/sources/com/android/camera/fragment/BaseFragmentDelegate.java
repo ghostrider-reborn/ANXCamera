@@ -21,7 +21,6 @@ import com.android.camera.fragment.dual.FragmentDualCameraAdjust;
 import com.android.camera.fragment.dual.FragmentDualCameraBokehAdjust;
 import com.android.camera.fragment.dual.FragmentDualStereo;
 import com.android.camera.fragment.fullscreen.FragmentFullScreen;
-import com.android.camera.fragment.lifeCircle.BaseFragmentLifecycle;
 import com.android.camera.fragment.lifeCircle.BaseLifeCircleBindFragment;
 import com.android.camera.fragment.lifeCircle.BaseLifecycleListener;
 import com.android.camera.fragment.live.FragmentLiveSpeed;
@@ -34,7 +33,7 @@ import com.android.camera.fragment.vv.FragmentVV;
 import com.android.camera.fragment.vv.FragmentVVProcess;
 import com.android.camera.module.loader.StartControl;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
+import com.android.camera.protocol.ModeProtocol;
 import com.mi.config.b;
 import io.reactivex.Completable;
 import io.reactivex.disposables.Disposable;
@@ -44,7 +43,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseFragmentDelegate implements BaseDelegate {
+public class BaseFragmentDelegate implements ModeProtocol.BaseDelegate {
     public static final int BEAUTY_FRAGMENT_CONTAINER_ID = 2131296286;
     public static final int EYE_LIGHT_POPU_TIP_FRAGMENT_CONTAINER_ID = 2131296293;
     public static final int FRAGMENT_BEAUTY = 251;
@@ -109,17 +108,17 @@ public class BaseFragmentDelegate implements BaseDelegate {
         if (camera == null || !camera.isFinishing()) {
             FragmentManager supportFragmentManager = this.mActivity.getSupportFragmentManager();
             FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-            for (BaseFragmentOperation baseFragmentOperation : list) {
-                int activeFragment = getActiveFragment(baseFragmentOperation.containerViewId);
-                int i = baseFragmentOperation.pendingFragmentInfo;
-                switch (baseFragmentOperation.operateType) {
+            for (BaseFragmentOperation next : list) {
+                int activeFragment = getActiveFragment(next.containerViewId);
+                int i = next.pendingFragmentInfo;
+                switch (next.operateType) {
                     case 1:
-                        int activeFragment2 = getActiveFragment(baseFragmentOperation.containerViewId);
+                        int activeFragment2 = getActiveFragment(next.containerViewId);
                         this.animationComposite.remove(activeFragment2);
                         BaseFragment constructFragment = constructFragment(false, i, activeFragment2, baseLifecycleListener);
-                        beginTransaction.replace(baseFragmentOperation.containerViewId, constructFragment, constructFragment.getFragmentTag());
+                        beginTransaction.replace(next.containerViewId, constructFragment, constructFragment.getFragmentTag());
                         this.animationComposite.put(constructFragment.getFragmentInto(), constructFragment);
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, i, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, i, next.operateType);
                         break;
                     case 2:
                         this.animationComposite.remove(i);
@@ -128,7 +127,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
                             baseFragment.pendingGone(false);
                             beginTransaction.remove(baseFragment);
                         }
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, i, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, i, next.operateType);
                         break;
                     case 3:
                         this.animationComposite.remove(activeFragment);
@@ -137,7 +136,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
                             baseFragment2.pendingGone(false);
                             beginTransaction.remove(baseFragment2);
                         }
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, activeFragment, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, activeFragment, next.operateType);
                         break;
                     case 4:
                         BaseFragment baseFragment3 = (BaseFragment) supportFragmentManager.findFragmentByTag(String.valueOf(activeFragment));
@@ -152,13 +151,13 @@ public class BaseFragmentDelegate implements BaseDelegate {
                             beginTransaction.show(baseFragment4);
                         } else {
                             baseFragment4 = constructFragment(false, i, activeFragment, baseLifecycleListener);
-                            beginTransaction.add(baseFragmentOperation.containerViewId, baseFragment4, baseFragment4.getFragmentTag());
+                            beginTransaction.add(next.containerViewId, baseFragment4, baseFragment4.getFragmentTag());
                         }
                         this.animationComposite.put(baseFragment4.getFragmentInto(), baseFragment4);
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, i, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, i, next.operateType);
                         break;
                     case 5:
-                        List list2 = (List) this.currentFragments.get(baseFragmentOperation.containerViewId);
+                        List list2 = this.currentFragments.get(next.containerViewId);
                         for (int i2 = 0; i2 < list2.size(); i2++) {
                             int intValue = ((Integer) list2.get(i2)).intValue();
                             if (intValue != i) {
@@ -178,7 +177,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
                         baseFragment6.setLastFragmentInfo(activeFragment);
                         baseFragment6.pendingShow();
                         beginTransaction.show(baseFragment6);
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, i, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, i, next.operateType);
                         break;
                     case 6:
                         if (activeFragment != i) {
@@ -192,14 +191,14 @@ public class BaseFragmentDelegate implements BaseDelegate {
                         baseFragment8.setLastFragmentInfo(activeFragment);
                         baseFragment8.pendingShow();
                         beginTransaction.show(baseFragment8);
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, i, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, i, next.operateType);
                         break;
                     case 7:
                         BaseFragment baseFragment9 = (BaseFragment) supportFragmentManager.findFragmentByTag(String.valueOf(activeFragment));
                         if (baseFragment9 != null) {
                             beginTransaction.hide(baseFragment9);
                         }
-                        updateCurrentFragments(baseFragmentOperation.containerViewId, activeFragment, baseFragmentOperation.operateType);
+                        updateCurrentFragments(next.containerViewId, activeFragment, next.operateType);
                         break;
                 }
             }
@@ -211,8 +210,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
     public static void bindLifeCircle(Fragment fragment) {
         FragmentManager childFragmentManager = fragment.getChildFragmentManager();
         BaseLifeCircleBindFragment baseLifeCircleBindFragment = new BaseLifeCircleBindFragment();
-        BaseFragmentLifecycle fragmentLifecycle = baseLifeCircleBindFragment.getFragmentLifecycle();
-        AnonymousClass2 r2 = new BaseLifecycleListener() {
+        baseLifeCircleBindFragment.getFragmentLifecycle().addListener(new BaseLifecycleListener() {
             public void onLifeAlive() {
             }
 
@@ -227,10 +225,8 @@ public class BaseFragmentDelegate implements BaseDelegate {
 
             public void setBlockingLifeCycles(List<String> list) {
             }
-        };
-        String str = BaseLifeCircleBindFragment.FRAGMENT_TAG;
-        fragmentLifecycle.addListener(r2, str);
-        childFragmentManager.beginTransaction().add((Fragment) baseLifeCircleBindFragment, str).commitAllowingStateLoss();
+        }, BaseLifeCircleBindFragment.FRAGMENT_TAG);
+        childFragmentManager.beginTransaction().add((Fragment) baseLifeCircleBindFragment, BaseLifeCircleBindFragment.FRAGMENT_TAG).commitAllowingStateLoss();
     }
 
     private BaseFragment constructFragment(boolean z, int i, int i2, BaseLifecycleListener baseLifecycleListener) {
@@ -400,7 +396,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
         if (r1 >= r0.size()) goto L_0x0041;
      */
     private void updateCurrentFragments(@IdRes int i, int i2, int i3) {
-        List list = (List) this.currentFragments.get(i);
+        List list = this.currentFragments.get(i);
         int i4 = 0;
         switch (i3) {
             case 1:
@@ -561,7 +557,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
                 }
         }
         if (!arrayList.isEmpty()) {
-            applyUpdateSet(arrayList, null);
+            applyUpdateSet(arrayList, (BaseLifecycleListener) null);
         }
     }
 
@@ -569,7 +565,7 @@ public class BaseFragmentDelegate implements BaseDelegate {
         if (this.mActivity == null) {
             return null;
         }
-        Action r0 = baseLifecycleListener != null ? new Action() {
+        AnonymousClass1 r0 = baseLifecycleListener != null ? new Action() {
             public void run() throws Exception {
                 baseLifecycleListener.onLifeAlive();
             }
@@ -579,16 +575,16 @@ public class BaseFragmentDelegate implements BaseDelegate {
         }
         if (completable != null) {
             if (baseLifecycleListener != null) {
-                completable.subscribe(r0);
+                completable.subscribe((Action) r0);
             } else {
                 completable.subscribe();
             }
         }
-        return this.animationComposite.dispose(null, null, startControl);
+        return this.animationComposite.dispose((Completable) null, (Action) null, startControl);
     }
 
     public int getActiveFragment(@IdRes int i) {
-        List list = (List) this.currentFragments.get(i);
+        List list = this.currentFragments.get(i);
         if (list == null || list.isEmpty()) {
             return 240;
         }
@@ -623,19 +619,19 @@ public class BaseFragmentDelegate implements BaseDelegate {
         beginTransaction.replace(R.id.main_content, constructFragment5, constructFragment5.getFragmentTag());
         beginTransaction.replace(R.id.panorama_content, constructFragment6, constructFragment6.getFragmentTag());
         beginTransaction.replace(R.id.main_vertical, constructFragment7, constructFragment7.getFragmentTag());
-        BaseFragment baseFragment = (b.isSupportedOpticalZoom() || HybridZoomingSystem.IS_3_OR_MORE_SAT) ? constructFragment(true, 4084, 240, baseLifecycleListener2) : b.vj() ? constructFragment(true, 4085, 240, baseLifecycleListener2) : null;
-        if (baseFragment != null) {
-            this.originalFragments.put(R.id.bottom_popup_dual_camera_adjust, baseFragment.getFragmentInto());
-            this.animationComposite.put(baseFragment.getFragmentInto(), baseFragment);
-            beginTransaction.replace(R.id.bottom_popup_dual_camera_adjust, baseFragment, baseFragment.getFragmentTag());
+        BaseFragment constructFragment8 = (b.isSupportedOpticalZoom() || HybridZoomingSystem.IS_3_OR_MORE_SAT) ? constructFragment(true, 4084, 240, baseLifecycleListener2) : b.vj() ? constructFragment(true, 4085, 240, baseLifecycleListener2) : null;
+        if (constructFragment8 != null) {
+            this.originalFragments.put(R.id.bottom_popup_dual_camera_adjust, constructFragment8.getFragmentInto());
+            this.animationComposite.put(constructFragment8.getFragmentInto(), constructFragment8);
+            beginTransaction.replace(R.id.bottom_popup_dual_camera_adjust, constructFragment8, constructFragment8.getFragmentTag());
         } else {
             this.originalFragments.put(R.id.bottom_popup_dual_camera_adjust, 240);
         }
         if (DataRepository.dataItemFeature().isSupportBokehAdjust()) {
-            BaseFragment constructFragment8 = constructFragment(true, 4091, 240, baseLifecycleListener2);
-            this.originalFragments.put(R.id.bottom_popup_dual_camera_bokeh_adjust, constructFragment8.getFragmentInto());
-            this.animationComposite.put(constructFragment8.getFragmentInto(), constructFragment8);
-            beginTransaction.replace(R.id.bottom_popup_dual_camera_bokeh_adjust, constructFragment8, constructFragment8.getFragmentTag());
+            BaseFragment constructFragment9 = constructFragment(true, 4091, 240, baseLifecycleListener2);
+            this.originalFragments.put(R.id.bottom_popup_dual_camera_bokeh_adjust, constructFragment9.getFragmentInto());
+            this.animationComposite.put(constructFragment9.getFragmentInto(), constructFragment9);
+            beginTransaction.replace(R.id.bottom_popup_dual_camera_bokeh_adjust, constructFragment9, constructFragment9.getFragmentTag());
         }
         this.originalFragments.put(R.id.bottom_popup_tips, constructFragment3.getFragmentInto());
         this.originalFragments.put(R.id.bottom_action, constructFragment4.getFragmentInto());
@@ -654,9 +650,9 @@ public class BaseFragmentDelegate implements BaseDelegate {
         this.animationComposite.put(constructFragment6.getFragmentInto(), constructFragment6);
         this.animationComposite.put(constructFragment7.getFragmentInto(), constructFragment7);
         if (DataRepository.dataItemFeature().mc()) {
-            BaseFragment constructFragment9 = constructFragment(true, 4094, 240, baseLifecycleListener2);
-            beginTransaction.replace(R.id.wideselfie_content, constructFragment9, constructFragment9.getFragmentTag());
-            this.animationComposite.put(constructFragment9.getFragmentInto(), constructFragment9);
+            BaseFragment constructFragment10 = constructFragment(true, 4094, 240, baseLifecycleListener2);
+            beginTransaction.replace(R.id.wideselfie_content, constructFragment10, constructFragment10.getFragmentTag());
+            this.animationComposite.put(constructFragment10.getFragmentInto(), constructFragment10);
         }
         initCurrentFragments(this.originalFragments);
         beginTransaction.commitAllowingStateLoss();

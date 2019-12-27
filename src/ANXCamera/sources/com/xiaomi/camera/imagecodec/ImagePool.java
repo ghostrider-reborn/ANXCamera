@@ -3,7 +3,6 @@ package com.xiaomi.camera.imagecodec;
 import android.annotation.TargetApi;
 import android.media.Image;
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.media.ImageWriter;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -14,7 +13,6 @@ import android.util.LongSparseArray;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class ImagePool {
     private static final String TAG = "ImagePool";
@@ -24,7 +22,7 @@ public class ImagePool {
     private static int sMaxDequeueImageCount = 4;
     private Map<ImageFormat, Integer> mAcquiredImageCountMap = new HashMap();
     private Map<Image, ImageFormat> mHoldImages = new HashMap();
-    private OnImageAvailableListener mImageAvailableListener = new OnImageAvailableListener() {
+    private ImageReader.OnImageAvailableListener mImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         public void onImageAvailable(ImageReader imageReader) {
             synchronized (ImagePool.this.mImageLock) {
                 Image acquireNextImage = imageReader.acquireNextImage();
@@ -81,7 +79,8 @@ public class ImagePool {
             int i = this.mWidth;
             int i2 = (i >>> 8) | (i << 8);
             int i3 = this.mHeight;
-            return (this.mFormat ^ i2) ^ ((i3 >>> 16) | (i3 << 16));
+            int i4 = i3 << 16;
+            return (this.mFormat ^ i2) ^ ((i3 >>> 16) | i4);
         }
     }
 
@@ -98,64 +97,57 @@ public class ImagePool {
     }
 
     private int changeAcquiredImageCountLocked(ImageFormat imageFormat, int i) {
-        Integer num = (Integer) this.mAcquiredImageCountMap.get(imageFormat);
-        Integer valueOf = Integer.valueOf(0);
+        Integer num = this.mAcquiredImageCountMap.get(imageFormat);
         if (num == null) {
-            num = valueOf;
+            num = 0;
         }
-        Integer valueOf2 = Integer.valueOf(num.intValue() + i);
-        if (valueOf2.intValue() < 0) {
-            valueOf2 = valueOf;
+        Integer valueOf = Integer.valueOf(num.intValue() + i);
+        if (valueOf.intValue() < 0) {
+            valueOf = 0;
         }
-        this.mAcquiredImageCountMap.put(imageFormat, valueOf2);
-        return valueOf2.intValue();
+        this.mAcquiredImageCountMap.put(imageFormat, valueOf);
+        return valueOf.intValue();
     }
 
     private int changePooledImageCountLocked(ImageFormat imageFormat, int i) {
-        Integer num = (Integer) this.mPooledImageCountMap.get(imageFormat);
-        Integer valueOf = Integer.valueOf(0);
+        Integer num = this.mPooledImageCountMap.get(imageFormat);
         if (num == null) {
-            num = valueOf;
+            num = 0;
         }
-        Integer valueOf2 = Integer.valueOf(num.intValue() + i);
-        if (valueOf2.intValue() < 0) {
-            valueOf2 = valueOf;
+        Integer valueOf = Integer.valueOf(num.intValue() + i);
+        if (valueOf.intValue() < 0) {
+            valueOf = 0;
         }
-        this.mPooledImageCountMap.put(imageFormat, valueOf2);
-        return valueOf2.intValue();
+        this.mPooledImageCountMap.put(imageFormat, valueOf);
+        return valueOf.intValue();
     }
 
     private int getAcquiredImageCountLocked(ImageFormat imageFormat) {
-        if (imageFormat != null) {
-            Integer num = (Integer) this.mAcquiredImageCountMap.get(imageFormat);
-            if (num != null) {
-                return num.intValue();
-            }
+        if (imageFormat == null) {
+            return 0;
+        }
+        Integer num = this.mAcquiredImageCountMap.get(imageFormat);
+        if (num != null) {
+            return num.intValue();
         }
         return 0;
     }
 
     private ImageWriter getImageWriter(@NonNull ImageFormat imageFormat) {
         if (this.mImageWriterMap.containsKey(imageFormat)) {
-            return (ImageWriter) this.mImageWriterMap.get(imageFormat);
+            return this.mImageWriterMap.get(imageFormat);
         }
         ImageReader newInstance = ImageReader.newInstance(imageFormat.getWidth(), imageFormat.getHeight(), imageFormat.getFormat(), sMaxAcquireImageCount);
         newInstance.setOnImageAvailableListener(this.mImageAvailableListener, new Handler(this.mImageReaderHandlerThread.getLooper()));
         ImageWriter newInstance2 = ImageWriter.newInstance(newInstance.getSurface(), sMaxDequeueImageCount);
-        newInstance2.setOnImageReleasedListener(null, new Handler(this.mImageWriterHandlerThread.getLooper()));
+        newInstance2.setOnImageReleasedListener((ImageWriter.OnImageReleasedListener) null, new Handler(this.mImageWriterHandlerThread.getLooper()));
         this.mImageReaderMap.put(imageFormat, newInstance);
         this.mImageWriterMap.put(imageFormat, newInstance2);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getImageWriter: mImageWriterMap.size = ");
-        sb.append(this.mImageWriterMap.size());
-        Log.d(str, sb.toString());
+        Log.d(str, "getImageWriter: mImageWriterMap.size = " + this.mImageWriterMap.size());
         if (this.mImageReaderMap.size() > 10) {
             String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("getImageWriter: there are too much ImageWriter and ImageReader instance in map, size is : ");
-            sb2.append(this.mImageReaderMap.size());
-            Log.e(str2, sb2.toString());
+            Log.e(str2, "getImageWriter: there are too much ImageWriter and ImageReader instance in map, size is : " + this.mImageReaderMap.size());
         }
         return newInstance2;
     }
@@ -166,28 +158,17 @@ public class ImagePool {
 
     public static void init(int i, int i2) {
         if (!sInited) {
-            String str = " maxDequeueCount=";
             if (i <= 0 || i2 <= 0) {
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("invalid parameter: maxAcquireCount=");
-                sb.append(i);
-                sb.append(str);
-                sb.append(i2);
-                Log.e(str2, sb.toString());
+                String str = TAG;
+                Log.e(str, "invalid parameter: maxAcquireCount=" + i + " maxDequeueCount=" + i2);
             } else if (i + i2 >= 64) {
                 Log.e(TAG, String.format(Locale.ENGLISH, "maxAcquireCount(%d) + maxDequeueCount(%d) should not be larger than 64", new Object[]{Integer.valueOf(i), Integer.valueOf(i)}));
             } else {
                 sInited = true;
                 sMaxAcquireImageCount = i;
                 sMaxDequeueImageCount = i2;
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("init: maxAcquireCount=");
-                sb2.append(i);
-                sb2.append(str);
-                sb2.append(i2);
-                Log.d(str3, sb2.toString());
+                String str2 = TAG;
+                Log.d(str2, "init: maxAcquireCount=" + i + " maxDequeueCount=" + i2);
             }
         }
     }
@@ -195,13 +176,13 @@ public class ImagePool {
     private boolean needTrimPoolBuffer() {
         int min = Math.min(sMaxAcquireImageCount, 10);
         synchronized (this.mQueueSizeLock) {
-            for (Entry entry : this.mPooledImageCountMap.entrySet()) {
-                if (entry.getValue() != null && ((Integer) entry.getValue()).intValue() >= min) {
+            for (Map.Entry next : this.mPooledImageCountMap.entrySet()) {
+                if (next.getValue() != null && ((Integer) next.getValue()).intValue() >= min) {
                     return true;
                 }
             }
-            for (Entry entry2 : this.mAcquiredImageCountMap.entrySet()) {
-                if (entry2.getValue() != null && ((Integer) entry2.getValue()).intValue() >= min) {
+            for (Map.Entry next2 : this.mAcquiredImageCountMap.entrySet()) {
+                if (next2.getValue() != null && ((Integer) next2.getValue()).intValue() >= min) {
                     return true;
                 }
             }
@@ -214,7 +195,7 @@ public class ImagePool {
         int i = 0;
         while (i < this.mImageLongSparseArray.size()) {
             try {
-                ((Image) this.mImageLongSparseArray.valueAt(i)).close();
+                this.mImageLongSparseArray.valueAt(i).close();
                 i++;
             } catch (Exception e2) {
                 Log.e(TAG, "clear ImagePool cause error: ", e2);
@@ -242,7 +223,7 @@ public class ImagePool {
     }
 
     public Image getImage(long j) {
-        Image image = (Image) this.mImageLongSparseArray.get(j);
+        Image image = this.mImageLongSparseArray.get(j);
         this.mImageLongSparseArray.remove(j);
         return image;
     }
@@ -254,14 +235,7 @@ public class ImagePool {
                 this.mHoldImages.put(image, imageQueueKey);
                 int changeAcquiredImageCountLocked = changeAcquiredImageCountLocked(imageQueueKey, 1);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("holdImage: image: ");
-                sb.append(image);
-                sb.append(" | ");
-                sb.append(image.getTimestamp());
-                sb.append(" qSize: ");
-                sb.append(changeAcquiredImageCountLocked);
-                Log.d(str, sb.toString());
+                Log.d(str, "holdImage: image: " + image + " | " + image.getTimestamp() + " qSize: " + changeAcquiredImageCountLocked);
                 this.mQueueSizeLock.notify();
             }
         }
@@ -286,12 +260,7 @@ public class ImagePool {
             synchronized (this.mImageLock) {
                 ImageWriter imageWriter = getImageWriter(imageQueueKey);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("queueImage: start. image: ");
-                sb.append(image);
-                sb.append(" | ");
-                sb.append(image.getTimestamp());
-                Log.d(str, sb.toString());
+                Log.d(str, "queueImage: start. image: " + image + " | " + image.getTimestamp());
                 imageWriter.queueInputImage(image);
                 try {
                     this.mImageLock.wait();
@@ -305,33 +274,22 @@ public class ImagePool {
             }
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Image has exist: ");
-        sb2.append(timestamp);
-        throw new RuntimeException(sb2.toString());
+        throw new RuntimeException("Image has exist: " + timestamp);
     }
 
     public void releaseImage(Image image) {
         synchronized (this.mQueueSizeLock) {
             if (image != null) {
-                ImageFormat imageFormat = (ImageFormat) this.mHoldImages.get(image);
+                ImageFormat imageFormat = this.mHoldImages.get(image);
                 if (imageFormat != null) {
                     this.mHoldImages.remove(image);
                     int changeAcquiredImageCountLocked = changeAcquiredImageCountLocked(imageFormat, -1);
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("releaseImage: image: ");
-                    sb.append(image);
-                    sb.append(" qSize: ");
-                    sb.append(changeAcquiredImageCountLocked);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "releaseImage: image: " + image + " qSize: " + changeAcquiredImageCountLocked);
                     this.mQueueSizeLock.notify();
                 } else {
                     String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("releaseImage: not hold image ");
-                    sb2.append(image);
-                    Log.w(str2, sb2.toString());
+                    Log.w(str2, "releaseImage: not hold image " + image);
                 }
             }
         }

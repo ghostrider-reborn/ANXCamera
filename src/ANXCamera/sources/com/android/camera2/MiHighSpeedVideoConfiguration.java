@@ -56,19 +56,14 @@ public class MiHighSpeedVideoConfiguration {
                 int i8 = i6 + 1;
                 int i9 = iArr[i6];
                 int i10 = i8 + 1;
-                int i11 = iArr[i8];
-                int i12 = i10 + 1;
-                MiHighSpeedVideoConfiguration miHighSpeedVideoConfiguration = new MiHighSpeedVideoConfiguration(i5, i7, i9, i11, iArr[i10]);
+                MiHighSpeedVideoConfiguration miHighSpeedVideoConfiguration = new MiHighSpeedVideoConfiguration(i5, i7, i9, iArr[i8], iArr[i10]);
                 arrayList.add(miHighSpeedVideoConfiguration);
                 i2++;
-                i3 = i12;
+                i3 = i10 + 1;
             }
             return arrayList;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("invalid buffer length ");
-            sb.append(iArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("invalid buffer length " + iArr.length);
         }
     }
 

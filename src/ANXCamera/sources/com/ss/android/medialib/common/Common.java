@@ -1,11 +1,11 @@
 package com.ss.android.medialib.common;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
-import com.arcsoft.camera.wideselfie.ArcWideSelfieDef.MAsvlOffScreen;
+import com.arcsoft.camera.wideselfie.ArcWideSelfieDef;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -47,37 +47,33 @@ public class Common {
                 case 1280:
                     str2 = "invalid enum";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YUYV /*1281*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YUYV:
                     str2 = "invalid value";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YVYU /*1282*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YVYU:
                     str2 = "invalid operation";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YUYV2 /*1285*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YUYV2:
                     str2 = "out of memory";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YVYU2 /*1286*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YVYU2:
                     str2 = "invalid framebuffer operation";
                     break;
                 default:
                     str2 = "unknown error";
                     break;
             }
-            Object[] objArr = {str, str2, Integer.valueOf(glGetError)};
-            Log.e("WIX", String.format("After tag \"%s\" glGetError %s(0x%x) ", objArr));
+            Log.e("WIX", String.format("After tag \"%s\" glGetError %s(0x%x) ", new Object[]{str, str2, Integer.valueOf(glGetError)}));
             glGetError = GLES20.glGetError();
         }
     }
 
-    public static Bitmap createBitmap(int i, int i2, Config config) {
+    public static Bitmap createBitmap(int i, int i2, Bitmap.Config config) {
         if (i > 0 && i2 > 0) {
             try {
                 return Bitmap.createBitmap(i, i2, config);
             } catch (Error e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("createBitmap: Error");
-                sb.append(e2.getMessage());
-                Log.e("WIX", sb.toString());
+                Log.e("WIX", "createBitmap: Error" + e2.getMessage());
             }
         }
         return null;
@@ -95,7 +91,7 @@ public class Common {
         int[] iArr = new int[1];
         GLES20.glGenTextures(1, iArr, 0);
         GLES20.glBindTexture(3553, iArr[0]);
-        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         int i5 = i3;
         _texParamHelper(3553, i3, i4);
         return iArr[0];

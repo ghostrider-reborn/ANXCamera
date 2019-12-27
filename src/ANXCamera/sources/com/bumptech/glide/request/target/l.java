@@ -26,7 +26,7 @@ public final class l<Z> extends m<Z> {
         HANDLER.obtainMessage(1, this).sendToTarget();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void clear() {
         this.da.d((o<?>) this);
     }

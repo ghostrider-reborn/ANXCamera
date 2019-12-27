@@ -2,11 +2,10 @@ package com.xiaomi.protocol;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.util.Locale;
 
 public class IImageReaderParameterSets implements Parcelable {
-    public static final Creator<IImageReaderParameterSets> CREATOR = new Creator<IImageReaderParameterSets>() {
+    public static final Parcelable.Creator<IImageReaderParameterSets> CREATOR = new Parcelable.Creator<IImageReaderParameterSets>() {
         public IImageReaderParameterSets createFromParcel(Parcel parcel) {
             return new IImageReaderParameterSets(parcel);
         }
@@ -37,10 +36,7 @@ public class IImageReaderParameterSets implements Parcelable {
         this.format = parcel.readInt();
         this.maxImages = parcel.readInt();
         this.targetCamera = parcel.readInt();
-        if (parcel.readByte() == 0) {
-            z = false;
-        }
-        this.shouldHoldImages = z;
+        this.shouldHoldImages = parcel.readByte() == 0 ? false : z;
     }
 
     public int describeContents() {

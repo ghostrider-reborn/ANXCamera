@@ -1,9 +1,8 @@
 package com.android.camera.fragment.manually.adapter;
 
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.android.camera.R;
@@ -13,10 +12,10 @@ import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.fragment.CommonRecyclerViewHolder;
 import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ColorImageView;
 
-public class ExtraRecyclerViewAdapter extends Adapter<CommonRecyclerViewHolder> implements OnClickListener {
+public class ExtraRecyclerViewAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> implements View.OnClickListener {
     private ComponentData mComponentData;
     private int mCurrentMode;
     private String mCurrentValue;
@@ -43,7 +42,7 @@ public class ExtraRecyclerViewAdapter extends Adapter<CommonRecyclerViewHolder> 
     public int getValuePosition() {
         int itemCount = getItemCount();
         for (int i = 0; i < itemCount; i++) {
-            if (this.mCurrentValue.equals(((ComponentDataItem) this.mComponentData.getItems().get(i)).mValue)) {
+            if (this.mCurrentValue.equals(this.mComponentData.getItems().get(i).mValue)) {
                 return i;
             }
         }
@@ -51,7 +50,7 @@ public class ExtraRecyclerViewAdapter extends Adapter<CommonRecyclerViewHolder> 
     }
 
     public void onBindViewHolder(CommonRecyclerViewHolder commonRecyclerViewHolder, int i) {
-        ComponentDataItem componentDataItem = (ComponentDataItem) this.mComponentData.getItems().get(i);
+        ComponentDataItem componentDataItem = this.mComponentData.getItems().get(i);
         String str = componentDataItem.mValue;
         commonRecyclerViewHolder.itemView.setOnClickListener(this);
         commonRecyclerViewHolder.itemView.setTag(str);
@@ -79,7 +78,7 @@ public class ExtraRecyclerViewAdapter extends Adapter<CommonRecyclerViewHolder> 
     }
 
     public void onClick(View view) {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null || !cameraAction.isDoingAction()) {
             String str = (String) view.getTag();
             if (couldNewValueTakeEffect(str)) {

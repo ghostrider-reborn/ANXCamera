@@ -12,9 +12,9 @@ import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.mediacompat.Rating2;
-import android.support.v4.media.MediaController2.PlaybackInfo;
+import android.support.v4.media.MediaController2;
+import android.support.v4.media.MediaInterface2;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import java.lang.annotation.Retention;
@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
 @TargetApi(19)
-public class MediaSession2 implements SessionPlayer, AutoCloseable {
+public class MediaSession2 implements MediaInterface2.SessionPlayer, AutoCloseable {
     public static final int ERROR_CODE_ACTION_ABORTED = 10;
     public static final int ERROR_CODE_APP_ERROR = 1;
     public static final int ERROR_CODE_AUTHENTICATION_EXPIRED = 3;
@@ -96,7 +96,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     static abstract class BuilderBase<T extends MediaSession2, U extends BuilderBase<T, U, C>, C extends SessionCallback> {
         C mCallback;
         Executor mCallbackExecutor;
@@ -116,11 +116,11 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             throw new IllegalArgumentException("context shouldn't be null");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public abstract T build();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public U setId(@NonNull String str) {
             if (str != null) {
@@ -130,7 +130,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             throw new IllegalArgumentException("id shouldn't be null");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public U setPlayer(@NonNull BaseMediaPlayer baseMediaPlayer) {
             if (baseMediaPlayer != null) {
@@ -140,7 +140,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             throw new IllegalArgumentException("player shouldn't be null");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public U setPlaylistAgent(@NonNull MediaPlaylistAgent mediaPlaylistAgent) {
             if (mediaPlaylistAgent != null) {
                 this.mPlaylistAgent = mediaPlaylistAgent;
@@ -149,14 +149,14 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             throw new IllegalArgumentException("playlistAgent shouldn't be null");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public U setSessionActivity(@Nullable PendingIntent pendingIntent) {
             this.mSessionActivity = pendingIntent;
             return this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public U setSessionCallback(@NonNull Executor executor, @NonNull C c2) {
             if (executor == null) {
@@ -170,7 +170,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public U setVolumeProvider(@Nullable VolumeProviderCompat volumeProviderCompat) {
             this.mVolumeProvider = volumeProviderCompat;
@@ -243,7 +243,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         }
 
         @Nullable
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public static CommandButton fromBundle(Bundle bundle) {
             if (bundle == null) {
                 return null;
@@ -284,7 +284,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             return this.mEnabled;
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         @NonNull
         public Bundle toBundle() {
             Bundle bundle = new Bundle();
@@ -308,7 +308,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             return getId().equals(((ControllerCb) obj).getId());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public abstract IBinder getId();
 
@@ -316,70 +316,70 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             return getId().hashCode();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onAllowedCommandsChanged(@NonNull SessionCommandGroup2 sessionCommandGroup2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onBufferingStateChanged(@NonNull MediaItem2 mediaItem2, int i, long j) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onChildrenChanged(@NonNull String str, int i, @Nullable Bundle bundle) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onCurrentMediaItemChanged(@Nullable MediaItem2 mediaItem2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onCustomCommand(@NonNull SessionCommand2 sessionCommand2, @Nullable Bundle bundle, @Nullable ResultReceiver resultReceiver) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onCustomLayoutChanged(@NonNull List<CommandButton> list) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onDisconnected() throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onError(int i, @Nullable Bundle bundle) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onGetChildrenDone(@NonNull String str, int i, int i2, @Nullable List<MediaItem2> list, @Nullable Bundle bundle) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onGetItemDone(@NonNull String str, @Nullable MediaItem2 mediaItem2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onGetLibraryRootDone(@Nullable Bundle bundle, @Nullable String str, @Nullable Bundle bundle2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onGetSearchResultDone(@NonNull String str, int i, int i2, @Nullable List<MediaItem2> list, @Nullable Bundle bundle) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
-        public abstract void onPlaybackInfoChanged(@NonNull PlaybackInfo playbackInfo) throws RemoteException;
+        /* access modifiers changed from: package-private */
+        public abstract void onPlaybackInfoChanged(@NonNull MediaController2.PlaybackInfo playbackInfo) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onPlaybackSpeedChanged(long j, long j2, float f2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onPlayerStateChanged(long j, long j2, int i) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onPlaylistChanged(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 mediaMetadata2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onPlaylistMetadataChanged(@Nullable MediaMetadata2 mediaMetadata2) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onRepeatModeChanged(int i) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onRoutesInfoChanged(@Nullable List<Bundle> list) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onSearchResultChanged(@NonNull String str, int i, @Nullable Bundle bundle) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onSeekCompleted(long j, long j2, long j3) throws RemoteException;
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onShuffleModeChanged(int i) throws RemoteException;
     }
 
@@ -389,7 +389,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         private final String mPackageName;
         private final int mUid;
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         ControllerInfo(@NonNull String str, int i, int i2, @NonNull ControllerCb controllerCb) {
             this.mUid = i2;
             this.mPackageName = str;
@@ -403,13 +403,13 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             return this.mControllerCb.equals(((ControllerInfo) obj).mControllerCb);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public ControllerCb getControllerCb() {
             return this.mControllerCb;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public IBinder getId() {
             return this.mControllerCb.getId();
@@ -428,23 +428,17 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
             return this.mControllerCb.hashCode();
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public boolean isTrusted() {
             return this.mIsTrusted;
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("ControllerInfo {pkg=");
-            sb.append(this.mPackageName);
-            sb.append(", uid=");
-            sb.append(this.mUid);
-            sb.append("})");
-            return sb.toString();
+            return "ControllerInfo {pkg=" + this.mPackageName + ", uid=" + this.mUid + "})";
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ErrorCode {
     }
@@ -458,10 +452,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
 
         public void execute(Runnable runnable) {
             if (!this.mHandler.post(runnable)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(this.mHandler);
-                sb.append(" is shutting down");
-                throw new RejectedExecutionException(sb.toString());
+                throw new RejectedExecutionException(this.mHandler + " is shutting down");
             }
         }
     }
@@ -556,7 +547,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         }
     }
 
-    interface SupportLibraryImpl extends SessionPlayer, AutoCloseable {
+    interface SupportLibraryImpl extends MediaInterface2.SessionPlayer, AutoCloseable {
         AudioFocusHandler getAudioFocusHandler();
 
         SessionCallback getCallback();
@@ -570,7 +561,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
 
         MediaSession2 getInstance();
 
-        PlaybackInfo getPlaybackInfo();
+        MediaController2.PlaybackInfo getPlaybackInfo();
 
         PlaybackStateCompat getPlaybackStateCompat();
 
@@ -626,13 +617,13 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SupportLibraryImpl createImpl(Context context, String str, BaseMediaPlayer baseMediaPlayer, MediaPlaylistAgent mediaPlaylistAgent, VolumeProviderCompat volumeProviderCompat, PendingIntent pendingIntent, Executor executor, SessionCallback sessionCallback) {
         MediaSession2ImplBase mediaSession2ImplBase = new MediaSession2ImplBase(this, context, str, baseMediaPlayer, mediaPlaylistAgent, volumeProviderCompat, pendingIntent, executor, sessionCallback);
         return mediaSession2ImplBase;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public AudioFocusHandler getAudioFocusHandler() {
         return this.mImpl.getAudioFocusHandler();
@@ -646,13 +637,13 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         return this.mImpl.getBufferingState();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public SessionCallback getCallback() {
         return this.mImpl.getCallback();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public Executor getCallbackExecutor() {
         return this.mImpl.getCallbackExecutor();
@@ -663,7 +654,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         return this.mImpl.getConnectedControllers();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public Context getContext() {
         return this.mImpl.getContext();
@@ -681,7 +672,7 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         return this.mImpl.getDuration();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SupportLibraryImpl getImpl() {
         return this.mImpl;
     }
@@ -716,12 +707,12 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         return this.mImpl.getRepeatMode();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public IBinder getSessionBinder() {
         return this.mImpl.getSessionBinder();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public MediaSessionCompat getSessionCompat() {
         return this.mImpl.getSessionCompat();
     }
@@ -812,12 +803,12 @@ public class MediaSession2 implements SessionPlayer, AutoCloseable {
         this.mImpl.setShuffleMode(i);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void skipBackward() {
         this.mImpl.skipBackward();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void skipForward() {
         this.mImpl.skipForward();
     }

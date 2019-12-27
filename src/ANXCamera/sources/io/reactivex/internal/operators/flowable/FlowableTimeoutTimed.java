@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.SequentialDisposable;
 import io.reactivex.internal.subscriptions.SubscriptionArbiter;
@@ -59,9 +58,9 @@ public final class FlowableTimeoutTimed<T> extends AbstractFlowableWithUpstream<
         final long timeout;
         final TimeUnit unit;
         final AtomicReference<Subscription> upstream = new AtomicReference<>();
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        TimeoutFallbackSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Worker worker2, Publisher<? extends T> publisher) {
+        TimeoutFallbackSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Scheduler.Worker worker2, Publisher<? extends T> publisher) {
             this.actual = subscriber;
             this.timeout = j;
             this.unit = timeUnit;
@@ -125,7 +124,7 @@ public final class FlowableTimeoutTimed<T> extends AbstractFlowableWithUpstream<
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void startTimeout(long j) {
             this.task.replace(this.worker.schedule(new TimeoutTask(j, this), this.timeout, this.unit));
         }
@@ -139,9 +138,9 @@ public final class FlowableTimeoutTimed<T> extends AbstractFlowableWithUpstream<
         final long timeout;
         final TimeUnit unit;
         final AtomicReference<Subscription> upstream = new AtomicReference<>();
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        TimeoutSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Worker worker2) {
+        TimeoutSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Scheduler.Worker worker2) {
             this.actual = subscriber;
             this.timeout = j;
             this.unit = timeUnit;
@@ -199,7 +198,7 @@ public final class FlowableTimeoutTimed<T> extends AbstractFlowableWithUpstream<
             SubscriptionHelper.deferredRequest(this.upstream, this.requested, j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void startTimeout(long j) {
             this.task.replace(this.worker.schedule(new TimeoutTask(j, this), this.timeout, this.unit));
         }
@@ -237,12 +236,12 @@ public final class FlowableTimeoutTimed<T> extends AbstractFlowableWithUpstream<
             TimeoutSubscriber timeoutSubscriber = new TimeoutSubscriber(subscriber, this.timeout, this.unit, this.scheduler.createWorker());
             subscriber.onSubscribe(timeoutSubscriber);
             timeoutSubscriber.startTimeout(0);
-            this.source.subscribe((FlowableSubscriber<? super T>) timeoutSubscriber);
+            this.source.subscribe(timeoutSubscriber);
             return;
         }
         TimeoutFallbackSubscriber timeoutFallbackSubscriber = new TimeoutFallbackSubscriber(subscriber, this.timeout, this.unit, this.scheduler.createWorker(), this.other);
         subscriber.onSubscribe(timeoutFallbackSubscriber);
         timeoutFallbackSubscriber.startTimeout(0);
-        this.source.subscribe((FlowableSubscriber<? super T>) timeoutFallbackSubscriber);
+        this.source.subscribe(timeoutFallbackSubscriber);
     }
 }

@@ -47,15 +47,12 @@ public class MiGLSurfaceViewRender {
         this.textureVertices_buffer.position(0);
         this.mProgramId = createProgram(vertexShaderString, yuvFragmentShaderString);
         this.ATTRIB_VERTEX = GLES20.glGetAttribLocation(this.mProgramId, "vertexIn");
-        int i = this.ATTRIB_VERTEX;
-        String str = "glGetAttribLocation error ";
-        String str2 = TAG;
-        if (i == -1) {
-            Log.d(str2, str);
+        if (this.ATTRIB_VERTEX == -1) {
+            Log.d(TAG, "glGetAttribLocation error ");
         }
         this.ATTRIB_TEXTURE = GLES20.glGetAttribLocation(this.mProgramId, "textureIn");
         if (this.ATTRIB_TEXTURE == -1) {
-            Log.d(str2, str);
+            Log.d(TAG, "glGetAttribLocation error ");
         }
         this.m_textureUniformY = GLES20.glGetUniformLocation(this.mProgramId, "tex_y");
         this.m_textureUniformU = GLES20.glGetUniformLocation(this.mProgramId, "tex_u");
@@ -74,26 +71,13 @@ public class MiGLSurfaceViewRender {
     private int createProgram(String str, String str2) {
         int loadShader = loadShader(35633, str);
         int loadShader2 = loadShader(35632, str2);
-        StringBuilder sb = new StringBuilder();
-        sb.append("vertex shader: ");
-        sb.append(str);
-        String str3 = " -- ";
-        sb.append(str3);
-        sb.append(loadShader);
-        String sb2 = sb.toString();
-        String str4 = TAG;
-        Log.d(str4, sb2);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("fragment shader: ");
-        sb3.append(str2);
-        sb3.append(str3);
-        sb3.append(loadShader2);
-        Log.d(str4, sb3.toString());
+        Log.d(TAG, "vertex shader: " + str + " -- " + loadShader);
+        Log.d(TAG, "fragment shader: " + str2 + " -- " + loadShader2);
         int glCreateProgram = GLES20.glCreateProgram();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("program: ");
-        sb4.append(glCreateProgram);
-        Log.d(str4, sb4.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append("program: ");
+        sb.append(glCreateProgram);
+        Log.d(TAG, sb.toString());
         if (glCreateProgram != 0) {
             GLES20.glAttachShader(glCreateProgram, loadShader);
             GLES20.glAttachShader(glCreateProgram, loadShader2);
@@ -105,21 +89,13 @@ public class MiGLSurfaceViewRender {
                 glCreateProgram = 0;
             }
         }
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(" end if program: ");
-        sb5.append(glCreateProgram);
-        Log.d(str4, sb5.toString());
+        Log.d(TAG, " end if program: " + glCreateProgram);
         return glCreateProgram;
     }
 
     private int loadShader(int i, String str) {
         int glCreateShader = GLES20.glCreateShader(i);
-        StringBuilder sb = new StringBuilder();
-        sb.append("shader: ");
-        sb.append(glCreateShader);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        Log.d(str2, sb2);
+        Log.d(TAG, "shader: " + glCreateShader);
         if (glCreateShader != 0) {
             GLES20.glShaderSource(glCreateShader, str);
             GLES20.glCompileShader(glCreateShader);
@@ -130,10 +106,7 @@ public class MiGLSurfaceViewRender {
                 glCreateShader = 0;
             }
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("end shader: ");
-        sb3.append(glCreateShader);
-        Log.d(str2, sb3.toString());
+        Log.d(TAG, "end shader: " + glCreateShader);
         return glCreateShader;
     }
 
@@ -160,31 +133,9 @@ public class MiGLSurfaceViewRender {
     }
 
     public void init() {
-        String str = TAG;
-        Log.d(str, "init :");
+        Log.d(TAG, "init :");
         InitShaders();
-        StringBuilder sb = new StringBuilder();
-        sb.append("onSurfaceCreated: y ");
-        sb.append(this.m_textureid_y);
-        sb.append(", u ");
-        sb.append(this.m_textureid_u);
-        sb.append(", v ");
-        sb.append(this.m_textureid_v);
-        sb.append(", Y ");
-        sb.append(this.m_textureUniformY);
-        sb.append(", U ");
-        sb.append(this.m_textureUniformU);
-        sb.append(", V ");
-        sb.append(this.m_textureUniformV);
-        sb.append(", ATTRIB_VERTEX: ");
-        sb.append(this.ATTRIB_VERTEX);
-        sb.append(", ATTRIB_TEXTURE ");
-        sb.append(this.ATTRIB_TEXTURE);
-        sb.append(", vertexVertices: ");
-        sb.append(this.vertexVertices_buffer.remaining());
-        sb.append(", textureVertices ");
-        sb.append(this.textureVertices_buffer.remaining());
-        Log.d(str, sb.toString());
+        Log.d(TAG, "onSurfaceCreated: y " + this.m_textureid_y + ", u " + this.m_textureid_u + ", v " + this.m_textureid_v + ", Y " + this.m_textureUniformY + ", U " + this.m_textureUniformU + ", V " + this.m_textureUniformV + ", ATTRIB_VERTEX: " + this.ATTRIB_VERTEX + ", ATTRIB_TEXTURE " + this.ATTRIB_TEXTURE + ", vertexVertices: " + this.vertexVertices_buffer.remaining() + ", textureVertices " + this.textureVertices_buffer.remaining());
         byte[] bArr = new byte[this.vertexVertices_buffer.remaining()];
         this.vertexVertices_buffer.get(bArr);
         byte[] bArr2 = new byte[this.textureVertices_buffer.remaining()];

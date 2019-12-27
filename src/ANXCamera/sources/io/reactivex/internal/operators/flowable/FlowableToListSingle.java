@@ -73,18 +73,18 @@ public final class FlowableToListSingle<T, U extends Collection<? super T>> exte
     }
 
     public Flowable<U> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableToList<T>(this.source, this.collectionSupplier));
+        return RxJavaPlugins.onAssembly(new FlowableToList(this.source, this.collectionSupplier));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super U> singleObserver) {
         try {
-            Object call = this.collectionSupplier.call();
+            U call = this.collectionSupplier.call();
             ObjectHelper.requireNonNull(call, "The collectionSupplier returned a null collection. Null values are generally not allowed in 2.x operators and sources.");
-            this.source.subscribe((FlowableSubscriber<? super T>) new ToListSubscriber<Object>(singleObserver, (Collection) call));
+            this.source.subscribe(new ToListSubscriber(singleObserver, (Collection) call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

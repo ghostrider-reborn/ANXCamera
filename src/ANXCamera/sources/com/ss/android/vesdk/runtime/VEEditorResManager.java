@@ -21,36 +21,15 @@ public class VEEditorResManager {
     }
 
     public String genComposedVideoPath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(VEResManager.getFolder(this.mWorkSpace, "compose"));
-        sb.append(File.separator);
-        sb.append(System.currentTimeMillis());
-        sb.append("_");
-        sb.append("composed");
-        sb.append(".mp4");
-        return sb.toString();
+        return VEResManager.getFolder(this.mWorkSpace, "compose") + File.separator + System.currentTimeMillis() + "_" + "composed" + ".mp4";
     }
 
     public String genReverseVideoPath(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(VEResManager.getFolder(this.mWorkSpace, "concat"));
-        sb.append(File.separator);
-        sb.append(i);
-        sb.append("_");
-        sb.append("reverse");
-        sb.append(".mp4");
-        return sb.toString();
+        return VEResManager.getFolder(this.mWorkSpace, "concat") + File.separator + i + "_" + "reverse" + ".mp4";
     }
 
     public String genSeqAudioPath(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(VEResManager.getFolder(this.mWorkSpace, "concat"));
-        sb.append(File.separator);
-        sb.append(i);
-        sb.append("_");
-        sb.append("reverse");
-        sb.append(".wav");
-        return sb.toString();
+        return VEResManager.getFolder(this.mWorkSpace, "concat") + File.separator + i + "_" + "reverse" + ".wav";
     }
 
     public String getWorkspace() {

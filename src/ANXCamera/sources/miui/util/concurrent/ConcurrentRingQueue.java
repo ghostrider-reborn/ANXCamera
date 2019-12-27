@@ -1,7 +1,7 @@
 package miui.util.concurrent;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import miui.util.concurrent.Queue.Predicate;
+import miui.util.concurrent.Queue;
 
 public class ConcurrentRingQueue<T> implements Queue<T> {
     private volatile int mAdditional;
@@ -158,7 +158,7 @@ public class ConcurrentRingQueue<T> implements Queue<T> {
         return z;
     }
 
-    public int remove(Predicate<T> predicate) {
+    public int remove(Queue.Predicate<T> predicate) {
         if (predicate == null) {
             return 0;
         }

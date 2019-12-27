@@ -31,7 +31,7 @@ import com.android.camera.effect.renders.YGaussianEffectRender;
 import com.android.camera.effect.renders.YTiltShiftEffectRender;
 import com.android.camera.effect.renders.YuvToRgbRender;
 import com.android.camera.fragment.beauty.BeautyParameters;
-import com.android.camera.fragment.beauty.LiveBeautyFilterFragment.LiveFilterItem;
+import com.android.camera.fragment.beauty.LiveBeautyFilterFragment;
 import com.android.camera.log.Log;
 import com.android.camera.module.ModuleManager;
 import com.android.gallery3d.ui.GLCanvas;
@@ -40,7 +40,6 @@ import com.mi.config.d;
 import com.miui.filtersdk.filter.NewBeautificationFilter;
 import com.miui.filtersdk.filter.base.BaseOriginalFilter;
 import com.miui.filtersdk.filter.helper.FilterFactory;
-import com.miui.filtersdk.filter.helper.FilterFactory.FilterScene;
 import com.miui.filtersdk.filter.helper.FilterType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -75,7 +74,7 @@ public class EffectController {
     private EffectRectAttribute mEffectRectAttribute = new EffectRectAttribute((AnonymousClass1) null);
     private SparseArray<ArrayList<FilterInfo>> mFilterInfoMap;
     private boolean mIsDrawMainFrame = true;
-    private List<LiveFilterItem> mLiveFilters;
+    private List<LiveBeautyFilterFragment.LiveFilterItem> mLiveFilters;
     private Object mLock = new Object();
     private boolean mNeedDestroyMakeup = false;
     private int mOrientation;
@@ -83,7 +82,7 @@ public class EffectController {
     private int mOverrideEffectIndex = -1;
     private float mTiltShiftMaskAlpha;
 
-    /* renamed from: com.android.camera.effect.EffectController$1 reason: invalid class name */
+    /* renamed from: com.android.camera.effect.EffectController$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$filter$helper$FilterType = new int[FilterType.values().length];
 
@@ -191,18 +190,7 @@ public class EffectController {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("mRectF=");
-            sb.append(this.mRectF);
-            sb.append(" mPoint1=");
-            sb.append(this.mPoint1);
-            sb.append(" mPoint2=");
-            sb.append(this.mPoint2);
-            sb.append(" mInvertFlag=");
-            sb.append(this.mInvertFlag);
-            sb.append(" mRangeWidth=");
-            sb.append(this.mRangeWidth);
-            return sb.toString();
+            return "mRectF=" + this.mRectF + " mPoint1=" + this.mPoint1 + " mPoint2=" + this.mPoint2 + " mInvertFlag=" + this.mInvertFlag + " mRangeWidth=" + this.mRangeWidth;
         }
     }
 
@@ -210,8 +198,8 @@ public class EffectController {
         initialize();
     }
 
-    private FilterScene convertToFilterScene(int i) {
-        return i != 1 ? i != 2 ? i != 3 ? i != 5 ? i != 6 ? FilterScene.NONE : FilterScene.LIGHTING : FilterScene.AI : FilterScene.STICKER : FilterScene.BEAUTY : FilterScene.NORMAL;
+    private FilterFactory.FilterScene convertToFilterScene(int i) {
+        return i != 1 ? i != 2 ? i != 3 ? i != 5 ? i != 6 ? FilterFactory.FilterScene.NONE : FilterFactory.FilterScene.LIGHTING : FilterFactory.FilterScene.AI : FilterFactory.FilterScene.STICKER : FilterFactory.FilterScene.BEAUTY : FilterFactory.FilterScene.NORMAL;
     }
 
     private RenderGroup getAiSceneRenderNew(GLCanvas gLCanvas, RenderGroup renderGroup, boolean z, boolean z2, int i) {
@@ -380,14 +368,14 @@ public class EffectController {
     }
 
     private RenderGroup getRenderByCategory(GLCanvas gLCanvas, RenderGroup renderGroup, int i, boolean z) {
-        if (convertToFilterScene(i) == FilterScene.NONE) {
+        if (convertToFilterScene(i) == FilterFactory.FilterScene.NONE) {
             return renderGroup;
         }
-        ArrayList filterInfo = getFilterInfo(i);
+        ArrayList<FilterInfo> filterInfo = getFilterInfo(i);
         if (filterInfo != null) {
-            Iterator it = filterInfo.iterator();
+            Iterator<FilterInfo> it = filterInfo.iterator();
             while (it.hasNext()) {
-                getRenderById(gLCanvas, renderGroup, z, ((FilterInfo) it.next()).getId());
+                getRenderById(gLCanvas, renderGroup, z, it.next().getId());
             }
         }
         return renderGroup;
@@ -405,10 +393,7 @@ public class EffectController {
                 if (renderGroup.getRender(i) == null) {
                     int index = FilterInfo.getIndex(i);
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("getRenderById: index = ");
-                    sb.append(index);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "getRenderById: index = " + index);
                     if (index > -1 && index < FilterType.values().length) {
                         FilterType filterType = FilterType.values()[index];
                         BaseOriginalFilter filterByType = FilterFactory.getFilterByType(filterType);
@@ -444,32 +429,30 @@ public class EffectController {
 
     private ArrayList<FilterInfo> initAiSceneFilterInfo() {
         ArrayList<FilterInfo> arrayList = new ArrayList<>();
-        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterScene.AI);
+        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterFactory.FilterScene.AI);
         int i = 0;
         arrayList.add(new FilterInfo(FilterInfo.AI_SCENE_FILTER_ID_0_NONE, 0));
         int length = filtersByScene.length;
         int i2 = 1;
         while (i < length) {
-            int i3 = i2 + 1;
             arrayList.add(new FilterInfo(FilterInfo.getId(5, filtersByScene[i].ordinal()), i2));
             i++;
-            i2 = i3;
+            i2++;
         }
         return arrayList;
     }
 
     private ArrayList<FilterInfo> initLightingFilterInfo() {
         ArrayList<FilterInfo> arrayList = new ArrayList<>();
-        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterScene.LIGHTING);
+        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterFactory.FilterScene.LIGHTING);
         int i = 0;
         arrayList.add(new FilterInfo(FilterInfo.FILTER_ID_NONE, 0));
         int length = filtersByScene.length;
         int i2 = 1;
         while (i < length) {
-            int i3 = i2 + 1;
             arrayList.add(new FilterInfo(FilterInfo.getId(6, filtersByScene[i].ordinal()), i2));
             i++;
-            i2 = i3;
+            i2++;
         }
         return arrayList;
     }
@@ -482,7 +465,7 @@ public class EffectController {
         int i5;
         ArrayList<FilterInfo> arrayList = new ArrayList<>();
         arrayList.add(new FilterInfo(FilterInfo.FILTER_ID_NONE, R.string.pref_camera_coloreffect_entry_none, R.drawable.color_effect_image_none, 0));
-        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterScene.NORMAL);
+        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterFactory.FilterScene.NORMAL);
         int length = filtersByScene.length;
         int i6 = 0;
         int i7 = 0;
@@ -603,7 +586,7 @@ public class EffectController {
         int i5;
         ArrayList<FilterInfo> arrayList = new ArrayList<>();
         arrayList.add(new FilterInfo(FilterInfo.FILTER_ID_NONE, R.string.pref_camera_coloreffect_entry_none, R.drawable.video_effect_image_none, 0));
-        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterScene.STICKER);
+        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterFactory.FilterScene.STICKER);
         int length = filtersByScene.length;
         int i6 = 0;
         int i7 = 0;
@@ -711,7 +694,7 @@ public class EffectController {
     }
 
     public EffectRectAttribute copyEffectRectAttribute() {
-        return new EffectRectAttribute(this.mEffectRectAttribute, null);
+        return new EffectRectAttribute(this.mEffectRectAttribute, (AnonymousClass1) null);
     }
 
     public void enableMakeup(boolean z) {
@@ -722,14 +705,14 @@ public class EffectController {
         postNotifyEffectChanged(3);
     }
 
-    public LiveFilterItem findLiveFilter(Context context, int i) {
-        List<LiveFilterItem> liveFilterList = getLiveFilterList(context);
+    public LiveBeautyFilterFragment.LiveFilterItem findLiveFilter(Context context, int i) {
+        List<LiveBeautyFilterFragment.LiveFilterItem> liveFilterList = getLiveFilterList(context);
         if (liveFilterList == null) {
             return null;
         }
-        for (LiveFilterItem liveFilterItem : liveFilterList) {
-            if (liveFilterItem.id == i) {
-                return liveFilterItem;
+        for (LiveBeautyFilterFragment.LiveFilterItem next : liveFilterList) {
+            if (next.id == i) {
+                return next;
             }
         }
         return null;
@@ -763,7 +746,7 @@ public class EffectController {
     }
 
     public int getEffectCount(int i) {
-        ArrayList arrayList = (ArrayList) this.mFilterInfoMap.get(i);
+        ArrayList arrayList = this.mFilterInfoMap.get(i);
         if (arrayList == null) {
             return 0;
         }
@@ -804,15 +787,9 @@ public class EffectController {
             i2 = FilterInfo.getCategory(i);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getEffectGroup: renderId = ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "getEffectGroup: renderId = " + i);
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("getEffectGroup: category = ");
-        sb2.append(i2);
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "getEffectGroup: category = " + i2);
         switch (i2) {
             case 0:
                 getPrivateRender(gLCanvas, renderGroup, z, z2, i);
@@ -837,10 +814,7 @@ public class EffectController {
                 break;
             default:
                 String str3 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("invalid renderId ");
-                sb3.append(Integer.toHexString(i));
-                Log.e(str3, sb3.toString());
+                Log.e(str3, "invalid renderId " + Integer.toHexString(i));
                 break;
         }
         return renderGroup;
@@ -851,21 +825,21 @@ public class EffectController {
     }
 
     public ArrayList<FilterInfo> getFilterInfo(int i) {
-        return (ArrayList) this.mFilterInfoMap.get(i);
+        return this.mFilterInfoMap.get(i);
     }
 
     public int getInvertFlag() {
         return this.mEffectRectAttribute.mInvertFlag;
     }
 
-    public List<LiveFilterItem> getLiveFilterList(Context context) {
+    public List<LiveBeautyFilterFragment.LiveFilterItem> getLiveFilterList(Context context) {
         if (this.mLiveFilters == null) {
             TypedArray obtainTypedArray = context.getResources().obtainTypedArray(R.array.live_filter_icon);
             String[] stringArray = context.getResources().getStringArray(R.array.live_filter_name);
             String[] stringArray2 = context.getResources().getStringArray(R.array.live_filter_directory_name);
             this.mLiveFilters = new ArrayList();
             for (int i = 0; i < obtainTypedArray.length(); i++) {
-                LiveFilterItem liveFilterItem = new LiveFilterItem();
+                LiveBeautyFilterFragment.LiveFilterItem liveFilterItem = new LiveBeautyFilterFragment.LiveFilterItem();
                 liveFilterItem.id = i;
                 liveFilterItem.imageViewRes = obtainTypedArray.getDrawable(i);
                 liveFilterItem.name = stringArray[i];
@@ -963,14 +937,15 @@ public class EffectController {
     }
 
     public boolean isNeedRect(int i) {
-        ArrayList arrayList = (ArrayList) this.mFilterInfoMap.get(FilterInfo.getCategory(i));
-        if (arrayList != null) {
-            Iterator it = arrayList.iterator();
-            while (it.hasNext()) {
-                FilterInfo filterInfo = (FilterInfo) it.next();
-                if (filterInfo.getId() == i) {
-                    return filterInfo.isNeedRect();
-                }
+        ArrayList arrayList = this.mFilterInfoMap.get(FilterInfo.getCategory(i));
+        if (arrayList == null) {
+            return false;
+        }
+        Iterator it = arrayList.iterator();
+        while (it.hasNext()) {
+            FilterInfo filterInfo = (FilterInfo) it.next();
+            if (filterInfo.getId() == i) {
+                return filterInfo.isNeedRect();
             }
         }
         return false;

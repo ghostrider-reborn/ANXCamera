@@ -7,16 +7,13 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView.LayoutParams;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -30,7 +27,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class SpringConfiguratorView extends FrameLayout {
     /* access modifiers changed from: private */
@@ -63,14 +59,15 @@ public class SpringConfiguratorView extends FrameLayout {
     private final SpinnerAdapter spinnerAdapter;
     private final SpringConfigRegistry springConfigRegistry;
 
-    private class OnNubTouchListener implements OnTouchListener {
+    private class OnNubTouchListener implements View.OnTouchListener {
         private OnNubTouchListener() {
         }
 
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == 0) {
-                SpringConfiguratorView.this.togglePosition();
+            if (motionEvent.getAction() != 0) {
+                return true;
             }
+            SpringConfiguratorView.this.togglePosition();
             return true;
         }
     }
@@ -95,32 +92,26 @@ public class SpringConfiguratorView extends FrameLayout {
         }
     }
 
-    private class SeekbarListener implements OnSeekBarChangeListener {
+    private class SeekbarListener implements SeekBar.OnSeekBarChangeListener {
         private SeekbarListener() {
         }
 
         public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
             if (seekBar == SpringConfiguratorView.this.mTensionSeekBar) {
-                float f2 = ((((float) i) * SpringConfiguratorView.MAX_TENSION) / 100000.0f) + 0.0f;
-                double d2 = (double) f2;
-                SpringConfiguratorView.this.mSelectedSpringConfig.tension = OrigamiValueConverter.tensionFromOrigamiValue(d2);
+                SpringConfig access$400 = SpringConfiguratorView.this.mSelectedSpringConfig;
+                double d2 = (double) (((((float) i) * SpringConfiguratorView.MAX_TENSION) / 100000.0f) + 0.0f);
+                access$400.tension = OrigamiValueConverter.tensionFromOrigamiValue(d2);
                 String format = SpringConfiguratorView.DECIMAL_FORMAT.format(d2);
                 TextView access$900 = SpringConfiguratorView.this.mTensionLabel;
-                StringBuilder sb = new StringBuilder();
-                sb.append("T:");
-                sb.append(format);
-                access$900.setText(sb.toString());
+                access$900.setText("T:" + format);
             }
             if (seekBar == SpringConfiguratorView.this.mFrictionSeekBar) {
-                float f3 = ((((float) i) * SpringConfiguratorView.MAX_FRICTION) / 100000.0f) + 0.0f;
-                double d3 = (double) f3;
-                SpringConfiguratorView.this.mSelectedSpringConfig.friction = OrigamiValueConverter.frictionFromOrigamiValue(d3);
+                SpringConfig access$4002 = SpringConfiguratorView.this.mSelectedSpringConfig;
+                double d3 = (double) (((((float) i) * SpringConfiguratorView.MAX_FRICTION) / 100000.0f) + 0.0f);
+                access$4002.friction = OrigamiValueConverter.frictionFromOrigamiValue(d3);
                 String format2 = SpringConfiguratorView.DECIMAL_FORMAT.format(d3);
                 TextView access$1100 = SpringConfiguratorView.this.mFrictionLabel;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("F:");
-                sb2.append(format2);
-                access$1100.setText(sb2.toString());
+                access$1100.setText("F:" + format2);
             }
         }
 
@@ -165,25 +156,25 @@ public class SpringConfiguratorView extends FrameLayout {
             TextView textView;
             if (view == null) {
                 textView = new TextView(this.mContext);
-                textView.setLayoutParams(new LayoutParams(-1, -1));
+                textView.setLayoutParams(new AbsListView.LayoutParams(-1, -1));
                 int dpToPx = Util.dpToPx(12.0f, SpringConfiguratorView.this.getResources());
                 textView.setPadding(dpToPx, dpToPx, dpToPx, dpToPx);
                 textView.setTextColor(SpringConfiguratorView.this.mTextColor);
             } else {
                 textView = (TextView) view;
             }
-            textView.setText((CharSequence) this.mStrings.get(i));
+            textView.setText(this.mStrings.get(i));
             return textView;
         }
     }
 
-    private class SpringSelectedListener implements OnItemSelectedListener {
+    private class SpringSelectedListener implements AdapterView.OnItemSelectedListener {
         private SpringSelectedListener() {
         }
 
         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long j) {
             SpringConfiguratorView springConfiguratorView = SpringConfiguratorView.this;
-            springConfiguratorView.mSelectedSpringConfig = (SpringConfig) springConfiguratorView.mSpringConfigs.get(i);
+            SpringConfig unused = springConfiguratorView.mSelectedSpringConfig = (SpringConfig) springConfiguratorView.mSpringConfigs.get(i);
             SpringConfiguratorView springConfiguratorView2 = SpringConfiguratorView.this;
             springConfiguratorView2.updateSeekBarsForSpringConfig(springConfiguratorView2.mSelectedSpringConfig);
         }
@@ -193,7 +184,7 @@ public class SpringConfiguratorView extends FrameLayout {
     }
 
     public SpringConfiguratorView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public SpringConfiguratorView(Context context, AttributeSet attributeSet) {
@@ -325,17 +316,17 @@ public class SpringConfiguratorView extends FrameLayout {
     }
 
     public void refreshSpringConfigurations() {
-        Map allSpringConfig = this.springConfigRegistry.getAllSpringConfig();
+        Map<SpringConfig, String> allSpringConfig = this.springConfigRegistry.getAllSpringConfig();
         this.spinnerAdapter.clear();
         this.mSpringConfigs.clear();
-        for (Entry entry : allSpringConfig.entrySet()) {
-            if (entry.getKey() != SpringConfig.defaultConfig) {
-                this.mSpringConfigs.add(entry.getKey());
-                this.spinnerAdapter.add((String) entry.getValue());
+        for (Map.Entry next : allSpringConfig.entrySet()) {
+            if (next.getKey() != SpringConfig.defaultConfig) {
+                this.mSpringConfigs.add(next.getKey());
+                this.spinnerAdapter.add((String) next.getValue());
             }
         }
         this.mSpringConfigs.add(SpringConfig.defaultConfig);
-        this.spinnerAdapter.add((String) allSpringConfig.get(SpringConfig.defaultConfig));
+        this.spinnerAdapter.add(allSpringConfig.get(SpringConfig.defaultConfig));
         this.spinnerAdapter.notifyDataSetChanged();
         if (this.mSpringConfigs.size() > 0) {
             this.mSpringSelectorSpinner.setSelection(0);

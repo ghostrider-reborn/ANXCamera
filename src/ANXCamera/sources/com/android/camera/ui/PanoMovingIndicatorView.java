@@ -60,7 +60,7 @@ public class PanoMovingIndicatorView extends View {
     /* access modifiers changed from: private */
     public float mPointGap = -1.0f;
     private int mPreviewCenterY;
-    private StateChangeTrigger<Boolean> mStateChangeTrigger = new StateChangeTrigger<>(Boolean.valueOf(false), sTimesMap);
+    private StateChangeTrigger<Boolean> mStateChangeTrigger = new StateChangeTrigger<>(false, sTimesMap);
     private Paint mTailPaint;
 
     class StateChangeTrigger<T> {
@@ -80,19 +80,14 @@ public class PanoMovingIndicatorView extends View {
             if (!Objects.equals(this.mLatestState, t)) {
                 this.mLatestState = t;
                 this.mLatestTimes = 1;
-                Integer num = (Integer) this.mMaxTimesMap.get(this.mLatestState);
+                Integer num = this.mMaxTimesMap.get(this.mLatestState);
                 this.mMaxTimes = num == null ? 3 : num.intValue();
             } else {
                 int i = this.mLatestTimes;
                 if (i < this.mMaxTimes) {
                     this.mLatestTimes = i + 1;
                     String str = PanoMovingIndicatorView.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("mLatestState=");
-                    sb.append(this.mLatestState);
-                    sb.append("  ");
-                    sb.append(this.mLatestTimes);
-                    Log.v(str, sb.toString());
+                    Log.v(str, "mLatestState=" + this.mLatestState + "  " + this.mLatestTimes);
                 }
             }
             if (this.mMaxTimes == this.mLatestTimes && !Objects.equals(this.mCurrentState, this.mLatestState)) {
@@ -107,8 +102,8 @@ public class PanoMovingIndicatorView extends View {
     }
 
     static {
-        sTimesMap.put(Boolean.valueOf(true), Integer.valueOf(1));
-        sTimesMap.put(Boolean.valueOf(false), Integer.valueOf(4));
+        sTimesMap.put(true, 1);
+        sTimesMap.put(false, 4);
     }
 
     public PanoMovingIndicatorView(Context context, AttributeSet attributeSet) {
@@ -145,12 +140,7 @@ public class PanoMovingIndicatorView extends View {
             int i2 = this.mPreviewCenterY;
             if (i2 != 0 && ((float) Math.abs(i - i2)) >= ((float) this.mPreviewCenterY) * SHOW_ALIGN_THRESHOLD) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("too far current relative y is ");
-                sb.append(this.mCurrentFramePos.y);
-                sb.append(" refy is ");
-                sb.append(this.mPreviewCenterY);
-                Log.e(str, sb.toString());
+                Log.e(str, "too far current relative y is " + this.mCurrentFramePos.y + " refy is " + this.mPreviewCenterY);
                 return true;
             }
         }
@@ -163,11 +153,7 @@ public class PanoMovingIndicatorView extends View {
 
     public void onDraw(Canvas canvas) {
         Canvas canvas2 = canvas;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onDraw mPointGap=");
-        sb.append(this.mPointGap);
-        Log.v(str, sb.toString());
+        Log.v(TAG, "onDraw mPointGap=" + this.mPointGap);
         Point point = this.mCurrentFramePos;
         int i = point.x;
         if (i != Integer.MIN_VALUE && point.y != Integer.MIN_VALUE) {
@@ -190,15 +176,12 @@ public class PanoMovingIndicatorView extends View {
             triangleIndicatorDrawable.setBounds(i6, (-triangleIndicatorDrawable.getIntrinsicHeight()) / 2, 0, triangleIndicatorDrawable.getIntrinsicHeight() / 2);
             triangleIndicatorDrawable.draw(canvas2);
             canvas2.translate((float) triangleIndicatorDrawable.getIntrinsicWidth(), 0.0f);
-            float f2 = (float) i6;
-            float f3 = (float) STONE_WIDTH;
-            float f4 = this.mPointGap;
-            int i7 = (int) (f2 - (f3 + f4));
-            int i8 = (int) f4;
+            float f2 = this.mPointGap;
+            int i7 = (int) (((float) i6) - (((float) STONE_WIDTH) + f2));
+            int i8 = (int) f2;
             for (int i9 = 0; i9 < sGapWidth.length && i8 > 0; i9++) {
-                float f5 = (float) i7;
                 int i10 = this.mHalfStoneHeight;
-                canvas.drawRect(f5, (float) (-i10), (float) (sBlockWidth[i9] + i7), (float) i10, this.mTailPaint);
+                canvas.drawRect((float) i7, (float) (-i10), (float) (sBlockWidth[i9] + i7), (float) i10, this.mTailPaint);
                 int i11 = i7 + sBlockWidth[i9];
                 if (i8 >= sGapWidth[i9]) {
                     i7 = i11 + 8;
@@ -243,12 +226,7 @@ public class PanoMovingIndicatorView extends View {
 
     public void setTooFast(boolean z, int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setTooFast moveSpeed=");
-        sb.append(i);
-        sb.append(" fastFlag:");
-        sb.append(z);
-        Log.i(str, sb.toString());
+        Log.i(str, "setTooFast moveSpeed=" + i + " fastFlag:" + z);
         int i2 = MAX_SPEED_THRESHOLD;
         if (i <= MAX_SPEED_THRESHOLD) {
             i2 = i;

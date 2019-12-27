@@ -41,15 +41,6 @@ public class ProviderEffectModel {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ProviderEffectModel{search_tips='");
-        sb.append(this.search_tips);
-        sb.append('\'');
-        sb.append(", cursor=");
-        sb.append(this.cursor);
-        sb.append(", has_more=");
-        sb.append(this.has_more);
-        sb.append('}');
-        return sb.toString();
+        return "ProviderEffectModel{search_tips='" + this.search_tips + '\'' + ", cursor=" + this.cursor + ", has_more=" + this.has_more + '}';
     }
 }

@@ -23,7 +23,6 @@ public class z implements a<InputStream> {
     /* JADX WARNING: Removed duplicated region for block: B:23:0x003f A[SYNTHETIC, Splitter:B:23:0x003f] */
     /* JADX WARNING: Removed duplicated region for block: B:29:0x004a A[SYNTHETIC, Splitter:B:29:0x004a] */
     public boolean a(@NonNull InputStream inputStream, @NonNull File file, @NonNull g gVar) {
-        String str = TAG;
         byte[] bArr = (byte[]) this.Yd.a(65536, byte[].class);
         boolean z = false;
         FileOutputStream fileOutputStream = null;
@@ -40,7 +39,7 @@ public class z implements a<InputStream> {
                     e = e2;
                     fileOutputStream = fileOutputStream2;
                     try {
-                        if (Log.isLoggable(str, 3)) {
+                        if (Log.isLoggable(TAG, 3)) {
                         }
                         if (fileOutputStream != null) {
                         }
@@ -74,8 +73,8 @@ public class z implements a<InputStream> {
             }
         } catch (IOException e3) {
             e = e3;
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Failed to encode data onto the OutputStream", e);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to encode data onto the OutputStream", e);
             }
             if (fileOutputStream != null) {
                 fileOutputStream.close();

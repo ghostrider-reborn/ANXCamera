@@ -4,8 +4,7 @@ import android.content.Context;
 import android.graphics.RectF;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CaptureRequest.Builder;
-import android.hardware.camera2.CaptureRequest.Key;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.location.Location;
@@ -22,7 +21,7 @@ import com.android.camera.Thumbnail;
 import com.android.camera.effect.FaceAnalyzeInfo;
 import com.android.camera.fragment.beauty.BeautyValues;
 import com.android.camera.module.loader.camera2.FocusTask;
-import com.android.camera2.vendortag.struct.MarshalQueryableASDScene.ASDScene;
+import com.android.camera2.vendortag.struct.MarshalQueryableASDScene;
 import com.xiaomi.camera.core.ParallelCallback;
 import com.xiaomi.camera.core.ParallelTaskData;
 import com.xiaomi.camera.liveshot.LivePhotoResult;
@@ -203,7 +202,7 @@ public abstract class Camera2Proxy {
 
     public abstract int getFlashMode();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public FocusCallback getFocusCallback() {
         FocusCallback focusCallback;
         synchronized (this.mCallbackLock) {
@@ -218,7 +217,7 @@ public abstract class Camera2Proxy {
         return this.mActualCameraId;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public CameraMetaDataCallback getMetadataCallback() {
         CameraMetaDataCallback cameraMetaDataCallback;
         synchronized (this.mCallbackLock) {
@@ -227,7 +226,7 @@ public abstract class Camera2Proxy {
         return cameraMetaDataCallback;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public ParallelCallback getParallelCallback() {
         ParallelCallback parallelCallback;
         synchronized (this.mCallbackLock) {
@@ -241,7 +240,7 @@ public abstract class Camera2Proxy {
     /* access modifiers changed from: protected */
     public abstract ImageReader getPhotoImageReader();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public PictureCallback getPictureCallback() {
         PictureCallback pictureCallback;
         synchronized (this.mCallbackLock) {
@@ -259,7 +258,7 @@ public abstract class Camera2Proxy {
     /* access modifiers changed from: protected */
     public abstract ImageReader getPortraitRawImageReader();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public PreviewCallback getPreviewCallback() {
         PreviewCallback previewCallback;
         synchronized (this.mCallbackLock) {
@@ -271,7 +270,7 @@ public abstract class Camera2Proxy {
     public abstract int getPreviewMaxImages();
 
     /* access modifiers changed from: protected */
-    public abstract Builder getPreviewRequestBuilder();
+    public abstract CaptureRequest.Builder getPreviewRequestBuilder();
 
     public abstract CameraSize getPreviewSize();
 
@@ -294,7 +293,7 @@ public abstract class Camera2Proxy {
 
     public abstract int getSceneMode();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public ScreenLightCallback getScreenLightCallback() {
         ScreenLightCallback screenLightCallback;
         synchronized (this.mCallbackLock) {
@@ -508,18 +507,18 @@ public abstract class Camera2Proxy {
 
     public abstract void setNormalWideLDC(boolean z);
 
-    public abstract void setOnTripodModeStatus(ASDScene[] aSDSceneArr);
+    public abstract void setOnTripodModeStatus(MarshalQueryableASDScene.ASDScene[] aSDSceneArr);
 
     public abstract void setOpticalZoomToTele(boolean z);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setParallelCallback(ParallelCallback parallelCallback) {
         synchronized (this.mCallbackLock) {
             this.mParallelCallback = parallelCallback;
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setPictureCallback(PictureCallback pictureCallback) {
         synchronized (this.mCallbackLock) {
             this.mPictureCallBack = pictureCallback;
@@ -534,7 +533,7 @@ public abstract class Camera2Proxy {
 
     public abstract void setPortraitLighting(int i);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setPreviewCallback(PreviewCallback previewCallback) {
         synchronized (this.mCallbackLock) {
             this.mPreviewCallback = previewCallback;
@@ -597,7 +596,7 @@ public abstract class Camera2Proxy {
 
     public abstract void setUseLegacyFlashMode(boolean z);
 
-    public abstract <T> void setVendorSetting(Key<T> key, T t);
+    public abstract <T> void setVendorSetting(CaptureRequest.Key<T> key, T t);
 
     public abstract void setVideoFpsRange(Range<Integer> range);
 
@@ -640,11 +639,7 @@ public abstract class Camera2Proxy {
     public abstract void takePicture(@NonNull PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback);
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
-        sb.append(" - cameraId=");
-        sb.append(getId());
-        return sb.toString();
+        return super.toString() + " - cameraId=" + getId();
     }
 
     public abstract void unRegisterCaptureCallback();

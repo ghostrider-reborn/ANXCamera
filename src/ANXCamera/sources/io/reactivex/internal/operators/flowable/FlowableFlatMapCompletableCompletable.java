@@ -77,14 +77,14 @@ public final class FlowableFlatMapCompletableCompletable<T> extends Completable 
             this.set.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerComplete(InnerObserver innerObserver) {
+        /* access modifiers changed from: package-private */
+        public void innerComplete(FlatMapCompletableMainSubscriber<T>.InnerObserver innerObserver) {
             this.set.delete(innerObserver);
             onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerError(InnerObserver innerObserver, Throwable th) {
+        /* access modifiers changed from: package-private */
+        public void innerError(FlatMapCompletableMainSubscriber<T>.InnerObserver innerObserver, Throwable th) {
             this.set.delete(innerObserver);
             onError(th);
         }
@@ -160,11 +160,11 @@ public final class FlowableFlatMapCompletableCompletable<T> extends Completable 
     }
 
     public Flowable<T> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableFlatMapCompletable<T>(this.source, this.mapper, this.delayErrors, this.maxConcurrency));
+        return RxJavaPlugins.onAssembly(new FlowableFlatMapCompletable(this.source, this.mapper, this.delayErrors, this.maxConcurrency));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(CompletableObserver completableObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new FlatMapCompletableMainSubscriber<Object>(completableObserver, this.mapper, this.delayErrors, this.maxConcurrency));
+        this.source.subscribe(new FlatMapCompletableMainSubscriber(completableObserver, this.mapper, this.delayErrors, this.maxConcurrency));
     }
 }

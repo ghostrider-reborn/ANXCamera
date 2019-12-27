@@ -1,7 +1,6 @@
 package okhttp3.internal.connection;
 
 import java.io.IOException;
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.Socket;
 import java.util.List;
@@ -9,12 +8,12 @@ import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.EventListener;
-import okhttp3.Interceptor.Chain;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
-import okhttp3.internal.connection.RouteSelector.Selection;
+import okhttp3.internal.connection.RouteSelector;
 import okhttp3.internal.http.HttpCodec;
 import okhttp3.internal.http2.ConnectionShutdownException;
 import okhttp3.internal.http2.ErrorCode;
@@ -34,7 +33,7 @@ public final class StreamAllocation {
     private boolean released;
     private boolean reportedAcquired;
     private Route route;
-    private Selection routeSelection;
+    private RouteSelector.Selection routeSelection;
     private final RouteSelector routeSelector;
 
     public static final class StreamAllocationReference extends WeakReference<StreamAllocation> {
@@ -118,7 +117,7 @@ public final class StreamAllocation {
                     realConnection = null;
                 }
                 if (realConnection2 == null) {
-                    Internal.instance.get(this.connectionPool, this.address, this, null);
+                    Internal.instance.get(this.connectionPool, this.address, this, (Route) null);
                     if (this.connection != null) {
                         realConnection3 = this.connection;
                         route2 = null;
@@ -147,21 +146,21 @@ public final class StreamAllocation {
             return realConnection3;
         }
         if (route2 == null) {
-            Selection selection = this.routeSelection;
+            RouteSelector.Selection selection = this.routeSelection;
             if (selection == null || !selection.hasNext()) {
                 this.routeSelection = this.routeSelector.next();
                 z3 = true;
                 synchronized (this.connectionPool) {
                     if (!this.canceled) {
                         if (z3) {
-                            List all = this.routeSelection.getAll();
+                            List<Route> all = this.routeSelection.getAll();
                             int size = all.size();
                             int i4 = 0;
                             while (true) {
                                 if (i4 >= size) {
                                     break;
                                 }
-                                Route route3 = (Route) all.get(i4);
+                                Route route3 = all.get(i4);
                                 Internal.instance.get(this.connectionPool, this.address, this, route3);
                                 if (this.connection != null) {
                                     realConnection3 = this.connection;
@@ -234,7 +233,7 @@ public final class StreamAllocation {
     private void release(RealConnection realConnection) {
         int size = realConnection.allocations.size();
         for (int i = 0; i < size; i++) {
-            if (((Reference) realConnection.allocations.get(i)).get() == this) {
+            if (realConnection.allocations.get(i).get() == this) {
                 realConnection.allocations.remove(i);
                 return;
             }
@@ -293,7 +292,7 @@ public final class StreamAllocation {
 
     public boolean hasMoreRoutes() {
         if (this.route == null) {
-            Selection selection = this.routeSelection;
+            RouteSelector.Selection selection = this.routeSelection;
             if ((selection == null || !selection.hasNext()) && !this.routeSelector.hasNext()) {
                 return false;
             }
@@ -301,7 +300,7 @@ public final class StreamAllocation {
         return true;
     }
 
-    public HttpCodec newStream(OkHttpClient okHttpClient, Chain chain, boolean z) {
+    public HttpCodec newStream(OkHttpClient okHttpClient, Interceptor.Chain chain, boolean z) {
         try {
             HttpCodec newCodec = findHealthyConnection(chain.connectTimeoutMillis(), chain.readTimeoutMillis(), chain.writeTimeoutMillis(), okHttpClient.retryOnConnectionFailure(), z).newCodec(okHttpClient, chain, this);
             synchronized (this.connectionPool) {
@@ -347,10 +346,9 @@ public final class StreamAllocation {
 
     public Socket releaseAndAcquire(RealConnection realConnection) {
         if (this.codec == null && this.connection.allocations.size() == 1) {
-            Reference reference = (Reference) this.connection.allocations.get(0);
             Socket deallocate = deallocate(true, false, false);
             this.connection = realConnection;
-            realConnection.allocations.add(reference);
+            realConnection.allocations.add(this.connection.allocations.get(0));
             return deallocate;
         }
         throw new IllegalStateException();
@@ -419,12 +417,7 @@ public final class StreamAllocation {
                     z2 = this.released;
                 }
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("expected ");
-            sb.append(this.codec);
-            sb.append(" but was ");
-            sb.append(httpCodec);
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("expected " + this.codec + " but was " + httpCodec);
         }
         Util.closeQuietly(deallocate);
         if (realConnection != null) {

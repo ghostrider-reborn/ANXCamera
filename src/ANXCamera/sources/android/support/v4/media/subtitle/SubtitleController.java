@@ -3,22 +3,19 @@ package android.support.v4.media.subtitle;
 import android.content.Context;
 import android.media.MediaFormat;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.media.subtitle.SubtitleTrack.RenderingWidget;
+import android.support.v4.media.subtitle.SubtitleTrack;
 import android.view.accessibility.CaptioningManager;
-import android.view.accessibility.CaptioningManager.CaptioningChangeListener;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
 
 @RequiresApi(28)
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class SubtitleController {
     static final /* synthetic */ boolean $assertionsDisabled = false;
     private static final int WHAT_HIDE = 2;
@@ -26,8 +23,8 @@ public class SubtitleController {
     private static final int WHAT_SELECT_TRACK = 3;
     private static final int WHAT_SHOW = 1;
     private Anchor mAnchor;
-    private final Callback mCallback;
-    private CaptioningChangeListener mCaptioningChangeListener;
+    private final Handler.Callback mCallback;
+    private CaptioningManager.CaptioningChangeListener mCaptioningChangeListener;
     private CaptioningManager mCaptioningManager;
     private Handler mHandler;
     private Listener mListener;
@@ -44,7 +41,7 @@ public class SubtitleController {
     public interface Anchor {
         Looper getSubtitleLooper();
 
-        void setSubtitleWidget(RenderingWidget renderingWidget);
+        void setSubtitleWidget(SubtitleTrack.RenderingWidget renderingWidget);
     }
 
     interface Listener {
@@ -71,13 +68,13 @@ public class SubtitleController {
     }
 
     public SubtitleController(Context context) {
-        this(context, null, null);
+        this(context, (MediaTimeProvider) null, (Listener) null);
     }
 
     public SubtitleController(Context context, MediaTimeProvider mediaTimeProvider, Listener listener) {
         this.mRenderersLock = new Object();
         this.mTracksLock = new Object();
-        this.mCallback = new Callback() {
+        this.mCallback = new Handler.Callback() {
             public boolean handleMessage(Message message) {
                 int i = message.what;
                 if (i == 1) {
@@ -97,7 +94,7 @@ public class SubtitleController {
                 }
             }
         };
-        this.mCaptioningChangeListener = new CaptioningChangeListener() {
+        this.mCaptioningChangeListener = new CaptioningManager.CaptioningChangeListener() {
             public void onEnabledChanged(boolean z) {
                 SubtitleController.this.selectDefaultTrack();
             }
@@ -167,7 +164,7 @@ public class SubtitleController {
         if (subtitleTrack2 != subtitleTrack) {
             if (subtitleTrack2 != null) {
                 subtitleTrack2.hide();
-                this.mSelectedTrack.setTimeProvider(null);
+                this.mSelectedTrack.setTimeProvider((MediaTimeProvider) null);
             }
             this.mSelectedTrack = subtitleTrack;
             Anchor anchor = this.mAnchor;
@@ -196,7 +193,7 @@ public class SubtitleController {
         }
     }
 
-    private RenderingWidget getRenderingWidget() {
+    private SubtitleTrack.RenderingWidget getRenderingWidget() {
         SubtitleTrack subtitleTrack = this.mSelectedTrack;
         if (subtitleTrack == null) {
             return null;
@@ -214,11 +211,11 @@ public class SubtitleController {
 
     public SubtitleTrack addTrack(MediaFormat mediaFormat) {
         synchronized (this.mRenderersLock) {
-            Iterator it = this.mRenderers.iterator();
+            Iterator<Renderer> it = this.mRenderers.iterator();
             while (it.hasNext()) {
-                Renderer renderer = (Renderer) it.next();
-                if (renderer.supports(mediaFormat)) {
-                    SubtitleTrack createTrack = renderer.createTrack(mediaFormat);
+                Renderer next = it.next();
+                if (next.supports(mediaFormat)) {
+                    SubtitleTrack createTrack = next.createTrack(mediaFormat);
                     if (createTrack != null) {
                         synchronized (this.mTracksLock) {
                             if (this.mTracks.size() == 0) {
@@ -252,12 +249,12 @@ public class SubtitleController {
         Locale locale2 = locale == null ? Locale.getDefault() : locale;
         boolean z = !this.mCaptioningManager.isEnabled();
         synchronized (this.mTracksLock) {
-            Iterator it = this.mTracks.iterator();
+            Iterator<SubtitleTrack> it = this.mTracks.iterator();
             subtitleTrack = null;
             int i3 = -1;
             while (it.hasNext()) {
-                SubtitleTrack subtitleTrack2 = (SubtitleTrack) it.next();
-                MediaFormat format = subtitleTrack2.getFormat();
+                SubtitleTrack next = it.next();
+                MediaFormat format = next.getFormat();
                 String string = format.getString(EffectConfiguration.KEY_SYS_LANGUAGE);
                 int i4 = 0;
                 boolean z2 = MediaFormatUtil.getInteger(format, "is-forced-subtitle", 0) != 0;
@@ -273,7 +270,7 @@ public class SubtitleController {
                         i2 = i5 + i4 + i;
                         if (z || z2) {
                             if (((locale == null && z4) || (i != 0 && (z3 || z2 || locale != null))) && i2 > i3) {
-                                subtitleTrack = subtitleTrack2;
+                                subtitleTrack = next;
                                 i3 = i2;
                             }
                         }
@@ -286,7 +283,7 @@ public class SubtitleController {
                 i2 = i52 + i4 + i;
                 if (z) {
                 }
-                subtitleTrack = subtitleTrack2;
+                subtitleTrack = next;
                 i3 = i2;
             }
         }
@@ -308,9 +305,9 @@ public class SubtitleController {
 
     public boolean hasRendererFor(MediaFormat mediaFormat) {
         synchronized (this.mRenderersLock) {
-            Iterator it = this.mRenderers.iterator();
+            Iterator<Renderer> it = this.mRenderers.iterator();
             while (it.hasNext()) {
-                if (((Renderer) it.next()).supports(mediaFormat)) {
+                if (it.next().supports(mediaFormat)) {
                     return true;
                 }
             }
@@ -333,7 +330,7 @@ public class SubtitleController {
     public void reset() {
         checkAnchorLooper();
         hide();
-        selectTrack(null);
+        selectTrack((SubtitleTrack) null);
         this.mTracks.clear();
         this.mTrackIsExplicit = false;
         this.mVisibilityIsExplicit = false;
@@ -357,7 +354,7 @@ public class SubtitleController {
         if (anchor2 != anchor) {
             if (anchor2 != null) {
                 checkAnchorLooper();
-                this.mAnchor.setSubtitleWidget(null);
+                this.mAnchor.setSubtitleWidget((SubtitleTrack.RenderingWidget) null);
             }
             this.mAnchor = anchor;
             this.mHandler = null;

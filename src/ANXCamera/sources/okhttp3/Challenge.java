@@ -34,11 +34,8 @@ public final class Challenge {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Challenge) {
             Challenge challenge = (Challenge) obj;
-            if (challenge.scheme.equals(this.scheme) && challenge.realm.equals(this.realm) && challenge.charset.equals(this.charset)) {
-                return true;
-            }
+            return challenge.scheme.equals(this.scheme) && challenge.realm.equals(this.realm) && challenge.charset.equals(this.charset);
         }
-        return false;
     }
 
     public int hashCode() {
@@ -54,14 +51,7 @@ public final class Challenge {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.scheme);
-        sb.append(" realm=\"");
-        sb.append(this.realm);
-        sb.append("\" charset=\"");
-        sb.append(this.charset);
-        sb.append("\"");
-        return sb.toString();
+        return this.scheme + " realm=\"" + this.realm + "\" charset=\"" + this.charset + "\"";
     }
 
     public Challenge withCharset(Charset charset2) {

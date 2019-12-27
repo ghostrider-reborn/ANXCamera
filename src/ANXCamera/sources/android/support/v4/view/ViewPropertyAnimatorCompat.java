@@ -3,8 +3,8 @@ package android.support.v4.view;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.os.Build.VERSION;
+import android.graphics.Paint;
+import android.os.Build;
 import android.view.View;
 import android.view.animation.Interpolator;
 import java.lang.ref.WeakReference;
@@ -33,14 +33,17 @@ public final class ViewPropertyAnimatorCompat {
             }
         }
 
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v5, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: android.support.v4.view.ViewPropertyAnimatorListener} */
+        /* JADX WARNING: Multi-variable type inference failed */
         public void onAnimationEnd(View view) {
             int i = this.mVpa.mOldLayerType;
             ViewPropertyAnimatorListener viewPropertyAnimatorListener = null;
             if (i > -1) {
-                view.setLayerType(i, null);
+                view.setLayerType(i, (Paint) null);
                 this.mVpa.mOldLayerType = -1;
             }
-            if (VERSION.SDK_INT >= 16 || !this.mAnimEndCalled) {
+            if (Build.VERSION.SDK_INT >= 16 || !this.mAnimEndCalled) {
                 ViewPropertyAnimatorCompat viewPropertyAnimatorCompat = this.mVpa;
                 Runnable runnable = viewPropertyAnimatorCompat.mEndAction;
                 if (runnable != null) {
@@ -49,7 +52,7 @@ public final class ViewPropertyAnimatorCompat {
                 }
                 Object tag = view.getTag(ViewPropertyAnimatorCompat.LISTENER_TAG_ID);
                 if (tag instanceof ViewPropertyAnimatorListener) {
-                    viewPropertyAnimatorListener = (ViewPropertyAnimatorListener) tag;
+                    viewPropertyAnimatorListener = tag;
                 }
                 if (viewPropertyAnimatorListener != null) {
                     viewPropertyAnimatorListener.onAnimationEnd(view);
@@ -58,11 +61,14 @@ public final class ViewPropertyAnimatorCompat {
             }
         }
 
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v3, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v2, resolved type: android.support.v4.view.ViewPropertyAnimatorListener} */
+        /* JADX WARNING: Multi-variable type inference failed */
         public void onAnimationStart(View view) {
             this.mAnimEndCalled = false;
             ViewPropertyAnimatorListener viewPropertyAnimatorListener = null;
             if (this.mVpa.mOldLayerType > -1) {
-                view.setLayerType(2, null);
+                view.setLayerType(2, (Paint) null);
             }
             ViewPropertyAnimatorCompat viewPropertyAnimatorCompat = this.mVpa;
             Runnable runnable = viewPropertyAnimatorCompat.mStartAction;
@@ -72,7 +78,7 @@ public final class ViewPropertyAnimatorCompat {
             }
             Object tag = view.getTag(ViewPropertyAnimatorCompat.LISTENER_TAG_ID);
             if (tag instanceof ViewPropertyAnimatorListener) {
-                viewPropertyAnimatorListener = (ViewPropertyAnimatorListener) tag;
+                viewPropertyAnimatorListener = tag;
             }
             if (viewPropertyAnimatorListener != null) {
                 viewPropertyAnimatorListener.onAnimationStart(view);
@@ -100,7 +106,7 @@ public final class ViewPropertyAnimatorCompat {
                 }
             });
         } else {
-            view.animate().setListener(null);
+            view.animate().setListener((Animator.AnimatorListener) null);
         }
     }
 
@@ -137,7 +143,7 @@ public final class ViewPropertyAnimatorCompat {
 
     public Interpolator getInterpolator() {
         View view = (View) this.mView.get();
-        if (view == null || VERSION.SDK_INT < 18) {
+        if (view == null || Build.VERSION.SDK_INT < 18) {
             return null;
         }
         return (Interpolator) view.animate().getInterpolator();
@@ -250,7 +256,7 @@ public final class ViewPropertyAnimatorCompat {
     public ViewPropertyAnimatorCompat setListener(ViewPropertyAnimatorListener viewPropertyAnimatorListener) {
         View view = (View) this.mView.get();
         if (view != null) {
-            if (VERSION.SDK_INT >= 16) {
+            if (Build.VERSION.SDK_INT >= 16) {
                 setListenerInternal(view, viewPropertyAnimatorListener);
             } else {
                 view.setTag(LISTENER_TAG_ID, viewPropertyAnimatorListener);
@@ -270,10 +276,10 @@ public final class ViewPropertyAnimatorCompat {
 
     public ViewPropertyAnimatorCompat setUpdateListener(final ViewPropertyAnimatorUpdateListener viewPropertyAnimatorUpdateListener) {
         final View view = (View) this.mView.get();
-        if (view != null && VERSION.SDK_INT >= 19) {
+        if (view != null && Build.VERSION.SDK_INT >= 19) {
             AnonymousClass2 r1 = null;
             if (viewPropertyAnimatorUpdateListener != null) {
-                r1 = new AnimatorUpdateListener() {
+                r1 = new ValueAnimator.AnimatorUpdateListener() {
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         viewPropertyAnimatorUpdateListener.onAnimationUpdate(view);
                     }
@@ -325,7 +331,7 @@ public final class ViewPropertyAnimatorCompat {
 
     public ViewPropertyAnimatorCompat translationZ(float f2) {
         View view = (View) this.mView.get();
-        if (view != null && VERSION.SDK_INT >= 21) {
+        if (view != null && Build.VERSION.SDK_INT >= 21) {
             view.animate().translationZ(f2);
         }
         return this;
@@ -333,7 +339,7 @@ public final class ViewPropertyAnimatorCompat {
 
     public ViewPropertyAnimatorCompat translationZBy(float f2) {
         View view = (View) this.mView.get();
-        if (view != null && VERSION.SDK_INT >= 21) {
+        if (view != null && Build.VERSION.SDK_INT >= 21) {
             view.animate().translationZBy(f2);
         }
         return this;
@@ -342,7 +348,7 @@ public final class ViewPropertyAnimatorCompat {
     public ViewPropertyAnimatorCompat withEndAction(Runnable runnable) {
         View view = (View) this.mView.get();
         if (view != null) {
-            if (VERSION.SDK_INT >= 16) {
+            if (Build.VERSION.SDK_INT >= 16) {
                 view.animate().withEndAction(runnable);
             } else {
                 setListenerInternal(view, new ViewPropertyAnimatorListenerApi14(this));
@@ -355,7 +361,7 @@ public final class ViewPropertyAnimatorCompat {
     public ViewPropertyAnimatorCompat withLayer() {
         View view = (View) this.mView.get();
         if (view != null) {
-            if (VERSION.SDK_INT >= 16) {
+            if (Build.VERSION.SDK_INT >= 16) {
                 view.animate().withLayer();
             } else {
                 this.mOldLayerType = view.getLayerType();
@@ -368,7 +374,7 @@ public final class ViewPropertyAnimatorCompat {
     public ViewPropertyAnimatorCompat withStartAction(Runnable runnable) {
         View view = (View) this.mView.get();
         if (view != null) {
-            if (VERSION.SDK_INT >= 16) {
+            if (Build.VERSION.SDK_INT >= 16) {
                 view.animate().withStartAction(runnable);
             } else {
                 setListenerInternal(view, new ViewPropertyAnimatorListenerApi14(this));
@@ -412,7 +418,7 @@ public final class ViewPropertyAnimatorCompat {
 
     public ViewPropertyAnimatorCompat z(float f2) {
         View view = (View) this.mView.get();
-        if (view != null && VERSION.SDK_INT >= 21) {
+        if (view != null && Build.VERSION.SDK_INT >= 21) {
             view.animate().z(f2);
         }
         return this;
@@ -420,7 +426,7 @@ public final class ViewPropertyAnimatorCompat {
 
     public ViewPropertyAnimatorCompat zBy(float f2) {
         View view = (View) this.mView.get();
-        if (view != null && VERSION.SDK_INT >= 21) {
+        if (view != null && Build.VERSION.SDK_INT >= 21) {
             view.animate().zBy(f2);
         }
         return this;

@@ -2,7 +2,6 @@ package com.ss.android.ugc.effectmanager.effect.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.ss.android.ugc.effectmanager.common.model.UrlModel;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Effect implements Parcelable {
-    public static final Creator<Effect> CREATOR = new Creator<Effect>() {
+    public static final Parcelable.Creator<Effect> CREATOR = new Parcelable.Creator<Effect>() {
         public Effect createFromParcel(Parcel parcel) {
             return new Effect(parcel);
         }
@@ -85,10 +84,7 @@ public class Effect implements Parcelable {
         this.extra = parcel.readString();
         this.is_busi = parcel.readByte() != 0;
         this.poi_id = parcel.readString();
-        if (parcel.readByte() == 0) {
-            z = false;
-        }
-        this.is_poi = z;
+        this.is_poi = parcel.readByte() == 0 ? false : z;
     }
 
     public int describeContents() {
@@ -342,27 +338,7 @@ public class Effect implements Parcelable {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Effect{name='");
-        sb.append(this.name);
-        sb.append('\'');
-        sb.append(", effect_id='");
-        sb.append(this.effect_id);
-        sb.append('\'');
-        sb.append(", type='");
-        sb.append(this.type);
-        sb.append('\'');
-        sb.append(", unzipPath='");
-        sb.append(this.unzipPath);
-        sb.append('\'');
-        sb.append(", children=");
-        sb.append(this.children);
-        sb.append(", effectType=");
-        sb.append(this.effect_type);
-        sb.append(", parentId=");
-        sb.append(this.parent);
-        sb.append('}');
-        return sb.toString();
+        return "Effect{name='" + this.name + '\'' + ", effect_id='" + this.effect_id + '\'' + ", type='" + this.type + '\'' + ", unzipPath='" + this.unzipPath + '\'' + ", children=" + this.children + ", effectType=" + this.effect_type + ", parentId=" + this.parent + '}';
     }
 
     public void writeToParcel(Parcel parcel, int i) {

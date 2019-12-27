@@ -7,7 +7,7 @@ import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.text.style.UpdateAppearance;
 import android.util.Log;
-import android.view.accessibility.CaptioningManager.CaptionStyle;
+import android.view.accessibility.CaptioningManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -130,24 +130,26 @@ class Cea608CCParser {
                 }
             }
             byte b4 = this.mData1;
-            if (b4 == 19 || b4 == 27) {
-                byte b5 = this.mData2;
-                if (b5 >= 32 && b5 <= 63) {
-                    return sProtugueseCharMap[b5 - 32];
-                }
+            if (b4 != 19 && b4 != 27) {
+                return null;
             }
-            return null;
+            byte b5 = this.mData2;
+            if (b5 < 32 || b5 > 63) {
+                return null;
+            }
+            return sProtugueseCharMap[b5 - 32];
         }
 
         private String getSpecialChar() {
             byte b2 = this.mData1;
-            if (b2 == 17 || b2 == 25) {
-                byte b3 = this.mData2;
-                if (b3 >= 48 && b3 <= 63) {
-                    return sSpecialCharMap[b3 - 48];
-                }
+            if (b2 != 17 && b2 != 25) {
+                return null;
             }
-            return null;
+            byte b3 = this.mData2;
+            if (b3 < 48 || b3 > 63) {
+                return null;
+            }
+            return sSpecialCharMap[b3 - 48];
         }
 
         private boolean isBasicChar() {
@@ -160,37 +162,32 @@ class Cea608CCParser {
             byte b2 = this.mData1;
             if (b2 == 18 || b2 == 26 || b2 == 19 || b2 == 27) {
                 byte b3 = this.mData2;
-                if (b3 >= 32 && b3 <= 63) {
-                    return true;
-                }
+                return b3 >= 32 && b3 <= 63;
             }
-            return false;
         }
 
         private boolean isSpecialChar() {
             byte b2 = this.mData1;
             if (b2 == 17 || b2 == 25) {
                 byte b3 = this.mData2;
-                if (b3 >= 48 && b3 <= 63) {
-                    return true;
-                }
+                return b3 >= 48 && b3 <= 63;
             }
-            return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getCtrlCode() {
             byte b2 = this.mData1;
-            if (b2 == 20 || b2 == 28) {
-                byte b3 = this.mData2;
-                if (b3 >= 32 && b3 <= 47) {
-                    return b3;
-                }
+            if (b2 != 20 && b2 != 28) {
+                return -1;
             }
-            return -1;
+            byte b3 = this.mData2;
+            if (b3 < 32 || b3 > 47) {
+                return -1;
+            }
+            return b3;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public String getDisplayText() {
             String basicChars = getBasicChars();
             if (basicChars != null) {
@@ -200,43 +197,49 @@ class Cea608CCParser {
             return specialChar == null ? getExtendedChar() : specialChar;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public StyleCode getMidRow() {
             byte b2 = this.mData1;
-            if (b2 == 17 || b2 == 25) {
-                byte b3 = this.mData2;
-                if (b3 >= 32 && b3 <= 47) {
-                    return StyleCode.fromByte(b3);
-                }
+            if (b2 != 17 && b2 != 25) {
+                return null;
             }
-            return null;
+            byte b3 = this.mData2;
+            if (b3 < 32 || b3 > 47) {
+                return null;
+            }
+            return StyleCode.fromByte(b3);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public PAC getPAC() {
             byte b2 = this.mData1;
-            if ((b2 & 112) == 16) {
-                byte b3 = this.mData2;
-                if ((b3 & 64) == 64 && ((b2 & 7) != 0 || (b3 & 32) == 0)) {
-                    return PAC.fromBytes(this.mData1, this.mData2);
-                }
+            if ((b2 & 112) != 16) {
+                return null;
+            }
+            byte b3 = this.mData2;
+            if ((b3 & 64) != 64) {
+                return null;
+            }
+            if ((b2 & 7) != 0 || (b3 & 32) == 0) {
+                return PAC.fromBytes(this.mData1, this.mData2);
             }
             return null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getTabOffset() {
             byte b2 = this.mData1;
-            if (b2 == 23 || b2 == 31) {
-                byte b3 = this.mData2;
-                if (b3 >= 33 && b3 <= 35) {
-                    return b3 & 3;
-                }
+            if (b2 != 23 && b2 != 31) {
+                return 0;
             }
-            return 0;
+            byte b3 = this.mData2;
+            if (b3 < 33 || b3 > 35) {
+                return 0;
+            }
+            return b3 & 3;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isDisplayableChar() {
             return isBasicChar() || isSpecialChar() || isExtendedChar();
         }
@@ -278,7 +281,7 @@ class Cea608CCParser {
             this.mDisplayChars = new StringBuilder(str);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void applyStyleSpan(SpannableStringBuilder spannableStringBuilder, StyleCode styleCode, int i, int i2) {
             if (styleCode.isItalics()) {
                 spannableStringBuilder.setSpan(new StyleSpan(2), i, i2, 33);
@@ -288,66 +291,64 @@ class Cea608CCParser {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public char charAt(int i) {
             return this.mDisplayChars.charAt(i);
         }
 
-        /* access modifiers changed from: 0000 */
-        public SpannableStringBuilder getStyledText(CaptionStyle captionStyle) {
+        /* access modifiers changed from: package-private */
+        public SpannableStringBuilder getStyledText(CaptioningManager.CaptionStyle captionStyle) {
             SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(this.mDisplayChars);
-            int i = 0;
             StyleCode styleCode = null;
+            int i = -1;
             int i2 = -1;
-            int i3 = -1;
-            while (i < this.mDisplayChars.length()) {
+            for (int i3 = 0; i3 < this.mDisplayChars.length(); i3++) {
                 StyleCode[] styleCodeArr = this.mMidRowStyles;
-                StyleCode styleCode2 = styleCodeArr[i] != null ? styleCodeArr[i] : (this.mPACStyles[i] == null || (i2 >= 0 && i3 >= 0)) ? null : this.mPACStyles[i];
+                StyleCode styleCode2 = styleCodeArr[i3] != null ? styleCodeArr[i3] : (this.mPACStyles[i3] == null || (i >= 0 && i2 >= 0)) ? null : this.mPACStyles[i3];
                 if (styleCode2 != null) {
-                    if (i2 >= 0 && i3 >= 0) {
-                        applyStyleSpan(spannableStringBuilder, styleCode2, i2, i);
+                    if (i >= 0 && i2 >= 0) {
+                        applyStyleSpan(spannableStringBuilder, styleCode2, i, i3);
                     }
-                    i2 = i;
+                    i = i3;
                     styleCode = styleCode2;
                 }
-                if (this.mDisplayChars.charAt(i) != 160) {
-                    if (i3 < 0) {
-                        i3 = i;
+                if (this.mDisplayChars.charAt(i3) != 160) {
+                    if (i2 < 0) {
+                        i2 = i3;
                     }
-                } else if (i3 >= 0) {
-                    if (this.mDisplayChars.charAt(i3) != ' ') {
-                        i3--;
+                } else if (i2 >= 0) {
+                    if (this.mDisplayChars.charAt(i2) != ' ') {
+                        i2--;
                     }
-                    int i4 = this.mDisplayChars.charAt(i + -1) == ' ' ? i : i + 1;
-                    spannableStringBuilder.setSpan(new MutableBackgroundColorSpan(captionStyle.backgroundColor), i3, i4, 33);
-                    if (i2 >= 0) {
-                        applyStyleSpan(spannableStringBuilder, styleCode, i2, i4);
+                    int i4 = this.mDisplayChars.charAt(i3 + -1) == ' ' ? i3 : i3 + 1;
+                    spannableStringBuilder.setSpan(new MutableBackgroundColorSpan(captionStyle.backgroundColor), i2, i4, 33);
+                    if (i >= 0) {
+                        applyStyleSpan(spannableStringBuilder, styleCode, i, i4);
                     }
-                    i3 = -1;
+                    i2 = -1;
                 }
-                i++;
             }
             return spannableStringBuilder;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int length() {
             return this.mDisplayChars.length();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setCharAt(int i, char c2) {
             this.mDisplayChars.setCharAt(i, c2);
             this.mMidRowStyles[i] = null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setMidRowAt(int i, StyleCode styleCode) {
             this.mDisplayChars.setCharAt(i, ' ');
             this.mMidRowStyles[i] = styleCode;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setPACAt(int i, PAC pac) {
             this.mPACStyles[i] = pac;
         }
@@ -424,7 +425,7 @@ class Cea608CCParser {
             this.mRow = clamp(i, 1, 15);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void bs() {
             moveCursorByCol(-1);
             CCLineBuilder[] cCLineBuilderArr = this.mLines;
@@ -437,12 +438,12 @@ class Cea608CCParser {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cr() {
             moveCursorTo(this.mRow + 1, 1);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void der() {
             if (this.mLines[this.mRow] != null) {
                 for (int i = 0; i < this.mCol; i++) {
@@ -457,7 +458,7 @@ class Cea608CCParser {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void erase() {
             int i = 0;
             while (true) {
@@ -473,8 +474,8 @@ class Cea608CCParser {
             }
         }
 
-        /* access modifiers changed from: 0000 */
-        public SpannableStringBuilder[] getStyledText(CaptionStyle captionStyle) {
+        /* access modifiers changed from: package-private */
+        public SpannableStringBuilder[] getStyledText(CaptioningManager.CaptionStyle captionStyle) {
             ArrayList arrayList = new ArrayList(15);
             for (int i = 1; i <= 15; i++) {
                 CCLineBuilder[] cCLineBuilderArr = this.mLines;
@@ -483,7 +484,7 @@ class Cea608CCParser {
             return (SpannableStringBuilder[]) arrayList.toArray(new SpannableStringBuilder[15]);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void rollUp(int i) {
             int i2;
             int i3;
@@ -522,18 +523,18 @@ class Cea608CCParser {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void tab(int i) {
             moveCursorByCol(i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void writeMidRowCode(StyleCode styleCode) {
             getLineBuffer(this.mRow).setMidRowAt(this.mCol, styleCode);
             moveCursorByCol(1);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void writePAC(PAC pac) {
             if (pac.isIndentPAC()) {
                 moveCursorTo(pac.getRow(), pac.getCol());
@@ -543,7 +544,7 @@ class Cea608CCParser {
             getLineBuffer(this.mRow).setPACAt(this.mCol, pac);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void writeText(String str) {
             for (int i = 0; i < str.length(); i++) {
                 getLineBuffer(this.mRow).setCharAt(this.mCol, str.charAt(i));
@@ -553,7 +554,7 @@ class Cea608CCParser {
     }
 
     interface DisplayListener {
-        CaptionStyle getCaptionStyle();
+        CaptioningManager.CaptionStyle getCaptionStyle();
 
         void onDisplayChanged(SpannableStringBuilder[] spannableStringBuilderArr);
     }
@@ -602,17 +603,17 @@ class Cea608CCParser {
             return new PAC(i, -1, i2, i3);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getCol() {
             return this.mCol;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getRow() {
             return this.mRow;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isIndentPAC() {
             return this.mCol >= 0;
         }
@@ -652,17 +653,17 @@ class Cea608CCParser {
             return new StyleCode(i2, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getColor() {
             return this.mColor;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isItalics() {
             return (this.mStyle & 1) != 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isUnderline() {
             return (this.mStyle & 2) != 0;
         }
@@ -697,10 +698,7 @@ class Cea608CCParser {
         if (i == 4) {
             return this.mTextMem;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("unrecoginized mode: ");
-        sb.append(this.mMode);
-        Log.w(TAG, sb.toString());
+        Log.w(TAG, "unrecoginized mode: " + this.mMode);
         return this.mDisplay;
     }
 

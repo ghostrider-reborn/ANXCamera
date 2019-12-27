@@ -2,7 +2,8 @@ package com.android.volley;
 
 import android.os.Process;
 import android.support.annotation.VisibleForTesting;
-import com.android.volley.Cache.Entry;
+import com.android.volley.Cache;
+import com.android.volley.Request;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,7 @@ public class CacheDispatcher extends Thread {
     private volatile boolean mQuit = false;
     private final WaitingRequestManager mWaitingRequestManager;
 
-    private static class WaitingRequestManager implements NetworkRequestCompleteListener {
+    private static class WaitingRequestManager implements Request.NetworkRequestCompleteListener {
         private final CacheDispatcher mCacheDispatcher;
         private final Map<String, List<Request<?>>> mWaitingRequests = new HashMap();
 
@@ -38,7 +39,7 @@ public class CacheDispatcher extends Thread {
         public synchronized boolean maybeAddToWaitingRequests(Request<?> request) {
             String cacheKey = request.getCacheKey();
             if (this.mWaitingRequests.containsKey(cacheKey)) {
-                List list = (List) this.mWaitingRequests.get(cacheKey);
+                List list = this.mWaitingRequests.get(cacheKey);
                 if (list == null) {
                     list = new ArrayList();
                 }
@@ -49,7 +50,7 @@ public class CacheDispatcher extends Thread {
                     VolleyLog.d("Request for cacheKey=%s is in flight, putting on hold.", cacheKey);
                 }
             } else {
-                this.mWaitingRequests.put(cacheKey, null);
+                this.mWaitingRequests.put(cacheKey, (Object) null);
                 request.setNetworkRequestCompleteListener(this);
                 if (VolleyLog.DEBUG) {
                     VolleyLog.d("new request, sending to network %s", cacheKey);
@@ -59,13 +60,13 @@ public class CacheDispatcher extends Thread {
 
         public synchronized void onNoUsableResponseReceived(Request<?> request) {
             String cacheKey = request.getCacheKey();
-            List list = (List) this.mWaitingRequests.remove(cacheKey);
-            if (list != null && !list.isEmpty()) {
+            List remove = this.mWaitingRequests.remove(cacheKey);
+            if (remove != null && !remove.isEmpty()) {
                 if (VolleyLog.DEBUG) {
-                    VolleyLog.v("%d waiting requests for cacheKey=%s; resend to network", Integer.valueOf(list.size()), cacheKey);
+                    VolleyLog.v("%d waiting requests for cacheKey=%s; resend to network", Integer.valueOf(remove.size()), cacheKey);
                 }
-                Request request2 = (Request) list.remove(0);
-                this.mWaitingRequests.put(cacheKey, list);
+                Request request2 = (Request) remove.remove(0);
+                this.mWaitingRequests.put(cacheKey, remove);
                 request2.setNetworkRequestCompleteListener(this);
                 try {
                     this.mCacheDispatcher.mNetworkQueue.put(request2);
@@ -79,21 +80,21 @@ public class CacheDispatcher extends Thread {
         }
 
         public void onResponseReceived(Request<?> request, Response<?> response) {
-            List<Request> list;
-            Entry entry = response.cacheEntry;
+            List<Request> remove;
+            Cache.Entry entry = response.cacheEntry;
             if (entry == null || entry.isExpired()) {
                 onNoUsableResponseReceived(request);
                 return;
             }
             String cacheKey = request.getCacheKey();
             synchronized (this) {
-                list = (List) this.mWaitingRequests.remove(cacheKey);
+                remove = this.mWaitingRequests.remove(cacheKey);
             }
-            if (list != null) {
+            if (remove != null) {
                 if (VolleyLog.DEBUG) {
-                    VolleyLog.v("Releasing %d waiting requests for cacheKey=%s.", Integer.valueOf(list.size()), cacheKey);
+                    VolleyLog.v("Releasing %d waiting requests for cacheKey=%s.", Integer.valueOf(remove.size()), cacheKey);
                 }
-                for (Request postResponse : list) {
+                for (Request postResponse : remove) {
                     this.mCacheDispatcher.mDelivery.postResponse(postResponse, response);
                 }
             }
@@ -109,10 +110,10 @@ public class CacheDispatcher extends Thread {
     }
 
     private void processRequest() throws InterruptedException {
-        processRequest((Request) this.mCacheQueue.take());
+        processRequest(this.mCacheQueue.take());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void processRequest(final Request<?> request) throws InterruptedException {
         request.addMarker("cache-queue-take");
@@ -120,7 +121,7 @@ public class CacheDispatcher extends Thread {
             request.finish("cache-discard-canceled");
             return;
         }
-        Entry entry = this.mCache.get(request.getCacheKey());
+        Cache.Entry entry = this.mCache.get(request.getCacheKey());
         if (entry == null) {
             request.addMarker("cache-miss");
             if (!this.mWaitingRequestManager.maybeAddToWaitingRequests(request)) {
@@ -134,27 +135,27 @@ public class CacheDispatcher extends Thread {
             }
         } else {
             request.addMarker("cache-hit");
-            Response parseNetworkResponse = request.parseNetworkResponse(new NetworkResponse(entry.data, entry.responseHeaders));
+            Response<?> parseNetworkResponse = request.parseNetworkResponse(new NetworkResponse(entry.data, entry.responseHeaders));
             request.addMarker("cache-hit-parsed");
             if (!entry.refreshNeeded()) {
                 this.mDelivery.postResponse(request, parseNetworkResponse);
-            } else {
-                request.addMarker("cache-hit-refresh-needed");
-                request.setCacheEntry(entry);
-                parseNetworkResponse.intermediate = true;
-                if (!this.mWaitingRequestManager.maybeAddToWaitingRequests(request)) {
-                    this.mDelivery.postResponse(request, parseNetworkResponse, new Runnable() {
-                        public void run() {
-                            try {
-                                CacheDispatcher.this.mNetworkQueue.put(request);
-                            } catch (InterruptedException unused) {
-                                Thread.currentThread().interrupt();
-                            }
+                return;
+            }
+            request.addMarker("cache-hit-refresh-needed");
+            request.setCacheEntry(entry);
+            parseNetworkResponse.intermediate = true;
+            if (!this.mWaitingRequestManager.maybeAddToWaitingRequests(request)) {
+                this.mDelivery.postResponse(request, parseNetworkResponse, new Runnable() {
+                    public void run() {
+                        try {
+                            CacheDispatcher.this.mNetworkQueue.put(request);
+                        } catch (InterruptedException unused) {
+                            Thread.currentThread().interrupt();
                         }
-                    });
-                } else {
-                    this.mDelivery.postResponse(request, parseNetworkResponse);
-                }
+                    }
+                });
+            } else {
+                this.mDelivery.postResponse(request, parseNetworkResponse);
             }
         }
     }
@@ -177,9 +178,8 @@ public class CacheDispatcher extends Thread {
                 if (this.mQuit) {
                     Thread.currentThread().interrupt();
                     return;
-                } else {
-                    VolleyLog.e("Ignoring spurious interrupt of CacheDispatcher thread; use quit() to terminate it", new Object[0]);
                 }
+                VolleyLog.e("Ignoring spurious interrupt of CacheDispatcher thread; use quit() to terminate it", new Object[0]);
             }
         }
     }

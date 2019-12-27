@@ -4,14 +4,13 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 abstract class MapCollections<K, V> {
-    EntrySet mEntrySet;
-    KeySet mKeySet;
-    ValuesCollection mValues;
+    MapCollections<K, V>.EntrySet mEntrySet;
+    MapCollections<K, V>.KeySet mKeySet;
+    MapCollections<K, V>.ValuesCollection mValues;
 
     final class ArrayIterator<T> implements Iterator<T> {
         boolean mCanRemove = false;
@@ -50,17 +49,17 @@ abstract class MapCollections<K, V> {
         }
     }
 
-    final class EntrySet implements Set<Entry<K, V>> {
+    final class EntrySet implements Set<Map.Entry<K, V>> {
         EntrySet() {
         }
 
-        public boolean add(Entry<K, V> entry) {
+        public boolean add(Map.Entry<K, V> entry) {
             throw new UnsupportedOperationException();
         }
 
-        public boolean addAll(Collection<? extends Entry<K, V>> collection) {
+        public boolean addAll(Collection<? extends Map.Entry<K, V>> collection) {
             int colGetSize = MapCollections.this.colGetSize();
-            for (Entry entry : collection) {
+            for (Map.Entry entry : collection) {
                 MapCollections.this.colPut(entry.getKey(), entry.getValue());
             }
             return colGetSize != MapCollections.this.colGetSize();
@@ -71,10 +70,10 @@ abstract class MapCollections<K, V> {
         }
 
         public boolean contains(Object obj) {
-            if (!(obj instanceof Entry)) {
+            if (!(obj instanceof Map.Entry)) {
                 return false;
             }
-            Entry entry = (Entry) obj;
+            Map.Entry entry = (Map.Entry) obj;
             int colIndexOfKey = MapCollections.this.colIndexOfKey(entry.getKey());
             if (colIndexOfKey < 0) {
                 return false;
@@ -109,7 +108,7 @@ abstract class MapCollections<K, V> {
             return MapCollections.this.colGetSize() == 0;
         }
 
-        public Iterator<Entry<K, V>> iterator() {
+        public Iterator<Map.Entry<K, V>> iterator() {
             return new MapIterator();
         }
 
@@ -213,29 +212,25 @@ abstract class MapCollections<K, V> {
         }
     }
 
-    final class MapIterator implements Iterator<Entry<K, V>>, Entry<K, V> {
+    final class MapIterator implements Iterator<Map.Entry<K, V>>, Map.Entry<K, V> {
         int mEnd;
         boolean mEntryValid = false;
         int mIndex;
 
         MapIterator() {
-            this.mEnd = MapCollections.this.colGetSize() - 1;
+            this.mEnd = r2.colGetSize() - 1;
             this.mIndex = -1;
         }
 
         public boolean equals(Object obj) {
-            if (this.mEntryValid) {
-                boolean z = false;
-                if (!(obj instanceof Entry)) {
-                    return false;
-                }
-                Entry entry = (Entry) obj;
-                if (ContainerHelpers.equal(entry.getKey(), MapCollections.this.colGetEntry(this.mIndex, 0)) && ContainerHelpers.equal(entry.getValue(), MapCollections.this.colGetEntry(this.mIndex, 1))) {
-                    z = true;
-                }
-                return z;
+            if (!this.mEntryValid) {
+                throw new IllegalStateException("This container does not support retaining Map.Entry objects");
+            } else if (!(obj instanceof Map.Entry)) {
+                return false;
+            } else {
+                Map.Entry entry = (Map.Entry) obj;
+                return ContainerHelpers.equal(entry.getKey(), MapCollections.this.colGetEntry(this.mIndex, 0)) && ContainerHelpers.equal(entry.getValue(), MapCollections.this.colGetEntry(this.mIndex, 1));
             }
-            throw new IllegalStateException("This container does not support retaining Map.Entry objects");
         }
 
         public K getKey() {
@@ -270,7 +265,7 @@ abstract class MapCollections<K, V> {
             throw new IllegalStateException("This container does not support retaining Map.Entry objects");
         }
 
-        public Entry<K, V> next() {
+        public Map.Entry<K, V> next() {
             if (hasNext()) {
                 this.mIndex++;
                 this.mEntryValid = true;
@@ -298,11 +293,7 @@ abstract class MapCollections<K, V> {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(getKey());
-            sb.append("=");
-            sb.append(getValue());
-            return sb.toString();
+            return getKey() + "=" + getValue();
         }
     }
 
@@ -410,17 +401,13 @@ abstract class MapCollections<K, V> {
     }
 
     public static <T> boolean equalsSetHelper(Set<T> set, Object obj) {
-        boolean z = true;
         if (set == obj) {
             return true;
         }
         if (obj instanceof Set) {
             Set set2 = (Set) obj;
             try {
-                if (set.size() != set2.size() || !set.containsAll(set2)) {
-                    z = false;
-                }
-                return z;
+                return set.size() == set2.size() && set.containsAll(set2);
             } catch (ClassCastException | NullPointerException unused) {
             }
         }
@@ -437,7 +424,7 @@ abstract class MapCollections<K, V> {
 
     public static <K, V> boolean retainAllHelper(Map<K, V> map, Collection<?> collection) {
         int size = map.size();
-        Iterator it = map.keySet().iterator();
+        Iterator<K> it = map.keySet().iterator();
         while (it.hasNext()) {
             if (!collection.contains(it.next())) {
                 it.remove();
@@ -473,23 +460,23 @@ abstract class MapCollections<K, V> {
     /* access modifiers changed from: protected */
     public abstract V colSetValue(int i, V v);
 
-    public Set<Entry<K, V>> getEntrySet() {
+    public Set<Map.Entry<K, V>> getEntrySet() {
         if (this.mEntrySet == null) {
-            this.mEntrySet = new EntrySet<>();
+            this.mEntrySet = new EntrySet();
         }
         return this.mEntrySet;
     }
 
     public Set<K> getKeySet() {
         if (this.mKeySet == null) {
-            this.mKeySet = new KeySet<>();
+            this.mKeySet = new KeySet();
         }
         return this.mKeySet;
     }
 
     public Collection<V> getValues() {
         if (this.mValues == null) {
-            this.mValues = new ValuesCollection<>();
+            this.mValues = new ValuesCollection();
         }
         return this.mValues;
     }

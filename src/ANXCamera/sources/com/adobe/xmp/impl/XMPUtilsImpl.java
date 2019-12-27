@@ -80,24 +80,22 @@ public class XMPUtilsImpl implements XMPConst {
                         Iterator iterateChildren2 = xMPNode.iterateChildren();
                         while (iterateChildren2.hasNext()) {
                             XMPNode xMPNode3 = (XMPNode) iterateChildren2.next();
-                            if (xMPNode3.hasQualifier()) {
-                                if (XMPConst.XML_LANG.equals(xMPNode3.getQualifier(1).getName())) {
-                                    int lookupLanguageItem = XMPNodeUtils.lookupLanguageItem(findChildNode, xMPNode3.getQualifier(1).getValue());
-                                    if (!z2 || !(xMPNode3.getValue() == null || xMPNode3.getValue().length() == 0)) {
-                                        if (lookupLanguageItem == -1) {
-                                            if (!XMPConst.X_DEFAULT.equals(xMPNode3.getQualifier(1).getValue()) || !findChildNode.hasChildren()) {
-                                                xMPNode3.cloneSubtree(findChildNode);
-                                            } else {
-                                                XMPNode xMPNode4 = new XMPNode(xMPNode3.getName(), xMPNode3.getValue(), xMPNode3.getOptions());
-                                                xMPNode3.cloneSubtree(xMPNode4);
-                                                findChildNode.addChild(1, xMPNode4);
-                                            }
+                            if (xMPNode3.hasQualifier() && XMPConst.XML_LANG.equals(xMPNode3.getQualifier(1).getName())) {
+                                int lookupLanguageItem = XMPNodeUtils.lookupLanguageItem(findChildNode, xMPNode3.getQualifier(1).getValue());
+                                if (!z2 || !(xMPNode3.getValue() == null || xMPNode3.getValue().length() == 0)) {
+                                    if (lookupLanguageItem == -1) {
+                                        if (!XMPConst.X_DEFAULT.equals(xMPNode3.getQualifier(1).getValue()) || !findChildNode.hasChildren()) {
+                                            xMPNode3.cloneSubtree(findChildNode);
+                                        } else {
+                                            XMPNode xMPNode4 = new XMPNode(xMPNode3.getName(), xMPNode3.getValue(), xMPNode3.getOptions());
+                                            xMPNode3.cloneSubtree(xMPNode4);
+                                            findChildNode.addChild(1, xMPNode4);
                                         }
-                                    } else if (lookupLanguageItem != -1) {
-                                        findChildNode.removeChild(lookupLanguageItem);
-                                        if (!findChildNode.hasChildren()) {
-                                            xMPNode2.removeChild(findChildNode);
-                                        }
+                                    }
+                                } else if (lookupLanguageItem != -1) {
+                                    findChildNode.removeChild(lookupLanguageItem);
+                                    if (!findChildNode.hasChildren()) {
+                                        xMPNode2.removeChild(findChildNode);
                                     }
                                 }
                             }
@@ -181,8 +179,7 @@ public class XMPUtilsImpl implements XMPConst {
         if (str4 == null || str4.length() == 0) {
             str4 = "\"";
         }
-        XMPMetaImpl xMPMetaImpl = (XMPMetaImpl) xMPMeta;
-        XMPNode findNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), XMPPathParser.expandXPath(str, str2), false, null);
+        XMPNode findNode = XMPNodeUtils.findNode(((XMPMetaImpl) xMPMeta).getRoot(), XMPPathParser.expandXPath(str, str2), false, (PropertyOptions) null);
         if (findNode == null) {
             return "";
         }
@@ -210,14 +207,13 @@ public class XMPUtilsImpl implements XMPConst {
 
     private static char checkQuotes(String str, char c2) throws XMPException {
         char c3;
-        String str2 = "Invalid quoting character";
         if (classifyCharacter(c2) == 4) {
             if (str.length() == 1) {
                 c3 = c2;
             } else {
                 c3 = str.charAt(1);
                 if (classifyCharacter(c3) != 4) {
-                    throw new XMPException(str2, 4);
+                    throw new XMPException("Invalid quoting character", 4);
                 }
             }
             if (c3 == getClosingQuote(c2)) {
@@ -225,7 +221,7 @@ public class XMPUtilsImpl implements XMPConst {
             }
             throw new XMPException("Mismatched quote pair", 4);
         }
-        throw new XMPException(str2, 4);
+        throw new XMPException("Invalid quoting character", 4);
     }
 
     private static void checkSeparator(String str) throws XMPException {
@@ -248,7 +244,10 @@ public class XMPUtilsImpl implements XMPConst {
     }
 
     private static int classifyCharacter(char c2) {
-        if (SPACES.indexOf(c2) >= 0 || (8192 <= c2 && c2 <= 8203)) {
+        if (SPACES.indexOf(c2) >= 0) {
+            return 1;
+        }
+        if (8192 <= c2 && c2 <= 8203) {
             return 1;
         }
         if (COMMAS.indexOf(c2) >= 0) {
@@ -257,10 +256,16 @@ public class XMPUtilsImpl implements XMPConst {
         if (SEMICOLA.indexOf(c2) >= 0) {
             return 3;
         }
-        if (QUOTES.indexOf(c2) >= 0 || ((12296 <= c2 && c2 <= 12303) || (8216 <= c2 && c2 <= 8223))) {
+        if (QUOTES.indexOf(c2) >= 0) {
             return 4;
         }
-        return (c2 < ' ' || CONTROLS.indexOf(c2) >= 0) ? 5 : 0;
+        if (12296 <= c2 && c2 <= 12303) {
+            return 4;
+        }
+        if (8216 > c2 || c2 > 8223) {
+            return (c2 < ' ' || CONTROLS.indexOf(c2) >= 0) ? 5 : 0;
+        }
+        return 4;
     }
 
     private static char getClosingQuote(char c2) {
@@ -379,7 +384,7 @@ public class XMPUtilsImpl implements XMPConst {
             if (z2) {
                 XMPAliasInfo[] findAliases = XMPMetaFactory.getSchemaRegistry().findAliases(str);
                 for (XMPAliasInfo xMPAliasInfo : findAliases) {
-                    XMPNode findNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), XMPPathParser.expandXPath(xMPAliasInfo.getNamespace(), xMPAliasInfo.getPropName()), false, null);
+                    XMPNode findNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), XMPPathParser.expandXPath(xMPAliasInfo.getNamespace(), xMPAliasInfo.getPropName()), false, (PropertyOptions) null);
                     if (findNode != null) {
                         findNode.getParent().removeChild(findNode);
                     }
@@ -389,7 +394,7 @@ public class XMPUtilsImpl implements XMPConst {
             throw new XMPException("Property name requires schema namespace", 4);
         } else {
             XMPPath expandXPath = XMPPathParser.expandXPath(str, str2);
-            XMPNode findNode2 = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), expandXPath, false, null);
+            XMPNode findNode2 = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), expandXPath, false, (PropertyOptions) null);
             if (findNode2 == null) {
                 return;
             }
@@ -463,22 +468,13 @@ public class XMPUtilsImpl implements XMPConst {
                                         i = i4;
                                         break;
                                     }
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append(str4);
-                                    sb.append(c4);
-                                    str4 = sb.toString();
+                                    str4 = str4 + c4;
                                 } else {
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append(str4);
-                                    sb2.append(c4);
-                                    str4 = sb2.toString();
+                                    str4 = str4 + c4;
                                     i = i4;
                                 }
                             } else {
-                                StringBuilder sb3 = new StringBuilder();
-                                sb3.append(str4);
-                                sb3.append(c4);
-                                str4 = sb3.toString();
+                                str4 = str4 + c4;
                             }
                             i++;
                         }
@@ -530,7 +526,7 @@ public class XMPUtilsImpl implements XMPConst {
                         }
                     }
                     if (i3 < 0) {
-                        separateFindCreateArray.addChild(new XMPNode(XMPConst.ARRAY_ITEM_NAME, str4, null));
+                        separateFindCreateArray.addChild(new XMPNode(XMPConst.ARRAY_ITEM_NAME, str4, (PropertyOptions) null));
                     }
                 } else {
                     return;
@@ -542,10 +538,10 @@ public class XMPUtilsImpl implements XMPConst {
     }
 
     private static XMPNode separateFindCreateArray(String str, String str2, PropertyOptions propertyOptions, XMPMetaImpl xMPMetaImpl) throws XMPException {
-        PropertyOptions verifySetOptions = XMPNodeUtils.verifySetOptions(propertyOptions, null);
+        PropertyOptions verifySetOptions = XMPNodeUtils.verifySetOptions(propertyOptions, (Object) null);
         if (verifySetOptions.isOnlyArrayOptions()) {
             XMPPath expandXPath = XMPPathParser.expandXPath(str, str2);
-            XMPNode findNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), expandXPath, false, null);
+            XMPNode findNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), expandXPath, false, (PropertyOptions) null);
             if (findNode != null) {
                 PropertyOptions options = findNode.getOptions();
                 if (!options.isArray() || options.isArrayAlternate()) {

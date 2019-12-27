@@ -4,13 +4,13 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
-import android.graphics.Shader.TileMode;
+import android.graphics.Shader;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
-import android.view.animation.Animation.AnimationListener;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 
 class CircleImageView extends ImageView {
@@ -20,7 +20,7 @@ class CircleImageView extends ImageView {
     private static final float SHADOW_RADIUS = 3.5f;
     private static final float X_OFFSET = 0.0f;
     private static final float Y_OFFSET = 1.75f;
-    private AnimationListener mListener;
+    private Animation.AnimationListener mListener;
     int mShadowRadius;
 
     private class OvalShadow extends OvalShape {
@@ -34,7 +34,7 @@ class CircleImageView extends ImageView {
 
         private void updateRadialGradient(int i) {
             float f2 = (float) (i / 2);
-            RadialGradient radialGradient = new RadialGradient(f2, f2, (float) CircleImageView.this.mShadowRadius, new int[]{CircleImageView.FILL_SHADOW_COLOR, 0}, null, TileMode.CLAMP);
+            RadialGradient radialGradient = new RadialGradient(f2, f2, (float) CircleImageView.this.mShadowRadius, new int[]{CircleImageView.FILL_SHADOW_COLOR, 0}, (float[]) null, Shader.TileMode.CLAMP);
             this.mRadialGradient = radialGradient;
             this.mShadowPaint.setShader(this.mRadialGradient);
         }
@@ -55,8 +55,8 @@ class CircleImageView extends ImageView {
     }
 
     CircleImageView(Context context, int i) {
-        ShapeDrawable shapeDrawable;
         super(context);
+        ShapeDrawable shapeDrawable;
         float f2 = getContext().getResources().getDisplayMetrics().density;
         int i2 = (int) (Y_OFFSET * f2);
         int i3 = (int) (0.0f * f2);
@@ -77,12 +77,12 @@ class CircleImageView extends ImageView {
     }
 
     private boolean elevationSupported() {
-        return VERSION.SDK_INT >= 21;
+        return Build.VERSION.SDK_INT >= 21;
     }
 
     public void onAnimationEnd() {
         super.onAnimationEnd();
-        AnimationListener animationListener = this.mListener;
+        Animation.AnimationListener animationListener = this.mListener;
         if (animationListener != null) {
             animationListener.onAnimationEnd(getAnimation());
         }
@@ -90,7 +90,7 @@ class CircleImageView extends ImageView {
 
     public void onAnimationStart() {
         super.onAnimationStart();
-        AnimationListener animationListener = this.mListener;
+        Animation.AnimationListener animationListener = this.mListener;
         if (animationListener != null) {
             animationListener.onAnimationStart(getAnimation());
         }
@@ -104,7 +104,7 @@ class CircleImageView extends ImageView {
         }
     }
 
-    public void setAnimationListener(AnimationListener animationListener) {
+    public void setAnimationListener(Animation.AnimationListener animationListener) {
         this.mListener = animationListener;
     }
 

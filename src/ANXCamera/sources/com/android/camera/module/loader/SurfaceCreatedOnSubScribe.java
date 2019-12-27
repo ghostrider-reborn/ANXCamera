@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraDevice.StateCallback;
 import android.hardware.camera2.CameraManager;
 import android.support.annotation.NonNull;
 import com.android.camera.CameraAppImpl;
@@ -34,7 +33,7 @@ public class SurfaceCreatedOnSubScribe implements SingleOnSubscribe<Boolean>, Su
         String[] strArr = new String[0];
         try {
             strArr = cameraManager.getCameraIdList();
-            cameraManager.openCamera(strArr[0], new StateCallback() {
+            cameraManager.openCamera(strArr[0], new CameraDevice.StateCallback() {
                 public void onDisconnected(@NonNull CameraDevice cameraDevice) {
                 }
 
@@ -42,17 +41,14 @@ public class SurfaceCreatedOnSubScribe implements SingleOnSubscribe<Boolean>, Su
                 }
 
                 public void onOpened(@NonNull CameraDevice cameraDevice) {
-                    SurfaceCreatedOnSubScribe.this.mSingleEmitter.onSuccess(Boolean.valueOf(true));
+                    SurfaceCreatedOnSubScribe.this.mSingleEmitter.onSuccess(true);
                 }
             }, Camera2OpenManager.getInstance().getCameraHandler());
         } catch (CameraAccessException e2) {
             e2.printStackTrace();
         }
         for (String str : strArr) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append("");
-            Log.e("ids:", sb.toString());
+            Log.e("ids:", str + "");
         }
     }
 

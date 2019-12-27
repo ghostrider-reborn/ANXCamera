@@ -37,7 +37,7 @@ public final class ObservableDebounce<T, U> extends AbstractObservableWithUpstre
                 this.value = t;
             }
 
-            /* access modifiers changed from: 0000 */
+            /* access modifiers changed from: package-private */
             public void emit() {
                 if (this.once.compareAndSet(false, true)) {
                     this.parent.emit(this.index, this.value);
@@ -79,7 +79,7 @@ public final class ObservableDebounce<T, U> extends AbstractObservableWithUpstre
             DisposableHelper.dispose(this.debouncer);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit(long j, T t) {
             if (j == this.index) {
                 this.actual.onNext(t);
@@ -93,7 +93,7 @@ public final class ObservableDebounce<T, U> extends AbstractObservableWithUpstre
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
-                Disposable disposable = (Disposable) this.debouncer.get();
+                Disposable disposable = this.debouncer.get();
                 if (disposable != DisposableHelper.DISPOSED) {
                     ((DebounceInnerObserver) disposable).emit();
                     DisposableHelper.dispose(this.debouncer);
@@ -111,7 +111,7 @@ public final class ObservableDebounce<T, U> extends AbstractObservableWithUpstre
             if (!this.done) {
                 long j = this.index + 1;
                 this.index = j;
-                Disposable disposable = (Disposable) this.debouncer.get();
+                Disposable disposable = this.debouncer.get();
                 if (disposable != null) {
                     disposable.dispose();
                 }

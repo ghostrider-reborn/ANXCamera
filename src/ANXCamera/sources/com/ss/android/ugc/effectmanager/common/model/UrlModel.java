@@ -2,11 +2,10 @@ package com.ss.android.ugc.effectmanager.common.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.util.List;
 
 public class UrlModel implements Parcelable {
-    public static final Creator<UrlModel> CREATOR = new Creator<UrlModel>() {
+    public static final Parcelable.Creator<UrlModel> CREATOR = new Parcelable.Creator<UrlModel>() {
         public UrlModel createFromParcel(Parcel parcel) {
             return new UrlModel(parcel);
         }
@@ -50,20 +49,13 @@ public class UrlModel implements Parcelable {
         StringBuilder sb = new StringBuilder();
         List<String> list = this.url_list;
         if (list != null) {
-            for (String str : list) {
+            for (String append : list) {
                 sb.append(" [");
-                sb.append(str);
+                sb.append(append);
                 sb.append("] ");
             }
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("UrlModel{url_list=");
-        sb2.append(sb.toString());
-        sb2.append(", uri='");
-        sb2.append(this.uri);
-        sb2.append('\'');
-        sb2.append('}');
-        return sb2.toString();
+        return "UrlModel{url_list=" + sb.toString() + ", uri='" + this.uri + '\'' + '}';
     }
 
     public void writeToParcel(Parcel parcel, int i) {

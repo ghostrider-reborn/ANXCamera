@@ -33,7 +33,7 @@ public final class LongHashMap<T> {
 
     public void clear() {
         this.size = 0;
-        Arrays.fill(this.table, null);
+        Arrays.fill(this.table, (Object) null);
     }
 
     public boolean containsKey(long j) {
@@ -55,7 +55,6 @@ public final class LongHashMap<T> {
     }
 
     public void logStats() {
-        Entry<T>[] entryArr;
         int i = 0;
         for (Entry<T> entry : this.table) {
             while (entry != null) {
@@ -66,18 +65,7 @@ public final class LongHashMap<T> {
                 i++;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("load: ");
-        sb.append(((float) this.size) / ((float) this.capacity));
-        sb.append(", size: ");
-        sb.append(this.size);
-        sb.append(", capa: ");
-        sb.append(this.capacity);
-        sb.append(", collisions: ");
-        sb.append(i);
-        sb.append(", collision ratio: ");
-        sb.append(((float) i) / ((float) this.size));
-        DaoLog.d(sb.toString());
+        DaoLog.d("load: " + (((float) this.size) / ((float) this.capacity)) + ", size: " + this.size + ", capa: " + this.capacity + ", collisions: " + i + ", collision ratio: " + (((float) i) / ((float) this.size)));
     }
 
     public T put(long j, T t) {
@@ -92,9 +80,10 @@ public final class LongHashMap<T> {
         }
         this.table[i] = new Entry<>(j, t, entry);
         this.size++;
-        if (this.size > this.threshold) {
-            setCapacity(this.capacity * 2);
+        if (this.size <= this.threshold) {
+            return null;
         }
+        setCapacity(this.capacity * 2);
         return null;
     }
 

@@ -50,12 +50,7 @@ public class VESafelyLibsLoader {
                 System.loadLibrary(str);
                 sLoadedLibs.add(str);
             } catch (UnsatisfiedLinkError e2) {
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("loadLibrary ");
-                sb.append(str);
-                sb.append(" error");
-                Log.e(str2, sb.toString(), e2);
+                Log.e(TAG, "loadLibrary " + str + " error", e2);
                 File libraryFile = getLibraryFile(context, str);
                 if (libraryFile == null) {
                     return false;
@@ -65,12 +60,7 @@ public class VESafelyLibsLoader {
                 }
                 String unpackLibrary = unpackLibrary(context, str, libraryFile);
                 if (unpackLibrary != null) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(e2.getMessage());
-                    sb2.append("[");
-                    sb2.append(unpackLibrary);
-                    sb2.append("]");
-                    Log.e("loadLibrary", sb2.toString());
+                    Log.e("loadLibrary", e2.getMessage() + "[" + unpackLibrary + "]");
                     return false;
                 }
                 System.load(libraryFile.getAbsolutePath());
@@ -87,36 +77,25 @@ public class VESafelyLibsLoader {
         String message;
         InputStream inputStream2;
         FileOutputStream fileOutputStream;
-        String str2 = "/";
-        String str3 = "lib/";
         FileOutputStream fileOutputStream2 = null;
         try {
             zipFile = new ZipFile(new File(context.getApplicationInfo().sourceDir), 1);
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str3);
-                sb.append(Build.CPU_ABI);
-                sb.append(str2);
-                sb.append(System.mapLibraryName(str));
-                ZipEntry entry = zipFile.getEntry(sb.toString());
+                ZipEntry entry = zipFile.getEntry("lib/" + Build.CPU_ABI + "/" + System.mapLibraryName(str));
                 if (entry == null) {
                     int indexOf = Build.CPU_ABI.indexOf(45);
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str3);
-                    String str4 = Build.CPU_ABI;
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("lib/");
+                    String str2 = Build.CPU_ABI;
                     if (indexOf <= 0) {
                         indexOf = Build.CPU_ABI.length();
                     }
-                    sb2.append(str4.substring(0, indexOf));
-                    sb2.append(str2);
-                    sb2.append(System.mapLibraryName(str));
-                    String sb3 = sb2.toString();
-                    ZipEntry entry2 = zipFile.getEntry(sb3);
+                    sb.append(str2.substring(0, indexOf));
+                    sb.append("/");
+                    sb.append(System.mapLibraryName(str));
+                    ZipEntry entry2 = zipFile.getEntry(sb.toString());
                     if (entry2 == null) {
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("Library entry not found:");
-                        sb4.append(sb3);
-                        message = sb4.toString();
+                        message = "Library entry not found:" + r7;
                         VEFileUtils.close((Closeable) null);
                         VEFileUtils.close((Closeable) null);
                         VEFileUtils.close(zipFile);

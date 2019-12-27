@@ -29,10 +29,7 @@ public class TTLiveMusicResourceRequest extends BaseJsonRequest<List<LiveMusicIn
 
     public List<LiveMusicInfo> loadFromCache() throws BaseRequestException {
         String tTLiveMusicJsonCache = CameraSettings.getTTLiveMusicJsonCache();
-        StringBuilder sb = new StringBuilder();
-        sb.append("loadFromCache = ");
-        sb.append(tTLiveMusicJsonCache);
-        Log.e("BaseRequest", sb.toString());
+        Log.e("BaseRequest", "loadFromCache = " + tTLiveMusicJsonCache);
         try {
             return processJson(new JSONObject(tTLiveMusicJsonCache));
         } catch (JSONException e2) {
@@ -41,33 +38,27 @@ public class TTLiveMusicResourceRequest extends BaseJsonRequest<List<LiveMusicIn
     }
 
     public List<LiveMusicInfo> processJson(JSONObject jSONObject) throws BaseRequestException, JSONException {
-        if (jSONObject != null) {
-            String str = "status_code";
-            if (jSONObject.has(str)) {
-                if (jSONObject.getInt(str) == 0) {
-                    String str2 = "music_list";
-                    if (!jSONObject.isNull(str2)) {
-                        CameraSettings.setTTLiveMusicJsonCache(jSONObject.toString());
-                        ArrayList arrayList = new ArrayList();
-                        JSONArray jSONArray = new JSONArray(jSONObject.optString(str2));
-                        for (int i = 0; i < jSONArray.length(); i++) {
-                            LiveMusicInfo liveMusicInfo = new LiveMusicInfo();
-                            JSONObject jSONObject2 = jSONArray.getJSONObject(i);
-                            liveMusicInfo.mDuration = jSONObject2.getString("duration");
-                            String str3 = "uri";
-                            liveMusicInfo.mPlayUrl = jSONObject2.getJSONObject("play_url").getString(str3);
-                            liveMusicInfo.mThumbnailUrl = jSONObject2.getJSONObject("cover_thumb").getString(str3);
-                            liveMusicInfo.mAuthor = jSONObject2.getString("author");
-                            liveMusicInfo.mTitle = jSONObject2.getString("title").replace('/', '|');
-                            arrayList.add(liveMusicInfo);
-                        }
-                        return arrayList;
-                    }
-                    throw new BaseRequestException(ErrorCode.BODY_EMPTY, "response empty data");
-                }
-                throw new BaseRequestException(ErrorCode.SERVER_ERROR, jSONObject.optString(NotificationCompat.CATEGORY_MESSAGE));
+        if (jSONObject == null || !jSONObject.has("status_code")) {
+            throw new BaseRequestException(ErrorCode.PARSE_ERROR, "response has no status_code");
+        } else if (jSONObject.getInt("status_code") != 0) {
+            throw new BaseRequestException(ErrorCode.SERVER_ERROR, jSONObject.optString(NotificationCompat.CATEGORY_MESSAGE));
+        } else if (!jSONObject.isNull("music_list")) {
+            CameraSettings.setTTLiveMusicJsonCache(jSONObject.toString());
+            ArrayList arrayList = new ArrayList();
+            JSONArray jSONArray = new JSONArray(jSONObject.optString("music_list"));
+            for (int i = 0; i < jSONArray.length(); i++) {
+                LiveMusicInfo liveMusicInfo = new LiveMusicInfo();
+                JSONObject jSONObject2 = jSONArray.getJSONObject(i);
+                liveMusicInfo.mDuration = jSONObject2.getString("duration");
+                liveMusicInfo.mPlayUrl = jSONObject2.getJSONObject("play_url").getString("uri");
+                liveMusicInfo.mThumbnailUrl = jSONObject2.getJSONObject("cover_thumb").getString("uri");
+                liveMusicInfo.mAuthor = jSONObject2.getString("author");
+                liveMusicInfo.mTitle = jSONObject2.getString("title").replace('/', '|');
+                arrayList.add(liveMusicInfo);
             }
+            return arrayList;
+        } else {
+            throw new BaseRequestException(ErrorCode.BODY_EMPTY, "response empty data");
         }
-        throw new BaseRequestException(ErrorCode.PARSE_ERROR, "response has no status_code");
     }
 }

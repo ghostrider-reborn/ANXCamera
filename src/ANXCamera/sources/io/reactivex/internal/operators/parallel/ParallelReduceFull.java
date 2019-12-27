@@ -30,7 +30,7 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
             this.reducer = biFunction;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancel() {
             SubscriptionHelper.cancel(this);
         }
@@ -96,15 +96,15 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
             this.remaining.lazySet(i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SlotPair<T> addValue(T t) {
             SlotPair<T> slotPair;
             int tryAcquireSlot;
             while (true) {
-                slotPair = (SlotPair) this.current.get();
+                slotPair = this.current.get();
                 if (slotPair == null) {
                     slotPair = new SlotPair<>();
-                    if (!this.current.compareAndSet(null, slotPair)) {
+                    if (!this.current.compareAndSet((Object) null, slotPair)) {
                         continue;
                     }
                 }
@@ -112,7 +112,7 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
                 if (tryAcquireSlot >= 0) {
                     break;
                 }
-                this.current.compareAndSet(slotPair, null);
+                this.current.compareAndSet(slotPair, (Object) null);
             }
             if (tryAcquireSlot == 0) {
                 slotPair.first = t;
@@ -122,7 +122,7 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
             if (!slotPair.releaseSlot()) {
                 return null;
             }
-            this.current.compareAndSet(slotPair, null);
+            this.current.compareAndSet(slotPair, (Object) null);
             return slotPair;
         }
 
@@ -132,7 +132,7 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete(T t) {
             if (t != null) {
                 while (true) {
@@ -151,8 +151,8 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
                 }
             }
             if (this.remaining.decrementAndGet() == 0) {
-                SlotPair slotPair = (SlotPair) this.current.get();
-                this.current.lazySet(null);
+                SlotPair slotPair = this.current.get();
+                this.current.lazySet((Object) null);
                 if (slotPair != null) {
                     complete(slotPair.first);
                 } else {
@@ -161,9 +161,9 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(Throwable th) {
-            if (this.error.compareAndSet(null, th)) {
+            if (this.error.compareAndSet((Object) null, th)) {
                 cancel();
                 this.actual.onError(th);
             } else if (th != this.error.get()) {
@@ -181,12 +181,12 @@ public final class ParallelReduceFull<T> extends Flowable<T> {
         SlotPair() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean releaseSlot() {
             return this.releaseIndex.incrementAndGet() == 2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int tryAcquireSlot() {
             int i;
             do {

@@ -228,12 +228,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         } else if (-1 != this.markpos) {
             this.pos = this.markpos;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Mark has been invalidated, pos: ");
-            sb.append(this.pos);
-            sb.append(" markLimit: ");
-            sb.append(this.marklimit);
-            throw new InvalidMarkException(sb.toString());
+            throw new InvalidMarkException("Mark has been invalidated, pos: " + this.pos + " markLimit: " + this.marklimit);
         }
     }
 

@@ -3,8 +3,6 @@ package android.support.v4.app;
 import android.graphics.Rect;
 import android.support.annotation.RequiresApi;
 import android.transition.Transition;
-import android.transition.Transition.EpicenterCallback;
-import android.transition.Transition.TransitionListener;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.view.View;
@@ -41,7 +39,7 @@ class FragmentTransitionCompat21 extends FragmentTransitionImpl {
             } else if (!hasSimpleTarget(transition) && FragmentTransitionImpl.isNullOrEmpty(transition.getTargets())) {
                 int size = arrayList.size();
                 while (i < size) {
-                    transition.addTarget((View) arrayList.get(i));
+                    transition.addTarget(arrayList.get(i));
                     i++;
                 }
             }
@@ -114,22 +112,22 @@ class FragmentTransitionCompat21 extends FragmentTransitionImpl {
                 i++;
             }
         } else if (!hasSimpleTarget(transition)) {
-            List targets = transition.getTargets();
+            List<View> targets = transition.getTargets();
             if (targets != null && targets.size() == arrayList.size() && targets.containsAll(arrayList)) {
                 int size = arrayList2 == null ? 0 : arrayList2.size();
                 while (i < size) {
-                    transition.addTarget((View) arrayList2.get(i));
+                    transition.addTarget(arrayList2.get(i));
                     i++;
                 }
                 for (int size2 = arrayList.size() - 1; size2 >= 0; size2--) {
-                    transition.removeTarget((View) arrayList.get(size2));
+                    transition.removeTarget(arrayList.get(size2));
                 }
             }
         }
     }
 
     public void scheduleHideFragmentView(Object obj, final View view, final ArrayList<View> arrayList) {
-        ((Transition) obj).addListener(new TransitionListener() {
+        ((Transition) obj).addListener(new Transition.TransitionListener() {
             public void onTransitionCancel(Transition transition) {
             }
 
@@ -154,14 +152,13 @@ class FragmentTransitionCompat21 extends FragmentTransitionImpl {
     }
 
     public void scheduleRemoveTargets(Object obj, Object obj2, ArrayList<View> arrayList, Object obj3, ArrayList<View> arrayList2, Object obj4, ArrayList<View> arrayList3) {
-        Transition transition = (Transition) obj;
         final Object obj5 = obj2;
         final ArrayList<View> arrayList4 = arrayList;
         final Object obj6 = obj3;
         final ArrayList<View> arrayList5 = arrayList2;
         final Object obj7 = obj4;
         final ArrayList<View> arrayList6 = arrayList3;
-        AnonymousClass3 r1 = new TransitionListener() {
+        AnonymousClass3 r1 = new Transition.TransitionListener() {
             public void onTransitionCancel(Transition transition) {
             }
 
@@ -177,24 +174,24 @@ class FragmentTransitionCompat21 extends FragmentTransitionImpl {
             public void onTransitionStart(Transition transition) {
                 Object obj = obj5;
                 if (obj != null) {
-                    FragmentTransitionCompat21.this.replaceTargets(obj, arrayList4, null);
+                    FragmentTransitionCompat21.this.replaceTargets(obj, arrayList4, (ArrayList<View>) null);
                 }
                 Object obj2 = obj6;
                 if (obj2 != null) {
-                    FragmentTransitionCompat21.this.replaceTargets(obj2, arrayList5, null);
+                    FragmentTransitionCompat21.this.replaceTargets(obj2, arrayList5, (ArrayList<View>) null);
                 }
                 Object obj3 = obj7;
                 if (obj3 != null) {
-                    FragmentTransitionCompat21.this.replaceTargets(obj3, arrayList6, null);
+                    FragmentTransitionCompat21.this.replaceTargets(obj3, arrayList6, (ArrayList<View>) null);
                 }
             }
         };
-        transition.addListener(r1);
+        ((Transition) obj).addListener(r1);
     }
 
     public void setEpicenter(Object obj, final Rect rect) {
         if (obj != null) {
-            ((Transition) obj).setEpicenterCallback(new EpicenterCallback() {
+            ((Transition) obj).setEpicenterCallback(new Transition.EpicenterCallback() {
                 public Rect onGetEpicenter(Transition transition) {
                     Rect rect = rect;
                     if (rect == null || rect.isEmpty()) {
@@ -208,10 +205,9 @@ class FragmentTransitionCompat21 extends FragmentTransitionImpl {
 
     public void setEpicenter(Object obj, View view) {
         if (view != null) {
-            Transition transition = (Transition) obj;
             final Rect rect = new Rect();
             getBoundsOnScreen(view, rect);
-            transition.setEpicenterCallback(new EpicenterCallback() {
+            ((Transition) obj).setEpicenterCallback(new Transition.EpicenterCallback() {
                 public Rect onGetEpicenter(Transition transition) {
                     return rect;
                 }
@@ -225,7 +221,7 @@ class FragmentTransitionCompat21 extends FragmentTransitionImpl {
         targets.clear();
         int size = arrayList.size();
         for (int i = 0; i < size; i++) {
-            FragmentTransitionImpl.bfsAddViewChildren(targets, (View) arrayList.get(i));
+            FragmentTransitionImpl.bfsAddViewChildren(targets, arrayList.get(i));
         }
         targets.add(view);
         arrayList.add(view);

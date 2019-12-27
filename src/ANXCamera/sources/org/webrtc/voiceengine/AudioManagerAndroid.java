@@ -4,15 +4,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.util.Log;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 
 class AudioManagerAndroid implements HeadsetPlugHandler {
     private static final int DEFAULT_FRAMES_PER_BUFFER = 256;
@@ -40,11 +39,11 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
         /* access modifiers changed from: private */
         public BluetoothHeadset mBluetoothHeadset;
         private boolean mIsBluetoothHeadsetAvailable = false;
-        private ServiceListener mProfileListener = new ServiceListener() {
+        private BluetoothProfile.ServiceListener mProfileListener = new BluetoothProfile.ServiceListener() {
             public void onServiceConnected(int i, BluetoothProfile bluetoothProfile) {
                 if (i == 1) {
                     Log.i("AudioManagerAndroid", "updateAudioDevice onServiceConnected");
-                    HeadsetPlugReceiver.this.mBluetoothHeadset = (BluetoothHeadset) bluetoothProfile;
+                    BluetoothHeadset unused = HeadsetPlugReceiver.this.mBluetoothHeadset = (BluetoothHeadset) bluetoothProfile;
                     if (HeadsetPlugReceiver.this.isBluetoothHeadsetConnected()) {
                         HeadsetPlugReceiver.this.HeadsetMessageHandler(210);
                     }
@@ -55,21 +54,20 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
                 if (i == 1) {
                     Log.i("AudioManagerAndroid", "updateAudioDevice onServiceDisconnected");
                     HeadsetPlugReceiver.this.HeadsetMessageHandler(213);
-                    HeadsetPlugReceiver.this.mBluetoothHeadset = null;
+                    BluetoothHeadset unused = HeadsetPlugReceiver.this.mBluetoothHeadset = null;
                 }
             }
         };
 
         HeadsetPlugReceiver(HeadsetPlugHandler headsetPlugHandler, Context context2) {
-            String str = "AudioManagerAndroid";
-            Log.i(str, "HeadsetPlugReceiver ");
+            Log.i("AudioManagerAndroid", "HeadsetPlugReceiver ");
             this.callback = headsetPlugHandler;
             this.context = context2;
-            this.mAudioManager = (AudioManager) context2.getSystemService(MVConsts.TYPE_AUDIO);
+            this.mAudioManager = (AudioManager) context2.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
             try {
                 BluetoothAdapter.getDefaultAdapter().getProfileProxy(context2, this.mProfileListener, 1);
             } catch (SecurityException unused) {
-                Log.i(str, "The app  bluetooth permissions denied");
+                Log.i("AudioManagerAndroid", "The app  bluetooth permissions denied");
             }
             IntentFilter intentFilter = new IntentFilter(ACTION_MEDIA_KEYEVENT_HEADSETHOOT_RECEIVER);
             intentFilter.addAction("android.intent.action.HEADSET_PLUG");
@@ -80,26 +78,25 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
         }
 
         public void HeadsetMessageHandler(int i) {
-            String str = "AudioManagerAndroid";
             if (i == 200) {
-                Log.i(str, "updateAudioDevice: MSG_EARPHONE_PLUGGED");
+                Log.i("AudioManagerAndroid", "updateAudioDevice: MSG_EARPHONE_PLUGGED");
                 this.callback.onHeadsetPlugChange(true);
             } else if (i != 201) {
                 switch (i) {
                     case 210:
-                        Log.i(str, "updateAudioDevice: MSG_BLUETOOTH_HEADSET_CONNECTED");
+                        Log.i("AudioManagerAndroid", "updateAudioDevice: MSG_BLUETOOTH_HEADSET_CONNECTED");
                         return;
                     case 211:
-                        Log.i(str, "updateAudioDevice: MSG_BLUETOOTH_HEADSET_DISCONNECTED");
+                        Log.i("AudioManagerAndroid", "updateAudioDevice: MSG_BLUETOOTH_HEADSET_DISCONNECTED");
                         return;
                     case 212:
-                        Log.i(str, "updateAudioDevice: MSG_SCO_AUDIO_STATE_CONNECTED");
+                        Log.i("AudioManagerAndroid", "updateAudioDevice: MSG_SCO_AUDIO_STATE_CONNECTED");
                         this.mIsBluetoothHeadsetAvailable = true;
                         this.mAudioManager.setBluetoothScoOn(true);
                         this.callback.onBluetoothHeadsetPlugChange(true);
                         return;
                     case 213:
-                        Log.i(str, "updateAudioDevice: MSG_SCO_AUDIO_STATE_DISCONNECTED");
+                        Log.i("AudioManagerAndroid", "updateAudioDevice: MSG_SCO_AUDIO_STATE_DISCONNECTED");
                         if (this.mIsBluetoothHeadsetAvailable) {
                             this.mIsBluetoothHeadsetAvailable = false;
                             this.callback.onBluetoothHeadsetPlugChange(false);
@@ -110,7 +107,7 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
                         return;
                 }
             } else {
-                Log.i(str, "updateAudioDevice: MSG_EARPHONE_UNPLUGGED");
+                Log.i("AudioManagerAndroid", "updateAudioDevice: MSG_EARPHONE_UNPLUGGED");
                 if (!this.mAudioManager.isBluetoothA2dpOn()) {
                     this.callback.onHeadsetPlugChange(false);
                 }
@@ -127,11 +124,12 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
 
         public boolean isBluetoothHeadsetConnected() {
             BluetoothHeadset bluetoothHeadset = this.mBluetoothHeadset;
-            if (bluetoothHeadset != null) {
-                for (BluetoothDevice connectionState : bluetoothHeadset.getConnectedDevices()) {
-                    if (this.mBluetoothHeadset.getConnectionState(connectionState) == 2) {
-                        return true;
-                    }
+            if (bluetoothHeadset == null) {
+                return false;
+            }
+            for (BluetoothDevice connectionState : bluetoothHeadset.getConnectedDevices()) {
+                if (this.mBluetoothHeadset.getConnectionState(connectionState) == 2) {
+                    return true;
                 }
             }
             return false;
@@ -147,23 +145,19 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
                     } else if (intExtra == 1) {
                         i = 200;
                     }
-                } else {
-                    if ("android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED".equals(intent.getAction())) {
-                        int intExtra2 = intent.getIntExtra("android.bluetooth.profile.extra.STATE", 10);
-                        if (intExtra2 == 0) {
-                            i = 211;
-                        } else if (intExtra2 == 2) {
-                            i = 210;
-                        }
-                    } else {
-                        if ("android.media.ACTION_SCO_AUDIO_STATE_UPDATED".equals(intent.getAction())) {
-                            int intExtra3 = intent.getIntExtra("android.media.extra.SCO_AUDIO_STATE", 0);
-                            if (intExtra3 == 0) {
-                                i = 213;
-                            } else if (intExtra3 == 1) {
-                                i = 212;
-                            }
-                        }
+                } else if ("android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED".equals(intent.getAction())) {
+                    int intExtra2 = intent.getIntExtra("android.bluetooth.profile.extra.STATE", 10);
+                    if (intExtra2 == 0) {
+                        i = 211;
+                    } else if (intExtra2 == 2) {
+                        i = 210;
+                    }
+                } else if ("android.media.ACTION_SCO_AUDIO_STATE_UPDATED".equals(intent.getAction())) {
+                    int intExtra3 = intent.getIntExtra("android.media.extra.SCO_AUDIO_STATE", 0);
+                    if (intExtra3 == 0) {
+                        i = 213;
+                    } else if (intExtra3 == 1) {
+                        i = 212;
                     }
                 }
                 HeadsetMessageHandler(i);
@@ -173,8 +167,8 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
 
     private AudioManagerAndroid(Context context2) {
         this.context = context2;
-        AudioManager audioManager2 = (AudioManager) context2.getSystemService(MVConsts.TYPE_AUDIO);
-        if (VERSION.SDK_INT >= 17) {
+        AudioManager audioManager2 = (AudioManager) context2.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
+        if (Build.VERSION.SDK_INT >= 17) {
             String property = audioManager2.getProperty("android.media.property.OUTPUT_SAMPLE_RATE");
             if (property != null) {
                 this.mNativeOutputSampleRate = Integer.parseInt(property);
@@ -230,28 +224,23 @@ class AudioManagerAndroid implements HeadsetPlugHandler {
     }
 
     public void setLoudspeakerStatus(boolean z) {
-        AudioManager audioManager2 = (AudioManager) this.context.getSystemService(MVConsts.TYPE_AUDIO);
+        AudioManager audioManager2 = (AudioManager) this.context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
         audioManager2.setMicrophoneMute(false);
         boolean isSpeakerphoneOn = audioManager2.isSpeakerphoneOn();
-        String str = "AudioManagerAndroid";
         if (z) {
             if (!isSpeakerphoneOn) {
-                Log.i(str, "setSpeakerphoneOn true");
+                Log.i("AudioManagerAndroid", "setSpeakerphoneOn true");
                 audioManager2.setSpeakerphoneOn(true);
             }
         } else if (isSpeakerphoneOn) {
-            Log.i(str, "setSpeakerphoneOn false");
+            Log.i("AudioManagerAndroid", "setSpeakerphoneOn false");
             audioManager2.setSpeakerphoneOn(false);
         }
     }
 
     public int setSpeakerVolume(int i) {
-        AudioManager audioManager2 = (AudioManager) this.context.getSystemService(MVConsts.TYPE_AUDIO);
-        StringBuilder sb = new StringBuilder();
-        sb.append("set volume level:");
-        sb.append(Integer.toString(i));
-        Log.i("set speaker volume:", sb.toString());
-        audioManager2.setStreamVolume(3, i, 4);
+        Log.i("set speaker volume:", "set volume level:" + Integer.toString(i));
+        ((AudioManager) this.context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO)).setStreamVolume(3, i, 4);
         return 0;
     }
 }

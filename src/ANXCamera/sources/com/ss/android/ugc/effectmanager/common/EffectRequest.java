@@ -23,10 +23,7 @@ public class EffectRequest {
     }
 
     public String getBodyContentType() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("application/x-www-form-urlencoded; charset=");
-        sb.append(getParamsEncoding());
-        return sb.toString();
+        return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
     }
 
     public String getContentType() {

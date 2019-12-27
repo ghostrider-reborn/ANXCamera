@@ -2,9 +2,8 @@ package android.arch.core.a;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 /* compiled from: TaskExecutor */
 public abstract class e {
     public abstract void a(@NonNull Runnable runnable);

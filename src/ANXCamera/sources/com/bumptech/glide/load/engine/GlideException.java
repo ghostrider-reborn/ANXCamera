@@ -72,11 +72,11 @@ public final class GlideException extends Exception {
     }
 
     public GlideException(String str) {
-        this(str, Collections.emptyList());
+        this(str, (List<Throwable>) Collections.emptyList());
     }
 
     public GlideException(String str, Throwable th) {
-        this(str, Collections.singletonList(th));
+        this(str, (List<Throwable>) Collections.singletonList(th));
     }
 
     public GlideException(String str, List<Throwable> list) {
@@ -122,7 +122,7 @@ public final class GlideException extends Exception {
         while (i < size) {
             int i2 = i + 1;
             appendable.append("Cause (").append(String.valueOf(i2)).append(" of ").append(String.valueOf(size)).append("): ");
-            Throwable th = (Throwable) list.get(i);
+            Throwable th = list.get(i);
             if (th instanceof GlideException) {
                 ((GlideException) th).a(appendable);
             } else {
@@ -142,12 +142,12 @@ public final class GlideException extends Exception {
         return arrayList;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(c cVar, DataSource dataSource2) {
-        a(cVar, dataSource2, null);
+        a(cVar, dataSource2, (Class<?>) null);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(c cVar, DataSource dataSource2, Class<?> cls) {
         this.key = cVar;
         this.dataSource = dataSource2;
@@ -163,33 +163,23 @@ public final class GlideException extends Exception {
         String str2;
         StringBuilder sb = new StringBuilder(71);
         sb.append(this.detailMessage);
-        String str3 = ", ";
-        String str4 = "";
+        String str3 = "";
         if (this.dataClass != null) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str3);
-            sb2.append(this.dataClass);
-            str = sb2.toString();
+            str = ", " + this.dataClass;
         } else {
-            str = str4;
+            str = str3;
         }
         sb.append(str);
         if (this.dataSource != null) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str3);
-            sb3.append(this.dataSource);
-            str2 = sb3.toString();
+            str2 = ", " + this.dataSource;
         } else {
-            str2 = str4;
+            str2 = str3;
         }
         sb.append(str2);
         if (this.key != null) {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(str3);
-            sb4.append(this.key);
-            str4 = sb4.toString();
+            str3 = ", " + this.key;
         }
-        sb.append(str4);
+        sb.append(str3);
         List<Throwable> Mj = Mj();
         if (Mj.isEmpty()) {
             return sb.toString();
@@ -201,11 +191,11 @@ public final class GlideException extends Exception {
             sb.append(Mj.size());
             sb.append(" causes:");
         }
-        for (Throwable th : Mj) {
+        for (Throwable next : Mj) {
             sb.append(10);
-            sb.append(th.getClass().getName());
+            sb.append(next.getClass().getName());
             sb.append('(');
-            sb.append(th.getMessage());
+            sb.append(next.getMessage());
             sb.append(')');
         }
         sb.append("\n call GlideException#logRootCauses(String) for more detail");
@@ -225,7 +215,7 @@ public final class GlideException extends Exception {
     }
 
     public void x(String str) {
-        List Mj = Mj();
+        List<Throwable> Mj = Mj();
         int size = Mj.size();
         int i = 0;
         while (i < size) {
@@ -236,7 +226,7 @@ public final class GlideException extends Exception {
             sb.append(" of ");
             sb.append(size);
             sb.append(")");
-            Log.i(str, sb.toString(), (Throwable) Mj.get(i));
+            Log.i(str, sb.toString(), Mj.get(i));
             i = i2;
         }
     }

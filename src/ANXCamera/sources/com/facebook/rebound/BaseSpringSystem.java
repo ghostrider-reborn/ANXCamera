@@ -26,9 +26,9 @@ public class BaseSpringSystem {
         throw new IllegalArgumentException("springLooper is required");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void activateSpring(String str) {
-        Spring spring = (Spring) this.mSpringRegistry.get(str);
+        Spring spring = this.mSpringRegistry.get(str);
         if (spring != null) {
             this.mActiveSprings.add(spring);
             if (getIsIdle()) {
@@ -38,11 +38,7 @@ public class BaseSpringSystem {
             }
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("springId ");
-        sb.append(str);
-        sb.append(" does not reference a registered spring");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("springId " + str + " does not reference a registered spring");
     }
 
     public void addListener(SpringSystemListener springSystemListener) {
@@ -53,13 +49,13 @@ public class BaseSpringSystem {
         throw new IllegalArgumentException("newListener is required");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void advance(double d2) {
-        for (Spring spring : this.mActiveSprings) {
-            if (spring.systemShouldAdvance()) {
-                spring.advance(d2 / 1000.0d);
+        for (Spring next : this.mActiveSprings) {
+            if (next.systemShouldAdvance()) {
+                next.advance(d2 / 1000.0d);
             } else {
-                this.mActiveSprings.remove(spring);
+                this.mActiveSprings.remove(next);
             }
         }
     }
@@ -70,7 +66,7 @@ public class BaseSpringSystem {
         return spring;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void deregisterSpring(Spring spring) {
         if (spring != null) {
             this.mActiveSprings.remove(spring);
@@ -81,7 +77,7 @@ public class BaseSpringSystem {
     }
 
     public List<Spring> getAllSprings() {
-        Collection values = this.mSpringRegistry.values();
+        Collection<Spring> values = this.mSpringRegistry.values();
         return Collections.unmodifiableList(values instanceof List ? (List) values : new ArrayList(values));
     }
 
@@ -91,30 +87,30 @@ public class BaseSpringSystem {
 
     public Spring getSpringById(String str) {
         if (str != null) {
-            return (Spring) this.mSpringRegistry.get(str);
+            return this.mSpringRegistry.get(str);
         }
         throw new IllegalArgumentException("id is required");
     }
 
     public void loop(double d2) {
-        Iterator it = this.mListeners.iterator();
+        Iterator<SpringSystemListener> it = this.mListeners.iterator();
         while (it.hasNext()) {
-            ((SpringSystemListener) it.next()).onBeforeIntegrate(this);
+            it.next().onBeforeIntegrate(this);
         }
         advance(d2);
         if (this.mActiveSprings.isEmpty()) {
             this.mIdle = true;
         }
-        Iterator it2 = this.mListeners.iterator();
+        Iterator<SpringSystemListener> it2 = this.mListeners.iterator();
         while (it2.hasNext()) {
-            ((SpringSystemListener) it2.next()).onAfterIntegrate(this);
+            it2.next().onAfterIntegrate(this);
         }
         if (this.mIdle) {
             this.mSpringLooper.stop();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void registerSpring(Spring spring) {
         if (spring == null) {
             throw new IllegalArgumentException("spring is required");

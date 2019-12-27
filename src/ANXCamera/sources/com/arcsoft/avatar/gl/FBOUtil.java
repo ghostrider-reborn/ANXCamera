@@ -1,26 +1,27 @@
 package com.arcsoft.avatar.gl;
 
 import android.opengl.GLES20;
+import java.nio.Buffer;
 
 public class FBOUtil {
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private static final String f65f = "FBOUtil";
     private static final String j = "/sdcard/Pictures/readfbo/";
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     int[] f66a = new int[1];
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     int[] f67b = new int[1];
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     int[] f68c = new int[1];
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     int[] f69d = new int[1];
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     boolean f70e;
     private int g;
     private int h;
@@ -65,7 +66,7 @@ public class FBOUtil {
         GLES20.glTexParameteri(3553, 10240, 9728);
         GLES20.glTexParameteri(3553, 10242, 33071);
         GLES20.glTexParameteri(3553, 10243, 33071);
-        GLES20.glTexImage2D(3553, 0, 6408, i2, i3, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, i2, i3, 0, 6408, 5121, (Buffer) null);
         GLES20.glFramebufferTexture2D(36160, 36064, 3553, this.f68c[0], 0);
         GLES20.glGenRenderbuffers(1, this.f69d, 0);
         GLES20.glBindRenderbuffer(36161, this.f69d[0]);

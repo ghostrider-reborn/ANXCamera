@@ -30,10 +30,10 @@ public final class SingleTimer extends Single<Long> {
         }
 
         public void run() {
-            this.actual.onSuccess(Long.valueOf(0));
+            this.actual.onSuccess(0L);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setFuture(Disposable disposable) {
             DisposableHelper.replace(this, disposable);
         }

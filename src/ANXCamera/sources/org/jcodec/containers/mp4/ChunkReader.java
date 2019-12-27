@@ -7,8 +7,7 @@ import org.jcodec.containers.mp4.boxes.ChunkOffsetsBox;
 import org.jcodec.containers.mp4.boxes.SampleDescriptionBox;
 import org.jcodec.containers.mp4.boxes.SampleSizesBox;
 import org.jcodec.containers.mp4.boxes.SampleToChunkBox;
-import org.jcodec.containers.mp4.boxes.SampleToChunkBox.SampleToChunkEntry;
-import org.jcodec.containers.mp4.boxes.TimeToSampleBox.TimeToSampleEntry;
+import org.jcodec.containers.mp4.boxes.TimeToSampleBox;
 import org.jcodec.containers.mp4.boxes.TrakBox;
 import org.jcodec.platform.Platform;
 
@@ -18,10 +17,10 @@ public class ChunkReader {
     private int curChunk;
     private int s2cIndex;
     private int sampleNo;
-    private SampleToChunkEntry[] sampleToChunk;
+    private SampleToChunkBox.SampleToChunkEntry[] sampleToChunk;
     private SampleDescriptionBox stsd;
     private SampleSizesBox stsz;
-    private TimeToSampleEntry[] tts;
+    private TimeToSampleBox.TimeToSampleEntry[] tts;
     private int ttsInd = 0;
     private int ttsSubInd = 0;
 
@@ -42,7 +41,7 @@ public class ChunkReader {
 
     private int getFrameSize() {
         int defaultSize = this.stsz.getDefaultSize();
-        Box box = (Box) this.stsd.getBoxes().get(this.sampleToChunk[this.s2cIndex].getEntry() - 1);
+        Box box = this.stsd.getBoxes().get(this.sampleToChunk[this.s2cIndex].getEntry() - 1);
         return box instanceof AudioSampleEntry ? ((AudioSampleEntry) box).calcFrameSize() : defaultSize;
     }
 
@@ -61,7 +60,7 @@ public class ChunkReader {
         }
         int i4 = this.s2cIndex;
         int i5 = i4 + 1;
-        SampleToChunkEntry[] sampleToChunkEntryArr = this.sampleToChunk;
+        SampleToChunkBox.SampleToChunkEntry[] sampleToChunkEntryArr = this.sampleToChunk;
         if (i5 < sampleToChunkEntryArr.length && ((long) (i3 + 1)) == sampleToChunkEntryArr[i4 + 1].getFirst()) {
             this.s2cIndex++;
         }

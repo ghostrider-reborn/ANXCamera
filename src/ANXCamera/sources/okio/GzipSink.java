@@ -93,10 +93,7 @@ public final class GzipSink implements Sink {
     public void write(Buffer buffer, long j) throws IOException {
         int i = (j > 0 ? 1 : (j == 0 ? 0 : -1));
         if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + j);
         } else if (i != 0) {
             updateCrc(buffer, j);
             this.deflaterSink.write(buffer, j);

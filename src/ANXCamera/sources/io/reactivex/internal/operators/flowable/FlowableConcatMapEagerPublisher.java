@@ -2,6 +2,7 @@ package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
+import io.reactivex.internal.operators.flowable.FlowableConcatMapEager;
 import io.reactivex.internal.util.ErrorMode;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -24,7 +25,7 @@ public final class FlowableConcatMapEagerPublisher<T, R> extends Flowable<R> {
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super R> subscriber) {
         Publisher<T> publisher = this.source;
-        ConcatMapEagerDelayErrorSubscriber concatMapEagerDelayErrorSubscriber = new ConcatMapEagerDelayErrorSubscriber(subscriber, this.mapper, this.maxConcurrency, this.prefetch, this.errorMode);
+        FlowableConcatMapEager.ConcatMapEagerDelayErrorSubscriber concatMapEagerDelayErrorSubscriber = new FlowableConcatMapEager.ConcatMapEagerDelayErrorSubscriber(subscriber, this.mapper, this.maxConcurrency, this.prefetch, this.errorMode);
         publisher.subscribe(concatMapEagerDelayErrorSubscriber);
     }
 }

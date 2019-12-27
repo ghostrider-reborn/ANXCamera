@@ -72,10 +72,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
             }
             return of(bArr);
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unexpected hex string: ");
-            sb.append(str);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unexpected hex string: " + str);
         }
     }
 
@@ -87,10 +84,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
         if (c2 < 'a' || c2 > 'f') {
             c3 = 'A';
             if (c2 < 'A' || c2 > 'F') {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unexpected hex digit: ");
-                sb.append(c2);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("Unexpected hex digit: " + c2);
             }
         }
         return (c2 - c3) + 10;
@@ -177,10 +171,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
             }
             return new ByteString(bArr);
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + i);
         }
     }
 
@@ -218,29 +209,17 @@ public class ByteString implements Serializable, Comparable<ByteString> {
         int size = size();
         int size2 = byteString.size();
         int min = Math.min(size, size2);
-        int i = 0;
-        while (true) {
-            int i2 = -1;
-            if (i < min) {
-                byte b2 = getByte(i) & 255;
-                byte b3 = byteString.getByte(i) & 255;
-                if (b2 == b3) {
-                    i++;
-                } else {
-                    if (b2 >= b3) {
-                        i2 = 1;
-                    }
-                    return i2;
-                }
-            } else if (size == size2) {
-                return 0;
-            } else {
-                if (size >= size2) {
-                    i2 = 1;
-                }
-                return i2;
+        for (int i = 0; i < min; i++) {
+            byte b2 = getByte(i) & 255;
+            byte b3 = byteString.getByte(i) & 255;
+            if (b2 != b3) {
+                return b2 < b3 ? -1 : 1;
             }
         }
+        if (size == size2) {
+            return 0;
+        }
+        return size < size2 ? -1 : 1;
     }
 
     public final boolean endsWith(ByteString byteString) {
@@ -251,11 +230,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
         return rangeEquals(size() - bArr.length, bArr, 0, bArr.length);
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:8:0x0019, code lost:
-        if (r5.rangeEquals(0, r4, 0, r4.length) != false) goto L_0x001d;
-     */
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
@@ -263,11 +238,11 @@ public class ByteString implements Serializable, Comparable<ByteString> {
             ByteString byteString = (ByteString) obj;
             int size = byteString.size();
             byte[] bArr = this.data;
-            if (size == bArr.length) {
+            if (size == bArr.length && byteString.rangeEquals(0, bArr, 0, bArr.length)) {
+                return true;
             }
         }
-        z = false;
-        return z;
+        return false;
     }
 
     public byte getByte(int i) {
@@ -332,7 +307,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
         return -1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public byte[] internalArray() {
         return this.data;
     }
@@ -369,11 +344,8 @@ public class ByteString implements Serializable, Comparable<ByteString> {
     public boolean rangeEquals(int i, byte[] bArr, int i2, int i3) {
         if (i >= 0) {
             byte[] bArr2 = this.data;
-            if (i <= bArr2.length - i3 && i2 >= 0 && i2 <= bArr.length - i3 && Util.arrayRangeEquals(bArr2, i, bArr, i2, i3)) {
-                return true;
-            }
+            return i <= bArr2.length - i3 && i2 >= 0 && i2 <= bArr.length - i3 && Util.arrayRangeEquals(bArr2, i, bArr, i2, i3);
         }
-        return false;
     }
 
     public ByteString sha1() {
@@ -426,11 +398,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
                     return new ByteString(bArr2);
                 }
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("endIndex > length(");
-                sb.append(this.data.length);
-                sb.append(")");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("endIndex > length(" + this.data.length + ")");
             }
         } else {
             throw new IllegalArgumentException("beginIndex < 0");
@@ -490,51 +458,22 @@ public class ByteString implements Serializable, Comparable<ByteString> {
     }
 
     public String toString() {
-        String str;
-        String str2;
         if (this.data.length == 0) {
             return "[size=0]";
         }
         String utf82 = utf8();
         int codePointIndexToCharIndex = codePointIndexToCharIndex(utf82, 64);
-        String str3 = "…]";
-        String str4 = "[size=";
-        String str5 = "]";
-        if (codePointIndexToCharIndex == -1) {
-            if (this.data.length <= 64) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("[hex=");
-                sb.append(hex());
-                sb.append(str5);
-                str2 = sb.toString();
-            } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str4);
-                sb2.append(this.data.length);
-                sb2.append(" hex=");
-                sb2.append(substring(0, 64).hex());
-                sb2.append(str3);
-                str2 = sb2.toString();
+        if (codePointIndexToCharIndex != -1) {
+            String replace = utf82.substring(0, codePointIndexToCharIndex).replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r");
+            if (codePointIndexToCharIndex < utf82.length()) {
+                return "[size=" + this.data.length + " text=" + replace + "…]";
             }
-            return str2;
-        }
-        String replace = utf82.substring(0, codePointIndexToCharIndex).replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r");
-        if (codePointIndexToCharIndex < utf82.length()) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str4);
-            sb3.append(this.data.length);
-            sb3.append(" text=");
-            sb3.append(replace);
-            sb3.append(str3);
-            str = sb3.toString();
+            return "[text=" + replace + "]";
+        } else if (this.data.length <= 64) {
+            return "[hex=" + hex() + "]";
         } else {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("[text=");
-            sb4.append(replace);
-            sb4.append(str5);
-            str = sb4.toString();
+            return "[size=" + this.data.length + " hex=" + substring(0, 64).hex() + "…]";
         }
-        return str;
     }
 
     public String utf8() {
@@ -555,7 +494,7 @@ public class ByteString implements Serializable, Comparable<ByteString> {
         throw new IllegalArgumentException("out == null");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void write(Buffer buffer) {
         byte[] bArr = this.data;
         buffer.write(bArr, 0, bArr.length);

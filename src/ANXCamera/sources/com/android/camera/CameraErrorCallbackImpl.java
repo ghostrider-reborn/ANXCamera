@@ -4,10 +4,9 @@ import com.android.camera.log.Log;
 import com.android.camera.module.Module;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.CameraErrorCallback;
 import java.lang.ref.WeakReference;
 
-public class CameraErrorCallbackImpl implements CameraErrorCallback {
+public class CameraErrorCallbackImpl implements Camera2Proxy.CameraErrorCallback {
     private static final String TAG = "CameraErrorCallback";
     private WeakReference<ActivityBase> mWeakActivity;
 
@@ -16,27 +15,20 @@ public class CameraErrorCallbackImpl implements CameraErrorCallback {
     }
 
     public void onCameraError(Camera2Proxy camera2Proxy, int i) {
-        String str = TAG;
         if (i == 5) {
-            Log.e(str, "onCameraError: camera service error");
+            Log.e(TAG, "onCameraError: camera service error");
         } else if (i == 4) {
-            Log.e(str, "onCameraError: camera device error");
+            Log.e(TAG, "onCameraError: camera device error");
         } else if (i == 3) {
-            Log.e(str, "onCameraError: camera disabled");
+            Log.e(TAG, "onCameraError: camera disabled");
         } else if (i == 2) {
-            Log.e(str, "onCameraError: max camera in use");
+            Log.e(TAG, "onCameraError: max camera in use");
         } else if (i == 1) {
-            Log.e(str, "onCameraError: camera in use");
+            Log.e(TAG, "onCameraError: camera in use");
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onCameraError: other error ");
-            sb.append(i);
-            Log.e(str, sb.toString());
+            Log.e(TAG, "onCameraError: other error " + i);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("");
-        sb2.append(i);
-        CameraStatUtil.trackCameraError(sb2.toString());
+        CameraStatUtil.trackCameraError("" + i);
         ActivityBase activityBase = (ActivityBase) this.mWeakActivity.get();
         if (activityBase != null) {
             Module currentModule = activityBase.getCurrentModule();
@@ -46,6 +38,6 @@ public class CameraErrorCallbackImpl implements CameraErrorCallback {
             }
             return;
         }
-        Log.d(str, "mActivity has been collected.");
+        Log.d(TAG, "mActivity has been collected.");
     }
 }

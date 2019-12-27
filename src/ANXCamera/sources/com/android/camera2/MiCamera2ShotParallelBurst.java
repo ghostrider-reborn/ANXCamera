@@ -2,10 +2,8 @@ package com.android.camera2;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.Face;
@@ -22,7 +20,7 @@ import com.android.camera.lib.compatibility.util.CompatibilityUtils;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.parallel.AlgoConnector;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.compat.MiCameraCompat;
 import com.mi.config.b;
 import com.xiaomi.camera.base.CameraDeviceUtil;
@@ -55,7 +53,7 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
         this.mOperationMode = this.mMiCamera.getCapabilities().getOperatingMode();
     }
 
-    private void applyAlgoParameter(Builder builder, int i, int i2) {
+    private void applyAlgoParameter(CaptureRequest.Builder builder, int i, int i2) {
         if (i2 == 1) {
             applyHdrParameter(builder, i);
         } else if (i2 == 2) {
@@ -70,7 +68,7 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
         }
     }
 
-    private void applyClearShotParameter(Builder builder) {
+    private void applyClearShotParameter(CaptureRequest.Builder builder) {
         MiCameraCompat.applySwMfnrEnable(builder, this.mShouldDoMFNR);
         MiCameraCompat.applyMfnrEnable(builder, false);
         if (b.hi() || b.Kn) {
@@ -78,32 +76,26 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
         }
     }
 
-    private void applyHdrParameter(Builder builder, int i) {
+    private void applyHdrParameter(CaptureRequest.Builder builder, int i) {
         if (i <= this.mSequenceNum) {
-            MiCameraCompat.applyHdrBracketMode(builder, 1);
+            MiCameraCompat.applyHdrBracketMode(builder, (byte) 1);
             MiCameraCompat.applyMultiFrameInputNum(builder, this.mSequenceNum);
             if (b.isMTKPlatform()) {
-                builder.set(CaptureRequest.CONTROL_AE_LOCK, Boolean.valueOf(true));
+                builder.set(CaptureRequest.CONTROL_AE_LOCK, true);
             }
             builder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, Integer.valueOf(this.mHdrCheckerEvValue[i]));
             if (!"tucana".equals(b.km) || this.mMiCamera.getSatMasterCameraId() != 2 || this.mHdrCheckerEvValue[i] < 0 || !isIn3OrMoreSatMode()) {
                 MiCameraCompat.applyMfnrEnable(builder, false);
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("applyHdrParameter enable mfnr EV = ");
-            sb.append(this.mHdrCheckerEvValue[i]);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "applyHdrParameter enable mfnr EV = " + this.mHdrCheckerEvValue[i]);
             MiCameraCompat.applyMfnrEnable(builder, true);
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("wrong request index ");
-        sb2.append(i);
-        throw new RuntimeException(sb2.toString());
+        throw new RuntimeException("wrong request index " + i);
     }
 
-    private void applySuperResolutionParameter(Builder builder) {
+    private void applySuperResolutionParameter(CaptureRequest.Builder builder) {
         MiCameraCompat.applyMultiFrameInputNum(builder, this.mSequenceNum);
         MiCameraCompat.applyMfnrEnable(builder, false);
         if (b.isMTKPlatform()) {
@@ -138,8 +130,7 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
     }
 
     private void prepareHdr() {
-        String str = TAG;
-        Log.d(str, "prepareHdr: start");
+        Log.d(TAG, "prepareHdr: start");
         byte[] hdrCheckerValues = CaptureResultParser.getHdrCheckerValues(this.mPreviewCaptureResult);
         if (hdrCheckerValues != 0 && hdrCheckerValues.length >= 1) {
             int i = 0;
@@ -152,21 +143,14 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
                         while (i < this.mSequenceNum) {
                             int i3 = i + 1;
                             this.mHdrCheckerEvValue[i] = hdrCheckerValues[i3 * 4];
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("prepareHdr: evValue[");
-                            sb.append(i);
-                            sb.append("]=");
-                            sb.append(this.mHdrCheckerEvValue[i]);
-                            Log.d(str, sb.toString());
+                            Log.d(TAG, "prepareHdr: evValue[" + i + "]=" + this.mHdrCheckerEvValue[i]);
                             i = i3;
                         }
+                        return;
                     }
                     return;
                 }
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("wrong sequenceNum ");
-                sb2.append(this.mSequenceNum);
-                throw new RuntimeException(sb2.toString());
+                throw new RuntimeException("wrong sequenceNum " + this.mSequenceNum);
             }
         }
         this.mSequenceNum = 3;
@@ -178,30 +162,20 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
     }
 
     /* access modifiers changed from: protected */
-    public CaptureCallback generateCaptureCallback() {
-        return new CaptureCallback() {
+    public CameraCaptureSession.CaptureCallback generateCaptureCallback() {
+        return new CameraCaptureSession.CaptureCallback() {
             long captureTimestamp = -1;
 
             public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
-                MiCamera2ShotParallelBurst.this.mCompletedNum = MiCamera2ShotParallelBurst.this.mCompletedNum + 1;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted: ");
-                sb.append(MiCamera2ShotParallelBurst.this.mCompletedNum);
-                sb.append("/");
-                sb.append(MiCamera2ShotParallelBurst.this.mSequenceNum);
-                String sb2 = sb.toString();
-                String str = MiCamera2ShotParallelBurst.TAG;
-                Log.d(str, sb2);
+                int unused = MiCamera2ShotParallelBurst.this.mCompletedNum = MiCamera2ShotParallelBurst.this.mCompletedNum + 1;
+                Log.d(MiCamera2ShotParallelBurst.TAG, "onCaptureCompleted: " + MiCamera2ShotParallelBurst.this.mCompletedNum + "/" + MiCamera2ShotParallelBurst.this.mSequenceNum);
                 AlgoConnector.getInstance().getLocalBinder().onCaptureCompleted(CameraDeviceUtil.getCustomCaptureResult(totalCaptureResult), MiCamera2ShotParallelBurst.this.mCompletedNum == 1);
                 if (MiCamera2ShotParallelBurst.this.mSequenceNum == MiCamera2ShotParallelBurst.this.mCompletedNum) {
                     MiCamera2ShotParallelBurst miCamera2ShotParallelBurst = MiCamera2ShotParallelBurst.this;
                     miCamera2ShotParallelBurst.mMiCamera.onCapturePictureFinished(true, miCamera2ShotParallelBurst);
                 }
                 boolean isSREnable = CaptureResultParser.isSREnable(totalCaptureResult);
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("onCaptureCompleted: isSREnabled = ");
-                sb3.append(isSREnable);
-                Log.d(str, sb3.toString());
+                Log.d(MiCamera2ShotParallelBurst.TAG, "onCaptureCompleted: isSREnabled = " + isSREnable);
                 if (b.isMTKPlatform()) {
                     ImagePool.getInstance().trimPoolBuffer();
                 }
@@ -209,12 +183,7 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
 
             public void onCaptureFailed(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull CaptureFailure captureFailure) {
                 super.onCaptureFailed(cameraCaptureSession, captureRequest, captureFailure);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureFailed: reason=");
-                sb.append(captureFailure.getReason());
-                sb.append(" timestamp=");
-                sb.append(this.captureTimestamp);
-                Log.e(MiCamera2ShotParallelBurst.TAG, sb.toString());
+                Log.e(MiCamera2ShotParallelBurst.TAG, "onCaptureFailed: reason=" + captureFailure.getReason() + " timestamp=" + this.captureTimestamp);
                 MiCamera2ShotParallelBurst miCamera2ShotParallelBurst = MiCamera2ShotParallelBurst.this;
                 miCamera2ShotParallelBurst.mMiCamera.onCapturePictureFinished(false, miCamera2ShotParallelBurst);
                 if (this.captureTimestamp != -1) {
@@ -223,19 +192,10 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
             }
 
             public void onCaptureStarted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, long j, long j2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureStarted: timestamp=");
-                sb.append(j);
-                sb.append(" frameNumber=");
-                sb.append(j2);
-                sb.append(" isFirst=");
-                sb.append(MiCamera2ShotParallelBurst.this.mFirstNum);
-                String sb2 = sb.toString();
-                String str = MiCamera2ShotParallelBurst.TAG;
-                Log.d(str, sb2);
+                Log.d(MiCamera2ShotParallelBurst.TAG, "onCaptureStarted: timestamp=" + j + " frameNumber=" + j2 + " isFirst=" + MiCamera2ShotParallelBurst.this.mFirstNum);
                 super.onCaptureStarted(cameraCaptureSession, captureRequest, j, j2);
                 if (MiCamera2ShotParallelBurst.this.mFirstNum) {
-                    PictureCallback pictureCallback = MiCamera2ShotParallelBurst.this.getPictureCallback();
+                    Camera2Proxy.PictureCallback pictureCallback = MiCamera2ShotParallelBurst.this.getPictureCallback();
                     if (pictureCallback != null) {
                         ParallelTaskData parallelTaskData = new ParallelTaskData(MiCamera2ShotParallelBurst.this.mMiCamera.getId(), j, MiCamera2ShotParallelBurst.this.mMiCamera.getCameraConfigs().getShotType(), MiCamera2ShotParallelBurst.this.mMiCamera.getCameraConfigs().getShotPath());
                         MiCamera2ShotParallelBurst miCamera2ShotParallelBurst = MiCamera2ShotParallelBurst.this;
@@ -246,26 +206,24 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
                             this.captureTimestamp = j;
                             AlgoConnector.getInstance().getLocalBinder().onCaptureStarted(onCaptureStart);
                         } else {
-                            Log.w(str, "onCaptureStarted: null task data");
+                            Log.w(MiCamera2ShotParallelBurst.TAG, "onCaptureStarted: null task data");
                         }
                     } else {
-                        Log.w(str, "onCaptureStarted: null picture callback");
+                        Log.w(MiCamera2ShotParallelBurst.TAG, "onCaptureStarted: null picture callback");
                     }
-                    MiCamera2ShotParallelBurst.this.mFirstNum = false;
+                    boolean unused = MiCamera2ShotParallelBurst.this.mFirstNum = false;
                 }
             }
         };
     }
 
     /* access modifiers changed from: protected */
-    public Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
-        Builder createCaptureRequest = this.mMiCamera.getCameraDevice().createCaptureRequest(2);
-        boolean isQcfaEnable = this.mMiCamera.isQcfaEnable();
-        String str = TAG;
-        if (isQcfaEnable) {
+    public CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
+        CaptureRequest.Builder createCaptureRequest = this.mMiCamera.getCameraDevice().createCaptureRequest(2);
+        if (this.mMiCamera.isQcfaEnable()) {
             Surface wideRemoteSurface = this.mShouldDoQcfaCapture ? this.mMiCamera.getWideRemoteSurface() : this.mMiCamera.getQcfaRemoteSurface();
             Size surfaceSize = SurfaceUtils.getSurfaceSize(wideRemoteSurface);
-            Log.d(str, String.format(Locale.ENGLISH, "[QCFA]add surface %s to capture request, size is: %s", new Object[]{wideRemoteSurface, surfaceSize}));
+            Log.d(TAG, String.format(Locale.ENGLISH, "[QCFA]add surface %s to capture request, size is: %s", new Object[]{wideRemoteSurface, surfaceSize}));
             createCaptureRequest.addTarget(wideRemoteSurface);
             if (b.hi() || b.Kn) {
                 createCaptureRequest.addTarget(this.mMiCamera.getPreviewSurface());
@@ -275,34 +233,31 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
             if (isIn3OrMoreSatMode()) {
                 Surface mainCaptureSurface = getMainCaptureSurface();
                 Size surfaceSize2 = SurfaceUtils.getSurfaceSize(mainCaptureSurface);
-                Log.d(str, String.format(Locale.ENGLISH, "[SAT]add surface %s to capture request, size is: %s", new Object[]{mainCaptureSurface, surfaceSize2}));
+                Log.d(TAG, String.format(Locale.ENGLISH, "[SAT]add surface %s to capture request, size is: %s", new Object[]{mainCaptureSurface, surfaceSize2}));
                 createCaptureRequest.addTarget(mainCaptureSurface);
                 int i = 513;
                 if (mainCaptureSurface == this.mMiCamera.getUltraWideRemoteSurface()) {
                     i = 3;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("[SAT]combinationMode: ");
-                sb.append(i);
-                Log.d(str, sb.toString());
+                Log.d(TAG, "[SAT]combinationMode: " + i);
                 configParallelSession(surfaceSize2, i);
             } else {
-                for (Surface surface : this.mMiCamera.getRemoteSurfaceList()) {
-                    Log.d(str, String.format(Locale.ENGLISH, "add surface %s to capture request, size is: %s", new Object[]{surface, SurfaceUtils.getSurfaceSize(surface)}));
-                    createCaptureRequest.addTarget(surface);
+                for (Surface next : this.mMiCamera.getRemoteSurfaceList()) {
+                    Log.d(TAG, String.format(Locale.ENGLISH, "add surface %s to capture request, size is: %s", new Object[]{next, SurfaceUtils.getSurfaceSize(next)}));
+                    createCaptureRequest.addTarget(next);
                 }
                 this.mCapturedImageSize = this.mMiCamera.getPictureSize();
             }
             if (!b.isMTKPlatform() && this.mOperationMode != 36865 && (b.hi() || b.Kn || this.mOperationMode != 36867)) {
                 Surface previewSurface = this.mMiCamera.getPreviewSurface();
-                Log.d(str, String.format(Locale.ENGLISH, "add preview surface %s to capture request, size is: %s", new Object[]{previewSurface, SurfaceUtils.getSurfaceSize(previewSurface)}));
+                Log.d(TAG, String.format(Locale.ENGLISH, "add preview surface %s to capture request, size is: %s", new Object[]{previewSurface, SurfaceUtils.getSurfaceSize(previewSurface)}));
                 createCaptureRequest.addTarget(previewSurface);
             }
         }
-        createCaptureRequest.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
+        createCaptureRequest.set(CaptureRequest.CONTROL_AE_MODE, 1);
         this.mMiCamera.applySettingsForCapture(createCaptureRequest, 3);
         if (!b.isMTKPlatform() || this.mAlgoType == 1) {
-            Log.d(str, "disable ZSL for HDR");
+            Log.d(TAG, "disable ZSL for HDR");
             CompatibilityUtils.setZsl(createCaptureRequest, false);
         }
         return createCaptureRequest;
@@ -313,9 +268,7 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
         this.mFirstNum = true;
         this.mShouldDoQcfaCapture = false;
         this.mShouldDoSR = this.mMiCamera.getCameraConfigs().isSuperResolutionEnabled();
-        boolean isHDREnabled = this.mMiCamera.getCameraConfigs().isHDREnabled();
-        String str = TAG;
-        if (isHDREnabled) {
+        if (this.mMiCamera.getCameraConfigs().isHDREnabled()) {
             this.mAlgoType = 1;
             prepareHdr();
         } else if (CameraSettings.isGroupShotOn()) {
@@ -326,10 +279,7 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
             prepareSR();
         } else {
             Integer num = (Integer) this.mPreviewCaptureResult.get(CaptureResult.SENSOR_SENSITIVITY);
-            StringBuilder sb = new StringBuilder();
-            sb.append("prepare: iso = ");
-            sb.append(num);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "prepare: iso = " + num);
             if (b.ei()) {
                 this.mShouldDoMFNR = true;
             } else {
@@ -343,16 +293,15 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
                 this.mSequenceNum = 1;
             }
         }
-        Log.d(str, String.format(Locale.ENGLISH, "prepare: algo=%d captureNum=%d doMFNR=%b doSR=%b", new Object[]{Integer.valueOf(this.mAlgoType), Integer.valueOf(this.mSequenceNum), Boolean.valueOf(this.mShouldDoMFNR), Boolean.valueOf(this.mShouldDoSR)}));
+        Log.d(TAG, String.format(Locale.ENGLISH, "prepare: algo=%d captureNum=%d doMFNR=%b doSR=%b", new Object[]{Integer.valueOf(this.mAlgoType), Integer.valueOf(this.mSequenceNum), Boolean.valueOf(this.mShouldDoMFNR), Boolean.valueOf(this.mShouldDoSR)}));
     }
 
     /* access modifiers changed from: protected */
     public void startSessionCapture() {
-        String str = TAG;
         try {
-            CaptureCallback generateCaptureCallback = generateCaptureCallback();
+            CameraCaptureSession.CaptureCallback generateCaptureCallback = generateCaptureCallback();
             for (int i = 0; i < this.mSequenceNum; i++) {
-                Builder generateRequestBuilder = generateRequestBuilder();
+                CaptureRequest.Builder generateRequestBuilder = generateRequestBuilder();
                 if (b.isMTKPlatform() && this.mMiCamera.getCapabilities().getCameraId() == Camera2DataContainer.getInstance().getUltraWideCameraId()) {
                     MiCameraCompat.copyFpcDataFromCaptureResultToRequest(this.mPreviewCaptureResult, generateRequestBuilder);
                 }
@@ -362,13 +311,13 @@ public class MiCamera2ShotParallelBurst extends MiCamera2ShotParallel<ParallelTa
             this.mMiCamera.getCaptureSession().captureBurst(this.requests, generateCaptureCallback, this.mCameraHandler);
         } catch (CameraAccessException e2) {
             e2.printStackTrace();
-            Log.e(str, "Cannot captureBurst");
+            Log.e(TAG, "Cannot captureBurst");
             this.mMiCamera.notifyOnError(e2.getReason());
         } catch (IllegalStateException e3) {
-            Log.e(str, "Failed to captureBurst, IllegalState", e3);
+            Log.e(TAG, "Failed to captureBurst, IllegalState", e3);
             this.mMiCamera.notifyOnError(256);
         } catch (IllegalArgumentException e4) {
-            Log.e(str, "Failed to capture a still picture, IllegalArgument", e4);
+            Log.e(TAG, "Failed to capture a still picture, IllegalArgument", e4);
             this.mMiCamera.notifyOnError(256);
         }
     }

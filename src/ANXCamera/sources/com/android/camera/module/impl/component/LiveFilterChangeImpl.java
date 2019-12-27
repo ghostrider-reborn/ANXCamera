@@ -1,10 +1,10 @@
 package com.android.camera.module.impl.component;
 
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.FilterProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.ss.android.vesdk.TERecorder;
 
-public class LiveFilterChangeImpl implements FilterProtocol {
+public class LiveFilterChangeImpl implements ModeProtocol.FilterProtocol {
     private TERecorder mRecorder;
 
     public LiveFilterChangeImpl(TERecorder tERecorder) {

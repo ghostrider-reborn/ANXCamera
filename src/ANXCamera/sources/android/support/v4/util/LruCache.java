@@ -3,7 +3,6 @@ package android.support.v4.util;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class LruCache<K, V> {
     private int createCount;
@@ -29,12 +28,7 @@ public class LruCache<K, V> {
         if (sizeOf >= 0) {
             return sizeOf;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Negative size: ");
-        sb.append(k);
-        sb.append("=");
-        sb.append(v);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Negative size: " + k + "=" + v);
     }
 
     /* access modifiers changed from: protected */
@@ -64,41 +58,41 @@ public class LruCache<K, V> {
     /* JADX WARNING: Code restructure failed: missing block: B:11:0x001e, code lost:
         if (r0 != null) goto L_0x0022;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:13:0x0021, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:12:0x0020, code lost:
         return null;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:14:0x0022, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:13:0x0022, code lost:
         monitor-enter(r4);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:16:?, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:15:?, code lost:
         r4.createCount++;
         r1 = r4.map.put(r5, r0);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:17:0x002f, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:16:0x002f, code lost:
         if (r1 == null) goto L_0x0037;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:18:0x0031, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:17:0x0031, code lost:
         r4.map.put(r5, r1);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:19:0x0037, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:18:0x0037, code lost:
         r4.size += safeSizeOf(r5, r0);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:20:0x0040, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:19:0x0040, code lost:
         monitor-exit(r4);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:21:0x0041, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:20:0x0041, code lost:
         if (r1 == null) goto L_0x0048;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:22:0x0043, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:21:0x0043, code lost:
         entryRemoved(false, r5, r0, r1);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:23:0x0047, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:22:0x0047, code lost:
         return r1;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:24:0x0048, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:23:0x0048, code lost:
         trimToSize(r4.maxSize);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:25:0x004d, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:24:0x004d, code lost:
         return r0;
      */
     public final V get(K k) {
@@ -162,7 +156,7 @@ public class LruCache<K, V> {
                 }
             }
             if (remove != null) {
-                entryRemoved(false, k, remove, null);
+                entryRemoved(false, k, remove, (V) null);
             }
             return remove;
         }
@@ -200,7 +194,7 @@ public class LruCache<K, V> {
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:20:0x0070, code lost:
-        throw new java.lang.IllegalStateException(r0.toString());
+        throw new java.lang.IllegalStateException(getClass().getName() + ".sizeOf() is reporting inconsistent results!");
      */
     public void trimToSize(int i) {
         Object key;
@@ -208,22 +202,19 @@ public class LruCache<K, V> {
         while (true) {
             synchronized (this) {
                 if (this.size < 0 || (this.map.isEmpty() && this.size != 0)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(getClass().getName());
-                    sb.append(".sizeOf() is reporting inconsistent results!");
                 } else if (this.size > i) {
                     if (this.map.isEmpty()) {
                         break;
                     }
-                    Entry entry = (Entry) this.map.entrySet().iterator().next();
-                    key = entry.getKey();
-                    value = entry.getValue();
+                    Map.Entry next = this.map.entrySet().iterator().next();
+                    key = next.getKey();
+                    value = next.getValue();
                     this.map.remove(key);
                     this.size -= safeSizeOf(key, value);
                     this.evictionCount++;
                 }
             }
-            entryRemoved(true, key, value, null);
+            entryRemoved(true, key, value, (Object) null);
         }
     }
 }

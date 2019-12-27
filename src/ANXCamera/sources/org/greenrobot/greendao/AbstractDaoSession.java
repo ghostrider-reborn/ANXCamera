@@ -57,14 +57,11 @@ public class AbstractDaoSession {
     }
 
     public AbstractDao<?, ?> getDao(Class<? extends Object> cls) {
-        AbstractDao<?, ?> abstractDao = (AbstractDao) this.entityToDao.get(cls);
+        AbstractDao<?, ?> abstractDao = this.entityToDao.get(cls);
         if (abstractDao != null) {
             return abstractDao;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("No DAO registered for ");
-        sb.append(cls);
-        throw new DaoException(sb.toString());
+        throw new DaoException("No DAO registered for " + cls);
     }
 
     public Database getDatabase() {

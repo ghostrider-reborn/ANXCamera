@@ -80,6 +80,6 @@ public final class FlowableTakeWhile<T> extends AbstractFlowableWithUpstream<T, 
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new TakeWhileSubscriber<Object>(subscriber, this.predicate));
+        this.source.subscribe(new TakeWhileSubscriber(subscriber, this.predicate));
     }
 }

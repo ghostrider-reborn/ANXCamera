@@ -1,10 +1,10 @@
 package com.android.camera.db;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraApplicationDelegate;
 import com.android.camera.db.greendao.DaoMaster;
-import com.android.camera.db.greendao.DaoMaster.DevOpenHelper;
 import com.android.camera.db.greendao.DaoSession;
 
 public class DbContainer {
@@ -54,7 +54,7 @@ public class DbContainer {
             if (this.context == null) {
                 this.context = CameraAppImpl.getAndroidContext();
             }
-            DevOpenHelper devOpenHelper = new DevOpenHelper(this.context, "camera.db", null);
+            DaoMaster.DevOpenHelper devOpenHelper = new DaoMaster.DevOpenHelper(this.context, "camera.db", (SQLiteDatabase.CursorFactory) null);
             devOpenHelper.setLoadSQLCipherNativeLibs(false);
             this.daoMaster = new DaoMaster(devOpenHelper.getWritableDb());
         }

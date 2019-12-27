@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.a;
 
 import android.support.annotation.NonNull;
+import com.bumptech.glide.load.a.e;
 import com.bumptech.glide.util.i;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,8 +9,8 @@ import java.util.Map;
 
 /* compiled from: DataRewinderRegistry */
 public class g {
-    private static final com.bumptech.glide.load.a.e.a<?> Sd = new f();
-    private final Map<Class<?>, com.bumptech.glide.load.a.e.a<?>> Rd = new HashMap();
+    private static final e.a<?> Sd = new f();
+    private final Map<Class<?>, e.a<?>> Rd = new HashMap();
 
     /* compiled from: DataRewinderRegistry */
     private static final class a implements e<Object> {
@@ -28,24 +29,24 @@ public class g {
         }
     }
 
-    public synchronized void a(@NonNull com.bumptech.glide.load.a.e.a<?> aVar) {
+    public synchronized void a(@NonNull e.a<?> aVar) {
         this.Rd.put(aVar.M(), aVar);
     }
 
     @NonNull
     public synchronized <T> e<T> build(@NonNull T t) {
-        com.bumptech.glide.load.a.e.a aVar;
+        e.a<?> aVar;
         i.checkNotNull(t);
-        aVar = (com.bumptech.glide.load.a.e.a) this.Rd.get(t.getClass());
+        aVar = this.Rd.get(t.getClass());
         if (aVar == null) {
-            Iterator it = this.Rd.values().iterator();
+            Iterator<e.a<?>> it = this.Rd.values().iterator();
             while (true) {
                 if (!it.hasNext()) {
                     break;
                 }
-                com.bumptech.glide.load.a.e.a aVar2 = (com.bumptech.glide.load.a.e.a) it.next();
-                if (aVar2.M().isAssignableFrom(t.getClass())) {
-                    aVar = aVar2;
+                e.a<?> next = it.next();
+                if (next.M().isAssignableFrom(t.getClass())) {
+                    aVar = next;
                     break;
                 }
             }

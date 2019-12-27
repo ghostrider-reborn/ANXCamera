@@ -44,7 +44,7 @@ public final class ObservableSubscribeOn<T> extends AbstractObservableWithUpstre
             DisposableHelper.setOnce(this.s, disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setDisposable(Disposable disposable) {
             DisposableHelper.setOnce(this, disposable);
         }

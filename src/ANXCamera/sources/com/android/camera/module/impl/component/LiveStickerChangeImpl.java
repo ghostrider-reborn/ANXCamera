@@ -1,10 +1,10 @@
 package com.android.camera.module.impl.component;
 
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.StickerProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.ss.android.vesdk.TERecorder;
 
-public class LiveStickerChangeImpl implements StickerProtocol {
+public class LiveStickerChangeImpl implements ModeProtocol.StickerProtocol {
     private TERecorder mRecorder;
 
     public LiveStickerChangeImpl(TERecorder tERecorder) {
@@ -13,10 +13,7 @@ public class LiveStickerChangeImpl implements StickerProtocol {
 
     public void onStickerChanged(String str) {
         TERecorder tERecorder = this.mRecorder;
-        StringBuilder sb = new StringBuilder();
-        sb.append(FileUtils.STICKER_RESOURCE_DIR);
-        sb.append(str);
-        tERecorder.switchEffect(sb.toString());
+        tERecorder.switchEffect(FileUtils.STICKER_RESOURCE_DIR + str);
     }
 
     public void registerProtocol() {

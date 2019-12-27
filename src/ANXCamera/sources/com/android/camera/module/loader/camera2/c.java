@@ -1,9 +1,9 @@
 package com.android.camera.module.loader.camera2;
 
-import com.android.camera2.Camera2Proxy.CaptureBusyCallback;
+import com.android.camera2.Camera2Proxy;
 
 /* compiled from: lambda */
-public final /* synthetic */ class c implements CaptureBusyCallback {
+public final /* synthetic */ class c implements Camera2Proxy.CaptureBusyCallback {
     private final /* synthetic */ Camera2OpenManager ub;
     private final /* synthetic */ boolean vb;
 

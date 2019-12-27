@@ -39,10 +39,7 @@ public class VideoRenderer {
             this.sharpCoff = f5;
             this.sharpStrength = f6;
             this.rotateAngle = i3;
-            if (byteBufferArr == null) {
-                byteBufferArr = new ByteBuffer[]{ByteBuffer.allocateDirect(iArr[0] * i2), ByteBuffer.allocateDirect((iArr[1] * i2) / 2), ByteBuffer.allocateDirect((iArr[2] * i2) / 2)};
-            }
-            this.yuvPlanes = byteBufferArr;
+            this.yuvPlanes = byteBufferArr == null ? new ByteBuffer[]{ByteBuffer.allocateDirect(iArr[0] * i2), ByteBuffer.allocateDirect((iArr[1] * i2) / 2), ByteBuffer.allocateDirect((iArr[2] * i2) / 2)} : byteBufferArr;
         }
 
         private void copyPlane(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
@@ -65,27 +62,11 @@ public class VideoRenderer {
                 copyPlane(i420Frame.yuvPlanes[2], this.yuvPlanes[2]);
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Mismatched dimensions!  Source: ");
-            sb.append(i420Frame.toString());
-            sb.append(", destination: ");
-            sb.append(toString());
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException("Mismatched dimensions!  Source: " + i420Frame.toString() + ", destination: " + toString());
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.width);
-            sb.append("x");
-            sb.append(this.height);
-            String str = ":";
-            sb.append(str);
-            sb.append(this.yuvStrides[0]);
-            sb.append(str);
-            sb.append(this.yuvStrides[1]);
-            sb.append(str);
-            sb.append(this.yuvStrides[2]);
-            return sb.toString();
+            return this.width + "x" + this.height + ":" + this.yuvStrides[0] + ":" + this.yuvStrides[1] + ":" + this.yuvStrides[2];
         }
     }
 

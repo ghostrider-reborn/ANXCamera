@@ -6,7 +6,7 @@ import com.android.camera.constant.BeautyConstant;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 
 public class LiveBeautyModeFragment extends BaseBeautyMakeupFragment {
@@ -34,7 +34,7 @@ public class LiveBeautyModeFragment extends BaseBeautyMakeupFragment {
 
     /* access modifiers changed from: protected */
     public void onAdapterItemClick(TypeItem typeItem) {
-        MakeupProtocol makeupProtocol = (MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
+        ModeProtocol.MakeupProtocol makeupProtocol = (ModeProtocol.MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
         if (makeupProtocol != null) {
             makeupProtocol.onMakeupItemSelected(typeItem.mKeyOrType, true);
         }

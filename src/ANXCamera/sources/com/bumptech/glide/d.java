@@ -5,9 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.a.a.C0007a;
+import com.bumptech.glide.load.engine.a.a;
 import com.bumptech.glide.load.engine.a.m;
-import com.bumptech.glide.load.engine.a.n;
 import com.bumptech.glide.load.engine.a.o;
 import com.bumptech.glide.load.engine.a.q;
 import com.bumptech.glide.load.engine.b.b;
@@ -15,7 +14,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.e;
 import com.bumptech.glide.load.engine.bitmap_recycle.i;
 import com.bumptech.glide.load.engine.bitmap_recycle.j;
 import com.bumptech.glide.manager.g;
-import com.bumptech.glide.manager.n.a;
+import com.bumptech.glide.manager.n;
 import com.bumptech.glide.request.f;
 import java.util.Map;
 
@@ -26,10 +25,10 @@ public final class d {
     private com.bumptech.glide.manager.d Gb;
     private b Mb;
     private b Nb;
-    private C0007a Ob;
+    private a.C0007a Ob;
     private q Pb;
     @Nullable
-    private a Qb;
+    private n.a Qb;
     private b Rb;
     private boolean Sb;
     private int logLevel = 4;
@@ -38,14 +37,14 @@ public final class d {
     private final Map<Class<?>, n<?, ?>> ua = new ArrayMap();
     private Engine va;
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public d a(Engine engine) {
         this.va = engine;
         return this;
     }
 
     @NonNull
-    public d a(@Nullable C0007a aVar) {
+    public d a(@Nullable a.C0007a aVar) {
         this.Ob = aVar;
         return this;
     }
@@ -103,8 +102,8 @@ public final class d {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
-    public void a(@Nullable a aVar) {
+    /* access modifiers changed from: package-private */
+    public void a(@Nullable n.a aVar) {
         this.Qb = aVar;
     }
 
@@ -125,7 +124,7 @@ public final class d {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public c g(@NonNull Context context) {
         if (this.Mb == null) {
@@ -155,7 +154,7 @@ public final class d {
             this.qa = new i(this.Pb.vg());
         }
         if (this.Cb == null) {
-            this.Cb = new n((long) this.Pb.xg());
+            this.Cb = new com.bumptech.glide.load.engine.a.n((long) this.Pb.xg());
         }
         if (this.Ob == null) {
             this.Ob = new m(context);
@@ -165,7 +164,7 @@ public final class d {
             this.va = engine;
         }
         Context context2 = context;
-        c cVar = new c(context2, this.va, this.Cb, this.Bb, this.qa, new com.bumptech.glide.manager.n(this.Qb), this.Gb, this.logLevel, this.ta.lock(), this.ua);
+        c cVar = new c(context2, this.va, this.Cb, this.Bb, this.qa, new n(this.Qb), this.Gb, this.logLevel, this.ta.lock(), this.ua);
         return cVar;
     }
 

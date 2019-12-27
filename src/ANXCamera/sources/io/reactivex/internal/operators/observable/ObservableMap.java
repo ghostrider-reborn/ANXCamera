@@ -36,7 +36,7 @@ public final class ObservableMap<T, U> extends AbstractObservableWithUpstream<T,
 
         @Nullable
         public U poll() throws Exception {
-            Object poll = this.qs.poll();
+            T poll = this.qs.poll();
             if (poll == null) {
                 return null;
             }

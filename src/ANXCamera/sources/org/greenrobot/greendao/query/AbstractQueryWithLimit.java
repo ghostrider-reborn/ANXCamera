@@ -37,9 +37,6 @@ abstract class AbstractQueryWithLimit<T> extends AbstractQuery<T> {
             super.setParameter(i, obj);
             return this;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Illegal parameter index: ");
-        sb.append(i);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Illegal parameter index: " + i);
     }
 }

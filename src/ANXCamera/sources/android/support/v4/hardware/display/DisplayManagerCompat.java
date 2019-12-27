@@ -2,7 +2,7 @@ package android.support.v4.hardware.display;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.Display;
@@ -22,7 +22,7 @@ public final class DisplayManagerCompat {
     public static DisplayManagerCompat getInstance(@NonNull Context context) {
         DisplayManagerCompat displayManagerCompat;
         synchronized (sInstances) {
-            displayManagerCompat = (DisplayManagerCompat) sInstances.get(context);
+            displayManagerCompat = sInstances.get(context);
             if (displayManagerCompat == null) {
                 displayManagerCompat = new DisplayManagerCompat(context);
                 sInstances.put(context, displayManagerCompat);
@@ -33,7 +33,7 @@ public final class DisplayManagerCompat {
 
     @Nullable
     public Display getDisplay(int i) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return ((DisplayManager) this.mContext.getSystemService("display")).getDisplay(i);
         }
         Display defaultDisplay = ((WindowManager) this.mContext.getSystemService("window")).getDefaultDisplay();
@@ -45,7 +45,7 @@ public final class DisplayManagerCompat {
 
     @NonNull
     public Display[] getDisplays() {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return ((DisplayManager) this.mContext.getSystemService("display")).getDisplays();
         }
         return new Display[]{((WindowManager) this.mContext.getSystemService("window")).getDefaultDisplay()};
@@ -53,7 +53,7 @@ public final class DisplayManagerCompat {
 
     @NonNull
     public Display[] getDisplays(@Nullable String str) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return ((DisplayManager) this.mContext.getSystemService("display")).getDisplays(str);
         }
         if (str == null) {

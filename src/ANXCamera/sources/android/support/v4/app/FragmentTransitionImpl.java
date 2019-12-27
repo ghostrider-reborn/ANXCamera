@@ -2,7 +2,6 @@ package android.support.v4.app;
 
 import android.graphics.Rect;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewGroupCompat;
 import android.view.View;
@@ -10,16 +9,15 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public abstract class FragmentTransitionImpl {
     protected static void bfsAddViewChildren(List<View> list, View view) {
         int size = list.size();
         if (!containedBeforeIndex(list, view, size)) {
             list.add(view);
             for (int i = size; i < list.size(); i++) {
-                View view2 = (View) list.get(i);
+                View view2 = list.get(i);
                 if (view2 instanceof ViewGroup) {
                     ViewGroup viewGroup = (ViewGroup) view2;
                     int childCount = viewGroup.getChildCount();
@@ -44,9 +42,9 @@ public abstract class FragmentTransitionImpl {
     }
 
     static String findKeyForValue(Map<String, String> map, String str) {
-        for (Entry entry : map.entrySet()) {
-            if (str.equals(entry.getValue())) {
-                return (String) entry.getKey();
+        for (Map.Entry next : map.entrySet()) {
+            if (str.equals(next.getValue())) {
+                return (String) next.getKey();
             }
         }
         return null;
@@ -64,7 +62,7 @@ public abstract class FragmentTransitionImpl {
 
     public abstract boolean canHandle(Object obj);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void captureTransitioningViews(ArrayList<View> arrayList, View view) {
         if (view.getVisibility() != 0) {
             return;
@@ -86,7 +84,7 @@ public abstract class FragmentTransitionImpl {
 
     public abstract Object cloneTransition(Object obj);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void findNamedViews(Map<String, View> map, View view) {
         if (view.getVisibility() == 0) {
             String transitionName = ViewCompat.getTransitionName(view);
@@ -114,14 +112,14 @@ public abstract class FragmentTransitionImpl {
 
     public abstract Object mergeTransitionsTogether(Object obj, Object obj2, Object obj3);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public ArrayList<String> prepareSetNameOverridesReordered(ArrayList<View> arrayList) {
         ArrayList<String> arrayList2 = new ArrayList<>();
         int size = arrayList.size();
         for (int i = 0; i < size; i++) {
-            View view = (View) arrayList.get(i);
+            View view = arrayList.get(i);
             arrayList2.add(ViewCompat.getTransitionName(view));
-            ViewCompat.setTransitionName(view, null);
+            ViewCompat.setTransitionName(view, (String) null);
         }
         return arrayList2;
     }
@@ -132,7 +130,7 @@ public abstract class FragmentTransitionImpl {
 
     public abstract void scheduleHideFragmentView(Object obj, View view, ArrayList<View> arrayList);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void scheduleNameReset(ViewGroup viewGroup, final ArrayList<View> arrayList, final Map<String, String> map) {
         OneShotPreDrawListener.add(viewGroup, new Runnable() {
             public void run() {
@@ -151,7 +149,7 @@ public abstract class FragmentTransitionImpl {
 
     public abstract void setEpicenter(Object obj, View view);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setNameOverridesOrdered(View view, final ArrayList<View> arrayList, final Map<String, String> map) {
         OneShotPreDrawListener.add(view, new Runnable() {
             public void run() {
@@ -167,23 +165,23 @@ public abstract class FragmentTransitionImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setNameOverridesReordered(View view, ArrayList<View> arrayList, ArrayList<View> arrayList2, ArrayList<String> arrayList3, Map<String, String> map) {
         final int size = arrayList2.size();
         final ArrayList arrayList4 = new ArrayList();
         for (int i = 0; i < size; i++) {
-            View view2 = (View) arrayList.get(i);
+            View view2 = arrayList.get(i);
             String transitionName = ViewCompat.getTransitionName(view2);
             arrayList4.add(transitionName);
             if (transitionName != null) {
-                ViewCompat.setTransitionName(view2, null);
-                String str = (String) map.get(transitionName);
+                ViewCompat.setTransitionName(view2, (String) null);
+                String str = map.get(transitionName);
                 int i2 = 0;
                 while (true) {
                     if (i2 >= size) {
                         break;
                     } else if (str.equals(arrayList3.get(i2))) {
-                        ViewCompat.setTransitionName((View) arrayList2.get(i2), transitionName);
+                        ViewCompat.setTransitionName(arrayList2.get(i2), transitionName);
                         break;
                     } else {
                         i2++;

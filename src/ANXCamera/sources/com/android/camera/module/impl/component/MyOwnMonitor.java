@@ -10,10 +10,6 @@ public class MyOwnMonitor implements VEExternalMonitorListener {
     }
 
     public void onMonitorInvoked(String str, int i, String str2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(i);
-        sb.append(str2);
-        Log.i("LiveLog", sb.toString());
+        Log.i("LiveLog", str + i + str2);
     }
 }

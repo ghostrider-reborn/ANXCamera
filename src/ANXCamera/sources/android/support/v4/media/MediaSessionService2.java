@@ -48,7 +48,7 @@ public abstract class MediaSessionService2 extends Service {
         MediaNotification onUpdateNotification();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SupportLibraryImpl createImpl() {
         return new MediaSessionService2ImplBase();
     }

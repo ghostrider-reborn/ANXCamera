@@ -12,11 +12,7 @@ public class MarshalQueryableASDScene implements MarshalQueryable<ASDScene> {
         public int value;
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.type);
-            sb.append(",,,");
-            sb.append(this.value);
-            return sb.toString();
+            return this.type + ",,," + this.value;
         }
     }
 

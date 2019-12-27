@@ -4,12 +4,11 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-@RestrictTo({Scope.LIBRARY})
+@RestrictTo({RestrictTo.Scope.LIBRARY})
 public class ViewGroupUtils {
     private static final ThreadLocal<Matrix> sMatrix = new ThreadLocal<>();
     private static final ThreadLocal<RectF> sRectF = new ThreadLocal<>();
@@ -36,7 +35,7 @@ public class ViewGroupUtils {
     }
 
     static void offsetDescendantRect(ViewGroup viewGroup, View view, Rect rect) {
-        Matrix matrix = (Matrix) sMatrix.get();
+        Matrix matrix = sMatrix.get();
         if (matrix == null) {
             matrix = new Matrix();
             sMatrix.set(matrix);
@@ -44,7 +43,7 @@ public class ViewGroupUtils {
             matrix.reset();
         }
         offsetDescendantMatrix(viewGroup, view, matrix);
-        RectF rectF = (RectF) sRectF.get();
+        RectF rectF = sRectF.get();
         if (rectF == null) {
             rectF = new RectF();
             sRectF.set(rectF);

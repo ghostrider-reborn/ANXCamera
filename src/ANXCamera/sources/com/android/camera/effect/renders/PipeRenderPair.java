@@ -58,10 +58,10 @@ public final class PipeRenderPair extends RenderGroup {
                 if (size < 0) {
                     break;
                 }
-                int width = ((FrameBuffer) this.mFrameBuffers.get(size)).getWidth();
-                int height = ((FrameBuffer) this.mFrameBuffers.get(size)).getHeight();
+                int width = this.mFrameBuffers.get(size).getWidth();
+                int height = this.mFrameBuffers.get(size).getHeight();
                 if ((i < i2 ? Math.abs((((double) height) / ((double) width)) - (((double) i2) / ((double) i))) : Math.abs((((double) width) / ((double) height)) - (((double) i) / ((double) i2)))) <= 0.1d && Utils.nextPowerOf2(width) == Utils.nextPowerOf2(i) && Utils.nextPowerOf2(height) == Utils.nextPowerOf2(i2)) {
-                    frameBuffer = (FrameBuffer) this.mFrameBuffers.get(size);
+                    frameBuffer = this.mFrameBuffers.get(size);
                     break;
                 }
                 size--;

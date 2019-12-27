@@ -12,16 +12,16 @@ public class ViewModelStore {
         this.mMap.clear();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final ViewModel get(String str) {
-        return (ViewModel) this.mMap.get(str);
+        return this.mMap.get(str);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void put(String str, ViewModel viewModel) {
-        ViewModel viewModel2 = (ViewModel) this.mMap.put(str, viewModel);
-        if (viewModel2 != null) {
-            viewModel2.onCleared();
+        ViewModel put = this.mMap.put(str, viewModel);
+        if (put != null) {
+            put.onCleared();
         }
     }
 }

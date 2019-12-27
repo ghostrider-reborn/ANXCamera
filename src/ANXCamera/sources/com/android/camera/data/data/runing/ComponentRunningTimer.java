@@ -44,19 +44,15 @@ public class ComponentRunningTimer extends ComponentData {
 
     public String getNextValue() {
         String componentValue = getComponentValue(160);
-        String str = "0";
-        String str2 = "3";
-        if (str.equals(componentValue)) {
-            return str2;
+        if ("0".equals(componentValue)) {
+            return "3";
         }
-        boolean equals = str2.equals(componentValue);
-        String str3 = "5";
-        if (equals) {
-            return str3;
+        if ("3".equals(componentValue)) {
+            return "5";
         }
-        if (str3.equals(componentValue)) {
+        if ("5".equals(componentValue)) {
         }
-        return str;
+        return "0";
     }
 
     public int getTimer() {

@@ -49,10 +49,7 @@ public class XmpHelper {
             XMPMetaFactory.getSchemaRegistry().registerNamespace(XIAOMI_XMP_METADATA_NAMESPACE, XIAOMI_XMP_METADATA_PREFIX);
         } catch (XMPException e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to register namespaces: ");
-            sb.append(e2);
-            Log.d(str, sb.toString());
+            Log.d(str, "Failed to register namespaces: " + e2);
         }
     }
 
@@ -73,18 +70,15 @@ public class XmpHelper {
         if (parse == null) {
             return null;
         }
-        for (Section section : parse) {
-            if (hasXMPHeader(section.data)) {
-                byte[] bArr = new byte[(getXMPContentEnd(section.data) - 29)];
-                System.arraycopy(section.data, 29, bArr, 0, bArr.length);
+        for (Section next : parse) {
+            if (hasXMPHeader(next.data)) {
+                byte[] bArr = new byte[(getXMPContentEnd(next.data) - 29)];
+                System.arraycopy(next.data, 29, bArr, 0, bArr.length);
                 try {
                     return XMPMetaFactory.parseFromBuffer(bArr);
                 } catch (XMPException e2) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("XMP parse error: ");
-                    sb.append(e2);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "XMP parse error: " + e2);
                 }
             }
         }
@@ -97,12 +91,7 @@ public class XmpHelper {
                 return extractXMPMeta((InputStream) new FileInputStream(str));
             } catch (FileNotFoundException e2) {
                 String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Could not read from ");
-                sb.append(str);
-                sb.append(": ");
-                sb.append(e2);
-                Log.e(str2, sb.toString());
+                Log.e(str2, "Could not read from " + str + ": " + e2);
                 return null;
             }
         } else {
@@ -127,12 +116,9 @@ public class XmpHelper {
         try {
             byte[] bArr2 = new byte[29];
             System.arraycopy(bArr, 0, bArr2, 0, 29);
-            if (new String(bArr2, "UTF-8").equals(XMP_HEADER)) {
-                return true;
-            }
+            return new String(bArr2, "UTF-8").equals(XMP_HEADER);
         } catch (UnsupportedEncodingException unused) {
         }
-        return false;
     }
 
     private static List<Section> insertXMPSection(List<Section> list, XMPMeta xMPMeta) {
@@ -156,7 +142,7 @@ public class XmpHelper {
                     section.data = bArr;
                     int i2 = 0;
                     while (i2 < list.size()) {
-                        if (((Section) list.get(i2)).marker != 225 || !hasXMPHeader(((Section) list.get(i2)).data)) {
+                        if (list.get(i2).marker != 225 || !hasXMPHeader(list.get(i2).data)) {
                             i2++;
                         } else {
                             list.set(i2, section);
@@ -164,7 +150,7 @@ public class XmpHelper {
                         }
                     }
                     ArrayList arrayList = new ArrayList();
-                    if (((Section) list.get(0)).marker != 225) {
+                    if (list.get(0).marker != 225) {
                         i = 0;
                     }
                     arrayList.addAll(list.subList(0, i));
@@ -172,11 +158,7 @@ public class XmpHelper {
                     arrayList.addAll(list.subList(i, list.size()));
                     return arrayList;
                 } catch (XMPException e2) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Serialize xmp failed: ");
-                    sb.append(e2);
-                    Log.d(str, sb.toString());
+                    Log.d(TAG, "Serialize xmp failed: " + e2);
                 }
             }
         }
@@ -187,7 +169,7 @@ public class XmpHelper {
         if (r9 != false) goto L_0x0059;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:30:?, code lost:
-        r9 = new com.android.camera.XmpHelper.Section(null);
+        r9 = new com.android.camera.XmpHelper.Section((com.android.camera.XmpHelper.AnonymousClass1) null);
         r9.marker = r3;
         r9.length = -1;
         r9.data = new byte[r8.available()];
@@ -282,11 +264,7 @@ public class XmpHelper {
             return null;
             return arrayList;
         } catch (IOException e2) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Could not parse file: ");
-            sb.append(e2);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "Could not parse file: " + e2);
             if (inputStream != null) {
                 try {
                     inputStream.close();
@@ -294,53 +272,51 @@ public class XmpHelper {
                 }
             }
             return null;
-        } finally {
+        } catch (Throwable th) {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException unused7) {
                 }
             }
+            throw th;
         }
     }
 
     private static void writeJpegFile(OutputStream outputStream, List<Section> list) throws IOException {
         outputStream.write(255);
         outputStream.write(216);
-        for (Section section : list) {
+        for (Section next : list) {
             outputStream.write(255);
-            outputStream.write(section.marker);
-            int i = section.length;
+            outputStream.write(next.marker);
+            int i = next.length;
             if (i > 0) {
-                int i2 = i >> 8;
-                int i3 = i & 255;
-                outputStream.write(i2);
-                outputStream.write(i3);
+                outputStream.write(i >> 8);
+                outputStream.write(i & 255);
             }
-            outputStream.write(section.data);
+            outputStream.write(next.data);
         }
     }
 
     public static boolean writeXMPMeta(InputStream inputStream, OutputStream outputStream, XMPMeta xMPMeta) {
-        List insertXMPSection = insertXMPSection(parse(inputStream, false), xMPMeta);
+        List<Section> insertXMPSection = insertXMPSection(parse(inputStream, false), xMPMeta);
         if (insertXMPSection == null) {
             return false;
         }
         try {
             writeJpegFile(outputStream, insertXMPSection);
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException unused) {
-                }
+            if (outputStream == null) {
+                return true;
             }
-            return true;
+            try {
+                outputStream.close();
+                return true;
+            } catch (IOException unused) {
+                return true;
+            }
         } catch (IOException e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Write to stream failed: ");
-            sb.append(e2);
-            Log.d(str, sb.toString());
+            Log.d(str, "Write to stream failed: " + e2);
             if (outputStream != null) {
                 try {
                     outputStream.close();
@@ -348,30 +324,30 @@ public class XmpHelper {
                 }
             }
             return false;
-        } finally {
+        } catch (Throwable th) {
             if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (IOException unused3) {
                 }
             }
+            throw th;
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:21:0x0042, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:20:0x0042, code lost:
         r3 = move-exception;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:23:?, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:22:?, code lost:
         r1.close();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:27:0x004b, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:26:0x004b, code lost:
         throw r3;
      */
     public static boolean writeXMPMeta(String str, XMPMeta xMPMeta) {
-        String str2 = ": ";
         if (str.toLowerCase().endsWith(Storage.JPEG_SUFFIX) || str.toLowerCase().endsWith(".jpeg")) {
             try {
-                List insertXMPSection = insertXMPSection(parse(new FileInputStream(str), false), xMPMeta);
+                List<Section> insertXMPSection = insertXMPSection(parse(new FileInputStream(str), false), xMPMeta);
                 if (insertXMPSection == null) {
                     return false;
                 }
@@ -381,25 +357,15 @@ public class XmpHelper {
                     fileOutputStream.close();
                     return true;
                 } catch (IOException e2) {
-                    String str3 = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Failed to write to ");
-                    sb.append(str);
-                    sb.append(str2);
-                    sb.append(e2);
-                    Log.d(str3, sb.toString());
+                    String str2 = TAG;
+                    Log.d(str2, "Failed to write to " + str + ": " + e2);
                     return false;
                 } catch (Throwable th) {
                     r6.addSuppressed(th);
                 }
             } catch (FileNotFoundException e3) {
-                String str4 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Could not read from ");
-                sb2.append(str);
-                sb2.append(str2);
-                sb2.append(e3);
-                Log.e(str4, sb2.toString());
+                String str3 = TAG;
+                Log.e(str3, "Could not read from " + str + ": " + e3);
                 return false;
             }
         } else {

@@ -8,7 +8,7 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES20;
 import android.support.annotation.NonNull;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarProcessInfo;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.gl.GLFramebuffer;
 import com.arcsoft.avatar.gl.GLRenderEngine;
 import com.arcsoft.avatar.gl.TextureHelper;
@@ -28,13 +28,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class RecordModule {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f41a = "RecordModule";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static final int f42b = 1;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private static final int f43c = 512000;
     private boolean A;
     private int B = 270;
@@ -48,7 +48,7 @@ public class RecordModule {
     private volatile boolean J;
     private boolean K;
     private RecordingListener L = null;
-    private ASAvatarProcessInfo M = null;
+    private AvatarConfig.ASAvatarProcessInfo M = null;
     private MediaResultCallback N = null;
     private boolean O = false;
     private boolean[] P = new boolean[3];
@@ -59,13 +59,13 @@ public class RecordModule {
     private volatile boolean U = true;
     private volatile boolean V = false;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private Context f44d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private Lock f45e = new ReentrantLock();
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private Lock f46f = new ReentrantLock();
     private volatile boolean g = false;
     private volatile boolean h = false;
@@ -105,7 +105,7 @@ public class RecordModule {
         }
         long j3 = j2 - 512000;
         if (j3 <= 0) {
-            j3 = 1;
+            return 1;
         }
         return j3;
     }
@@ -116,31 +116,24 @@ public class RecordModule {
 
     private void a(int i2) {
         if (i2 <= 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("recordingIfNeed textureId = ");
-            sb.append(i2);
-            LOG.d(f41a, sb.toString());
-            return;
-        }
-        if (!this.I && this.H != null && this.K) {
-            String str = "video_test_log";
-            LOG.d(str, "-- recordingIfNeed 1--");
+            LOG.d(f41a, "recordingIfNeed textureId = " + i2);
+        } else if (!this.I && this.H != null && this.K) {
+            LOG.d("video_test_log", "-- recordingIfNeed 1--");
             this.H.drawSurfaceWithTextureId(i2);
             b();
-            LOG.d(str, "-- recordingIfNeed 2--");
+            LOG.d("video_test_log", "-- recordingIfNeed 2--");
         }
     }
 
     private void a(int i2, int i3, int i4, boolean z2) {
         if ((!this.J || !z2 || i3 != i4) && this.J && i2 > 0) {
-            String str = "video_test_log";
-            LOG.d(str, "-- captureIfNeed 1--");
+            LOG.d("video_test_log", "-- captureIfNeed 1--");
             ByteBuffer allocateDirect = ByteBuffer.allocateDirect(this.q * this.r * 4);
             allocateDirect.order(ByteOrder.nativeOrder());
-            LOG.d(str, "-- captureIfNeed 2--");
+            LOG.d("video_test_log", "-- captureIfNeed 2--");
             GLES20.glReadPixels(this.s, this.t, this.q, this.r, 6408, 5121, allocateDirect);
             this.J = false;
-            LOG.d(str, "-- captureIfNeed 3--");
+            LOG.d("video_test_log", "-- captureIfNeed 3--");
             MediaResultCallback mediaResultCallback = this.N;
             if (mediaResultCallback != null) {
                 mediaResultCallback.onCaptureResult(allocateDirect);
@@ -149,43 +142,22 @@ public class RecordModule {
     }
 
     private void a(ASVLOFFSCREEN asvloffscreen) {
-        String str = "Test_Arc";
-        StringBuilder sb = new StringBuilder();
-        sb.append("putPreviewInQueue  mPreviewQueue.size() = ");
-        sb.append(this.u.size());
-        String str2 = "CKK";
-        LOG.d(str2, sb.toString());
+        LOG.d("CKK", "putPreviewInQueue  mPreviewQueue.size() = " + this.u.size());
         if (this.u.size() >= 1) {
-            LOG.d(str2, "mPreviewQueue.poll()");
+            LOG.d("CKK", "mPreviewQueue.poll()");
             this.u.poll();
         }
         try {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("mPreviewQueue.offer w = ");
-            sb2.append(asvloffscreen.getWidth());
-            sb2.append(" h = ");
-            sb2.append(asvloffscreen.getHeight());
-            sb2.append(" st = ");
-            sb2.append(asvloffscreen.getRowStride());
-            LOG.d(str2, sb2.toString());
+            LOG.d("CKK", "mPreviewQueue.offer w = " + asvloffscreen.getWidth() + " h = " + asvloffscreen.getHeight() + " st = " + asvloffscreen.getRowStride());
             this.u.offer(asvloffscreen);
         } catch (ClassCastException e2) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("putPreviewInQueue  error1 = ");
-            sb3.append(e2.toString());
-            LOG.d(str, sb3.toString());
+            LOG.d("Test_Arc", "putPreviewInQueue  error1 = " + e2.toString());
             e2.printStackTrace();
         } catch (NullPointerException e3) {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("putPreviewInQueue  error2 = ");
-            sb4.append(e3.toString());
-            LOG.d(str, sb4.toString());
+            LOG.d("Test_Arc", "putPreviewInQueue  error2 = " + e3.toString());
             e3.printStackTrace();
         } catch (IllegalArgumentException e4) {
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("putPreviewInQueue  error3 = ");
-            sb5.append(e4.toString());
-            LOG.d(str, sb5.toString());
+            LOG.d("Test_Arc", "putPreviewInQueue  error3 = " + e4.toString());
             e4.printStackTrace();
         }
     }
@@ -213,15 +185,9 @@ public class RecordModule {
             }
         }
         long j3 = this.F;
-        String str = "video_test_log";
         if (j3 > 0 && muxerTimeElapsed > j3) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("mMaxRecordingDuration = ");
-            sb.append(this.F);
-            sb.append(" ,timeElapsed = ");
-            sb.append(muxerTimeElapsed);
-            LOG.d(str, sb.toString());
-            LOG.d(str, "-- controlRecordingProcess1 stopRecording--");
+            LOG.d("video_test_log", "mMaxRecordingDuration = " + this.F + " ,timeElapsed = " + muxerTimeElapsed);
+            LOG.d("video_test_log", "-- controlRecordingProcess1 stopRecording--");
             stopRecording();
             RecordingListener recordingListener2 = this.L;
             if (recordingListener2 != null) {
@@ -229,13 +195,8 @@ public class RecordModule {
             }
         }
         if (a2 > 0 && muxerSizeRecorded > a2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("adjuestedMaxSizle = ");
-            sb2.append(a2);
-            sb2.append(" ,sizeFile = ");
-            sb2.append(muxerSizeRecorded);
-            LOG.d(str, sb2.toString());
-            LOG.d(str, "-- controlRecordingProcess2 stopRecording--");
+            LOG.d("video_test_log", "adjuestedMaxSizle = " + a2 + " ,sizeFile = " + muxerSizeRecorded);
+            LOG.d("video_test_log", "-- controlRecordingProcess2 stopRecording--");
             stopRecording();
             RecordingListener recordingListener3 = this.L;
             if (recordingListener3 != null) {
@@ -245,19 +206,15 @@ public class RecordModule {
     }
 
     private boolean c() {
-        ASAvatarProcessInfo aSAvatarProcessInfo = this.M;
-        String str = "CheckOutLine";
+        AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo = this.M;
         if (aSAvatarProcessInfo == null) {
-            LOG.d(str, TEDefine.FACE_BEAUTY_NULL);
+            LOG.d("CheckOutLine", TEDefine.FACE_BEAUTY_NULL);
             this.O = true;
         } else if (aSAvatarProcessInfo.shelterIsNull()) {
-            LOG.d(str, "shelterFlags == null");
+            LOG.d("CheckOutLine", "shelterFlags == null");
             this.O = true;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("faceCount = ");
-            sb.append(this.M.getFaceCount());
-            LOG.d(str, sb.toString());
+            LOG.d("CheckOutLine", "faceCount = " + this.M.getFaceCount());
             if (this.M.getFaceCount() <= 0) {
                 this.O = true;
             } else {
@@ -279,10 +236,7 @@ public class RecordModule {
                 }
             }
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("--- > mBlockingFaces <---");
-        sb2.append(this.O);
-        LOG.d(str, sb2.toString());
+        LOG.d("CheckOutLine", "--- > mBlockingFaces <---" + this.O);
         return this.O;
     }
 
@@ -299,21 +253,14 @@ public class RecordModule {
     }
 
     public void changeHumanTemplate(String str, String str2) {
-        String str3 = "test_log_c";
-        LOG.d(str3, "-- changeHumanTemplate in--");
-        StringBuilder sb = new StringBuilder();
-        sb.append("-- templatePath = ");
-        sb.append(str);
-        LOG.d(str3, sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("-- configPath = ");
-        sb2.append(str2);
-        LOG.d(str3, sb2.toString());
+        LOG.d("test_log_c", "-- changeHumanTemplate in--");
+        LOG.d("test_log_c", "-- templatePath = " + str);
+        LOG.d("test_log_c", "-- configPath = " + str2);
         this.V = true;
         this.G.setTemplatePath(str);
         this.G.loadConfig(str2);
         this.V = false;
-        LOG.d(str3, "-- changeHumanTemplate out--");
+        LOG.d("test_log_c", "-- changeHumanTemplate out--");
     }
 
     public AvatarEngine getAvatarEngine() {
@@ -339,7 +286,7 @@ public class RecordModule {
         this.l = EGL14.EGL_NO_DISPLAY;
         this.m = EGL14.EGL_NO_CONTEXT;
         this.n = EGL14.EGL_NO_SURFACE;
-        this.M = new ASAvatarProcessInfo();
+        this.M = new AvatarConfig.ASAvatarProcessInfo();
         this.g = true;
     }
 
@@ -408,16 +355,10 @@ public class RecordModule {
     }
 
     public boolean startProcess(@NonNull ASVLOFFSCREEN asvloffscreen, int i2, boolean z2) {
-        String str = "avatarProcessWithInfo";
-        String str2 = "performance";
-        String str3 = "buildNV21SingleBuffer";
-        String str4 = "lock -> process unlock";
         try {
             this.f45e.lock();
-            boolean z3 = this.g;
-            String str5 = f41a;
-            if (!z3) {
-                LOG.d(str5, "startProcess_1() failed, engine is not inited. ");
+            if (!this.g) {
+                LOG.d(f41a, "startProcess_1() failed, engine is not inited. ");
                 return true;
             }
             this.f45e.unlock();
@@ -426,21 +367,21 @@ public class RecordModule {
             }
             try {
                 this.i = true;
-                LOG.d(str5, "lock -> process lock");
+                LOG.d(f41a, "lock -> process lock");
                 this.f46f.lock();
-                d.a(str3);
+                d.a("buildNV21SingleBuffer");
                 this.T = asvloffscreen;
-                d.a(str2, str3);
+                d.a("performance", "buildNV21SingleBuffer");
                 this.f46f.unlock();
-                LOG.d(str5, str4);
+                LOG.d(f41a, "lock -> process unlock");
                 this.h = true;
                 if (!z2) {
                     this.i = false;
                     return true;
                 }
-                d.a(str);
+                d.a("avatarProcessWithInfo");
                 this.G.avatarProcessWithInfoEx(asvloffscreen, 90, this.A, i2, this.M, false);
-                d.a(str2, str);
+                d.a("performance", "avatarProcessWithInfo");
                 this.U = c();
                 this.i = false;
                 return this.U;
@@ -453,7 +394,7 @@ public class RecordModule {
                 }
             } catch (Throwable th2) {
                 this.f46f.unlock();
-                LOG.d(str5, str4);
+                LOG.d(f41a, "lock -> process unlock");
                 throw th2;
             }
         } finally {
@@ -465,14 +406,10 @@ public class RecordModule {
         byte[] bArr2 = bArr;
         int i5 = i3;
         int i6 = i4;
-        String str = "avatarProcessWithInfo";
-        String str2 = "lock -> process unlock";
         try {
             this.f45e.lock();
-            boolean z3 = this.g;
-            String str3 = f41a;
-            if (!z3) {
-                LOG.d(str3, "startProcess_1() failed, engine is not inited. ");
+            if (!this.g) {
+                LOG.d(f41a, "startProcess_1() failed, engine is not inited. ");
                 return true;
             }
             this.f45e.unlock();
@@ -481,19 +418,19 @@ public class RecordModule {
             }
             try {
                 this.i = true;
-                LOG.d(str3, "lock -> process lock");
+                LOG.d(f41a, "lock -> process lock");
                 this.f46f.lock();
                 this.T = new ASVLOFFSCREEN(bArr, i5, i5, i6);
                 this.f46f.unlock();
-                LOG.d(str3, str2);
+                LOG.d(f41a, "lock -> process unlock");
                 this.h = true;
                 if (!z2) {
                     this.i = false;
                     return true;
                 }
-                d.a(str);
+                d.a("avatarProcessWithInfo");
                 this.G.avatarProcessWithInfo(bArr, i3, i4, i3, 90, this.A, i2, this.M);
-                d.a("performance", str);
+                d.a("performance", "avatarProcessWithInfo");
                 this.U = c();
                 this.i = false;
                 return this.U;
@@ -506,7 +443,7 @@ public class RecordModule {
                 }
             } catch (Throwable th2) {
                 this.f46f.unlock();
-                LOG.d(str3, str2);
+                LOG.d(f41a, "lock -> process unlock");
                 throw th2;
             }
         } finally {
@@ -516,8 +453,7 @@ public class RecordModule {
 
     public void startRecording(@NonNull FileDescriptor fileDescriptor, RecordingListener recordingListener, int i2, @NonNull int i3, @NonNull int i4, int i5, String str) {
         int i6 = i2;
-        String str2 = "video_test_log";
-        LOG.d(str2, "-- startRecording 1--");
+        LOG.d("video_test_log", "-- startRecording 1--");
         try {
             this.f45e.lock();
             if (!this.g) {
@@ -541,13 +477,9 @@ public class RecordModule {
                     this.H.startRecording();
                     this.K = true;
                     this.I = false;
-                    LOG.d(str2, "-- startRecording 2--");
+                    LOG.d("video_test_log", "-- startRecording 2--");
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("StickerApi-> startRecording(...) screenOrientation = ");
-                    sb.append(i2);
-                    sb.append(" is invalid");
-                    throw new RuntimeException(sb.toString());
+                    throw new RuntimeException("StickerApi-> startRecording(...) screenOrientation = " + i2 + " is invalid");
                 }
             }
         } finally {
@@ -557,8 +489,7 @@ public class RecordModule {
 
     public void startRecording(@NonNull String str, RecordingListener recordingListener, int i2, @NonNull int i3, @NonNull int i4, int i5, String str2) {
         int i6 = i2;
-        String str3 = "video_test_log";
-        LOG.d(str3, "-- startRecording 1--");
+        LOG.d("video_test_log", "-- startRecording 1--");
         try {
             this.f45e.lock();
             if (!this.g) {
@@ -582,13 +513,9 @@ public class RecordModule {
                     this.H.startRecording();
                     this.K = true;
                     this.I = false;
-                    LOG.d(str3, "-- startRecording 2--");
+                    LOG.d("video_test_log", "-- startRecording 2--");
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("StickerApi-> startRecording(...) screenOrientation = ");
-                    sb.append(i2);
-                    sb.append(" is invalid");
-                    throw new RuntimeException(sb.toString());
+                    throw new RuntimeException("StickerApi-> startRecording(...) screenOrientation = " + i2 + " is invalid");
                 }
             }
         } finally {
@@ -605,29 +532,24 @@ public class RecordModule {
         ASVLOFFSCREEN asvloffscreen;
         boolean z5;
         int[] iArr2 = iArr;
-        String str = "lock -> startRender unlock";
-        String str2 = "times";
-        String str3 = "render lock";
         try {
             this.f45e.lock();
-            boolean z6 = this.g;
-            String str4 = f41a;
-            if (z6) {
+            if (this.g) {
                 if (this.h) {
                     this.f45e.unlock();
                     if (this.T == null) {
-                        LOG.d(str4, "mBackgroundBuffer == null");
+                        LOG.d(f41a, "mBackgroundBuffer == null");
                         return;
                     }
                     try {
                         this.j = true;
-                        LOG.d(str4, "lock -> startRender lock");
-                        d.a(str3);
+                        LOG.d(f41a, "lock -> startRender lock");
+                        d.a("render lock");
                         this.f46f.lock();
                         ASVLOFFSCREEN asvloffscreen2 = (ASVLOFFSCREEN) this.T.clone();
                         this.f46f.unlock();
-                        d.a(str2, str3);
-                        LOG.d(str4, str);
+                        d.a("times", "render lock");
+                        LOG.d(f41a, "lock -> startRender unlock");
                         if (asvloffscreen2 != null && asvloffscreen2.getHeight() > 0) {
                             if (asvloffscreen2.getWidth() > 0) {
                                 int height = asvloffscreen2.getHeight();
@@ -665,23 +587,20 @@ public class RecordModule {
                         return;
                     } catch (Exception e2) {
                         try {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("startRender meet error = ");
-                            sb.append(e2.getMessage());
-                            LOG.d(str4, sb.toString());
+                            LOG.d(f41a, "startRender meet error = " + e2.getMessage());
                         } catch (Throwable th) {
                             this.j = false;
                             throw th;
                         }
                     } catch (Throwable th2) {
                         this.f46f.unlock();
-                        d.a(str2, str3);
-                        LOG.d(str4, str);
+                        d.a("times", "render lock");
+                        LOG.d(f41a, "lock -> startRender unlock");
                         throw th2;
                     }
                 }
             }
-            LOG.d(str4, "startRender() failed, engine is not inited or startRender process not ready! ");
+            LOG.d(f41a, "startRender() failed, engine is not inited or startRender process not ready! ");
             this.f45e.unlock();
         } catch (Throwable th3) {
             this.f45e.unlock();
@@ -690,8 +609,7 @@ public class RecordModule {
     }
 
     public void stopRecording() {
-        String str = "video_test_log";
-        LOG.d(str, "-- stopRecording 1--");
+        LOG.d("video_test_log", "-- stopRecording 1--");
         try {
             this.f45e.lock();
             if (!this.g) {
@@ -705,14 +623,14 @@ public class RecordModule {
         }
         this.f45e.unlock();
         if (this.K) {
-            LOG.d(str, "-- stopRecording 2--");
+            LOG.d("video_test_log", "-- stopRecording 2--");
             if (this.H != null) {
-                LOG.d(str, "-- stopRecording 3--");
+                LOG.d("video_test_log", "-- stopRecording 3--");
                 resumeRecording();
-                LOG.d(str, "-- stopRecording 4--x");
+                LOG.d("video_test_log", "-- stopRecording 4--x");
                 this.K = false;
                 this.H.stopRecording();
-                LOG.d(str, "-- stopRecording 5--");
+                LOG.d("video_test_log", "-- stopRecording 5--");
                 this.H = null;
                 this.I = false;
                 this.F = 0;
@@ -723,15 +641,14 @@ public class RecordModule {
                     mediaResultCallback.onVideoResult();
                 }
             }
-            LOG.d(str, "-- stopRecording 6--");
+            LOG.d("video_test_log", "-- stopRecording 6--");
         }
     }
 
     public void unInit() {
-        String str = "video_test_log";
-        LOG.d(str, "-- unInit 1--");
+        LOG.d("video_test_log", "-- unInit 1--");
         stopRecording();
-        LOG.d(str, "-- unInit 2--");
+        LOG.d("video_test_log", "-- unInit 2--");
         try {
             this.f45e.lock();
             if (!this.g) {
@@ -785,7 +702,7 @@ public class RecordModule {
             this.j = false;
             this.h = false;
             this.f45e.unlock();
-            LOG.d(str, "-- unInit 3--");
+            LOG.d("video_test_log", "-- unInit 3--");
         } catch (InterruptedException e2) {
             e2.printStackTrace();
         } catch (Throwable th) {

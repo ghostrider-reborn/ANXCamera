@@ -4,7 +4,6 @@ import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.Log;
 import java.lang.annotation.Retention;
@@ -39,12 +38,12 @@ public abstract class MediaPlaylistAgent {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RepeatMode {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShuffleMode {
     }
@@ -64,12 +63,12 @@ public abstract class MediaPlaylistAgent {
     @Nullable
     public MediaItem2 getMediaItem(@NonNull DataSourceDesc dataSourceDesc) {
         if (dataSourceDesc != null) {
-            List playlist = getPlaylist();
+            List<MediaItem2> playlist = getPlaylist();
             if (playlist == null) {
                 return null;
             }
             for (int i = 0; i < playlist.size(); i++) {
-                MediaItem2 mediaItem2 = (MediaItem2) playlist.get(i);
+                MediaItem2 mediaItem2 = playlist.get(i);
                 if (mediaItem2 != null && mediaItem2.getDataSourceDesc().equals(dataSourceDesc)) {
                     return mediaItem2;
                 }
@@ -90,26 +89,26 @@ public abstract class MediaPlaylistAgent {
     public abstract int getShuffleMode();
 
     public final void notifyPlaylistChanged() {
-        SimpleArrayMap callbacks = getCallbacks();
-        final List playlist = getPlaylist();
+        SimpleArrayMap<PlaylistEventCallback, Executor> callbacks = getCallbacks();
+        final List<MediaItem2> playlist = getPlaylist();
         final MediaMetadata2 playlistMetadata = getPlaylistMetadata();
         for (int i = 0; i < callbacks.size(); i++) {
-            final PlaylistEventCallback playlistEventCallback = (PlaylistEventCallback) callbacks.keyAt(i);
-            ((Executor) callbacks.valueAt(i)).execute(new Runnable() {
+            final PlaylistEventCallback keyAt = callbacks.keyAt(i);
+            callbacks.valueAt(i).execute(new Runnable() {
                 public void run() {
-                    playlistEventCallback.onPlaylistChanged(MediaPlaylistAgent.this, playlist, playlistMetadata);
+                    keyAt.onPlaylistChanged(MediaPlaylistAgent.this, playlist, playlistMetadata);
                 }
             });
         }
     }
 
     public final void notifyPlaylistMetadataChanged() {
-        SimpleArrayMap callbacks = getCallbacks();
+        SimpleArrayMap<PlaylistEventCallback, Executor> callbacks = getCallbacks();
         for (int i = 0; i < callbacks.size(); i++) {
-            final PlaylistEventCallback playlistEventCallback = (PlaylistEventCallback) callbacks.keyAt(i);
-            ((Executor) callbacks.valueAt(i)).execute(new Runnable() {
+            final PlaylistEventCallback keyAt = callbacks.keyAt(i);
+            callbacks.valueAt(i).execute(new Runnable() {
                 public void run() {
-                    PlaylistEventCallback playlistEventCallback = playlistEventCallback;
+                    PlaylistEventCallback playlistEventCallback = keyAt;
                     MediaPlaylistAgent mediaPlaylistAgent = MediaPlaylistAgent.this;
                     playlistEventCallback.onPlaylistMetadataChanged(mediaPlaylistAgent, mediaPlaylistAgent.getPlaylistMetadata());
                 }
@@ -118,12 +117,12 @@ public abstract class MediaPlaylistAgent {
     }
 
     public final void notifyRepeatModeChanged() {
-        SimpleArrayMap callbacks = getCallbacks();
+        SimpleArrayMap<PlaylistEventCallback, Executor> callbacks = getCallbacks();
         for (int i = 0; i < callbacks.size(); i++) {
-            final PlaylistEventCallback playlistEventCallback = (PlaylistEventCallback) callbacks.keyAt(i);
-            ((Executor) callbacks.valueAt(i)).execute(new Runnable() {
+            final PlaylistEventCallback keyAt = callbacks.keyAt(i);
+            callbacks.valueAt(i).execute(new Runnable() {
                 public void run() {
-                    PlaylistEventCallback playlistEventCallback = playlistEventCallback;
+                    PlaylistEventCallback playlistEventCallback = keyAt;
                     MediaPlaylistAgent mediaPlaylistAgent = MediaPlaylistAgent.this;
                     playlistEventCallback.onRepeatModeChanged(mediaPlaylistAgent, mediaPlaylistAgent.getRepeatMode());
                 }
@@ -132,12 +131,12 @@ public abstract class MediaPlaylistAgent {
     }
 
     public final void notifyShuffleModeChanged() {
-        SimpleArrayMap callbacks = getCallbacks();
+        SimpleArrayMap<PlaylistEventCallback, Executor> callbacks = getCallbacks();
         for (int i = 0; i < callbacks.size(); i++) {
-            final PlaylistEventCallback playlistEventCallback = (PlaylistEventCallback) callbacks.keyAt(i);
-            ((Executor) callbacks.valueAt(i)).execute(new Runnable() {
+            final PlaylistEventCallback keyAt = callbacks.keyAt(i);
+            callbacks.valueAt(i).execute(new Runnable() {
                 public void run() {
-                    PlaylistEventCallback playlistEventCallback = playlistEventCallback;
+                    PlaylistEventCallback playlistEventCallback = keyAt;
                     MediaPlaylistAgent mediaPlaylistAgent = MediaPlaylistAgent.this;
                     playlistEventCallback.onShuffleModeChanged(mediaPlaylistAgent, mediaPlaylistAgent.getShuffleMode());
                 }

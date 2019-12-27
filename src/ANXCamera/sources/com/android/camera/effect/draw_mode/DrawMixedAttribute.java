@@ -18,5 +18,6 @@ public class DrawMixedAttribute extends DrawAttribute {
         this.mHeight = f5;
         this.mBasicTexture = basicTexture;
         this.mToColor = i;
+        this.mTarget = 3;
     }
 }

@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
 import com.android.camera.network.net.HttpManager;
 import com.android.camera.network.util.NetworkUtils;
 import java.io.File;
@@ -25,7 +24,7 @@ public class NetworkDependencies {
             NetworkInfo[] allNetworkInfo = connectivityManager.getAllNetworkInfo();
             if (allNetworkInfo != null) {
                 for (NetworkInfo state : allNetworkInfo) {
-                    if (state.getState() == State.CONNECTED) {
+                    if (state.getState() == NetworkInfo.State.CONNECTED) {
                         return true;
                     }
                 }

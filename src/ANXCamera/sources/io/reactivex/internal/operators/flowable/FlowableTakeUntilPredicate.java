@@ -79,6 +79,6 @@ public final class FlowableTakeUntilPredicate<T> extends AbstractFlowableWithUps
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new InnerSubscriber<Object>(subscriber, this.predicate));
+        this.source.subscribe(new InnerSubscriber(subscriber, this.predicate));
     }
 }

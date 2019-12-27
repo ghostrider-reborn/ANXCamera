@@ -1,10 +1,8 @@
 package com.ss.android.ttve.nativePort;
 
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.support.annotation.Keep;
 import com.ss.android.ttve.utils.CameraInstance;
-import com.ss.android.ttve.utils.CameraInstance.CameraOpenCallback;
 import com.ss.android.vesdk.VELogUtil;
 
 @Keep
@@ -12,9 +10,9 @@ public class TECameraProxy extends CameraInstance {
     private static final String TAG = "TECameraProxy";
     /* access modifiers changed from: private */
     public static long mNativeAddr;
-    private CameraOpenCallback mCameraOpenCallback = new CameraOpenCallback() {
+    private CameraInstance.CameraOpenCallback mCameraOpenCallback = new CameraInstance.CameraOpenCallback() {
         public void cameraReady() {
-            TECameraProxy.this.nativeOnCameraCreate(TECameraProxy.mNativeAddr, 0);
+            int unused = TECameraProxy.this.nativeOnCameraCreate(TECameraProxy.mNativeAddr, 0);
         }
     };
     private int mCameraTextureID = 0;
@@ -52,10 +50,10 @@ public class TECameraProxy extends CameraInstance {
             return -100;
         } else if (obj instanceof SurfaceTexture) {
             this.mSurfaceTexture = (SurfaceTexture) obj;
-            this.mSurfaceTexture.setOnFrameAvailableListener(new OnFrameAvailableListener() {
+            this.mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
                 public synchronized void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     if (!TECameraProxy.this.mbSurfaceTextureReleased) {
-                        TECameraProxy.this.nativeOnFrameAvailable(TECameraProxy.mNativeAddr, surfaceTexture);
+                        int unused = TECameraProxy.this.nativeOnFrameAvailable(TECameraProxy.mNativeAddr, surfaceTexture);
                     }
                 }
             });
@@ -73,7 +71,7 @@ public class TECameraProxy extends CameraInstance {
 
     public synchronized void stopCamera() {
         this.mbSurfaceTextureReleased = true;
-        this.mSurfaceTexture.setOnFrameAvailableListener(null);
+        this.mSurfaceTexture.setOnFrameAvailableListener((SurfaceTexture.OnFrameAvailableListener) null);
         super.stopCamera();
     }
 

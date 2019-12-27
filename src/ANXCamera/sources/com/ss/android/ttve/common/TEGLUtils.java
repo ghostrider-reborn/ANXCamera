@@ -1,7 +1,7 @@
 package com.ss.android.ttve.common;
 
 import android.opengl.GLES20;
-import com.arcsoft.camera.wideselfie.ArcWideSelfieDef.MAsvlOffScreen;
+import com.arcsoft.camera.wideselfie.ArcWideSelfieDef;
 import com.ss.android.vesdk.VELogUtil;
 
 public class TEGLUtils {
@@ -16,16 +16,16 @@ public class TEGLUtils {
                 case 1280:
                     str2 = "invalid enum";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YUYV /*1281*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YUYV:
                     str2 = "invalid value";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YVYU /*1282*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YVYU:
                     str2 = "invalid operation";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YUYV2 /*1285*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YUYV2:
                     str2 = "out of memory";
                     break;
-                case MAsvlOffScreen.ASVL_PAF_YVYU2 /*1286*/:
+                case ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_YVYU2:
                     str2 = "invalid framebuffer operation";
                     break;
                 default:

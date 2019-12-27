@@ -43,17 +43,14 @@ public class AudioDataProcessThread implements Runnable {
         public void handleMessage(Message message) {
             int i = message.what;
             AudioDataProcessThread audioDataProcessThread = (AudioDataProcessThread) this.mProcessor.get();
-            String str = AudioDataProcessThread.TAG;
             if (audioDataProcessThread == null) {
-                VELogUtil.e(str, "EncoderHandler.handleMessage: encoder is null");
-                return;
-            }
-            if (i == 0) {
+                VELogUtil.e(AudioDataProcessThread.TAG, "EncoderHandler.handleMessage: encoder is null");
+            } else if (i == 0) {
                 audioDataProcessThread.handleStartFeeding(message.arg1, message.arg2, ((Double) message.obj).doubleValue());
             } else if (i == 1) {
                 audioDataProcessThread.handleStopFeeding();
             } else if (i == 2) {
-                VELogUtil.i(str, "Exit loop");
+                VELogUtil.i(AudioDataProcessThread.TAG, "Exit loop");
                 audioDataProcessThread.handleStopFeeding();
                 removeMessages(3);
                 Looper.myLooper().quit();
@@ -63,20 +60,14 @@ public class AudioDataProcessThread implements Runnable {
                 int decrementAndGet = audioDataProcessThread.mBufferCount.decrementAndGet();
                 if (audioDataProcessThread.mListener != null) {
                     audioDataProcessThread.mListener.onProcessData(bArr, i2);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Buffer processed, size=");
-                    sb.append(i2);
-                    sb.append(", ");
-                    sb.append(decrementAndGet);
-                    sb.append(" buffers remaining");
-                    VELogUtil.d(str, sb.toString());
+                    VELogUtil.d(AudioDataProcessThread.TAG, "Buffer processed, size=" + i2 + ", " + decrementAndGet + " buffers remaining");
                 }
             }
         }
     }
 
     public AudioDataProcessThread(a aVar, OnProcessDataListener onProcessDataListener) {
-        this.mLock = aVar != 0 ? aVar : new Object();
+        this.mLock = aVar != null ? aVar : new Object();
         this.mRecorderInterface = aVar;
         this.mListener = onProcessDataListener;
     }
@@ -84,22 +75,12 @@ public class AudioDataProcessThread implements Runnable {
     /* access modifiers changed from: private */
     public void handleStartFeeding(int i, int i2, double d2) {
         if (this.mRecorderInterface != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("handleStartFeeding() called with: sampleRateInHz = [");
-            sb.append(i);
-            sb.append("], channels = [");
-            sb.append(i2);
-            sb.append("], speed = [");
-            sb.append(d2);
-            sb.append("]");
-            String sb2 = sb.toString();
-            String str = TAG;
-            VELogUtil.i(str, sb2);
+            VELogUtil.i(TAG, "handleStartFeeding() called with: sampleRateInHz = [" + i + "], channels = [" + i2 + "], speed = [" + d2 + "]");
             if (this.mRecorderInterface.initWavFile(i, i2, d2) != 0) {
-                VELogUtil.e(str, "init wav file failed");
-                return;
+                VELogUtil.e(TAG, "init wav file failed");
+            } else {
+                this.mStopped = false;
             }
-            this.mStopped = false;
         }
     }
 
@@ -185,11 +166,7 @@ public class AudioDataProcessThread implements Runnable {
     }
 
     public void start() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(VELogUtil.__FILE__());
-        sb.append(": ");
-        sb.append(VELogUtil.__FUNCTION__());
-        VELogUtil.i(TAG, sb.toString());
+        VELogUtil.i(TAG, VELogUtil.__FILE__() + ": " + VELogUtil.__FUNCTION__());
         synchronized (this.mReadyFence) {
             if (this.mRunning) {
                 VELogUtil.w(TAG, "thread already running");

@@ -29,18 +29,18 @@ public class ReadUpdateTagTask extends NormalTask {
     public void execute() {
         InputStream queryToStream = this.mCache.queryToStream(EffectConstants.KEY_EFFECT_UPDATE_TIME);
         if (queryToStream == null) {
-            sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, null, new ExceptionResult((int) ErrorConstants.CODE_NO_LOCAL_TAG)));
+            sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, (HashMap<String, String>) null, new ExceptionResult((int) ErrorConstants.CODE_NO_LOCAL_TAG)));
             return;
         }
         try {
             HashMap hashMap = (HashMap) this.mJsonConverter.convertJsonToObj(queryToStream, HashMap.class);
             if (hashMap != null) {
-                sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, hashMap, null));
+                sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, hashMap, (ExceptionResult) null));
             } else {
-                sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, null, new ExceptionResult((Exception) new IllegalStateException("local file destroy"))));
+                sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, (HashMap<String, String>) null, new ExceptionResult((Exception) new IllegalStateException("local file destroy"))));
             }
         } catch (Exception e2) {
-            sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, null, new ExceptionResult(e2)));
+            sendMessage(52, new ReadTagTaskResult(this.mId, this.mUpdateTime, (HashMap<String, String>) null, new ExceptionResult(e2)));
         }
     }
 }

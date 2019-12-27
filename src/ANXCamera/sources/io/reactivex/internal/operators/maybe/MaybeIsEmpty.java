@@ -10,7 +10,7 @@ public final class MaybeIsEmpty<T> extends AbstractMaybeWithUpstream<T, Boolean>
     static final class IsEmptyMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         final MaybeObserver<? super Boolean> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f296d;
 
         IsEmptyMaybeObserver(MaybeObserver<? super Boolean> maybeObserver) {
@@ -26,7 +26,7 @@ public final class MaybeIsEmpty<T> extends AbstractMaybeWithUpstream<T, Boolean>
         }
 
         public void onComplete() {
-            this.actual.onSuccess(Boolean.valueOf(true));
+            this.actual.onSuccess(true);
         }
 
         public void onError(Throwable th) {
@@ -41,7 +41,7 @@ public final class MaybeIsEmpty<T> extends AbstractMaybeWithUpstream<T, Boolean>
         }
 
         public void onSuccess(T t) {
-            this.actual.onSuccess(Boolean.valueOf(false));
+            this.actual.onSuccess(false);
         }
     }
 

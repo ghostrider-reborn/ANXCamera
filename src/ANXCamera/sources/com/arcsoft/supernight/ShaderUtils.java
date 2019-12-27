@@ -28,11 +28,7 @@ public class ShaderUtils {
     public static void checkGlError(String str) {
         int glGetError = GLES20.glGetError();
         if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": glError ");
-            sb.append(glGetError);
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException(str + ": glError " + glGetError);
         }
     }
 
@@ -50,18 +46,17 @@ public class ShaderUtils {
             return 0;
         }
         GLES20.glAttachShader(glCreateProgram, a3);
-        String str3 = "glAttachShader";
-        checkGlError(str3);
+        checkGlError("glAttachShader");
         GLES20.glAttachShader(glCreateProgram, a2);
-        checkGlError(str3);
+        checkGlError("glAttachShader");
         GLES20.glLinkProgram(glCreateProgram);
         int[] iArr = new int[1];
         GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
-        if (iArr[0] != 1) {
-            GLES20.glDeleteProgram(glCreateProgram);
-            glCreateProgram = 0;
+        if (iArr[0] == 1) {
+            return glCreateProgram;
         }
-        return glCreateProgram;
+        GLES20.glDeleteProgram(glCreateProgram);
+        return 0;
     }
 
     public static String loadFromAssetsFile(String str, Resources resources) {

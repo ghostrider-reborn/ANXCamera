@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import com.ss.android.ugc.effectmanager.common.WeakHandler;
-import com.ss.android.ugc.effectmanager.common.WeakHandler.IHandler;
 import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.common.utils.LogUtils;
 import com.ss.android.ugc.effectmanager.context.EffectContext;
@@ -24,7 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinkSelector implements IHandler {
+public class LinkSelector implements WeakHandler.IHandler {
     private static final String TAG = "HostSelector";
     private static final String TASK_FLAG = "SpeedMeasure";
     private volatile boolean isRun = false;
@@ -71,9 +70,9 @@ public class LinkSelector implements IHandler {
         try {
             URI uri = new URL(str.replace(" ", "%20")).toURI();
             Host host = new Host(uri.getHost(), uri.getScheme());
-            for (Host host2 : this.mOptedHosts) {
-                if (host.hostEquals(host2)) {
-                    this.mBlackRoom.lock(host2);
+            for (Host next : this.mOptedHosts) {
+                if (host.hostEquals(next)) {
+                    this.mBlackRoom.lock(next);
                     updateBestHost();
                     return;
                 }
@@ -130,16 +129,9 @@ public class LinkSelector implements IHandler {
             if (obj instanceof HostListStatusUpdateTaskResult) {
                 HostListStatusUpdateTaskResult hostListStatusUpdateTaskResult = (HostListStatusUpdateTaskResult) obj;
                 ExceptionResult exceptionResult = hostListStatusUpdateTaskResult.getExceptionResult();
-                List hosts = hostListStatusUpdateTaskResult.getHosts();
+                List<Host> hosts = hostListStatusUpdateTaskResult.getHosts();
                 if (exceptionResult == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("on sort done = ");
-                    sb.append(hosts.size());
-                    sb.append(" selector:");
-                    sb.append(this);
-                    sb.append(" thread:");
-                    sb.append(Thread.currentThread());
-                    LogUtils.d(TAG, sb.toString());
+                    LogUtils.d(TAG, "on sort done = " + hosts.size() + " selector:" + this + " thread:" + Thread.currentThread());
                     this.mOptedHosts.clear();
                     this.mOptedHosts.addAll(hosts);
                     updateBestHost();
@@ -158,18 +150,15 @@ public class LinkSelector implements IHandler {
     }
 
     public boolean isNetworkAvailable() {
-        boolean z = false;
         if (getContext() == null) {
             return false;
         }
         try {
             NetworkInfo activeNetworkInfo = ((ConnectivityManager) getContext().getSystemService("connectivity")).getActiveNetworkInfo();
-            if (activeNetworkInfo != null && activeNetworkInfo.isAvailable()) {
-                z = true;
-            }
+            return activeNetworkInfo != null && activeNetworkInfo.isAvailable();
         } catch (Exception unused) {
+            return false;
         }
-        return z;
     }
 
     public void linkSelectorConfigure(@NonNull LinkSelectorConfiguration linkSelectorConfiguration) {
@@ -180,7 +169,7 @@ public class LinkSelector implements IHandler {
         this.mSpeedApi = linkSelectorConfiguration.getSpeedApi();
         this.mOriginHosts.clear();
         this.mOriginHosts.addAll(linkSelectorConfiguration.getOriginHosts());
-        this.mBestHostUrl = ((Host) this.mOriginHosts.get(0)).getItemName();
+        this.mBestHostUrl = this.mOriginHosts.get(0).getItemName();
         this.mIsNetworkChangeMonitor = linkSelectorConfiguration.isNetworkChangeMonitor();
         this.mIsLazy = linkSelectorConfiguration.isLazy();
         LogUtils.e(TAG, "link selector configure");
@@ -189,19 +178,13 @@ public class LinkSelector implements IHandler {
 
     public void onApiError(String str) {
         if (isNetworkAvailable()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("on link api error:");
-            sb.append(str);
-            LogUtils.e(TAG, sb.toString());
+            LogUtils.e(TAG, "on link api error:" + str);
             lockToBlackRoom(str);
         }
     }
 
     public void onApiSuccess(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("on link api success:");
-        sb.append(str);
-        LogUtils.d(TAG, sb.toString());
+        LogUtils.d(TAG, "on link api success:" + str);
     }
 
     public void startOptHosts() {
@@ -214,7 +197,7 @@ public class LinkSelector implements IHandler {
 
     public void updateBestHost() {
         if (!isLinkSelectorAvailable()) {
-            this.mBestHostUrl = ((Host) getOriginHosts().get(0)).getItemName();
+            this.mBestHostUrl = getOriginHosts().get(0).getItemName();
             return;
         }
         Host host = null;
@@ -223,7 +206,7 @@ public class LinkSelector implements IHandler {
             if (i >= this.mOptedHosts.size()) {
                 break;
             }
-            Host host2 = (Host) this.mOptedHosts.get(i);
+            Host host2 = this.mOptedHosts.get(i);
             if (this.mBlackRoom.checkHostAvailable(host2)) {
                 host = host2;
                 break;
@@ -231,7 +214,7 @@ public class LinkSelector implements IHandler {
             i++;
         }
         if (host == null) {
-            host = (Host) getOriginHosts().get(0);
+            host = getOriginHosts().get(0);
             startOptHosts();
         }
         this.mBestHostUrl = host.getItemName();

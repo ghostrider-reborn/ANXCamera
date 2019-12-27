@@ -2,13 +2,12 @@ package android.support.v4.view;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Message;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.support.v4.util.Pools.SynchronizedPool;
+import android.support.v4.util.Pools;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +18,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public final class AsyncLayoutInflater {
     private static final String TAG = "AsyncLayoutInflater";
     Handler mHandler;
-    private Callback mHandlerCallback = new Callback() {
+    private Handler.Callback mHandlerCallback = new Handler.Callback() {
         public boolean handleMessage(Message message) {
             InflateRequest inflateRequest = (InflateRequest) message.obj;
             if (inflateRequest.view == null) {
@@ -77,7 +76,7 @@ public final class AsyncLayoutInflater {
     private static class InflateThread extends Thread {
         private static final InflateThread sInstance = new InflateThread();
         private ArrayBlockingQueue<InflateRequest> mQueue = new ArrayBlockingQueue<>(10);
-        private SynchronizedPool<InflateRequest> mRequestPool = new SynchronizedPool<>(10);
+        private Pools.SynchronizedPool<InflateRequest> mRequestPool = new Pools.SynchronizedPool<>(10);
 
         static {
             sInstance.start();
@@ -99,8 +98,8 @@ public final class AsyncLayoutInflater {
         }
 
         public InflateRequest obtainRequest() {
-            InflateRequest inflateRequest = (InflateRequest) this.mRequestPool.acquire();
-            return inflateRequest == null ? new InflateRequest() : inflateRequest;
+            InflateRequest acquire = this.mRequestPool.acquire();
+            return acquire == null ? new InflateRequest() : acquire;
         }
 
         public void releaseRequest(InflateRequest inflateRequest) {
@@ -119,17 +118,16 @@ public final class AsyncLayoutInflater {
         }
 
         public void runInner() {
-            String str = AsyncLayoutInflater.TAG;
             try {
-                InflateRequest inflateRequest = (InflateRequest) this.mQueue.take();
+                InflateRequest take = this.mQueue.take();
                 try {
-                    inflateRequest.view = inflateRequest.inflater.mInflater.inflate(inflateRequest.resid, inflateRequest.parent, false);
+                    take.view = take.inflater.mInflater.inflate(take.resid, take.parent, false);
                 } catch (RuntimeException e2) {
-                    Log.w(str, "Failed to inflate resource in the background! Retrying on the UI thread", e2);
+                    Log.w(AsyncLayoutInflater.TAG, "Failed to inflate resource in the background! Retrying on the UI thread", e2);
                 }
-                Message.obtain(inflateRequest.inflater.mHandler, 0, inflateRequest).sendToTarget();
+                Message.obtain(take.inflater.mHandler, 0, take).sendToTarget();
             } catch (InterruptedException e3) {
-                Log.w(str, e3);
+                Log.w(AsyncLayoutInflater.TAG, e3);
             }
         }
     }

@@ -104,11 +104,10 @@ public final class ImageSaveRequest extends AbstractSaveRequest {
         Storage.getAvailableSpace();
         boolean z2 = (!this.needThumbnail || !this.saverCallback.needThumbnail(isFinal())) ? false : z;
         Uri uri3 = this.uri;
-        String str2 = TAG;
         if (uri3 != null) {
             if (z2) {
                 int highestOneBit = Integer.highestOneBit((int) Math.ceil(Math.max((double) this.width, (double) this.height) / 512.0d));
-                Log.d(str2, "image save try to create thumbnail");
+                Log.d(TAG, "image save try to create thumbnail");
                 Thumbnail createThumbnailFromUri = this.isMap ? Thumbnail.createThumbnailFromUri(this.context.getContentResolver(), this.uri, this.mirror) : Thumbnail.createThumbnail(this.data, this.orientation, highestOneBit, this.uri, this.mirror);
                 if (createThumbnailFromUri != null) {
                     this.saverCallback.postUpdateThumbnail(createThumbnailFromUri, z);
@@ -119,16 +118,16 @@ public final class ImageSaveRequest extends AbstractSaveRequest {
                 this.saverCallback.updatePreviewThumbnailUri(this.previewThumbnailHash, uri3);
             }
             this.saverCallback.notifyNewMediaData(this.uri, this.title, 2);
-            Log.d(str2, "image save finished");
+            Log.d(TAG, "image save finished");
             return;
         }
-        Log.e(str2, "image save failed");
+        Log.e(TAG, "image save failed");
         if (z2) {
             this.saverCallback.postHideThumbnailProgressing();
             return;
         }
-        Log.e(str2, "set mWaitingForUri is false");
-        this.saverCallback.updatePreviewThumbnailUri(this.previewThumbnailHash, null);
+        Log.e(TAG, "set mWaitingForUri is false");
+        this.saverCallback.updatePreviewThumbnailUri(this.previewThumbnailHash, (Uri) null);
     }
 
     public void setContextAndCallback(Context context2, SaverCallback saverCallback2) {

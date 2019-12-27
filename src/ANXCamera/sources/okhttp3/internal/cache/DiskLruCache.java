@@ -40,7 +40,6 @@ public final class DiskLruCache implements Closeable, Flushable {
     static final String VERSION_1 = "1";
     private final int appVersion;
     private final Runnable cleanupRunnable = new Runnable() {
-        /* JADX INFO: used method not loaded: okio.Okio.buffer(okio.Sink):null, types can be incorrect */
         /* JADX WARNING: Code restructure failed: missing block: B:20:?, code lost:
             r5.this$0.mostRecentRebuildFailed = true;
             r5.this$0.journalWriter = okio.Okio.buffer(okio.Okio.blackhole());
@@ -129,7 +128,7 @@ public final class DiskLruCache implements Closeable, Flushable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void detach() {
             if (this.entry.currentEditor == this) {
                 int i = 0;
@@ -224,13 +223,10 @@ public final class DiskLruCache implements Closeable, Flushable {
         }
 
         private IOException invalidLengths(String[] strArr) throws IOException {
-            StringBuilder sb = new StringBuilder();
-            sb.append("unexpected journal line: ");
-            sb.append(Arrays.toString(strArr));
-            throw new IOException(sb.toString());
+            throw new IOException("unexpected journal line: " + Arrays.toString(strArr));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setLengths(String[] strArr) throws IOException {
             if (strArr.length == DiskLruCache.this.valueCount) {
                 int i = 0;
@@ -249,7 +245,7 @@ public final class DiskLruCache implements Closeable, Flushable {
             throw null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Snapshot snapshot() {
             if (Thread.holdsLock(DiskLruCache.this)) {
                 Source[] sourceArr = new Source[DiskLruCache.this.valueCount];
@@ -267,9 +263,10 @@ public final class DiskLruCache implements Closeable, Flushable {
                         }
                         try {
                             DiskLruCache.this.removeEntry(this);
+                            return null;
                         } catch (IOException unused2) {
+                            return null;
                         }
-                        return null;
                     }
                 }
                 Snapshot snapshot = new Snapshot(this.key, this.sequenceNumber, sourceArr, jArr);
@@ -278,7 +275,7 @@ public final class DiskLruCache implements Closeable, Flushable {
             throw new AssertionError();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void writeLengths(BufferedSink bufferedSink) throws IOException {
             for (long writeDecimalLong : this.lengths) {
                 bufferedSink.writeByte(32).writeDecimalLong(writeDecimalLong);
@@ -367,20 +364,20 @@ public final class DiskLruCache implements Closeable, Flushable {
 
     private void processJournal() throws IOException {
         this.fileSystem.delete(this.journalFileTmp);
-        Iterator it = this.lruEntries.values().iterator();
+        Iterator<Entry> it = this.lruEntries.values().iterator();
         while (it.hasNext()) {
-            Entry entry = (Entry) it.next();
+            Entry next = it.next();
             int i = 0;
-            if (entry.currentEditor == null) {
+            if (next.currentEditor == null) {
                 while (i < this.valueCount) {
-                    this.size += entry.lengths[i];
+                    this.size += next.lengths[i];
                     i++;
                 }
             } else {
-                entry.currentEditor = null;
+                next.currentEditor = null;
                 while (i < this.valueCount) {
-                    this.fileSystem.delete(entry.cleanFiles[i]);
-                    this.fileSystem.delete(entry.dirtyFiles[i]);
+                    this.fileSystem.delete(next.cleanFiles[i]);
+                    this.fileSystem.delete(next.dirtyFiles[i]);
                     i++;
                 }
                 it.remove();
@@ -407,7 +404,6 @@ public final class DiskLruCache implements Closeable, Flushable {
     /* JADX WARNING: Missing exception handler attribute for start block: B:16:0x005d */
     /* JADX WARNING: Unknown top exception splitter block from list: {B:23:0x007a=Splitter:B:23:0x007a, B:16:0x005d=Splitter:B:16:0x005d} */
     private void readJournal() throws IOException {
-        String str = ", ";
         BufferedSource buffer = Okio.buffer(this.fileSystem.source(this.journalFile));
         try {
             String readUtf8LineStrict = buffer.readUtf8LineStrict();
@@ -416,17 +412,7 @@ public final class DiskLruCache implements Closeable, Flushable {
             String readUtf8LineStrict4 = buffer.readUtf8LineStrict();
             String readUtf8LineStrict5 = buffer.readUtf8LineStrict();
             if (!MAGIC.equals(readUtf8LineStrict) || !"1".equals(readUtf8LineStrict2) || !Integer.toString(this.appVersion).equals(readUtf8LineStrict3) || !Integer.toString(this.valueCount).equals(readUtf8LineStrict4) || !"".equals(readUtf8LineStrict5)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected journal header: [");
-                sb.append(readUtf8LineStrict);
-                sb.append(str);
-                sb.append(readUtf8LineStrict2);
-                sb.append(str);
-                sb.append(readUtf8LineStrict4);
-                sb.append(str);
-                sb.append(readUtf8LineStrict5);
-                sb.append("]");
-                throw new IOException(sb.toString());
+                throw new IOException("unexpected journal header: [" + readUtf8LineStrict + ", " + readUtf8LineStrict2 + ", " + readUtf8LineStrict4 + ", " + readUtf8LineStrict5 + "]");
             }
             int i = 0;
             while (true) {
@@ -441,7 +427,6 @@ public final class DiskLruCache implements Closeable, Flushable {
     private void readJournalLine(String str) throws IOException {
         String str2;
         int indexOf = str.indexOf(32);
-        String str3 = "unexpected journal line: ";
         if (indexOf != -1) {
             int i = indexOf + 1;
             int indexOf2 = str.indexOf(32, i);
@@ -454,7 +439,7 @@ public final class DiskLruCache implements Closeable, Flushable {
             } else {
                 str2 = str.substring(i, indexOf2);
             }
-            Entry entry = (Entry) this.lruEntries.get(str2);
+            Entry entry = this.lruEntries.get(str2);
             if (entry == null) {
                 entry = new Entry(str2);
                 this.lruEntries.put(str2, entry);
@@ -466,32 +451,21 @@ public final class DiskLruCache implements Closeable, Flushable {
                 entry.setLengths(split);
             } else if (indexOf2 == -1 && indexOf == 5 && str.startsWith(DIRTY)) {
                 entry.currentEditor = new Editor(entry);
-            } else if (!(indexOf2 == -1 && indexOf == 4 && str.startsWith(READ))) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str3);
-                sb.append(str);
-                throw new IOException(sb.toString());
+            } else if (indexOf2 != -1 || indexOf != 4 || !str.startsWith(READ)) {
+                throw new IOException("unexpected journal line: " + str);
             }
-            return;
+        } else {
+            throw new IOException("unexpected journal line: " + str);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str3);
-        sb2.append(str);
-        throw new IOException(sb2.toString());
     }
 
     private void validateKey(String str) {
         if (!LEGAL_KEY_PATTERN.matcher(str).matches()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("keys must match regex [a-z0-9_-]{1,120}: \"");
-            sb.append(str);
-            sb.append("\"");
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("keys must match regex [a-z0-9_-]{1,120}: \"" + str + "\"");
         }
     }
 
     public synchronized void close() throws IOException {
-        Entry[] entryArr;
         if (this.initialized) {
             if (!this.closed) {
                 for (Entry entry : (Entry[]) this.lruEntries.values().toArray(new Entry[this.lruEntries.size()])) {
@@ -509,7 +483,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         this.closed = true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     /* JADX WARNING: Code restructure failed: missing block: B:43:0x00f4, code lost:
         return;
      */
@@ -521,10 +495,7 @@ public final class DiskLruCache implements Closeable, Flushable {
                 while (i < this.valueCount) {
                     if (!editor.written[i]) {
                         editor.abort();
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Newly created entry didn't create value for index ");
-                        sb.append(i);
-                        throw new IllegalStateException(sb.toString());
+                        throw new IllegalStateException("Newly created entry didn't create value for index " + i);
                     } else if (!this.fileSystem.exists(entry.dirtyFiles[i])) {
                         editor.abort();
                         return;
@@ -584,7 +555,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         return edit(str, -1);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     /* JADX WARNING: Code restructure failed: missing block: B:9:0x0022, code lost:
         return null;
      */
@@ -592,7 +563,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         initialize();
         checkNotClosed();
         validateKey(str);
-        Entry entry = (Entry) this.lruEntries.get(str);
+        Entry entry = this.lruEntries.get(str);
         if (j == -1 || (entry != null && entry.sequenceNumber == j)) {
             if (entry != null) {
                 if (entry.currentEditor != null) {
@@ -646,7 +617,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         initialize();
         checkNotClosed();
         validateKey(str);
-        Entry entry = (Entry) this.lruEntries.get(str);
+        Entry entry = this.lruEntries.get(str);
         if (entry != null) {
             if (entry.readable) {
                 Snapshot snapshot = entry.snapshot();
@@ -687,13 +658,7 @@ public final class DiskLruCache implements Closeable, Flushable {
                     return;
                 } catch (IOException e2) {
                     Platform platform = Platform.get();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("DiskLruCache ");
-                    sb.append(this.directory);
-                    sb.append(" is corrupt: ");
-                    sb.append(e2.getMessage());
-                    sb.append(", removing");
-                    platform.log(5, sb.toString(), e2);
+                    platform.log(5, "DiskLruCache " + this.directory + " is corrupt: " + e2.getMessage() + ", removing", e2);
                     delete();
                     this.closed = false;
                 } catch (Throwable th) {
@@ -710,14 +675,14 @@ public final class DiskLruCache implements Closeable, Flushable {
         return this.closed;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean journalRebuildRequired() {
         int i = this.redundantOpCount;
         return i >= 2000 && i >= this.lruEntries.size();
     }
 
     /* JADX INFO: finally extract failed */
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void rebuildJournal() throws IOException {
         if (this.journalWriter != null) {
             this.journalWriter.close();
@@ -729,15 +694,15 @@ public final class DiskLruCache implements Closeable, Flushable {
             buffer.writeDecimalLong((long) this.appVersion).writeByte(10);
             buffer.writeDecimalLong((long) this.valueCount).writeByte(10);
             buffer.writeByte(10);
-            for (Entry entry : this.lruEntries.values()) {
-                if (entry.currentEditor != null) {
+            for (Entry next : this.lruEntries.values()) {
+                if (next.currentEditor != null) {
                     buffer.writeUtf8(DIRTY).writeByte(32);
-                    buffer.writeUtf8(entry.key);
+                    buffer.writeUtf8(next.key);
                     buffer.writeByte(10);
                 } else {
                     buffer.writeUtf8(CLEAN).writeByte(32);
-                    buffer.writeUtf8(entry.key);
-                    entry.writeLengths(buffer);
+                    buffer.writeUtf8(next.key);
+                    next.writeLengths(buffer);
                     buffer.writeByte(10);
                 }
             }
@@ -763,7 +728,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         initialize();
         checkNotClosed();
         validateKey(str);
-        Entry entry = (Entry) this.lruEntries.get(str);
+        Entry entry = this.lruEntries.get(str);
         if (entry == null) {
             return false;
         }
@@ -773,7 +738,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean removeEntry(Entry entry) throws IOException {
         Editor editor = entry.currentEditor;
         if (editor != null) {
@@ -823,7 +788,7 @@ public final class DiskLruCache implements Closeable, Flushable {
                         return false;
                     }
                     while (this.delegate.hasNext()) {
-                        Snapshot snapshot = ((Entry) this.delegate.next()).snapshot();
+                        Snapshot snapshot = this.delegate.next().snapshot();
                         if (snapshot != null) {
                             this.nextSnapshot = snapshot;
                             return true;
@@ -860,10 +825,10 @@ public final class DiskLruCache implements Closeable, Flushable {
         };
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void trimToSize() throws IOException {
         while (this.size > this.maxSize) {
-            removeEntry((Entry) this.lruEntries.values().iterator().next());
+            removeEntry(this.lruEntries.values().iterator().next());
         }
         this.mostRecentTrimFailed = false;
     }

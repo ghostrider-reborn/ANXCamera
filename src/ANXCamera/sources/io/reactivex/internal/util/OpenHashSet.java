@@ -60,7 +60,7 @@ public final class OpenHashSet<T> {
         return this.keys;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void rehash() {
         T[] tArr = this.keys;
         int length = tArr.length;
@@ -113,7 +113,7 @@ public final class OpenHashSet<T> {
         return removeEntry(mix, tArr, i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean removeEntry(int i, T[] tArr, int i2) {
         int i3;
         T t;

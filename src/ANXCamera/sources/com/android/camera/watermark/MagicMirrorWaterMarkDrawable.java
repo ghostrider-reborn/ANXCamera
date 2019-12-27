@@ -1,7 +1,6 @@
 package com.android.camera.watermark;
 
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.drawable.Drawable;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.R;
@@ -45,7 +44,7 @@ public class MagicMirrorWaterMarkDrawable extends BaseWaterMarkDrawable {
         this.mFaceRectPaint = new Paint();
         this.mFaceRectPaint.setAntiAlias(true);
         this.mFaceRectPaint.setStrokeWidth((float) CameraAppImpl.getAndroidContext().getResources().getDimensionPixelSize(R.dimen.face_rect_width));
-        this.mFaceRectPaint.setStyle(Style.STROKE);
+        this.mFaceRectPaint.setStyle(Paint.Style.STROKE);
         this.mFaceRectPaint.setColor(MAGIC_MIRROR_RECT_COLOR);
         this.mFacePopupBottom = (int) (((double) this.mMagicMirrorInfoPop.getIntrinsicHeight()) * 0.12d);
         this.mHonPadding = this.mContext.getResources().getDimensionPixelSize(R.dimen.face_info_female_hon_padding);

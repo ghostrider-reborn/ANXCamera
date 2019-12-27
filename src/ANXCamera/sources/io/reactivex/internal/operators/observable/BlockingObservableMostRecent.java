@@ -56,8 +56,8 @@ public final class BlockingObservableMostRecent<T> implements Iterable<T> {
             this.value = t;
         }
 
-        public Iterator getIterable() {
-            return new Iterator<>();
+        public MostRecentObserver<T>.Iterator getIterable() {
+            return new Iterator();
         }
 
         public void onComplete() {

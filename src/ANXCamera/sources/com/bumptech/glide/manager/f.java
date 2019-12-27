@@ -8,7 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.bumptech.glide.manager.c.a;
+import com.bumptech.glide.manager.c;
 import com.bumptech.glide.util.i;
 
 /* compiled from: DefaultConnectivityMonitor */
@@ -18,9 +18,9 @@ final class f implements c {
     private final BroadcastReceiver gk = new e(this);
     boolean isConnected;
     private boolean isRegistered;
-    final a listener;
+    final c.a listener;
 
-    f(@NonNull Context context2, @NonNull a aVar) {
+    f(@NonNull Context context2, @NonNull c.a aVar) {
         this.context = context2.getApplicationContext();
         this.listener = aVar;
     }
@@ -32,9 +32,8 @@ final class f implements c {
                 this.context.registerReceiver(this.gk, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
                 this.isRegistered = true;
             } catch (SecurityException e2) {
-                String str = TAG;
-                if (Log.isLoggable(str, 5)) {
-                    Log.w(str, "Failed to register", e2);
+                if (Log.isLoggable(TAG, 5)) {
+                    Log.w(TAG, "Failed to register", e2);
                 }
             }
         }
@@ -47,22 +46,17 @@ final class f implements c {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @SuppressLint({"MissingPermission"})
     public boolean isConnected(@NonNull Context context2) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context2.getSystemService("connectivity");
         i.checkNotNull(connectivityManager);
-        boolean z = true;
         try {
             NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
-                z = false;
-            }
-            return z;
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
         } catch (RuntimeException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                Log.w(str, "Failed to determine connectivity status when connectivity changed", e2);
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Failed to determine connectivity status when connectivity changed", e2);
             }
             return true;
         }

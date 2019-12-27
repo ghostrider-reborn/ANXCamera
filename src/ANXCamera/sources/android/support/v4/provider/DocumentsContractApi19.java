@@ -56,17 +56,13 @@ class DocumentsContractApi19 {
         boolean z = false;
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(uri, new String[]{"document_id"}, null, null, null);
+            cursor = contentResolver.query(uri, new String[]{"document_id"}, (String) null, (String[]) null, (String) null);
             if (cursor.getCount() > 0) {
                 z = true;
             }
             return z;
         } catch (Exception e2) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed query: ");
-            sb.append(e2);
-            Log.w(str, sb.toString());
+            Log.w(TAG, "Failed query: " + e2);
             return false;
         } finally {
             closeQuietly(cursor);
@@ -79,12 +75,12 @@ class DocumentsContractApi19 {
 
     @Nullable
     public static String getName(Context context, Uri uri) {
-        return queryForString(context, uri, "_display_name", null);
+        return queryForString(context, uri, "_display_name", (String) null);
     }
 
     @Nullable
     private static String getRawType(Context context, Uri uri) {
-        return queryForString(context, uri, "mime_type", null);
+        return queryForString(context, uri, "mime_type", (String) null);
     }
 
     @Nullable
@@ -106,14 +102,7 @@ class DocumentsContractApi19 {
     }
 
     public static boolean isVirtual(Context context, Uri uri) {
-        boolean z = false;
-        if (!DocumentsContract.isDocumentUri(context, uri)) {
-            return false;
-        }
-        if ((getFlags(context, uri) & 512) != 0) {
-            z = true;
-        }
-        return z;
+        return DocumentsContract.isDocumentUri(context, uri) && (getFlags(context, uri) & 512) != 0;
     }
 
     public static long lastModified(Context context, Uri uri) {
@@ -131,18 +120,14 @@ class DocumentsContractApi19 {
     private static long queryForLong(Context context, Uri uri, String str, long j) {
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(uri, new String[]{str}, null, null, null);
+            cursor = context.getContentResolver().query(uri, new String[]{str}, (String) null, (String[]) null, (String) null);
             if (cursor.moveToFirst() && !cursor.isNull(0)) {
                 return cursor.getLong(0);
             }
             closeQuietly(cursor);
             return j;
         } catch (Exception e2) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed query: ");
-            sb.append(e2);
-            Log.w(str2, sb.toString());
+            Log.w(TAG, "Failed query: " + e2);
             return j;
         } finally {
             closeQuietly(cursor);
@@ -153,18 +138,14 @@ class DocumentsContractApi19 {
     private static String queryForString(Context context, Uri uri, String str, @Nullable String str2) {
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(uri, new String[]{str}, null, null, null);
+            cursor = context.getContentResolver().query(uri, new String[]{str}, (String) null, (String[]) null, (String) null);
             if (cursor.moveToFirst() && !cursor.isNull(0)) {
                 return cursor.getString(0);
             }
             closeQuietly(cursor);
             return str2;
         } catch (Exception e2) {
-            String str3 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed query: ");
-            sb.append(e2);
-            Log.w(str3, sb.toString());
+            Log.w(TAG, "Failed query: " + e2);
             return str2;
         } finally {
             closeQuietly(cursor);

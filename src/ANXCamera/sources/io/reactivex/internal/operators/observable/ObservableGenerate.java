@@ -127,7 +127,7 @@ public final class ObservableGenerate<T, S> extends Observable<T> {
             generatorDisposable.run();
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

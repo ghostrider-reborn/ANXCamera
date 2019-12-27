@@ -1,6 +1,6 @@
 package android.support.v4.text;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -9,12 +9,7 @@ import java.util.Locale;
 public final class TextUtilsCompat {
     private static final String ARAB_SCRIPT_SUBTAG = "Arab";
     private static final String HEBR_SCRIPT_SUBTAG = "Hebr";
-    private static final Locale ROOT;
-
-    static {
-        String str = "";
-        ROOT = new Locale(str, str);
-    }
+    private static final Locale ROOT = new Locale("", "");
 
     private TextUtilsCompat() {
     }
@@ -25,24 +20,19 @@ public final class TextUtilsCompat {
     }
 
     public static int getLayoutDirectionFromLocale(@Nullable Locale locale) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return TextUtils.getLayoutDirectionFromLocale(locale);
         }
-        if (locale != null && !locale.equals(ROOT)) {
-            String maximizeAndGetScript = ICUCompat.maximizeAndGetScript(locale);
-            if (maximizeAndGetScript == null) {
-                return getLayoutDirectionFromFirstChar(locale);
-            }
-            if (maximizeAndGetScript.equalsIgnoreCase(ARAB_SCRIPT_SUBTAG) || maximizeAndGetScript.equalsIgnoreCase(HEBR_SCRIPT_SUBTAG)) {
-                return 1;
-            }
+        if (locale == null || locale.equals(ROOT)) {
+            return 0;
         }
-        return 0;
+        String maximizeAndGetScript = ICUCompat.maximizeAndGetScript(locale);
+        return maximizeAndGetScript == null ? getLayoutDirectionFromFirstChar(locale) : (maximizeAndGetScript.equalsIgnoreCase(ARAB_SCRIPT_SUBTAG) || maximizeAndGetScript.equalsIgnoreCase(HEBR_SCRIPT_SUBTAG)) ? 1 : 0;
     }
 
     @NonNull
     public static String htmlEncode(@NonNull String str) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return TextUtils.htmlEncode(str);
         }
         StringBuilder sb = new StringBuilder();

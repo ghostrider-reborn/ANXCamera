@@ -9,19 +9,18 @@ import android.animation.ValueAnimator;
 import android.arch.lifecycle.ViewModelStore;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources.NotFoundException;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Build.VERSION;
+import android.graphics.Paint;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment.SavedState;
-import android.support.v4.app.FragmentManager.BackStackEntry;
-import android.support.v4.app.FragmentManager.FragmentLifecycleCallbacks;
-import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.os.EnvironmentCompat;
 import android.support.v4.util.ArraySet;
 import android.support.v4.util.DebugUtils;
@@ -30,7 +29,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.LayoutInflater.Factory2;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,7 +38,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
@@ -57,7 +55,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /* compiled from: FragmentManager */
-final class FragmentManagerImpl extends FragmentManager implements Factory2 {
+final class FragmentManagerImpl extends FragmentManager implements LayoutInflater.Factory2 {
     static final Interpolator ACCELERATE_CUBIC = new AccelerateInterpolator(1.5f);
     static final Interpolator ACCELERATE_QUINT = new AccelerateInterpolator(2.5f);
     static final int ANIM_DUR = 220;
@@ -80,7 +78,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     final ArrayList<Fragment> mAdded = new ArrayList<>();
     ArrayList<Integer> mAvailBackStackIndices;
     ArrayList<BackStackRecord> mBackStack;
-    ArrayList<OnBackStackChangedListener> mBackStackChangeListeners;
+    ArrayList<FragmentManager.OnBackStackChangedListener> mBackStackChangeListeners;
     ArrayList<BackStackRecord> mBackStackIndices;
     FragmentContainer mContainer;
     ArrayList<Fragment> mCreatedMenus;
@@ -116,37 +114,37 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     private static class AnimateOnHWLayerIfNeededListener extends AnimationListenerWrapper {
         View mView;
 
-        AnimateOnHWLayerIfNeededListener(View view, AnimationListener animationListener) {
+        AnimateOnHWLayerIfNeededListener(View view, Animation.AnimationListener animationListener) {
             super(animationListener);
             this.mView = view;
         }
 
         @CallSuper
         public void onAnimationEnd(Animation animation) {
-            if (ViewCompat.isAttachedToWindow(this.mView) || VERSION.SDK_INT >= 24) {
+            if (ViewCompat.isAttachedToWindow(this.mView) || Build.VERSION.SDK_INT >= 24) {
                 this.mView.post(new Runnable() {
                     public void run() {
-                        AnimateOnHWLayerIfNeededListener.this.mView.setLayerType(0, null);
+                        AnimateOnHWLayerIfNeededListener.this.mView.setLayerType(0, (Paint) null);
                     }
                 });
             } else {
-                this.mView.setLayerType(0, null);
+                this.mView.setLayerType(0, (Paint) null);
             }
             super.onAnimationEnd(animation);
         }
     }
 
     /* compiled from: FragmentManager */
-    private static class AnimationListenerWrapper implements AnimationListener {
-        private final AnimationListener mWrapped;
+    private static class AnimationListenerWrapper implements Animation.AnimationListener {
+        private final Animation.AnimationListener mWrapped;
 
-        private AnimationListenerWrapper(AnimationListener animationListener) {
+        private AnimationListenerWrapper(Animation.AnimationListener animationListener) {
             this.mWrapped = animationListener;
         }
 
         @CallSuper
         public void onAnimationEnd(Animation animation) {
-            AnimationListener animationListener = this.mWrapped;
+            Animation.AnimationListener animationListener = this.mWrapped;
             if (animationListener != null) {
                 animationListener.onAnimationEnd(animation);
             }
@@ -154,7 +152,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
         @CallSuper
         public void onAnimationRepeat(Animation animation) {
-            AnimationListener animationListener = this.mWrapped;
+            Animation.AnimationListener animationListener = this.mWrapped;
             if (animationListener != null) {
                 animationListener.onAnimationRepeat(animation);
             }
@@ -162,7 +160,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
         @CallSuper
         public void onAnimationStart(Animation animation) {
-            AnimationListener animationListener = this.mWrapped;
+            Animation.AnimationListener animationListener = this.mWrapped;
             if (animationListener != null) {
                 animationListener.onAnimationStart(animation);
             }
@@ -200,12 +198,12 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
 
         public void onAnimationEnd(Animator animator) {
-            this.mView.setLayerType(0, null);
+            this.mView.setLayerType(0, (Paint) null);
             animator.removeListener(this);
         }
 
         public void onAnimationStart(Animator animator) {
-            this.mView.setLayerType(2, null);
+            this.mView.setLayerType(2, (Paint) null);
         }
     }
 
@@ -253,10 +251,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     /* compiled from: FragmentManager */
     private static final class FragmentLifecycleCallbacksHolder {
-        final FragmentLifecycleCallbacks mCallback;
+        final FragmentManager.FragmentLifecycleCallbacks mCallback;
         final boolean mRecursive;
 
-        FragmentLifecycleCallbacksHolder(FragmentLifecycleCallbacks fragmentLifecycleCallbacks, boolean z) {
+        FragmentLifecycleCallbacksHolder(FragmentManager.FragmentLifecycleCallbacks fragmentLifecycleCallbacks, boolean z) {
             this.mCallback = fragmentLifecycleCallbacks;
             this.mRecursive = z;
         }
@@ -303,7 +301,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     }
 
     /* compiled from: FragmentManager */
-    static class StartEnterTransitionListener implements OnStartEnterTransitionListener {
+    static class StartEnterTransitionListener implements Fragment.OnStartEnterTransitionListener {
         /* access modifiers changed from: private */
         public final boolean mIsBack;
         private int mNumPostponed;
@@ -325,8 +323,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             FragmentManagerImpl fragmentManagerImpl = this.mRecord.mManager;
             int size = fragmentManagerImpl.mAdded.size();
             for (int i = 0; i < size; i++) {
-                Fragment fragment = (Fragment) fragmentManagerImpl.mAdded.get(i);
-                fragment.setOnStartEnterTransitionListener(null);
+                Fragment fragment = fragmentManagerImpl.mAdded.get(i);
+                fragment.setOnStartEnterTransitionListener((Fragment.OnStartEnterTransitionListener) null);
                 if (z && fragment.isPostponed()) {
                     fragment.startPostponedEnterTransition();
                 }
@@ -360,7 +358,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             int min = Math.min(i, 4);
             int size = this.mAdded.size();
             for (int i2 = 0; i2 < size; i2++) {
-                Fragment fragment = (Fragment) this.mAdded.get(i2);
+                Fragment fragment = this.mAdded.get(i2);
                 if (fragment.mState < min) {
                     moveToState(fragment, min, fragment.getNextAnim(), fragment.getNextTransition(), false);
                     if (fragment.mView != null && !fragment.mHidden && fragment.mIsNewlyAdded) {
@@ -386,7 +384,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     viewGroup.post(new Runnable() {
                         public void run() {
                             if (fragment.getAnimatingAway() != null) {
-                                fragment.setAnimatingAway(null);
+                                fragment.setAnimatingAway((View) null);
                                 AnonymousClass2 r6 = AnonymousClass2.this;
                                 FragmentManagerImpl fragmentManagerImpl = FragmentManagerImpl.this;
                                 Fragment fragment = fragment;
@@ -406,7 +404,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             public void onAnimationEnd(Animator animator) {
                 viewGroup.endViewTransition(view);
                 Animator animator2 = fragment.getAnimator();
-                fragment.setAnimator(null);
+                fragment.setAnimator((Animator) null);
                 if (animator2 != null && viewGroup.indexOfChild(view) < 0) {
                     FragmentManagerImpl fragmentManagerImpl = FragmentManagerImpl.this;
                     Fragment fragment = fragment;
@@ -435,10 +433,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         if (isStateSaved()) {
             throw new IllegalStateException("Can not perform this action after onSaveInstanceState");
         } else if (this.mNoTransactionsBecause != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Can not perform this action inside of ");
-            sb.append(this.mNoTransactionsBecause);
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Can not perform this action inside of " + this.mNoTransactionsBecause);
         }
     }
 
@@ -469,17 +464,17 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         if (sparseArray != null) {
             int size = sparseArray.size();
             for (int i = 0; i < size; i++) {
-                Fragment fragment = (Fragment) this.mActive.valueAt(i);
-                if (fragment != null && fragment.mView != null && fragment.mIsNewlyAdded && backStackRecord.interactsWith(fragment.mContainerId)) {
-                    float f2 = fragment.mPostponedAlpha;
+                Fragment valueAt = this.mActive.valueAt(i);
+                if (valueAt != null && valueAt.mView != null && valueAt.mIsNewlyAdded && backStackRecord.interactsWith(valueAt.mContainerId)) {
+                    float f2 = valueAt.mPostponedAlpha;
                     if (f2 > 0.0f) {
-                        fragment.mView.setAlpha(f2);
+                        valueAt.mView.setAlpha(f2);
                     }
                     if (z3) {
-                        fragment.mPostponedAlpha = 0.0f;
+                        valueAt.mPostponedAlpha = 0.0f;
                     } else {
-                        fragment.mPostponedAlpha = -1.0f;
-                        fragment.mIsNewlyAdded = false;
+                        valueAt.mPostponedAlpha = -1.0f;
+                        valueAt.mIsNewlyAdded = false;
                     }
                 }
             }
@@ -503,20 +498,20 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         SparseArray<Fragment> sparseArray = this.mActive;
         int size = sparseArray == null ? 0 : sparseArray.size();
         for (int i = 0; i < size; i++) {
-            Fragment fragment = (Fragment) this.mActive.valueAt(i);
-            if (fragment != null) {
-                if (fragment.getAnimatingAway() != null) {
-                    int stateAfterAnimating = fragment.getStateAfterAnimating();
-                    View animatingAway = fragment.getAnimatingAway();
+            Fragment valueAt = this.mActive.valueAt(i);
+            if (valueAt != null) {
+                if (valueAt.getAnimatingAway() != null) {
+                    int stateAfterAnimating = valueAt.getStateAfterAnimating();
+                    View animatingAway = valueAt.getAnimatingAway();
                     Animation animation = animatingAway.getAnimation();
                     if (animation != null) {
                         animation.cancel();
                         animatingAway.clearAnimation();
                     }
-                    fragment.setAnimatingAway(null);
-                    moveToState(fragment, stateAfterAnimating, 0, 0, false);
-                } else if (fragment.getAnimator() != null) {
-                    fragment.getAnimator().end();
+                    valueAt.setAnimatingAway((View) null);
+                    moveToState(valueAt, stateAfterAnimating, 0, 0, false);
+                } else if (valueAt.getAnimator() != null) {
+                    valueAt.getAnimator().end();
                 }
             }
         }
@@ -537,7 +532,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             this.mExecutingActions = true;
             try {
-                executePostponedTransaction(null, null);
+                executePostponedTransaction((ArrayList<BackStackRecord>) null, (ArrayList<Boolean>) null);
             } finally {
                 this.mExecutingActions = false;
             }
@@ -548,9 +543,9 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     private static void executeOps(ArrayList<BackStackRecord> arrayList, ArrayList<Boolean> arrayList2, int i, int i2) {
         while (i < i2) {
-            BackStackRecord backStackRecord = (BackStackRecord) arrayList.get(i);
+            BackStackRecord backStackRecord = arrayList.get(i);
             boolean z = true;
-            if (((Boolean) arrayList2.get(i)).booleanValue()) {
+            if (arrayList2.get(i).booleanValue()) {
                 backStackRecord.bumpBackStackNesting(-1);
                 if (i != i2 - 1) {
                     z = false;
@@ -570,7 +565,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         ArrayList<Boolean> arrayList4 = arrayList2;
         int i4 = i;
         int i5 = i2;
-        boolean z = ((BackStackRecord) arrayList3.get(i4)).mReorderingAllowed;
+        boolean z = arrayList3.get(i4).mReorderingAllowed;
         ArrayList<Fragment> arrayList5 = this.mTmpAddedFragments;
         if (arrayList5 == null) {
             this.mTmpAddedFragments = new ArrayList<>();
@@ -581,8 +576,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         Fragment primaryNavigationFragment = getPrimaryNavigationFragment();
         boolean z2 = false;
         for (int i6 = i4; i6 < i5; i6++) {
-            BackStackRecord backStackRecord = (BackStackRecord) arrayList3.get(i6);
-            primaryNavigationFragment = !((Boolean) arrayList4.get(i6)).booleanValue() ? backStackRecord.expandOps(this.mTmpAddedFragments, primaryNavigationFragment) : backStackRecord.trackAddedFragmentsInPop(this.mTmpAddedFragments, primaryNavigationFragment);
+            BackStackRecord backStackRecord = arrayList3.get(i6);
+            primaryNavigationFragment = !arrayList4.get(i6).booleanValue() ? backStackRecord.expandOps(this.mTmpAddedFragments, primaryNavigationFragment) : backStackRecord.trackAddedFragmentsInPop(this.mTmpAddedFragments, primaryNavigationFragment);
             z2 = z2 || backStackRecord.mAddToBackStack;
         }
         this.mTmpAddedFragments.clear();
@@ -604,8 +599,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             moveToState(this.mCurState, true);
         }
         while (i4 < i5) {
-            BackStackRecord backStackRecord2 = (BackStackRecord) arrayList3.get(i4);
-            if (((Boolean) arrayList4.get(i4)).booleanValue()) {
+            BackStackRecord backStackRecord2 = arrayList3.get(i4);
+            if (arrayList4.get(i4).booleanValue()) {
                 int i7 = backStackRecord2.mIndex;
                 if (i7 >= 0) {
                     freeBackStackIndex(i7);
@@ -625,10 +620,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         int size = arrayList3 == null ? 0 : arrayList3.size();
         int i = 0;
         while (i < size) {
-            StartEnterTransitionListener startEnterTransitionListener = (StartEnterTransitionListener) this.mPostponedTransactions.get(i);
+            StartEnterTransitionListener startEnterTransitionListener = this.mPostponedTransactions.get(i);
             if (arrayList != null && !startEnterTransitionListener.mIsBack) {
                 int indexOf = arrayList.indexOf(startEnterTransitionListener.mRecord);
-                if (indexOf != -1 && ((Boolean) arrayList2.get(indexOf)).booleanValue()) {
+                if (indexOf != -1 && arrayList2.get(indexOf).booleanValue()) {
                     startEnterTransitionListener.cancelTransaction();
                     i++;
                 }
@@ -639,7 +634,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 size--;
                 if (arrayList != null && !startEnterTransitionListener.mIsBack) {
                     int indexOf2 = arrayList.indexOf(startEnterTransitionListener.mRecord);
-                    if (indexOf2 != -1 && ((Boolean) arrayList2.get(indexOf2)).booleanValue()) {
+                    if (indexOf2 != -1 && arrayList2.get(indexOf2).booleanValue()) {
                         startEnterTransitionListener.cancelTransaction();
                     }
                 }
@@ -654,7 +649,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         View view = fragment.mView;
         if (!(viewGroup == null || view == null)) {
             for (int indexOf = this.mAdded.indexOf(fragment) - 1; indexOf >= 0; indexOf--) {
-                Fragment fragment2 = (Fragment) this.mAdded.get(indexOf);
+                Fragment fragment2 = this.mAdded.get(indexOf);
                 if (fragment2.mContainer == viewGroup && fragment2.mView != null) {
                     return fragment2;
                 }
@@ -666,7 +661,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     private void forcePostponedTransactions() {
         if (this.mPostponedTransactions != null) {
             while (!this.mPostponedTransactions.isEmpty()) {
-                ((StartEnterTransitionListener) this.mPostponedTransactions.remove(0)).completeTransaction();
+                this.mPostponedTransactions.remove(0).completeTransaction();
             }
         }
     }
@@ -678,9 +673,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         synchronized (this) {
             if (this.mPendingActions != null) {
                 if (this.mPendingActions.size() != 0) {
+                    int size = this.mPendingActions.size();
                     boolean z = false;
-                    for (int i = 0; i < this.mPendingActions.size(); i++) {
-                        z |= ((OpGenerator) this.mPendingActions.get(i)).generateOps(arrayList, arrayList2);
+                    for (int i = 0; i < size; i++) {
+                        z |= this.mPendingActions.get(i).generateOps(arrayList, arrayList2);
                     }
                     this.mPendingActions.clear();
                     this.mHost.getHandler().removeCallbacks(this.mExecCommit);
@@ -690,19 +686,18 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    private static AnimationListener getAnimationListener(Animation animation) {
-        String str = TAG;
+    private static Animation.AnimationListener getAnimationListener(Animation animation) {
         try {
             if (sAnimationListenerField == null) {
                 sAnimationListenerField = Animation.class.getDeclaredField("mListener");
                 sAnimationListenerField.setAccessible(true);
             }
-            return (AnimationListener) sAnimationListenerField.get(animation);
+            return (Animation.AnimationListener) sAnimationListenerField.get(animation);
         } catch (NoSuchFieldException e2) {
-            Log.e(str, "No field with the name mListener is found in Animation class", e2);
+            Log.e(TAG, "No field with the name mListener is found in Animation class", e2);
             return null;
         } catch (IllegalAccessException e3) {
-            Log.e(str, "Cannot access Animation's mListener field", e3);
+            Log.e(TAG, "Cannot access Animation's mListener field", e3);
             return null;
         }
     }
@@ -730,10 +725,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     private void makeRemovedFragmentsInvisible(ArraySet<Fragment> arraySet) {
         int size = arraySet.size();
         for (int i = 0; i < size; i++) {
-            Fragment fragment = (Fragment) arraySet.valueAt(i);
-            if (!fragment.mAdded) {
-                View view = fragment.getView();
-                fragment.mPostponedAlpha = view.getAlpha();
+            Fragment valueAt = arraySet.valueAt(i);
+            if (!valueAt.mAdded) {
+                View view = valueAt.getView();
+                valueAt.mPostponedAlpha = view.getAlpha();
                 view.setAlpha(0.0f);
             }
         }
@@ -751,9 +746,9 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 }
             }
         } else if (animator instanceof AnimatorSet) {
-            ArrayList childAnimations = ((AnimatorSet) animator).getChildAnimations();
+            ArrayList<Animator> childAnimations = ((AnimatorSet) animator).getChildAnimations();
             for (int i = 0; i < childAnimations.size(); i++) {
-                if (modifiesAlpha((Animator) childAnimations.get(i))) {
+                if (modifiesAlpha(childAnimations.get(i))) {
                     return true;
                 }
             }
@@ -769,7 +764,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         if (!(animation instanceof AnimationSet)) {
             return modifiesAlpha(animationOrAnimator.animator);
         }
-        List animations = ((AnimationSet) animation).getAnimations();
+        List<Animation> animations = ((AnimationSet) animation).getAnimations();
         for (int i = 0; i < animations.size(); i++) {
             if (animations.get(i) instanceof AlphaAnimation) {
                 return true;
@@ -805,8 +800,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     private int postponePostponableTransactions(ArrayList<BackStackRecord> arrayList, ArrayList<Boolean> arrayList2, int i, int i2, ArraySet<Fragment> arraySet) {
         int i3 = i2;
         for (int i4 = i2 - 1; i4 >= i; i4--) {
-            BackStackRecord backStackRecord = (BackStackRecord) arrayList.get(i4);
-            boolean booleanValue = ((Boolean) arrayList2.get(i4)).booleanValue();
+            BackStackRecord backStackRecord = arrayList.get(i4);
+            boolean booleanValue = arrayList2.get(i4).booleanValue();
             if (backStackRecord.isPostponed() && !backStackRecord.interactsWith(arrayList, i4 + 1, i2)) {
                 if (this.mPostponedTransactions == null) {
                     this.mPostponedTransactions = new ArrayList<>();
@@ -840,13 +835,13 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             int i = 0;
             int i2 = 0;
             while (i < size) {
-                if (!((BackStackRecord) arrayList.get(i)).mReorderingAllowed) {
+                if (!arrayList.get(i).mReorderingAllowed) {
                     if (i2 != i) {
                         executeOpsTogether(arrayList, arrayList2, i2, i);
                     }
                     i2 = i + 1;
-                    if (((Boolean) arrayList2.get(i)).booleanValue()) {
-                        while (i2 < size && ((Boolean) arrayList2.get(i2)).booleanValue() && !((BackStackRecord) arrayList.get(i2)).mReorderingAllowed) {
+                    if (arrayList2.get(i).booleanValue()) {
+                        while (i2 < size && arrayList2.get(i2).booleanValue() && !arrayList.get(i2).mReorderingAllowed) {
                             i2++;
                         }
                     }
@@ -893,8 +888,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 animator.addListener(new AnimatorOnHWLayerIfNeededListener(view));
                 return;
             }
-            AnimationListener animationListener = getAnimationListener(animationOrAnimator.animation);
-            view.setLayerType(2, null);
+            Animation.AnimationListener animationListener = getAnimationListener(animationOrAnimator.animation);
+            view.setLayerType(2, (Paint) null);
             animationOrAnimator.animation.setAnimationListener(new AnimateOnHWLayerIfNeededListener(view, animationListener));
         }
     }
@@ -917,29 +912,25 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     }
 
     static boolean shouldRunOnHWLayer(View view, AnimationOrAnimator animationOrAnimator) {
-        return view != null && animationOrAnimator != null && VERSION.SDK_INT >= 19 && view.getLayerType() == 0 && ViewCompat.hasOverlappingRendering(view) && modifiesAlpha(animationOrAnimator);
+        return view != null && animationOrAnimator != null && Build.VERSION.SDK_INT >= 19 && view.getLayerType() == 0 && ViewCompat.hasOverlappingRendering(view) && modifiesAlpha(animationOrAnimator);
     }
 
     private void throwException(RuntimeException runtimeException) {
-        String message = runtimeException.getMessage();
-        String str = TAG;
-        Log.e(str, message);
-        Log.e(str, "Activity state:");
-        PrintWriter printWriter = new PrintWriter(new LogWriter(str));
+        Log.e(TAG, runtimeException.getMessage());
+        Log.e(TAG, "Activity state:");
+        PrintWriter printWriter = new PrintWriter(new LogWriter(TAG));
         FragmentHostCallback fragmentHostCallback = this.mHost;
-        String str2 = "Failed dumping state";
-        String str3 = "  ";
         if (fragmentHostCallback != null) {
             try {
-                fragmentHostCallback.onDump(str3, null, printWriter, new String[0]);
+                fragmentHostCallback.onDump("  ", (FileDescriptor) null, printWriter, new String[0]);
             } catch (Exception e2) {
-                Log.e(str, str2, e2);
+                Log.e(TAG, "Failed dumping state", e2);
             }
         } else {
             try {
-                dump(str3, null, printWriter, new String[0]);
+                dump("  ", (FileDescriptor) null, printWriter, new String[0]);
             } catch (Exception e3) {
-                Log.e(str, str2, e3);
+                Log.e(TAG, "Failed dumping state", e3);
             }
         }
         throw runtimeException;
@@ -958,7 +949,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return z ? 3 : 4;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addBackStackState(BackStackRecord backStackRecord) {
         if (this.mBackStack == null) {
             this.mBackStack = new ArrayList<>();
@@ -968,10 +959,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void addFragment(Fragment fragment, boolean z) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("add: ");
-            sb.append(fragment);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "add: " + fragment);
         }
         makeActive(fragment);
         if (fragment.mDetached) {
@@ -995,13 +983,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Fragment already added: ");
-        sb2.append(fragment);
-        throw new IllegalStateException(sb2.toString());
+        throw new IllegalStateException("Fragment already added: " + fragment);
     }
 
-    public void addOnBackStackChangedListener(OnBackStackChangedListener onBackStackChangedListener) {
+    public void addOnBackStackChangedListener(FragmentManager.OnBackStackChangedListener onBackStackChangedListener) {
         if (this.mBackStackChangeListeners == null) {
             this.mBackStackChangeListeners = new ArrayList<>();
         }
@@ -1012,15 +997,9 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         synchronized (this) {
             if (this.mAvailBackStackIndices != null) {
                 if (this.mAvailBackStackIndices.size() > 0) {
-                    int intValue = ((Integer) this.mAvailBackStackIndices.remove(this.mAvailBackStackIndices.size() - 1)).intValue();
+                    int intValue = this.mAvailBackStackIndices.remove(this.mAvailBackStackIndices.size() - 1).intValue();
                     if (DEBUG) {
-                        String str = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Adding back stack index ");
-                        sb.append(intValue);
-                        sb.append(" with ");
-                        sb.append(backStackRecord);
-                        Log.v(str, sb.toString());
+                        Log.v(TAG, "Adding back stack index " + intValue + " with " + backStackRecord);
                     }
                     this.mBackStackIndices.set(intValue, backStackRecord);
                     return intValue;
@@ -1031,13 +1010,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             int size = this.mBackStackIndices.size();
             if (DEBUG) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Setting back stack index ");
-                sb2.append(size);
-                sb2.append(" to ");
-                sb2.append(backStackRecord);
-                Log.v(str2, sb2.toString());
+                Log.v(TAG, "Setting back stack index " + size + " to " + backStackRecord);
             }
             this.mBackStackIndices.add(backStackRecord);
             return size;
@@ -1056,10 +1029,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void attachFragment(Fragment fragment) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("attach: ");
-            sb.append(fragment);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "attach: " + fragment);
         }
         if (fragment.mDetached) {
             fragment.mDetached = false;
@@ -1068,10 +1038,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             if (!this.mAdded.contains(fragment)) {
                 if (DEBUG) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("add from attach: ");
-                    sb2.append(fragment);
-                    Log.v(TAG, sb2.toString());
+                    Log.v(TAG, "add from attach: " + fragment);
                 }
                 synchronized (this.mAdded) {
                     this.mAdded.add(fragment);
@@ -1083,10 +1050,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 }
                 return;
             }
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Fragment already added: ");
-            sb3.append(fragment);
-            throw new IllegalStateException(sb3.toString());
+            throw new IllegalStateException("Fragment already added: " + fragment);
         }
     }
 
@@ -1094,7 +1058,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return new BackStackRecord(this);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void completeShowHideFragment(final Fragment fragment) {
         if (fragment.mView != null) {
             AnimationOrAnimator loadAnimation = loadAnimation(fragment, fragment.getNextTransition(), !fragment.mHidden, fragment.getNextTransitionStyle());
@@ -1144,19 +1108,13 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void detachFragment(Fragment fragment) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("detach: ");
-            sb.append(fragment);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "detach: " + fragment);
         }
         if (!fragment.mDetached) {
             fragment.mDetached = true;
             if (fragment.mAdded) {
                 if (DEBUG) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("remove from detach: ");
-                    sb2.append(fragment);
-                    Log.v(TAG, sb2.toString());
+                    Log.v(TAG, "remove from detach: " + fragment);
                 }
                 synchronized (this.mAdded) {
                     this.mAdded.remove(fragment);
@@ -1177,7 +1135,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void dispatchConfigurationChanged(Configuration configuration) {
         for (int i = 0; i < this.mAdded.size(); i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null) {
                 fragment.performConfigurationChanged(configuration);
             }
@@ -1189,7 +1147,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             return false;
         }
         for (int i = 0; i < this.mAdded.size(); i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null && fragment.performContextItemSelected(menuItem)) {
                 return true;
             }
@@ -1210,7 +1168,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         ArrayList<Fragment> arrayList = null;
         boolean z = false;
         for (int i = 0; i < this.mAdded.size(); i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null && fragment.performCreateOptionsMenu(menu, menuInflater)) {
                 if (arrayList == null) {
                     arrayList = new ArrayList<>();
@@ -1221,7 +1179,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
         if (this.mCreatedMenus != null) {
             for (int i2 = 0; i2 < this.mCreatedMenus.size(); i2++) {
-                Fragment fragment2 = (Fragment) this.mCreatedMenus.get(i2);
+                Fragment fragment2 = this.mCreatedMenus.get(i2);
                 if (arrayList == null || !arrayList.contains(fragment2)) {
                     fragment2.onDestroyOptionsMenu();
                 }
@@ -1246,7 +1204,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void dispatchLowMemory() {
         for (int i = 0; i < this.mAdded.size(); i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null) {
                 fragment.performLowMemory();
             }
@@ -1255,14 +1213,14 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void dispatchMultiWindowModeChanged(boolean z) {
         for (int size = this.mAdded.size() - 1; size >= 0; size--) {
-            Fragment fragment = (Fragment) this.mAdded.get(size);
+            Fragment fragment = this.mAdded.get(size);
             if (fragment != null) {
                 fragment.performMultiWindowModeChanged(z);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentActivityCreated(@NonNull Fragment fragment, @Nullable Bundle bundle, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1271,16 +1229,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentActivityCreated(fragment, bundle, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentActivityCreated(this, fragment, bundle);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentActivityCreated(this, fragment, bundle);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentAttached(@NonNull Fragment fragment, @NonNull Context context, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1289,16 +1247,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentAttached(fragment, context, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentAttached(this, fragment, context);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentAttached(this, fragment, context);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentCreated(@NonNull Fragment fragment, @Nullable Bundle bundle, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1307,16 +1265,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentCreated(fragment, bundle, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentCreated(this, fragment, bundle);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentCreated(this, fragment, bundle);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentDestroyed(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1325,16 +1283,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentDestroyed(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentDestroyed(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentDestroyed(this, fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentDetached(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1343,16 +1301,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentDetached(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentDetached(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentDetached(this, fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentPaused(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1361,16 +1319,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentPaused(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentPaused(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentPaused(this, fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentPreAttached(@NonNull Fragment fragment, @NonNull Context context, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1379,16 +1337,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentPreAttached(fragment, context, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentPreAttached(this, fragment, context);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentPreAttached(this, fragment, context);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentPreCreated(@NonNull Fragment fragment, @Nullable Bundle bundle, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1397,16 +1355,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentPreCreated(fragment, bundle, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentPreCreated(this, fragment, bundle);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentPreCreated(this, fragment, bundle);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentResumed(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1415,16 +1373,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentResumed(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentResumed(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentResumed(this, fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentSaveInstanceState(@NonNull Fragment fragment, @NonNull Bundle bundle, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1433,16 +1391,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentSaveInstanceState(fragment, bundle, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentSaveInstanceState(this, fragment, bundle);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentSaveInstanceState(this, fragment, bundle);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentStarted(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1451,16 +1409,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentStarted(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentStarted(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentStarted(this, fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentStopped(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1469,16 +1427,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentStopped(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentStopped(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentStopped(this, fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentViewCreated(@NonNull Fragment fragment, @NonNull View view, @Nullable Bundle bundle, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1487,16 +1445,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentViewCreated(fragment, view, bundle, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentViewCreated(this, fragment, view, bundle);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentViewCreated(this, fragment, view, bundle);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchOnFragmentViewDestroyed(@NonNull Fragment fragment, boolean z) {
         Fragment fragment2 = this.mParent;
         if (fragment2 != null) {
@@ -1505,11 +1463,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 ((FragmentManagerImpl) fragmentManager).dispatchOnFragmentViewDestroyed(fragment, true);
             }
         }
-        Iterator it = this.mLifecycleCallbacks.iterator();
+        Iterator<FragmentLifecycleCallbacksHolder> it = this.mLifecycleCallbacks.iterator();
         while (it.hasNext()) {
-            FragmentLifecycleCallbacksHolder fragmentLifecycleCallbacksHolder = (FragmentLifecycleCallbacksHolder) it.next();
-            if (!z || fragmentLifecycleCallbacksHolder.mRecursive) {
-                fragmentLifecycleCallbacksHolder.mCallback.onFragmentViewDestroyed(this, fragment);
+            FragmentLifecycleCallbacksHolder next = it.next();
+            if (!z || next.mRecursive) {
+                next.mCallback.onFragmentViewDestroyed(this, fragment);
             }
         }
     }
@@ -1519,7 +1477,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             return false;
         }
         for (int i = 0; i < this.mAdded.size(); i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null && fragment.performOptionsItemSelected(menuItem)) {
                 return true;
             }
@@ -1530,7 +1488,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     public void dispatchOptionsMenuClosed(Menu menu) {
         if (this.mCurState >= 1) {
             for (int i = 0; i < this.mAdded.size(); i++) {
-                Fragment fragment = (Fragment) this.mAdded.get(i);
+                Fragment fragment = this.mAdded.get(i);
                 if (fragment != null) {
                     fragment.performOptionsMenuClosed(menu);
                 }
@@ -1544,7 +1502,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void dispatchPictureInPictureModeChanged(boolean z) {
         for (int size = this.mAdded.size() - 1; size >= 0; size--) {
-            Fragment fragment = (Fragment) this.mAdded.get(size);
+            Fragment fragment = this.mAdded.get(size);
             if (fragment != null) {
                 fragment.performPictureInPictureModeChanged(z);
             }
@@ -1557,7 +1515,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
         boolean z = false;
         for (int i = 0; i < this.mAdded.size(); i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null && fragment.performPrepareOptionsMenu(menu)) {
                 z = true;
             }
@@ -1586,7 +1544,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         dispatchStateChange(3);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void doPendingDeferredStart() {
         if (this.mHavePendingDeferredStart) {
             this.mHavePendingDeferredStart = false;
@@ -1595,10 +1553,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     }
 
     public void dump(String str, FileDescriptor fileDescriptor, PrintWriter printWriter, String[] strArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append("    ");
-        String sb2 = sb.toString();
+        String str2 = str + "    ";
         SparseArray<Fragment> sparseArray = this.mActive;
         if (sparseArray != null) {
             int size = sparseArray.size();
@@ -1608,14 +1563,14 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 printWriter.print(Integer.toHexString(System.identityHashCode(this)));
                 printWriter.println(":");
                 for (int i = 0; i < size; i++) {
-                    Fragment fragment = (Fragment) this.mActive.valueAt(i);
+                    Fragment valueAt = this.mActive.valueAt(i);
                     printWriter.print(str);
                     printWriter.print("  #");
                     printWriter.print(i);
                     printWriter.print(": ");
-                    printWriter.println(fragment);
-                    if (fragment != null) {
-                        fragment.dump(sb2, fileDescriptor, printWriter, strArr);
+                    printWriter.println(valueAt);
+                    if (valueAt != null) {
+                        valueAt.dump(str2, fileDescriptor, printWriter, strArr);
                     }
                 }
             }
@@ -1625,12 +1580,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             printWriter.print(str);
             printWriter.println("Added Fragments:");
             for (int i2 = 0; i2 < size2; i2++) {
-                Fragment fragment2 = (Fragment) this.mAdded.get(i2);
                 printWriter.print(str);
                 printWriter.print("  #");
                 printWriter.print(i2);
                 printWriter.print(": ");
-                printWriter.println(fragment2.toString());
+                printWriter.println(this.mAdded.get(i2).toString());
             }
         }
         ArrayList<Fragment> arrayList = this.mCreatedMenus;
@@ -1640,12 +1594,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 printWriter.print(str);
                 printWriter.println("Fragments Created Menus:");
                 for (int i3 = 0; i3 < size3; i3++) {
-                    Fragment fragment3 = (Fragment) this.mCreatedMenus.get(i3);
                     printWriter.print(str);
                     printWriter.print("  #");
                     printWriter.print(i3);
                     printWriter.print(": ");
-                    printWriter.println(fragment3.toString());
+                    printWriter.println(this.mCreatedMenus.get(i3).toString());
                 }
             }
         }
@@ -1656,13 +1609,13 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 printWriter.print(str);
                 printWriter.println("Back Stack:");
                 for (int i4 = 0; i4 < size4; i4++) {
-                    BackStackRecord backStackRecord = (BackStackRecord) this.mBackStack.get(i4);
+                    BackStackRecord backStackRecord = this.mBackStack.get(i4);
                     printWriter.print(str);
                     printWriter.print("  #");
                     printWriter.print(i4);
                     printWriter.print(": ");
                     printWriter.println(backStackRecord.toString());
-                    backStackRecord.dump(sb2, fileDescriptor, printWriter, strArr);
+                    backStackRecord.dump(str2, fileDescriptor, printWriter, strArr);
                 }
             }
         }
@@ -1673,12 +1626,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     printWriter.print(str);
                     printWriter.println("Back Stack Indices:");
                     for (int i5 = 0; i5 < size5; i5++) {
-                        BackStackRecord backStackRecord2 = (BackStackRecord) this.mBackStackIndices.get(i5);
                         printWriter.print(str);
                         printWriter.print("  #");
                         printWriter.print(i5);
                         printWriter.print(": ");
-                        printWriter.println(backStackRecord2);
+                        printWriter.println(this.mBackStackIndices.get(i5));
                     }
                 }
             }
@@ -1695,12 +1647,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 printWriter.print(str);
                 printWriter.println("Pending Actions:");
                 for (int i6 = 0; i6 < size6; i6++) {
-                    OpGenerator opGenerator = (OpGenerator) this.mPendingActions.get(i6);
                     printWriter.print(str);
                     printWriter.print("  #");
                     printWriter.print(i6);
                     printWriter.print(": ");
-                    printWriter.println(opGenerator);
+                    printWriter.println(this.mPendingActions.get(i6));
                 }
             }
         }
@@ -1759,10 +1710,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void ensureInflatedFragmentView(Fragment fragment) {
         if (fragment.mFromLayout && !fragment.mPerformedCreateView) {
-            fragment.performCreateView(fragment.performGetLayoutInflater(fragment.mSavedFragmentState), null, fragment.mSavedFragmentState);
+            fragment.performCreateView(fragment.performGetLayoutInflater(fragment.mSavedFragmentState), (ViewGroup) null, fragment.mSavedFragmentState);
             View view = fragment.mView;
             if (view != null) {
                 fragment.mInnerView = view;
@@ -1823,18 +1774,19 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     @Nullable
     public Fragment findFragmentById(int i) {
         for (int size = this.mAdded.size() - 1; size >= 0; size--) {
-            Fragment fragment = (Fragment) this.mAdded.get(size);
+            Fragment fragment = this.mAdded.get(size);
             if (fragment != null && fragment.mFragmentId == i) {
                 return fragment;
             }
         }
         SparseArray<Fragment> sparseArray = this.mActive;
-        if (sparseArray != null) {
-            for (int size2 = sparseArray.size() - 1; size2 >= 0; size2--) {
-                Fragment fragment2 = (Fragment) this.mActive.valueAt(size2);
-                if (fragment2 != null && fragment2.mFragmentId == i) {
-                    return fragment2;
-                }
+        if (sparseArray == null) {
+            return null;
+        }
+        for (int size2 = sparseArray.size() - 1; size2 >= 0; size2--) {
+            Fragment valueAt = this.mActive.valueAt(size2);
+            if (valueAt != null && valueAt.mFragmentId == i) {
+                return valueAt;
             }
         }
         return null;
@@ -1844,19 +1796,20 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     public Fragment findFragmentByTag(@Nullable String str) {
         if (str != null) {
             for (int size = this.mAdded.size() - 1; size >= 0; size--) {
-                Fragment fragment = (Fragment) this.mAdded.get(size);
+                Fragment fragment = this.mAdded.get(size);
                 if (fragment != null && str.equals(fragment.mTag)) {
                     return fragment;
                 }
             }
         }
         SparseArray<Fragment> sparseArray = this.mActive;
-        if (!(sparseArray == null || str == null)) {
-            for (int size2 = sparseArray.size() - 1; size2 >= 0; size2--) {
-                Fragment fragment2 = (Fragment) this.mActive.valueAt(size2);
-                if (fragment2 != null && str.equals(fragment2.mTag)) {
-                    return fragment2;
-                }
+        if (sparseArray == null || str == null) {
+            return null;
+        }
+        for (int size2 = sparseArray.size() - 1; size2 >= 0; size2--) {
+            Fragment valueAt = this.mActive.valueAt(size2);
+            if (valueAt != null && str.equals(valueAt.mTag)) {
+                return valueAt;
             }
         }
         return null;
@@ -1864,14 +1817,15 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public Fragment findFragmentByWho(String str) {
         SparseArray<Fragment> sparseArray = this.mActive;
-        if (!(sparseArray == null || str == null)) {
-            for (int size = sparseArray.size() - 1; size >= 0; size--) {
-                Fragment fragment = (Fragment) this.mActive.valueAt(size);
-                if (fragment != null) {
-                    Fragment findFragmentByWho = fragment.findFragmentByWho(str);
-                    if (findFragmentByWho != null) {
-                        return findFragmentByWho;
-                    }
+        if (sparseArray == null || str == null) {
+            return null;
+        }
+        for (int size = sparseArray.size() - 1; size >= 0; size--) {
+            Fragment valueAt = this.mActive.valueAt(size);
+            if (valueAt != null) {
+                Fragment findFragmentByWho = valueAt.findFragmentByWho(str);
+                if (findFragmentByWho != null) {
+                    return findFragmentByWho;
                 }
             }
         }
@@ -1880,22 +1834,18 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void freeBackStackIndex(int i) {
         synchronized (this) {
-            this.mBackStackIndices.set(i, null);
+            this.mBackStackIndices.set(i, (Object) null);
             if (this.mAvailBackStackIndices == null) {
                 this.mAvailBackStackIndices = new ArrayList<>();
             }
             if (DEBUG) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Freeing back stack index ");
-                sb.append(i);
-                Log.v(str, sb.toString());
+                Log.v(TAG, "Freeing back stack index " + i);
             }
             this.mAvailBackStackIndices.add(Integer.valueOf(i));
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getActiveFragmentCount() {
         SparseArray<Fragment> sparseArray = this.mActive;
         if (sparseArray == null) {
@@ -1904,7 +1854,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return sparseArray.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public List<Fragment> getActiveFragments() {
         SparseArray<Fragment> sparseArray = this.mActive;
         if (sparseArray == null) {
@@ -1918,8 +1868,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return arrayList;
     }
 
-    public BackStackEntry getBackStackEntryAt(int i) {
-        return (BackStackEntry) this.mBackStack.get(i);
+    public FragmentManager.BackStackEntry getBackStackEntryAt(int i) {
+        return this.mBackStack.get(i);
     }
 
     public int getBackStackEntryCount() {
@@ -1936,16 +1886,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         if (i == -1) {
             return null;
         }
-        Fragment fragment = (Fragment) this.mActive.get(i);
+        Fragment fragment = this.mActive.get(i);
         if (fragment != null) {
             return fragment;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Fragment no longer exists for key ");
-        sb.append(str);
-        sb.append(": index ");
-        sb.append(i);
-        throwException(new IllegalStateException(sb.toString()));
+        throwException(new IllegalStateException("Fragment no longer exists for key " + str + ": index " + i));
         throw null;
     }
 
@@ -1960,8 +1905,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return list;
     }
 
-    /* access modifiers changed from: 0000 */
-    public Factory2 getLayoutInflaterFactory() {
+    /* access modifiers changed from: package-private */
+    public LayoutInflater.Factory2 getLayoutInflaterFactory() {
         return this;
     }
 
@@ -1972,10 +1917,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public void hideFragment(Fragment fragment) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("hide: ");
-            sb.append(fragment);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "hide: " + fragment);
         }
         if (!fragment.mHidden) {
             fragment.mHidden = true;
@@ -1987,7 +1929,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return this.mDestroyed;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isStateAtLeast(int i) {
         return this.mCurState >= i;
     }
@@ -1996,7 +1938,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return this.mStateSaved || this.mStopped;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public AnimationOrAnimator loadAnimation(Fragment fragment, int i, boolean z, int i2) {
         int nextAnim = fragment.getNextAnim();
         Animation onCreateAnimation = fragment.onCreateAnimation(i, z, nextAnim);
@@ -2017,7 +1959,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                         return new AnimationOrAnimator(loadAnimation);
                     }
                     z2 = true;
-                } catch (NotFoundException e2) {
+                } catch (Resources.NotFoundException e2) {
                     throw e2;
                 } catch (RuntimeException unused) {
                 }
@@ -2070,7 +2012,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void makeActive(Fragment fragment) {
         if (fragment.mIndex < 0) {
             int i = this.mNextFragmentIndex;
@@ -2081,29 +2023,23 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             this.mActive.put(fragment.mIndex, fragment);
             if (DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Allocated fragment index ");
-                sb.append(fragment);
-                Log.v(TAG, sb.toString());
+                Log.v(TAG, "Allocated fragment index " + fragment);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void makeInactive(Fragment fragment) {
         if (fragment.mIndex >= 0) {
             if (DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Freeing fragment index ");
-                sb.append(fragment);
-                Log.v(TAG, sb.toString());
+                Log.v(TAG, "Freeing fragment index " + fragment);
             }
-            this.mActive.put(fragment.mIndex, null);
+            this.mActive.put(fragment.mIndex, (Object) null);
             fragment.initState();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void moveFragmentToExpectedState(Fragment fragment) {
         if (fragment != null) {
             int i = this.mCurState;
@@ -2149,7 +2085,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void moveToState(int i, boolean z) {
         if (this.mHost == null && i != 0) {
             throw new IllegalStateException("No activity");
@@ -2158,13 +2094,13 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             if (this.mActive != null) {
                 int size = this.mAdded.size();
                 for (int i2 = 0; i2 < size; i2++) {
-                    moveFragmentToExpectedState((Fragment) this.mAdded.get(i2));
+                    moveFragmentToExpectedState(this.mAdded.get(i2));
                 }
                 int size2 = this.mActive.size();
                 for (int i3 = 0; i3 < size2; i3++) {
-                    Fragment fragment = (Fragment) this.mActive.valueAt(i3);
-                    if (fragment != null && ((fragment.mRemoving || fragment.mDetached) && !fragment.mIsNewlyAdded)) {
-                        moveFragmentToExpectedState(fragment);
+                    Fragment valueAt = this.mActive.valueAt(i3);
+                    if (valueAt != null && ((valueAt.mRemoving || valueAt.mDetached) && !valueAt.mIsNewlyAdded)) {
+                        moveFragmentToExpectedState(valueAt);
                     }
                 }
                 startPendingDeferredFragments();
@@ -2179,66 +2115,44 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void moveToState(Fragment fragment) {
         moveToState(fragment, this.mCurState, 0, 0, false);
     }
 
-    /* JADX WARNING: type inference failed for: r8v0 */
-    /* JADX WARNING: type inference failed for: r8v1, types: [int] */
-    /* JADX WARNING: type inference failed for: r11v1 */
-    /* JADX WARNING: type inference failed for: r8v2 */
-    /* JADX WARNING: type inference failed for: r11v2 */
-    /* JADX WARNING: type inference failed for: r11v3 */
-    /* JADX WARNING: type inference failed for: r11v4 */
-    /* JADX WARNING: type inference failed for: r11v5 */
-    /* JADX WARNING: type inference failed for: r8v3, types: [boolean] */
-    /* JADX WARNING: type inference failed for: r8v4 */
-    /* JADX WARNING: type inference failed for: r11v6 */
-    /* JADX WARNING: type inference failed for: r11v7 */
-    /* JADX WARNING: type inference failed for: r8v5 */
-    /* JADX WARNING: type inference failed for: r11v10 */
-    /* JADX WARNING: type inference failed for: r11v11 */
-    /* access modifiers changed from: 0000 */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r11v6
-  assigns: []
-  uses: []
-  mth insns count: 442
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r8v0, resolved type: boolean} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v0, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r8v1, resolved type: boolean} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v1, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r8v2, resolved type: boolean} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v2, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v3, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v4, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v5, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r8v3, resolved type: boolean} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r8v4, resolved type: boolean} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v6, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v7, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v8, resolved type: int} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v9, resolved type: int} */
+    /* access modifiers changed from: package-private */
+    /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:132:0x02a0  */
     /* JADX WARNING: Removed duplicated region for block: B:134:0x02a4  */
     /* JADX WARNING: Removed duplicated region for block: B:140:0x02c5  */
     /* JADX WARNING: Removed duplicated region for block: B:229:0x0453  */
+    /* JADX WARNING: Removed duplicated region for block: B:231:? A[RETURN, SYNTHETIC] */
     /* JADX WARNING: Removed duplicated region for block: B:77:0x015e  */
     /* JADX WARNING: Removed duplicated region for block: B:86:0x0192  */
-    /* JADX WARNING: Unknown variable types count: 3 */
     public void moveToState(Fragment fragment, int i, int i2, int i3, boolean z) {
         int i4;
-        ? r8;
-        char c2;
-        char c3;
+        int i5;
+        int i6;
         ViewGroup viewGroup;
         String str;
         String str2;
         Fragment fragment2 = fragment;
-        ? r82 = 1;
+        boolean z2 = 1;
         if (!fragment2.mAdded || fragment2.mDetached) {
             i4 = i;
             if (i4 > 1) {
@@ -2248,34 +2162,30 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             i4 = i;
         }
         if (fragment2.mRemoving) {
-            int i5 = fragment2.mState;
-            if (i4 > i5) {
-                i4 = (i5 != 0 || !fragment.isInBackStack()) ? fragment2.mState : 1;
+            int i7 = fragment2.mState;
+            if (i4 > i7) {
+                i4 = (i7 != 0 || !fragment.isInBackStack()) ? fragment2.mState : 1;
             }
         }
-        ? r11 = (!fragment2.mDeferStart || fragment2.mState >= 4 || i4 <= 3) ? i4 : 3;
-        int i6 = fragment2.mState;
-        String str3 = TAG;
-        if (i6 <= r11) {
+        int i8 = (!fragment2.mDeferStart || fragment2.mState >= 4 || i4 <= 3) ? i4 : 3;
+        int i9 = fragment2.mState;
+        if (i9 <= i8) {
             if (!fragment2.mFromLayout || fragment2.mInLayout) {
                 if (!(fragment.getAnimatingAway() == null && fragment.getAnimator() == null)) {
-                    fragment2.setAnimatingAway(null);
-                    fragment2.setAnimator(null);
+                    fragment2.setAnimatingAway((View) null);
+                    fragment2.setAnimator((Animator) null);
                     moveToState(fragment, fragment.getStateAfterAnimating(), 0, 0, true);
                 }
-                int i7 = fragment2.mState;
-                if (i7 != 0) {
-                    if (i7 != 1) {
-                        if (i7 != 2) {
-                            if (i7 != 3) {
-                                if (i7 == 4) {
-                                    c3 = 4;
-                                    if (r11 > c3) {
+                int i10 = fragment2.mState;
+                if (i10 != 0) {
+                    if (i10 != 1) {
+                        if (i10 != 2) {
+                            if (i10 != 3) {
+                                if (i10 == 4) {
+                                    i6 = 4;
+                                    if (i8 > i6) {
                                         if (DEBUG) {
-                                            StringBuilder sb = new StringBuilder();
-                                            sb.append("moveto RESUMED: ");
-                                            sb.append(fragment2);
-                                            Log.v(str3, sb.toString());
+                                            Log.v(TAG, "moveto RESUMED: " + fragment2);
                                         }
                                         fragment.performResume();
                                         dispatchOnFragmentResumed(fragment2, false);
@@ -2284,37 +2194,29 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                                     }
                                 }
                             }
-                            if (r11 > 3) {
+                            if (i8 > 3) {
                                 if (DEBUG) {
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append("moveto STARTED: ");
-                                    sb2.append(fragment2);
-                                    Log.v(str3, sb2.toString());
+                                    Log.v(TAG, "moveto STARTED: " + fragment2);
                                 }
                                 fragment.performStart();
                                 dispatchOnFragmentStarted(fragment2, false);
                             }
-                            c3 = 4;
-                            r11 = r11;
-                            if (r11 > c3) {
+                            i6 = 4;
+                            if (i8 > i6) {
                             }
                         }
-                        if (r11 > 2) {
+                        if (i8 > 2) {
                             fragment2.mState = 3;
                         }
-                        if (r11 > 3) {
+                        if (i8 > 3) {
                         }
-                        c3 = 4;
-                        r11 = r11;
-                        if (r11 > c3) {
+                        i6 = 4;
+                        if (i8 > i6) {
                         }
                     }
-                } else if (r11 > 0) {
+                } else if (i8 > 0) {
                     if (DEBUG) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("moveto CREATED: ");
-                        sb3.append(fragment2);
-                        Log.v(str3, sb3.toString());
+                        Log.v(TAG, "moveto CREATED: " + fragment2);
                     }
                     Bundle bundle = fragment2.mSavedFragmentState;
                     if (bundle != null) {
@@ -2333,8 +2235,8 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                         }
                         if (!fragment2.mUserVisibleHint) {
                             fragment2.mDeferStart = true;
-                            if (r11 > 3) {
-                                r11 = 3;
+                            if (i8 > 3) {
+                                i8 = 3;
                             }
                         }
                     }
@@ -2344,31 +2246,23 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     fragment2.mParentFragment = fragment3;
                     fragment2.mFragmentManager = fragment3 != null ? fragment3.mChildFragmentManager : fragmentHostCallback.getFragmentManagerImpl();
                     Fragment fragment4 = fragment2.mTarget;
-                    String str4 = "Fragment ";
                     if (fragment4 != null) {
-                        Object obj = this.mActive.get(fragment4.mIndex);
-                        Fragment fragment5 = fragment2.mTarget;
-                        if (obj != fragment5) {
-                            String str5 = str4;
-                            StringBuilder sb4 = new StringBuilder();
-                            sb4.append(str5);
-                            sb4.append(fragment2);
-                            sb4.append(" declared target fragment ");
-                            sb4.append(fragment2.mTarget);
-                            sb4.append(" that does not belong to this FragmentManager!");
-                            throw new IllegalStateException(sb4.toString());
-                        } else if (fragment5.mState < 1) {
-                            str2 = str4;
-                            moveToState(fragment5, 1, 0, 0, true);
+                        Fragment fragment5 = this.mActive.get(fragment4.mIndex);
+                        Fragment fragment6 = fragment2.mTarget;
+                        if (fragment5 != fragment6) {
+                            throw new IllegalStateException("Fragment " + fragment2 + " declared target fragment " + fragment2.mTarget + " that does not belong to this FragmentManager!");
+                        } else if (fragment6.mState < 1) {
+                            str2 = "Fragment ";
+                            moveToState(fragment6, 1, 0, 0, true);
                             dispatchOnFragmentPreAttached(fragment2, this.mHost.getContext(), false);
                             fragment2.mCalled = false;
                             fragment2.onAttach(this.mHost.getContext());
                             if (!fragment2.mCalled) {
-                                Fragment fragment6 = fragment2.mParentFragment;
-                                if (fragment6 == null) {
+                                Fragment fragment7 = fragment2.mParentFragment;
+                                if (fragment7 == null) {
                                     this.mHost.onAttachFragment(fragment2);
                                 } else {
-                                    fragment6.onAttachFragment(fragment2);
+                                    fragment7.onAttachFragment(fragment2);
                                 }
                                 dispatchOnFragmentAttached(fragment2, this.mHost.getContext(), false);
                                 if (!fragment2.mIsCreated) {
@@ -2380,17 +2274,12 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                                     fragment2.mState = 1;
                                 }
                                 fragment2.mRetaining = false;
-                                r11 = r11;
                             } else {
-                                StringBuilder sb5 = new StringBuilder();
-                                sb5.append(str2);
-                                sb5.append(fragment2);
-                                sb5.append(" did not call through to super.onAttach()");
-                                throw new SuperNotCalledException(sb5.toString());
+                                throw new SuperNotCalledException(str2 + fragment2 + " did not call through to super.onAttach()");
                             }
                         }
                     }
-                    str2 = str4;
+                    str2 = "Fragment ";
                     dispatchOnFragmentPreAttached(fragment2, this.mHost.getContext(), false);
                     fragment2.mCalled = false;
                     fragment2.onAttach(this.mHost.getContext());
@@ -2398,41 +2287,27 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     }
                 }
                 ensureInflatedFragmentView(fragment);
-                if (r11 > 1) {
+                if (i8 > 1) {
                     if (DEBUG) {
-                        StringBuilder sb6 = new StringBuilder();
-                        sb6.append("moveto ACTIVITY_CREATED: ");
-                        sb6.append(fragment2);
-                        Log.v(str3, sb6.toString());
+                        Log.v(TAG, "moveto ACTIVITY_CREATED: " + fragment2);
                     }
                     if (!fragment2.mFromLayout) {
-                        int i8 = fragment2.mContainerId;
-                        if (i8 == 0) {
+                        int i11 = fragment2.mContainerId;
+                        if (i11 == 0) {
                             viewGroup = null;
-                        } else if (i8 != -1) {
-                            viewGroup = (ViewGroup) this.mContainer.onFindViewById(i8);
+                        } else if (i11 != -1) {
+                            viewGroup = (ViewGroup) this.mContainer.onFindViewById(i11);
                             if (viewGroup == null && !fragment2.mRestored) {
                                 try {
                                     str = fragment.getResources().getResourceName(fragment2.mContainerId);
-                                } catch (NotFoundException unused) {
+                                } catch (Resources.NotFoundException unused) {
                                     str = EnvironmentCompat.MEDIA_UNKNOWN;
                                 }
-                                StringBuilder sb7 = new StringBuilder();
-                                sb7.append("No view found for id 0x");
-                                sb7.append(Integer.toHexString(fragment2.mContainerId));
-                                sb7.append(" (");
-                                sb7.append(str);
-                                sb7.append(") for fragment ");
-                                sb7.append(fragment2);
-                                throwException(new IllegalArgumentException(sb7.toString()));
+                                throwException(new IllegalArgumentException("No view found for id 0x" + Integer.toHexString(fragment2.mContainerId) + " (" + str + ") for fragment " + fragment2));
                                 throw null;
                             }
                         } else {
-                            StringBuilder sb8 = new StringBuilder();
-                            sb8.append("Cannot create fragment ");
-                            sb8.append(fragment2);
-                            sb8.append(" for a container view with no id");
-                            throwException(new IllegalArgumentException(sb8.toString()));
+                            throwException(new IllegalArgumentException("Cannot create fragment " + fragment2 + " for a container view with no id"));
                             throw null;
                         }
                         fragment2.mContainer = viewGroup;
@@ -2450,9 +2325,9 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                             fragment2.onViewCreated(fragment2.mView, fragment2.mSavedFragmentState);
                             dispatchOnFragmentViewCreated(fragment2, fragment2.mView, fragment2.mSavedFragmentState, false);
                             if (fragment2.mView.getVisibility() != 0 || fragment2.mContainer == null) {
-                                r82 = 0;
+                                z2 = 0;
                             }
-                            fragment2.mIsNewlyAdded = r82;
+                            fragment2.mIsNewlyAdded = z2;
                         } else {
                             fragment2.mInnerView = null;
                         }
@@ -2464,63 +2339,50 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     }
                     fragment2.mSavedFragmentState = null;
                 }
-                if (r11 > 2) {
+                if (i8 > 2) {
                 }
-                if (r11 > 3) {
+                if (i8 > 3) {
                 }
-                c3 = 4;
-                r11 = r11;
-                if (r11 > c3) {
+                i6 = 4;
+                if (i8 > i6) {
                 }
             } else {
                 return;
             }
-        } else if (i6 > r11) {
-            if (i6 != 1) {
-                if (i6 != 2) {
-                    if (i6 != 3) {
-                        if (i6 == 4) {
-                            c2 = 4;
-                        } else if (i6 == 5) {
-                            if (r11 < 5) {
+        } else if (i9 > i8) {
+            if (i9 != 1) {
+                if (i9 != 2) {
+                    if (i9 != 3) {
+                        if (i9 == 4) {
+                            i5 = 4;
+                        } else if (i9 == 5) {
+                            if (i8 < 5) {
                                 if (DEBUG) {
-                                    StringBuilder sb9 = new StringBuilder();
-                                    sb9.append("movefrom RESUMED: ");
-                                    sb9.append(fragment2);
-                                    Log.v(str3, sb9.toString());
+                                    Log.v(TAG, "movefrom RESUMED: " + fragment2);
                                 }
                                 fragment.performPause();
                                 dispatchOnFragmentPaused(fragment2, false);
                             }
-                            c2 = 4;
+                            i5 = 4;
                         }
-                        if (r11 < c2) {
+                        if (i8 < i5) {
                             if (DEBUG) {
-                                StringBuilder sb10 = new StringBuilder();
-                                sb10.append("movefrom STARTED: ");
-                                sb10.append(fragment2);
-                                Log.v(str3, sb10.toString());
+                                Log.v(TAG, "movefrom STARTED: " + fragment2);
                             }
                             fragment.performStop();
                             dispatchOnFragmentStopped(fragment2, false);
                         }
                     }
-                    if (r11 < 3) {
+                    if (i8 < 3) {
                         if (DEBUG) {
-                            StringBuilder sb11 = new StringBuilder();
-                            sb11.append("movefrom STOPPED: ");
-                            sb11.append(fragment2);
-                            Log.v(str3, sb11.toString());
+                            Log.v(TAG, "movefrom STOPPED: " + fragment2);
                         }
                         fragment.performReallyStop();
                     }
                 }
-                if (r11 < 2) {
+                if (i8 < 2) {
                     if (DEBUG) {
-                        StringBuilder sb12 = new StringBuilder();
-                        sb12.append("movefrom ACTIVITY_CREATED: ");
-                        sb12.append(fragment2);
-                        Log.v(str3, sb12.toString());
+                        Log.v(TAG, "movefrom ACTIVITY_CREATED: " + fragment2);
                     }
                     if (fragment2.mView != null && this.mHost.onShouldSaveFragmentState(fragment2) && fragment2.mSavedViewState == null) {
                         saveFragmentViewState(fragment);
@@ -2536,7 +2398,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                             AnimationOrAnimator loadAnimation = (this.mCurState <= 0 || this.mDestroyed || fragment2.mView.getVisibility() != 0 || fragment2.mPostponedAlpha < 0.0f) ? null : loadAnimation(fragment2, i2, false, i3);
                             fragment2.mPostponedAlpha = 0.0f;
                             if (loadAnimation != null) {
-                                animateRemoveFragment(fragment2, loadAnimation, r11);
+                                animateRemoveFragment(fragment2, loadAnimation, i8);
                             }
                             fragment2.mContainer.removeView(fragment2.mView);
                         }
@@ -2549,24 +2411,21 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     fragment2.mInLayout = false;
                 }
             }
-            if (r11 < 1) {
+            if (i8 < 1) {
                 if (this.mDestroyed) {
                     if (fragment.getAnimatingAway() != null) {
                         View animatingAway = fragment.getAnimatingAway();
-                        fragment2.setAnimatingAway(null);
+                        fragment2.setAnimatingAway((View) null);
                         animatingAway.clearAnimation();
                     } else if (fragment.getAnimator() != null) {
                         Animator animator = fragment.getAnimator();
-                        fragment2.setAnimator(null);
+                        fragment2.setAnimator((Animator) null);
                         animator.cancel();
                     }
                 }
                 if (fragment.getAnimatingAway() == null && fragment.getAnimator() == null) {
                     if (DEBUG) {
-                        StringBuilder sb13 = new StringBuilder();
-                        sb13.append("movefrom CREATED: ");
-                        sb13.append(fragment2);
-                        Log.v(str3, sb13.toString());
+                        Log.v(TAG, "movefrom CREATED: " + fragment2);
                     }
                     if (!fragment2.mRetaining) {
                         fragment.performDestroy();
@@ -2586,25 +2445,18 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                         }
                     }
                 } else {
-                    fragment2.setStateAfterAnimating(r11);
-                    r8 = r82;
-                    if (fragment2.mState != r8) {
-                        StringBuilder sb14 = new StringBuilder();
-                        sb14.append("moveToState: Fragment state for ");
-                        sb14.append(fragment2);
-                        sb14.append(" not updated inline; ");
-                        sb14.append("expected state ");
-                        sb14.append(r8);
-                        sb14.append(" found ");
-                        sb14.append(fragment2.mState);
-                        Log.w(str3, sb14.toString());
-                        fragment2.mState = r8;
+                    fragment2.setStateAfterAnimating(i8);
+                    if (fragment2.mState == z2) {
+                        Log.w(TAG, "moveToState: Fragment state for " + fragment2 + " not updated inline; " + "expected state " + z2 + " found " + fragment2.mState);
+                        fragment2.mState = z2;
+                        return;
                     }
+                    return;
                 }
             }
         }
-        r8 = r11;
-        if (fragment2.mState != r8) {
+        z2 = i8;
+        if (fragment2.mState == z2) {
         }
     }
 
@@ -2614,7 +2466,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         this.mStopped = false;
         int size = this.mAdded.size();
         for (int i = 0; i < size; i++) {
-            Fragment fragment = (Fragment) this.mAdded.get(i);
+            Fragment fragment = this.mAdded.get(i);
             if (fragment != null) {
                 fragment.noteStateNotSaved();
             }
@@ -2629,7 +2481,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         if (!"fragment".equals(str)) {
             return null;
         }
-        String attributeValue = attributeSet2.getAttributeValue(null, "class");
+        String attributeValue = attributeSet2.getAttributeValue((String) null, "class");
         TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet2, FragmentTag.Fragment);
         int i = 0;
         if (attributeValue == null) {
@@ -2646,11 +2498,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             i = view.getId();
         }
         if (i == -1 && resourceId == -1 && string == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(attributeSet.getPositionDescription());
-            sb.append(": Must specify unique android:id, android:tag, or have a parent with an id for ");
-            sb.append(str3);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException(attributeSet.getPositionDescription() + ": Must specify unique android:id, android:tag, or have a parent with an id for " + str3);
         }
         Fragment findFragmentById = resourceId != -1 ? findFragmentById(resourceId) : null;
         if (findFragmentById == null && string != null) {
@@ -2660,17 +2508,10 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             findFragmentById = findFragmentById(i);
         }
         if (DEBUG) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("onCreateView: id=0x");
-            sb2.append(Integer.toHexString(resourceId));
-            sb2.append(" fname=");
-            sb2.append(str3);
-            sb2.append(" existing=");
-            sb2.append(findFragmentById);
-            Log.v(TAG, sb2.toString());
+            Log.v(TAG, "onCreateView: id=0x" + Integer.toHexString(resourceId) + " fname=" + str3 + " existing=" + findFragmentById);
         }
         if (findFragmentById == null) {
-            Fragment instantiate = this.mContainer.instantiate(context, str3, null);
+            Fragment instantiate = this.mContainer.instantiate(context, str3, (Bundle) null);
             instantiate.mFromLayout = true;
             instantiate.mFragmentId = resourceId != 0 ? resourceId : i;
             instantiate.mContainerId = i;
@@ -2691,17 +2532,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             fragment = findFragmentById;
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(attributeSet.getPositionDescription());
-            sb3.append(": Duplicate id 0x");
-            sb3.append(Integer.toHexString(resourceId));
-            sb3.append(", tag ");
-            sb3.append(string);
-            sb3.append(", or parent id 0x");
-            sb3.append(Integer.toHexString(i));
-            sb3.append(" with another fragment for ");
-            sb3.append(str3);
-            throw new IllegalArgumentException(sb3.toString());
+            throw new IllegalArgumentException(attributeSet.getPositionDescription() + ": Duplicate id 0x" + Integer.toHexString(resourceId) + ", tag " + string + ", or parent id 0x" + Integer.toHexString(i) + " with another fragment for " + str3);
         }
         if (this.mCurState >= 1 || !fragment.mFromLayout) {
             moveToState(fragment);
@@ -2718,41 +2549,35 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             return fragment.mView;
         }
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("Fragment ");
-        sb4.append(str3);
-        sb4.append(" did not create a view.");
-        throw new IllegalStateException(sb4.toString());
+        throw new IllegalStateException("Fragment " + str3 + " did not create a view.");
     }
 
     public View onCreateView(String str, Context context, AttributeSet attributeSet) {
-        return onCreateView(null, str, context, attributeSet);
+        return onCreateView((View) null, str, context, attributeSet);
     }
 
     public void performPendingDeferredStart(Fragment fragment) {
-        if (fragment.mDeferStart) {
-            if (this.mExecutingActions) {
-                this.mHavePendingDeferredStart = true;
-                return;
-            }
-            fragment.mDeferStart = false;
-            moveToState(fragment, this.mCurState, 0, 0, false);
+        if (!fragment.mDeferStart) {
+            return;
         }
+        if (this.mExecutingActions) {
+            this.mHavePendingDeferredStart = true;
+            return;
+        }
+        fragment.mDeferStart = false;
+        moveToState(fragment, this.mCurState, 0, 0, false);
     }
 
     public void popBackStack() {
-        enqueueAction(new PopBackStackState(null, -1, 0), false);
+        enqueueAction(new PopBackStackState((String) null, -1, 0), false);
     }
 
     public void popBackStack(int i, int i2) {
         if (i >= 0) {
-            enqueueAction(new PopBackStackState(null, i, i2), false);
+            enqueueAction(new PopBackStackState((String) null, i, i2), false);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Bad id: ");
-        sb.append(i);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Bad id: " + i);
     }
 
     public void popBackStack(@Nullable String str, int i) {
@@ -2761,19 +2586,16 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
 
     public boolean popBackStackImmediate() {
         checkStateLoss();
-        return popBackStackImmediate(null, -1, 0);
+        return popBackStackImmediate((String) null, -1, 0);
     }
 
     public boolean popBackStackImmediate(int i, int i2) {
         checkStateLoss();
         execPendingActions();
         if (i >= 0) {
-            return popBackStackImmediate(null, i, i2);
+            return popBackStackImmediate((String) null, i, i2);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Bad id: ");
-        sb.append(i);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Bad id: " + i);
     }
 
     public boolean popBackStackImmediate(@Nullable String str, int i) {
@@ -2781,7 +2603,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return popBackStackImmediate(str, -1, i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean popBackStackState(ArrayList<BackStackRecord> arrayList, ArrayList<Boolean> arrayList2, String str, int i, int i2) {
         int i3;
         ArrayList<BackStackRecord> arrayList3 = this.mBackStack;
@@ -2794,12 +2616,12 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 return false;
             }
             arrayList.add(this.mBackStack.remove(size));
-            arrayList2.add(Boolean.valueOf(true));
+            arrayList2.add(true);
         } else {
             if (str != null || i >= 0) {
                 i3 = this.mBackStack.size() - 1;
                 while (i3 >= 0) {
-                    BackStackRecord backStackRecord = (BackStackRecord) this.mBackStack.get(i3);
+                    BackStackRecord backStackRecord = this.mBackStack.get(i3);
                     if ((str != null && str.equals(backStackRecord.getName())) || (i >= 0 && i == backStackRecord.mIndex)) {
                         break;
                     }
@@ -2814,7 +2636,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                         if (i3 < 0) {
                             break;
                         }
-                        BackStackRecord backStackRecord2 = (BackStackRecord) this.mBackStack.get(i3);
+                        BackStackRecord backStackRecord2 = this.mBackStack.get(i3);
                         if ((str == null || !str.equals(backStackRecord2.getName())) && (i < 0 || i != backStackRecord2.mIndex)) {
                             break;
                         }
@@ -2828,7 +2650,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             }
             for (int size2 = this.mBackStack.size() - 1; size2 > i3; size2--) {
                 arrayList.add(this.mBackStack.remove(size2));
-                arrayList2.add(Boolean.valueOf(true));
+                arrayList2.add(true);
             }
         }
         return true;
@@ -2840,26 +2662,17 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             bundle.putInt(str, i);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Fragment ");
-        sb.append(fragment);
-        sb.append(" is not currently in the FragmentManager");
-        throwException(new IllegalStateException(sb.toString()));
+        throwException(new IllegalStateException("Fragment " + fragment + " is not currently in the FragmentManager"));
         throw null;
     }
 
-    public void registerFragmentLifecycleCallbacks(FragmentLifecycleCallbacks fragmentLifecycleCallbacks, boolean z) {
+    public void registerFragmentLifecycleCallbacks(FragmentManager.FragmentLifecycleCallbacks fragmentLifecycleCallbacks, boolean z) {
         this.mLifecycleCallbacks.add(new FragmentLifecycleCallbacksHolder(fragmentLifecycleCallbacks, z));
     }
 
     public void removeFragment(Fragment fragment) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("remove: ");
-            sb.append(fragment);
-            sb.append(" nesting=");
-            sb.append(fragment.mBackStackNesting);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "remove: " + fragment + " nesting=" + fragment.mBackStackNesting);
         }
         boolean z = !fragment.isInBackStack();
         if (!fragment.mDetached || z) {
@@ -2874,42 +2687,39 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    public void removeOnBackStackChangedListener(OnBackStackChangedListener onBackStackChangedListener) {
-        ArrayList<OnBackStackChangedListener> arrayList = this.mBackStackChangeListeners;
+    public void removeOnBackStackChangedListener(FragmentManager.OnBackStackChangedListener onBackStackChangedListener) {
+        ArrayList<FragmentManager.OnBackStackChangedListener> arrayList = this.mBackStackChangeListeners;
         if (arrayList != null) {
             arrayList.remove(onBackStackChangedListener);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void reportBackStackChanged() {
         if (this.mBackStackChangeListeners != null) {
             for (int i = 0; i < this.mBackStackChangeListeners.size(); i++) {
-                ((OnBackStackChangedListener) this.mBackStackChangeListeners.get(i)).onBackStackChanged();
+                this.mBackStackChangeListeners.get(i).onBackStackChanged();
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void restoreAllState(Parcelable parcelable, FragmentManagerNonConfig fragmentManagerNonConfig) {
-        List list;
-        List list2;
+        List<ViewModelStore> list;
+        List<FragmentManagerNonConfig> list2;
         if (parcelable != null) {
             FragmentManagerState fragmentManagerState = (FragmentManagerState) parcelable;
             if (fragmentManagerState.mActive != null) {
                 if (fragmentManagerNonConfig != null) {
-                    List fragments = fragmentManagerNonConfig.getFragments();
+                    List<Fragment> fragments = fragmentManagerNonConfig.getFragments();
                     list2 = fragmentManagerNonConfig.getChildNonConfigs();
                     list = fragmentManagerNonConfig.getViewModelStores();
                     int size = fragments != null ? fragments.size() : 0;
                     int i = 0;
                     while (i < size) {
-                        Fragment fragment = (Fragment) fragments.get(i);
+                        Fragment fragment = fragments.get(i);
                         if (DEBUG) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("restoreAllState: re-attaching retained ");
-                            sb.append(fragment);
-                            Log.v(TAG, sb.toString());
+                            Log.v(TAG, "restoreAllState: re-attaching retained " + fragment);
                         }
                         int i2 = 0;
                         while (true) {
@@ -2937,10 +2747,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                             }
                             i++;
                         } else {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Could not find active fragment with index ");
-                            sb2.append(fragment.mIndex);
-                            throwException(new IllegalStateException(sb2.toString()));
+                            throwException(new IllegalStateException("Could not find active fragment with index " + fragment.mIndex));
                             throw null;
                         }
                     }
@@ -2957,14 +2764,9 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     }
                     FragmentState fragmentState2 = fragmentStateArr3[i3];
                     if (fragmentState2 != null) {
-                        Fragment instantiate = fragmentState2.instantiate(this.mHost, this.mContainer, this.mParent, (list2 == null || i3 >= list2.size()) ? null : (FragmentManagerNonConfig) list2.get(i3), (list == null || i3 >= list.size()) ? null : (ViewModelStore) list.get(i3));
+                        Fragment instantiate = fragmentState2.instantiate(this.mHost, this.mContainer, this.mParent, (list2 == null || i3 >= list2.size()) ? null : list2.get(i3), (list == null || i3 >= list.size()) ? null : list.get(i3));
                         if (DEBUG) {
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("restoreAllState: active #");
-                            sb3.append(i3);
-                            sb3.append(": ");
-                            sb3.append(instantiate);
-                            Log.v(TAG, sb3.toString());
+                            Log.v(TAG, "restoreAllState: active #" + i3 + ": " + instantiate);
                         }
                         this.mActive.put(instantiate.mIndex, instantiate);
                         fragmentState2.mInstance = null;
@@ -2972,20 +2774,15 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                     i3++;
                 }
                 if (fragmentManagerNonConfig != null) {
-                    List fragments2 = fragmentManagerNonConfig.getFragments();
+                    List<Fragment> fragments2 = fragmentManagerNonConfig.getFragments();
                     int size2 = fragments2 != null ? fragments2.size() : 0;
                     for (int i4 = 0; i4 < size2; i4++) {
-                        Fragment fragment2 = (Fragment) fragments2.get(i4);
+                        Fragment fragment2 = fragments2.get(i4);
                         int i5 = fragment2.mTargetIndex;
                         if (i5 >= 0) {
-                            fragment2.mTarget = (Fragment) this.mActive.get(i5);
+                            fragment2.mTarget = this.mActive.get(i5);
                             if (fragment2.mTarget == null) {
-                                StringBuilder sb4 = new StringBuilder();
-                                sb4.append("Re-attaching retained fragment ");
-                                sb4.append(fragment2);
-                                sb4.append(" target no longer exists: ");
-                                sb4.append(fragment2.mTargetIndex);
-                                Log.w(TAG, sb4.toString());
+                                Log.w(TAG, "Re-attaching retained fragment " + fragment2 + " target no longer exists: " + fragment2.mTargetIndex);
                             }
                         }
                     }
@@ -2998,16 +2795,11 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                         if (i6 >= iArr.length) {
                             break;
                         }
-                        Fragment fragment3 = (Fragment) this.mActive.get(iArr[i6]);
+                        Fragment fragment3 = this.mActive.get(iArr[i6]);
                         if (fragment3 != null) {
                             fragment3.mAdded = true;
                             if (DEBUG) {
-                                StringBuilder sb5 = new StringBuilder();
-                                sb5.append("restoreAllState: added #");
-                                sb5.append(i6);
-                                sb5.append(": ");
-                                sb5.append(fragment3);
-                                Log.v(TAG, sb5.toString());
+                                Log.v(TAG, "restoreAllState: added #" + i6 + ": " + fragment3);
                             }
                             if (!this.mAdded.contains(fragment3)) {
                                 synchronized (this.mAdded) {
@@ -3018,10 +2810,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                                 throw new IllegalStateException("Already added!");
                             }
                         } else {
-                            StringBuilder sb6 = new StringBuilder();
-                            sb6.append("No instantiated fragment for index #");
-                            sb6.append(fragmentManagerState.mAdded[i6]);
-                            throwException(new IllegalStateException(sb6.toString()));
+                            throwException(new IllegalStateException("No instantiated fragment for index #" + fragmentManagerState.mAdded[i6]));
                             throw null;
                         }
                     }
@@ -3037,14 +2826,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                         }
                         BackStackRecord instantiate2 = backStackStateArr2[i7].instantiate(this);
                         if (DEBUG) {
-                            StringBuilder sb7 = new StringBuilder();
-                            sb7.append("restoreAllState: back stack #");
-                            sb7.append(i7);
-                            sb7.append(" (index ");
-                            sb7.append(instantiate2.mIndex);
-                            sb7.append("): ");
-                            sb7.append(instantiate2);
-                            Log.v(TAG, sb7.toString());
+                            Log.v(TAG, "restoreAllState: back stack #" + i7 + " (index " + instantiate2.mIndex + "): " + instantiate2);
                             PrintWriter printWriter = new PrintWriter(new LogWriter(TAG));
                             instantiate2.dump("  ", printWriter, false);
                             printWriter.close();
@@ -3061,20 +2843,20 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
                 }
                 int i9 = fragmentManagerState.mPrimaryNavActiveIndex;
                 if (i9 >= 0) {
-                    this.mPrimaryNav = (Fragment) this.mActive.get(i9);
+                    this.mPrimaryNav = this.mActive.get(i9);
                 }
                 this.mNextFragmentIndex = fragmentManagerState.mNextFragmentIndex;
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public FragmentManagerNonConfig retainNonConfig() {
         setRetaining(this.mSavedNonConfig);
         return this.mSavedNonConfig;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Parcelable saveAllState() {
         int[] iArr;
         forcePostponedTransactions();
@@ -3089,134 +2871,96 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
         int size = this.mActive.size();
         FragmentState[] fragmentStateArr = new FragmentState[size];
-        int i = 0;
         boolean z = false;
-        while (true) {
-            String str = " has cleared index: ";
-            String str2 = "Failure saving state: active ";
-            String str3 = ": ";
-            String str4 = TAG;
-            if (i < size) {
-                Fragment fragment = (Fragment) this.mActive.valueAt(i);
-                if (fragment != null) {
-                    if (fragment.mIndex >= 0) {
-                        FragmentState fragmentState = new FragmentState(fragment);
-                        fragmentStateArr[i] = fragmentState;
-                        if (fragment.mState <= 0 || fragmentState.mSavedFragmentState != null) {
-                            fragmentState.mSavedFragmentState = fragment.mSavedFragmentState;
-                        } else {
-                            fragmentState.mSavedFragmentState = saveFragmentBasicState(fragment);
-                            Fragment fragment2 = fragment.mTarget;
-                            if (fragment2 != null) {
-                                if (fragment2.mIndex >= 0) {
-                                    if (fragmentState.mSavedFragmentState == null) {
-                                        fragmentState.mSavedFragmentState = new Bundle();
-                                    }
-                                    putFragment(fragmentState.mSavedFragmentState, TARGET_STATE_TAG, fragment.mTarget);
-                                    int i2 = fragment.mTargetRequestCode;
-                                    if (i2 != 0) {
-                                        fragmentState.mSavedFragmentState.putInt(TARGET_REQUEST_CODE_STATE_TAG, i2);
-                                    }
-                                } else {
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append("Failure saving state: ");
-                                    sb.append(fragment);
-                                    sb.append(" has target not in fragment manager: ");
-                                    sb.append(fragment.mTarget);
-                                    throwException(new IllegalStateException(sb.toString()));
-                                    throw null;
-                                }
-                            }
-                        }
-                        if (DEBUG) {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Saved state of ");
-                            sb2.append(fragment);
-                            sb2.append(str3);
-                            sb2.append(fragmentState.mSavedFragmentState);
-                            Log.v(str4, sb2.toString());
-                        }
-                        z = true;
+        for (int i = 0; i < size; i++) {
+            Fragment valueAt = this.mActive.valueAt(i);
+            if (valueAt != null) {
+                if (valueAt.mIndex >= 0) {
+                    FragmentState fragmentState = new FragmentState(valueAt);
+                    fragmentStateArr[i] = fragmentState;
+                    if (valueAt.mState <= 0 || fragmentState.mSavedFragmentState != null) {
+                        fragmentState.mSavedFragmentState = valueAt.mSavedFragmentState;
                     } else {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append(str2);
-                        sb3.append(fragment);
-                        sb3.append(str);
-                        sb3.append(fragment.mIndex);
-                        throwException(new IllegalStateException(sb3.toString()));
-                        throw null;
-                    }
-                }
-                i++;
-            } else if (!z) {
-                if (DEBUG) {
-                    Log.v(str4, "saveAllState: no fragments!");
-                }
-                return null;
-            } else {
-                int size2 = this.mAdded.size();
-                if (size2 > 0) {
-                    iArr = new int[size2];
-                    int i3 = 0;
-                    while (i3 < size2) {
-                        iArr[i3] = ((Fragment) this.mAdded.get(i3)).mIndex;
-                        if (iArr[i3] >= 0) {
-                            if (DEBUG) {
-                                StringBuilder sb4 = new StringBuilder();
-                                sb4.append("saveAllState: adding fragment #");
-                                sb4.append(i3);
-                                sb4.append(str3);
-                                sb4.append(this.mAdded.get(i3));
-                                Log.v(str4, sb4.toString());
+                        fragmentState.mSavedFragmentState = saveFragmentBasicState(valueAt);
+                        Fragment fragment = valueAt.mTarget;
+                        if (fragment != null) {
+                            if (fragment.mIndex >= 0) {
+                                if (fragmentState.mSavedFragmentState == null) {
+                                    fragmentState.mSavedFragmentState = new Bundle();
+                                }
+                                putFragment(fragmentState.mSavedFragmentState, TARGET_STATE_TAG, valueAt.mTarget);
+                                int i2 = valueAt.mTargetRequestCode;
+                                if (i2 != 0) {
+                                    fragmentState.mSavedFragmentState.putInt(TARGET_REQUEST_CODE_STATE_TAG, i2);
+                                }
+                            } else {
+                                throwException(new IllegalStateException("Failure saving state: " + valueAt + " has target not in fragment manager: " + valueAt.mTarget));
+                                throw null;
                             }
-                            i3++;
-                        } else {
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append(str2);
-                            sb5.append(this.mAdded.get(i3));
-                            sb5.append(str);
-                            sb5.append(iArr[i3]);
-                            throwException(new IllegalStateException(sb5.toString()));
-                            throw null;
                         }
                     }
+                    if (DEBUG) {
+                        Log.v(TAG, "Saved state of " + valueAt + ": " + fragmentState.mSavedFragmentState);
+                    }
+                    z = true;
                 } else {
-                    iArr = null;
+                    throwException(new IllegalStateException("Failure saving state: active " + valueAt + " has cleared index: " + valueAt.mIndex));
+                    throw null;
                 }
-                ArrayList<BackStackRecord> arrayList = this.mBackStack;
-                if (arrayList != null) {
-                    int size3 = arrayList.size();
-                    if (size3 > 0) {
-                        backStackStateArr = new BackStackState[size3];
-                        for (int i4 = 0; i4 < size3; i4++) {
-                            backStackStateArr[i4] = new BackStackState((BackStackRecord) this.mBackStack.get(i4));
-                            if (DEBUG) {
-                                StringBuilder sb6 = new StringBuilder();
-                                sb6.append("saveAllState: adding back stack #");
-                                sb6.append(i4);
-                                sb6.append(str3);
-                                sb6.append(this.mBackStack.get(i4));
-                                Log.v(str4, sb6.toString());
-                            }
-                        }
-                    }
-                }
-                FragmentManagerState fragmentManagerState = new FragmentManagerState();
-                fragmentManagerState.mActive = fragmentStateArr;
-                fragmentManagerState.mAdded = iArr;
-                fragmentManagerState.mBackStack = backStackStateArr;
-                Fragment fragment3 = this.mPrimaryNav;
-                if (fragment3 != null) {
-                    fragmentManagerState.mPrimaryNavActiveIndex = fragment3.mIndex;
-                }
-                fragmentManagerState.mNextFragmentIndex = this.mNextFragmentIndex;
-                saveNonConfig();
-                return fragmentManagerState;
             }
         }
+        if (!z) {
+            if (DEBUG) {
+                Log.v(TAG, "saveAllState: no fragments!");
+            }
+            return null;
+        }
+        int size2 = this.mAdded.size();
+        if (size2 > 0) {
+            iArr = new int[size2];
+            int i3 = 0;
+            while (i3 < size2) {
+                iArr[i3] = this.mAdded.get(i3).mIndex;
+                if (iArr[i3] >= 0) {
+                    if (DEBUG) {
+                        Log.v(TAG, "saveAllState: adding fragment #" + i3 + ": " + this.mAdded.get(i3));
+                    }
+                    i3++;
+                } else {
+                    throwException(new IllegalStateException("Failure saving state: active " + this.mAdded.get(i3) + " has cleared index: " + iArr[i3]));
+                    throw null;
+                }
+            }
+        } else {
+            iArr = null;
+        }
+        ArrayList<BackStackRecord> arrayList = this.mBackStack;
+        if (arrayList != null) {
+            int size3 = arrayList.size();
+            if (size3 > 0) {
+                backStackStateArr = new BackStackState[size3];
+                for (int i4 = 0; i4 < size3; i4++) {
+                    backStackStateArr[i4] = new BackStackState(this.mBackStack.get(i4));
+                    if (DEBUG) {
+                        Log.v(TAG, "saveAllState: adding back stack #" + i4 + ": " + this.mBackStack.get(i4));
+                    }
+                }
+            }
+        }
+        FragmentManagerState fragmentManagerState = new FragmentManagerState();
+        fragmentManagerState.mActive = fragmentStateArr;
+        fragmentManagerState.mAdded = iArr;
+        fragmentManagerState.mBackStack = backStackStateArr;
+        Fragment fragment2 = this.mPrimaryNav;
+        if (fragment2 != null) {
+            fragmentManagerState.mPrimaryNavActiveIndex = fragment2.mIndex;
+        }
+        fragmentManagerState.mNextFragmentIndex = this.mNextFragmentIndex;
+        saveNonConfig();
+        return fragmentManagerState;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Bundle saveFragmentBasicState(Fragment fragment) {
         Bundle bundle;
         if (this.mStateBundle == null) {
@@ -3249,26 +2993,22 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
     }
 
     @Nullable
-    public SavedState saveFragmentInstanceState(Fragment fragment) {
+    public Fragment.SavedState saveFragmentInstanceState(Fragment fragment) {
         if (fragment.mIndex < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Fragment ");
-            sb.append(fragment);
-            sb.append(" is not currently in the FragmentManager");
-            throwException(new IllegalStateException(sb.toString()));
+            throwException(new IllegalStateException("Fragment " + fragment + " is not currently in the FragmentManager"));
             throw null;
         } else if (fragment.mState <= 0) {
             return null;
         } else {
             Bundle saveFragmentBasicState = saveFragmentBasicState(fragment);
             if (saveFragmentBasicState != null) {
-                return new SavedState(saveFragmentBasicState);
+                return new Fragment.SavedState(saveFragmentBasicState);
             }
             return null;
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void saveFragmentViewState(Fragment fragment) {
         if (fragment.mInnerView != null) {
             SparseArray<Parcelable> sparseArray = this.mStateArray;
@@ -3285,7 +3025,7 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void saveNonConfig() {
         ArrayList arrayList;
         ArrayList arrayList2;
@@ -3296,46 +3036,43 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             arrayList2 = null;
             arrayList = null;
             for (int i = 0; i < this.mActive.size(); i++) {
-                Fragment fragment = (Fragment) this.mActive.valueAt(i);
-                if (fragment != null) {
-                    if (fragment.mRetainInstance) {
+                Fragment valueAt = this.mActive.valueAt(i);
+                if (valueAt != null) {
+                    if (valueAt.mRetainInstance) {
                         if (arrayList3 == null) {
                             arrayList3 = new ArrayList();
                         }
-                        arrayList3.add(fragment);
-                        Fragment fragment2 = fragment.mTarget;
-                        fragment.mTargetIndex = fragment2 != null ? fragment2.mIndex : -1;
+                        arrayList3.add(valueAt);
+                        Fragment fragment = valueAt.mTarget;
+                        valueAt.mTargetIndex = fragment != null ? fragment.mIndex : -1;
                         if (DEBUG) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("retainNonConfig: keeping retained ");
-                            sb.append(fragment);
-                            Log.v(TAG, sb.toString());
+                            Log.v(TAG, "retainNonConfig: keeping retained " + valueAt);
                         }
                     }
-                    FragmentManagerImpl fragmentManagerImpl = fragment.mChildFragmentManager;
+                    FragmentManagerImpl fragmentManagerImpl = valueAt.mChildFragmentManager;
                     if (fragmentManagerImpl != null) {
                         fragmentManagerImpl.saveNonConfig();
-                        fragmentManagerNonConfig = fragment.mChildFragmentManager.mSavedNonConfig;
+                        fragmentManagerNonConfig = valueAt.mChildFragmentManager.mSavedNonConfig;
                     } else {
-                        fragmentManagerNonConfig = fragment.mChildNonConfig;
+                        fragmentManagerNonConfig = valueAt.mChildNonConfig;
                     }
                     if (arrayList2 == null && fragmentManagerNonConfig != null) {
                         arrayList2 = new ArrayList(this.mActive.size());
                         for (int i2 = 0; i2 < i; i2++) {
-                            arrayList2.add(null);
+                            arrayList2.add((Object) null);
                         }
                     }
                     if (arrayList2 != null) {
                         arrayList2.add(fragmentManagerNonConfig);
                     }
-                    if (arrayList == null && fragment.mViewModelStore != null) {
+                    if (arrayList == null && valueAt.mViewModelStore != null) {
                         arrayList = new ArrayList(this.mActive.size());
                         for (int i3 = 0; i3 < i; i3++) {
-                            arrayList.add(null);
+                            arrayList.add((Object) null);
                         }
                     }
                     if (arrayList != null) {
-                        arrayList.add(fragment.mViewModelStore);
+                        arrayList.add(valueAt.mViewModelStore);
                     }
                 }
             }
@@ -3359,39 +3096,23 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             int size = this.mBackStackIndices.size();
             if (i < size) {
                 if (DEBUG) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Setting back stack index ");
-                    sb.append(i);
-                    sb.append(" to ");
-                    sb.append(backStackRecord);
-                    Log.v(str, sb.toString());
+                    Log.v(TAG, "Setting back stack index " + i + " to " + backStackRecord);
                 }
                 this.mBackStackIndices.set(i, backStackRecord);
             } else {
                 while (size < i) {
-                    this.mBackStackIndices.add(null);
+                    this.mBackStackIndices.add((Object) null);
                     if (this.mAvailBackStackIndices == null) {
                         this.mAvailBackStackIndices = new ArrayList<>();
                     }
                     if (DEBUG) {
-                        String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Adding available back stack index ");
-                        sb2.append(size);
-                        Log.v(str2, sb2.toString());
+                        Log.v(TAG, "Adding available back stack index " + size);
                     }
                     this.mAvailBackStackIndices.add(Integer.valueOf(size));
                     size++;
                 }
                 if (DEBUG) {
-                    String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("Adding back stack index ");
-                    sb3.append(i);
-                    sb3.append(" with ");
-                    sb3.append(backStackRecord);
-                    Log.v(str3, sb3.toString());
+                    Log.v(TAG, "Adding back stack index " + i + " with " + backStackRecord);
                 }
                 this.mBackStackIndices.add(backStackRecord);
             }
@@ -3403,20 +3124,12 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
             this.mPrimaryNav = fragment;
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Fragment ");
-        sb.append(fragment);
-        sb.append(" is not an active fragment of FragmentManager ");
-        sb.append(this);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Fragment " + fragment + " is not an active fragment of FragmentManager " + this);
     }
 
     public void showFragment(Fragment fragment) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("show: ");
-            sb.append(fragment);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "show: " + fragment);
         }
         if (fragment.mHidden) {
             fragment.mHidden = false;
@@ -3424,13 +3137,13 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void startPendingDeferredFragments() {
         if (this.mActive != null) {
             for (int i = 0; i < this.mActive.size(); i++) {
-                Fragment fragment = (Fragment) this.mActive.valueAt(i);
-                if (fragment != null) {
-                    performPendingDeferredStart(fragment);
+                Fragment valueAt = this.mActive.valueAt(i);
+                if (valueAt != null) {
+                    performPendingDeferredStart(valueAt);
                 }
             }
         }
@@ -3451,14 +3164,14 @@ final class FragmentManagerImpl extends FragmentManager implements Factory2 {
         return sb.toString();
     }
 
-    public void unregisterFragmentLifecycleCallbacks(FragmentLifecycleCallbacks fragmentLifecycleCallbacks) {
+    public void unregisterFragmentLifecycleCallbacks(FragmentManager.FragmentLifecycleCallbacks fragmentLifecycleCallbacks) {
         synchronized (this.mLifecycleCallbacks) {
             int i = 0;
             int size = this.mLifecycleCallbacks.size();
             while (true) {
                 if (i >= size) {
                     break;
-                } else if (((FragmentLifecycleCallbacksHolder) this.mLifecycleCallbacks.get(i)).mCallback == fragmentLifecycleCallbacks) {
+                } else if (this.mLifecycleCallbacks.get(i).mCallback == fragmentLifecycleCallbacks) {
                     this.mLifecycleCallbacks.remove(i);
                     break;
                 } else {

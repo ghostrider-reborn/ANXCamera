@@ -46,17 +46,10 @@ public class XMPUtils {
             throw new XMPException("Empty convert-string", 5);
         }
         String lowerCase = str.toLowerCase();
-        boolean z = true;
         try {
-            if (Integer.parseInt(lowerCase) == 0) {
-                z = false;
-            }
-            return z;
+            return Integer.parseInt(lowerCase) != 0;
         } catch (NumberFormatException unused) {
-            if (!"true".equals(lowerCase) && !"t".equals(lowerCase) && !"on".equals(lowerCase) && !"yes".equals(lowerCase)) {
-                z = false;
-            }
-            return z;
+            return "true".equals(lowerCase) || "t".equals(lowerCase) || "on".equals(lowerCase) || "yes".equals(lowerCase);
         }
     }
 

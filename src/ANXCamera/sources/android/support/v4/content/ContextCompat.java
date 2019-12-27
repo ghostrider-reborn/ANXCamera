@@ -41,7 +41,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.PowerManager;
@@ -50,7 +50,7 @@ import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.storage.StorageManager;
 import android.print.PrintManager;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -67,7 +67,7 @@ import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textservice.TextServicesManager;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import java.io.File;
 import java.util.HashMap;
 
@@ -80,11 +80,11 @@ public class ContextCompat {
         static final HashMap<Class<?>, String> SERVICES = new HashMap<>();
 
         static {
-            if (VERSION.SDK_INT > 22) {
+            if (Build.VERSION.SDK_INT > 22) {
                 SERVICES.put(SubscriptionManager.class, "telephony_subscription_service");
                 SERVICES.put(UsageStatsManager.class, "usagestats");
             }
-            if (VERSION.SDK_INT > 21) {
+            if (Build.VERSION.SDK_INT > 21) {
                 SERVICES.put(AppWidgetManager.class, "appwidget");
                 SERVICES.put(BatteryManager.class, "batterymanager");
                 SERVICES.put(CameraManager.class, "camera");
@@ -96,20 +96,20 @@ public class ContextCompat {
                 SERVICES.put(TelecomManager.class, "telecom");
                 SERVICES.put(TvInputManager.class, "tv_input");
             }
-            if (VERSION.SDK_INT > 19) {
+            if (Build.VERSION.SDK_INT > 19) {
                 SERVICES.put(AppOpsManager.class, "appops");
                 SERVICES.put(CaptioningManager.class, "captioning");
                 SERVICES.put(ConsumerIrManager.class, "consumer_ir");
                 SERVICES.put(PrintManager.class, "print");
             }
-            if (VERSION.SDK_INT > 18) {
+            if (Build.VERSION.SDK_INT > 18) {
                 SERVICES.put(BluetoothManager.class, "bluetooth");
             }
-            if (VERSION.SDK_INT > 17) {
+            if (Build.VERSION.SDK_INT > 17) {
                 SERVICES.put(DisplayManager.class, "display");
                 SERVICES.put(UserManager.class, "user");
             }
-            if (VERSION.SDK_INT > 16) {
+            if (Build.VERSION.SDK_INT > 16) {
                 SERVICES.put(InputManager.class, "input");
                 SERVICES.put(MediaRouter.class, "media_router");
                 SERVICES.put(NsdManager.class, "servicediscovery");
@@ -118,7 +118,7 @@ public class ContextCompat {
             SERVICES.put(AccountManager.class, "account");
             SERVICES.put(ActivityManager.class, "activity");
             SERVICES.put(AlarmManager.class, NotificationCompat.CATEGORY_ALARM);
-            SERVICES.put(AudioManager.class, MVConsts.TYPE_AUDIO);
+            SERVICES.put(AudioManager.class, VEEditor.MVConsts.TYPE_AUDIO);
             SERVICES.put(ClipboardManager.class, "clipboard");
             SERVICES.put(ConnectivityManager.class, "connectivity");
             SERVICES.put(DevicePolicyManager.class, "device_policy");
@@ -141,7 +141,7 @@ public class ContextCompat {
             SERVICES.put(Vibrator.class, "vibrator");
             SERVICES.put(WallpaperManager.class, "wallpaper");
             SERVICES.put(WifiP2pManager.class, "wifip2p");
-            SERVICES.put(WifiManager.class, System.WIFI_SHARE);
+            SERVICES.put(WifiManager.class, MiuiSettings.System.WIFI_SHARE);
             SERVICES.put(WindowManager.class, "window");
         }
 
@@ -172,7 +172,7 @@ public class ContextCompat {
 
     @Nullable
     public static Context createDeviceProtectedStorageContext(@NonNull Context context) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return context.createDeviceProtectedStorageContext();
         }
         return null;
@@ -187,43 +187,42 @@ public class ContextCompat {
                 if (file.exists()) {
                     return file;
                 }
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unable to create files subdir ");
-                sb.append(file.getPath());
-                Log.w(str, sb.toString());
+                Log.w(TAG, "Unable to create files subdir " + file.getPath());
                 return null;
             }
         }
     }
 
     public static File getCodeCacheDir(@NonNull Context context) {
-        return VERSION.SDK_INT >= 21 ? context.getCodeCacheDir() : createFilesDir(new File(context.getApplicationInfo().dataDir, "code_cache"));
+        return Build.VERSION.SDK_INT >= 21 ? context.getCodeCacheDir() : createFilesDir(new File(context.getApplicationInfo().dataDir, "code_cache"));
     }
 
     @ColorInt
     public static int getColor(@NonNull Context context, @ColorRes int i) {
-        return VERSION.SDK_INT >= 23 ? context.getColor(i) : context.getResources().getColor(i);
+        return Build.VERSION.SDK_INT >= 23 ? context.getColor(i) : context.getResources().getColor(i);
     }
 
     @Nullable
     public static ColorStateList getColorStateList(@NonNull Context context, @ColorRes int i) {
-        return VERSION.SDK_INT >= 23 ? context.getColorStateList(i) : context.getResources().getColorStateList(i);
+        return Build.VERSION.SDK_INT >= 23 ? context.getColorStateList(i) : context.getResources().getColorStateList(i);
     }
 
     @Nullable
     public static File getDataDir(@NonNull Context context) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return context.getDataDir();
         }
         String str = context.getApplicationInfo().dataDir;
-        return str != null ? new File(str) : null;
+        if (str != null) {
+            return new File(str);
+        }
+        return null;
     }
 
     @Nullable
     public static Drawable getDrawable(@NonNull Context context, @DrawableRes int i) {
         int i2;
-        int i3 = VERSION.SDK_INT;
+        int i3 = Build.VERSION.SDK_INT;
         if (i3 >= 21) {
             return context.getDrawable(i);
         }
@@ -242,7 +241,7 @@ public class ContextCompat {
 
     @NonNull
     public static File[] getExternalCacheDirs(@NonNull Context context) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return context.getExternalCacheDirs();
         }
         return new File[]{context.getExternalCacheDir()};
@@ -250,7 +249,7 @@ public class ContextCompat {
 
     @NonNull
     public static File[] getExternalFilesDirs(@NonNull Context context, @Nullable String str) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return context.getExternalFilesDirs(str);
         }
         return new File[]{context.getExternalFilesDir(str)};
@@ -258,12 +257,12 @@ public class ContextCompat {
 
     @Nullable
     public static File getNoBackupFilesDir(@NonNull Context context) {
-        return VERSION.SDK_INT >= 21 ? context.getNoBackupFilesDir() : createFilesDir(new File(context.getApplicationInfo().dataDir, "no_backup"));
+        return Build.VERSION.SDK_INT >= 21 ? context.getNoBackupFilesDir() : createFilesDir(new File(context.getApplicationInfo().dataDir, "no_backup"));
     }
 
     @NonNull
     public static File[] getObbDirs(@NonNull Context context) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return context.getObbDirs();
         }
         return new File[]{context.getObbDir()};
@@ -271,40 +270,43 @@ public class ContextCompat {
 
     @Nullable
     public static <T> T getSystemService(@NonNull Context context, @NonNull Class<T> cls) {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             return context.getSystemService(cls);
         }
         String systemServiceName = getSystemServiceName(context, cls);
-        return systemServiceName != null ? context.getSystemService(systemServiceName) : null;
+        if (systemServiceName != null) {
+            return context.getSystemService(systemServiceName);
+        }
+        return null;
     }
 
     @Nullable
     public static String getSystemServiceName(@NonNull Context context, @NonNull Class<?> cls) {
-        return VERSION.SDK_INT >= 23 ? context.getSystemServiceName(cls) : (String) LegacyServiceMapHolder.SERVICES.get(cls);
+        return Build.VERSION.SDK_INT >= 23 ? context.getSystemServiceName(cls) : LegacyServiceMapHolder.SERVICES.get(cls);
     }
 
     public static boolean isDeviceProtectedStorage(@NonNull Context context) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return context.isDeviceProtectedStorage();
         }
         return false;
     }
 
     public static boolean startActivities(@NonNull Context context, @NonNull Intent[] intentArr) {
-        return startActivities(context, intentArr, null);
+        return startActivities(context, intentArr, (Bundle) null);
     }
 
     public static boolean startActivities(@NonNull Context context, @NonNull Intent[] intentArr, @Nullable Bundle bundle) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             context.startActivities(intentArr, bundle);
-        } else {
-            context.startActivities(intentArr);
+            return true;
         }
+        context.startActivities(intentArr);
         return true;
     }
 
     public static void startActivity(@NonNull Context context, @NonNull Intent intent, @Nullable Bundle bundle) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             context.startActivity(intent, bundle);
         } else {
             context.startActivity(intent);
@@ -312,7 +314,7 @@ public class ContextCompat {
     }
 
     public static void startForegroundService(@NonNull Context context, @NonNull Intent intent) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             context.startForegroundService(intent);
         } else {
             context.startService(intent);

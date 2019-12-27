@@ -7,6 +7,8 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.disposables.EmptyDisposable;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.single.SingleMap;
+import io.reactivex.internal.operators.single.SingleZipArray;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
@@ -38,7 +40,7 @@ public final class SingleZipIterable<T, R> extends Single<R> {
             int i = 0;
             for (SingleSource singleSource : this.sources) {
                 if (singleSource == null) {
-                    EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), singleObserver);
+                    EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), (SingleObserver<?>) singleObserver);
                     return;
                 }
                 if (i == singleSourceArr2.length) {
@@ -49,11 +51,11 @@ public final class SingleZipIterable<T, R> extends Single<R> {
                 i = i2;
             }
             if (i == 0) {
-                EmptyDisposable.error((Throwable) new NoSuchElementException(), singleObserver);
+                EmptyDisposable.error((Throwable) new NoSuchElementException(), (SingleObserver<?>) singleObserver);
             } else if (i == 1) {
-                singleSourceArr2[0].subscribe(new MapSingleObserver(singleObserver, new SingletonArrayFunc()));
+                singleSourceArr2[0].subscribe(new SingleMap.MapSingleObserver(singleObserver, new SingletonArrayFunc()));
             } else {
-                ZipCoordinator zipCoordinator = new ZipCoordinator(singleObserver, i, this.zipper);
+                SingleZipArray.ZipCoordinator zipCoordinator = new SingleZipArray.ZipCoordinator(singleObserver, i, this.zipper);
                 singleObserver.onSubscribe(zipCoordinator);
                 for (int i3 = 0; i3 < i && !zipCoordinator.isDisposed(); i3++) {
                     singleSourceArr2[i3].subscribe(zipCoordinator.observers[i3]);
@@ -61,7 +63,7 @@ public final class SingleZipIterable<T, R> extends Single<R> {
             }
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

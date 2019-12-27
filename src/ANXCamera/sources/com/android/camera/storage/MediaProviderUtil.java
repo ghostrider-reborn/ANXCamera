@@ -5,9 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Images.Media;
-import android.provider.MediaStore.Video;
+import android.provider.MediaStore;
 import com.android.camera.log.Log;
 import java.io.File;
 
@@ -42,34 +40,35 @@ public class MediaProviderUtil {
         throw r0;
      */
     public static Uri getContentUriFromPath(Context context, String str) {
-        String str2 = "external";
+        Uri contentUri = MediaStore.Files.getContentUri("external");
+        String[] strArr = {"_id", "media_type"};
         try {
-            Cursor query = context.getContentResolver().query(Files.getContentUri(str2), new String[]{"_id", "media_type"}, "_data = ?", new String[]{str}, "");
+            Cursor query = context.getContentResolver().query(contentUri, strArr, "_data = ?", new String[]{str}, "");
             if (query.moveToNext()) {
                 long j = (long) query.getInt(0);
                 int i = query.getInt(1);
                 if (i == 1) {
-                    Uri withAppendedId = ContentUris.withAppendedId(Media.getContentUri(str2), j);
+                    Uri withAppendedId = ContentUris.withAppendedId(MediaStore.Images.Media.getContentUri("external"), j);
                     if (query != null) {
-                        $closeResource(null, query);
+                        $closeResource((Throwable) null, query);
                     }
                     return withAppendedId;
                 } else if (i == 3) {
-                    Uri withAppendedId2 = ContentUris.withAppendedId(Video.Media.getContentUri(str2), j);
+                    Uri withAppendedId2 = ContentUris.withAppendedId(MediaStore.Video.Media.getContentUri("external"), j);
                     if (query != null) {
-                        $closeResource(null, query);
+                        $closeResource((Throwable) null, query);
                     }
                     return withAppendedId2;
                 } else {
-                    Uri withAppendedId3 = ContentUris.withAppendedId(Files.getContentUri(str2), j);
+                    Uri withAppendedId3 = ContentUris.withAppendedId(MediaStore.Files.getContentUri("external"), j);
                     if (query != null) {
-                        $closeResource(null, query);
+                        $closeResource((Throwable) null, query);
                     }
                     return withAppendedId3;
                 }
             } else {
                 if (query != null) {
-                    $closeResource(null, query);
+                    $closeResource((Throwable) null, query);
                 }
                 return null;
             }
@@ -90,20 +89,23 @@ public class MediaProviderUtil {
         throw r0;
      */
     private static long getParent(Context context, String str) {
+        Uri contentUri = MediaStore.Files.getContentUri("external");
         try {
-            Cursor query = context.getContentResolver().query(Files.getContentUri("external"), new String[]{"_id"}, "_data = ?", new String[]{new File(str).getParent()}, "");
+            Cursor query = context.getContentResolver().query(contentUri, new String[]{"_id"}, "_data = ?", new String[]{new File(str).getParent()}, "");
             if (query.moveToNext()) {
                 long j = query.getLong(0);
                 if (query != null) {
-                    $closeResource(null, query);
+                    $closeResource((Throwable) null, query);
                 }
                 return j;
+            } else if (query == null) {
+                return 0;
+            } else {
+                $closeResource((Throwable) null, query);
+                return 0;
             }
-            if (query != null) {
-                $closeResource(null, query);
-            }
-            return 0;
         } catch (Exception unused) {
+            return 0;
         }
     }
 
@@ -120,10 +122,10 @@ public class MediaProviderUtil {
     }
 
     public static Uri insertDirectory(Context context, String str, long j) {
-        Uri contentUri = Files.getContentUri("external");
+        Uri contentUri = MediaStore.Files.getContentUri("external");
         ContentValues contentValues = new ContentValues();
-        contentValues.put("format", Integer.valueOf(12289));
-        contentValues.put("media_type", Integer.valueOf(0));
+        contentValues.put("format", 12289);
+        contentValues.put("media_type", 0);
         contentValues.put("_data", str);
         contentValues.put("parent", Long.valueOf(j));
         File file = new File(str);
@@ -133,10 +135,7 @@ public class MediaProviderUtil {
         try {
             return context.getContentResolver().insert(contentUri, contentValues);
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("insertDirectory fail, path = ");
-            sb.append(str);
-            Log.w(TAG, sb.toString(), e2);
+            Log.w(TAG, "insertDirectory fail, path = " + str, e2);
             return null;
         }
     }

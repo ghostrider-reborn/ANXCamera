@@ -38,7 +38,7 @@ public class h {
     }
 
     public void h(@NonNull Class<?> cls, @NonNull Class<?> cls2) {
-        d(cls, cls2, null);
+        d(cls, cls2, (Class<?>) null);
     }
 
     public int hashCode() {
@@ -48,12 +48,6 @@ public class h {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("MultiClassKey{first=");
-        sb.append(this.first);
-        sb.append(", second=");
-        sb.append(this.second);
-        sb.append('}');
-        return sb.toString();
+        return "MultiClassKey{first=" + this.first + ", second=" + this.second + '}';
     }
 }

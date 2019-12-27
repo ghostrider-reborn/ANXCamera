@@ -13,10 +13,7 @@ public class HandGesture {
             System.loadLibrary("camera_arcsoft_handgesture");
         } catch (UnsatisfiedLinkError e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("can't loadLibrary, ");
-            sb.append(e2.getMessage());
-            Log.e(str, sb.toString());
+            Log.e(str, "can't loadLibrary, " + e2.getMessage());
         }
     }
 

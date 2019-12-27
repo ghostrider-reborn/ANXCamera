@@ -4,16 +4,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.AdapterDataObserver;
-import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.LayoutParams;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
@@ -41,22 +36,22 @@ public class AutoSelectHorizontalView extends RecyclerView {
     /* access modifiers changed from: private */
     public WrapperAdapter mWrapAdapter;
 
-    class WrapperAdapter extends Adapter {
+    class WrapperAdapter extends RecyclerView.Adapter {
         private static final int HEADER_FOOTER_TYPE = -1;
-        private Adapter adapter;
+        private RecyclerView.Adapter adapter;
         /* access modifiers changed from: private */
         public Context context;
         private int headerFooterWidth;
         private int itemPageCount = 5;
         private int itemWidth;
 
-        class HeaderFooterViewHolder extends ViewHolder {
+        class HeaderFooterViewHolder extends RecyclerView.ViewHolder {
             HeaderFooterViewHolder(View view) {
                 super(view);
             }
         }
 
-        public WrapperAdapter(Adapter adapter2, Context context2) {
+        public WrapperAdapter(RecyclerView.Adapter adapter2, Context context2) {
             this.adapter = adapter2;
             this.context = context2;
         }
@@ -96,21 +91,21 @@ public class AutoSelectHorizontalView extends RecyclerView {
             this.adapter.onAttachedToRecyclerView(recyclerView);
         }
 
-        public void onBindViewHolder(ViewHolder viewHolder, int i) {
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
             if (!isHeaderOrFooter(i)) {
                 this.adapter.onBindViewHolder(viewHolder, i - 1);
             }
         }
 
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             this.itemWidth = ((viewGroup.getMeasuredWidth() / this.itemPageCount) * 11) / 10;
             if (i == -1) {
                 View view = new View(this.context);
                 this.headerFooterWidth = (viewGroup.getMeasuredWidth() / 2) - (this.itemWidth / 2);
-                view.setLayoutParams(new LayoutParams(this.headerFooterWidth, -1));
+                view.setLayoutParams(new RecyclerView.LayoutParams(this.headerFooterWidth, -1));
                 return new HeaderFooterViewHolder(view);
             }
-            ViewHolder onCreateViewHolder = this.adapter.onCreateViewHolder(viewGroup, i);
+            RecyclerView.ViewHolder onCreateViewHolder = this.adapter.onCreateViewHolder(viewGroup, i);
             ViewGroup.LayoutParams layoutParams = onCreateViewHolder.itemView.getLayoutParams();
             if (layoutParams != null) {
                 layoutParams.width = this.itemWidth;
@@ -153,7 +148,7 @@ public class AutoSelectHorizontalView extends RecyclerView {
         }
     }
 
-    private void correctDeltax(Adapter adapter) {
+    private void correctDeltax(RecyclerView.Adapter adapter) {
         if (adapter.getItemCount() <= this.mSelectPosition) {
             this.mDeltaX -= this.mWrapAdapter.getItemWidth() * ((this.mSelectPosition - adapter.getItemCount()) + 1);
         }
@@ -162,27 +157,28 @@ public class AutoSelectHorizontalView extends RecyclerView {
 
     private void init() {
         this.mScroller = new Scroller(getContext(), new DecelerateInterpolator());
-        getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             public void onGlobalLayout() {
-                if (AutoSelectHorizontalView.this.isInit) {
-                    if (AutoSelectHorizontalView.this.mAutoSelectAdapter == null) {
-                        Log.e("View", "mAutoSelectAdapter  不能为空");
-                        return;
-                    }
-                    if (AutoSelectHorizontalView.this.mInitPosition >= AutoSelectHorizontalView.this.mAutoSelectAdapter.getItemCount()) {
-                        AutoSelectHorizontalView autoSelectHorizontalView = AutoSelectHorizontalView.this;
-                        autoSelectHorizontalView.mInitPosition = autoSelectHorizontalView.mAutoSelectAdapter.getItemCount() - 1;
-                    }
-                    if (AutoSelectHorizontalView.this.mInitPosition < 0) {
-                        AutoSelectHorizontalView.this.mInitPosition = 0;
-                    }
-                    if (AutoSelectHorizontalView.this.isFirstPositionChanged) {
-                        AutoSelectHorizontalView autoSelectHorizontalView2 = AutoSelectHorizontalView.this;
-                        autoSelectHorizontalView2.selectedPositionChanged(autoSelectHorizontalView2.mInitPosition);
-                    }
-                    AutoSelectHorizontalView.this.mLinearLayoutManager.scrollToPositionWithOffset(0, (-AutoSelectHorizontalView.this.mInitPosition) * AutoSelectHorizontalView.this.mWrapAdapter.getItemWidth());
-                    AutoSelectHorizontalView.this.isInit = false;
+                if (!AutoSelectHorizontalView.this.isInit) {
+                    return;
                 }
+                if (AutoSelectHorizontalView.this.mAutoSelectAdapter == null) {
+                    Log.e("View", "mAutoSelectAdapter  不能为空");
+                    return;
+                }
+                if (AutoSelectHorizontalView.this.mInitPosition >= AutoSelectHorizontalView.this.mAutoSelectAdapter.getItemCount()) {
+                    AutoSelectHorizontalView autoSelectHorizontalView = AutoSelectHorizontalView.this;
+                    int unused = autoSelectHorizontalView.mInitPosition = autoSelectHorizontalView.mAutoSelectAdapter.getItemCount() - 1;
+                }
+                if (AutoSelectHorizontalView.this.mInitPosition < 0) {
+                    int unused2 = AutoSelectHorizontalView.this.mInitPosition = 0;
+                }
+                if (AutoSelectHorizontalView.this.isFirstPositionChanged) {
+                    AutoSelectHorizontalView autoSelectHorizontalView2 = AutoSelectHorizontalView.this;
+                    autoSelectHorizontalView2.selectedPositionChanged(autoSelectHorizontalView2.mInitPosition);
+                }
+                AutoSelectHorizontalView.this.mLinearLayoutManager.scrollToPositionWithOffset(0, (-AutoSelectHorizontalView.this.mInitPosition) * AutoSelectHorizontalView.this.mWrapAdapter.getItemWidth());
+                boolean unused3 = AutoSelectHorizontalView.this.isInit = false;
             }
         });
     }
@@ -259,7 +255,7 @@ public class AutoSelectHorizontalView extends RecyclerView {
         }
         WrapperAdapter wrapperAdapter = this.mWrapAdapter;
         if (wrapperAdapter != null) {
-            wrapperAdapter.context = null;
+            Context unused = wrapperAdapter.context = null;
             this.mWrapAdapter = null;
         }
     }
@@ -316,7 +312,7 @@ public class AutoSelectHorizontalView extends RecyclerView {
         }
     }
 
-    public void setAdapter(Adapter adapter) {
+    public void setAdapter(RecyclerView.Adapter adapter) {
         if (!(adapter instanceof AutoSelectAdapter)) {
             Log.e(AutoSelectHorizontalView.class.getSimpleName(), "mAutoSelectAdapter must extends AutoSelectAdapter<T extends SelectItemBean> ");
             return;
@@ -324,7 +320,7 @@ public class AutoSelectHorizontalView extends RecyclerView {
         this.mAutoSelectAdapter = (AutoSelectAdapter) adapter;
         this.mWrapAdapter = new WrapperAdapter(adapter, getContext());
         this.mWrapAdapter.setHasStableIds(true);
-        adapter.registerAdapterDataObserver(new AdapterDataObserver() {
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             public void onChanged() {
                 super.onChanged();
                 AutoSelectHorizontalView.this.mWrapAdapter.notifyDataSetChanged();
@@ -366,7 +362,7 @@ public class AutoSelectHorizontalView extends RecyclerView {
         this.mSelectPosition = i;
     }
 
-    public void setLayoutManager(LayoutManager layoutManager) {
+    public void setLayoutManager(RecyclerView.LayoutManager layoutManager) {
         if (!(layoutManager instanceof LinearLayoutManagerWrapper)) {
             Log.e("View", "The LayoutManager here must be LinearLayoutManager!");
         } else {
@@ -375,6 +371,7 @@ public class AutoSelectHorizontalView extends RecyclerView {
     }
 
     public void smoothMoveToPosition(int i) {
+        int finalX;
         if (this.mAutoSelectAdapter != null && this.mWrapAdapter != null) {
             if (Math.abs(i) > 4000) {
                 this.isOverSpeed = true;
@@ -388,22 +385,14 @@ public class AutoSelectHorizontalView extends RecyclerView {
             if (i2 >= this.mAutoSelectAdapter.getItemCount()) {
                 i2 = this.mAutoSelectAdapter.getItemCount() - 1;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("fling  速度太快啦   position : ");
-            sb.append(i2);
-            String str = "View";
-            Log.w(str, sb.toString());
+            Log.w("View", "fling  速度太快啦   position : " + i2);
             this.mLastMoveX = 0;
             int itemWidth = this.mWrapAdapter.getItemWidth();
             int itemCount = this.mAutoSelectAdapter.getItemCount() * itemWidth;
             if (Math.abs(i) < 9000) {
                 int i3 = this.mDeltaX;
                 this.mScroller.startScroll(getScrollX(), getScrollY(), ((i2 - (i3 / itemWidth)) * itemWidth) - (i3 % itemWidth), 0);
-                int finalX = this.mScroller.getFinalX() - (this.mScroller.getFinalX() % itemWidth);
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("fling 9000以内 finalX: ");
-                sb2.append(finalX);
-                Log.w(str, sb2.toString());
+                Log.w("View", "fling 9000以内 finalX: " + finalX);
                 this.mScroller.setFinalX(finalX);
             } else if (i < 0) {
                 this.mScroller.startScroll(getScrollX(), getScrollY(), -this.mDeltaX, 0);

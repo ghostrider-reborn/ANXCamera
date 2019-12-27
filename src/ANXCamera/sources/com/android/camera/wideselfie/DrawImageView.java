@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -26,7 +25,7 @@ public class DrawImageView extends View {
     private int mThumbnailBackgroundWidth;
 
     public DrawImageView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public DrawImageView(Context context, AttributeSet attributeSet) {
@@ -38,7 +37,7 @@ public class DrawImageView extends View {
         this.mBitmapPaint = new Paint();
         this.mBorderPaint = new Paint();
         this.mBorderPaint.setColor(context.getColor(R.color.wide_selfie_thumbnail_border_color));
-        this.mBorderPaint.setStyle(Style.STROKE);
+        this.mBorderPaint.setStyle(Paint.Style.STROKE);
         this.mBorderPaint.setStrokeWidth(context.getResources().getDimension(R.dimen.wide_selfie_thumbnail_border_size));
     }
 
@@ -94,7 +93,7 @@ public class DrawImageView extends View {
         if (bitmap != null) {
             Rect rect = this.mImageRect;
             if (rect != null) {
-                canvas.drawBitmap(bitmap, null, rect, this.mBitmapPaint);
+                canvas.drawBitmap(bitmap, (Rect) null, rect, this.mBitmapPaint);
                 Rect rect2 = this.mBorderRect;
                 if (rect2 != null) {
                     canvas.drawRect(rect2, this.mBorderPaint);
@@ -116,25 +115,10 @@ public class DrawImageView extends View {
         this.mBitmap = bitmap;
         if (rect != null) {
             this.mImageRect = convertImageRect(rect);
-            StringBuilder sb = new StringBuilder();
-            sb.append("convertImageRect src = ");
-            sb.append(rect);
-            String str = ", dest = ";
-            sb.append(str);
-            sb.append(this.mImageRect);
-            sb.append(", mOrientation ");
-            sb.append(this.mOrientation);
-            String sb2 = sb.toString();
-            String str2 = TAG;
-            Log.d(str2, sb2);
+            Log.d(TAG, "convertImageRect src = " + rect + ", dest = " + this.mImageRect + ", mOrientation " + this.mOrientation);
             this.mBorderRect = convertBorderRect(rect2);
             this.mBorderRect.inset(2, 2);
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("convertBorderRect src = ");
-            sb3.append(rect2);
-            sb3.append(str);
-            sb3.append(this.mBorderRect);
-            Log.d(str2, sb3.toString());
+            Log.d(TAG, "convertBorderRect src = " + rect2 + ", dest = " + this.mBorderRect);
         }
         invalidate();
     }

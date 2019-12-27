@@ -62,6 +62,7 @@ public final class FlowableConcatArray<T> extends Flowable<T> {
                         i++;
                         this.index = i;
                         if (this.wip.decrementAndGet() == 0) {
+                            return;
                         }
                     }
                 }
@@ -69,7 +70,7 @@ public final class FlowableConcatArray<T> extends Flowable<T> {
                 if (list2 == null) {
                     this.actual.onComplete();
                 } else if (list2.size() == 1) {
-                    this.actual.onError((Throwable) list2.get(0));
+                    this.actual.onError(list2.get(0));
                 } else {
                     this.actual.onError(new CompositeException((Iterable<? extends Throwable>) list2));
                 }

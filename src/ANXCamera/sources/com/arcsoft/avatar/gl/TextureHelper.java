@@ -7,7 +7,7 @@ import java.nio.IntBuffer;
 
 public class TextureHelper {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private int[] f90a = new int[1];
 
     public void deleteTexture() {

@@ -48,7 +48,7 @@ public final class ObservableSkipLastTimed<T> extends AbstractObservableWithUpst
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 Observer<? super T> observer = this.actual;
@@ -81,10 +81,11 @@ public final class ObservableSkipLastTimed<T> extends AbstractObservableWithUpst
                             Throwable th2 = this.error;
                             if (th2 != null) {
                                 observer.onError(th2);
+                                return;
                             } else {
                                 observer.onComplete();
+                                return;
                             }
-                            return;
                         }
                     }
                     if (z3) {

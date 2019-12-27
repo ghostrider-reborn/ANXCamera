@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.media.MediaController2.ControllerCallback;
+import android.support.v4.media.MediaController2;
 import android.util.Log;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -13,7 +13,7 @@ public class MediaBrowser2 extends MediaController2 {
     static final boolean DEBUG = Log.isLoggable(TAG, 3);
     static final String TAG = "MediaBrowser2";
 
-    public static class BrowserCallback extends ControllerCallback {
+    public static class BrowserCallback extends MediaController2.ControllerCallback {
         public void onChildrenChanged(@NonNull MediaBrowser2 mediaBrowser2, @NonNull String str, int i, @Nullable Bundle bundle) {
         }
 
@@ -33,7 +33,7 @@ public class MediaBrowser2 extends MediaController2 {
         }
     }
 
-    interface SupportLibraryImpl extends SupportLibraryImpl {
+    interface SupportLibraryImpl extends MediaController2.SupportLibraryImpl {
         void getChildren(@NonNull String str, int i, int i2, @Nullable Bundle bundle);
 
         void getItem(@NonNull String str);
@@ -53,8 +53,8 @@ public class MediaBrowser2 extends MediaController2 {
         super(context, sessionToken2, executor, browserCallback);
     }
 
-    /* access modifiers changed from: 0000 */
-    public SupportLibraryImpl createImpl(@NonNull Context context, @NonNull SessionToken2 sessionToken2, @NonNull Executor executor, @NonNull ControllerCallback controllerCallback) {
+    /* access modifiers changed from: package-private */
+    public SupportLibraryImpl createImpl(@NonNull Context context, @NonNull SessionToken2 sessionToken2, @NonNull Executor executor, @NonNull MediaController2.ControllerCallback controllerCallback) {
         if (sessionToken2.isLegacySession()) {
             MediaBrowser2ImplLegacy mediaBrowser2ImplLegacy = new MediaBrowser2ImplLegacy(context, this, sessionToken2, executor, (BrowserCallback) controllerCallback);
             return mediaBrowser2ImplLegacy;
@@ -63,7 +63,7 @@ public class MediaBrowser2 extends MediaController2 {
         return mediaBrowser2ImplBase;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public BrowserCallback getCallback() {
         return (BrowserCallback) super.getCallback();
     }
@@ -72,7 +72,7 @@ public class MediaBrowser2 extends MediaController2 {
         getImpl().getChildren(str, i, i2, bundle);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SupportLibraryImpl getImpl() {
         return (SupportLibraryImpl) super.getImpl();
     }

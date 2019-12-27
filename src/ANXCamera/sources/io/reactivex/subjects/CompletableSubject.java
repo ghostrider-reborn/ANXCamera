@@ -26,7 +26,7 @@ public final class CompletableSubject extends Completable implements Completable
         }
 
         public void dispose() {
-            CompletableSubject completableSubject = (CompletableSubject) getAndSet(null);
+            CompletableSubject completableSubject = (CompletableSubject) getAndSet((Object) null);
             if (completableSubject != null) {
                 completableSubject.remove(this);
             }
@@ -45,12 +45,12 @@ public final class CompletableSubject extends Completable implements Completable
         return new CompletableSubject();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(CompletableDisposable completableDisposable) {
         CompletableDisposable[] completableDisposableArr;
         CompletableDisposable[] completableDisposableArr2;
         do {
-            completableDisposableArr = (CompletableDisposable[]) this.observers.get();
+            completableDisposableArr = this.observers.get();
             if (completableDisposableArr == TERMINATED) {
                 return false;
             }
@@ -74,21 +74,21 @@ public final class CompletableSubject extends Completable implements Completable
     }
 
     public boolean hasObservers() {
-        return ((CompletableDisposable[]) this.observers.get()).length != 0;
+        return this.observers.get().length != 0;
     }
 
     public boolean hasThrowable() {
         return this.observers.get() == TERMINATED && this.error != null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int observerCount() {
-        return ((CompletableDisposable[]) this.observers.get()).length;
+        return this.observers.get().length;
     }
 
     public void onComplete() {
         if (this.once.compareAndSet(false, true)) {
-            for (CompletableDisposable completableDisposable : (CompletableDisposable[]) this.observers.getAndSet(TERMINATED)) {
+            for (CompletableDisposable completableDisposable : this.observers.getAndSet(TERMINATED)) {
                 completableDisposable.actual.onComplete();
             }
         }
@@ -98,7 +98,7 @@ public final class CompletableSubject extends Completable implements Completable
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
         if (this.once.compareAndSet(false, true)) {
             this.error = th;
-            for (CompletableDisposable completableDisposable : (CompletableDisposable[]) this.observers.getAndSet(TERMINATED)) {
+            for (CompletableDisposable completableDisposable : this.observers.getAndSet(TERMINATED)) {
                 completableDisposable.actual.onError(th);
             }
             return;
@@ -112,12 +112,12 @@ public final class CompletableSubject extends Completable implements Completable
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(CompletableDisposable completableDisposable) {
         CompletableDisposable[] completableDisposableArr;
         CompletableDisposable[] completableDisposableArr2;
         do {
-            completableDisposableArr = (CompletableDisposable[]) this.observers.get();
+            completableDisposableArr = this.observers.get();
             int length = completableDisposableArr.length;
             if (length != 0) {
                 int i = -1;

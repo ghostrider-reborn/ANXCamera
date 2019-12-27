@@ -7,25 +7,25 @@ import java.nio.FloatBuffer;
 
 public class GLRender {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f77a = "Arc_GLRender";
     private static final int l = 4;
     private static final String m = "attribute vec2 vPos;\nattribute vec2 vTex;\nvarying   vec2 vTextureCoord;\nvoid main(){\ngl_Position=vec4(vPos,0.0,1.0);\nvTextureCoord = vTex;\n}\n";
     private static final String n = "precision mediump float;\nvarying vec2 vTextureCoord;\nuniform sampler2D sTexture;\nvoid main() {\n    gl_FragColor = texture2D(sTexture, vTextureCoord);\n}\n";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private int f78b;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private int f79c;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private int f80d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private int f81e;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private int[] f82f = new int[2];
     private int g;
     private int h;
@@ -35,13 +35,7 @@ public class GLRender {
 
     public GLRender(int i2, int i3, int i4, boolean z) {
         if (i3 * i3 <= 0 || i2 < 0 || i3 < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("GLRender() frameWidth=");
-            sb.append(i2);
-            sb.append(" ,frameHeight=");
-            sb.append(i3);
-            sb.append(" invalid.");
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException("GLRender() frameWidth=" + i2 + " ,frameHeight=" + i3 + " invalid.");
         }
         this.g = i2;
         this.h = i3;

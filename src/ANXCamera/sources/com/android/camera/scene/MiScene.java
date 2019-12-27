@@ -9,7 +9,7 @@ public class MiScene {
     public SparseArray<Integer> valueArray = new SparseArray<>();
 
     public MiScene() {
-        this.valueArray.put(0, Integer.valueOf(-1111111));
+        this.valueArray.put(0, -1111111);
     }
 
     public static MiScene create() {

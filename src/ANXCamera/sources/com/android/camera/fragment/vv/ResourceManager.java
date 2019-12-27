@@ -18,7 +18,7 @@ public class ResourceManager {
     private static final String PREFIX_CLOUD_RESOURCE = "https://";
     private static final String PREFIX_EXTERNAL_RESOURCE = "sdcard/";
     private static final String PREFIX_NATIVE_RESOURCE = "assets://";
-    private static final String TEST_PATH;
+    private static final String TEST_PATH = (Environment.getExternalStorageDirectory().getPath() + "/MIUI/Camera/Test/");
     private static ResourceManager sInstance;
     private SparseArray<BaseResourceList> mStoragedResourceList = new SparseArray<>();
 
@@ -26,42 +26,24 @@ public class ResourceManager {
         void onExtraFinished(boolean z);
     }
 
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().getPath());
-        sb.append("/MIUI/Camera/Test/");
-        TEST_PATH = sb.toString();
-    }
-
     private void decompressNativeResource(Context context, BaseResourceItem baseResourceItem, String str, boolean z) throws IOException {
         String str2 = baseResourceItem.uri.split(PREFIX_NATIVE_RESOURCE)[1];
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(baseResourceItem.id);
-        sb.append(File.separator);
-        String sb2 = sb.toString();
-        if (!z || !baseResourceItem.simpleVerification(sb2)) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(TEST_PATH);
-            sb3.append(str2);
-            String sb4 = sb3.toString();
-            if (new File(sb4).exists()) {
-                Util.verifySdcardZip(context, sb4, sb2, 32768);
+        String str3 = str + baseResourceItem.id + File.separator;
+        if (!z || !baseResourceItem.simpleVerification(str3)) {
+            String str4 = TEST_PATH + str2;
+            if (new File(str4).exists()) {
+                Util.verifySdcardZip(context, str4, str3, 32768);
             } else {
-                Util.verifyAssetZip(context, str2, sb2, 32768);
+                Util.verifyAssetZip(context, str2, str3, 32768);
             }
-            baseResourceItem.onDecompressFinished(sb2);
+            baseResourceItem.onDecompressFinished(str3);
             return;
         }
-        baseResourceItem.onDecompressFinished(sb2);
+        baseResourceItem.onDecompressFinished(str3);
     }
 
     private void decompressSdcardResource(Context context, String str, BaseResourceItem baseResourceItem, String str2) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str2);
-        sb.append(baseResourceItem.id);
-        sb.append(File.separator);
-        baseResourceItem.onDecompressFinished(sb.toString());
+        baseResourceItem.onDecompressFinished(str2 + baseResourceItem.id + File.separator);
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:29:0x008f A[SYNTHETIC, Splitter:B:29:0x008f] */
@@ -76,20 +58,14 @@ public class ResourceManager {
             }
             ZipFile zipFile2 = new ZipFile(str);
             try {
-                Enumeration entries = zipFile2.entries();
+                Enumeration<? extends ZipEntry> entries = zipFile2.entries();
                 while (entries.hasMoreElements()) {
                     ZipEntry zipEntry = (ZipEntry) entries.nextElement();
                     String name = zipEntry.getName();
                     if (zipEntry.isDirectory()) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(str2);
-                        sb.append(name);
-                        new File(sb.toString()).mkdirs();
+                        new File(str2 + name).mkdirs();
                     } else {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(str2);
-                        sb2.append(name);
-                        FileOutputStream fileOutputStream = new FileOutputStream(new File(sb2.toString()));
+                        FileOutputStream fileOutputStream = new FileOutputStream(new File(str2 + name));
                         byte[] bArr = new byte[1024];
                         InputStream inputStream = zipFile2.getInputStream(zipEntry);
                         while (true) {

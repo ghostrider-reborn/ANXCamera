@@ -2,7 +2,6 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.NonNull;
 import com.android.camera.Util;
 
@@ -15,10 +14,10 @@ public class VECameraSettings {
         FACING_BACK,
         FACING_FRONT;
         
-        public static final Creator<CAMERA_FACING_ID> CREATOR = null;
+        public static final Parcelable.Creator<CAMERA_FACING_ID> CREATOR = null;
 
         static {
-            CREATOR = new Creator<CAMERA_FACING_ID>() {
+            CREATOR = new Parcelable.Creator<CAMERA_FACING_ID>() {
                 public CAMERA_FACING_ID createFromParcel(Parcel parcel) {
                     return CAMERA_FACING_ID.values()[parcel.readInt()];
                 }

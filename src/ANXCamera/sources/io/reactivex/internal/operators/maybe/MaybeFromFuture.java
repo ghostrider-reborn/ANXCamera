@@ -27,12 +27,13 @@ public final class MaybeFromFuture<T> extends Maybe<T> {
         if (!empty.isDisposed()) {
             try {
                 Object obj = this.timeout <= 0 ? this.future.get() : this.future.get(this.timeout, this.unit);
-                if (!empty.isDisposed()) {
-                    if (obj == null) {
-                        maybeObserver.onComplete();
-                    } else {
-                        maybeObserver.onSuccess(obj);
-                    }
+                if (empty.isDisposed()) {
+                    return;
+                }
+                if (obj == null) {
+                    maybeObserver.onComplete();
+                } else {
+                    maybeObserver.onSuccess(obj);
                 }
             } catch (InterruptedException e2) {
                 if (!empty.isDisposed()) {

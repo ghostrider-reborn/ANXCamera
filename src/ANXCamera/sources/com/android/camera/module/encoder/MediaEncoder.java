@@ -1,7 +1,6 @@
 package com.android.camera.module.encoder;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.FunctionParseBeautyBodySlimCount;
 import java.io.IOException;
@@ -11,7 +10,7 @@ import java.nio.ByteBuffer;
 public abstract class MediaEncoder implements Runnable {
     protected static final int TIMEOUT_USEC = 10000;
     private final String TAG;
-    private BufferInfo mBufferInfo;
+    private MediaCodec.BufferInfo mBufferInfo;
     protected long mFirstFrameTime;
     private int mFrame;
     protected volatile boolean mIsCapturing;
@@ -41,7 +40,7 @@ public abstract class MediaEncoder implements Runnable {
         this.mListener = mediaEncoderListener;
         this.TAG = getClass().getSimpleName();
         synchronized (this.mSync) {
-            this.mBufferInfo = new BufferInfo();
+            this.mBufferInfo = new MediaCodec.BufferInfo();
             this.mIsReady = false;
             this.mThread = new Thread(this, getClass().getSimpleName());
             this.mThread.start();
@@ -50,10 +49,7 @@ public abstract class MediaEncoder implements Runnable {
                     this.mSync.wait();
                 } catch (InterruptedException e2) {
                     String str = this.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Exception occurred: ");
-                    sb.append(e2.getMessage());
-                    Log.e(str, sb.toString(), e2);
+                    Log.e(str, "Exception occurred: " + e2.getMessage(), e2);
                 }
             }
         }
@@ -72,11 +68,7 @@ public abstract class MediaEncoder implements Runnable {
         if (mediaCodec != null) {
             ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
             int i = 0;
-            loop0:
-            while (true) {
-                if (!this.mIsCapturing) {
-                    break;
-                }
+            while (this.mIsCapturing) {
                 if (this.mSkipFrame) {
                     this.mSkipFrame = System.currentTimeMillis() < this.mFirstFrameTime;
                 }
@@ -86,7 +78,7 @@ public abstract class MediaEncoder implements Runnable {
                         if (!this.mIsEOS) {
                             i++;
                             if (i > 5) {
-                                break;
+                                return;
                             }
                         } else {
                             continue;
@@ -109,9 +101,10 @@ public abstract class MediaEncoder implements Runnable {
                                             try {
                                                 mediaMuxerWrapper.wait(100);
                                                 if (this.mRequestStop) {
-                                                    break loop0;
+                                                    return;
                                                 }
                                             } catch (InterruptedException unused) {
+                                                return;
                                             }
                                         }
                                     }
@@ -125,11 +118,7 @@ public abstract class MediaEncoder implements Runnable {
                             throw new RuntimeException("format changed twice");
                         }
                     } else if (dequeueOutputBuffer < 0) {
-                        String str = this.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("drain: unexpected status: ");
-                        sb.append(dequeueOutputBuffer);
-                        Log.w(str, sb.toString());
+                        Log.w(this.TAG, "drain: unexpected status: " + dequeueOutputBuffer);
                     } else {
                         ByteBuffer byteBuffer = outputBuffers[dequeueOutputBuffer];
                         if (byteBuffer != null) {
@@ -154,25 +143,16 @@ public abstract class MediaEncoder implements Runnable {
                             this.mMediaCodec.releaseOutputBuffer(dequeueOutputBuffer, false);
                             if ((this.mBufferInfo.flags & 4) != 0) {
                                 this.mIsCapturing = false;
-                                break;
+                                return;
                             }
                         } else {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("encoderOutputBuffer ");
-                            sb2.append(dequeueOutputBuffer);
-                            sb2.append(" was null");
-                            throw new RuntimeException(sb2.toString());
+                            throw new RuntimeException("encoderOutputBuffer " + dequeueOutputBuffer + " was null");
                         }
                     }
                 } catch (IllegalStateException e2) {
-                    String str2 = this.TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("dequeueOutputBuffer() failed:");
-                    sb3.append(e2.getMessage());
-                    Log.e(str2, sb3.toString());
+                    Log.e(this.TAG, "dequeueOutputBuffer() failed:" + e2.getMessage());
+                    return;
                 }
-            }
-            while (true) {
             }
         }
     }
@@ -181,10 +161,7 @@ public abstract class MediaEncoder implements Runnable {
     public void encode(ByteBuffer byteBuffer, int i, long j) {
         if (this.mIsCapturing) {
             ByteBuffer[] inputBuffers = this.mMediaCodec.getInputBuffers();
-            while (true) {
-                if (!this.mIsCapturing) {
-                    break;
-                }
+            while (this.mIsCapturing) {
                 int dequeueInputBuffer = this.mMediaCodec.dequeueInputBuffer(FunctionParseBeautyBodySlimCount.TIP_INTERVAL_TIME);
                 if (dequeueInputBuffer >= 0) {
                     ByteBuffer byteBuffer2 = inputBuffers[dequeueInputBuffer];
@@ -196,9 +173,10 @@ public abstract class MediaEncoder implements Runnable {
                         this.mIsEOS = true;
                         Log.d(this.TAG, "send BUFFER_FLAG_END_OF_STREAM");
                         this.mMediaCodec.queueInputBuffer(dequeueInputBuffer, 0, 0, j, 4);
-                    } else {
-                        this.mMediaCodec.queueInputBuffer(dequeueInputBuffer, 0, i, j, 0);
+                        return;
                     }
+                    this.mMediaCodec.queueInputBuffer(dequeueInputBuffer, 0, i, j, 0);
+                    return;
                 }
             }
         }
@@ -213,11 +191,7 @@ public abstract class MediaEncoder implements Runnable {
                     return true;
                 }
             }
-            String str = this.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("frameAvailableSoon: requestStop=");
-            sb.append(this.mRequestStop);
-            Log.w(str, sb.toString());
+            Log.w(this.TAG, "frameAvailableSoon: requestStop=" + this.mRequestStop);
             return false;
         }
     }
@@ -229,7 +203,7 @@ public abstract class MediaEncoder implements Runnable {
         return nanoTime < j ? nanoTime + (j - nanoTime) : nanoTime;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void join() {
         Thread thread = this.mThread;
         if (thread != null) {
@@ -242,7 +216,7 @@ public abstract class MediaEncoder implements Runnable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract void prepare() throws IOException;
 
     /* access modifiers changed from: protected */
@@ -317,11 +291,7 @@ public abstract class MediaEncoder implements Runnable {
                         try {
                             this.mSync.wait();
                         } catch (InterruptedException e2) {
-                            String str = this.TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Exception occurred: ");
-                            sb.append(e2.getMessage());
-                            Log.e(str, sb.toString());
+                            Log.e(this.TAG, "Exception occurred: " + e2.getMessage());
                         }
                     }
                 }
@@ -337,10 +307,10 @@ public abstract class MediaEncoder implements Runnable {
     /* access modifiers changed from: protected */
     public void signalEndOfInputStream() {
         Log.d(this.TAG, "signalEndOfInputStream");
-        encode(null, 0, getPTSUs());
+        encode((ByteBuffer) null, 0, getPTSUs());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean startRecording(long j) {
         Log.d(this.TAG, "startRecording");
         synchronized (this.mSync) {
@@ -354,7 +324,7 @@ public abstract class MediaEncoder implements Runnable {
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     /* JADX WARNING: Code restructure failed: missing block: B:12:0x0021, code lost:
         return;
      */

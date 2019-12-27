@@ -1,10 +1,10 @@
 package com.android.camera.ui.baseview;
 
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 
-public abstract class BaseRecyclerAdapter<T> extends Adapter<BaseRecyclerViewHolder> {
+public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
     private ArrayList<T> mDdataList;
     private OnRecyclerItemClickListener<T> onRecyclerItemClickListener;
 

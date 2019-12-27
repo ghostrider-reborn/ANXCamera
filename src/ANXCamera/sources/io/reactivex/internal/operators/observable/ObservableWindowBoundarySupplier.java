@@ -76,7 +76,7 @@ public final class ObservableWindowBoundarySupplier<T, B> extends AbstractObserv
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             MpscLinkedQueue mpscLinkedQueue = (MpscLinkedQueue) this.queue;
             Observer<? super V> observer = this.actual;
@@ -91,10 +91,11 @@ public final class ObservableWindowBoundarySupplier<T, B> extends AbstractObserv
                     Throwable th = this.error;
                     if (th != null) {
                         unicastSubject.onError(th);
+                        return;
                     } else {
                         unicastSubject.onComplete();
+                        return;
                     }
-                    return;
                 } else if (z2) {
                     i = leave(-i);
                     if (i == 0) {
@@ -138,7 +139,7 @@ public final class ObservableWindowBoundarySupplier<T, B> extends AbstractObserv
             return this.cancelled;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void next() {
             this.queue.offer(NEXT);
             if (enter()) {
@@ -206,7 +207,7 @@ public final class ObservableWindowBoundarySupplier<T, B> extends AbstractObserv
                         this.window = create;
                         observer.onNext(create);
                         WindowBoundaryInnerObserver windowBoundaryInnerObserver = new WindowBoundaryInnerObserver(this);
-                        if (this.boundary.compareAndSet(null, windowBoundaryInnerObserver)) {
+                        if (this.boundary.compareAndSet((Object) null, windowBoundaryInnerObserver)) {
                             this.windows.getAndIncrement();
                             observableSource.subscribe(windowBoundaryInnerObserver);
                         }

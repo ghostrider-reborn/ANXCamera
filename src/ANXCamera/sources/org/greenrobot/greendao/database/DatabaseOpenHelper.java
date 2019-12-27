@@ -2,7 +2,6 @@ package org.greenrobot.greendao.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public abstract class DatabaseOpenHelper extends SQLiteOpenHelper {
@@ -12,10 +11,10 @@ public abstract class DatabaseOpenHelper extends SQLiteOpenHelper {
     private final int version;
 
     public DatabaseOpenHelper(Context context2, String str, int i) {
-        this(context2, str, null, i);
+        this(context2, str, (SQLiteDatabase.CursorFactory) null, i);
     }
 
-    public DatabaseOpenHelper(Context context2, String str, CursorFactory cursorFactory, int i) {
+    public DatabaseOpenHelper(Context context2, String str, SQLiteDatabase.CursorFactory cursorFactory, int i) {
         super(context2, str, cursorFactory, i);
         this.loadSQLCipherNativeLibs = true;
         this.context = context2;

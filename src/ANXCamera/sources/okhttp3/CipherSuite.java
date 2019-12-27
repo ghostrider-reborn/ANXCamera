@@ -12,31 +12,19 @@ public final class CipherSuite {
     static final Comparator<String> ORDER_BY_NAME = new Comparator<String>() {
         public int compare(String str, String str2) {
             int min = Math.min(str.length(), str2.length());
-            int i = 4;
-            while (true) {
-                int i2 = -1;
-                if (i < min) {
-                    char charAt = str.charAt(i);
-                    char charAt2 = str2.charAt(i);
-                    if (charAt != charAt2) {
-                        if (charAt >= charAt2) {
-                            i2 = 1;
-                        }
-                        return i2;
-                    }
-                    i++;
-                } else {
-                    int length = str.length();
-                    int length2 = str2.length();
-                    if (length == length2) {
-                        return 0;
-                    }
-                    if (length >= length2) {
-                        i2 = 1;
-                    }
-                    return i2;
+            for (int i = 4; i < min; i++) {
+                char charAt = str.charAt(i);
+                char charAt2 = str2.charAt(i);
+                if (charAt != charAt2) {
+                    return charAt < charAt2 ? -1 : 1;
                 }
             }
+            int length = str.length();
+            int length2 = str2.length();
+            if (length != length2) {
+                return length < length2 ? -1 : 1;
+            }
+            return 0;
         }
     };
     public static final CipherSuite TLS_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA = of("SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA", 17);
@@ -164,7 +152,7 @@ public final class CipherSuite {
     public static synchronized CipherSuite forJavaName(String str) {
         CipherSuite cipherSuite;
         synchronized (CipherSuite.class) {
-            cipherSuite = (CipherSuite) INSTANCES.get(str);
+            cipherSuite = INSTANCES.get(str);
             if (cipherSuite == null) {
                 cipherSuite = new CipherSuite(str);
                 INSTANCES.put(str, cipherSuite);

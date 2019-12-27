@@ -18,7 +18,7 @@ public final class ObservableReduceMaybe<T> extends Maybe<T> {
     static final class ReduceObserver<T> implements Observer<T>, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f321d;
         boolean done;
         final BiFunction<T, T, T> reducer;

@@ -3,7 +3,7 @@ package com.android.camera.fragment.beauty;
 import com.android.camera.R;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.List;
 
 public class MakeupParamsFragment extends BaseBeautyMakeupFragment {
@@ -25,7 +25,7 @@ public class MakeupParamsFragment extends BaseBeautyMakeupFragment {
 
     /* access modifiers changed from: protected */
     public void onAdapterItemClick(TypeItem typeItem) {
-        MakeupProtocol makeupProtocol = (MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
+        ModeProtocol.MakeupProtocol makeupProtocol = (ModeProtocol.MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
         if (makeupProtocol != null) {
             makeupProtocol.onMakeupItemSelected(typeItem.mKeyOrType, true);
         }
@@ -43,7 +43,7 @@ public class MakeupParamsFragment extends BaseBeautyMakeupFragment {
         selectFirstItem();
         List<TypeItem> list = this.mItemList;
         if (list != null && !list.isEmpty()) {
-            if ("pref_beautify_skin_smooth_ratio_key".equals(((TypeItem) this.mItemList.get(0)).mKeyOrType)) {
+            if ("pref_beautify_skin_smooth_ratio_key".equals(this.mItemList.get(0).mKeyOrType)) {
                 toast(getResources().getString(R.string.beauty_reset_toast));
             } else {
                 toast(getResources().getString(R.string.beauty_mode_reset_toast));

@@ -1,7 +1,7 @@
 package com.android.camera.permission;
 
 import android.app.Activity;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import com.android.camera.CameraAppImpl;
@@ -9,9 +9,7 @@ import com.android.camera.log.Log;
 import com.mi.config.b;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import miui.os.Build;
 
 public class PermissionManager {
     private static final int CAM_REQUEST_CODE_ASK_RUNTIME_PERMISSIONS = 100;
@@ -37,7 +35,7 @@ public class PermissionManager {
     }
 
     public static boolean checkCameraLaunchPermissions() {
-        if (VERSION.SDK_INT >= 23 && Build.IS_INTERNATIONAL_BUILD) {
+        if (Build.VERSION.SDK_INT >= 23 && miui.os.Build.IS_INTERNATIONAL_BUILD) {
             if (getNeedCheckPermissionList(mLaunchPermissionList).size() > 0) {
                 return false;
             }
@@ -47,7 +45,7 @@ public class PermissionManager {
     }
 
     public static boolean checkCameraLocationPermissions() {
-        if (VERSION.SDK_INT >= 23 && Build.IS_INTERNATIONAL_BUILD) {
+        if (Build.VERSION.SDK_INT >= 23 && miui.os.Build.IS_INTERNATIONAL_BUILD) {
             if (getNeedCheckPermissionList(sLocationPermissionList).size() > 0) {
                 return false;
             }
@@ -57,11 +55,11 @@ public class PermissionManager {
     }
 
     public static boolean checkPhoneStatePermission(Activity activity) {
-        return VERSION.SDK_INT < 23 || !Build.IS_INTERNATIONAL_BUILD || ContextCompat.checkSelfPermission(activity, "android.permission.READ_PHONE_STATE") == 0;
+        return Build.VERSION.SDK_INT < 23 || !miui.os.Build.IS_INTERNATIONAL_BUILD || ContextCompat.checkSelfPermission(activity, "android.permission.READ_PHONE_STATE") == 0;
     }
 
     public static boolean checkStoragePermissions() {
-        if (VERSION.SDK_INT >= 23 && Build.IS_INTERNATIONAL_BUILD) {
+        if (Build.VERSION.SDK_INT >= 23 && miui.os.Build.IS_INTERNATIONAL_BUILD) {
             if (getNeedCheckPermissionList(sStoragePermissionList).size() > 0) {
                 return false;
             }
@@ -79,68 +77,46 @@ public class PermissionManager {
             return list;
         }
         ArrayList arrayList = new ArrayList();
-        Iterator it = list.iterator();
-        while (true) {
-            boolean hasNext = it.hasNext();
-            String str = TAG;
-            if (hasNext) {
-                String str2 = (String) it.next();
-                if (ContextCompat.checkSelfPermission(CameraAppImpl.getAndroidContext(), str2) != 0) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("getNeedCheckPermissionList() permission =");
-                    sb.append(str2);
-                    Log.i(str, sb.toString());
-                    arrayList.add(str2);
-                }
-            } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("getNeedCheckPermissionList() listSize =");
-                sb2.append(arrayList.size());
-                Log.i(str, sb2.toString());
-                return arrayList;
+        for (String next : list) {
+            if (ContextCompat.checkSelfPermission(CameraAppImpl.getAndroidContext(), next) != 0) {
+                Log.i(TAG, "getNeedCheckPermissionList() permission =" + next);
+                arrayList.add(next);
             }
         }
+        Log.i(TAG, "getNeedCheckPermissionList() listSize =" + arrayList.size());
+        return arrayList;
     }
 
     public static boolean isCameraLaunchPermissionsResultReady(String[] strArr, int[] iArr) {
         HashMap hashMap = new HashMap();
-        Integer valueOf = Integer.valueOf(0);
-        String str = "android.permission.CAMERA";
-        hashMap.put(str, valueOf);
-        String str2 = "android.permission.RECORD_AUDIO";
-        hashMap.put(str2, valueOf);
-        String str3 = "android.permission.WRITE_EXTERNAL_STORAGE";
-        hashMap.put(str3, valueOf);
+        hashMap.put("android.permission.CAMERA", 0);
+        hashMap.put("android.permission.RECORD_AUDIO", 0);
+        hashMap.put("android.permission.WRITE_EXTERNAL_STORAGE", 0);
         for (int i = 0; i < strArr.length; i++) {
             hashMap.put(strArr[i], Integer.valueOf(iArr[i]));
         }
-        return ((Integer) hashMap.get(str)).intValue() == 0 && ((Integer) hashMap.get(str2)).intValue() == 0 && ((Integer) hashMap.get(str3)).intValue() == 0;
+        return ((Integer) hashMap.get("android.permission.CAMERA")).intValue() == 0 && ((Integer) hashMap.get("android.permission.RECORD_AUDIO")).intValue() == 0 && ((Integer) hashMap.get("android.permission.WRITE_EXTERNAL_STORAGE")).intValue() == 0;
     }
 
     public static boolean isCameraLocationPermissionsResultReady(String[] strArr, int[] iArr) {
         HashMap hashMap = new HashMap();
-        Integer valueOf = Integer.valueOf(0);
-        String str = "android.permission.ACCESS_COARSE_LOCATION";
-        hashMap.put(str, valueOf);
-        String str2 = "android.permission.ACCESS_FINE_LOCATION";
-        hashMap.put(str2, valueOf);
+        hashMap.put("android.permission.ACCESS_COARSE_LOCATION", 0);
+        hashMap.put("android.permission.ACCESS_FINE_LOCATION", 0);
         for (int i = 0; i < strArr.length; i++) {
             hashMap.put(strArr[i], Integer.valueOf(iArr[i]));
         }
-        return ((Integer) hashMap.get(str)).intValue() == 0 && ((Integer) hashMap.get(str2)).intValue() == 0;
+        return ((Integer) hashMap.get("android.permission.ACCESS_COARSE_LOCATION")).intValue() == 0 && ((Integer) hashMap.get("android.permission.ACCESS_FINE_LOCATION")).intValue() == 0;
     }
 
     public static boolean requestCameraRuntimePermissions(Activity activity) {
-        if (VERSION.SDK_INT >= 23 && Build.IS_INTERNATIONAL_BUILD) {
-            List needCheckPermissionList = getNeedCheckPermissionList(sRuntimePermissions);
-            int size = needCheckPermissionList.size();
-            String str = TAG;
-            if (size > 0) {
-                Log.i(str, "requestCameraRuntimePermissions(), user check");
+        if (Build.VERSION.SDK_INT >= 23 && miui.os.Build.IS_INTERNATIONAL_BUILD) {
+            List<String> needCheckPermissionList = getNeedCheckPermissionList(sRuntimePermissions);
+            if (needCheckPermissionList.size() > 0) {
+                Log.i(TAG, "requestCameraRuntimePermissions(), user check");
                 ActivityCompat.requestPermissions(activity, (String[]) needCheckPermissionList.toArray(new String[needCheckPermissionList.size()]), 100);
                 return false;
             }
-            Log.i(str, "requestCameraRuntimePermissions(), all on");
+            Log.i(TAG, "requestCameraRuntimePermissions(), all on");
         }
         return true;
     }

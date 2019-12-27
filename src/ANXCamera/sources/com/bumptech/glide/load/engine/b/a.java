@@ -2,21 +2,22 @@ package com.bumptech.glide.load.engine.b;
 
 import android.os.Process;
 import android.os.StrictMode;
-import android.os.StrictMode.ThreadPolicy.Builder;
+import com.bumptech.glide.load.engine.b.b;
 
 /* compiled from: GlideExecutor */
 class a extends Thread {
-    final /* synthetic */ a this$0;
+    final /* synthetic */ b.a this$0;
 
-    a(a aVar, Runnable runnable, String str) {
-        this.this$0 = aVar;
+    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
+    a(b.a aVar, Runnable runnable, String str) {
         super(runnable, str);
+        this.this$0 = aVar;
     }
 
     public void run() {
         Process.setThreadPriority(9);
         if (this.this$0.eh) {
-            StrictMode.setThreadPolicy(new Builder().detectNetwork().penaltyDeath().build());
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectNetwork().penaltyDeath().build());
         }
         try {
             super.run();

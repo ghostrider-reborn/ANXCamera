@@ -2,18 +2,13 @@ package com.ss.android.medialib;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecInfo.CodecCapabilities;
-import android.media.MediaCodecInfo.CodecProfileLevel;
-import android.media.MediaCodecInfo.EncoderCapabilities;
 import android.media.MediaCodecList;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.opengl.GLES20;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.util.Pair;
 import android.view.Surface;
 import com.ss.android.medialib.common.TextureDrawer;
@@ -39,7 +34,7 @@ public class AVCEncoder {
     private byte[] codec_config;
     BufferedOutputStream fileWriter = null;
     ByteBuffer[] inputBuffers;
-    BufferInfo mBufferInfo = null;
+    MediaCodec.BufferInfo mBufferInfo = null;
     private String mCodecName = "video/avc";
     private int mColorFormat;
     private int mDrawCount = 0;
@@ -165,7 +160,7 @@ public class AVCEncoder {
             }
             throw th;
         }
-        Bitmap createBitmap = Bitmap.createBitmap(this.mWidth, this.mHeight, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(this.mWidth, this.mHeight, Bitmap.Config.ARGB_8888);
         createBitmap.copyPixelsFromBuffer(order);
         if (z) {
             saveBitmap(createBitmap, "/sdcard/aweme/picture/record_e.jpeg");
@@ -176,7 +171,6 @@ public class AVCEncoder {
     }
 
     public synchronized void createEncoder() {
-        String[] supportedTypes;
         if (this.status == 0) {
             this.mColorFormat = getOneColorFormat();
             if (this.mColorFormat >= 0) {
@@ -185,27 +179,17 @@ public class AVCEncoder {
                     MediaCodecInfo codecInfo = this.mMediaCodec.getCodecInfo();
                     if (!codecInfo.getName().startsWith("OMX.google.")) {
                         for (String str : codecInfo.getSupportedTypes()) {
-                            String str2 = TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("CodecNames: ");
-                            sb.append(str);
-                            VELogUtil.i(str2, sb.toString());
+                            VELogUtil.i(TAG, "CodecNames: " + str);
                         }
                         this.status = 1;
                     }
                 } catch (IOException e2) {
-                    String str3 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("createEncoderByTyp: ");
-                    sb2.append(e2.getMessage());
-                    VELogUtil.e(str3, sb2.toString());
+                    VELogUtil.e(TAG, "createEncoderByTyp: " + e2.getMessage());
                 }
             }
         }
     }
 
-    /* JADX INFO: used method not loaded: com.ss.android.vesdk.VELogUtil.d(java.lang.String, java.lang.String):null, types can be incorrect */
-    /* JADX INFO: used method not loaded: com.ss.android.vesdk.VELogUtil.w(java.lang.String, java.lang.String):null, types can be incorrect */
     /* JADX WARNING: Can't wrap try/catch for region: R(6:22|23|24|25|26|27) */
     /* JADX WARNING: Code restructure failed: missing block: B:53:0x0137, code lost:
         if (r9 >= 0) goto L_0x0147;
@@ -261,18 +245,14 @@ public class AVCEncoder {
         if (mEncoderCaller == null) goto L_0x0200;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:75:0x019e, code lost:
-        r4 = TAG;
-        r8 = new java.lang.StringBuilder();
-        r8.append("encode: pts queue size = ");
-        r8.append(r1.mPTSQueue.size());
-        com.ss.android.vesdk.VELogUtil.d(r4, r8.toString());
+        com.ss.android.vesdk.VELogUtil.d(TAG, "encode: pts queue size = " + r1.mPTSQueue.size());
      */
     /* JADX WARNING: Code restructure failed: missing block: B:76:0x01c0, code lost:
         if (r1.mPTSQueue.size() <= 0) goto L_0x01f8;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:77:0x01c2, code lost:
         r1.mEncodeCount++;
-        r4 = (android.util.Pair) r1.mPTSQueue.poll();
+        r4 = r1.mPTSQueue.poll();
         r14 = 0;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:78:0x01d7, code lost:
@@ -292,40 +272,25 @@ public class AVCEncoder {
      */
     /* JADX WARNING: Missing exception handler attribute for start block: B:24:0x00b7 */
     public int encode(int i, int i2, int i3, boolean z) {
+        int i4;
         int dequeueOutputBuffer;
-        int i4 = i;
-        int i5 = i2;
+        int i5 = i;
         boolean z2 = z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("encodeTexture::texID: ");
-        sb.append(i4);
-        sb.append(" pts: ");
-        sb.append(i5);
-        sb.append(" duration:");
-        sb.append(i3);
-        sb.append("  isEndStream = ");
-        sb.append(z2);
-        VELogUtil.d(TAG, sb.toString());
+        VELogUtil.d(TAG, "encodeTexture::texID: " + i5 + " pts: " + i4 + " duration:" + i3 + "  isEndStream = " + z2);
         synchronized (this) {
             if (this.status == 2) {
                 if (this.mMediaCodec != null) {
-                    if (i4 > 0) {
-                        if (i5 >= 0) {
+                    if (i5 > 0) {
+                        if (i4 >= 0) {
                             if (this.mTextureDrawer == null && !initEGLCtx()) {
                                 return -1;
                             }
                             this.mPTSQueue.offer(Pair.create(Integer.valueOf(i2), Integer.valueOf(i3)));
                             GLES20.glViewport(0, 0, this.mWidth, this.mHeight);
-                            String str = TAG;
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("encode: width = ");
-                            sb2.append(this.mWidth);
-                            sb2.append(" height = ");
-                            sb2.append(this.mHeight);
-                            VELogUtil.d(str, sb2.toString());
-                            this.mTextureDrawer.drawTexture(i4);
+                            VELogUtil.d(TAG, "encode: width = " + this.mWidth + " height = " + this.mHeight);
+                            this.mTextureDrawer.drawTexture(i5);
                             GLES20.glFinish();
-                            this.mDrawCount++;
+                            this.mDrawCount = this.mDrawCount + 1;
                             mEncoderCaller.onSwapGlBuffers();
                             if (this.mFlag) {
                                 testCode(z2);
@@ -342,20 +307,12 @@ public class AVCEncoder {
                                 while (true) {
                                     i6++;
                                     try {
-                                        if (VERSION.SDK_INT < 21) {
+                                        if (Build.VERSION.SDK_INT < 21) {
                                             this.outputBuffers = this.mMediaCodec.getOutputBuffers();
                                         }
                                         dequeueOutputBuffer = this.mMediaCodec.dequeueOutputBuffer(this.mBufferInfo, (long) TIMEOUT_USEC);
-                                        String str2 = TAG;
-                                        StringBuilder sb3 = new StringBuilder();
-                                        sb3.append("outputBufferIndex = ");
-                                        sb3.append(dequeueOutputBuffer);
-                                        VELogUtil.d(str2, sb3.toString());
-                                        String str3 = TAG;
-                                        StringBuilder sb4 = new StringBuilder();
-                                        sb4.append("mBufferInfo.flags = ");
-                                        sb4.append(this.mBufferInfo.flags);
-                                        VELogUtil.d(str3, sb4.toString());
+                                        VELogUtil.d(TAG, "outputBufferIndex = " + dequeueOutputBuffer);
+                                        VELogUtil.d(TAG, "mBufferInfo.flags = " + this.mBufferInfo.flags);
                                         if (dequeueOutputBuffer != -1) {
                                             if (dequeueOutputBuffer != -3) {
                                                 if (dequeueOutputBuffer != -2) {
@@ -371,7 +328,6 @@ public class AVCEncoder {
                                             }
                                             if (!z2 || this.mDrawCount == this.mEncodeCount || i6 >= 10) {
                                                 break loop0;
-                                                break loop0;
                                             }
                                         }
                                     } catch (Throwable unused) {
@@ -386,13 +342,7 @@ public class AVCEncoder {
                             }
                         }
                     }
-                    String str4 = TAG;
-                    StringBuilder sb5 = new StringBuilder();
-                    sb5.append("encode: invalidate params: texID = ");
-                    sb5.append(i4);
-                    sb5.append(", pts = ");
-                    sb5.append(i5);
-                    VELogUtil.e(str4, sb5.toString());
+                    VELogUtil.e(TAG, "encode: invalidate params: texID = " + i5 + ", pts = " + i4);
                     return -1;
                 }
             }
@@ -411,14 +361,8 @@ public class AVCEncoder {
         synchronized (this) {
             if (this.status == 2) {
                 if (this.mMediaCodec != null) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("encodeBuffer pts: ");
-                    sb.append(i2);
-                    sb.append("  isEndStream = ");
-                    sb.append(z2);
-                    VELogUtil.d(str, sb.toString());
-                    if (VERSION.SDK_INT >= 21) {
+                    VELogUtil.d(TAG, "encodeBuffer pts: " + i2 + "  isEndStream = " + z2);
+                    if (Build.VERSION.SDK_INT >= 21) {
                         int dequeueInputBuffer = this.mMediaCodec.dequeueInputBuffer(-1);
                         if (dequeueInputBuffer >= 0) {
                             ByteBuffer inputBuffer = this.mMediaCodec.getInputBuffer(dequeueInputBuffer);
@@ -426,18 +370,9 @@ public class AVCEncoder {
                             inputBuffer.put(bArr2, 0, bArr2.length);
                             this.mMediaCodec.queueInputBuffer(dequeueInputBuffer, 0, bArr2.length, (long) i2, z2 ? 4 : 0);
                         }
-                        int dequeueOutputBuffer = this.mMediaCodec.dequeueOutputBuffer(this.mBufferInfo, (long) TIMEOUT_USEC);
-                        String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("outputBufferIndex = ");
-                        sb2.append(dequeueOutputBuffer);
-                        VELogUtil.d(str2, sb2.toString());
-                        String str3 = TAG;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("mBufferInfo.flags = ");
-                        sb3.append(this.mBufferInfo.flags);
-                        VELogUtil.d(str3, sb3.toString());
-                        while (dequeueOutputBuffer >= 0) {
+                        VELogUtil.d(TAG, "outputBufferIndex = " + r0);
+                        VELogUtil.d(TAG, "mBufferInfo.flags = " + this.mBufferInfo.flags);
+                        for (int dequeueOutputBuffer = this.mMediaCodec.dequeueOutputBuffer(this.mBufferInfo, (long) TIMEOUT_USEC); dequeueOutputBuffer >= 0; dequeueOutputBuffer = this.mMediaCodec.dequeueOutputBuffer(this.mBufferInfo, 0)) {
                             ByteBuffer outputBuffer = this.mMediaCodec.getOutputBuffer(dequeueOutputBuffer);
                             outputBuffer.position(this.mBufferInfo.offset);
                             outputBuffer.limit(this.mBufferInfo.offset + this.mBufferInfo.size);
@@ -456,7 +391,6 @@ public class AVCEncoder {
                                 }
                             }
                             this.mMediaCodec.releaseOutputBuffer(dequeueOutputBuffer, false);
-                            dequeueOutputBuffer = this.mMediaCodec.dequeueOutputBuffer(this.mBufferInfo, 0);
                         }
                     } else {
                         int dequeueInputBuffer2 = this.mMediaCodec.dequeueInputBuffer(-1);
@@ -498,18 +432,14 @@ public class AVCEncoder {
     }
 
     public int[] getColorFormats() {
-        String str = TAG;
-        VELogUtil.i(str, "start == ");
-        this.mMediaCodecInfo = VERSION.SDK_INT >= 21 ? getMediaCodecInfo21() : getMediaCodecInfo();
-        VELogUtil.i(str, "end == ");
+        VELogUtil.i(TAG, "start == ");
+        this.mMediaCodecInfo = Build.VERSION.SDK_INT >= 21 ? getMediaCodecInfo21() : getMediaCodecInfo();
+        VELogUtil.i(TAG, "end == ");
         if (this.mMediaCodecInfo == null) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("mMediaCodecInfo name = ");
-        sb.append(this.mMediaCodecInfo.getName());
-        VELogUtil.i(str, sb.toString());
-        CodecCapabilities capabilitiesForType = this.mMediaCodecInfo.getCapabilitiesForType(this.mCodecName);
+        VELogUtil.i(TAG, "mMediaCodecInfo name = " + this.mMediaCodecInfo.getName());
+        MediaCodecInfo.CodecCapabilities capabilitiesForType = this.mMediaCodecInfo.getCapabilitiesForType(this.mCodecName);
         int length = capabilitiesForType.colorFormats.length;
         int[] iArr = new int[length];
         for (int i = 0; i < length; i++) {
@@ -530,7 +460,7 @@ public class AVCEncoder {
         if (r13.profile < 8) goto L_0x011a;
      */
     /* JADX WARNING: Removed duplicated region for block: B:41:0x0120 A[Catch:{ Exception -> 0x0321 }, LOOP:0: B:24:0x00c7->B:41:0x0120, LOOP_END] */
-    /* JADX WARNING: Removed duplicated region for block: B:94:0x011f A[SYNTHETIC] */
+    /* JADX WARNING: Removed duplicated region for block: B:92:0x011f A[SYNTHETIC] */
     public Surface initAVCEncoder(int i, int i2, int i3, int i4, int i5, int i6, boolean z) {
         int i7;
         float f2;
@@ -540,39 +470,21 @@ public class AVCEncoder {
         int i10 = i3;
         int i11 = i4;
         int i12 = i5;
-        boolean z2 = z;
-        if (!z2 || VERSION.SDK_INT < 18) {
+        if (!z || Build.VERSION.SDK_INT < 18) {
             return null;
         }
         this.mDrawCount = 0;
         this.mEncodeCount = 0;
         VELogUtil.i(TAG, "initAVCEncoder == enter");
         if (i11 < 0 || i11 > 2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Do not support bitrate mode ");
-            sb.append(i11);
-            sb.append(", set VBR mode");
-            VELogUtil.i(TAG, sb.toString());
+            VELogUtil.i(TAG, "Do not support bitrate mode " + i11 + ", set VBR mode");
             i11 = 1;
         }
         if (i12 < 1 || i12 > 64) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Do not support profile ");
-            sb2.append(i12);
-            sb2.append(", use baseline");
-            VELogUtil.i(TAG, sb2.toString());
+            VELogUtil.i(TAG, "Do not support profile " + i12 + ", use baseline");
             i12 = 1;
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("width + ");
-        sb3.append(i8);
-        sb3.append("\theight = ");
-        sb3.append(i9);
-        sb3.append("\tbitrate = ");
-        sb3.append(i10);
-        sb3.append("\tuseTextureInput = ");
-        sb3.append(z2);
-        VELogUtil.i(TAG, sb3.toString());
+        VELogUtil.i(TAG, "width + " + i8 + "\theight = " + i9 + "\tbitrate = " + i10 + "\tuseTextureInput = " + r6);
         if (i8 <= 0 || i9 <= 0) {
             return null;
         }
@@ -585,23 +497,17 @@ public class AVCEncoder {
                     mEncoderCaller.setColorFormat(this.mColorFormat);
                 }
                 MediaFormat createVideoFormat = MediaFormat.createVideoFormat(this.mCodecName, i8, i9);
-                CodecCapabilities capabilitiesForType = this.mMediaCodec.getCodecInfo().getCapabilitiesForType(this.mCodecName);
-                CodecProfileLevel[] codecProfileLevelArr = capabilitiesForType.profileLevels;
+                MediaCodecInfo.CodecCapabilities capabilitiesForType = this.mMediaCodec.getCodecInfo().getCapabilitiesForType(this.mCodecName);
+                MediaCodecInfo.CodecProfileLevel[] codecProfileLevelArr = capabilitiesForType.profileLevels;
                 int length = codecProfileLevelArr.length;
-                CodecProfileLevel codecProfileLevel = null;
+                MediaCodecInfo.CodecProfileLevel codecProfileLevel = null;
                 int i13 = 0;
                 while (true) {
                     if (i13 >= length) {
                         break;
                     }
-                    CodecProfileLevel codecProfileLevel2 = codecProfileLevelArr[i13];
-                    String str = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("Profile = ");
-                    sb4.append(codecProfileLevel2.profile);
-                    sb4.append(", Level = ");
-                    sb4.append(codecProfileLevel2.level);
-                    VELogUtil.i(str, sb4.toString());
+                    MediaCodecInfo.CodecProfileLevel codecProfileLevel2 = codecProfileLevelArr[i13];
+                    VELogUtil.i(TAG, "Profile = " + codecProfileLevel2.profile + ", Level = " + codecProfileLevel2.level);
                     if (codecProfileLevel2.profile == 1) {
                         VELogUtil.i(TAG, "Support Baseline Profile!");
                     } else if (codecProfileLevel2.profile == 2) {
@@ -623,35 +529,19 @@ public class AVCEncoder {
                     if (codecProfileLevel2.profile == i12) {
                     }
                 }
-                if (VERSION.SDK_INT >= 21) {
-                    EncoderCapabilities encoderCapabilities = capabilitiesForType.getEncoderCapabilities();
+                if (Build.VERSION.SDK_INT >= 21) {
+                    MediaCodecInfo.EncoderCapabilities encoderCapabilities = capabilitiesForType.getEncoderCapabilities();
                     for (int i14 = 0; i14 < 3; i14++) {
-                        String str2 = TAG;
-                        StringBuilder sb5 = new StringBuilder();
-                        sb5.append(BITRATE_MODES[i14]);
-                        sb5.append(": ");
-                        sb5.append(encoderCapabilities.isBitrateModeSupported(i14));
-                        VELogUtil.d(str2, sb5.toString());
+                        VELogUtil.d(TAG, BITRATE_MODES[i14] + ": " + encoderCapabilities.isBitrateModeSupported(i14));
                     }
                 }
-                if (VERSION.SDK_INT < 24 || codecProfileLevel == null) {
-                    String str3 = TAG;
-                    StringBuilder sb6 = new StringBuilder();
-                    sb6.append("Do not support profile ");
-                    sb6.append(i12);
-                    sb6.append(", use baseline");
-                    VELogUtil.w(str3, sb6.toString());
+                if (Build.VERSION.SDK_INT < 24 || codecProfileLevel == null) {
+                    VELogUtil.w(TAG, "Do not support profile " + i12 + ", use baseline");
                     TEMonitor.perfLong(0, TEMonitorNewKeys.TE_MEDIACODEC_PROFILE, 1);
                     TEMonitor.perfLong(VEMonitorKeys.IESMMTRACKER_KEY_RECORD_MEDIACODEC_PROFILE, 1);
                     i7 = i10;
                 } else {
-                    String str4 = TAG;
-                    StringBuilder sb7 = new StringBuilder();
-                    sb7.append("Set Profile: ");
-                    sb7.append(codecProfileLevel.profile);
-                    sb7.append(", Level = ");
-                    sb7.append(codecProfileLevel.level);
-                    VELogUtil.i(str4, sb7.toString());
+                    VELogUtil.i(TAG, "Set Profile: " + codecProfileLevel.profile + ", Level = " + codecProfileLevel.level);
                     this.mProfile = codecProfileLevel.profile;
                     createVideoFormat.setInteger("profile", codecProfileLevel.profile);
                     createVideoFormat.setInteger("level", codecProfileLevel.level);
@@ -676,60 +566,37 @@ public class AVCEncoder {
                 if (i7 > 12000000) {
                     i7 = 12000000;
                 }
-                String str5 = TAG;
-                StringBuilder sb8 = new StringBuilder();
-                sb8.append("bitrate = ");
-                sb8.append((((float) i7) * 1.0f) / 1000000.0f);
-                sb8.append("Mb/s");
-                VELogUtil.i(str5, sb8.toString());
-                String str6 = TAG;
-                StringBuilder sb9 = new StringBuilder();
-                sb9.append("speed = ");
-                sb9.append(i6);
-                VELogUtil.i(str6, sb9.toString());
+                VELogUtil.i(TAG, "bitrate = " + ((((float) i7) * 1.0f) / 1000000.0f) + "Mb/s");
+                StringBuilder sb = new StringBuilder();
+                sb.append("speed = ");
+                sb.append(i6);
+                VELogUtil.i(TAG, sb.toString());
                 createVideoFormat.setInteger("bitrate", i7);
-                if (VERSION.SDK_INT >= 21) {
-                    EncoderCapabilities encoderCapabilities2 = capabilitiesForType.getEncoderCapabilities();
+                if (Build.VERSION.SDK_INT >= 21) {
+                    MediaCodecInfo.EncoderCapabilities encoderCapabilities2 = capabilitiesForType.getEncoderCapabilities();
                     for (int i16 = 0; i16 < 3; i16++) {
-                        String str7 = TAG;
-                        StringBuilder sb10 = new StringBuilder();
-                        sb10.append(BITRATE_MODES[i16]);
-                        sb10.append(": ");
-                        sb10.append(encoderCapabilities2.isBitrateModeSupported(i16));
-                        VELogUtil.i(str7, sb10.toString());
+                        VELogUtil.i(TAG, BITRATE_MODES[i16] + ": " + encoderCapabilities2.isBitrateModeSupported(i16));
                     }
                     createVideoFormat.setInteger("bitrate-mode", i11);
-                    String str8 = TAG;
-                    StringBuilder sb11 = new StringBuilder();
-                    sb11.append("Bitrate mode = ");
-                    sb11.append(i11);
-                    VELogUtil.i(str8, sb11.toString());
+                    VELogUtil.i(TAG, "Bitrate mode = " + i11);
                     TEMonitor.perfLong(0, TEMonitorNewKeys.TE_RECORD_MEDIACODEC_RATE_CONTROL, (long) i11);
                     createVideoFormat.setInteger("max-bitrate", i10);
-                    String str9 = TAG;
-                    StringBuilder sb12 = new StringBuilder();
-                    sb12.append("Encoder ComplexityRange: ");
-                    sb12.append(encoderCapabilities2.getComplexityRange().toString());
-                    VELogUtil.i(str9, sb12.toString());
+                    VELogUtil.i(TAG, "Encoder ComplexityRange: " + encoderCapabilities2.getComplexityRange().toString());
                 }
                 createVideoFormat.setInteger("color-format", this.mColorFormat);
                 createVideoFormat.setInteger("frame-rate", this.mFrameRate);
                 createVideoFormat.setInteger("i-frame-interval", 1);
                 TEMonitor.perfLong(0, TEMonitorNewKeys.TE_RECORD_VIDEO_ENCODE_GOP, (long) (this.mFrameRate * 1));
-                String str10 = TAG;
-                StringBuilder sb13 = new StringBuilder();
-                sb13.append("initAVCEncoder: format = ");
-                sb13.append(createVideoFormat);
-                VELogUtil.i(str10, sb13.toString());
-                this.mMediaCodec.configure(createVideoFormat, null, null, 1);
+                VELogUtil.i(TAG, "initAVCEncoder: format = " + createVideoFormat);
+                this.mMediaCodec.configure(createVideoFormat, (Surface) null, (MediaCrypto) null, 1);
                 this.mSurface = this.mMediaCodec.createInputSurface();
                 this.mMediaCodec.start();
                 this.status = 2;
-                if (VERSION.SDK_INT < 21) {
+                if (Build.VERSION.SDK_INT < 21) {
                     this.inputBuffers = this.mMediaCodec.getInputBuffers();
                     this.outputBuffers = this.mMediaCodec.getOutputBuffers();
                 }
-                this.mBufferInfo = new BufferInfo();
+                this.mBufferInfo = new MediaCodec.BufferInfo();
                 if (this.mSurface == null) {
                     return null;
                 }
@@ -777,26 +644,18 @@ public class AVCEncoder {
         }
         this.mMediaCodec = null;
         this.status = 0;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("time cost: ");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "time cost: " + (System.currentTimeMillis() - currentTimeMillis));
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:31:0x0070 A[SYNTHETIC, Splitter:B:31:0x0070] */
     /* JADX WARNING: Removed duplicated region for block: B:36:0x007a A[SYNTHETIC, Splitter:B:36:0x007a] */
-    /* JADX WARNING: Removed duplicated region for block: B:42:0x0085 A[SYNTHETIC, Splitter:B:42:0x0085] */
-    /* JADX WARNING: Removed duplicated region for block: B:47:0x008f A[SYNTHETIC, Splitter:B:47:0x008f] */
+    /* JADX WARNING: Removed duplicated region for block: B:41:0x0085 A[SYNTHETIC, Splitter:B:41:0x0085] */
+    /* JADX WARNING: Removed duplicated region for block: B:46:0x008f A[SYNTHETIC, Splitter:B:46:0x008f] */
+    /* JADX WARNING: Removed duplicated region for block: B:52:? A[RETURN, SYNTHETIC] */
     public void saveBitmap(Bitmap bitmap, String str) {
         FileOutputStream fileOutputStream;
         BufferedOutputStream bufferedOutputStream;
-        StringBuilder sb = new StringBuilder();
-        sb.append("saving Bitmap : ");
-        sb.append(str);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        VELogUtil.i(str2, sb2);
+        VELogUtil.i(TAG, "saving Bitmap : " + str);
         BufferedOutputStream bufferedOutputStream2 = null;
         try {
             fileOutputStream = new FileOutputStream(str);
@@ -805,7 +664,7 @@ public class AVCEncoder {
             } catch (IOException e2) {
                 e = e2;
                 try {
-                    VELogUtil.e(str2, "Err when saving bitmap...");
+                    VELogUtil.e(TAG, "Err when saving bitmap...");
                     e.printStackTrace();
                     if (bufferedOutputStream2 != null) {
                         try {
@@ -817,9 +676,13 @@ public class AVCEncoder {
                     if (fileOutputStream != null) {
                         try {
                             fileOutputStream.close();
+                            return;
                         } catch (IOException e4) {
                             e4.printStackTrace();
+                            return;
                         }
+                    } else {
+                        return;
                     }
                 } catch (Throwable th) {
                     th = th;
@@ -841,7 +704,7 @@ public class AVCEncoder {
                 }
             }
             try {
-                bitmap.compress(CompressFormat.JPEG, 100, bufferedOutputStream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bufferedOutputStream);
                 bufferedOutputStream.flush();
                 try {
                     bufferedOutputStream.close();
@@ -853,15 +716,11 @@ public class AVCEncoder {
                 } catch (IOException e8) {
                     e8.printStackTrace();
                 }
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Bitmap ");
-                sb3.append(str);
-                sb3.append(" saved!");
-                VELogUtil.i(str2, sb3.toString());
+                VELogUtil.i(TAG, "Bitmap " + str + " saved!");
             } catch (IOException e9) {
                 e = e9;
                 bufferedOutputStream2 = bufferedOutputStream;
-                VELogUtil.e(str2, "Err when saving bitmap...");
+                VELogUtil.e(TAG, "Err when saving bitmap...");
                 e.printStackTrace();
                 if (bufferedOutputStream2 != null) {
                 }
@@ -879,7 +738,7 @@ public class AVCEncoder {
         } catch (IOException e10) {
             e = e10;
             fileOutputStream = null;
-            VELogUtil.e(str2, "Err when saving bitmap...");
+            VELogUtil.e(TAG, "Err when saving bitmap...");
             e.printStackTrace();
             if (bufferedOutputStream2 != null) {
             }

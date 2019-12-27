@@ -1,10 +1,10 @@
 package com.bumptech.glide;
 
-import android.widget.ImageView.ScaleType;
+import android.widget.ImageView;
 
 /* compiled from: RequestBuilder */
 /* synthetic */ class i {
-    static final /* synthetic */ int[] sc = new int[ScaleType.values().length];
+    static final /* synthetic */ int[] sc = new int[ImageView.ScaleType.values().length];
     static final /* synthetic */ int[] tc = new int[Priority.values().length];
 
     /* JADX WARNING: Can't wrap try/catch for region: R(24:0|(2:1|2)|3|(2:5|6)|7|(2:9|10)|11|(2:13|14)|15|17|18|19|20|21|22|23|24|25|26|27|28|29|30|(3:31|32|34)) */
@@ -36,15 +36,15 @@ import android.widget.ImageView.ScaleType;
             tc[Priority.IMMEDIATE.ordinal()] = 4;
         } catch (NoSuchFieldError unused4) {
         }
-        sc[ScaleType.CENTER_CROP.ordinal()] = 1;
-        sc[ScaleType.CENTER_INSIDE.ordinal()] = 2;
-        sc[ScaleType.FIT_CENTER.ordinal()] = 3;
-        sc[ScaleType.FIT_START.ordinal()] = 4;
-        sc[ScaleType.FIT_END.ordinal()] = 5;
-        sc[ScaleType.FIT_XY.ordinal()] = 6;
-        sc[ScaleType.CENTER.ordinal()] = 7;
+        sc[ImageView.ScaleType.CENTER_CROP.ordinal()] = 1;
+        sc[ImageView.ScaleType.CENTER_INSIDE.ordinal()] = 2;
+        sc[ImageView.ScaleType.FIT_CENTER.ordinal()] = 3;
+        sc[ImageView.ScaleType.FIT_START.ordinal()] = 4;
+        sc[ImageView.ScaleType.FIT_END.ordinal()] = 5;
+        sc[ImageView.ScaleType.FIT_XY.ordinal()] = 6;
+        sc[ImageView.ScaleType.CENTER.ordinal()] = 7;
         try {
-            sc[ScaleType.MATRIX.ordinal()] = 8;
+            sc[ImageView.ScaleType.MATRIX.ordinal()] = 8;
         } catch (NoSuchFieldError unused5) {
         }
     }

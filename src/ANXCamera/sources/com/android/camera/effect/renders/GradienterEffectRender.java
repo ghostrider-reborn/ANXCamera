@@ -53,12 +53,7 @@ public class GradienterEffectRender extends PixelEffectRender {
             if (f5 >= 360.0f) {
                 this.mLastRotation = f5 - 360.0f;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("filteRotation deviceRotation=");
-                sb.append(f2);
-                sb.append(" mLastRotation=");
-                sb.append(this.mLastRotation);
-                Log.v(TAG, sb.toString());
+                Log.v(TAG, "filteRotation deviceRotation=" + f2 + " mLastRotation=" + this.mLastRotation);
                 return;
             }
         }
@@ -89,7 +84,7 @@ public class GradienterEffectRender extends PixelEffectRender {
             }
         }
         if (this.mZero) {
-            orientation = 0.0f;
+            return 0.0f;
         }
         return orientation;
     }

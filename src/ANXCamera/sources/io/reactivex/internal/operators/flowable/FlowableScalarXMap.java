@@ -32,9 +32,9 @@ public final class FlowableScalarXMap {
                         Object call = ((Callable) publisher).call();
                         if (call == null) {
                             EmptySubscription.complete(subscriber);
-                            return;
+                        } else {
+                            subscriber.onSubscribe(new ScalarSubscription(subscriber, call));
                         }
-                        subscriber.onSubscribe(new ScalarSubscription(subscriber, call));
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         EmptySubscription.error(th, subscriber);
@@ -53,7 +53,7 @@ public final class FlowableScalarXMap {
     }
 
     public static <T, U> Flowable<U> scalarXMap(T t, Function<? super T, ? extends Publisher<? extends U>> function) {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new ScalarXMapFlowable<T>(t, function));
+        return RxJavaPlugins.onAssembly(new ScalarXMapFlowable(t, function));
     }
 
     public static <T, R> boolean tryScalarXMapSubscribe(Publisher<T> publisher, Subscriber<? super R> subscriber, Function<? super T, ? extends Publisher<? extends R>> function) {

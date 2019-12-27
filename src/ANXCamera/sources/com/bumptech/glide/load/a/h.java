@@ -17,10 +17,7 @@ public final class h extends FilterInputStream {
     public h(InputStream inputStream, int i) {
         super(inputStream);
         if (i < -1 || i > 8) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot add invalid orientation: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Cannot add invalid orientation: " + i);
         }
         this.orientation = (byte) i;
     }

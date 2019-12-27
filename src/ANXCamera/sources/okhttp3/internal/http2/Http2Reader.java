@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import okhttp3.internal.Util;
+import okhttp3.internal.http2.Hpack;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;
@@ -16,7 +17,7 @@ final class Http2Reader implements Closeable {
     static final Logger logger = Logger.getLogger(Http2.class.getName());
     private final boolean client;
     private final ContinuationSource continuation = new ContinuationSource(this.source);
-    final Reader hpackReader = new Reader(4096, this.continuation);
+    final Hpack.Reader hpackReader = new Hpack.Reader(4096, this.continuation);
     private final BufferedSource source;
 
     static final class ContinuationSource implements Source {
@@ -275,10 +276,10 @@ final class Http2Reader implements Closeable {
         } else if ((b2 & 1) != 0) {
             if (i == 0) {
                 handler.ackSettings();
-                return;
+            } else {
+                Http2.ioException("FRAME_SIZE_ERROR ack frame should be empty!", new Object[0]);
+                throw null;
             }
-            Http2.ioException("FRAME_SIZE_ERROR ack frame should be empty!", new Object[0]);
-            throw null;
         } else if (i % 6 == 0) {
             Settings settings = new Settings();
             for (int i3 = 0; i3 < i; i3 += 6) {

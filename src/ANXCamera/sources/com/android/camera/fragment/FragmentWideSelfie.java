@@ -2,7 +2,7 @@ package com.android.camera.fragment;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.opengl.GLSurfaceView.Renderer;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import com.android.camera.ActivityBase;
 import com.android.camera.CameraScreenNail;
@@ -24,10 +23,8 @@ import com.android.camera.animation.type.AlphaOutOnSubscribe;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.effect.draw_mode.DrawRectAttribute;
 import com.android.camera.log.Log;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.WideSelfieProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.GLTextureView;
-import com.android.camera.ui.GLTextureView.EGLShareContextGetter;
 import com.android.camera.wideselfie.DrawImageView;
 import com.android.camera.wideselfie.WideSelfieConfig;
 import com.android.gallery3d.ui.GLCanvasImpl;
@@ -38,7 +35,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 
-public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtocol {
+public class FragmentWideSelfie extends BaseFragment implements ModeProtocol.WideSelfieProtocol {
     private static final int ALPHA_ANIM_MILLIS = 300;
     public static final int FRAGMENT_INFO = 4094;
     private static final int GUIDE_HIDDEN_DELAY_MILLIS = 3000;
@@ -73,7 +70,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     /* access modifiers changed from: private */
     public boolean mWaitingFirstFrame = false;
 
-    private class StillPreviewRender implements Renderer {
+    private class StillPreviewRender implements GLSurfaceView.Renderer {
         private DrawExtTexAttribute mExtTexture;
         private GLPaint mGlPaint;
         private Handler mHandler;
@@ -108,7 +105,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
                     gLCanvas.recycledResources();
                 }
                 if (FragmentWideSelfie.this.mWaitingFirstFrame) {
-                    FragmentWideSelfie.this.mWaitingFirstFrame = false;
+                    boolean unused = FragmentWideSelfie.this.mWaitingFirstFrame = false;
                     this.mHandler.post(new Runnable() {
                         public void run() {
                             FragmentWideSelfie.this.mStillPreview.animate().alpha(1.0f);
@@ -128,12 +125,12 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     private void updateGuideVisibility() {
         if (isLandScape()) {
             this.mGuideImage.setVisibility(8);
-            this.mMainHandler.removeCallbacksAndMessages(null);
+            this.mMainHandler.removeCallbacksAndMessages((Object) null);
         }
     }
 
     private void updateProgressImageViewLayout(boolean z) {
-        LayoutParams layoutParams = (LayoutParams) this.mProgressImageView.getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) this.mProgressImageView.getLayoutParams();
         if (z) {
             layoutParams.width = this.mThumbViewWidthVertical;
             layoutParams.height = this.mThumbViewHeightVertical;
@@ -148,7 +145,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     }
 
     private void updateStillPreviewLayout(boolean z) {
-        LayoutParams layoutParams = (LayoutParams) this.mStillPreviewLayout.getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) this.mStillPreviewLayout.getLayoutParams();
         if (z) {
             layoutParams.topMargin = this.mThumbBgTopMarginVertical + 1 + (((this.mThumbBgHeightVertical - 2) - this.mStillPreviewHeight) / 2);
             this.mStillPreviewLayout.requestLayout();
@@ -159,7 +156,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     }
 
     private void updateThumbnailBackgroundLayout(boolean z) {
-        LayoutParams layoutParams = (LayoutParams) this.mThumbNailBackground.getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) this.mThumbNailBackground.getLayoutParams();
         if (z) {
             layoutParams.width = this.mThumbBgWidthVertical;
             layoutParams.height = this.mThumbBgHeightVertical;
@@ -187,10 +184,8 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
         if (drawImageView != null) {
             drawImageView.setOrientation(this.mDegree);
         }
-        boolean isLandScape = isLandScape();
-        String str = TAG;
-        if (isLandScape) {
-            Log.d(str, "updateUiLayout LandScape");
+        if (isLandScape()) {
+            Log.d(TAG, "updateUiLayout LandScape");
             if (isLeftLandScape()) {
                 startAnimateViewVisible(this.mUseHintLeft, z);
             } else if (isRightLandScape()) {
@@ -201,7 +196,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
             updateStillPreviewLayout(true);
             return;
         }
-        Log.d(str, "updateUiLayout Portrait");
+        Log.d(TAG, "updateUiLayout Portrait");
         startAnimateViewVisible(this.mUseHint, z);
         updateThumbnailBackgroundLayout(false);
         updateProgressImageViewLayout(false);
@@ -242,7 +237,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
         if (this.mStillPreview.getRenderer() == null) {
             StillPreviewRender stillPreviewRender = new StillPreviewRender();
             this.mStillPreview.setEGLContextClientVersion(2);
-            this.mStillPreview.setEGLShareContextGetter(new EGLShareContextGetter() {
+            this.mStillPreview.setEGLShareContextGetter(new GLTextureView.EGLShareContextGetter() {
                 public EGLContext getShareContext() {
                     return ((ActivityBase) FragmentWideSelfie.this.getContext()).getGLView().getEGLContext();
                 }
@@ -284,7 +279,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
 
     public void onDestroy() {
         super.onDestroy();
-        this.mMainHandler.removeCallbacksAndMessages(null);
+        this.mMainHandler.removeCallbacksAndMessages((Object) null);
     }
 
     public void onPause() {
@@ -316,7 +311,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(216, this);
     }
@@ -339,7 +334,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
         this.mUseHint.setText(R.string.wideselfie_press_shoot_key_to_start);
         this.mUseHintLeft.setText(R.string.wideselfie_press_shoot_key_to_start);
         this.mUseHintRight.setText(R.string.wideselfie_press_shoot_key_to_start);
-        this.mMainHandler.removeCallbacksAndMessages(null);
+        this.mMainHandler.removeCallbacksAndMessages((Object) null);
         if (this.mGuideImage.getVisibility() == 0) {
             Completable.create(new AlphaOutOnSubscribe(this.mGuideImage).setDurationTime(300)).subscribe();
         }
@@ -349,9 +344,9 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
         Log.d(TAG, "setShootingUI");
         this.mIsShooting = true;
         setClickEnable(false);
-        this.mProgressImageView.setImageBitmap(null, null, null);
+        this.mProgressImageView.setImageBitmap((Bitmap) null, (Rect) null, (Rect) null);
         this.mProgressImageView.setVisibility(0);
-        this.mMainHandler.removeCallbacksAndMessages(null);
+        this.mMainHandler.removeCallbacksAndMessages((Object) null);
         if (!isLandScape()) {
             Completable.create(new AlphaInOnSubscribe(this.mGuideImage).setDurationTime(300)).subscribe();
             this.mMainHandler.postDelayed(new Runnable() {
@@ -378,14 +373,14 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(216, this);
     }
 
     public void updateHintText(@StringRes int i) {
         this.mUseHint.setText(i);
-        int i2 = 2131690436;
+        int i2 = R.string.wideselfie_rotate_to_right_slowly;
         if (i != R.string.wideselfie_rotate_to_left_slowly) {
             i2 = i == R.string.wideselfie_rotate_to_right_slowly ? R.string.wideselfie_rotate_to_left_slowly : i;
         }
@@ -407,7 +402,7 @@ public class FragmentWideSelfie extends BaseFragment implements WideSelfieProtoc
     }
 
     public void updateThumbBackgroudLayout(boolean z, boolean z2, int i) {
-        LayoutParams layoutParams = (LayoutParams) this.mThumbNailBackground.getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) this.mThumbNailBackground.getLayoutParams();
         if (z) {
             layoutParams.height -= i;
             if (z2) {

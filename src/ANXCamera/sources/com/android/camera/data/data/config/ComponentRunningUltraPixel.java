@@ -38,31 +38,22 @@ public class ComponentRunningUltraPixel extends ComponentData {
     private void add48M() {
         Resources resources = CameraAppImpl.getAndroidContext().getResources();
         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_48mp, (int) R.drawable.ic_menu_ultra_pixel_photography_48mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)}), "OFF"));
-        List<ComponentDataItem> list = this.mItems;
-        String string = resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)});
-        String str = ULTRA_PIXEL_ON_REAR_48M;
-        list.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_48mp, (int) R.drawable.ic_menu_ultra_pixel_photography_48mp, string, str));
-        initUltraPixelResource(str);
+        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_48mp, (int) R.drawable.ic_menu_ultra_pixel_photography_48mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)}), ULTRA_PIXEL_ON_REAR_48M));
+        initUltraPixelResource(ULTRA_PIXEL_ON_REAR_48M);
     }
 
     private void add64M() {
         Resources resources = CameraAppImpl.getAndroidContext().getResources();
         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_64mp, (int) R.drawable.ic_menu_ultra_pixel_photography_64mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)}), "OFF"));
-        List<ComponentDataItem> list = this.mItems;
-        String string = resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)});
-        String str = ULTRA_PIXEL_ON_REAR_64M;
-        list.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_64mp, (int) R.drawable.ic_menu_ultra_pixel_photography_64mp, string, str));
-        initUltraPixelResource(str);
+        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_64mp, (int) R.drawable.ic_menu_ultra_pixel_photography_64mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)}), ULTRA_PIXEL_ON_REAR_64M));
+        initUltraPixelResource(ULTRA_PIXEL_ON_REAR_64M);
     }
 
     private void addTEST() {
         Resources resources = CameraAppImpl.getAndroidContext().getResources();
         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_64mp, (int) R.drawable.ic_menu_ultra_pixel_photography_64mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_device)}), "OFF"));
-        List<ComponentDataItem> list = this.mItems;
-        String string = resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_device)});
-        String str = ULTRA_PIXEL_ON_REAR_TEST;
-        list.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_64mp, (int) R.drawable.ic_menu_ultra_pixel_photography_64mp, string, str));
-        initUltraPixelResource(str);
+        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_64mp, (int) R.drawable.ic_menu_ultra_pixel_photography_64mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_device)}), ULTRA_PIXEL_ON_REAR_TEST));
+        initUltraPixelResource(ULTRA_PIXEL_ON_REAR_TEST);
     }
 
     public static String getNoSupportZoomTip() {
@@ -98,6 +89,7 @@ public class ComponentRunningUltraPixel extends ComponentData {
         return Ja != 3 ? Ja != 48000000 ? Ja != 64144128 ? new int[]{R.drawable.ic_ultra_pixel_photography_48mp, R.drawable.ic_ultra_pixel_photography_48mp_highlight} : new int[]{R.drawable.ic_ultra_pixel_photography_64mp, R.drawable.ic_ultra_pixel_photography_64mp_highlight} : new int[]{R.drawable.ic_ultra_pixel_photography_48mp, R.drawable.ic_ultra_pixel_photography_48mp_highlight} : new int[]{R.drawable.ic_ultra_pixel_photography_64mp, R.drawable.ic_ultra_pixel_photography_64mp_highlight};
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Removed duplicated region for block: B:18:0x004d  */
     /* JADX WARNING: Removed duplicated region for block: B:26:0x0102  */
     private void initUltraPixelResource(@UltraPixelSupport String str) {
@@ -143,11 +135,7 @@ public class ComponentRunningUltraPixel extends ComponentData {
                 this.mMenuString = resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)});
                 return;
             } else if (c2 != 3) {
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown ultra pixel size: ");
-                sb.append(str);
-                Log.d(str2, sb.toString());
+                Log.d(TAG, "Unknown ultra pixel size: " + str);
                 return;
             } else {
                 this.mMenuDrawable = R.drawable.ic_menu_ultra_pixel_photography_64mp;
@@ -164,7 +152,7 @@ public class ComponentRunningUltraPixel extends ComponentData {
 
     @UltraPixelSupport
     public String getCurrentSupportUltraPixel() {
-        return ((ComponentDataItem) this.mItems.get(1)).mValue;
+        return this.mItems.get(1).mValue;
     }
 
     @NonNull
@@ -250,21 +238,21 @@ public class ComponentRunningUltraPixel extends ComponentData {
         }
         if (cameraCapabilities != null) {
             Resources resources = CameraAppImpl.getAndroidContext().getResources();
-            String str = "OFF";
             if (i == 163 || i == 165) {
                 if (i2 == 0 && !DataRepository.dataItemFeature().fd()) {
                     int Ja = DataRepository.dataItemFeature().Ja();
-                    if (Ja > 0) {
-                        if (Ja == 48000000) {
-                            add48M();
-                        } else if (Ja == 64144128) {
-                            add64M();
-                        }
+                    if (Ja <= 0) {
+                        return;
+                    }
+                    if (Ja == 48000000) {
+                        add48M();
+                    } else if (Ja == 64144128) {
+                        add64M();
                     }
                 } else if (i2 == 1) {
                     int Da = DataRepository.dataItemFeature().Da();
                     if (Da > 0 && cameraCapabilities.isUltraPixelPhotographySupported(Da) && Da == 32275200) {
-                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_32mp, (int) R.drawable.ic_menu_ultra_pixel_photography_32mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_32mp)}), str));
+                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_32mp, (int) R.drawable.ic_menu_ultra_pixel_photography_32mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_32mp)}), "OFF"));
                         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_menu_ultra_pixel_photography_32mp, (int) R.drawable.ic_menu_ultra_pixel_photography_32mp, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_32mp)}), ULTRA_PIXEL_ON_FRONT_32M));
                         initUltraPixelResource(ULTRA_PIXEL_ON_FRONT_32M);
                     }
@@ -272,14 +260,15 @@ public class ComponentRunningUltraPixel extends ComponentData {
             } else if (i != 167) {
                 if (i == 175 && i2 == 0) {
                     int Ja2 = DataRepository.dataItemFeature().Ja();
-                    if (Ja2 > 0) {
-                        if (Ja2 == 3) {
-                            addTEST();
-                        } else if (Ja2 == 48000000) {
-                            add48M();
-                        } else if (Ja2 == 64144128) {
-                            add64M();
-                        }
+                    if (Ja2 <= 0) {
+                        return;
+                    }
+                    if (Ja2 == 3) {
+                        addTEST();
+                    } else if (Ja2 == 48000000) {
+                        add48M();
+                    } else if (Ja2 == 64144128) {
+                        add64M();
                     }
                 }
             } else if (i2 == 0) {
@@ -288,20 +277,14 @@ public class ComponentRunningUltraPixel extends ComponentData {
                     if (Ja3 == 3) {
                         addTEST();
                     } else if (Ja3 == 48000000) {
-                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_48mp, (int) R.drawable.ic_ultra_pixel_photography_48mp_highlight, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)}), str));
-                        List<ComponentDataItem> list2 = this.mItems;
-                        String string = resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)});
-                        String str2 = ULTRA_PIXEL_ON_REAR_48M;
-                        list2.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_48mp, (int) R.drawable.ic_ultra_pixel_photography_48mp_highlight, string, str2));
-                        initUltraPixelResource(str2);
+                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_48mp, (int) R.drawable.ic_ultra_pixel_photography_48mp_highlight, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)}), "OFF"));
+                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_48mp, (int) R.drawable.ic_ultra_pixel_photography_48mp_highlight, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_48mp)}), ULTRA_PIXEL_ON_REAR_48M));
+                        initUltraPixelResource(ULTRA_PIXEL_ON_REAR_48M);
                     } else if (Ja3 != 64144128) {
-                        String str3 = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Unknown rearPixel size: ");
-                        sb.append(Ja3);
-                        Log.d(str3, sb.toString());
+                        String str = TAG;
+                        Log.d(str, "Unknown rearPixel size: " + Ja3);
                     } else {
-                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_64mp, (int) R.drawable.ic_ultra_pixel_photography_64mp_highlight, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)}), str));
+                        this.mItems.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_64mp, (int) R.drawable.ic_ultra_pixel_photography_64mp_highlight, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)}), "OFF"));
                         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_ultra_pixel_photography_64mp, (int) R.drawable.ic_ultra_pixel_photography_64mp_highlight, resources.getString(R.string.pref_menu_ultra_pixel_photography, new Object[]{resources.getString(R.string.ultra_pixel_64mp)}), ULTRA_PIXEL_ON_REAR_64M));
                         initUltraPixelResource(ULTRA_PIXEL_ON_REAR_64M);
                     }

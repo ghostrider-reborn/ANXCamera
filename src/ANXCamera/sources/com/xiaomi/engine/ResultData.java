@@ -22,12 +22,6 @@ public class ResultData {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ResultData{ mResultId=");
-        sb.append(this.mResultId);
-        sb.append(", mFlawResult=");
-        sb.append(this.mFlawResult);
-        sb.append('}');
-        return sb.toString();
+        return "ResultData{ mResultId=" + this.mResultId + ", mFlawResult=" + this.mFlawResult + '}';
     }
 }

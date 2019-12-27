@@ -4,28 +4,23 @@ import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
-import android.widget.RadioGroup.OnCheckedChangeListener;
 import com.android.camera.R;
 import com.android.camera.animation.FragmentAnimationFactory;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.CtaNoticeFragment;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.NoScrollViewPager;
 import io.reactivex.Completable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentSticker extends BaseFragment implements HandleBackTrace {
+public class FragmentSticker extends BaseFragment implements ModeProtocol.HandleBackTrace {
     public static final int FRAGMENT_INFO = 255;
     private ImageView mBackButton;
     /* access modifiers changed from: private */
@@ -56,7 +51,7 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
         }
 
         public Fragment getItem(int i) {
-            return (Fragment) this.mFragmentList.get(i);
+            return this.mFragmentList.get(i);
         }
     }
 
@@ -77,7 +72,7 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
         arrayList.add(new FragmentStickerPager());
         arrayList.add(new FragmentStickerPager());
         this.mViewPager.setAdapter(new StickerPagerAdapter(getChildFragmentManager(), arrayList));
-        this.mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
+        this.mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public void onPageScrollStateChanged(int i) {
             }
 
@@ -93,13 +88,13 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
             }
         });
         this.mRadioGroup = (RadioGroup) view.findViewById(R.id.radio_group_layout_sticker);
-        this.mRadioGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        this.mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
                 switch (i) {
-                    case R.id.radio_button_sticker_one /*2131296509*/:
+                    case R.id.radio_button_sticker_one:
                         FragmentSticker.this.mViewPager.setCurrentItem(0, false);
                         break;
-                    case R.id.radio_button_sticker_two /*2131296510*/:
+                    case R.id.radio_button_sticker_two:
                         FragmentSticker.this.mViewPager.setCurrentItem(1, false);
                         break;
                 }
@@ -110,11 +105,11 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
         });
         this.mRadioGroup.check(R.id.radio_button_sticker_one);
         this.mBackButton = (ImageView) view.findViewById(R.id.effect_back);
-        this.mBackButton.setOnClickListener(new OnClickListener() {
+        this.mBackButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(4);
+                ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(4);
                 if (FragmentSticker.this.mCurrentMode == 161) {
-                    ((BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).reInitTipImage();
+                    ((ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).reInitTipImage();
                 }
             }
         });
@@ -122,7 +117,7 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
     }
 
     public boolean onBackEvent(int i) {
-        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
         if (baseDelegate == null || baseDelegate.getActiveFragment(R.id.bottom_action) != 255) {
             return false;
         }
@@ -145,7 +140,7 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         registerBackStack(modeCoordinator, this);
     }
@@ -155,7 +150,7 @@ public class FragmentSticker extends BaseFragment implements HandleBackTrace {
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         unRegisterBackStack(modeCoordinator, this);
     }

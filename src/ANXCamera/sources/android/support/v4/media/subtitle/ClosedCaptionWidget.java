@@ -1,33 +1,31 @@
 package android.support.v4.media.subtitle;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.annotation.RequiresApi;
-import android.support.v4.media.subtitle.SubtitleTrack.RenderingWidget;
-import android.support.v4.media.subtitle.SubtitleTrack.RenderingWidget.OnChangedListener;
+import android.support.v4.media.subtitle.SubtitleTrack;
 import android.util.AttributeSet;
-import android.view.View.MeasureSpec;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.CaptioningManager;
-import android.view.accessibility.CaptioningManager.CaptionStyle;
-import android.view.accessibility.CaptioningManager.CaptioningChangeListener;
 
 @RequiresApi(28)
-abstract class ClosedCaptionWidget extends ViewGroup implements RenderingWidget {
-    protected CaptionStyle mCaptionStyle;
-    private final CaptioningChangeListener mCaptioningListener;
+abstract class ClosedCaptionWidget extends ViewGroup implements SubtitleTrack.RenderingWidget {
+    protected CaptioningManager.CaptionStyle mCaptionStyle;
+    private final CaptioningManager.CaptioningChangeListener mCaptioningListener;
     protected ClosedCaptionLayout mClosedCaptionLayout;
     private boolean mHasChangeListener;
-    protected OnChangedListener mListener;
+    protected SubtitleTrack.RenderingWidget.OnChangedListener mListener;
     private final CaptioningManager mManager;
 
     interface ClosedCaptionLayout {
-        void setCaptionStyle(CaptionStyle captionStyle);
+        void setCaptionStyle(CaptioningManager.CaptionStyle captionStyle);
 
         void setFontScale(float f2);
     }
 
     ClosedCaptionWidget(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     ClosedCaptionWidget(Context context, AttributeSet attributeSet) {
@@ -40,18 +38,18 @@ abstract class ClosedCaptionWidget extends ViewGroup implements RenderingWidget 
 
     ClosedCaptionWidget(Context context, AttributeSet attributeSet, int i, int i2) {
         super(context, attributeSet, i, i2);
-        this.mCaptioningListener = new CaptioningChangeListener() {
+        this.mCaptioningListener = new CaptioningManager.CaptioningChangeListener() {
             public void onFontScaleChanged(float f2) {
                 ClosedCaptionWidget.this.mClosedCaptionLayout.setFontScale(f2);
             }
 
-            public void onUserStyleChanged(CaptionStyle captionStyle) {
+            public void onUserStyleChanged(CaptioningManager.CaptionStyle captionStyle) {
                 ClosedCaptionWidget closedCaptionWidget = ClosedCaptionWidget.this;
                 closedCaptionWidget.mCaptionStyle = captionStyle;
                 closedCaptionWidget.mClosedCaptionLayout.setCaptionStyle(closedCaptionWidget.mCaptionStyle);
             }
         };
-        setLayerType(1, null);
+        setLayerType(1, (Paint) null);
         this.mManager = (CaptioningManager) context.getSystemService("captioning");
         this.mCaptionStyle = this.mManager.getUserStyle();
         this.mClosedCaptionLayout = createCaptionLayout(context);
@@ -96,12 +94,12 @@ abstract class ClosedCaptionWidget extends ViewGroup implements RenderingWidget 
         ((ViewGroup) this.mClosedCaptionLayout).measure(i, i2);
     }
 
-    public void setOnChangedListener(OnChangedListener onChangedListener) {
+    public void setOnChangedListener(SubtitleTrack.RenderingWidget.OnChangedListener onChangedListener) {
         this.mListener = onChangedListener;
     }
 
     public void setSize(int i, int i2) {
-        measure(MeasureSpec.makeMeasureSpec(i, 1073741824), MeasureSpec.makeMeasureSpec(i2, 1073741824));
+        measure(View.MeasureSpec.makeMeasureSpec(i, 1073741824), View.MeasureSpec.makeMeasureSpec(i2, 1073741824));
         layout(0, 0, i, i2);
     }
 

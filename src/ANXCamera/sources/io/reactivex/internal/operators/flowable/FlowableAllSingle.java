@@ -40,7 +40,7 @@ public final class FlowableAllSingle<T> extends Single<Boolean> implements FuseT
             if (!this.done) {
                 this.done = true;
                 this.s = SubscriptionHelper.CANCELLED;
-                this.actual.onSuccess(Boolean.valueOf(true));
+                this.actual.onSuccess(true);
             }
         }
 
@@ -61,7 +61,7 @@ public final class FlowableAllSingle<T> extends Single<Boolean> implements FuseT
                         this.done = true;
                         this.s.cancel();
                         this.s = SubscriptionHelper.CANCELLED;
-                        this.actual.onSuccess(Boolean.valueOf(false));
+                        this.actual.onSuccess(false);
                     }
                 } catch (Throwable th) {
                     Exceptions.throwIfFatal(th);
@@ -87,11 +87,11 @@ public final class FlowableAllSingle<T> extends Single<Boolean> implements FuseT
     }
 
     public Flowable<Boolean> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableAll<T>(this.source, this.predicate));
+        return RxJavaPlugins.onAssembly(new FlowableAll(this.source, this.predicate));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super Boolean> singleObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new AllSubscriber<Object>(singleObserver, this.predicate));
+        this.source.subscribe(new AllSubscriber(singleObserver, this.predicate));
     }
 }

@@ -52,7 +52,7 @@ public final class FlowableSequenceEqual<T> extends Flowable<Boolean> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAndClear() {
             this.first.cancel();
             this.first.clear();
@@ -104,17 +104,17 @@ public final class FlowableSequenceEqual<T> extends Flowable<Boolean> {
                             }
                             boolean z4 = t2 == null;
                             if (z && z3 && z2 && z4) {
-                                complete(Boolean.valueOf(true));
+                                complete(true);
                                 return;
                             } else if (z && z3 && z2 != z4) {
                                 cancelAndClear();
-                                complete(Boolean.valueOf(false));
+                                complete(false);
                                 return;
                             } else if (!z2 && !z4) {
                                 try {
                                     if (!this.comparer.test(t, t2)) {
                                         cancelAndClear();
-                                        complete(Boolean.valueOf(false));
+                                        complete(false);
                                         return;
                                     }
                                     this.v1 = null;
@@ -155,7 +155,7 @@ public final class FlowableSequenceEqual<T> extends Flowable<Boolean> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(Publisher<? extends T> publisher, Publisher<? extends T> publisher2) {
             publisher.subscribe(this.first);
             publisher2.subscribe(this.second);
@@ -188,7 +188,7 @@ public final class FlowableSequenceEqual<T> extends Flowable<Boolean> {
             SubscriptionHelper.cancel(this);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
             SimpleQueue<T> simpleQueue = this.queue;
             if (simpleQueue != null) {

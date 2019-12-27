@@ -36,9 +36,10 @@ public final class ArrayCompositeSubscription extends AtomicReferenceArray<Subsc
         do {
             subscription2 = (Subscription) get(i);
             if (subscription2 == SubscriptionHelper.CANCELLED) {
-                if (subscription != null) {
-                    subscription.cancel();
+                if (subscription == null) {
+                    return null;
                 }
+                subscription.cancel();
                 return null;
             }
         } while (!compareAndSet(i, subscription2, subscription));
@@ -50,15 +51,17 @@ public final class ArrayCompositeSubscription extends AtomicReferenceArray<Subsc
         do {
             subscription2 = (Subscription) get(i);
             if (subscription2 == SubscriptionHelper.CANCELLED) {
-                if (subscription != null) {
-                    subscription.cancel();
+                if (subscription == null) {
+                    return false;
                 }
+                subscription.cancel();
                 return false;
             }
         } while (!compareAndSet(i, subscription2, subscription));
-        if (subscription2 != null) {
-            subscription2.cancel();
+        if (subscription2 == null) {
+            return true;
         }
+        subscription2.cancel();
         return true;
     }
 }

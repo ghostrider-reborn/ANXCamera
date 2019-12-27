@@ -57,27 +57,17 @@ public final class BasicCertificateChainCleaner extends CertificateChainCleaner 
                 if (z) {
                     return arrayList;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to find a trusted cert that signed ");
-                sb.append(x509Certificate);
-                throw new SSLPeerUnverifiedException(sb.toString());
+                throw new SSLPeerUnverifiedException("Failed to find a trusted cert that signed " + x509Certificate);
             }
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Certificate chain too long: ");
-        sb2.append(arrayList);
-        throw new SSLPeerUnverifiedException(sb2.toString());
+        throw new SSLPeerUnverifiedException("Certificate chain too long: " + arrayList);
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof BasicCertificateChainCleaner) || !((BasicCertificateChainCleaner) obj).trustRootIndex.equals(this.trustRootIndex)) {
-            z = false;
-        }
-        return z;
+        return (obj instanceof BasicCertificateChainCleaner) && ((BasicCertificateChainCleaner) obj).trustRootIndex.equals(this.trustRootIndex);
     }
 
     public int hashCode() {

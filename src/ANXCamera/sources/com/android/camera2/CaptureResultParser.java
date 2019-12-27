@@ -54,10 +54,7 @@ public class CaptureResultParser {
     public static boolean getFastZoomResult(CaptureResult captureResult) {
         Byte b2 = (Byte) VendorTagHelper.getValueSafely(captureResult, CaptureResultVendorTags.FAST_ZOOM_RESULT);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("FAST_ZOOM_RESULT = ");
-        sb.append(b2);
-        Log.d(str, sb.toString());
+        Log.d(str, "FAST_ZOOM_RESULT = " + b2);
         return b2 != null && b2.byteValue() == 1;
     }
 
@@ -82,16 +79,13 @@ public class CaptureResultParser {
         if (captureResult != null) {
             num = (Integer) VendorTagHelper.getValue(captureResult, CaptureResultVendorTags.SAT_MATER_CAMERA_ID);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("getSatMasterCameraId: ");
-            sb.append(num);
-            Log.d(str, sb.toString());
+            Log.d(str, "getSatMasterCameraId: " + num);
         } else {
             num = null;
         }
         if (num == null) {
             Log.w(TAG, "getSatMasterCameraId: not found");
-            num = Integer.valueOf(2);
+            num = 2;
         }
         return num.intValue();
     }
@@ -110,10 +104,7 @@ public class CaptureResultParser {
             return false;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isASDEnable: ");
-        sb.append(b2);
-        Log.d(str, sb.toString());
+        Log.d(str, "isASDEnable: " + b2);
         return b2.byteValue() == 1;
     }
 
@@ -127,34 +118,25 @@ public class CaptureResultParser {
         return num != null && num.intValue() == 1;
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:12:0x0061  */
-    /* JADX WARNING: Removed duplicated region for block: B:14:? A[RETURN, SYNTHETIC] */
+    /* JADX WARNING: Removed duplicated region for block: B:12:0x0061 A[ORIG_RETURN, RETURN, SYNTHETIC] */
+    /* JADX WARNING: Removed duplicated region for block: B:13:? A[RETURN, SYNTHETIC] */
     public static boolean isQuadCfaRunning(CaptureResult captureResult) {
         float f2;
         boolean _b = DataRepository.dataItemFeature()._b();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isQuadCfaRunning: support=");
-        sb.append(_b);
-        Log.d(str, sb.toString());
+        Log.d(str, "isQuadCfaRunning: support=" + _b);
         if (_b) {
             AECFrameControl aECFrameControl = (AECFrameControl) VendorTagHelper.getValueSafely(captureResult, CaptureResultVendorTags.AEC_FRAME_CONTROL);
             if (!(aECFrameControl == null || aECFrameControl.getAecExposureDatas() == null || aECFrameControl.getAecExposureDatas().length <= 0)) {
                 f2 = aECFrameControl.getAecExposureDatas()[0].getLinearGain();
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("isQuadCfaRunning: gain=");
-                sb2.append(f2);
-                Log.d(str2, sb2.toString());
+                Log.d(str2, "isQuadCfaRunning: gain=" + f2);
                 return f2 >= 2.0f;
             }
         }
         f2 = 3.0f;
         String str22 = TAG;
-        StringBuilder sb22 = new StringBuilder();
-        sb22.append("isQuadCfaRunning: gain=");
-        sb22.append(f2);
-        Log.d(str22, sb22.toString());
+        Log.d(str22, "isQuadCfaRunning: gain=" + f2);
         if (f2 >= 2.0f) {
         }
     }
@@ -162,10 +144,7 @@ public class CaptureResultParser {
     public static boolean isRemosaicDetected(CaptureResult captureResult) {
         Boolean bool = (Boolean) VendorTagHelper.getValueSafely(captureResult, CaptureResultVendorTags.REMOSAIC_DETECTED);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isRemosaicDetected: ");
-        sb.append(bool);
-        Log.d(str, sb.toString());
+        Log.d(str, "isRemosaicDetected: " + bool);
         return bool != null && bool.booleanValue();
     }
 

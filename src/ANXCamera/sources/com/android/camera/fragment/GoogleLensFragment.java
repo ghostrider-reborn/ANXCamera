@@ -7,7 +7,7 @@ import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import com.android.camera.R;
-import miui.app.AlertDialog.Builder;
+import miui.app.AlertDialog;
 
 public class GoogleLensFragment extends DialogFragment {
     public static final String TAG = "GoogleLensFragment";
@@ -25,13 +25,12 @@ public class GoogleLensFragment extends DialogFragment {
     }
 
     public static GoogleLensFragment showOptions(FragmentManager fragmentManager, OnClickListener onClickListener) {
-        String str = TAG;
-        Fragment findFragmentByTag = fragmentManager.findFragmentByTag(str);
+        Fragment findFragmentByTag = fragmentManager.findFragmentByTag(TAG);
         if (findFragmentByTag != null) {
             return (GoogleLensFragment) findFragmentByTag;
         }
         GoogleLensFragment googleLensFragment = new GoogleLensFragment(onClickListener);
-        googleLensFragment.show(fragmentManager, str);
+        googleLensFragment.show(fragmentManager, TAG);
         return googleLensFragment;
     }
 
@@ -47,6 +46,6 @@ public class GoogleLensFragment extends DialogFragment {
     }
 
     public Dialog onCreateDialog(Bundle bundle) {
-        return new Builder(getActivity()).setTitle(R.string.pref_camera_long_press_viewfinder_title).setItems(R.array.dialog_camera_long_press_viewfinder_options, new e(this)).setNegativeButton(17039360, null).create();
+        return new AlertDialog.Builder(getActivity()).setTitle(R.string.pref_camera_long_press_viewfinder_title).setItems(R.array.dialog_camera_long_press_viewfinder_options, new e(this)).setNegativeButton(17039360, (DialogInterface.OnClickListener) null).create();
     }
 }

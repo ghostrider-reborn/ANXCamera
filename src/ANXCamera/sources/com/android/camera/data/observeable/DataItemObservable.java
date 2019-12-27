@@ -29,19 +29,12 @@ public class DataItemObservable {
 
     @NonNull
     public <T extends VMBase> T create(@NonNull Class<T> cls) {
-        String str = "Cannot create an instance of ";
         try {
             return (VMBase) cls.newInstance();
         } catch (InstantiationException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(cls);
-            throw new RuntimeException(sb.toString(), e2);
+            throw new RuntimeException("Cannot create an instance of " + cls, e2);
         } catch (IllegalAccessException e3) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(cls);
-            throw new RuntimeException(sb2.toString(), e3);
+            throw new RuntimeException("Cannot create an instance of " + cls, e3);
         }
     }
 
@@ -50,24 +43,21 @@ public class DataItemObservable {
     public <T extends VMBase> T get(@NonNull Class<T> cls) {
         String canonicalName = cls.getCanonicalName();
         if (canonicalName != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("com.android.camera.ViewModelProvider.DefaultKey:");
-            sb.append(canonicalName);
-            return get(sb.toString(), cls);
+            return get("com.android.camera.ViewModelProvider.DefaultKey:" + canonicalName, cls);
         }
         throw new IllegalArgumentException("Local and anonymous classes can not be ViewModels");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final VMBase get(String str) {
-        return (VMBase) this.mMap.get(str);
+        return this.mMap.get(str);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void put(String str, VMBase vMBase) {
-        VMBase vMBase2 = (VMBase) this.mMap.put(str, vMBase);
-        if (vMBase2 != null) {
-            vMBase2.onCleared();
+        VMBase put = this.mMap.put(str, vMBase);
+        if (put != null) {
+            put.onCleared();
         }
     }
 }

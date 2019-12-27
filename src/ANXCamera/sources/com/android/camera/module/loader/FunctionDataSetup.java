@@ -20,7 +20,7 @@ public class FunctionDataSetup extends Func1Base<BaseModule, BaseModule> {
         if (!nullHolder.isPresent()) {
             return nullHolder;
         }
-        BaseModule baseModule = (BaseModule) nullHolder.get();
+        BaseModule baseModule = nullHolder.get();
         if (baseModule.isDeparted()) {
             return NullHolder.ofNullable(baseModule, 225);
         }

@@ -1,9 +1,9 @@
 package android.support.v4.widget;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.View.OnTouchListener;
+import android.view.View;
 import android.widget.PopupMenu;
 
 public final class PopupMenuCompat {
@@ -11,8 +11,8 @@ public final class PopupMenuCompat {
     }
 
     @Nullable
-    public static OnTouchListener getDragToOpenListener(@NonNull Object obj) {
-        if (VERSION.SDK_INT >= 19) {
+    public static View.OnTouchListener getDragToOpenListener(@NonNull Object obj) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return ((PopupMenu) obj).getDragToOpenListener();
         }
         return null;

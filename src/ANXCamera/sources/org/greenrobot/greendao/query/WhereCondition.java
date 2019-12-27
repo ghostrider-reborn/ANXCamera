@@ -60,9 +60,10 @@ public interface WhereCondition {
             this.op = str;
         }
 
+        /* JADX INFO: super call moved to the top of the method (can break code semantics) */
         public PropertyCondition(Property property2, String str, Object[] objArr) {
-            checkValuesForType(property2, objArr);
             super(objArr);
+            checkValuesForType(property2, objArr);
             this.property = property2;
             this.op = str;
         }
@@ -78,23 +79,17 @@ public interface WhereCondition {
                         if (obj instanceof Number) {
                             int intValue = ((Number) obj).intValue();
                             if (!(intValue == 0 || intValue == 1)) {
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("Illegal boolean value: numbers must be 0 or 1, but was ");
-                                sb.append(obj);
-                                throw new DaoException(sb.toString());
+                                throw new DaoException("Illegal boolean value: numbers must be 0 or 1, but was " + obj);
                             }
                         } else if (obj instanceof String) {
                             String str = (String) obj;
                             if ("TRUE".equalsIgnoreCase(str)) {
-                                return Integer.valueOf(1);
+                                return 1;
                             }
                             if ("FALSE".equalsIgnoreCase(str)) {
-                                return Integer.valueOf(0);
+                                return 0;
                             }
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Illegal boolean value: Strings must be \"TRUE\" or \"FALSE\" (case insensitive), but was ");
-                            sb2.append(obj);
-                            throw new DaoException(sb2.toString());
+                            throw new DaoException("Illegal boolean value: Strings must be \"TRUE\" or \"FALSE\" (case insensitive), but was " + obj);
                         }
                     }
                     return obj;
@@ -104,10 +99,7 @@ public interface WhereCondition {
                     if (obj instanceof Long) {
                         return obj;
                     }
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("Illegal date value: expected java.util.Date or Long for value ");
-                    sb3.append(obj);
-                    throw new DaoException(sb3.toString());
+                    throw new DaoException("Illegal date value: expected java.util.Date or Long for value " + obj);
                 }
             } else {
                 throw new DaoException("Illegal value: found array, but simple object required");

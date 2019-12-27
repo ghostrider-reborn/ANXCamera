@@ -5,13 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 public abstract class ComponentData {
-    protected List<ComponentDataItem> mItems = new ArrayList();
+    protected List<ComponentDataItem> mItems;
     protected Object mItemsLock = new Object();
     protected DataItemBase mParentDataItem;
 
@@ -29,9 +28,9 @@ public abstract class ComponentData {
     }
 
     public int findIndexOfValue(String str) {
-        List items = getItems();
+        List<ComponentDataItem> items = getItems();
         for (int i = 0; i < items.size(); i++) {
-            if (str.equals(((ComponentDataItem) items.get(i)).mValue)) {
+            if (str.equals(items.get(i).mValue)) {
                 return i;
             }
         }
@@ -45,10 +44,7 @@ public abstract class ComponentData {
             return string;
         }
         String simpleName = getClass().getSimpleName();
-        StringBuilder sb = new StringBuilder();
-        sb.append("reset invalid value ");
-        sb.append(string);
-        Log.e(simpleName, sb.toString());
+        Log.e(simpleName, "reset invalid value " + string);
         resetComponentValue(i);
         return this.mParentDataItem.getString(getKey(i), defaultValue);
     }
@@ -81,9 +77,9 @@ public abstract class ComponentData {
     public int getValueDisplayString(int i) {
         String componentValue = getComponentValue(i);
         List<ComponentDataItem> items = getItems();
-        for (ComponentDataItem componentDataItem : items) {
-            if (componentDataItem.mValue.equals(componentValue)) {
-                return componentDataItem.mDisplayNameRes;
+        for (ComponentDataItem next : items) {
+            if (next.mValue.equals(componentValue)) {
+                return next.mDisplayNameRes;
             }
         }
         String format = String.format(Locale.ENGLISH, "mode %1$d, invalid value %2$s for %3$s, items = %4$s", new Object[]{Integer.valueOf(i), componentValue, getKey(i), Arrays.toString(items.toArray())});
@@ -98,9 +94,9 @@ public abstract class ComponentData {
     public int getValueSelectedDrawable(int i) {
         String componentValue = getComponentValue(i);
         List<ComponentDataItem> items = getItems();
-        for (ComponentDataItem componentDataItem : items) {
-            if (componentDataItem.mValue.equals(componentValue)) {
-                return componentDataItem.mIconSelectedRes;
+        for (ComponentDataItem next : items) {
+            if (next.mValue.equals(componentValue)) {
+                return next.mIconSelectedRes;
             }
         }
         String format = String.format(Locale.ENGLISH, "mode %1$d, invalid value %2$s for %3$s, items = %4$s", new Object[]{Integer.valueOf(i), componentValue, getKey(i), Arrays.toString(items.toArray())});

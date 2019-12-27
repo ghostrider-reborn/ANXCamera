@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.Exceptions;
@@ -32,45 +31,48 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
         SimpleQueue<T> queue;
         Disposable s;
         int sourceMode;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        ObserveOnObserver(Observer<? super T> observer, Worker worker2, boolean z, int i) {
+        ObserveOnObserver(Observer<? super T> observer, Scheduler.Worker worker2, boolean z, int i) {
             this.actual = observer;
             this.worker = worker2;
             this.delayError = z;
             this.bufferSize = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Observer<? super T> observer) {
             if (this.cancelled) {
                 this.queue.clear();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 Throwable th = this.error;
                 if (this.delayError) {
-                    if (z2) {
-                        if (th != null) {
-                            observer.onError(th);
-                        } else {
-                            observer.onComplete();
-                        }
-                        this.worker.dispose();
-                        return true;
+                    if (!z2) {
+                        return false;
                     }
+                    if (th != null) {
+                        observer.onError(th);
+                    } else {
+                        observer.onComplete();
+                    }
+                    this.worker.dispose();
+                    return true;
                 } else if (th != null) {
                     this.queue.clear();
                     observer.onError(th);
                     this.worker.dispose();
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     observer.onComplete();
                     this.worker.dispose();
                     return true;
                 }
             }
-            return false;
         }
 
         public void clear() {
@@ -88,7 +90,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainFused() {
             int i = 1;
             while (!this.cancelled) {
@@ -118,7 +120,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainNormal() {
             SimpleQueue<T> simpleQueue = this.queue;
             Observer<? super T> observer = this.actual;
@@ -127,7 +129,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
                 while (true) {
                     boolean z = this.done;
                     try {
-                        Object poll = simpleQueue.poll();
+                        T poll = simpleQueue.poll();
                         boolean z2 = poll == null;
                         if (!checkTerminated(z, z2, observer)) {
                             if (z2) {
@@ -233,7 +235,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void schedule() {
             if (getAndIncrement() == 0) {
                 this.worker.schedule(this);

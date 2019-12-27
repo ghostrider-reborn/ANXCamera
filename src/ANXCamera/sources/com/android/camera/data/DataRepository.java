@@ -3,7 +3,7 @@ package com.android.camera.data;
 import android.content.Context;
 import com.android.camera.data.backup.DataBackUp;
 import com.android.camera.data.backup.DataBackUpMgr;
-import com.android.camera.data.cloud.DataCloud.CloudManager;
+import com.android.camera.data.cloud.DataCloud;
 import com.android.camera.data.cloud.DataCloudMgr;
 import com.android.camera.data.data.config.DataItemConfig;
 import com.android.camera.data.data.extra.DataItemLive;
@@ -19,12 +19,12 @@ import com.mi.config.a;
 public class DataRepository implements DataProtocol {
     private static DataRepository sInstance;
     private DataBackUpMgr mDataBackUp = new DataBackUpMgr();
-    private CloudManager mDataCloudMgr = new DataCloudMgr();
+    private DataCloud.CloudManager mDataCloudMgr = new DataCloudMgr();
     private DataItemObservable mDataItemObservable;
     private DataProviderMgr mDataProvider = new DataProviderMgr(this.mDataCloudMgr);
     private DataRestoreMgr mDataRestore = new DataRestoreMgr();
 
-    public static CloudManager dataCloudMgr() {
+    public static DataCloud.CloudManager dataCloudMgr() {
         return getInstance().mDataCloudMgr;
     }
 

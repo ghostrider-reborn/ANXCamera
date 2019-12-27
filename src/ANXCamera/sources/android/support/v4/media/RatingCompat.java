@@ -1,18 +1,16 @@
 package android.support.v4.media;
 
 import android.media.Rating;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public final class RatingCompat implements Parcelable {
-    public static final Creator<RatingCompat> CREATOR = new Creator<RatingCompat>() {
+    public static final Parcelable.Creator<RatingCompat> CREATOR = new Parcelable.Creator<RatingCompat>() {
         public RatingCompat createFromParcel(Parcel parcel) {
             return new RatingCompat(parcel.readInt(), parcel.readFloat());
         }
@@ -34,12 +32,12 @@ public final class RatingCompat implements Parcelable {
     private final int mRatingStyle;
     private final float mRatingValue;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface StarStyle {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Style {
     }
@@ -51,7 +49,7 @@ public final class RatingCompat implements Parcelable {
 
     public static RatingCompat fromRating(Object obj) {
         RatingCompat ratingCompat = null;
-        if (obj != null && VERSION.SDK_INT >= 19) {
+        if (obj != null && Build.VERSION.SDK_INT >= 19) {
             Rating rating = (Rating) obj;
             int ratingStyle = rating.getRatingStyle();
             if (rating.isRated()) {
@@ -95,17 +93,12 @@ public final class RatingCompat implements Parcelable {
 
     public static RatingCompat newStarRating(int i, float f2) {
         float f3;
-        String str = TAG;
         if (i == 3) {
             f3 = 3.0f;
         } else if (i == 4) {
             f3 = 4.0f;
         } else if (i != 5) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid rating style (");
-            sb.append(i);
-            sb.append(") for a star rating");
-            Log.e(str, sb.toString());
+            Log.e(TAG, "Invalid rating style (" + i + ") for a star rating");
             return null;
         } else {
             f3 = 5.0f;
@@ -113,7 +106,7 @@ public final class RatingCompat implements Parcelable {
         if (f2 >= 0.0f && f2 <= f3) {
             return new RatingCompat(i, f2);
         }
-        Log.e(str, "Trying to set out of range star-based rating");
+        Log.e(TAG, "Trying to set out of range star-based rating");
         return null;
     }
 
@@ -147,7 +140,7 @@ public final class RatingCompat implements Parcelable {
     }
 
     public Object getRating() {
-        if (this.mRatingObj == null && VERSION.SDK_INT >= 19) {
+        if (this.mRatingObj == null && Build.VERSION.SDK_INT >= 19) {
             if (isRated()) {
                 int i = this.mRatingStyle;
                 switch (i) {
@@ -188,14 +181,7 @@ public final class RatingCompat implements Parcelable {
     }
 
     public boolean hasHeart() {
-        boolean z = false;
-        if (this.mRatingStyle != 1) {
-            return false;
-        }
-        if (this.mRatingValue == 1.0f) {
-            z = true;
-        }
-        return z;
+        return this.mRatingStyle == 1 && this.mRatingValue == 1.0f;
     }
 
     public boolean isRated() {
@@ -203,14 +189,7 @@ public final class RatingCompat implements Parcelable {
     }
 
     public boolean isThumbUp() {
-        boolean z = false;
-        if (this.mRatingStyle != 2) {
-            return false;
-        }
-        if (this.mRatingValue == 1.0f) {
-            z = true;
-        }
-        return z;
+        return this.mRatingStyle == 2 && this.mRatingValue == 1.0f;
     }
 
     public String toString() {

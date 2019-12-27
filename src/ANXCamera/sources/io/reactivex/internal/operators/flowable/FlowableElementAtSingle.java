@@ -93,11 +93,11 @@ public final class FlowableElementAtSingle<T> extends Single<T> implements FuseT
 
     public Flowable<T> fuseToFlowable() {
         FlowableElementAt flowableElementAt = new FlowableElementAt(this.source, this.index, this.defaultValue, true);
-        return RxJavaPlugins.onAssembly((Flowable<T>) flowableElementAt);
+        return RxJavaPlugins.onAssembly(flowableElementAt);
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super T> singleObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new ElementAtSubscriber<Object>(singleObserver, this.index, this.defaultValue));
+        this.source.subscribe(new ElementAtSubscriber(singleObserver, this.index, this.defaultValue));
     }
 }

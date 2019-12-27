@@ -16,16 +16,12 @@ public final class FlowableLift<R, T> extends AbstractFlowableWithUpstream<T, R>
 
     public void subscribeActual(Subscriber<? super R> subscriber) {
         try {
-            Subscriber apply = this.operator.apply(subscriber);
+            Subscriber<? super Object> apply = this.operator.apply(subscriber);
             if (apply != null) {
                 this.source.subscribe(apply);
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Operator ");
-            sb.append(this.operator);
-            sb.append(" returned a null Subscriber");
-            throw new NullPointerException(sb.toString());
+            throw new NullPointerException("Operator " + this.operator + " returned a null Subscriber");
         } catch (NullPointerException e2) {
             throw e2;
         } catch (Throwable th) {

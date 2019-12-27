@@ -3,7 +3,6 @@ package android.support.v4.util;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -290,7 +289,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return z;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void append(E e2) {
         int i = this.mSize;
         int hashCode = e2 == null ? 0 : e2.hashCode();
@@ -369,11 +368,12 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
 
     public int hashCode() {
         int[] iArr = this.mHashes;
-        int i = 0;
-        for (int i2 = 0; i2 < this.mSize; i2++) {
-            i += iArr[i2];
+        int i = this.mSize;
+        int i2 = 0;
+        for (int i3 = 0; i3 < i; i3++) {
+            i2 += iArr[i3];
         }
-        return i;
+        return i2;
     }
 
     public int indexOf(Object obj) {

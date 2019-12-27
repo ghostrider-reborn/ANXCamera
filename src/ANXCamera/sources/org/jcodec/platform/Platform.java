@@ -33,9 +33,9 @@ public class Platform {
     private static Class[] classes(Object[] objArr) {
         Class[] clsArr = new Class[objArr.length];
         for (int i = 0; i < objArr.length; i++) {
-            Class cls = objArr[i].getClass();
+            Class<?> cls = objArr[i].getClass();
             if (boxed2primitive.containsKey(cls)) {
-                clsArr[i] = (Class) boxed2primitive.get(cls);
+                clsArr[i] = boxed2primitive.get(cls);
             } else {
                 clsArr[i] = cls;
             }
@@ -64,18 +64,13 @@ public class Platform {
     }
 
     public static <T> T invokeStaticMethod(Class<?> cls, String str, Object[] objArr) {
-        Method[] declaredMethods;
         try {
             for (Method method : cls.getDeclaredMethods()) {
                 if (method.getName().equals(str)) {
-                    return method.invoke(null, objArr);
+                    return method.invoke((Object) null, objArr);
                 }
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(cls);
-            sb.append(".");
-            sb.append(str);
-            throw new NoSuchMethodException(sb.toString());
+            throw new NoSuchMethodException(cls + "." + str);
         } catch (Exception e2) {
             throw new RuntimeException(e2);
         }

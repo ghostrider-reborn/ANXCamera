@@ -1,14 +1,13 @@
 package com.android.camera.protocol;
 
 import android.support.annotation.Nullable;
-import com.android.camera.protocol.ModeProtocol.BaseProtocol;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ModeCoordinatorImpl implements ModeCoordinator {
+public class ModeCoordinatorImpl implements ModeProtocol.ModeCoordinator {
     private static ModeCoordinatorImpl sInstance;
     private int mHolderKey;
-    private ConcurrentHashMap<Integer, BaseProtocol> protocolMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, ModeProtocol.BaseProtocol> protocolMap = new ConcurrentHashMap<>();
 
     public static void create(int i) {
         getInstance();
@@ -52,9 +51,9 @@ public class ModeCoordinatorImpl implements ModeCoordinator {
         return modeCoordinatorImpl != null && modeCoordinatorImpl.mHolderKey == i;
     }
 
-    private <P extends BaseProtocol> P nullCatcher(Class<P> cls) {
+    private <P extends ModeProtocol.BaseProtocol> P nullCatcher(Class<P> cls) {
         try {
-            return (BaseProtocol) cls.newInstance();
+            return (ModeProtocol.BaseProtocol) cls.newInstance();
         } catch (InstantiationException e2) {
             e2.printStackTrace();
         } catch (IllegalAccessException e3) {
@@ -63,11 +62,11 @@ public class ModeCoordinatorImpl implements ModeCoordinator {
         return null;
     }
 
-    public <P extends BaseProtocol> void attachProtocol(int i, @Nullable P p) {
+    public <P extends ModeProtocol.BaseProtocol> void attachProtocol(int i, @Nullable P p) {
         this.protocolMap.put(Integer.valueOf(i), p);
     }
 
-    public <P extends BaseProtocol> void detachProtocol(int i, P p) {
+    public <P extends ModeProtocol.BaseProtocol> void detachProtocol(int i, P p) {
         if (getAttachProtocol(i) == p) {
             this.protocolMap.remove(Integer.valueOf(i));
         }
@@ -77,7 +76,7 @@ public class ModeCoordinatorImpl implements ModeCoordinator {
         return this.protocolMap.size();
     }
 
-    public <P extends BaseProtocol> P getAttachProtocol(int i) {
-        return (BaseProtocol) this.protocolMap.get(Integer.valueOf(i));
+    public <P extends ModeProtocol.BaseProtocol> P getAttachProtocol(int i) {
+        return (ModeProtocol.BaseProtocol) this.protocolMap.get(Integer.valueOf(i));
     }
 }

@@ -39,10 +39,7 @@ public class ComponentRunningAutoZoom extends ComponentData {
         if (i == 162 || i == 169) {
             return "pref_camera_auto_zoom";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("pref_camera_auto_zoom_");
-        sb.append(Integer.toHexString(i));
-        return sb.toString();
+        return "pref_camera_auto_zoom_" + Integer.toHexString(i);
     }
 
     public int getResIcon(boolean z) {
@@ -54,20 +51,14 @@ public class ComponentRunningAutoZoom extends ComponentData {
     }
 
     public boolean isEnabled(int i) {
-        boolean z = false;
-        if (!DataRepository.dataItemFeature().Cb()) {
+        if (!DataRepository.dataItemFeature().Cb() || this.mCameraId != 0 || i != 162 || !this.mIsNormalIntent) {
             return false;
         }
-        if (this.mCameraId == 0 && i == 162) {
-            if (!this.mIsNormalIntent) {
-                return false;
-            }
-            Boolean bool = (Boolean) this.mValues.get(getKey(i));
-            if (bool != null) {
-                z = bool.booleanValue();
-            }
+        Boolean bool = this.mValues.get(getKey(i));
+        if (bool == null) {
+            return false;
         }
-        return z;
+        return bool.booleanValue();
     }
 
     public void reInit(int i, boolean z) {

@@ -17,7 +17,7 @@ public final class MaybeIsEmptySingle<T> extends Single<Boolean> implements HasU
     static final class IsEmptyMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         final SingleObserver<? super Boolean> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f297d;
 
         IsEmptyMaybeObserver(SingleObserver<? super Boolean> singleObserver) {
@@ -35,7 +35,7 @@ public final class MaybeIsEmptySingle<T> extends Single<Boolean> implements HasU
 
         public void onComplete() {
             this.f297d = DisposableHelper.DISPOSED;
-            this.actual.onSuccess(Boolean.valueOf(true));
+            this.actual.onSuccess(true);
         }
 
         public void onError(Throwable th) {
@@ -52,7 +52,7 @@ public final class MaybeIsEmptySingle<T> extends Single<Boolean> implements HasU
 
         public void onSuccess(T t) {
             this.f297d = DisposableHelper.DISPOSED;
-            this.actual.onSuccess(Boolean.valueOf(false));
+            this.actual.onSuccess(false);
         }
     }
 
@@ -61,7 +61,7 @@ public final class MaybeIsEmptySingle<T> extends Single<Boolean> implements HasU
     }
 
     public Maybe<Boolean> fuseToMaybe() {
-        return RxJavaPlugins.onAssembly((Maybe<T>) new MaybeIsEmpty<T>(this.source));
+        return RxJavaPlugins.onAssembly(new MaybeIsEmpty(this.source));
     }
 
     public MaybeSource<T> source() {

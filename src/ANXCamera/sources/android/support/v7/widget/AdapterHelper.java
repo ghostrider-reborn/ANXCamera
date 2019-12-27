@@ -1,13 +1,13 @@
 package android.support.v7.widget;
 
-import android.support.v4.util.Pools.Pool;
-import android.support.v4.util.Pools.SimplePool;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v4.util.Pools;
+import android.support.v7.widget.OpReorderer;
+import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class AdapterHelper implements Callback {
+class AdapterHelper implements OpReorderer.Callback {
     private static final boolean DEBUG = false;
     static final int POSITION_TYPE_INVISIBLE = 0;
     static final int POSITION_TYPE_NEW_OR_LAID_OUT = 1;
@@ -19,10 +19,10 @@ class AdapterHelper implements Callback {
     final OpReorderer mOpReorderer;
     final ArrayList<UpdateOp> mPendingUpdates;
     final ArrayList<UpdateOp> mPostponedList;
-    private Pool<UpdateOp> mUpdateOpPool;
+    private Pools.Pool<UpdateOp> mUpdateOpPool;
 
     interface Callback {
-        ViewHolder findViewHolder(int i);
+        RecyclerView.ViewHolder findViewHolder(int i);
 
         void markViewHoldersUpdated(int i, int i2, Object obj);
 
@@ -57,7 +57,7 @@ class AdapterHelper implements Callback {
             this.payload = obj;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public String cmdToString() {
             int i = this.cmd;
             return i != 1 ? i != 2 ? i != 4 ? i != 8 ? "??" : "mv" : "up" : "rm" : "add";
@@ -97,18 +97,7 @@ class AdapterHelper implements Callback {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Integer.toHexString(System.identityHashCode(this)));
-            sb.append("[");
-            sb.append(cmdToString());
-            sb.append(",s:");
-            sb.append(this.positionStart);
-            sb.append("c:");
-            sb.append(this.itemCount);
-            sb.append(",p:");
-            sb.append(this.payload);
-            sb.append("]");
-            return sb.toString();
+            return Integer.toHexString(System.identityHashCode(this)) + "[" + cmdToString() + ",s:" + this.positionStart + "c:" + this.itemCount + ",p:" + this.payload + "]";
         }
     }
 
@@ -117,7 +106,7 @@ class AdapterHelper implements Callback {
     }
 
     AdapterHelper(Callback callback, boolean z) {
-        this.mUpdateOpPool = new SimplePool(30);
+        this.mUpdateOpPool = new Pools.SimplePool(30);
         this.mPendingUpdates = new ArrayList<>();
         this.mPostponedList = new ArrayList<>();
         this.mExistingUpdateTypes = 0;
@@ -146,7 +135,7 @@ class AdapterHelper implements Callback {
         while (i4 < i3) {
             if (this.mCallback.findViewHolder(i4) != null || canFindInPreLayout(i4)) {
                 if (!z4) {
-                    dispatchAndUpdateViewHolders(obtainUpdateOp(2, i, i2, null));
+                    dispatchAndUpdateViewHolders(obtainUpdateOp(2, i, i2, (Object) null));
                     z3 = true;
                 } else {
                     z3 = false;
@@ -154,7 +143,7 @@ class AdapterHelper implements Callback {
                 z = true;
             } else {
                 if (z4) {
-                    postponeAndUpdateViewHolders(obtainUpdateOp(2, i, i2, null));
+                    postponeAndUpdateViewHolders(obtainUpdateOp(2, i, i2, (Object) null));
                     z2 = true;
                 } else {
                     z2 = false;
@@ -173,7 +162,7 @@ class AdapterHelper implements Callback {
         }
         if (i2 != updateOp.itemCount) {
             recycleUpdateOp(updateOp);
-            updateOp = obtainUpdateOp(2, i, i2, null);
+            updateOp = obtainUpdateOp(2, i, i2, (Object) null);
         }
         if (!z4) {
             dispatchAndUpdateViewHolders(updateOp);
@@ -222,7 +211,7 @@ class AdapterHelper implements Callback {
     private boolean canFindInPreLayout(int i) {
         int size = this.mPostponedList.size();
         for (int i2 = 0; i2 < size; i2++) {
-            UpdateOp updateOp = (UpdateOp) this.mPostponedList.get(i2);
+            UpdateOp updateOp = this.mPostponedList.get(i2);
             int i3 = updateOp.cmd;
             if (i3 == 8) {
                 if (findPositionOffset(updateOp.itemCount, i2 + 1) == i) {
@@ -259,10 +248,7 @@ class AdapterHelper implements Callback {
         } else if (i4 == 4) {
             i = 1;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("op should be remove or update.");
-            sb.append(updateOp);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("op should be remove or update." + updateOp);
         }
         int i5 = updatePositionWithPostponed;
         int i6 = i3;
@@ -304,16 +290,13 @@ class AdapterHelper implements Callback {
         } else if (i == 8) {
             this.mCallback.offsetPositionsForMove(updateOp.positionStart, updateOp.itemCount);
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unknown update op type for ");
-            sb.append(updateOp);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unknown update op type for " + updateOp);
         }
     }
 
     private int updatePositionWithPostponed(int i, int i2) {
         for (int size = this.mPostponedList.size() - 1; size >= 0; size--) {
-            UpdateOp updateOp = (UpdateOp) this.mPostponedList.get(size);
+            UpdateOp updateOp = this.mPostponedList.get(size);
             int i3 = updateOp.cmd;
             if (i3 == 8) {
                 int i4 = updateOp.positionStart;
@@ -368,7 +351,7 @@ class AdapterHelper implements Callback {
             }
         }
         for (int size2 = this.mPostponedList.size() - 1; size2 >= 0; size2--) {
-            UpdateOp updateOp2 = (UpdateOp) this.mPostponedList.get(size2);
+            UpdateOp updateOp2 = this.mPostponedList.get(size2);
             if (updateOp2.cmd == 8) {
                 int i10 = updateOp2.itemCount;
                 if (i10 == updateOp2.positionStart || i10 < 0) {
@@ -383,7 +366,7 @@ class AdapterHelper implements Callback {
         return i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public AdapterHelper addUpdateOp(UpdateOp... updateOpArr) {
         Collections.addAll(this.mPendingUpdates, updateOpArr);
         return this;
@@ -392,7 +375,7 @@ class AdapterHelper implements Callback {
     public int applyPendingUpdatesToPosition(int i) {
         int size = this.mPendingUpdates.size();
         for (int i2 = 0; i2 < size; i2++) {
-            UpdateOp updateOp = (UpdateOp) this.mPendingUpdates.get(i2);
+            UpdateOp updateOp = this.mPendingUpdates.get(i2);
             int i3 = updateOp.cmd;
             if (i3 != 1) {
                 if (i3 == 2) {
@@ -426,22 +409,22 @@ class AdapterHelper implements Callback {
         return i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void consumePostponedUpdates() {
         int size = this.mPostponedList.size();
         for (int i = 0; i < size; i++) {
-            this.mCallback.onDispatchSecondPass((UpdateOp) this.mPostponedList.get(i));
+            this.mCallback.onDispatchSecondPass(this.mPostponedList.get(i));
         }
         recycleUpdateOpsAndClearList(this.mPostponedList);
         this.mExistingUpdateTypes = 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void consumeUpdatesInOnePass() {
         consumePostponedUpdates();
         int size = this.mPendingUpdates.size();
         for (int i = 0; i < size; i++) {
-            UpdateOp updateOp = (UpdateOp) this.mPendingUpdates.get(i);
+            UpdateOp updateOp = this.mPendingUpdates.get(i);
             int i2 = updateOp.cmd;
             if (i2 == 1) {
                 this.mCallback.onDispatchSecondPass(updateOp);
@@ -465,7 +448,7 @@ class AdapterHelper implements Callback {
         this.mExistingUpdateTypes = 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispatchFirstPassAndUpdateViewHolders(UpdateOp updateOp, int i) {
         this.mCallback.onDispatchFirstPass(updateOp);
         int i2 = updateOp.cmd;
@@ -478,16 +461,16 @@ class AdapterHelper implements Callback {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int findPositionOffset(int i) {
         return findPositionOffset(i, 0);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int findPositionOffset(int i, int i2) {
         int size = this.mPostponedList.size();
         while (i2 < size) {
-            UpdateOp updateOp = (UpdateOp) this.mPostponedList.get(i2);
+            UpdateOp updateOp = this.mPostponedList.get(i2);
             int i3 = updateOp.cmd;
             if (i3 == 8) {
                 int i4 = updateOp.positionStart;
@@ -520,98 +503,82 @@ class AdapterHelper implements Callback {
         return i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean hasAnyUpdateTypes(int i) {
         return (this.mExistingUpdateTypes & i) != 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean hasPendingUpdates() {
         return this.mPendingUpdates.size() > 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean hasUpdates() {
         return !this.mPostponedList.isEmpty() && !this.mPendingUpdates.isEmpty();
     }
 
     public UpdateOp obtainUpdateOp(int i, int i2, int i3, Object obj) {
-        UpdateOp updateOp = (UpdateOp) this.mUpdateOpPool.acquire();
-        if (updateOp == null) {
+        UpdateOp acquire = this.mUpdateOpPool.acquire();
+        if (acquire == null) {
             return new UpdateOp(i, i2, i3, obj);
         }
-        updateOp.cmd = i;
-        updateOp.positionStart = i2;
-        updateOp.itemCount = i3;
-        updateOp.payload = obj;
-        return updateOp;
+        acquire.cmd = i;
+        acquire.positionStart = i2;
+        acquire.itemCount = i3;
+        acquire.payload = obj;
+        return acquire;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean onItemRangeChanged(int i, int i2, Object obj) {
-        boolean z = false;
         if (i2 < 1) {
             return false;
         }
         this.mPendingUpdates.add(obtainUpdateOp(4, i, i2, obj));
         this.mExistingUpdateTypes |= 4;
-        if (this.mPendingUpdates.size() == 1) {
-            z = true;
-        }
-        return z;
+        return this.mPendingUpdates.size() == 1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean onItemRangeInserted(int i, int i2) {
-        boolean z = false;
         if (i2 < 1) {
             return false;
         }
-        this.mPendingUpdates.add(obtainUpdateOp(1, i, i2, null));
+        this.mPendingUpdates.add(obtainUpdateOp(1, i, i2, (Object) null));
         this.mExistingUpdateTypes |= 1;
-        if (this.mPendingUpdates.size() == 1) {
-            z = true;
-        }
-        return z;
+        return this.mPendingUpdates.size() == 1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean onItemRangeMoved(int i, int i2, int i3) {
-        boolean z = false;
         if (i == i2) {
             return false;
         }
         if (i3 == 1) {
-            this.mPendingUpdates.add(obtainUpdateOp(8, i, i2, null));
+            this.mPendingUpdates.add(obtainUpdateOp(8, i, i2, (Object) null));
             this.mExistingUpdateTypes |= 8;
-            if (this.mPendingUpdates.size() == 1) {
-                z = true;
-            }
-            return z;
+            return this.mPendingUpdates.size() == 1;
         }
         throw new IllegalArgumentException("Moving more than 1 item is not supported yet");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean onItemRangeRemoved(int i, int i2) {
-        boolean z = false;
         if (i2 < 1) {
             return false;
         }
-        this.mPendingUpdates.add(obtainUpdateOp(2, i, i2, null));
+        this.mPendingUpdates.add(obtainUpdateOp(2, i, i2, (Object) null));
         this.mExistingUpdateTypes |= 2;
-        if (this.mPendingUpdates.size() == 1) {
-            z = true;
-        }
-        return z;
+        return this.mPendingUpdates.size() == 1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void preProcess() {
         this.mOpReorderer.reorderOps(this.mPendingUpdates);
         int size = this.mPendingUpdates.size();
         for (int i = 0; i < size; i++) {
-            UpdateOp updateOp = (UpdateOp) this.mPendingUpdates.get(i);
+            UpdateOp updateOp = this.mPendingUpdates.get(i);
             int i2 = updateOp.cmd;
             if (i2 == 1) {
                 applyAdd(updateOp);
@@ -637,16 +604,16 @@ class AdapterHelper implements Callback {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void recycleUpdateOpsAndClearList(List<UpdateOp> list) {
         int size = list.size();
         for (int i = 0; i < size; i++) {
-            recycleUpdateOp((UpdateOp) list.get(i));
+            recycleUpdateOp(list.get(i));
         }
         list.clear();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void reset() {
         recycleUpdateOpsAndClearList(this.mPendingUpdates);
         recycleUpdateOpsAndClearList(this.mPostponedList);

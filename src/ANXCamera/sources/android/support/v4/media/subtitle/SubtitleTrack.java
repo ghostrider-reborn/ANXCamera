@@ -5,9 +5,8 @@ import android.media.MediaFormat;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.media.SubtitleData2;
-import android.support.v4.media.subtitle.MediaTimeProvider.OnMediaTimeListener;
+import android.support.v4.media.subtitle.MediaTimeProvider;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -18,8 +17,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 @RequiresApi(28)
-@RestrictTo({Scope.LIBRARY_GROUP})
-public abstract class SubtitleTrack implements OnMediaTimeListener {
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
+public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeListener {
     private static final String TAG = "SubtitleTrack";
     public boolean DEBUG = false;
     /* access modifiers changed from: private */
@@ -67,10 +66,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
 
             EntryIterator(SortedMap<Long, ArrayList<Cue>> sortedMap) {
                 if (CueList.this.DEBUG) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(sortedMap);
-                    sb.append("");
-                    Log.v(CueList.TAG, sb.toString());
+                    Log.v(CueList.TAG, sortedMap + "");
                 }
                 this.mRemainingCues = sortedMap;
                 this.mLastListIterator = null;
@@ -83,7 +79,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
                 do {
                     try {
                         if (this.mRemainingCues != null) {
-                            this.mCurrentTimeMs = ((Long) this.mRemainingCues.firstKey()).longValue();
+                            this.mCurrentTimeMs = this.mRemainingCues.firstKey().longValue();
                             this.mListIterator = ((ArrayList) this.mRemainingCues.get(Long.valueOf(this.mCurrentTimeMs))).iterator();
                             this.mRemainingCues = this.mRemainingCues.tailMap(Long.valueOf(this.mCurrentTimeMs + 1));
                             this.mRemainingCues = null;
@@ -191,18 +187,12 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
             AnonymousClass1 r0 = new Iterable<Pair<Long, Cue>>() {
                 public Iterator<Pair<Long, Cue>> iterator() {
                     if (CueList.this.DEBUG) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("slice (");
-                        sb.append(j3);
-                        sb.append(", ");
-                        sb.append(j4);
-                        sb.append("]=");
-                        Log.d(CueList.TAG, sb.toString());
+                        Log.d(CueList.TAG, "slice (" + j3 + ", " + j4 + "]=");
                     }
                     try {
                         return new EntryIterator(CueList.this.mCues.subMap(Long.valueOf(j3 + 1), Long.valueOf(j4 + 1)));
                     } catch (IllegalArgumentException unused) {
-                        return new EntryIterator(null);
+                        return new EntryIterator((SortedMap<Long, ArrayList<Cue>>) null);
                     }
                 }
             };
@@ -211,9 +201,9 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
 
         public long nextTimeAfter(long j) {
             try {
-                SortedMap tailMap = this.mCues.tailMap(Long.valueOf(j + 1));
+                SortedMap<Long, ArrayList<Cue>> tailMap = this.mCues.tailMap(Long.valueOf(j + 1));
                 if (tailMap != null) {
-                    return ((Long) tailMap.firstKey()).longValue();
+                    return tailMap.firstKey().longValue();
                 }
             } catch (IllegalArgumentException | NoSuchElementException unused) {
             }
@@ -295,7 +285,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
             long j = this.mEndTimeMs;
             if (j >= 0) {
                 this.mPrevRunAtEndTimeMs = null;
-                this.mNextRunAtEndTimeMs = (Run) longSparseArray.get(j);
+                this.mNextRunAtEndTimeMs = longSparseArray.get(j);
                 Run run2 = this.mNextRunAtEndTimeMs;
                 if (run2 != null) {
                     run2.mPrevRunAtEndTimeMs = this;
@@ -314,20 +304,20 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
     }
 
     private void removeRunsByEndTimeIndex(int i) {
-        Run run = (Run) this.mRunsByEndTime.valueAt(i);
-        while (run != null) {
-            Cue cue = run.mFirstCue;
+        Run valueAt = this.mRunsByEndTime.valueAt(i);
+        while (valueAt != null) {
+            Cue cue = valueAt.mFirstCue;
             while (cue != null) {
                 this.mCues.remove(cue);
                 Cue cue2 = cue.mNextInRun;
                 cue.mNextInRun = null;
                 cue = cue2;
             }
-            this.mRunsByID.remove(run.mRunID);
-            Run run2 = run.mNextRunAtEndTimeMs;
-            run.mPrevRunAtEndTimeMs = null;
-            run.mNextRunAtEndTimeMs = null;
-            run = run2;
+            this.mRunsByID.remove(valueAt.mRunID);
+            Run run = valueAt.mNextRunAtEndTimeMs;
+            valueAt.mPrevRunAtEndTimeMs = null;
+            valueAt.mNextRunAtEndTimeMs = null;
+            valueAt = run;
         }
         this.mRunsByEndTime.removeAt(i);
     }
@@ -349,7 +339,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
     public synchronized boolean addCue(Cue cue) {
         this.mCues.add(cue);
         if (cue.mRunID != 0) {
-            Run run = (Run) this.mRunsByID.get(cue.mRunID);
+            Run run = this.mRunsByID.get(cue.mRunID);
             if (run == null) {
                 run = new Run();
                 this.mRunsByID.put(cue.mRunID, run);
@@ -365,19 +355,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
             j = this.mTimeProvider.getCurrentTimeUs(false, true) / 1000;
         }
         if (this.DEBUG) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("mVisible=");
-            sb.append(this.mVisible);
-            sb.append(", ");
-            sb.append(cue.mStartTimeMs);
-            sb.append(" <= ");
-            sb.append(j);
-            sb.append(", ");
-            sb.append(cue.mEndTimeMs);
-            sb.append(" >= ");
-            sb.append(this.mLastTimeMs);
-            Log.v(str, sb.toString());
+            Log.v(TAG, "mVisible=" + this.mVisible + ", " + cue.mStartTimeMs + " <= " + j + ", " + cue.mEndTimeMs + " >= " + this.mLastTimeMs);
         }
         if (!this.mVisible && cue.mStartTimeMs <= j && cue.mEndTimeMs >= this.mLastTimeMs) {
             if (this.mRunnable != null) {
@@ -386,7 +364,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
             this.mRunnable = new Runnable() {
                 public void run() {
                     synchronized (this) {
-                        SubtitleTrack.this.mRunnable = null;
+                        Runnable unused = SubtitleTrack.this.mRunnable = null;
                         SubtitleTrack.this.updateActiveCues(true, j);
                         SubtitleTrack.this.updateView(SubtitleTrack.this.mActiveCues);
                     }
@@ -407,12 +385,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
     /* access modifiers changed from: protected */
     public synchronized void clearActiveCues() {
         if (this.DEBUG) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Clearing ");
-            sb.append(this.mActiveCues.size());
-            sb.append(" active cues");
-            Log.v(str, sb.toString());
+            Log.v(TAG, "Clearing " + this.mActiveCues.size() + " active cues");
         }
         this.mActiveCues.clear();
         this.mLastUpdateTimeMs = -1;
@@ -429,7 +402,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
     /* access modifiers changed from: protected */
     public void finishedRun(long j) {
         if (j != 0 && j != -1) {
-            Run run = (Run) this.mRunsByID.get(j);
+            Run run = this.mRunsByID.get(j);
             if (run != null) {
                 run.storeByEndTimeMs(this.mRunsByEndTime);
             }
@@ -471,10 +444,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
 
     public void onSeek(long j) {
         if (this.DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onSeek ");
-            sb.append(j);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "onSeek " + j);
         }
         synchronized (this) {
             long j2 = j / 1000;
@@ -500,10 +470,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
 
     public void onTimedEvent(long j) {
         if (this.DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onTimedEvent ");
-            sb.append(j);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "onTimedEvent " + j);
         }
         synchronized (this) {
             long j2 = j / 1000;
@@ -519,12 +486,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
         if (this.mTimeProvider != null) {
             this.mNextScheduledTimeMs = this.mCues.nextTimeAfter(this.mLastTimeMs);
             if (this.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("sched @");
-                sb.append(this.mNextScheduledTimeMs);
-                sb.append(" after ");
-                sb.append(this.mLastTimeMs);
-                Log.d(TAG, sb.toString());
+                Log.d(TAG, "sched @" + this.mNextScheduledTimeMs + " after " + this.mLastTimeMs);
             }
             MediaTimeProvider mediaTimeProvider = this.mTimeProvider;
             long j = this.mNextScheduledTimeMs;
@@ -534,7 +496,7 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
 
     public void setRunDiscardTimeMs(long j, long j2) {
         if (j != 0 && j != -1) {
-            Run run = (Run) this.mRunsByID.get(j);
+            Run run = this.mRunsByID.get(j);
             if (run != null) {
                 run.mEndTimeMs = j2;
                 run.storeByEndTimeMs(this.mRunsByEndTime);
@@ -579,29 +541,21 @@ public abstract class SubtitleTrack implements OnMediaTimeListener {
         if (!z) {
         }
         clearActiveCues();
-        Iterator it = this.mCues.entriesBetween(this.mLastUpdateTimeMs, j).iterator();
+        Iterator<Pair<Long, Cue>> it = this.mCues.entriesBetween(this.mLastUpdateTimeMs, j).iterator();
         while (it.hasNext()) {
-            Pair pair = (Pair) it.next();
-            Cue cue = (Cue) pair.second;
-            if (cue.mEndTimeMs == ((Long) pair.first).longValue()) {
+            Pair next = it.next();
+            Cue cue = (Cue) next.second;
+            if (cue.mEndTimeMs == ((Long) next.first).longValue()) {
                 if (this.DEBUG) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Removing ");
-                    sb.append(cue);
-                    Log.v(str, sb.toString());
+                    Log.v(TAG, "Removing " + cue);
                 }
                 this.mActiveCues.remove(cue);
                 if (cue.mRunID == 0) {
                     it.remove();
                 }
-            } else if (cue.mStartTimeMs == ((Long) pair.first).longValue()) {
+            } else if (cue.mStartTimeMs == ((Long) next.first).longValue()) {
                 if (this.DEBUG) {
-                    String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Adding ");
-                    sb2.append(cue);
-                    Log.v(str2, sb2.toString());
+                    Log.v(TAG, "Adding " + cue);
                 }
                 if (cue.mInnerTimesMs != null) {
                     cue.onTime(j);

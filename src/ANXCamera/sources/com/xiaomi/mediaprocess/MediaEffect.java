@@ -9,12 +9,7 @@ public class MediaEffect {
     public static long CreateEffect(EffectType effectType) {
         long CreateEffectJni = CreateEffectJni(effectType.ordinal());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("create effect, type id: ");
-        sb.append(effectType);
-        sb.append(", effect id:");
-        sb.append(CreateEffectJni);
-        Log.d(str, sb.toString());
+        Log.d(str, "create effect, type id: " + effectType + ", effect id:" + CreateEffectJni);
         return CreateEffectJni;
     }
 
@@ -23,10 +18,7 @@ public class MediaEffect {
     public static void DestoryEffect(long j) {
         DestoryEffectJni(j);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("destory effect id: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "destory effect id: " + j);
     }
 
     public static native void DestoryEffectJni(long j);
@@ -41,28 +33,19 @@ public class MediaEffect {
     public static boolean SetParamsForAudioTrack(long j, Map<String, String> map) {
         String[] strArr;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("set param for audio track  id: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "set param for audio track  id: " + j);
         int i = 0;
         if (map == null || map.size() == 0) {
             Log.d(TAG, "Param Map: <null, null>");
             strArr = new String[0];
         } else {
             strArr = new String[(map.size() * 2)];
-            for (String str2 : map.keySet()) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Param Map: <");
-                sb2.append(str2);
-                sb2.append(", ");
-                sb2.append((String) map.get(str2));
-                sb2.append(">");
-                Log.d(str3, sb2.toString());
+            for (String next : map.keySet()) {
+                String str2 = TAG;
+                Log.d(str2, "Param Map: <" + next + ", " + map.get(next) + ">");
                 int i2 = i * 2;
-                strArr[i2] = str2.toLowerCase();
-                strArr[i2 + 1] = (String) map.get(str2);
+                strArr[i2] = next.toLowerCase();
+                strArr[i2 + 1] = map.get(next);
                 i++;
             }
         }
@@ -74,30 +57,19 @@ public class MediaEffect {
     public static boolean SetParamsForEffect(EffectType effectType, long j, Map<String, String> map) {
         String[] strArr;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("set param for effect, effect type: ");
-        sb.append(effectType);
-        sb.append(", effect id: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "set param for effect, effect type: " + effectType + ", effect id: " + j);
         int i = 0;
         if (map == null || map.size() == 0) {
             Log.d(TAG, "Param Map: <null, null>");
             strArr = new String[0];
         } else {
             strArr = new String[(map.size() * 2)];
-            for (String str2 : map.keySet()) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Param Map: <");
-                sb2.append(str2);
-                sb2.append(", ");
-                sb2.append((String) map.get(str2));
-                sb2.append(">");
-                Log.d(str3, sb2.toString());
+            for (String next : map.keySet()) {
+                String str2 = TAG;
+                Log.d(str2, "Param Map: <" + next + ", " + map.get(next) + ">");
                 int i2 = i * 2;
-                strArr[i2] = str2.toLowerCase();
-                strArr[i2 + 1] = (String) map.get(str2);
+                strArr[i2] = next.toLowerCase();
+                strArr[i2 + 1] = map.get(next);
                 i++;
             }
         }

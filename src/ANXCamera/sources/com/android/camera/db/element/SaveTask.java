@@ -87,10 +87,7 @@ public class SaveTask {
     }
 
     public void setStartTime(Long l) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setStartTime:");
-        sb.append(l);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setStartTime:" + l);
         this.startTime = l;
     }
 

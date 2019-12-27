@@ -236,39 +236,26 @@ public class DeviceManager {
     }
 
     public void EnableMicMixMusic(boolean z) {
-        String str = TAG;
-        Log.i(str, " EnableMicMixMusic ");
+        Log.i(TAG, " EnableMicMixMusic ");
         if (this.mContext == null) {
-            Log.e(str, " EnableMicMixMusic error, please init the engine first");
+            Log.e(TAG, " EnableMicMixMusic error, please init the engine first");
         } else {
             enableMicMixMusicJni(z);
         }
     }
 
     public void SetOrientation(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setting orientation with deviceOrientation:");
-        sb.append(i);
-        sb.append(" UI orientation:");
-        sb.append(i2);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.i(str, sb2);
+        Log.i(TAG, "setting orientation with deviceOrientation:" + i + " UI orientation:" + i2);
         if (this.mContext == null) {
-            Log.e(str, "SetOrientation error, please init the engine first");
+            Log.e(TAG, "SetOrientation error, please init the engine first");
             return;
         }
         setOrientationJni(i, i2);
-        Log.i(str, "set orientation done");
+        Log.i(TAG, "set orientation done");
     }
 
     public boolean addVideoPreprocessFilter(long j, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("addVideoPreprocessFilter filter:");
-        sb.append(j);
-        sb.append(" filterType:");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "addVideoPreprocessFilter filter:" + j + " filterType:" + i);
         return addVideoPreprocessFilterJni(j, i);
     }
 
@@ -279,10 +266,9 @@ public class DeviceManager {
     }
 
     public boolean constructDeviceManager(Context context) {
-        String str = TAG;
-        Log.d(str, "construct DeviceManager...");
+        Log.d(TAG, "construct DeviceManager...");
         if (this.mContext != null) {
-            Log.d(str, "construct error, please destroy the engine first");
+            Log.d(TAG, "construct error, please destroy the engine first");
             return false;
         }
         this.mContext = context;
@@ -291,10 +277,9 @@ public class DeviceManager {
     }
 
     public boolean destructDeviceManager() {
-        String str = TAG;
-        Log.d(str, "destruct DeviceManager...");
+        Log.d(TAG, "destruct DeviceManager...");
         if (this.mContext == null) {
-            Log.d(str, "destruct error, please destroy the engine first");
+            Log.d(TAG, "destruct error, please destroy the engine first");
             return false;
         }
         destructDeviceManagerJni();
@@ -315,18 +300,13 @@ public class DeviceManager {
     }
 
     public void enableRotation(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Eanble rotate with:");
-        sb.append(z);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.i(str, sb2);
+        Log.i(TAG, "Eanble rotate with:" + z);
         if (this.mContext == null) {
-            Log.e(str, "enableRotation error, please init the engine first");
+            Log.e(TAG, "enableRotation error, please init the engine first");
             return;
         }
         enableRotationJni(z);
-        Log.i(str, "set rotate done");
+        Log.i(TAG, "set rotate done");
     }
 
     public boolean enableVideoPreprocess(boolean z) {
@@ -449,14 +429,7 @@ public class DeviceManager {
     }
 
     public boolean isSupportResolution(int i, int i2, int i3) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(" isSupportResolution:");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        sb.append(":");
-        sb.append(i3);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, " isSupportResolution:" + i + "x" + i2 + ":" + i3);
         return isSupportResolutionJni(i, i2, i3);
     }
 
@@ -471,36 +444,33 @@ public class DeviceManager {
     }
 
     public void loopbackAudio(boolean z) {
-        String str = TAG;
-        Log.i(str, " loopbackAudio ");
+        Log.i(TAG, " loopbackAudio ");
         if (this.mContext == null) {
-            Log.e(str, " loopbackAudio error, please init the engine first");
+            Log.e(TAG, " loopbackAudio error, please init the engine first");
         } else {
             loopbackAudioJni(z);
         }
     }
 
     public boolean muteMicrophone() {
-        String str = TAG;
-        Log.i(str, "starting muteMicrophone...");
+        Log.i(TAG, "starting muteMicrophone...");
         if (this.mContext == null) {
-            Log.e(str, "muteMicrophone error, please init the engine first");
+            Log.e(TAG, "muteMicrophone error, please init the engine first");
             return false;
         }
         muteMicrophoneJni(true);
-        Log.i(str, "muteMicrophone succeeded");
+        Log.i(TAG, "muteMicrophone succeeded");
         return true;
     }
 
     public boolean muteSpeaker() {
-        String str = TAG;
-        Log.i(str, "starting muteSpeaker...");
+        Log.i(TAG, "starting muteSpeaker...");
         if (this.mContext == null) {
-            Log.e(str, "muteSpeaker error, please init the engine first");
+            Log.e(TAG, "muteSpeaker error, please init the engine first");
             return false;
         }
         muteSpeakerJni(true);
-        Log.i(str, "muteSpeaker succeeded");
+        Log.i(TAG, "muteSpeaker succeeded");
         return true;
     }
 
@@ -515,12 +485,7 @@ public class DeviceManager {
     }
 
     public void removeVideoPreprocessFilter(long j, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("removeVideoPreprocessFilter filter:");
-        sb.append(j);
-        sb.append(" filterType:");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "removeVideoPreprocessFilter filter:" + j + " filterType:" + i);
         removeVideoPreprocessFilterJni(j, i);
     }
 
@@ -540,16 +505,15 @@ public class DeviceManager {
     }
 
     public boolean setCameraParam(int i, int i2, int i3) {
-        String str = TAG;
-        Log.i(str, "setting  camera param ...");
+        Log.i(TAG, "setting  camera param ...");
         if (this.mContext == null) {
-            Log.e(str, "setCameraParam error, please init the engine first");
+            Log.e(TAG, "setCameraParam error, please init the engine first");
             return false;
         } else if (!setCameraParamJni(i, i2, i3)) {
-            Log.e(str, "set camera param failed");
+            Log.e(TAG, "set camera param failed");
             return false;
         } else {
-            Log.i(str, " set camera param succeeded");
+            Log.i(TAG, " set camera param succeeded");
             return true;
         }
     }
@@ -605,18 +569,12 @@ public class DeviceManager {
     }
 
     public void setSpeaker(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("set speaker phone on: ");
-        sb.append(z);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "set speaker phone on: " + z);
         setSpeakerJni(z);
     }
 
     public boolean setStickerPath(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setStickerPath:");
-        sb.append(str);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setStickerPath:" + str);
         return setStickerPathJni(str);
     }
 
@@ -631,16 +589,15 @@ public class DeviceManager {
     }
 
     public boolean setVideoOutputParam(int i, int i2, int i3) {
-        String str = TAG;
-        Log.i(str, "setting  video output param ...");
+        Log.i(TAG, "setting  video output param ...");
         if (this.mContext == null) {
-            Log.e(str, "setVideoOutputParam error, please init the engine first");
+            Log.e(TAG, "setVideoOutputParam error, please init the engine first");
             return false;
         } else if (!setVideoOutputParamJni(i, i2, i3)) {
-            Log.e(str, "set video output param failed");
+            Log.e(TAG, "set video output param failed");
             return false;
         } else {
-            Log.i(str, " set video output param succeeded");
+            Log.i(TAG, " set video output param succeeded");
             return true;
         }
     }
@@ -656,14 +613,9 @@ public class DeviceManager {
     }
 
     public void setVoiceChangeMode(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(" setVoiceChangeMode, mode: ");
-        sb.append(i);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.i(str, sb2);
+        Log.i(TAG, " setVoiceChangeMode, mode: " + i);
         if (this.mContext == null) {
-            Log.e(str, "setVoiceChangeMode AudioDevice error, please init the engine first");
+            Log.e(TAG, "setVoiceChangeMode AudioDevice error, please init the engine first");
         } else {
             setVoiceChangeModeJni(i);
         }
@@ -675,10 +627,9 @@ public class DeviceManager {
     }
 
     public void startAudioDevice() {
-        String str = TAG;
-        Log.i(str, " startAudioDevice ");
+        Log.i(TAG, " startAudioDevice ");
         if (this.mContext == null) {
-            Log.e(str, "start AudioDevice error, please init the engine first");
+            Log.e(TAG, "start AudioDevice error, please init the engine first");
             return;
         }
         startSpeakerJni(true);
@@ -686,37 +637,34 @@ public class DeviceManager {
     }
 
     public boolean startCamera() {
-        String str = TAG;
-        Log.i(str, "starting camera...");
+        Log.i(TAG, "starting camera...");
         if (this.mContext == null) {
-            Log.e(str, "startCamera error, please init the engine first");
+            Log.e(TAG, "startCamera error, please init the engine first");
             return false;
         } else if (!startCameraJni(true)) {
-            Log.e(str, "start camera failed");
+            Log.e(TAG, "start camera failed");
             return false;
         } else {
-            Log.i(str, " start camera succeeded");
+            Log.i(TAG, " start camera succeeded");
             return true;
         }
     }
 
     public void startMixMusic(String str, boolean z) {
-        String str2 = TAG;
-        Log.i(str2, " startMixMusic ");
+        Log.i(TAG, " startMixMusic ");
         if (this.mContext == null) {
-            Log.e(str2, " startMixMusic error, please init the engine first");
+            Log.e(TAG, " startMixMusic error, please init the engine first");
         } else {
             startMixMusicJni(str, z);
         }
     }
 
     public long startPlayBackgroundMusic(String str, boolean z) {
-        String str2 = TAG;
-        Log.i(str2, " startMixMusic ");
+        Log.i(TAG, " startMixMusic ");
         if (this.mContext != null) {
             return startPlayBackgroundMusicJni(str, z);
         }
-        Log.e(str2, " startMixMusic error, please init the engine first");
+        Log.e(TAG, " startMixMusic error, please init the engine first");
         return 0;
     }
 
@@ -726,10 +674,9 @@ public class DeviceManager {
     }
 
     public void stopAudioDevice() {
-        String str = TAG;
-        Log.i(str, " stopAudioDevice ");
+        Log.i(TAG, " stopAudioDevice ");
         if (this.mContext == null) {
-            Log.e(str, "stop AudioDevice error, please init the engine first");
+            Log.e(TAG, "stop AudioDevice error, please init the engine first");
             return;
         }
         startMicrophoneJni(false);
@@ -737,35 +684,32 @@ public class DeviceManager {
     }
 
     public boolean stopCamera() {
-        String str = TAG;
-        Log.i(str, "stopping camera...");
+        Log.i(TAG, "stopping camera...");
         if (this.mContext == null) {
-            Log.e(str, "stopCamera error, please init the engine first");
+            Log.e(TAG, "stopCamera error, please init the engine first");
             return false;
         } else if (!startCameraJni(false)) {
-            Log.e(str, "stop camera failed");
+            Log.e(TAG, "stop camera failed");
             return false;
         } else {
-            Log.i(str, "stop camera succeeded");
+            Log.i(TAG, "stop camera succeeded");
             return true;
         }
     }
 
     public void stopMixMusic() {
-        String str = TAG;
-        Log.i(str, " stopMixMusic ");
+        Log.i(TAG, " stopMixMusic ");
         if (this.mContext == null) {
-            Log.e(str, " stopMixMusic error, please init the engine first");
+            Log.e(TAG, " stopMixMusic error, please init the engine first");
         } else {
             stopMixMusicJni();
         }
     }
 
     public void stopPlayBackgroundMusic(long j) {
-        String str = TAG;
-        Log.i(str, " stopPlayBackgroundMusic");
+        Log.i(TAG, " stopPlayBackgroundMusic");
         if (this.mContext == null) {
-            Log.e(str, " stopPlayBackgroundMusic error, please init the engine first");
+            Log.e(TAG, " stopPlayBackgroundMusic error, please init the engine first");
         } else {
             stopPlayBackgroundMusicJni(j);
         }
@@ -777,41 +721,38 @@ public class DeviceManager {
     }
 
     public boolean switchCamera() {
-        String str = TAG;
-        Log.i(str, "switching camera...");
+        Log.i(TAG, "switching camera...");
         if (this.mContext == null) {
-            Log.e(str, "switchCamera error, please init the engine first");
+            Log.e(TAG, "switchCamera error, please init the engine first");
             return false;
         } else if (!switchCameraJni()) {
-            Log.e(str, "switch camera failed");
+            Log.e(TAG, "switch camera failed");
             return false;
         } else {
-            Log.i(str, "switch camera succeeded");
+            Log.i(TAG, "switch camera succeeded");
             return true;
         }
     }
 
     public boolean unMuteMicrophone() {
-        String str = TAG;
-        Log.i(str, "unMuting Microphone...");
+        Log.i(TAG, "unMuting Microphone...");
         if (this.mContext == null) {
-            Log.e(str, "unMuteMicrophone error, please init the engine first");
+            Log.e(TAG, "unMuteMicrophone error, please init the engine first");
             return false;
         }
         muteMicrophoneJni(false);
-        Log.i(str, "unMute Microphone succeeded");
+        Log.i(TAG, "unMute Microphone succeeded");
         return true;
     }
 
     public boolean unMuteSpeaker() {
-        String str = TAG;
-        Log.i(str, "unMuting Speaker...");
+        Log.i(TAG, "unMuting Speaker...");
         if (this.mContext == null) {
-            Log.e(str, "unMuteSpeaker error, please init the engine first");
+            Log.e(TAG, "unMuteSpeaker error, please init the engine first");
             return false;
         }
         muteSpeakerJni(false);
-        Log.i(str, "unMute Speaker succeeded");
+        Log.i(TAG, "unMute Speaker succeeded");
         return true;
     }
 }

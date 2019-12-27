@@ -6,14 +6,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.hardware.Camera.Area;
-import android.hardware.Camera.AutoFocusCallback;
-import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.Parameters;
-import android.hardware.Camera.Size;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.annotation.Keep;
 import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
@@ -32,14 +26,14 @@ public class CameraInstance {
     public static final int DEFAULT_PREVIEW_RATE = 30;
     public static final String TAG = "CameraInstance";
     private static CameraInstance mThisInstance;
-    private Comparator<Size> comparatorBigger = new Comparator<Size>() {
-        public int compare(Size size, Size size2) {
+    private Comparator<Camera.Size> comparatorBigger = new Comparator<Camera.Size>() {
+        public int compare(Camera.Size size, Camera.Size size2) {
             int i = size2.width - size.width;
             return i == 0 ? size2.height - size.height : i;
         }
     };
-    private Comparator<Size> comparatorSmaller = new Comparator<Size>() {
-        public int compare(Size size, Size size2) {
+    private Comparator<Camera.Size> comparatorSmaller = new Comparator<Camera.Size>() {
+        public int compare(Camera.Size size, Camera.Size size2) {
             int i = size.width - size2.width;
             return i == 0 ? size.height - size2.height : i;
         }
@@ -48,7 +42,7 @@ public class CameraInstance {
     private int mDefaultCameraID = -1;
     private int mFacing = 0;
     private boolean mIsPreviewing = false;
-    private Parameters mParams;
+    private Camera.Parameters mParams;
     private int mPictureHeight = Util.LIMIT_SURFACE_WIDTH;
     private int mPictureWidth = 1280;
     private int mPreferPreviewHeight = Util.LIMIT_SURFACE_WIDTH;
@@ -112,10 +106,9 @@ public class CameraInstance {
 
     public Rect calculateTapArea(float f2, float f3, float f4, int i) {
         int intValue = Float.valueOf(f4 * 1000.0f).intValue();
-        int i2 = ((int) (f3 * 2000.0f)) - 1000;
-        int i3 = intValue / 2;
-        int clamp = clamp((((int) (f2 * 2000.0f)) - 1000) - i3, NotificationManagerCompat.IMPORTANCE_UNSPECIFIED, 1000);
-        int clamp2 = clamp(i2 - i3, NotificationManagerCompat.IMPORTANCE_UNSPECIFIED, 1000);
+        int i2 = intValue / 2;
+        int clamp = clamp((((int) (f2 * 2000.0f)) - 1000) - i2, NotificationManagerCompat.IMPORTANCE_UNSPECIFIED, 1000);
+        int clamp2 = clamp((((int) (f3 * 2000.0f)) - 1000) - i2, NotificationManagerCompat.IMPORTANCE_UNSPECIFIED, 1000);
         RectF rectF = new RectF((float) clamp, (float) clamp2, (float) clamp(clamp + intValue), (float) clamp(clamp2 + intValue));
         Rect rect = new Rect(Math.round(rectF.left), Math.round(rectF.top), Math.round(rectF.right), Math.round(rectF.bottom));
         rotateRectForOrientation(i, new Rect(NotificationManagerCompat.IMPORTANCE_UNSPECIFIED, NotificationManagerCompat.IMPORTANCE_UNSPECIFIED, 1000, 1000), rect);
@@ -141,7 +134,7 @@ public class CameraInstance {
             Rect calculateTapArea = calculateTapArea(f2, f3, f4, this.mRotation);
             VELogUtil.d(TAG, String.format("FocusAreas: [%d, %d, %d, %d]", new Object[]{Integer.valueOf(calculateTapArea.left), Integer.valueOf(calculateTapArea.top), Integer.valueOf(calculateTapArea.right), Integer.valueOf(calculateTapArea.bottom)}));
             ArrayList arrayList = new ArrayList();
-            arrayList.add(new Area(calculateTapArea, 1000));
+            arrayList.add(new Camera.Area(calculateTapArea, 1000));
             try {
                 this.mCameraDevice.cancelAutoFocus();
                 if (!TextUtils.equals(Build.BRAND, "Multilaser") && !TextUtils.equals(Build.BRAND, "MS40")) {
@@ -150,16 +143,15 @@ public class CameraInstance {
                 this.mParams.setMeteringAreas(arrayList);
                 this.mParams.setFocusMode(AutoFocus.LEGACY_CONTINUOUS_VIDEO);
                 this.mCameraDevice.setParameters(this.mParams);
-                this.mCameraDevice.autoFocus(new AutoFocusCallback() {
+                this.mCameraDevice.autoFocus(new Camera.AutoFocusCallback() {
                     public void onAutoFocus(boolean z, Camera camera) {
-                        String str = CameraInstance.TAG;
                         if (z) {
-                            VELogUtil.i(str, "Camera Focus Succeed!");
+                            VELogUtil.i(CameraInstance.TAG, "Camera Focus Succeed!");
                             return;
                         }
-                        VELogUtil.i(str, "Camera Focus Failed!");
+                        VELogUtil.i(CameraInstance.TAG, "Camera Focus Failed!");
                         try {
-                            Parameters parameters = camera.getParameters();
+                            Camera.Parameters parameters = camera.getParameters();
                             parameters.setFocusMode("auto");
                             camera.setParameters(parameters);
                         } catch (Exception unused) {
@@ -167,11 +159,7 @@ public class CameraInstance {
                     }
                 });
             } catch (Exception e2) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Error: focusAtPoint failed: ");
-                sb.append(e2.toString());
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "Error: focusAtPoint failed: " + e2.toString());
             }
         } else {
             VELogUtil.i(TAG, "The device does not support metering areas...");
@@ -186,7 +174,7 @@ public class CameraInstance {
         return this.mFacing;
     }
 
-    public synchronized Parameters getParams() {
+    public synchronized Camera.Parameters getParams() {
         if (this.mCameraDevice == null) {
             return null;
         }
@@ -198,95 +186,73 @@ public class CameraInstance {
     }
 
     public void initCamera(int i) {
+        int max;
+        int min;
         Camera camera = this.mCameraDevice;
-        String str = TAG;
         if (camera == null) {
-            VELogUtil.e(str, "initCamera: Camera is not opened!");
+            VELogUtil.e(TAG, "initCamera: Camera is not opened!");
             return;
         }
         this.mParams = camera.getParameters();
         for (Integer intValue : this.mParams.getSupportedPictureFormats()) {
-            VELogUtil.i(str, String.format("Picture Format: %x", new Object[]{Integer.valueOf(intValue.intValue())}));
+            VELogUtil.i(TAG, String.format("Picture Format: %x", new Object[]{Integer.valueOf(intValue.intValue())}));
         }
         this.mParams.setPictureFormat(256);
-        List<Size> supportedPictureSizes = this.mParams.getSupportedPictureSizes();
+        List<Camera.Size> supportedPictureSizes = this.mParams.getSupportedPictureSizes();
         Collections.sort(supportedPictureSizes, this.comparatorBigger);
-        Size size = null;
-        Size size2 = null;
-        for (Size size3 : supportedPictureSizes) {
-            if (size2 == null || (size3.width >= this.mPictureWidth && size3.height >= this.mPictureHeight)) {
-                size2 = size3;
+        Camera.Size size = null;
+        Camera.Size size2 = null;
+        for (Camera.Size next : supportedPictureSizes) {
+            if (size2 == null || (next.width >= this.mPictureWidth && next.height >= this.mPictureHeight)) {
+                size2 = next;
             }
         }
-        List<Size> supportedPreviewSizes = this.mParams.getSupportedPreviewSizes();
+        List<Camera.Size> supportedPreviewSizes = this.mParams.getSupportedPreviewSizes();
         Collections.sort(supportedPreviewSizes, this.comparatorBigger);
-        for (Size size4 : supportedPreviewSizes) {
-            VELogUtil.d(str, String.format("Supported preview size: %d x %d", new Object[]{Integer.valueOf(size4.width), Integer.valueOf(size4.height)}));
-            if (size == null || (size4.width >= this.mPreferPreviewWidth && size4.height >= this.mPreferPreviewHeight)) {
-                size = size4;
+        for (Camera.Size next2 : supportedPreviewSizes) {
+            VELogUtil.d(TAG, String.format("Supported preview size: %d x %d", new Object[]{Integer.valueOf(next2.width), Integer.valueOf(next2.height)}));
+            if (size == null || (next2.width >= this.mPreferPreviewWidth && next2.height >= this.mPreferPreviewHeight)) {
+                size = next2;
             }
         }
         List<Integer> supportedPreviewFrameRates = this.mParams.getSupportedPreviewFrameRates();
         this.mParams.setPreviewSize(size.width, size.height);
         this.mParams.setPictureSize(size2.width, size2.height);
-        List supportedFocusModes = this.mParams.getSupportedFocusModes();
-        String str2 = AutoFocus.LEGACY_CONTINUOUS_VIDEO;
-        if (supportedFocusModes.contains(str2)) {
-            this.mParams.setFocusMode(str2);
+        if (this.mParams.getSupportedFocusModes().contains(AutoFocus.LEGACY_CONTINUOUS_VIDEO)) {
+            this.mParams.setFocusMode(AutoFocus.LEGACY_CONTINUOUS_VIDEO);
         }
         int i2 = 30;
         int i3 = (i * 2) / 3;
         int i4 = (i * 4) / 3;
         int i5 = 0;
-        for (Integer num : supportedPreviewFrameRates) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Supported frame rate: ");
-            sb.append(num);
-            VELogUtil.v(str, sb.toString());
-            if (i5 < num.intValue()) {
-                i5 = num.intValue();
+        for (Integer next3 : supportedPreviewFrameRates) {
+            VELogUtil.v(TAG, "Supported frame rate: " + next3);
+            if (i5 < next3.intValue()) {
+                i5 = next3.intValue();
             }
-            if (i2 > num.intValue()) {
-                i2 = num.intValue();
+            if (i2 > next3.intValue()) {
+                i2 = next3.intValue();
             }
         }
-        int max = Math.max(i2, i3);
-        int min = Math.min(i4, i5);
-        StringBuilder sb2 = new StringBuilder();
-        String str3 = "FpsRange = [";
-        sb2.append(str3);
-        sb2.append(max);
-        String str4 = ", ";
-        sb2.append(str4);
-        sb2.append(min);
-        String str5 = "]";
-        sb2.append(str5);
-        VELogUtil.i(str, sb2.toString());
+        VELogUtil.i(TAG, "FpsRange = [" + max + ", " + min + "]");
         this.mParams.setPreviewFpsRange(max * 1000, min * 1000);
-        int[] iArr = new int[2];
-        this.mParams.getPreviewFpsRange(iArr);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str3);
-        sb3.append(iArr[0] / 1000);
-        sb3.append(str4);
-        sb3.append(iArr[1] / 1000);
-        sb3.append(str5);
-        VELogUtil.i(str, sb3.toString());
+        this.mParams.getPreviewFpsRange(new int[2]);
+        VELogUtil.i(TAG, "FpsRange = [" + (r12[0] / 1000) + ", " + (new int[2][1] / 1000) + "]");
         try {
             this.mCameraDevice.setParameters(this.mParams);
         } catch (Exception e2) {
             e2.printStackTrace();
         }
         this.mParams = this.mCameraDevice.getParameters();
-        Size pictureSize = this.mParams.getPictureSize();
-        Size previewSize = this.mParams.getPreviewSize();
+        Camera.Size pictureSize = this.mParams.getPictureSize();
+        Camera.Size previewSize = this.mParams.getPreviewSize();
         this.mPreviewWidth = previewSize.width;
         this.mPreviewHeight = previewSize.height;
         int i6 = pictureSize.width;
         this.mPictureWidth = i6;
         this.mPictureHeight = pictureSize.height;
-        VELogUtil.i(str, String.format("Camera Picture Size: %d x %d", new Object[]{Integer.valueOf(i6), Integer.valueOf(pictureSize.height)}));
-        VELogUtil.i(str, String.format("Camera Preview Size: %d x %d", new Object[]{Integer.valueOf(previewSize.width), Integer.valueOf(previewSize.height)}));
+        VELogUtil.i(TAG, String.format("Camera Picture Size: %d x %d", new Object[]{Integer.valueOf(i6), Integer.valueOf(pictureSize.height)}));
+        VELogUtil.i(TAG, String.format("Camera Preview Size: %d x %d", new Object[]{Integer.valueOf(previewSize.width), Integer.valueOf(previewSize.height)}));
     }
 
     public boolean isCameraOpened() {
@@ -330,9 +296,9 @@ public class CameraInstance {
     }
 
     public int setOrientationDegrees(int i) {
-        CameraInfo cameraInfo = new CameraInfo();
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         Camera.getCameraInfo(this.mDefaultCameraID, cameraInfo);
-        int i2 = cameraInfo.facing == 1 ? ((360 - ((cameraInfo.orientation + i) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT)) + 180) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : ((cameraInfo.orientation - i) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        int i2 = cameraInfo.facing == 1 ? ((360 - ((cameraInfo.orientation + i) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT)) + 180) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : ((cameraInfo.orientation - i) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         try {
             this.mCameraDevice.setDisplayOrientation(i2);
         } catch (Exception unused) {
@@ -340,7 +306,7 @@ public class CameraInstance {
         return i2;
     }
 
-    public synchronized void setParams(Parameters parameters) {
+    public synchronized void setParams(Camera.Parameters parameters) {
         if (this.mCameraDevice != null) {
             this.mParams = parameters;
             this.mCameraDevice.setParameters(this.mParams);
@@ -354,20 +320,20 @@ public class CameraInstance {
             return;
         }
         this.mParams = this.mCameraDevice.getParameters();
-        List<Size> supportedPictureSizes = this.mParams.getSupportedPictureSizes();
-        Size size = null;
+        List<Camera.Size> supportedPictureSizes = this.mParams.getSupportedPictureSizes();
+        Camera.Size size = null;
         if (z) {
             Collections.sort(supportedPictureSizes, this.comparatorBigger);
-            for (Size size2 : supportedPictureSizes) {
-                if (size == null || (size2.width >= i && size2.height >= i2)) {
-                    size = size2;
+            for (Camera.Size next : supportedPictureSizes) {
+                if (size == null || (next.width >= i && next.height >= i2)) {
+                    size = next;
                 }
             }
         } else {
             Collections.sort(supportedPictureSizes, this.comparatorSmaller);
-            for (Size size3 : supportedPictureSizes) {
-                if (size == null || (size3.width <= i && size3.height <= i2)) {
-                    size = size3;
+            for (Camera.Size next2 : supportedPictureSizes) {
+                if (size == null || (next2.width <= i && next2.height <= i2)) {
+                    size = next2;
                 }
             }
         }
@@ -401,11 +367,7 @@ public class CameraInstance {
                 this.mIsPreviewing = true;
             } catch (Exception e2) {
                 e2.printStackTrace();
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("startPreview: Error ");
-                sb.append(e2.getMessage());
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "startPreview: Error " + e2.getMessage());
                 this.mIsPreviewing = false;
                 try {
                     this.mCameraDevice.release();
@@ -423,7 +385,7 @@ public class CameraInstance {
             this.mIsPreviewing = false;
             this.mCameraDevice.stopPreview();
             try {
-                this.mCameraDevice.setPreviewTexture(null);
+                this.mCameraDevice.setPreviewTexture((SurfaceTexture) null);
             } catch (Exception e2) {
                 e2.printStackTrace();
             }
@@ -445,24 +407,24 @@ public class CameraInstance {
         return tryOpenCamera(cameraOpenCallback, 0);
     }
 
-    /* JADX WARNING: Can't wrap try/catch for region: R(4:35|36|37|38) */
-    /* JADX WARNING: Code restructure failed: missing block: B:34:0x0080, code lost:
+    /* JADX WARNING: Can't wrap try/catch for region: R(4:34|35|36|37) */
+    /* JADX WARNING: Code restructure failed: missing block: B:33:0x007f, code lost:
         return true;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:36:?, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:35:?, code lost:
         r6.mCameraDevice.release();
         r6.mCameraDevice = null;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:38:0x0089, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:37:0x0089, code lost:
         return false;
      */
-    /* JADX WARNING: Missing exception handler attribute for start block: B:35:0x0081 */
+    /* JADX WARNING: Missing exception handler attribute for start block: B:34:0x0081 */
     public synchronized boolean tryOpenCamera(CameraOpenCallback cameraOpenCallback, int i) {
         VELogUtil.i(TAG, "try open camera...");
         try {
-            if (VERSION.SDK_INT > 8) {
+            if (Build.VERSION.SDK_INT > 8) {
                 int numberOfCameras = Camera.getNumberOfCameras();
-                CameraInfo cameraInfo = new CameraInfo();
+                Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
                 for (int i2 = 0; i2 < numberOfCameras; i2++) {
                     Camera.getCameraInfo(i2, cameraInfo);
                     if (cameraInfo.facing == i) {
@@ -482,11 +444,7 @@ public class CameraInstance {
                 this.mFacing = 0;
             }
             this.mRotation = setOrientationDegrees(0);
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Camera rotation = ");
-            sb.append(this.mRotation);
-            VELogUtil.d(str, sb.toString());
+            VELogUtil.d(TAG, "Camera rotation = " + this.mRotation);
             if (this.mCameraDevice == null) {
                 return false;
             }

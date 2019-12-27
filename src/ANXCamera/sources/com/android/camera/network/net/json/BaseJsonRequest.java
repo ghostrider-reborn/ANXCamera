@@ -3,13 +3,11 @@ package com.android.camera.network.net.json;
 import com.android.camera.network.net.base.ErrorCode;
 import com.android.camera.network.net.base.VolleyRequest;
 import com.android.volley.Request;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
+import com.android.volley.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONObject;
 
 public abstract class BaseJsonRequest<T> extends VolleyRequest<JSONObject, T> {
@@ -27,20 +25,15 @@ public abstract class BaseJsonRequest<T> extends VolleyRequest<JSONObject, T> {
             Map<String, String> map = this.mParams;
             if (map != null && !map.isEmpty()) {
                 StringBuilder sb = new StringBuilder(this.mUrl);
-                String str = "UTF-8";
-                String str2 = "?";
                 if (this.mUrl.indexOf(63) > 0) {
-                    if (!this.mUrl.endsWith(str2)) {
-                        String str3 = "&";
-                        if (!this.mUrl.endsWith(str3)) {
-                            sb.append(str3);
-                        }
+                    if (!this.mUrl.endsWith("?") && !this.mUrl.endsWith("&")) {
+                        sb.append("&");
                     }
-                    sb.append(encodeParameters(this.mParams, str));
+                    sb.append(encodeParameters(this.mParams, "UTF-8"));
                     return sb.toString();
                 }
-                sb.append(str2);
-                sb.append(encodeParameters(this.mParams, str));
+                sb.append("?");
+                sb.append(encodeParameters(this.mParams, "UTF-8"));
                 return sb.toString();
             }
         }
@@ -50,18 +43,15 @@ public abstract class BaseJsonRequest<T> extends VolleyRequest<JSONObject, T> {
     private String encodeParameters(Map<String, String> map, String str) {
         StringBuilder sb = new StringBuilder();
         try {
-            for (Entry entry : map.entrySet()) {
-                sb.append(URLEncoder.encode((String) entry.getKey(), str));
+            for (Map.Entry next : map.entrySet()) {
+                sb.append(URLEncoder.encode((String) next.getKey(), str));
                 sb.append('=');
-                sb.append(URLEncoder.encode((String) entry.getValue(), str));
+                sb.append(URLEncoder.encode((String) next.getValue(), str));
                 sb.append('&');
             }
             return sb.toString();
         } catch (UnsupportedEncodingException e2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Encoding not supported: ");
-            sb2.append(str);
-            throw new RuntimeException(sb2.toString(), e2);
+            throw new RuntimeException("Encoding not supported: " + str, e2);
         }
     }
 
@@ -73,7 +63,7 @@ public abstract class BaseJsonRequest<T> extends VolleyRequest<JSONObject, T> {
     }
 
     /* access modifiers changed from: protected */
-    public final Request<JSONObject> createVolleyRequest(Listener<JSONObject> listener, ErrorListener errorListener) {
+    public final Request<JSONObject> createVolleyRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         String str = this.mUrl;
         String appendUrlParams = appendUrlParams();
         if (this.mMethod == 0) {

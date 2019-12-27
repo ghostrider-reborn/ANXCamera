@@ -78,10 +78,7 @@ public final class MultipartBody extends RequestBody {
                 this.type = mediaType;
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("multipart != ");
-                sb.append(mediaType);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("multipart != " + mediaType);
             }
         }
     }
@@ -109,11 +106,11 @@ public final class MultipartBody extends RequestBody {
         }
 
         public static Part create(RequestBody requestBody) {
-            return create(null, requestBody);
+            return create((Headers) null, requestBody);
         }
 
         public static Part createFormData(String str, String str2) {
-            return createFormData(str, null, RequestBody.create((MediaType) null, str2));
+            return createFormData(str, (String) null, RequestBody.create((MediaType) null, str2));
         }
 
         public static Part createFormData(String str, @Nullable String str2, RequestBody requestBody) {
@@ -142,11 +139,7 @@ public final class MultipartBody extends RequestBody {
     MultipartBody(ByteString byteString, MediaType mediaType, List<Part> list) {
         this.boundary = byteString;
         this.originalType = mediaType;
-        StringBuilder sb = new StringBuilder();
-        sb.append(mediaType);
-        sb.append("; boundary=");
-        sb.append(byteString.utf8());
-        this.contentType = MediaType.parse(sb.toString());
+        this.contentType = MediaType.parse(mediaType + "; boundary=" + byteString.utf8());
         this.parts = Util.immutableList(list);
     }
 
@@ -169,66 +162,64 @@ public final class MultipartBody extends RequestBody {
         return sb;
     }
 
-    /* JADX WARNING: type inference failed for: r13v1, types: [okio.BufferedSink] */
-    /* JADX WARNING: type inference failed for: r0v1 */
-    /* JADX WARNING: type inference failed for: r13v2, types: [okio.Buffer] */
-    /* JADX WARNING: type inference failed for: r13v3 */
-    /* JADX WARNING: type inference failed for: r13v4 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r13v1, resolved type: okio.BufferedSink} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v0, resolved type: okio.Buffer} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v1, resolved type: okio.Buffer} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r13v2, resolved type: okio.BufferedSink} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v2, resolved type: okio.Buffer} */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 3 */
     private long writeOrCountBytes(@Nullable BufferedSink bufferedSink, boolean z) throws IOException {
         Buffer buffer;
         if (z) {
-            r13 = new Buffer();
-            buffer = r13;
-            r13 = r13;
+            bufferedSink = new Buffer();
+            buffer = bufferedSink;
         } else {
-            r13 = bufferedSink;
             buffer = 0;
         }
         int size = this.parts.size();
         long j = 0;
         for (int i = 0; i < size; i++) {
-            Part part = (Part) this.parts.get(i);
+            Part part = this.parts.get(i);
             Headers headers = part.headers;
             RequestBody requestBody = part.body;
-            r13.write(DASHDASH);
-            r13.write(this.boundary);
-            r13.write(CRLF);
+            bufferedSink.write(DASHDASH);
+            bufferedSink.write(this.boundary);
+            bufferedSink.write(CRLF);
             if (headers != null) {
                 int size2 = headers.size();
                 for (int i2 = 0; i2 < size2; i2++) {
-                    r13.writeUtf8(headers.name(i2)).write(COLONSPACE).writeUtf8(headers.value(i2)).write(CRLF);
+                    bufferedSink.writeUtf8(headers.name(i2)).write(COLONSPACE).writeUtf8(headers.value(i2)).write(CRLF);
                 }
             }
             MediaType contentType2 = requestBody.contentType();
             if (contentType2 != null) {
-                r13.writeUtf8("Content-Type: ").writeUtf8(contentType2.toString()).write(CRLF);
+                bufferedSink.writeUtf8("Content-Type: ").writeUtf8(contentType2.toString()).write(CRLF);
             }
             long contentLength2 = requestBody.contentLength();
             if (contentLength2 != -1) {
-                r13.writeUtf8("Content-Length: ").writeDecimalLong(contentLength2).write(CRLF);
+                bufferedSink.writeUtf8("Content-Length: ").writeDecimalLong(contentLength2).write(CRLF);
             } else if (z) {
                 buffer.clear();
                 return -1;
             }
-            r13.write(CRLF);
+            bufferedSink.write(CRLF);
             if (z) {
                 j += contentLength2;
             } else {
-                requestBody.writeTo(r13);
+                requestBody.writeTo(bufferedSink);
             }
-            r13.write(CRLF);
+            bufferedSink.write(CRLF);
         }
-        r13.write(DASHDASH);
-        r13.write(this.boundary);
-        r13.write(DASHDASH);
-        r13.write(CRLF);
-        if (z) {
-            j += buffer.size();
-            buffer.clear();
+        bufferedSink.write(DASHDASH);
+        bufferedSink.write(this.boundary);
+        bufferedSink.write(DASHDASH);
+        bufferedSink.write(CRLF);
+        if (!z) {
+            return j;
         }
-        return j;
+        long size3 = j + buffer.size();
+        buffer.clear();
+        return size3;
     }
 
     public String boundary() {
@@ -240,7 +231,7 @@ public final class MultipartBody extends RequestBody {
         if (j != -1) {
             return j;
         }
-        long writeOrCountBytes = writeOrCountBytes(null, true);
+        long writeOrCountBytes = writeOrCountBytes((BufferedSink) null, true);
         this.contentLength = writeOrCountBytes;
         return writeOrCountBytes;
     }
@@ -250,7 +241,7 @@ public final class MultipartBody extends RequestBody {
     }
 
     public Part part(int i) {
-        return (Part) this.parts.get(i);
+        return this.parts.get(i);
     }
 
     public List<Part> parts() {

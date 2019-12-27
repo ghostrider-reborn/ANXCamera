@@ -1,6 +1,6 @@
 package android.support.v4.media;
 
-import android.media.browse.MediaBrowser.MediaItem;
+import android.media.browse.MediaBrowser;
 import android.support.annotation.RequiresApi;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -21,7 +21,7 @@ class ParceledListSliceAdapterApi21 {
     private ParceledListSliceAdapterApi21() {
     }
 
-    static Object newInstance(List<MediaItem> list) {
+    static Object newInstance(List<MediaBrowser.MediaItem> list) {
         try {
             return sConstructor.newInstance(new Object[]{list});
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e2) {

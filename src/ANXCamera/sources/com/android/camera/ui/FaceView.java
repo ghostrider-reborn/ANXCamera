@@ -8,9 +8,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.FontMetricsInt;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -92,7 +89,7 @@ public class FaceView extends FrameView {
                     FaceView.this.setFaceRectVisible(0, 0);
                 }
             } else if (FaceView.this.mRectState == 3) {
-                FaceView.this.mRectState = 2;
+                int unused = FaceView.this.mRectState = 2;
                 FaceView.this.setFaceRectVisible(8, 600);
             }
         }
@@ -137,11 +134,11 @@ public class FaceView extends FrameView {
         super(context, attributeSet);
         this.mEffectRectPaint.setAntiAlias(true);
         this.mEffectRectPaint.setStrokeWidth((float) getResources().getDimensionPixelSize(R.dimen.face_rect_width));
-        this.mEffectRectPaint.setStyle(Style.STROKE);
+        this.mEffectRectPaint.setStyle(Paint.Style.STROKE);
         this.mNormalRectPaint = new Paint();
         this.mNormalRectPaint.setAntiAlias(true);
         this.mNormalRectPaint.setColor(-1);
-        this.mNormalRectPaint.setStyle(Style.STROKE);
+        this.mNormalRectPaint.setStyle(Paint.Style.STROKE);
         this.mNormalRectPaint.setStrokeWidth((float) Util.dpToPixel(1.0f));
         this.mCameraScreenNail = ((ActivityBase) context).getCameraScreenNail();
     }
@@ -216,30 +213,31 @@ public class FaceView extends FrameView {
         drawable3.setBounds(rect2);
         drawable3.draw(canvas2);
         if (f2 != 0.0f) {
-            FontMetricsInt fontMetricsInt = this.mFaceInfoTextPaint.getFontMetricsInt();
+            Paint.FontMetricsInt fontMetricsInt = this.mFaceInfoTextPaint.getFontMetricsInt();
             drawFaceInfoText(canvas2, str2, rect2.right + this.mGap, (((rect2.bottom + rect2.top) - fontMetricsInt.bottom) - fontMetricsInt.top) / 2);
         }
     }
 
     private void drawFaceRect(Canvas canvas, RectF rectF, int i, CameraHardwareFace cameraHardwareFace) {
-        if (i != -1) {
-            if (i != 0) {
-                boolean z = true;
-                if (i != 1) {
-                    if ((i == 2 || i == 4) && cameraHardwareFace.beautyscore > 0.0f) {
-                        this.mEffectRectPaint.setColor(MAGIC_MIRROR_RECT_COLOR);
-                        canvas.drawRoundRect(rectF, rectF.width() * 0.015f, rectF.height() * 0.015f, this.mEffectRectPaint);
-                    }
-                } else if (isValidAGInfo(cameraHardwareFace)) {
-                    if (cameraHardwareFace.gender >= 0.4f) {
-                        z = false;
-                    }
-                    this.mEffectRectPaint.setColor(z ? GENDER_FEMALE_RECT_COLOR : GENDER_MALE_RECT_COLOR);
+        if (i == -1) {
+            return;
+        }
+        if (i != 0) {
+            boolean z = true;
+            if (i != 1) {
+                if ((i == 2 || i == 4) && cameraHardwareFace.beautyscore > 0.0f) {
+                    this.mEffectRectPaint.setColor(MAGIC_MIRROR_RECT_COLOR);
                     canvas.drawRoundRect(rectF, rectF.width() * 0.015f, rectF.height() * 0.015f, this.mEffectRectPaint);
                 }
-            } else {
-                canvas.drawRoundRect(rectF, rectF.width() * 0.015f, rectF.height() * 0.015f, this.mNormalRectPaint);
+            } else if (isValidAGInfo(cameraHardwareFace)) {
+                if (cameraHardwareFace.gender >= 0.4f) {
+                    z = false;
+                }
+                this.mEffectRectPaint.setColor(z ? GENDER_FEMALE_RECT_COLOR : GENDER_MALE_RECT_COLOR);
+                canvas.drawRoundRect(rectF, rectF.width() * 0.015f, rectF.height() * 0.015f, this.mEffectRectPaint);
             }
+        } else {
+            canvas.drawRoundRect(rectF, rectF.width() * 0.015f, rectF.height() * 0.015f, this.mNormalRectPaint);
         }
     }
 
@@ -301,7 +299,7 @@ public class FaceView extends FrameView {
             this.mFaceInfoTextPaint.setColor(-1);
             float dimension = resources.getDimension(R.dimen.face_info_magic_textSize);
             this.mFaceInfoTextPaint.setTextSize(dimension);
-            this.mFaceInfoTextPaint.setTextAlign(Align.CENTER);
+            this.mFaceInfoTextPaint.setTextAlign(Paint.Align.CENTER);
             this.mFaceInfoTextPaint.setFakeBoldText(true);
             this.mFaceInfoNumberPaint = new Paint(this.mFaceInfoTextPaint);
             if (this.configuration.locale.equals(Locale.SIMPLIFIED_CHINESE) || this.configuration.locale.equals(Locale.TRADITIONAL_CHINESE)) {
@@ -325,11 +323,8 @@ public class FaceView extends FrameView {
     private boolean isValidAGInfo(CameraHardwareFace cameraHardwareFace) {
         if (0.5f <= cameraHardwareFace.prob) {
             float f2 = cameraHardwareFace.gender;
-            if (f2 != 0.0f && (f2 <= 0.4f || 0.6f <= f2)) {
-                return true;
-            }
+            return f2 != 0.0f && (f2 <= 0.4f || 0.6f <= f2);
         }
-        return false;
     }
 
     private void prepareMatrix() {
@@ -549,26 +544,25 @@ public class FaceView extends FrameView {
     public RectF getFocusRect() {
         RectF rectF = new RectF();
         CameraScreenNail cameraScreenNail = ((ActivityBase) getContext()).getCameraScreenNail();
-        if (cameraScreenNail != null) {
-            int i = this.mLatestFaceIndex;
-            if (i >= 0 && i < 6) {
-                this.mCamera2TranslateMatrix.reset();
-                this.mMatrix.reset();
-                Util.scaleCamera2Matrix(this.mCamera2TranslateMatrix, this.mActiveArraySize, this.mZoomValue);
-                Util.prepareMatrix(this.mMatrix, this.mMirror, this.mCameraDisplayOrientation, cameraScreenNail.getRenderWidth(), cameraScreenNail.getRenderHeight(), getWidth() / 2, getHeight() / 2, this.mActiveArraySize.width(), this.mActiveArraySize.height());
-                rectF.set(this.mLatestFaces[this.mLatestFaceIndex].rect);
-                this.mMatrix.postRotate((float) this.mOrientation);
-                this.mCamera2TranslateMatrix.mapRect(rectF);
-                this.mMatrix.mapRect(rectF);
-                return rectF;
-            }
+        if (cameraScreenNail == null) {
+            return null;
         }
-        return null;
+        int i = this.mLatestFaceIndex;
+        if (i < 0 || i >= 6) {
+            return null;
+        }
+        this.mCamera2TranslateMatrix.reset();
+        this.mMatrix.reset();
+        Util.scaleCamera2Matrix(this.mCamera2TranslateMatrix, this.mActiveArraySize, this.mZoomValue);
+        Util.prepareMatrix(this.mMatrix, this.mMirror, this.mCameraDisplayOrientation, cameraScreenNail.getRenderWidth(), cameraScreenNail.getRenderHeight(), getWidth() / 2, getHeight() / 2, this.mActiveArraySize.width(), this.mActiveArraySize.height());
+        rectF.set(this.mLatestFaces[this.mLatestFaceIndex].rect);
+        this.mMatrix.postRotate((float) this.mOrientation);
+        this.mCamera2TranslateMatrix.mapRect(rectF);
+        this.mMatrix.mapRect(rectF);
+        return rectF;
     }
 
     public boolean isFaceStable() {
-        CameraHardwareFace[] cameraHardwareFaceArr;
-        CameraHardwareFace[] cameraHardwareFaceArr2;
         boolean z = false;
         int i = 0;
         int i2 = 0;
@@ -625,7 +619,7 @@ public class FaceView extends FrameView {
     /* access modifiers changed from: protected */
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         cancelHideAnimator();
     }
 
@@ -635,7 +629,7 @@ public class FaceView extends FrameView {
         if (!this.mSkipDraw) {
             this.mDrawingFaces = getFaces();
             CameraHardwareFace[] cameraHardwareFaceArr = this.mDrawingFaces;
-            if (!(cameraHardwareFaceArr == null || cameraHardwareFaceArr.length == 0 || this.mCameraScreenNail == null || this.mPause)) {
+            if (cameraHardwareFaceArr != null && cameraHardwareFaceArr.length != 0 && this.mCameraScreenNail != null && !this.mPause) {
                 canvas.save();
                 if (!this.mLightingOn) {
                     canvas2.rotate((float) (-this.mOrientation));
@@ -644,33 +638,34 @@ public class FaceView extends FrameView {
                 int i = 0;
                 while (true) {
                     CameraHardwareFace[] cameraHardwareFaceArr2 = this.mDrawingFaces;
-                    if (i >= cameraHardwareFaceArr2.length) {
-                        break;
-                    }
-                    this.mRect.set(cameraHardwareFaceArr2[i].rect);
-                    transToViewRect(this.mDrawingFaces[i].rect, this.mRect);
-                    drawFaceRect(canvas2, this.mRect, popShowType, this.mDrawingFaces[i]);
-                    boolean z = true;
-                    if (popShowType != 1) {
-                        if (popShowType != 2) {
-                            if (popShowType == 4 && this.mDrawingFaces[i].beautyscore > 0.0f) {
+                    if (i < cameraHardwareFaceArr2.length) {
+                        this.mRect.set(cameraHardwareFaceArr2[i].rect);
+                        transToViewRect(this.mDrawingFaces[i].rect, this.mRect);
+                        drawFaceRect(canvas2, this.mRect, popShowType, this.mDrawingFaces[i]);
+                        boolean z = true;
+                        if (popShowType != 1) {
+                            if (popShowType != 2) {
+                                if (popShowType == 4 && this.mDrawingFaces[i].beautyscore > 0.0f) {
+                                    initFaceInfoStyle();
+                                    drawFacePopInfo(canvas, this.mRect, this.mBeautyScoreIc, this.mMagicMirrorInfoPop, getScoreInfo(this.mDrawingFaces[i]), this.mAgeFemaleHonPadding, this.mAgeVerPadding, this.mFacePopupBottom, this.mPopBottomMargin);
+                                }
+                            } else if (this.mDrawingFaces[i].beautyscore > 0.0f) {
                                 initFaceInfoStyle();
                                 drawFacePopInfo(canvas, this.mRect, this.mBeautyScoreIc, this.mMagicMirrorInfoPop, getScoreInfo(this.mDrawingFaces[i]), this.mAgeFemaleHonPadding, this.mAgeVerPadding, this.mFacePopupBottom, this.mPopBottomMargin);
                             }
-                        } else if (this.mDrawingFaces[i].beautyscore > 0.0f) {
+                        } else if (isValidAGInfo(this.mDrawingFaces[i])) {
                             initFaceInfoStyle();
-                            drawFacePopInfo(canvas, this.mRect, this.mBeautyScoreIc, this.mMagicMirrorInfoPop, getScoreInfo(this.mDrawingFaces[i]), this.mAgeFemaleHonPadding, this.mAgeVerPadding, this.mFacePopupBottom, this.mPopBottomMargin);
+                            if (this.mDrawingFaces[i].gender >= 0.4f) {
+                                z = false;
+                            }
+                            drawFacePopInfo(canvas, this.mRect, z ? this.mSexFemaleIc : this.mSexMaleIc, z ? this.mFemaleAgeInfoPop : this.mMaleAgeInfoPop, getAgeInfo(this.mDrawingFaces[i]), z ? this.mAgeFemaleHonPadding : this.mAgeMaleHonPadding, this.mAgeVerPadding, this.mFacePopupBottom, this.mPopBottomMargin);
                         }
-                    } else if (isValidAGInfo(this.mDrawingFaces[i])) {
-                        initFaceInfoStyle();
-                        if (this.mDrawingFaces[i].gender >= 0.4f) {
-                            z = false;
-                        }
-                        drawFacePopInfo(canvas, this.mRect, z ? this.mSexFemaleIc : this.mSexMaleIc, z ? this.mFemaleAgeInfoPop : this.mMaleAgeInfoPop, getAgeInfo(this.mDrawingFaces[i]), z ? this.mAgeFemaleHonPadding : this.mAgeMaleHonPadding, this.mAgeVerPadding, this.mFacePopupBottom, this.mPopBottomMargin);
+                        i++;
+                    } else {
+                        canvas.restore();
+                        return;
                     }
-                    i++;
                 }
-                canvas.restore();
             }
         }
     }
@@ -693,10 +688,7 @@ public class FaceView extends FrameView {
 
     public void setCameraDisplayOrientation(int i) {
         this.mCameraDisplayOrientation = i;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mCameraDisplayOrientation=");
-        sb.append(i);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "mCameraDisplayOrientation=" + i);
     }
 
     public void setFaceRectVisible(int i, int i2) {
@@ -767,18 +759,12 @@ public class FaceView extends FrameView {
 
     public void setLightingOn(boolean z) {
         this.mLightingOn = z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mLightingOn=");
-        sb.append(this.mLightingOn);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "mLightingOn=" + this.mLightingOn);
     }
 
     public void setMirror(boolean z) {
         this.mMirror = z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mMirror=");
-        sb.append(z);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "mMirror=" + z);
     }
 
     public void setOrientation(int i, boolean z) {
@@ -822,10 +808,7 @@ public class FaceView extends FrameView {
                 if (list2 != null && !list2.isEmpty()) {
                     this.mWaterInfos.clear();
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("setShutterStatus: updateInfo=");
-                sb.append(this.mIsUpdateFaceInfos);
-                Log.d(TAG, sb.toString());
+                Log.d(TAG, "setShutterStatus: updateInfo=" + this.mIsUpdateFaceInfos);
             }
         }
     }

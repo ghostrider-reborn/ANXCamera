@@ -13,7 +13,6 @@ public enum PlayerCacheType {
     }
 
     public static PlayerCacheType int2enum(int i) {
-        PlayerCacheType[] values;
         PlayerCacheType playerCacheType = PlayerCacheNo;
         for (PlayerCacheType playerCacheType2 : values()) {
             if (playerCacheType2.ordinal() == i) {

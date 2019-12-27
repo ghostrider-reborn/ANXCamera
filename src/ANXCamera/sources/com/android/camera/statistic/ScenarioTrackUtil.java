@@ -6,7 +6,7 @@ import android.os.statistics.E2EScenario;
 import android.os.statistics.E2EScenarioPayload;
 import android.os.statistics.E2EScenarioPerfTracer;
 import android.os.statistics.E2EScenarioSettings;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.android.camera.log.Log;
@@ -42,11 +42,7 @@ public class ScenarioTrackUtil {
                 return new E2EScenario(CAMERA_PACKAGE, CATEGORY_PERFORMANCE, str);
             } catch (Exception e2) {
                 String access$000 = ScenarioTrackUtil.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(" initializer failed: ");
-                sb.append(e2.getMessage());
-                Log.w(access$000, sb.toString());
+                Log.w(access$000, str + " initializer failed: " + e2.getMessage());
                 return null;
             }
         }
@@ -64,31 +60,20 @@ public class ScenarioTrackUtil {
     private static void abortScenario(@NonNull CameraEventScenario cameraEventScenario) {
         if (cameraEventScenario.e2eScenario == null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("track ");
-            sb.append(cameraEventScenario.toString());
-            sb.append(" event start cancel due to scenario is null!");
-            Log.w(str, sb.toString());
-            return;
-        }
-        if (cameraEventScenario.isTrackStarted) {
+            Log.w(str, "track " + cameraEventScenario.toString() + " event start cancel due to scenario is null!");
+        } else if (cameraEventScenario.isTrackStarted) {
             E2EScenarioPerfTracer.abortScenario(cameraEventScenario.e2eScenario);
         }
     }
 
     private static void beginScenario(@NonNull CameraEventScenario cameraEventScenario) {
-        beginScenario(cameraEventScenario, null);
+        beginScenario(cameraEventScenario, (E2EScenarioPayload) null);
     }
 
     private static void beginScenario(@NonNull CameraEventScenario cameraEventScenario, @Nullable E2EScenarioPayload e2EScenarioPayload) {
-        String str = "track ";
         if (cameraEventScenario.e2eScenario == null) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(cameraEventScenario.toString());
-            sb.append(" event start cancel due to scenario is null!");
-            Log.w(str2, sb.toString());
+            String str = TAG;
+            Log.w(str, "track " + cameraEventScenario.toString() + " event start cancel due to scenario is null!");
             return;
         }
         if (cameraEventScenario.isTrackStarted) {
@@ -98,44 +83,26 @@ public class ScenarioTrackUtil {
             E2EScenarioPerfTracer.asyncBeginScenario(cameraEventScenario.e2eScenario, scenarioSettings, e2EScenarioPayload);
             cameraEventScenario.isTrackStarted = true;
         } catch (Exception e2) {
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(cameraEventScenario.toString());
-            sb2.append(" event start failed: ");
-            sb2.append(e2.getMessage());
-            Log.w(str3, sb2.toString());
+            String str2 = TAG;
+            Log.w(str2, "track " + cameraEventScenario.toString() + " event start failed: " + e2.getMessage());
         }
     }
 
     private static void finishScenario(@NonNull CameraEventScenario cameraEventScenario, @Nullable E2EScenarioPayload e2EScenarioPayload) {
-        String str = "track ";
         if (cameraEventScenario.e2eScenario == null) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(cameraEventScenario.toString());
-            sb.append(" event end cancel, due to scenario is null!");
-            Log.w(str2, sb.toString());
+            String str = TAG;
+            Log.w(str, "track " + cameraEventScenario.toString() + " event end cancel, due to scenario is null!");
         } else if (!cameraEventScenario.isTrackStarted) {
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(cameraEventScenario.toString());
-            sb2.append(" event end cancel, due to scenario has not started!");
-            Log.w(str3, sb2.toString());
+            String str2 = TAG;
+            Log.w(str2, "track " + cameraEventScenario.toString() + " event end cancel, due to scenario has not started!");
         } else {
             if (e2EScenarioPayload != null) {
                 try {
                     E2EScenarioPerfTracer.finishScenario(cameraEventScenario.e2eScenario, e2EScenarioPayload);
                 } catch (Exception e2) {
-                    String str4 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append(str);
-                    sb3.append(cameraEventScenario.toString());
-                    sb3.append(" event end failed: ");
-                    sb3.append(e2.getMessage());
-                    Log.w(str4, sb3.toString());
+                    String str3 = TAG;
+                    Log.w(str3, "track " + cameraEventScenario.toString() + " event end failed: " + e2.getMessage());
+                    return;
                 }
             } else {
                 E2EScenarioPerfTracer.finishScenario(cameraEventScenario.e2eScenario);
@@ -147,18 +114,17 @@ public class ScenarioTrackUtil {
     /* JADX WARNING: Removed duplicated region for block: B:15:0x0040  */
     public static void trackAppLunchTimeEnd(@Nullable Map map, Context context) {
         JSONObject jSONObject;
-        String str = "time";
-        String string = System.getString(context.getContentResolver(), "camera_boost");
+        String string = MiuiSettings.System.getString(context.getContentResolver(), "camera_boost");
         E2EScenarioPayload e2EScenarioPayload = new E2EScenarioPayload();
         if (string != null) {
             boolean z = false;
             try {
                 jSONObject = new JSONObject(string);
                 try {
-                    if (SystemClock.uptimeMillis() - Long.parseLong(jSONObject.optString(str)) < 1000) {
+                    if (SystemClock.uptimeMillis() - Long.parseLong(jSONObject.optString("time")) < 1000) {
                         z = true;
                     }
-                    jSONObject.remove(str);
+                    jSONObject.remove("time");
                 } catch (Exception e2) {
                     e = e2;
                     Log.w(TAG, "Exception", e);
@@ -177,10 +143,10 @@ public class ScenarioTrackUtil {
                 finishScenario(sLaunchTimeScenario, e2EScenarioPayload);
             }
             if (z) {
-                Iterator keys = jSONObject.keys();
+                Iterator<String> keys = jSONObject.keys();
                 while (keys.hasNext()) {
-                    String str2 = (String) keys.next();
-                    e2EScenarioPayload.put(str2, jSONObject.opt(str2));
+                    String next = keys.next();
+                    e2EScenarioPayload.put(next, jSONObject.opt(next));
                 }
             }
         }
@@ -195,7 +161,7 @@ public class ScenarioTrackUtil {
     }
 
     public static void trackCaptureTimeEnd() {
-        finishScenario(sCaptureTimeScenario, null);
+        finishScenario(sCaptureTimeScenario, (E2EScenarioPayload) null);
     }
 
     public static void trackCaptureTimeStart(@NonNull boolean z, @NonNull int i) {
@@ -209,7 +175,7 @@ public class ScenarioTrackUtil {
     }
 
     public static void trackStartVideoRecordEnd() {
-        finishScenario(sStartVideoRecordTimeScenario, null);
+        finishScenario(sStartVideoRecordTimeScenario, (E2EScenarioPayload) null);
     }
 
     public static void trackStartVideoRecordStart(@NonNull String str, @NonNull boolean z) {
@@ -219,7 +185,7 @@ public class ScenarioTrackUtil {
     }
 
     public static void trackStopVideoRecordEnd() {
-        finishScenario(sStopVideoRecordTimeScenario, null);
+        finishScenario(sStopVideoRecordTimeScenario, (E2EScenarioPayload) null);
     }
 
     public static void trackStopVideoRecordStart(@NonNull String str, @NonNull boolean z) {
@@ -229,7 +195,7 @@ public class ScenarioTrackUtil {
     }
 
     public static void trackSwitchCameraEnd() {
-        finishScenario(sSwitchCameraTimeScenario, null);
+        finishScenario(sSwitchCameraTimeScenario, (E2EScenarioPayload) null);
     }
 
     public static void trackSwitchCameraStart(@NonNull boolean z, @NonNull boolean z2, @NonNull int i) {
@@ -239,7 +205,7 @@ public class ScenarioTrackUtil {
     }
 
     public static void trackSwitchModeEnd() {
-        finishScenario(sSwitchModeTimeScenario, null);
+        finishScenario(sSwitchModeTimeScenario, (E2EScenarioPayload) null);
     }
 
     public static void trackSwitchModeStart(@NonNull int i, @NonNull int i2, @NonNull boolean z) {

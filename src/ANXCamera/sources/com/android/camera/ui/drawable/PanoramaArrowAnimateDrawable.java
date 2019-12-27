@@ -3,7 +3,6 @@ package com.android.camera.ui.drawable;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -15,7 +14,7 @@ public class PanoramaArrowAnimateDrawable extends Drawable {
     private float mTransformationRatio;
 
     public PanoramaArrowAnimateDrawable() {
-        this.mPaint.setStyle(Style.FILL);
+        this.mPaint.setStyle(Paint.Style.FILL);
         this.mPaint.setColor(-1);
         this.mPaint.setAntiAlias(true);
         setTransformationRatio(2.0f);

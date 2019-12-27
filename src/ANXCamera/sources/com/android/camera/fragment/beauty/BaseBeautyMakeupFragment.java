@@ -7,15 +7,10 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Recycler;
-import android.support.v7.widget.RecyclerView.State;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,13 +18,12 @@ import com.android.camera.R;
 import com.android.camera.ToastUtils;
 import com.android.camera.Util;
 import com.android.camera.data.data.TypeItem;
-import com.android.camera.data.data.runing.ComponentRunningShine.ShineType;
+import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.fragment.DefaultItemAnimator;
 import com.android.camera.fragment.RecyclerAdapterWrapper;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ColorImageView;
 import java.util.List;
 
@@ -38,7 +32,7 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
     protected static final int EXTRA_NULL = -1;
     protected static final int EXTRA_RESET = 1;
     private static final String TAG = "BaseBeautyMakeup";
-    protected OnItemClickListener mClickListener;
+    protected AdapterView.OnItemClickListener mClickListener;
     protected int mFooterElement;
     protected int mHeaderCustomWidth;
     protected int mHeaderElement;
@@ -67,7 +61,7 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
             return this.isScrollEnabled && super.canScrollHorizontally();
         }
 
-        public void onLayoutChildren(Recycler recycler, State state) {
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
             try {
                 super.onLayoutChildren(recycler, state);
             } catch (IndexOutOfBoundsException e2) {
@@ -109,11 +103,10 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
             i2 = 0;
         }
         int size = this.mItemList.size();
-        float integer = ((float) getResources().getInteger(R.integer.beauty_list_max_count)) + 0.5f;
         int i3 = this.mTotalWidth;
-        int i4 = (int) (((float) (i3 - i)) / integer);
-        int max = Math.max(((i3 - i) - i2) / size, i4);
-        if (max == i4) {
+        int integer = (int) (((float) (i3 - i)) / (((float) getResources().getInteger(R.integer.beauty_list_max_count)) + 0.5f));
+        int max = Math.max(((i3 - i) - i2) / size, integer);
+        if (max == integer) {
             this.mNeedScroll = true;
         } else {
             this.mNeedScroll = false;
@@ -139,7 +132,7 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
             textView.setText(R.string.beauty_clear);
         }
         inflate.setTag(Integer.valueOf(this.mFooterElement));
-        inflate.setOnClickListener(new OnClickListener() {
+        inflate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 BaseBeautyMakeupFragment.this.onExtraClick(view);
             }
@@ -161,13 +154,13 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
                 colorImageView.setImageResource(R.drawable.icon_beauty_reset);
                 textView.setText(R.string.face_beauty_close);
             }
-            MarginLayoutParams marginLayoutParams = (MarginLayoutParams) inflate.findViewById(R.id.makeup_item).getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) inflate.findViewById(R.id.makeup_item).getLayoutParams();
             int i2 = this.mHeaderCustomWidth;
             if (i2 > 0) {
                 marginLayoutParams.width = i2;
             }
             inflate.setTag(Integer.valueOf(this.mHeaderElement));
-            inflate.setOnClickListener(new OnClickListener() {
+            inflate.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     BaseBeautyMakeupFragment.this.onExtraClick(view);
                 }
@@ -177,7 +170,7 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
     }
 
     private final List<TypeItem> initItems() {
-        MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+        ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
         if (miBeautyProtocol != null) {
             return miBeautyProtocol.getSupportedBeautyItems(getShineType());
         }
@@ -212,11 +205,11 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
 
     /* access modifiers changed from: private */
     public boolean scrollIfNeed(int i) {
-        int i2 = (i == this.mLayoutManager.findFirstVisibleItemPosition() || i == this.mLayoutManager.findFirstCompletelyVisibleItemPosition()) ? Math.max(0, i - 1) : (i == this.mLayoutManager.findLastVisibleItemPosition() || i == this.mLayoutManager.findLastCompletelyVisibleItemPosition()) ? Math.min(i + 1, this.mLayoutManager.getItemCount() - 1) : i;
-        if (i2 == i) {
+        int max = (i == this.mLayoutManager.findFirstVisibleItemPosition() || i == this.mLayoutManager.findFirstCompletelyVisibleItemPosition()) ? Math.max(0, i - 1) : (i == this.mLayoutManager.findLastVisibleItemPosition() || i == this.mLayoutManager.findLastCompletelyVisibleItemPosition()) ? Math.min(i + 1, this.mLayoutManager.getItemCount() - 1) : i;
+        if (max == i) {
             return false;
         }
-        this.mLayoutManager.scrollToPosition(i2);
+        this.mLayoutManager.scrollToPosition(max);
         return true;
     }
 
@@ -241,17 +234,17 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
     }
 
     /* access modifiers changed from: protected */
-    @ShineType
+    @ComponentRunningShine.ShineType
     public abstract String getShineType();
 
     /* access modifiers changed from: protected */
     public abstract void initExtraType();
 
     /* access modifiers changed from: protected */
-    public OnItemClickListener initOnItemClickListener() {
-        return new OnItemClickListener() {
+    public AdapterView.OnItemClickListener initOnItemClickListener() {
+        return new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-                BaseBeautyMakeupFragment.this.mLastClickTime = System.currentTimeMillis();
+                long unused = BaseBeautyMakeupFragment.this.mLastClickTime = System.currentTimeMillis();
                 BaseBeautyMakeupFragment.this.mSelectedParam = i;
                 Object tag = view.getTag();
                 if (tag != null && (tag instanceof TypeItem)) {
@@ -280,7 +273,7 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
         MakeupSingleCheckAdapter makeupSingleCheckAdapter = new MakeupSingleCheckAdapter(getActivity(), this.mItemList, 0, true, this.mItemWidth, this.mItemMargin);
         this.mMakeupAdapter = makeupSingleCheckAdapter;
         this.mClickListener = initOnItemClickListener();
-        this.mMakeupAdapter.setOnItemClickListener(new OnItemClickListener() {
+        this.mMakeupAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
                 BaseBeautyMakeupFragment baseBeautyMakeupFragment = BaseBeautyMakeupFragment.this;
                 baseBeautyMakeupFragment.mLastSelectedParam = baseBeautyMakeupFragment.mSelectedParam;
@@ -335,8 +328,8 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
         super.onViewCreatedAndVisibleToUser(z);
         List<TypeItem> list = this.mItemList;
         if (list != null) {
-            TypeItem typeItem = (TypeItem) list.get(this.mSelectedParam);
-            MakeupProtocol makeupProtocol = (MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
+            TypeItem typeItem = list.get(this.mSelectedParam);
+            ModeProtocol.MakeupProtocol makeupProtocol = (ModeProtocol.MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
             if (makeupProtocol != null) {
                 makeupProtocol.onMakeupItemSelected(typeItem.mKeyOrType, false);
             }
@@ -348,9 +341,9 @@ public abstract class BaseBeautyMakeupFragment extends BaseBeautyFragment {
         this.mSelectedParam = 0;
         this.mMakeupAdapter.setSelectedPosition(this.mSelectedParam);
         this.mLayoutManager.scrollToPosition(this.mSelectedParam);
-        MakeupProtocol makeupProtocol = (MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
+        ModeProtocol.MakeupProtocol makeupProtocol = (ModeProtocol.MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
         if (makeupProtocol != null) {
-            makeupProtocol.onMakeupItemSelected(((TypeItem) this.mItemList.get(0)).mKeyOrType, true);
+            makeupProtocol.onMakeupItemSelected(this.mItemList.get(0).mKeyOrType, true);
         }
         this.mMakeupAdapter.notifyDataSetChanged();
     }

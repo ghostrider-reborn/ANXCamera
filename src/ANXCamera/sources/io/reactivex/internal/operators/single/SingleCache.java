@@ -42,7 +42,7 @@ public final class SingleCache<T> extends Single<T> implements SingleObserver<T>
         this.source = singleSource;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(CacheDisposable<T> cacheDisposable) {
         CacheDisposable[] cacheDisposableArr;
         CacheDisposable[] cacheDisposableArr2;
@@ -60,7 +60,6 @@ public final class SingleCache<T> extends Single<T> implements SingleObserver<T>
     }
 
     public void onError(Throwable th) {
-        CacheDisposable[] cacheDisposableArr;
         this.error = th;
         for (CacheDisposable cacheDisposable : (CacheDisposable[]) this.observers.getAndSet(TERMINATED)) {
             if (!cacheDisposable.isDisposed()) {
@@ -73,7 +72,6 @@ public final class SingleCache<T> extends Single<T> implements SingleObserver<T>
     }
 
     public void onSuccess(T t) {
-        CacheDisposable[] cacheDisposableArr;
         this.value = t;
         for (CacheDisposable cacheDisposable : (CacheDisposable[]) this.observers.getAndSet(TERMINATED)) {
             if (!cacheDisposable.isDisposed()) {
@@ -82,7 +80,7 @@ public final class SingleCache<T> extends Single<T> implements SingleObserver<T>
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(CacheDisposable<T> cacheDisposable) {
         CacheDisposable<T>[] cacheDisposableArr;
         CacheDisposable[] cacheDisposableArr2;
@@ -130,6 +128,7 @@ public final class SingleCache<T> extends Single<T> implements SingleObserver<T>
             }
             if (this.wip.getAndIncrement() == 0) {
                 this.source.subscribe(this);
+                return;
             }
             return;
         }

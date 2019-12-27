@@ -6,9 +6,7 @@ import com.android.camera.R;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.android.camera.log.Log;
 import com.android.camera.statistic.CameraStat;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigValue;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.AvatarEngine;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AvatarEngineManager {
-    public static final String BearTemplatePath;
+    public static final String BearTemplatePath = (MimojiHelper.MODEL_PATH + "bear_v_0_0_0_5");
     public static final int CONFIGTYPE_EARRING = 18;
     public static final int CONFIGTYPE_EAR_SHAPE = 29;
     public static final int CONFIGTYPE_EYEBROW_COLOR = 20;
@@ -41,28 +39,28 @@ public class AvatarEngineManager {
     public static final int CONFIGTYPE_MUSTACHE_COLOR = 17;
     public static final int CONFIGTYPE_NEVUS = 8;
     public static final int CONFIGTYPE_NOSE_SHAPE = 26;
-    public static final String FACE_MODEL;
+    public static final String FACE_MODEL = (MimojiHelper.DATA_DIR + "config.txt");
     public static final String FAKE_BEAR_CONFIGPATH = "bear";
     public static final String FAKE_PIG_CONFIGPATH = "pig";
     public static final String FAKE_RABBIT_CONFIGPATH = "rabbit";
     public static final String FAKE_ROYAN_CONFIGPATH = "royan";
-    public static final String PersonTemplatePath;
-    public static final String PigTemplatePath;
-    public static final String RabbitTemplatePath;
-    public static final String RoyanTemplatePath;
+    public static final String PersonTemplatePath = (MimojiHelper.MODEL_PATH + "cartoon_xiaomi_v_0_0_0_27");
+    public static final String PigTemplatePath = (MimojiHelper.MODEL_PATH + "pig_v_0_0_0_3");
+    public static final String RabbitTemplatePath = (MimojiHelper.MODEL_PATH + "rabbit_v_0_0_0_4");
+    public static final String RoyanTemplatePath = (MimojiHelper.MODEL_PATH + "royan_v_0_0_0_7");
     public static final int THUMB_HEIGHT = 200;
     public static final int THUMB_WIDTH = 200;
-    public static final String TRACK_DATA;
-    public static final String TempEditConfigPath;
-    public static final String TempOriginalConfigPath;
+    public static final String TRACK_DATA = (MimojiHelper.DATA_DIR + "track_data.dat");
+    public static final String TempEditConfigPath = (MimojiHelper.DATA_DIR + "edit_config.dat");
+    public static final String TempOriginalConfigPath = (MimojiHelper.DATA_DIR + "origin_config.dat");
     private static AvatarEngineManager mInstance;
-    private ASAvatarConfigValue mASAvatarConfigValue;
-    private ASAvatarConfigValue mASAvatarConfigValueDefault;
+    private AvatarConfig.ASAvatarConfigValue mASAvatarConfigValue;
+    private AvatarConfig.ASAvatarConfigValue mASAvatarConfigValueDefault;
     private boolean mAllNeedUpdate = false;
     private AvatarEngine mAvatar;
     private int mAvatarRef = 0;
     private Map<Integer, LinearLayoutManagerWrapper> mColorLayoutManagerMap = new ConcurrentHashMap();
-    private Map<Integer, ArrayList<ASAvatarConfigInfo>> mConfigMap = new ConcurrentHashMap();
+    private Map<Integer, ArrayList<AvatarConfig.ASAvatarConfigInfo>> mConfigMap = new ConcurrentHashMap();
     private Map<Integer, Float> mInnerConfigSelectMap = new ConcurrentHashMap();
     private Map<Integer, Integer> mInterruptMap = new ConcurrentHashMap();
     private boolean mIsColorSelected = false;
@@ -70,59 +68,20 @@ public class AvatarEngineManager {
     private int mSelectTabIndex = 0;
     private int mSelectType = 0;
     private CopyOnWriteArrayList<MimojiLevelBean> mSubConfigs = new CopyOnWriteArrayList<>();
-    private ArrayList<ASAvatarConfigType> mTypeList = new ArrayList<>();
-
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(MimojiHelper.DATA_DIR);
-        sb.append("track_data.dat");
-        TRACK_DATA = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(MimojiHelper.DATA_DIR);
-        sb2.append("config.txt");
-        FACE_MODEL = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(MimojiHelper.MODEL_PATH);
-        sb3.append("cartoon_xiaomi_v_0_0_0_27");
-        PersonTemplatePath = sb3.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(MimojiHelper.MODEL_PATH);
-        sb4.append("bear_v_0_0_0_5");
-        BearTemplatePath = sb4.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(MimojiHelper.MODEL_PATH);
-        sb5.append("pig_v_0_0_0_3");
-        PigTemplatePath = sb5.toString();
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(MimojiHelper.MODEL_PATH);
-        sb6.append("royan_v_0_0_0_7");
-        RoyanTemplatePath = sb6.toString();
-        StringBuilder sb7 = new StringBuilder();
-        sb7.append(MimojiHelper.MODEL_PATH);
-        sb7.append("rabbit_v_0_0_0_4");
-        RabbitTemplatePath = sb7.toString();
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append(MimojiHelper.DATA_DIR);
-        sb8.append("origin_config.dat");
-        TempOriginalConfigPath = sb8.toString();
-        StringBuilder sb9 = new StringBuilder();
-        sb9.append(MimojiHelper.DATA_DIR);
-        sb9.append("edit_config.dat");
-        TempEditConfigPath = sb9.toString();
-    }
+    private ArrayList<AvatarConfig.ASAvatarConfigType> mTypeList = new ArrayList<>();
 
     public static boolean filterTypeTitle(int i) {
-        if (!(i == 1 || i == 12 || i == 16 || i == 30 || i == 8 || i == 9)) {
-            switch (i) {
-                case 21:
-                case 22:
-                case 23:
-                    break;
-                default:
-                    return true;
-            }
+        if (i == 1 || i == 12 || i == 16 || i == 30 || i == 8 || i == 9) {
+            return false;
         }
-        return false;
+        switch (i) {
+            case 21:
+            case 22:
+            case 23:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public static synchronized AvatarEngineManager getInstance() {
@@ -136,7 +95,7 @@ public class AvatarEngineManager {
         return avatarEngineManager;
     }
 
-    public static Map<String, String> getMimojiConfigValue(ASAvatarConfigValue aSAvatarConfigValue) {
+    public static Map<String, String> getMimojiConfigValue(AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         HashMap hashMap = new HashMap();
         hashMap.put(CameraStat.PARAM_MIMOJI_CONFIG_HARISTYLE, String.valueOf(aSAvatarConfigValue.configHairStyleID));
         hashMap.put(CameraStat.PARAM_MIMOJI_CONFIG_FEATURE_FACE, String.valueOf(aSAvatarConfigValue.configFaceShapeID));
@@ -194,7 +153,7 @@ public class AvatarEngineManager {
         return (i == 1 || i == 7 || i == 9 || i == 12 || i == 16 || i == 26 || i == 30 || i == 21 || i == 22) ? false : true;
     }
 
-    public synchronized AvatarEngine addAvatarConfig(ASAvatarConfigInfo aSAvatarConfigInfo) {
+    public synchronized AvatarEngine addAvatarConfig(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo) {
         if (aSAvatarConfigInfo == null) {
             Log.d("AvatarEngineManager", "AvatarConfig.ASAvatarConfigInfo is null");
             return null;
@@ -211,12 +170,12 @@ public class AvatarEngineManager {
         this.mColorLayoutManagerMap.clear();
     }
 
-    public ASAvatarConfigValue getASAvatarConfigValue() {
+    public AvatarConfig.ASAvatarConfigValue getASAvatarConfigValue() {
         return this.mASAvatarConfigValue;
     }
 
     public LinearLayoutManagerWrapper getColorLayoutManagerMap(int i) {
-        return (LinearLayoutManagerWrapper) this.mColorLayoutManagerMap.get(Integer.valueOf(i));
+        return this.mColorLayoutManagerMap.get(Integer.valueOf(i));
     }
 
     public int getColorType(int i) {
@@ -238,19 +197,19 @@ public class AvatarEngineManager {
         return 5;
     }
 
-    public synchronized ArrayList<ASAvatarConfigInfo> getConfigList(int i) {
-        return this.mConfigMap.size() <= 0 ? null : (ArrayList) this.mConfigMap.get(Integer.valueOf(i));
+    public synchronized ArrayList<AvatarConfig.ASAvatarConfigInfo> getConfigList(int i) {
+        return this.mConfigMap.size() <= 0 ? null : this.mConfigMap.get(Integer.valueOf(i));
     }
 
-    public ASAvatarConfigType getConfigTypeForIndex(int i) {
-        ArrayList<ASAvatarConfigType> arrayList = this.mTypeList;
+    public AvatarConfig.ASAvatarConfigType getConfigTypeForIndex(int i) {
+        ArrayList<AvatarConfig.ASAvatarConfigType> arrayList = this.mTypeList;
         if (arrayList == null || arrayList.size() <= 0) {
             return null;
         }
-        return (ASAvatarConfigType) this.mTypeList.get(i);
+        return this.mTypeList.get(i);
     }
 
-    public ArrayList<ASAvatarConfigType> getConfigTypeList() {
+    public ArrayList<AvatarConfig.ASAvatarConfigType> getConfigTypeList() {
         return this.mTypeList;
     }
 
@@ -258,22 +217,22 @@ public class AvatarEngineManager {
         if (this.mInnerConfigSelectMap.get(Integer.valueOf(i)) == null) {
             return -1.0f;
         }
-        return ((Float) this.mInnerConfigSelectMap.get(Integer.valueOf(i))).floatValue();
+        return this.mInnerConfigSelectMap.get(Integer.valueOf(i)).floatValue();
     }
 
     public int getInterruptIndex(int i) {
-        Integer num = (Integer) this.mInterruptMap.get(Integer.valueOf(i));
+        Integer num = this.mInterruptMap.get(Integer.valueOf(i));
         if (num == null) {
             return 0;
         }
         return num.intValue();
     }
 
-    public ArrayList<ASAvatarConfigInfo> getSelectConfigList() {
+    public ArrayList<AvatarConfig.ASAvatarConfigInfo> getSelectConfigList() {
         if (this.mConfigMap.size() <= 0) {
             return null;
         }
-        return (ArrayList) this.mConfigMap.get(Integer.valueOf(this.mSelectType));
+        return this.mConfigMap.get(Integer.valueOf(this.mSelectType));
     }
 
     public int getSelectType() {
@@ -284,7 +243,7 @@ public class AvatarEngineManager {
         return this.mSelectTabIndex;
     }
 
-    public ArrayList<ASAvatarConfigInfo> getSubConfigColorList(int i) {
+    public ArrayList<AvatarConfig.ASAvatarConfigInfo> getSubConfigColorList(int i) {
         if (i == 1) {
             return getConfigList(2);
         }
@@ -319,7 +278,7 @@ public class AvatarEngineManager {
         if (i == 1) {
             MimojiLevelBean mimojiLevelBean = new MimojiLevelBean();
             mimojiLevelBean.thumnails = getConfigList(1);
-            ArrayList<ASAvatarConfigInfo> arrayList = mimojiLevelBean.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList = mimojiLevelBean.thumnails;
             if (arrayList != null && arrayList.size() > 0) {
                 mimojiLevelBean.configType = 1;
                 mimojiLevelBean.configTypeName = resources.getString(R.string.mimoji_hairstyle);
@@ -328,7 +287,7 @@ public class AvatarEngineManager {
         } else if (i == 12) {
             MimojiLevelBean mimojiLevelBean2 = new MimojiLevelBean();
             mimojiLevelBean2.thumnails = getConfigList(12);
-            ArrayList<ASAvatarConfigInfo> arrayList2 = mimojiLevelBean2.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList2 = mimojiLevelBean2.thumnails;
             if (arrayList2 != null && arrayList2.size() > 0) {
                 mimojiLevelBean2.configType = 12;
                 mimojiLevelBean2.configTypeName = resources.getString(R.string.mimoji_headwear);
@@ -336,7 +295,7 @@ public class AvatarEngineManager {
             }
             MimojiLevelBean mimojiLevelBean3 = new MimojiLevelBean();
             mimojiLevelBean3.thumnails = getConfigList(18);
-            ArrayList<ASAvatarConfigInfo> arrayList3 = mimojiLevelBean3.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList3 = mimojiLevelBean3.thumnails;
             if (arrayList3 != null && arrayList3.size() > 0) {
                 mimojiLevelBean3.configType = 18;
                 mimojiLevelBean3.configTypeName = resources.getString(R.string.mimoji_earring);
@@ -345,7 +304,7 @@ public class AvatarEngineManager {
         } else if (i == 16) {
             MimojiLevelBean mimojiLevelBean4 = new MimojiLevelBean();
             mimojiLevelBean4.thumnails = getConfigList(16);
-            ArrayList<ASAvatarConfigInfo> arrayList4 = mimojiLevelBean4.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList4 = mimojiLevelBean4.thumnails;
             if (arrayList4 != null && arrayList4.size() > 0) {
                 mimojiLevelBean4.configType = 16;
                 mimojiLevelBean4.configTypeName = resources.getString(R.string.mimoji_mustache);
@@ -354,7 +313,7 @@ public class AvatarEngineManager {
         } else if (i == 30) {
             MimojiLevelBean mimojiLevelBean5 = new MimojiLevelBean();
             mimojiLevelBean5.thumnails = getConfigList(30);
-            ArrayList<ASAvatarConfigInfo> arrayList5 = mimojiLevelBean5.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList5 = mimojiLevelBean5.thumnails;
             if (arrayList5 != null && arrayList5.size() > 0) {
                 mimojiLevelBean5.configType = 30;
                 mimojiLevelBean5.configTypeName = resources.getString(R.string.mimoji_eyebrow_shape);
@@ -363,7 +322,7 @@ public class AvatarEngineManager {
         } else if (i == 8) {
             MimojiLevelBean mimojiLevelBean6 = new MimojiLevelBean();
             mimojiLevelBean6.thumnails = getConfigList(7);
-            ArrayList<ASAvatarConfigInfo> arrayList6 = mimojiLevelBean6.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList6 = mimojiLevelBean6.thumnails;
             if (arrayList6 != null && arrayList6.size() > 0) {
                 mimojiLevelBean6.configType = 7;
                 mimojiLevelBean6.configTypeName = resources.getString(R.string.mimoji_freckle);
@@ -371,7 +330,7 @@ public class AvatarEngineManager {
             }
             MimojiLevelBean mimojiLevelBean7 = new MimojiLevelBean();
             mimojiLevelBean7.thumnails = getConfigList(8);
-            ArrayList<ASAvatarConfigInfo> arrayList7 = mimojiLevelBean7.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList7 = mimojiLevelBean7.thumnails;
             if (arrayList7 != null && arrayList7.size() > 0) {
                 mimojiLevelBean7.configType = 8;
                 mimojiLevelBean7.configTypeName = resources.getString(R.string.mimoji_mole);
@@ -382,7 +341,7 @@ public class AvatarEngineManager {
                 case 21:
                     MimojiLevelBean mimojiLevelBean8 = new MimojiLevelBean();
                     mimojiLevelBean8.thumnails.addAll(getConfigList(21));
-                    ArrayList<ASAvatarConfigInfo> arrayList8 = mimojiLevelBean8.thumnails;
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList8 = mimojiLevelBean8.thumnails;
                     if (arrayList8 != null && arrayList8.size() > 0) {
                         mimojiLevelBean8.configType = 21;
                         mimojiLevelBean8.configTypeName = resources.getString(R.string.mimoji_featured_face);
@@ -390,7 +349,7 @@ public class AvatarEngineManager {
                     }
                     MimojiLevelBean mimojiLevelBean9 = new MimojiLevelBean();
                     mimojiLevelBean9.thumnails = getConfigList(29);
-                    ArrayList<ASAvatarConfigInfo> arrayList9 = mimojiLevelBean9.thumnails;
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList9 = mimojiLevelBean9.thumnails;
                     if (arrayList9 != null && arrayList9.size() > 0) {
                         mimojiLevelBean9.configType = 29;
                         mimojiLevelBean9.configTypeName = resources.getString(R.string.mimoji_ear);
@@ -400,7 +359,7 @@ public class AvatarEngineManager {
                 case 22:
                     MimojiLevelBean mimojiLevelBean10 = new MimojiLevelBean();
                     mimojiLevelBean10.thumnails = getConfigList(22);
-                    ArrayList<ASAvatarConfigInfo> arrayList10 = mimojiLevelBean10.thumnails;
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList10 = mimojiLevelBean10.thumnails;
                     if (arrayList10 != null && arrayList10.size() > 0) {
                         mimojiLevelBean10.configType = 22;
                         mimojiLevelBean10.configTypeName = resources.getString(R.string.mimoji_eye_shape);
@@ -408,7 +367,7 @@ public class AvatarEngineManager {
                     }
                     MimojiLevelBean mimojiLevelBean11 = new MimojiLevelBean();
                     mimojiLevelBean11.thumnails = getConfigList(19);
-                    ArrayList<ASAvatarConfigInfo> arrayList11 = mimojiLevelBean11.thumnails;
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList11 = mimojiLevelBean11.thumnails;
                     if (arrayList11 != null && arrayList11.size() > 0) {
                         mimojiLevelBean11.configType = 19;
                         mimojiLevelBean11.configTypeName = resources.getString(R.string.mimoji_eyelash);
@@ -418,7 +377,7 @@ public class AvatarEngineManager {
                 case 23:
                     MimojiLevelBean mimojiLevelBean12 = new MimojiLevelBean();
                     mimojiLevelBean12.thumnails = getConfigList(26);
-                    ArrayList<ASAvatarConfigInfo> arrayList12 = mimojiLevelBean12.thumnails;
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList12 = mimojiLevelBean12.thumnails;
                     if (arrayList12 != null && arrayList12.size() > 0) {
                         mimojiLevelBean12.configType = 26;
                         mimojiLevelBean12.configTypeName = resources.getString(R.string.mimoji_nose);
@@ -426,7 +385,7 @@ public class AvatarEngineManager {
                     }
                     MimojiLevelBean mimojiLevelBean13 = new MimojiLevelBean();
                     mimojiLevelBean13.thumnails = getConfigList(23);
-                    ArrayList<ASAvatarConfigInfo> arrayList13 = mimojiLevelBean13.thumnails;
+                    ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList13 = mimojiLevelBean13.thumnails;
                     if (arrayList13 != null && arrayList13.size() > 0) {
                         mimojiLevelBean13.configType = 23;
                         mimojiLevelBean13.configTypeName = resources.getString(R.string.mimoji_mouth_type);
@@ -437,7 +396,7 @@ public class AvatarEngineManager {
         } else {
             MimojiLevelBean mimojiLevelBean14 = new MimojiLevelBean();
             mimojiLevelBean14.thumnails = getConfigList(9);
-            ArrayList<ASAvatarConfigInfo> arrayList14 = mimojiLevelBean14.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList14 = mimojiLevelBean14.thumnails;
             if (arrayList14 != null && arrayList14.size() > 0) {
                 mimojiLevelBean14.configType = 9;
                 mimojiLevelBean14.configTypeName = resources.getString(R.string.mimoji_eyeglass);
@@ -458,23 +417,19 @@ public class AvatarEngineManager {
     }
 
     public boolean isNeedUpdate(int i) {
-        Boolean bool = (Boolean) this.mNeedUpdateMap.get(Integer.valueOf(i));
-        boolean z = true;
-        if (bool == null) {
-            this.mNeedUpdateMap.put(Integer.valueOf(i), Boolean.valueOf(false));
-            return true;
+        Boolean bool = this.mNeedUpdateMap.get(Integer.valueOf(i));
+        if (bool != null) {
+            return bool.booleanValue() || this.mAllNeedUpdate;
         }
-        if (!bool.booleanValue() && !this.mAllNeedUpdate) {
-            z = false;
-        }
-        return z;
+        this.mNeedUpdateMap.put(Integer.valueOf(i), false);
+        return true;
     }
 
     public void putColorLayoutManagerMap(int i, LinearLayoutManagerWrapper linearLayoutManagerWrapper) {
         this.mColorLayoutManagerMap.put(Integer.valueOf(i), linearLayoutManagerWrapper);
     }
 
-    public void putConfigList(int i, ArrayList<ASAvatarConfigInfo> arrayList) {
+    public void putConfigList(int i, ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList) {
         if (!this.mConfigMap.containsKey(Integer.valueOf(i))) {
             this.mConfigMap.put(Integer.valueOf(i), arrayList);
         }
@@ -497,124 +452,41 @@ public class AvatarEngineManager {
 
     public void resetData() {
         this.mInnerConfigSelectMap.clear();
-        this.mASAvatarConfigValue = (ASAvatarConfigValue) this.mASAvatarConfigValueDefault.clone();
+        this.mASAvatarConfigValue = (AvatarConfig.ASAvatarConfigValue) this.mASAvatarConfigValueDefault.clone();
         setASAvatarConfigValue(this.mASAvatarConfigValue);
         initUpdatePara();
     }
 
-    public void setASAvatarConfigValue(ASAvatarConfigValue aSAvatarConfigValue) {
+    public void setASAvatarConfigValue(AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         this.mASAvatarConfigValue = aSAvatarConfigValue;
         if (aSAvatarConfigValue != null) {
             String str = FragmentMimojiEdit.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("value 属性:gender = ");
-            sb.append(aSAvatarConfigValue.gender);
-            sb.append(" configHairStyleID = ");
-            sb.append(aSAvatarConfigValue.configHairStyleID);
-            sb.append(" configHairColorID = ");
-            sb.append(aSAvatarConfigValue.configHairColorID);
-            sb.append(" configHairColorValue = ");
-            sb.append(aSAvatarConfigValue.configHairColorValue);
-            sb.append(" configFaceColorID = ");
-            sb.append(aSAvatarConfigValue.configFaceColorID);
-            sb.append(" configFaceColorValue = ");
-            sb.append(aSAvatarConfigValue.configFaceColorValue);
-            sb.append(" configEyeColorID = ");
-            sb.append(aSAvatarConfigValue.configEyeColorID);
-            sb.append(" configEyeColorValue = ");
-            sb.append(aSAvatarConfigValue.configEyeColorValue);
-            sb.append(" configLipColorID = ");
-            sb.append(aSAvatarConfigValue.configLipColorID);
-            sb.append(" configLipColorValue = ");
-            sb.append(aSAvatarConfigValue.configLipColorValue);
-            sb.append(" configHairHighlightColorID = ");
-            sb.append(aSAvatarConfigValue.configHairHighlightColorID);
-            sb.append(" configHairHighlightColorValue = ");
-            sb.append(aSAvatarConfigValue.configHairHighlightColorValue);
-            sb.append(" configFrecklesID = ");
-            sb.append(aSAvatarConfigValue.configFrecklesID);
-            sb.append(" configNevusID = ");
-            sb.append(aSAvatarConfigValue.configNevusID);
-            sb.append(" configEyewearStyleID = ");
-            sb.append(aSAvatarConfigValue.configEyewearStyleID);
-            sb.append(" configEyewearFrameID = ");
-            sb.append(aSAvatarConfigValue.configEyewearFrameID);
-            sb.append(" configEyewearFrameValue = ");
-            sb.append(aSAvatarConfigValue.configEyewearFrameValue);
-            sb.append(" configEyewearLensesID = ");
-            sb.append(aSAvatarConfigValue.configEyewearLensesID);
-            sb.append(" configEyewearLensesValue = ");
-            sb.append(aSAvatarConfigValue.configEyewearLensesValue);
-            sb.append(" configHeadwearStyleID = ");
-            sb.append(aSAvatarConfigValue.configHeadwearStyleID);
-            sb.append(" configHeadwearColorID = ");
-            sb.append(aSAvatarConfigValue.configHeadwearColorID);
-            sb.append(" configHeadwearColorValue = ");
-            sb.append(aSAvatarConfigValue.configHeadwearColorValue);
-            sb.append(" configBeardStyleID = ");
-            sb.append(aSAvatarConfigValue.configBeardStyleID);
-            sb.append(" configBeardColorID = ");
-            sb.append(aSAvatarConfigValue.configBeardColorID);
-            sb.append(" configBeardColorValue = ");
-            sb.append(aSAvatarConfigValue.configBeardColorValue);
-            sb.append(" configEarringStyleID = ");
-            sb.append(aSAvatarConfigValue.configEarringStyleID);
-            sb.append(" configEyelashStyleID = ");
-            sb.append(aSAvatarConfigValue.configEyelashStyleID);
-            sb.append(" configEyebrowColorID = ");
-            sb.append(aSAvatarConfigValue.configEyebrowColorID);
-            sb.append(" configEyebrowColorValue = ");
-            sb.append(aSAvatarConfigValue.configEyebrowColorValue);
-            sb.append(" configFaceShapeID = ");
-            sb.append(aSAvatarConfigValue.configFaceShapeID);
-            sb.append(" configFaceShapeValue = ");
-            sb.append(aSAvatarConfigValue.configFaceShapeValue);
-            sb.append(" configEyeShapeID = ");
-            sb.append(aSAvatarConfigValue.configEyeShapeID);
-            sb.append(" configEyeShapeValue = ");
-            sb.append(aSAvatarConfigValue.configEyeShapeValue);
-            sb.append(" configMouthShapeID = ");
-            sb.append(aSAvatarConfigValue.configMouthShapeID);
-            sb.append(" configMouthShapeValue = ");
-            sb.append(aSAvatarConfigValue.configMouthShapeValue);
-            sb.append(" configNoseShapeID = ");
-            sb.append(aSAvatarConfigValue.configNoseShapeID);
-            sb.append(" configNoseShapeValue = ");
-            sb.append(aSAvatarConfigValue.configNoseShapeValue);
-            sb.append(" configEarShapeID = ");
-            sb.append(aSAvatarConfigValue.configEarShapeID);
-            sb.append(" configEarShapeValue = ");
-            sb.append(aSAvatarConfigValue.configEarShapeValue);
-            sb.append(" configEyebrowShapeID = ");
-            sb.append(aSAvatarConfigValue.configEyebrowShapeID);
-            sb.append(" configEyebrowShapeValue = ");
-            sb.append(aSAvatarConfigValue.configEyebrowShapeValue);
-            Log.i(str, sb.toString());
-            this.mInnerConfigSelectMap.put(Integer.valueOf(1), Float.valueOf((float) aSAvatarConfigValue.configHairStyleID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(2), Float.valueOf((float) aSAvatarConfigValue.configHairColorID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(3), Float.valueOf((float) aSAvatarConfigValue.configFaceColorID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(21), Float.valueOf((float) aSAvatarConfigValue.configFaceShapeID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(4), Float.valueOf(aSAvatarConfigValue.configEyeColorValue));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(5), Float.valueOf((float) aSAvatarConfigValue.configLipColorID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(7), Float.valueOf((float) aSAvatarConfigValue.configFrecklesID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(8), Float.valueOf((float) aSAvatarConfigValue.configNevusID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(9), Float.valueOf((float) aSAvatarConfigValue.configEyewearStyleID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(16), Float.valueOf((float) aSAvatarConfigValue.configBeardStyleID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(17), Float.valueOf((float) aSAvatarConfigValue.configBeardColorID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(19), Float.valueOf((float) aSAvatarConfigValue.configEyelashStyleID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(20), Float.valueOf((float) aSAvatarConfigValue.configEyebrowColorID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(22), Float.valueOf((float) aSAvatarConfigValue.configEyeShapeID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(23), Float.valueOf((float) aSAvatarConfigValue.configMouthShapeID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(26), Float.valueOf((float) aSAvatarConfigValue.configNoseShapeID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(29), Float.valueOf((float) aSAvatarConfigValue.configEarShapeID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(30), Float.valueOf((float) aSAvatarConfigValue.configEyebrowShapeID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(13), Float.valueOf((float) aSAvatarConfigValue.configHeadwearColorID));
-            this.mInnerConfigSelectMap.put(Integer.valueOf(12), Float.valueOf((float) aSAvatarConfigValue.configHeadwearStyleID));
+            Log.i(str, "value 属性:gender = " + aSAvatarConfigValue.gender + " configHairStyleID = " + aSAvatarConfigValue.configHairStyleID + " configHairColorID = " + aSAvatarConfigValue.configHairColorID + " configHairColorValue = " + aSAvatarConfigValue.configHairColorValue + " configFaceColorID = " + aSAvatarConfigValue.configFaceColorID + " configFaceColorValue = " + aSAvatarConfigValue.configFaceColorValue + " configEyeColorID = " + aSAvatarConfigValue.configEyeColorID + " configEyeColorValue = " + aSAvatarConfigValue.configEyeColorValue + " configLipColorID = " + aSAvatarConfigValue.configLipColorID + " configLipColorValue = " + aSAvatarConfigValue.configLipColorValue + " configHairHighlightColorID = " + aSAvatarConfigValue.configHairHighlightColorID + " configHairHighlightColorValue = " + aSAvatarConfigValue.configHairHighlightColorValue + " configFrecklesID = " + aSAvatarConfigValue.configFrecklesID + " configNevusID = " + aSAvatarConfigValue.configNevusID + " configEyewearStyleID = " + aSAvatarConfigValue.configEyewearStyleID + " configEyewearFrameID = " + aSAvatarConfigValue.configEyewearFrameID + " configEyewearFrameValue = " + aSAvatarConfigValue.configEyewearFrameValue + " configEyewearLensesID = " + aSAvatarConfigValue.configEyewearLensesID + " configEyewearLensesValue = " + aSAvatarConfigValue.configEyewearLensesValue + " configHeadwearStyleID = " + aSAvatarConfigValue.configHeadwearStyleID + " configHeadwearColorID = " + aSAvatarConfigValue.configHeadwearColorID + " configHeadwearColorValue = " + aSAvatarConfigValue.configHeadwearColorValue + " configBeardStyleID = " + aSAvatarConfigValue.configBeardStyleID + " configBeardColorID = " + aSAvatarConfigValue.configBeardColorID + " configBeardColorValue = " + aSAvatarConfigValue.configBeardColorValue + " configEarringStyleID = " + aSAvatarConfigValue.configEarringStyleID + " configEyelashStyleID = " + aSAvatarConfigValue.configEyelashStyleID + " configEyebrowColorID = " + aSAvatarConfigValue.configEyebrowColorID + " configEyebrowColorValue = " + aSAvatarConfigValue.configEyebrowColorValue + " configFaceShapeID = " + aSAvatarConfigValue.configFaceShapeID + " configFaceShapeValue = " + aSAvatarConfigValue.configFaceShapeValue + " configEyeShapeID = " + aSAvatarConfigValue.configEyeShapeID + " configEyeShapeValue = " + aSAvatarConfigValue.configEyeShapeValue + " configMouthShapeID = " + aSAvatarConfigValue.configMouthShapeID + " configMouthShapeValue = " + aSAvatarConfigValue.configMouthShapeValue + " configNoseShapeID = " + aSAvatarConfigValue.configNoseShapeID + " configNoseShapeValue = " + aSAvatarConfigValue.configNoseShapeValue + " configEarShapeID = " + aSAvatarConfigValue.configEarShapeID + " configEarShapeValue = " + aSAvatarConfigValue.configEarShapeValue + " configEyebrowShapeID = " + aSAvatarConfigValue.configEyebrowShapeID + " configEyebrowShapeValue = " + aSAvatarConfigValue.configEyebrowShapeValue);
+            this.mInnerConfigSelectMap.put(1, Float.valueOf((float) aSAvatarConfigValue.configHairStyleID));
+            this.mInnerConfigSelectMap.put(2, Float.valueOf((float) aSAvatarConfigValue.configHairColorID));
+            this.mInnerConfigSelectMap.put(3, Float.valueOf((float) aSAvatarConfigValue.configFaceColorID));
+            this.mInnerConfigSelectMap.put(21, Float.valueOf((float) aSAvatarConfigValue.configFaceShapeID));
+            this.mInnerConfigSelectMap.put(4, Float.valueOf(aSAvatarConfigValue.configEyeColorValue));
+            this.mInnerConfigSelectMap.put(5, Float.valueOf((float) aSAvatarConfigValue.configLipColorID));
+            this.mInnerConfigSelectMap.put(7, Float.valueOf((float) aSAvatarConfigValue.configFrecklesID));
+            this.mInnerConfigSelectMap.put(8, Float.valueOf((float) aSAvatarConfigValue.configNevusID));
+            this.mInnerConfigSelectMap.put(9, Float.valueOf((float) aSAvatarConfigValue.configEyewearStyleID));
+            this.mInnerConfigSelectMap.put(16, Float.valueOf((float) aSAvatarConfigValue.configBeardStyleID));
+            this.mInnerConfigSelectMap.put(17, Float.valueOf((float) aSAvatarConfigValue.configBeardColorID));
+            this.mInnerConfigSelectMap.put(19, Float.valueOf((float) aSAvatarConfigValue.configEyelashStyleID));
+            this.mInnerConfigSelectMap.put(20, Float.valueOf((float) aSAvatarConfigValue.configEyebrowColorID));
+            this.mInnerConfigSelectMap.put(22, Float.valueOf((float) aSAvatarConfigValue.configEyeShapeID));
+            this.mInnerConfigSelectMap.put(23, Float.valueOf((float) aSAvatarConfigValue.configMouthShapeID));
+            this.mInnerConfigSelectMap.put(26, Float.valueOf((float) aSAvatarConfigValue.configNoseShapeID));
+            this.mInnerConfigSelectMap.put(29, Float.valueOf((float) aSAvatarConfigValue.configEarShapeID));
+            this.mInnerConfigSelectMap.put(30, Float.valueOf((float) aSAvatarConfigValue.configEyebrowShapeID));
+            this.mInnerConfigSelectMap.put(13, Float.valueOf((float) aSAvatarConfigValue.configHeadwearColorID));
+            this.mInnerConfigSelectMap.put(12, Float.valueOf((float) aSAvatarConfigValue.configHeadwearStyleID));
         }
     }
 
-    public void setASAvatarConfigValueDefault(ASAvatarConfigValue aSAvatarConfigValue) {
-        this.mASAvatarConfigValueDefault = (ASAvatarConfigValue) aSAvatarConfigValue.clone();
+    public void setASAvatarConfigValueDefault(AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
+        this.mASAvatarConfigValueDefault = (AvatarConfig.ASAvatarConfigValue) aSAvatarConfigValue.clone();
     }
 
     public void setAllNeedUpdate(boolean z, boolean z2) {
@@ -623,7 +495,7 @@ public class AvatarEngineManager {
         this.mInterruptMap.clear();
     }
 
-    public void setConfigTypeList(ArrayList<ASAvatarConfigType> arrayList) {
+    public void setConfigTypeList(ArrayList<AvatarConfig.ASAvatarConfigType> arrayList) {
         this.mTypeList = arrayList;
     }
 

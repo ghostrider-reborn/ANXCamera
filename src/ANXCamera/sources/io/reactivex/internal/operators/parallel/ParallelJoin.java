@@ -39,7 +39,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
             return SubscriptionHelper.cancel(this);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SimplePlainQueue<T> getQueue() {
             SimplePlainQueue<T> simplePlainQueue = this.queue;
             if (simplePlainQueue != null) {
@@ -96,14 +96,14 @@ public final class ParallelJoin<T> extends Flowable<T> {
             super(subscriber, i, i2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:28:0x0060, code lost:
             if (r12 == false) goto L_0x0068;
          */
@@ -148,7 +148,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
                                     JoinInnerSubscriber<T> joinInnerSubscriber = joinInnerSubscriberArr[i2];
                                     SimplePlainQueue<T> simplePlainQueue = joinInnerSubscriber.queue;
                                     if (simplePlainQueue != null) {
-                                        Object poll = simplePlainQueue.poll();
+                                        T poll = simplePlainQueue.poll();
                                         if (poll != null) {
                                             subscriber.onNext(poll);
                                             joinInnerSubscriber.requestOne();
@@ -230,7 +230,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
         }
 
         public void onError(Throwable th) {
-            if (this.errors.compareAndSet(null, th)) {
+            if (this.errors.compareAndSet((Object) null, th)) {
                 cancelAll();
                 drain();
             } else if (th != this.errors.get()) {
@@ -239,7 +239,6 @@ public final class ParallelJoin<T> extends Flowable<T> {
         }
 
         public void onNext(JoinInnerSubscriber<T> joinInnerSubscriber, T t) {
-            String str = "Queue full?!";
             if (get() == 0 && compareAndSet(0, 1)) {
                 if (this.requested.get() != 0) {
                     this.actual.onNext(t);
@@ -249,20 +248,21 @@ public final class ParallelJoin<T> extends Flowable<T> {
                     joinInnerSubscriber.request(1);
                 } else if (!joinInnerSubscriber.getQueue().offer(t)) {
                     cancelAll();
-                    MissingBackpressureException missingBackpressureException = new MissingBackpressureException(str);
-                    if (this.errors.compareAndSet(null, missingBackpressureException)) {
+                    MissingBackpressureException missingBackpressureException = new MissingBackpressureException("Queue full?!");
+                    if (this.errors.compareAndSet((Object) null, missingBackpressureException)) {
                         this.actual.onError(missingBackpressureException);
+                        return;
                     } else {
                         RxJavaPlugins.onError(missingBackpressureException);
+                        return;
                     }
-                    return;
                 }
                 if (decrementAndGet() == 0) {
                     return;
                 }
             } else if (!joinInnerSubscriber.getQueue().offer(t)) {
                 cancelAll();
-                onError(new MissingBackpressureException(str));
+                onError(new MissingBackpressureException("Queue full?!"));
                 return;
             } else if (getAndIncrement() != 0) {
                 return;
@@ -300,7 +300,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             int i = 0;
             while (true) {
@@ -314,7 +314,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cleanup() {
             int i = 0;
             while (true) {
@@ -328,16 +328,16 @@ public final class ParallelJoin<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void drain();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onComplete();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onError(Throwable th);
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onNext(JoinInnerSubscriber<T> joinInnerSubscriber, T t);
 
         public void request(long j) {
@@ -355,14 +355,14 @@ public final class ParallelJoin<T> extends Flowable<T> {
             super(subscriber, i, i2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:23:0x004e, code lost:
             if (r12 == false) goto L_0x006a;
          */
@@ -378,14 +378,17 @@ public final class ParallelJoin<T> extends Flowable<T> {
         /* JADX WARNING: Code restructure failed: missing block: B:28:0x0066, code lost:
             r3.onComplete();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:29:0x0069, code lost:
-            return;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:30:0x006a, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:29:0x006a, code lost:
             if (r11 == false) goto L_0x006e;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:31:0x006c, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:30:0x006c, code lost:
             r10 = r14;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:86:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:87:?, code lost:
+            return;
          */
         public void drainLoop() {
             boolean z;
@@ -411,7 +414,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
                                 JoinInnerSubscriber<T> joinInnerSubscriber = joinInnerSubscriberArr[i2];
                                 SimplePlainQueue<T> simplePlainQueue = joinInnerSubscriber.queue;
                                 if (simplePlainQueue != null) {
-                                    Object poll = simplePlainQueue.poll();
+                                    T poll = simplePlainQueue.poll();
                                     if (poll != null) {
                                         subscriber.onNext(poll);
                                         joinInnerSubscriber.requestOne();
@@ -460,10 +463,11 @@ public final class ParallelJoin<T> extends Flowable<T> {
                     if (z4 && z) {
                         if (((Throwable) this.errors.get()) != null) {
                             subscriber.onError(this.errors.terminate());
+                            return;
                         } else {
                             subscriber.onComplete();
+                            return;
                         }
-                        return;
                     }
                 }
                 if (!(j3 == 0 || j2 == Long.MAX_VALUE)) {
@@ -480,25 +484,24 @@ public final class ParallelJoin<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onComplete() {
             this.done.decrementAndGet();
             drain();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onError(Throwable th) {
             this.errors.addThrowable(th);
             this.done.decrementAndGet();
             drain();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onNext(JoinInnerSubscriber<T> joinInnerSubscriber, T t) {
-            String str = "Queue full?!";
             if (get() != 0 || !compareAndSet(0, 1)) {
                 if (!joinInnerSubscriber.getQueue().offer(t) && joinInnerSubscriber.cancel()) {
-                    this.errors.addThrowable(new MissingBackpressureException(str));
+                    this.errors.addThrowable(new MissingBackpressureException("Queue full?!"));
                     this.done.decrementAndGet();
                 }
                 if (getAndIncrement() != 0) {
@@ -513,7 +516,7 @@ public final class ParallelJoin<T> extends Flowable<T> {
                     joinInnerSubscriber.request(1);
                 } else if (!joinInnerSubscriber.getQueue().offer(t)) {
                     joinInnerSubscriber.cancel();
-                    this.errors.addThrowable(new MissingBackpressureException(str));
+                    this.errors.addThrowable(new MissingBackpressureException("Queue full?!"));
                     this.done.decrementAndGet();
                     drainLoop();
                     return;

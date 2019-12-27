@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import com.android.camera.R;
 import com.android.camera.constant.ColorConstant;
@@ -13,9 +12,8 @@ import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.ui.ColorActivateTextView;
 import com.android.camera.ui.ColorImageView;
 import com.android.camera.ui.HorizontalListView;
-import com.android.camera.ui.HorizontalListView.OnSingleTapDownListener;
 
-public class ExtraCustomWBListAdapter extends BaseAdapter implements OnItemClickListener, OnSingleTapDownListener {
+public class ExtraCustomWBListAdapter extends BaseAdapter implements AdapterView.OnItemClickListener, HorizontalListView.OnSingleTapDownListener {
     private static final int GAP_K_LONG_VALUE = 500;
     private static final int GAP_K_SHOT_VALUE = 200;
     private static final int MAX_K_VALUE = 8000;
@@ -81,10 +79,10 @@ public class ExtraCustomWBListAdapter extends BaseAdapter implements OnItemClick
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
         if (view == null) {
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_manually_extra_item, null);
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_manually_extra_item, (ViewGroup) null);
             viewHolder = new ViewHolder();
-            viewHolder.mColorImageView = (ColorImageView) view.findViewById(R.id.extra_item_image);
-            viewHolder.mText = (ColorActivateTextView) view.findViewById(R.id.extra_item_text);
+            ColorImageView unused = viewHolder.mColorImageView = (ColorImageView) view.findViewById(R.id.extra_item_image);
+            ColorActivateTextView unused2 = viewHolder.mText = (ColorActivateTextView) view.findViewById(R.id.extra_item_text);
             viewHolder.mText.setNormalCor(ColorConstant.COLOR_COMMON_NORMAL);
             viewHolder.mText.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
             view.setTag(viewHolder);

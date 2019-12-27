@@ -94,7 +94,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void requestMore(long j) {
             if (this.fusionMode != 1) {
                 long j2 = this.produced + j;
@@ -140,7 +140,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             this.subscribers.lazySet(EMPTY);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean addInner(InnerSubscriber<T, U> innerSubscriber) {
             InnerSubscriber<?, ?>[] innerSubscriberArr;
             InnerSubscriber[] innerSubscriberArr2;
@@ -172,7 +172,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminate() {
             if (this.cancelled) {
                 clearScalarQueue();
@@ -189,7 +189,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clearScalarQueue() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             if (simplePlainQueue != null) {
@@ -197,7 +197,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeAll() {
             InnerSubscriber<?, ?>[] innerSubscriberArr = (InnerSubscriber[]) this.subscribers.get();
             InnerSubscriber<?, ?>[] innerSubscriberArr2 = CANCELLED;
@@ -215,14 +215,14 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             long j;
             boolean z;
@@ -243,22 +243,22 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                 if (simplePlainQueue != null) {
                     while (true) {
                         long j8 = 0;
-                        Object obj = null;
+                        U u = null;
                         while (true) {
                             if (j5 == 0) {
                                 break;
                             }
-                            Object poll = simplePlainQueue.poll();
+                            U poll = simplePlainQueue.poll();
                             if (!checkTerminate()) {
                                 if (poll == null) {
-                                    obj = poll;
+                                    u = poll;
                                     break;
                                 }
                                 subscriber.onNext(poll);
                                 j7++;
                                 j8++;
                                 j5--;
-                                obj = poll;
+                                u = poll;
                             } else {
                                 return;
                             }
@@ -266,7 +266,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                         if (j8 != 0) {
                             j5 = z3 ? Long.MAX_VALUE : this.requested.addAndGet(-j8);
                         }
-                        if (j5 == 0 || obj == null) {
+                        if (j5 == 0 || u == null) {
                             break;
                         }
                     }
@@ -304,23 +304,23 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                                 break;
                             } else if (!checkTerminate()) {
                                 InnerSubscriber innerSubscriber = innerSubscriberArr[i8];
-                                Object obj2 = null;
+                                U u2 = null;
                                 while (!checkTerminate()) {
                                     SimpleQueue<U> simpleQueue = innerSubscriber.queue;
                                     if (simpleQueue == null) {
                                         i = length;
                                     } else {
                                         i = length;
-                                        Object obj3 = obj2;
+                                        U u3 = u2;
                                         long j10 = j6;
                                         while (true) {
                                             if (j == j6) {
                                                 break;
                                             }
                                             try {
-                                                Object poll2 = simpleQueue.poll();
+                                                U poll2 = simpleQueue.poll();
                                                 if (poll2 == null) {
-                                                    obj3 = poll2;
+                                                    u3 = poll2;
                                                     j6 = 0;
                                                     break;
                                                 }
@@ -328,7 +328,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                                                 if (!checkTerminate()) {
                                                     j--;
                                                     j10++;
-                                                    obj3 = poll2;
+                                                    u3 = poll2;
                                                     j6 = 0;
                                                 } else {
                                                     return;
@@ -358,9 +358,9 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                                         } else {
                                             j4 = j6;
                                         }
-                                        if (!(j == j4 || obj3 == null)) {
+                                        if (!(j == j4 || u3 == null)) {
                                             length = i;
-                                            obj2 = obj3;
+                                            u2 = u3;
                                             j6 = 0;
                                         }
                                     }
@@ -416,19 +416,21 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                     }
                 } else {
                     Throwable terminate = this.errs.terminate();
-                    if (terminate != ExceptionHelper.TERMINATED) {
-                        if (terminate == null) {
-                            subscriber.onComplete();
-                        } else {
-                            subscriber.onError(terminate);
-                        }
+                    if (terminate == ExceptionHelper.TERMINATED) {
+                        return;
                     }
-                    return;
+                    if (terminate == null) {
+                        subscriber.onComplete();
+                        return;
+                    } else {
+                        subscriber.onError(terminate);
+                        return;
+                    }
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SimpleQueue<U> getInnerQueue(InnerSubscriber<T, U> innerSubscriber) {
             SimpleQueue<U> simpleQueue = innerSubscriber.queue;
             if (simpleQueue != null) {
@@ -439,7 +441,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             return spscArrayQueue;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SimpleQueue<U> getMainQueue() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             if (simplePlainQueue == null) {
@@ -450,7 +452,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             return simplePlainQueue;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(InnerSubscriber<T, U> innerSubscriber, Throwable th) {
             if (this.errs.addThrowable(th)) {
                 innerSubscriber.done = true;
@@ -476,9 +478,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
         public void onError(Throwable th) {
             if (this.done) {
                 RxJavaPlugins.onError(th);
-                return;
-            }
-            if (this.errs.addThrowable(th)) {
+            } else if (this.errs.addThrowable(th)) {
                 this.done = true;
                 drain();
             } else {
@@ -542,10 +542,10 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void removeInner(InnerSubscriber<T, U> innerSubscriber) {
             InnerSubscriber<?, ?>[] innerSubscriberArr;
-            Object obj;
+            InnerSubscriber<?, ?>[] innerSubscriberArr2;
             do {
                 innerSubscriberArr = (InnerSubscriber[]) this.subscribers.get();
                 if (innerSubscriberArr != CANCELLED && innerSubscriberArr != EMPTY) {
@@ -564,18 +564,20 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                     }
                     if (i >= 0) {
                         if (length == 1) {
-                            obj = EMPTY;
+                            innerSubscriberArr2 = EMPTY;
                         } else {
-                            InnerSubscriber[] innerSubscriberArr2 = new InnerSubscriber[(length - 1)];
-                            System.arraycopy(innerSubscriberArr, 0, innerSubscriberArr2, 0, i);
-                            System.arraycopy(innerSubscriberArr, i + 1, innerSubscriberArr2, i, (length - i) - 1);
-                            obj = innerSubscriberArr2;
+                            InnerSubscriber<?, ?>[] innerSubscriberArr3 = new InnerSubscriber[(length - 1)];
+                            System.arraycopy(innerSubscriberArr, 0, innerSubscriberArr3, 0, i);
+                            System.arraycopy(innerSubscriberArr, i + 1, innerSubscriberArr3, i, (length - i) - 1);
+                            innerSubscriberArr2 = innerSubscriberArr3;
                         }
                     } else {
                         return;
                     }
+                } else {
+                    return;
                 }
-            } while (!this.subscribers.compareAndSet(innerSubscriberArr, obj));
+            } while (!this.subscribers.compareAndSet(innerSubscriberArr, innerSubscriberArr2));
         }
 
         public void request(long j) {
@@ -585,9 +587,8 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void tryEmit(U u, InnerSubscriber<T, U> innerSubscriber) {
-            String str = "Inner queue full?!";
             if (get() != 0 || !compareAndSet(0, 1)) {
                 SimpleQueue simpleQueue = innerSubscriber.queue;
                 if (simpleQueue == null) {
@@ -595,7 +596,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                     innerSubscriber.queue = simpleQueue;
                 }
                 if (!simpleQueue.offer(u)) {
-                    onError(new MissingBackpressureException(str));
+                    onError(new MissingBackpressureException("Inner queue full?!"));
                     return;
                 } else if (getAndIncrement() != 0) {
                     return;
@@ -608,7 +609,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                         simpleQueue2 = getInnerQueue(innerSubscriber);
                     }
                     if (!simpleQueue2.offer(u)) {
-                        onError(new MissingBackpressureException(str));
+                        onError(new MissingBackpressureException("Inner queue full?!"));
                         return;
                     }
                 } else {
@@ -625,9 +626,8 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
             drainLoop();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void tryEmitScalar(U u) {
-            String str = "Scalar queue full?!";
             if (get() == 0 && compareAndSet(0, 1)) {
                 long j = this.requested.get();
                 SimpleQueue simpleQueue = this.queue;
@@ -636,7 +636,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                         simpleQueue = getMainQueue();
                     }
                     if (!simpleQueue.offer(u)) {
-                        onError(new IllegalStateException(str));
+                        onError(new IllegalStateException("Scalar queue full?!"));
                         return;
                     }
                 } else {
@@ -658,7 +658,7 @@ public final class FlowableFlatMap<T, U> extends AbstractFlowableWithUpstream<T,
                     return;
                 }
             } else if (!getMainQueue().offer(u)) {
-                onError(new IllegalStateException(str));
+                onError(new IllegalStateException("Scalar queue full?!"));
                 return;
             } else if (getAndIncrement() != 0) {
                 return;

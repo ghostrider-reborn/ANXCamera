@@ -94,6 +94,6 @@ public final class FlowableDoOnLifecycle<T> extends AbstractFlowableWithUpstream
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new SubscriptionLambdaSubscriber<Object>(subscriber, this.onSubscribe, this.onRequest, this.onCancel));
+        this.source.subscribe(new SubscriptionLambdaSubscriber(subscriber, this.onSubscribe, this.onRequest, this.onCancel));
     }
 }

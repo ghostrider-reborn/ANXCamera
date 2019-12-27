@@ -1,13 +1,11 @@
 package com.android.camera.fragment.mimoji;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.os.Environment;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import com.android.camera.R;
 import com.android.camera.log.Log;
 import java.io.File;
@@ -18,37 +16,14 @@ import java.util.List;
 public class MimojiHelper {
     public static final int COLOR_FormatI420 = 1;
     public static final int COLOR_FormatNV21 = 2;
-    public static final String CUSTOM_DIR;
-    public static final String DATA_DIR;
-    public static final String MIMOJI_DIR;
+    public static final String CUSTOM_DIR = (ROOT_DIR + "custom/");
+    public static final String DATA_DIR = (MIMOJI_DIR + "data/");
+    public static final String MIMOJI_DIR = (ROOT_DIR + "mimoji/");
     public static final String MIMOJI_PREFIX = "vendor/camera/mimoji/";
-    public static final String MODEL_PATH;
+    public static final String MODEL_PATH = (MIMOJI_DIR + "model/");
     private static final int ORIENTATION_HYSTERESIS = 5;
-    public static final String ROOT_DIR;
+    public static final String ROOT_DIR = (Environment.getExternalStorageDirectory().getPath() + "/MIUI/Camera/");
     private static int mCurrentOrientation = -1;
-
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().getPath());
-        sb.append("/MIUI/Camera/");
-        ROOT_DIR = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(ROOT_DIR);
-        sb2.append("mimoji/");
-        MIMOJI_DIR = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(MIMOJI_DIR);
-        sb3.append("data/");
-        DATA_DIR = sb3.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(MIMOJI_DIR);
-        sb4.append("model/");
-        MODEL_PATH = sb4.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(ROOT_DIR);
-        sb5.append("custom/");
-        CUSTOM_DIR = sb5.toString();
-    }
 
     public static byte[] getDataFromImage(Image image, int i) {
         Rect rect;
@@ -61,7 +36,7 @@ public class MimojiHelper {
             int format = image.getFormat();
             int width = cropRect.width();
             int height = cropRect.height();
-            Plane[] planes = image.getPlanes();
+            Image.Plane[] planes = image.getPlanes();
             int i6 = width * height;
             byte[] bArr = new byte[((ImageFormat.getBitsPerPixel(format) * i6) / 8)];
             int i7 = 0;
@@ -137,48 +112,40 @@ public class MimojiHelper {
     }
 
     public static List<MimojiInfo> getMimojiInfoList() {
-        File[] listFiles;
+        String absolutePath;
         File file = new File(MODEL_PATH);
         if (!file.exists()) {
             return null;
         }
-        File[] listFiles2 = file.listFiles();
+        File[] listFiles = file.listFiles();
         ArrayList arrayList = new ArrayList();
-        for (File absolutePath : listFiles2) {
-            String absolutePath2 = absolutePath.getAbsolutePath();
-            StringBuilder sb = new StringBuilder();
-            sb.append(absolutePath2);
-            sb.append("/save");
-            File file2 = new File(sb.toString());
+        int length = listFiles.length;
+        int i = 0;
+        while (i < length) {
+            File file2 = new File(absolutePath + "/save");
             if (file2.exists()) {
                 for (File file3 : file2.listFiles()) {
                     if (file3.getPath().substring(file3.getPath().length() - 4).equals(".dat")) {
                         MimojiInfo mimojiInfo = new MimojiInfo();
-                        mimojiInfo.mAvatarTemplatePath = absolutePath2;
+                        mimojiInfo.mAvatarTemplatePath = absolutePath;
                         mimojiInfo.mConfigPath = file3.getAbsolutePath();
                     }
                 }
             }
+            i++;
         }
         return arrayList;
     }
 
     public static int getOutlineOrientation(int i, int i2, boolean z) {
         mCurrentOrientation = roundOrientation(i2, mCurrentOrientation);
-        int i3 = z ? ((i - mCurrentOrientation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : (mCurrentOrientation + i) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
-        StringBuilder sb = new StringBuilder();
-        sb.append("cameraRotation = ");
-        sb.append(i);
-        sb.append(" sensorOrientation = ");
-        sb.append(mCurrentOrientation);
-        sb.append("outlineOrientation = ");
-        sb.append(i3);
-        Log.d("OrientationUtil", sb.toString());
+        int i3 = z ? ((i - mCurrentOrientation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : (mCurrentOrientation + i) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        Log.d("OrientationUtil", "cameraRotation = " + i + " sensorOrientation = " + mCurrentOrientation + "outlineOrientation = " + i3);
         return i3;
     }
 
     public static Bitmap getThumbnailBitmapFromData(byte[] bArr, int i, int i2) {
-        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
         createBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(bArr));
         return createBitmap;
     }
@@ -223,6 +190,6 @@ public class MimojiHelper {
                 z = false;
             }
         }
-        return z ? (((i + 45) / 90) * 90) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : i2;
+        return z ? (((i + 45) / 90) * 90) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : i2;
     }
 }

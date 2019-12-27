@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -17,7 +16,7 @@ import com.android.camera.fragment.beauty.MenuItem;
 import com.android.camera.ui.ColorActivateTextView;
 import com.mi.config.b;
 
-public class FrontBeautyMenu extends AbBottomMenu implements OnClickListener {
+public class FrontBeautyMenu extends AbBottomMenu implements View.OnClickListener {
     private SparseArray mFrontBeautyMenuTabList;
     private int mLastCamerId = -1;
     private SparseArray<ColorActivateTextView> mMenuTextViewList;
@@ -36,23 +35,19 @@ public class FrontBeautyMenu extends AbBottomMenu implements OnClickListener {
     }
 
     private boolean isJustBeautyTab() {
-        boolean z = true;
         if (DataRepository.dataItemFeature().db()) {
             return true;
         }
         int currentMode = ((DataItemGlobal) DataRepository.provider().dataGlobal()).getCurrentMode();
-        if (!(currentMode == 162 || currentMode == 161 || currentMode == 174 || currentMode == 171 || currentMode == 176)) {
-            z = false;
-        }
-        return z;
+        return currentMode == 162 || currentMode == 161 || currentMode == 174 || currentMode == 171 || currentMode == 176;
     }
 
     public void addAllView() {
         this.mMenuTextViewList = new SparseArray<>();
-        SparseArray menuData = getMenuData();
+        SparseArray<MenuItem> menuData = getMenuData();
         for (int i = 0; i < menuData.size(); i++) {
-            MenuItem menuItem = (MenuItem) menuData.valueAt(i);
-            if (!isJustBeautyTab() || menuItem.type == 1) {
+            MenuItem valueAt = menuData.valueAt(i);
+            if (!isJustBeautyTab() || valueAt.type == 1) {
                 ColorActivateTextView colorActivateTextView = (ColorActivateTextView) LayoutInflater.from(this.mContext).inflate(R.layout.beauty_menu_select_item, this.mContainerView, false);
                 colorActivateTextView.setNormalCor(ColorConstant.WHITE_ALPHA_99);
                 if (isJustBeautyTab()) {
@@ -60,37 +55,37 @@ public class FrontBeautyMenu extends AbBottomMenu implements OnClickListener {
                 } else {
                     colorActivateTextView.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
                 }
-                colorActivateTextView.setText(menuItem.text);
-                colorActivateTextView.setTag(Integer.valueOf(menuItem.type));
+                colorActivateTextView.setText(valueAt.text);
+                colorActivateTextView.setTag(Integer.valueOf(valueAt.type));
                 colorActivateTextView.setOnClickListener(this);
-                if (menuItem.redDot) {
+                if (valueAt.redDot) {
                     Drawable drawable = this.mContext.getResources().getDrawable(R.drawable.ic_dot_hint);
                     colorActivateTextView.setCompoundDrawablePadding(this.mContext.getResources().getDimensionPixelOffset(R.dimen.beautycamera_beauty_fragment_tab_dot_hint_padding));
-                    colorActivateTextView.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+                    colorActivateTextView.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, (Drawable) null, drawable, (Drawable) null);
                 }
-                if (1 == menuItem.type) {
+                if (1 == valueAt.type) {
                     colorActivateTextView.setActivated(true);
                     this.mCurrentBeautyTextView = colorActivateTextView;
                 } else {
                     colorActivateTextView.setActivated(false);
                 }
-                this.mMenuTextViewList.put(menuItem.type, colorActivateTextView);
+                this.mMenuTextViewList.put(valueAt.type, colorActivateTextView);
                 this.mContainerView.addView(colorActivateTextView);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SparseArray<ColorActivateTextView> getChildMenuViewList() {
         return this.mMenuTextViewList;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getDefaultType() {
         return 1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public SparseArray<MenuItem> getMenuData() {
         SparseArray sparseArray = this.mFrontBeautyMenuTabList;
         if (sparseArray != null && sparseArray.size() > 0) {
@@ -134,12 +129,12 @@ public class FrontBeautyMenu extends AbBottomMenu implements OnClickListener {
             selectBeautyType(intValue);
             if (intValue == 3 && !CameraSettings.isBeautyMakeupClicked()) {
                 CameraSettings.setBeautyMakeupClicked();
-                this.mCurrentBeautyTextView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                this.mCurrentBeautyTextView.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, (Drawable) null, (Drawable) null, (Drawable) null);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void switchMenu() {
         BeautyMenuAnimator beautyMenuAnimator = this.mBeautyMenuAnimator;
         if (beautyMenuAnimator != null) {

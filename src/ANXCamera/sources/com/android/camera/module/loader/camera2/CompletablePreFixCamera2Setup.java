@@ -91,9 +91,7 @@ public class CompletablePreFixCamera2Setup implements CompletableOnSubscribe, Ob
         sb.append(" LastMode is ");
         Module module = this.mLastMode;
         sb.append(module == null ? TEDefine.FACE_BEAUTY_NULL : Integer.valueOf(module.getModuleIndex()));
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, sb.toString());
         if (this.mModuleChanged) {
             Module module2 = this.mLastMode;
             if (module2 != null) {
@@ -110,13 +108,10 @@ public class CompletablePreFixCamera2Setup implements CompletableOnSubscribe, Ob
             }
             closeLastModule();
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("subscribe: mIntent = ");
-        sb3.append(this.mIntent);
-        Log.d(str, sb3.toString());
+        Log.d(TAG, "subscribe: mIntent = " + this.mIntent);
         Intent intent = this.mIntent;
         if (intent != null) {
-            Pair parseIntent = dataItemGlobal.parseIntent(intent, Boolean.valueOf(this.isFromVoiceControl), this.mStartFromKeyguard, true, true);
+            Pair<Integer, Integer> parseIntent = dataItemGlobal.parseIntent(intent, Boolean.valueOf(this.isFromVoiceControl), this.mStartFromKeyguard, true, true);
             int intValue = ((Integer) parseIntent.first).intValue();
             int intValue2 = ((Integer) parseIntent.second).intValue();
             ThermalDetector.getInstance().onCreate(CameraAppImpl.getAndroidContext());

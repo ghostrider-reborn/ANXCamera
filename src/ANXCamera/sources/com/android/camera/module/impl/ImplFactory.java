@@ -12,27 +12,27 @@ import com.android.camera.module.impl.component.LiveVideoEditorTTImpl;
 import com.android.camera.module.impl.component.ManuallyValueChangeImpl;
 import com.android.camera.module.impl.component.MimojiAvatarEngineImpl;
 import com.android.camera.module.impl.component.RecordingStateChangeImpl;
-import com.android.camera.protocol.ModeProtocol.BaseProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ImplFactory {
-    private List<BaseProtocol> mAdditionalProtocolList;
-    private List<BaseProtocol> mBaseProtocolList;
-    private List<BaseProtocol> mPersistentProtocolList;
+    private List<ModeProtocol.BaseProtocol> mAdditionalProtocolList;
+    private List<ModeProtocol.BaseProtocol> mBaseProtocolList;
+    private List<ModeProtocol.BaseProtocol> mPersistentProtocolList;
     private boolean mReleased;
 
-    private void detach(List<BaseProtocol> list) {
+    private void detach(List<ModeProtocol.BaseProtocol> list) {
         if (!this.mReleased && list != null) {
-            for (BaseProtocol unRegisterProtocol : list) {
+            for (ModeProtocol.BaseProtocol unRegisterProtocol : list) {
                 unRegisterProtocol.unRegisterProtocol();
             }
             list.clear();
         }
     }
 
-    private void initTypes(ActivityBase activityBase, List<BaseProtocol> list, int... iArr) {
-        BaseProtocol baseProtocol;
+    private void initTypes(ActivityBase activityBase, List<ModeProtocol.BaseProtocol> list, int... iArr) {
+        ModeProtocol.BaseProtocol baseProtocol;
         if (!this.mReleased) {
             for (int i : iArr) {
                 if (i == 164) {

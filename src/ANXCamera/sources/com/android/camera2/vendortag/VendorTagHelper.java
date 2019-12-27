@@ -1,9 +1,7 @@
 package com.android.camera2.vendortag;
 
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.CaptureResult;
 import android.util.Log;
 import com.android.camera.CameraAppImpl;
@@ -23,11 +21,11 @@ public class VendorTagHelper {
         return sPreferredAction;
     }
 
-    public static <T> T getValue(CameraCharacteristics cameraCharacteristics, VendorTag<Key<T>> vendorTag) {
+    public static <T> T getValue(CameraCharacteristics cameraCharacteristics, VendorTag<CameraCharacteristics.Key<T>> vendorTag) {
         return tryGetValue(cameraCharacteristics, vendorTag, getPreferredAction());
     }
 
-    public static <T> T getValue(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag) {
+    public static <T> T getValue(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag) {
         return tryGetValue(builder, vendorTag, getPreferredAction());
     }
 
@@ -35,11 +33,11 @@ public class VendorTagHelper {
         return tryGetValue(captureResult, vendorTag, getPreferredAction());
     }
 
-    public static <T> T getValueQuietly(CameraCharacteristics cameraCharacteristics, VendorTag<Key<T>> vendorTag) {
+    public static <T> T getValueQuietly(CameraCharacteristics cameraCharacteristics, VendorTag<CameraCharacteristics.Key<T>> vendorTag) {
         return tryGetValue(cameraCharacteristics, vendorTag, (int) SWALLOW);
     }
 
-    public static <T> T getValueQuietly(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
+    public static <T> T getValueQuietly(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
         return tryGetValue(builder, vendorTag, (int) SWALLOW);
     }
 
@@ -47,11 +45,11 @@ public class VendorTagHelper {
         return tryGetValue(captureResult, vendorTag, (int) SWALLOW);
     }
 
-    public static <T> T getValueSafely(CameraCharacteristics cameraCharacteristics, VendorTag<Key<T>> vendorTag) {
+    public static <T> T getValueSafely(CameraCharacteristics cameraCharacteristics, VendorTag<CameraCharacteristics.Key<T>> vendorTag) {
         return tryGetValue(cameraCharacteristics, vendorTag, (int) WARNING);
     }
 
-    public static <T> T getValueSafely(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag) {
+    public static <T> T getValueSafely(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag) {
         return tryGetValue(builder, vendorTag, (int) WARNING);
     }
 
@@ -59,33 +57,29 @@ public class VendorTagHelper {
         return tryGetValue(captureResult, vendorTag, (int) WARNING);
     }
 
-    public static <T> void setValue(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
+    public static <T> void setValue(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
         trySetValue(builder, vendorTag, t, getPreferredAction());
     }
 
-    public static <T> void setValueQuietly(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
+    public static <T> void setValueQuietly(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
         trySetValue(builder, vendorTag, t, SWALLOW);
     }
 
-    public static <T> void setValueSafely(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
+    public static <T> void setValueSafely(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t) {
         trySetValue(builder, vendorTag, t, WARNING);
     }
 
-    private static <T> T tryGetValue(CameraCharacteristics cameraCharacteristics, VendorTag<Key<T>> vendorTag, int i) {
-        String str = TAG;
+    private static <T> T tryGetValue(CameraCharacteristics cameraCharacteristics, VendorTag<CameraCharacteristics.Key<T>> vendorTag, int i) {
         if (cameraCharacteristics == null || vendorTag == null || vendorTag.getKey() == null) {
-            Log.w(str, "caution: failed to try get value from camera characteristics: <NULL>");
+            Log.w(TAG, "caution: failed to try get value from camera characteristics: <NULL>");
             return null;
         }
         try {
-            return cameraCharacteristics.get((Key) vendorTag.getKey());
+            return cameraCharacteristics.get(vendorTag.getKey());
         } catch (Exception e2) {
             if (i != RETHROW) {
                 if (i == WARNING) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("caution: failed to try get value from camera characteristics: <VTNF>, ");
-                    sb.append(vendorTag.getName());
-                    Log.w(str, sb.toString());
+                    Log.w(TAG, "caution: failed to try get value from camera characteristics: <VTNF>, " + vendorTag.getName());
                 }
                 return null;
             }
@@ -93,21 +87,17 @@ public class VendorTagHelper {
         }
     }
 
-    private static <T> T tryGetValue(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, int i) {
-        String str = TAG;
+    private static <T> T tryGetValue(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, int i) {
         if (builder == null || vendorTag == null || vendorTag.getKey() == null) {
-            Log.w(str, "caution: failed to try get value from capture request: <NULL>");
+            Log.w(TAG, "caution: failed to try get value from capture request: <NULL>");
             return null;
         }
         try {
-            return builder.get((CaptureRequest.Key) vendorTag.getKey());
+            return builder.get(vendorTag.getKey());
         } catch (Exception e2) {
             if (i != RETHROW) {
                 if (i == WARNING) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("caution: failed to try get value from capture request: <VTNF>, ");
-                    sb.append(vendorTag.getName());
-                    Log.w(str, sb.toString());
+                    Log.w(TAG, "caution: failed to try get value from capture request: <VTNF>, " + vendorTag.getName());
                 }
                 return null;
             }
@@ -116,20 +106,16 @@ public class VendorTagHelper {
     }
 
     private static <T> T tryGetValue(CaptureResult captureResult, VendorTag<CaptureResult.Key<T>> vendorTag, int i) {
-        String str = TAG;
         if (captureResult == null || vendorTag == null || vendorTag.getKey() == null) {
-            Log.w(str, "caution: failed to try get value from capture result: <NULL>");
+            Log.w(TAG, "caution: failed to try get value from capture result: <NULL>");
             return null;
         }
         try {
-            return captureResult.get((CaptureResult.Key) vendorTag.getKey());
+            return captureResult.get(vendorTag.getKey());
         } catch (Exception e2) {
             if (i != RETHROW) {
                 if (i == WARNING) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("caution: failed to try get value from capture result: <VTNF>, ");
-                    sb.append(vendorTag.getName());
-                    Log.w(str, sb.toString());
+                    Log.w(TAG, "caution: failed to try get value from capture result: <VTNF>, " + vendorTag.getName());
                 }
                 return null;
             }
@@ -137,22 +123,18 @@ public class VendorTagHelper {
         }
     }
 
-    private static <T> void trySetValue(Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t, int i) {
-        String str = TAG;
+    private static <T> void trySetValue(CaptureRequest.Builder builder, VendorTag<CaptureRequest.Key<T>> vendorTag, T t, int i) {
         if (builder == null || vendorTag == null || vendorTag.getKey() == null) {
-            Log.w(str, "caution: failed to update capture request: <NULL>");
+            Log.w(TAG, "caution: failed to update capture request: <NULL>");
             return;
         }
         try {
-            builder.set((CaptureRequest.Key) vendorTag.getKey(), t);
+            builder.set(vendorTag.getKey(), t);
         } catch (Exception e2) {
             if (i == RETHROW) {
                 throw new VendorTagNotFoundException((Throwable) e2);
             } else if (i == WARNING) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("caution: failed to update capture request: <VTNF>, ");
-                sb.append(vendorTag.getName());
-                Log.w(str, sb.toString());
+                Log.w(TAG, "caution: failed to update capture request: <VTNF>, " + vendorTag.getName());
             }
         }
     }

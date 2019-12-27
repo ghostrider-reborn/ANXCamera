@@ -51,9 +51,10 @@ public final class ArrayCompositeDisposable extends AtomicReferenceArray<Disposa
                 return false;
             }
         } while (!compareAndSet(i, disposable2, disposable));
-        if (disposable2 != null) {
-            disposable2.dispose();
+        if (disposable2 == null) {
+            return true;
         }
+        disposable2.dispose();
         return true;
     }
 }

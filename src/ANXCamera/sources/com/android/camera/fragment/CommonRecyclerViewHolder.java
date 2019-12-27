@@ -1,10 +1,10 @@
 package com.android.camera.fragment;
 
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
 
-public class CommonRecyclerViewHolder extends ViewHolder {
+public class CommonRecyclerViewHolder extends RecyclerView.ViewHolder {
     private final SparseArray<View> mViews = new SparseArray<>();
 
     public CommonRecyclerViewHolder(View view) {

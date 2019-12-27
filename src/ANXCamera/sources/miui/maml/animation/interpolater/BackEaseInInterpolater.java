@@ -14,8 +14,7 @@ public class BackEaseInInterpolater implements Interpolator {
     }
 
     public float getInterpolation(float f2) {
-        float f3 = f2 * f2;
-        float f4 = this.mFactor;
-        return f3 * (((1.0f + f4) * f2) - f4);
+        float f3 = this.mFactor;
+        return f2 * f2 * (((1.0f + f3) * f2) - f3);
     }
 }

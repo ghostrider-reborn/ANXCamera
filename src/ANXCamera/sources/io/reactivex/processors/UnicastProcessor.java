@@ -44,7 +44,7 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
                 UnicastProcessor unicastProcessor2 = UnicastProcessor.this;
                 if (!unicastProcessor2.enableOperatorFusion && unicastProcessor2.wip.getAndIncrement() == 0) {
                     UnicastProcessor.this.queue.clear();
-                    UnicastProcessor.this.actual.lazySet(null);
+                    UnicastProcessor.this.actual.lazySet((Object) null);
                 }
             }
         }
@@ -79,7 +79,7 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
     }
 
     UnicastProcessor(int i) {
-        this(i, null, true);
+        this(i, (Runnable) null, true);
     }
 
     UnicastProcessor(int i, Runnable runnable) {
@@ -123,25 +123,28 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
     @CheckReturnValue
     @Experimental
     public static <T> UnicastProcessor<T> create(boolean z) {
-        return new UnicastProcessor<>(Flowable.bufferSize(), null, z);
+        return new UnicastProcessor<>(Flowable.bufferSize(), (Runnable) null, z);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean checkTerminated(boolean z, boolean z2, boolean z3, Subscriber<? super T> subscriber, SpscLinkedArrayQueue<T> spscLinkedArrayQueue) {
         if (this.cancelled) {
             spscLinkedArrayQueue.clear();
-            this.actual.lazySet(null);
+            this.actual.lazySet((Object) null);
             return true;
-        }
-        if (z2) {
+        } else if (!z2) {
+            return false;
+        } else {
             if (z && this.error != null) {
                 spscLinkedArrayQueue.clear();
-                this.actual.lazySet(null);
+                this.actual.lazySet((Object) null);
                 subscriber.onError(this.error);
                 return true;
-            } else if (z3) {
+            } else if (!z3) {
+                return false;
+            } else {
                 Throwable th = this.error;
-                this.actual.lazySet(null);
+                this.actual.lazySet((Object) null);
                 if (th != null) {
                     subscriber.onError(th);
                 } else {
@@ -150,26 +153,25 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
                 return true;
             }
         }
-        return false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void doTerminate() {
-        Runnable runnable = (Runnable) this.onTerminate.get();
-        if (runnable != null && this.onTerminate.compareAndSet(runnable, null)) {
+        Runnable runnable = this.onTerminate.get();
+        if (runnable != null && this.onTerminate.compareAndSet(runnable, (Object) null)) {
             runnable.run();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drain() {
         if (this.wip.getAndIncrement() == 0) {
             int i = 1;
-            Subscriber subscriber = (Subscriber) this.actual.get();
+            Subscriber subscriber = this.actual.get();
             while (subscriber == null) {
                 i = this.wip.addAndGet(-i);
                 if (i != 0) {
-                    subscriber = (Subscriber) this.actual.get();
+                    subscriber = this.actual.get();
                 } else {
                     return;
                 }
@@ -182,7 +184,7 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drainFused(Subscriber<? super T> subscriber) {
         SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
         int i = 1;
@@ -192,31 +194,33 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
             if (!z || !z2 || this.error == null) {
                 subscriber.onNext(null);
                 if (z2) {
-                    this.actual.lazySet(null);
+                    this.actual.lazySet((Object) null);
                     Throwable th = this.error;
                     if (th != null) {
                         subscriber.onError(th);
+                        return;
                     } else {
                         subscriber.onComplete();
+                        return;
                     }
-                    return;
-                }
-                i = this.wip.addAndGet(-i);
-                if (i == 0) {
-                    return;
+                } else {
+                    i = this.wip.addAndGet(-i);
+                    if (i == 0) {
+                        return;
+                    }
                 }
             } else {
                 spscLinkedArrayQueue.clear();
-                this.actual.lazySet(null);
+                this.actual.lazySet((Object) null);
                 subscriber.onError(this.error);
                 return;
             }
         }
         spscLinkedArrayQueue.clear();
-        this.actual.lazySet(null);
+        this.actual.lazySet((Object) null);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drainRegular(Subscriber<? super T> subscriber) {
         int i;
         long j;
@@ -234,15 +238,15 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
                     break;
                 }
                 boolean z3 = this.done;
-                Object poll = spscLinkedArrayQueue.poll();
+                T poll = spscLinkedArrayQueue.poll();
                 boolean z4 = poll == null ? z : false;
-                Object obj = poll;
+                T t = poll;
                 j = j3;
                 if (!checkTerminated(z2, z3, z4, subscriber, spscLinkedArrayQueue)) {
                     if (z4) {
                         break;
                     }
-                    subscriber.onNext(obj);
+                    subscriber.onNext(t);
                     j3 = 1 + j;
                     z = true;
                 } else {
@@ -331,7 +335,7 @@ public final class UnicastProcessor<T> extends FlowableProcessor<T> {
         subscriber.onSubscribe(this.wip);
         this.actual.set(subscriber);
         if (this.cancelled) {
-            this.actual.lazySet(null);
+            this.actual.lazySet((Object) null);
         } else {
             drain();
         }

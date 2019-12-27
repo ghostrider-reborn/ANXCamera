@@ -5,7 +5,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,14 +58,13 @@ public class i<Data> implements t<File, Data> {
             return this.me.M();
         }
 
-        public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super Data> aVar) {
+        public void a(@NonNull Priority priority, @NonNull d.a<? super Data> aVar) {
             try {
                 this.data = this.me.b(this.file);
                 aVar.b(this.data);
             } catch (FileNotFoundException e2) {
-                String str = i.TAG;
-                if (Log.isLoggable(str, 3)) {
-                    Log.d(str, "Failed to open file", e2);
+                if (Log.isLoggable(i.TAG, 3)) {
+                    Log.d(i.TAG, "Failed to open file", e2);
                 }
                 aVar.b((Exception) e2);
             }
@@ -108,8 +109,8 @@ public class i<Data> implements t<File, Data> {
         this.Oh = dVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<Data> a(@NonNull File file, int i, int i2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(file), new c(file, this.Oh));
+    public t.a<Data> a(@NonNull File file, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(file), new c(file, this.Oh));
     }
 
     /* renamed from: f */

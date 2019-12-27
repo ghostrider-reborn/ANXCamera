@@ -1,7 +1,6 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import java.util.concurrent.ThreadFactory;
 
@@ -20,7 +19,7 @@ public final class NewThreadScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
+    public Scheduler.Worker createWorker() {
         return new NewThreadWorker(this.threadFactory);
     }
 }

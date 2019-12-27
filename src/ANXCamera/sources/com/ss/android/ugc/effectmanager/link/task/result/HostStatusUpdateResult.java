@@ -30,12 +30,6 @@ public class HostStatusUpdateResult extends BaseTaskResult {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HostStatusUpdateResult{mHostStatus=");
-        sb.append(this.mHostStatus);
-        sb.append(", mExceptionResult=");
-        sb.append(this.mExceptionResult);
-        sb.append('}');
-        return sb.toString();
+        return "HostStatusUpdateResult{mHostStatus=" + this.mHostStatus + ", mExceptionResult=" + this.mExceptionResult + '}';
     }
 }

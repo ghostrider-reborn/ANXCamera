@@ -66,7 +66,7 @@ public class MessageCenter {
                 sMessageCenterThread = null;
             }
             if (sMessageHandler != null) {
-                sMessageHandler.removeCallbacksAndMessages(null);
+                sMessageHandler.removeCallbacksAndMessages((Object) null);
                 sMessageHandler = null;
             }
             for (MessageInterceptor destroy : sInterceptors) {

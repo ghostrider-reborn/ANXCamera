@@ -21,8 +21,8 @@ public final class OkHostnameVerifier implements HostnameVerifier {
     }
 
     public static List<String> allSubjectAltNames(X509Certificate x509Certificate) {
-        List subjectAltNames = getSubjectAltNames(x509Certificate, 7);
-        List subjectAltNames2 = getSubjectAltNames(x509Certificate, 2);
+        List<String> subjectAltNames = getSubjectAltNames(x509Certificate, 7);
+        List<String> subjectAltNames2 = getSubjectAltNames(x509Certificate, 2);
         ArrayList arrayList = new ArrayList(subjectAltNames.size() + subjectAltNames2.size());
         arrayList.addAll(subjectAltNames);
         arrayList.addAll(subjectAltNames2);
@@ -32,17 +32,17 @@ public final class OkHostnameVerifier implements HostnameVerifier {
     private static List<String> getSubjectAltNames(X509Certificate x509Certificate, int i) {
         ArrayList arrayList = new ArrayList();
         try {
-            Collection<List> subjectAlternativeNames = x509Certificate.getSubjectAlternativeNames();
+            Collection<List<?>> subjectAlternativeNames = x509Certificate.getSubjectAlternativeNames();
             if (subjectAlternativeNames == null) {
                 return Collections.emptyList();
             }
-            for (List list : subjectAlternativeNames) {
-                if (list != null) {
-                    if (list.size() >= 2) {
-                        Integer num = (Integer) list.get(0);
+            for (List next : subjectAlternativeNames) {
+                if (next != null) {
+                    if (next.size() >= 2) {
+                        Integer num = (Integer) next.get(0);
                         if (num != null) {
                             if (num.intValue() == i) {
-                                String str = (String) list.get(1);
+                                String str = (String) next.get(1);
                                 if (str != null) {
                                     arrayList.add(str);
                                 }
@@ -59,12 +59,12 @@ public final class OkHostnameVerifier implements HostnameVerifier {
 
     private boolean verifyHostname(String str, X509Certificate x509Certificate) {
         String lowerCase = str.toLowerCase(Locale.US);
-        List subjectAltNames = getSubjectAltNames(x509Certificate, 2);
+        List<String> subjectAltNames = getSubjectAltNames(x509Certificate, 2);
         int size = subjectAltNames.size();
         int i = 0;
         boolean z = false;
         while (i < size) {
-            if (verifyHostname(lowerCase, (String) subjectAltNames.get(i))) {
+            if (verifyHostname(lowerCase, subjectAltNames.get(i))) {
                 return true;
             }
             i++;
@@ -80,10 +80,10 @@ public final class OkHostnameVerifier implements HostnameVerifier {
     }
 
     private boolean verifyIpAddress(String str, X509Certificate x509Certificate) {
-        List subjectAltNames = getSubjectAltNames(x509Certificate, 7);
+        List<String> subjectAltNames = getSubjectAltNames(x509Certificate, 7);
         int size = subjectAltNames.size();
         for (int i = 0; i < size; i++) {
-            if (str.equalsIgnoreCase((String) subjectAltNames.get(i))) {
+            if (str.equalsIgnoreCase(subjectAltNames.get(i))) {
                 return true;
             }
         }
@@ -103,39 +103,26 @@ public final class OkHostnameVerifier implements HostnameVerifier {
     }
 
     public boolean verifyHostname(String str, String str2) {
-        if (!(str == null || str.length() == 0)) {
-            String str3 = ".";
-            if (!str.startsWith(str3)) {
-                String str4 = "..";
-                if (!str.endsWith(str4) && str2 != null && str2.length() != 0 && !str2.startsWith(str3) && !str2.endsWith(str4)) {
-                    if (!str.endsWith(str3)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(str);
-                        sb.append('.');
-                        str = sb.toString();
-                    }
-                    if (!str2.endsWith(str3)) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(str2);
-                        sb2.append('.');
-                        str2 = sb2.toString();
-                    }
-                    String lowerCase = str2.toLowerCase(Locale.US);
-                    if (!lowerCase.contains("*")) {
-                        return str.equals(lowerCase);
-                    }
-                    String str5 = "*.";
-                    if (!lowerCase.startsWith(str5) || lowerCase.indexOf(42, 1) != -1 || str.length() < lowerCase.length() || str5.equals(lowerCase)) {
-                        return false;
-                    }
-                    String substring = lowerCase.substring(1);
-                    if (!str.endsWith(substring)) {
-                        return false;
-                    }
-                    int length = str.length() - substring.length();
-                    return length <= 0 || str.lastIndexOf(46, length - 1) == -1;
-                }
+        if (str != null && str.length() != 0 && !str.startsWith(".") && !str.endsWith("..") && str2 != null && str2.length() != 0 && !str2.startsWith(".") && !str2.endsWith("..")) {
+            if (!str.endsWith(".")) {
+                str = str + '.';
             }
+            if (!str2.endsWith(".")) {
+                str2 = str2 + '.';
+            }
+            String lowerCase = str2.toLowerCase(Locale.US);
+            if (!lowerCase.contains("*")) {
+                return str.equals(lowerCase);
+            }
+            if (!lowerCase.startsWith("*.") || lowerCase.indexOf(42, 1) != -1 || str.length() < lowerCase.length() || "*.".equals(lowerCase)) {
+                return false;
+            }
+            String substring = lowerCase.substring(1);
+            if (!str.endsWith(substring)) {
+                return false;
+            }
+            int length = str.length() - substring.length();
+            return length <= 0 || str.lastIndexOf(46, length - 1) == -1;
         }
         return false;
     }

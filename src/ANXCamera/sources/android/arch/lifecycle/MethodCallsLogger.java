@@ -1,17 +1,16 @@
 package android.arch.lifecycle;
 
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class MethodCallsLogger {
     private Map<String, Integer> mCalledMethods = new HashMap();
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public boolean approveCall(String str, int i) {
-        Integer num = (Integer) this.mCalledMethods.get(str);
+        Integer num = this.mCalledMethods.get(str);
         boolean z = false;
         int intValue = num != null ? num.intValue() : 0;
         if ((intValue & i) != 0) {

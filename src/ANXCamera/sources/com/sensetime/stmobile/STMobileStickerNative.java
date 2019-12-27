@@ -26,7 +26,6 @@ public class STMobileStickerNative {
         }
 
         public static RenderStatus fromStatus(int i) {
-            RenderStatus[] values;
             for (RenderStatus renderStatus : values()) {
                 if (renderStatus.getStatus() == i) {
                     return renderStatus;

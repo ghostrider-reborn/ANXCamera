@@ -1,7 +1,7 @@
 package android.support.v4.view.accessibility;
 
 import android.graphics.Rect;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 public class AccessibilityWindowInfoCompat {
@@ -18,14 +18,14 @@ public class AccessibilityWindowInfoCompat {
     }
 
     public static AccessibilityWindowInfoCompat obtain() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return wrapNonNullInstance(AccessibilityWindowInfo.obtain());
         }
         return null;
     }
 
     public static AccessibilityWindowInfoCompat obtain(AccessibilityWindowInfoCompat accessibilityWindowInfoCompat) {
-        if (VERSION.SDK_INT < 21 || accessibilityWindowInfoCompat == null) {
+        if (Build.VERSION.SDK_INT < 21 || accessibilityWindowInfoCompat == null) {
             return null;
         }
         return wrapNonNullInstance(AccessibilityWindowInfo.obtain((AccessibilityWindowInfo) accessibilityWindowInfoCompat.mInfo));
@@ -62,69 +62,69 @@ public class AccessibilityWindowInfoCompat {
     }
 
     public AccessibilityNodeInfoCompat getAnchor() {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return AccessibilityNodeInfoCompat.wrapNonNullInstance(((AccessibilityWindowInfo) this.mInfo).getAnchor());
         }
         return null;
     }
 
     public void getBoundsInScreen(Rect rect) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             ((AccessibilityWindowInfo) this.mInfo).getBoundsInScreen(rect);
         }
     }
 
     public AccessibilityWindowInfoCompat getChild(int i) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return wrapNonNullInstance(((AccessibilityWindowInfo) this.mInfo).getChild(i));
         }
         return null;
     }
 
     public int getChildCount() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).getChildCount();
         }
         return 0;
     }
 
     public int getId() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).getId();
         }
         return -1;
     }
 
     public int getLayer() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).getLayer();
         }
         return -1;
     }
 
     public AccessibilityWindowInfoCompat getParent() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return wrapNonNullInstance(((AccessibilityWindowInfo) this.mInfo).getParent());
         }
         return null;
     }
 
     public AccessibilityNodeInfoCompat getRoot() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return AccessibilityNodeInfoCompat.wrapNonNullInstance(((AccessibilityWindowInfo) this.mInfo).getRoot());
         }
         return null;
     }
 
     public CharSequence getTitle() {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             return ((AccessibilityWindowInfo) this.mInfo).getTitle();
         }
         return null;
     }
 
     public int getType() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).getType();
         }
         return -1;
@@ -139,28 +139,28 @@ public class AccessibilityWindowInfoCompat {
     }
 
     public boolean isAccessibilityFocused() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).isAccessibilityFocused();
         }
         return true;
     }
 
     public boolean isActive() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).isActive();
         }
         return true;
     }
 
     public boolean isFocused() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return ((AccessibilityWindowInfo) this.mInfo).isFocused();
         }
         return true;
     }
 
     public void recycle() {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             ((AccessibilityWindowInfo) this.mInfo).recycle();
         }
     }

@@ -3,12 +3,9 @@ package com.android.camera.fragment;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
@@ -16,11 +13,10 @@ import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.data.data.runing.ComponentRunningLighting;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ColorImageView;
 
-public class FragmentLighting extends BaseFragment implements OnClickListener {
+public class FragmentLighting extends BaseFragment implements View.OnClickListener {
     private ComponentRunningLighting mComponentRunningLighting;
     private int mCurrentIndex = 0;
     private int mHolderWidth;
@@ -30,7 +26,7 @@ public class FragmentLighting extends BaseFragment implements OnClickListener {
     private RecyclerView mRecyclerView;
     private int mTotalWidth;
 
-    private static class LightingAdapter extends Adapter<CommonRecyclerViewHolder> {
+    private static class LightingAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> {
         private int mBgAlpha = 255;
         private Drawable mBgNormal;
         private Drawable mBgSelected;
@@ -39,9 +35,9 @@ public class FragmentLighting extends BaseFragment implements OnClickListener {
         private int mCount;
         private int mCurrentMode;
         private int mMargin;
-        private OnClickListener mOnClickListener;
+        private View.OnClickListener mOnClickListener;
 
-        public LightingAdapter(Context context, int i, OnClickListener onClickListener, ComponentRunningLighting componentRunningLighting) {
+        public LightingAdapter(Context context, int i, View.OnClickListener onClickListener, ComponentRunningLighting componentRunningLighting) {
             this.mCurrentMode = i;
             this.mOnClickListener = onClickListener;
             this.mComponentRunningLighting = componentRunningLighting;
@@ -56,7 +52,7 @@ public class FragmentLighting extends BaseFragment implements OnClickListener {
             if (Util.isAccessible() || Util.isSetContentDesc()) {
                 this.mContent = new String[this.mCount];
                 for (int i = 0; i < this.mCount; i++) {
-                    this.mContent[i] = context.getString(((ComponentDataItem) this.mComponentRunningLighting.getItems().get(i)).mDisplayNameRes);
+                    this.mContent[i] = context.getString(this.mComponentRunningLighting.getItems().get(i).mDisplayNameRes);
                 }
             }
         }
@@ -66,11 +62,11 @@ public class FragmentLighting extends BaseFragment implements OnClickListener {
         }
 
         public void onBindViewHolder(CommonRecyclerViewHolder commonRecyclerViewHolder, int i) {
-            MarginLayoutParams marginLayoutParams = (MarginLayoutParams) commonRecyclerViewHolder.itemView.getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) commonRecyclerViewHolder.itemView.getLayoutParams();
             ColorImageView colorImageView = (ColorImageView) commonRecyclerViewHolder.getView(R.id.lighting_item_base);
             ColorImageView colorImageView2 = (ColorImageView) commonRecyclerViewHolder.getView(R.id.lighting_item_image);
             String componentValue = this.mComponentRunningLighting.getComponentValue(this.mCurrentMode);
-            ComponentDataItem componentDataItem = (ComponentDataItem) this.mComponentRunningLighting.getItems().get(i);
+            ComponentDataItem componentDataItem = this.mComponentRunningLighting.getItems().get(i);
             if (Util.isAccessible() || Util.isSetContentDesc()) {
                 colorImageView2.setContentDescription(this.mContent[i]);
             }
@@ -122,10 +118,10 @@ public class FragmentLighting extends BaseFragment implements OnClickListener {
     }
 
     private void onItemSelected(int i, boolean z) {
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
         if (configChanges != null) {
             String componentValue = this.mComponentRunningLighting.getComponentValue(this.mCurrentMode);
-            String str = ((ComponentDataItem) this.mComponentRunningLighting.getItems().get(i)).mValue;
+            String str = this.mComponentRunningLighting.getItems().get(i).mValue;
             if (!componentValue.equals(str)) {
                 this.mComponentRunningLighting.setComponentValue(this.mCurrentMode, str);
                 configChanges.setLighting(false, componentValue, str, true);
@@ -186,7 +182,7 @@ public class FragmentLighting extends BaseFragment implements OnClickListener {
 
     public void onClick(View view) {
         if (isEnableClick()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction == null || !cameraAction.isDoingAction()) {
                 onItemSelected(((Integer) view.getTag()).intValue(), true);
             }

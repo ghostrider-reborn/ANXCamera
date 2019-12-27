@@ -2,7 +2,6 @@ package com.android.camera2.compat;
 
 import android.annotation.TargetApi;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import com.android.camera.HybridZoomingSystem;
 import com.android.camera.log.Log;
 import com.android.camera2.vendortag.CaptureRequestVendorTags;
@@ -13,61 +12,58 @@ class MiCameraCompatQcomImpl extends MiCameraCompatBaseImpl {
     MiCameraCompatQcomImpl() {
     }
 
-    public void applyContrast(Builder builder, int i) {
+    public void applyContrast(CaptureRequest.Builder builder, int i) {
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.CONTRAST_LEVEL, Integer.valueOf(i + 1));
     }
 
-    public void applyCustomWB(Builder builder, int i) {
+    public void applyCustomWB(CaptureRequest.Builder builder, int i) {
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.USE_CUSTOM_WB, Integer.valueOf(i));
     }
 
-    public void applyExposureMeteringMode(Builder builder, int i) {
+    public void applyExposureMeteringMode(CaptureRequest.Builder builder, int i) {
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.EXPOSURE_METERING, Integer.valueOf(i));
     }
 
-    public void applyExposureTime(Builder builder, long j) {
+    public void applyExposureTime(CaptureRequest.Builder builder, long j) {
         Long l = (Long) VendorTagHelper.getValue(builder, CaptureRequestVendorTags.ISO_EXP);
         if ((l == null || l.longValue() == 0) && j > 0) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.SELECT_PRIORITY, Integer.valueOf(1));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.SELECT_PRIORITY, 1);
             if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
                 VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(j));
             }
-            builder.set(CaptureRequest.SENSOR_SENSITIVITY, null);
+            builder.set(CaptureRequest.SENSOR_SENSITIVITY, (Object) null);
         }
         super.applyExposureTime(builder, j);
     }
 
-    public void applyHdrBracketMode(Builder builder, byte b2) {
+    public void applyHdrBracketMode(CaptureRequest.Builder builder, byte b2) {
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.HDR_BRACKET_MODE, Byte.valueOf(b2));
     }
 
-    public void applyISO(Builder builder, int i) {
-        VendorTagHelper.setValue(builder, CaptureRequestVendorTags.SELECT_PRIORITY, Integer.valueOf(0));
+    public void applyISO(CaptureRequest.Builder builder, int i) {
+        VendorTagHelper.setValue(builder, CaptureRequestVendorTags.SELECT_PRIORITY, 0);
         if (i == 0) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(0));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 0L);
         } else if (i == 100) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(2));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 2L);
         } else if (i == 200) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(3));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 3L);
         } else if (i == 400) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(4));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 4L);
         } else if (i == 800) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(5));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 5L);
         } else if (i == 1600) {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(6));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 6L);
         } else if (i != 3200) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("applyISO(): set manual absolute iso value to ");
-            sb.append(i);
-            Log.d("MiCameraCompat", sb.toString());
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(8));
+            Log.d("MiCameraCompat", "applyISO(): set manual absolute iso value to " + i);
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 8L);
             VendorTagHelper.setValue(builder, CaptureRequestVendorTags.USE_ISO_VALUE, Integer.valueOf(i));
         } else {
-            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, Long.valueOf(7));
+            VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ISO_EXP, 7L);
         }
     }
 
-    public void applySaturation(Builder builder, int i) {
+    public void applySaturation(CaptureRequest.Builder builder, int i) {
         int i2 = 0;
         switch (i) {
             case 1:
@@ -92,7 +88,7 @@ class MiCameraCompatQcomImpl extends MiCameraCompatBaseImpl {
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.SATURATION, Integer.valueOf(i2));
     }
 
-    public void applySharpness(Builder builder, int i) {
+    public void applySharpness(CaptureRequest.Builder builder, int i) {
         int i2 = 0;
         switch (i) {
             case 1:
@@ -117,15 +113,12 @@ class MiCameraCompatQcomImpl extends MiCameraCompatBaseImpl {
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.SHARPNESS_CONTROL, Integer.valueOf(i2));
     }
 
-    public void applySmoothTransition(Builder builder, boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("applySmoothTransition: ");
-        sb.append(z);
-        Log.d("MiCameraCompat", sb.toString());
+    public void applySmoothTransition(CaptureRequest.Builder builder, boolean z) {
+        Log.d("MiCameraCompat", "applySmoothTransition: " + z);
         VendorTagHelper.setValue(builder, CaptureRequestVendorTags.ST_ENABLED, Boolean.valueOf(z));
     }
 
-    public void applyVideoStreamState(Builder builder, boolean z) {
+    public void applyVideoStreamState(CaptureRequest.Builder builder, boolean z) {
         StringBuilder sb = new StringBuilder();
         sb.append("recordingEndOfStream: ");
         sb.append(z ? "0x0" : "0x1");

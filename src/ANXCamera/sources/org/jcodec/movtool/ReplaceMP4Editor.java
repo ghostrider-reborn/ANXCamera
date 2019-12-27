@@ -3,11 +3,10 @@ package org.jcodec.movtool;
 import java.io.File;
 import java.io.IOException;
 import org.jcodec.containers.mp4.MP4Util;
-import org.jcodec.containers.mp4.MP4Util.Movie;
 
 public class ReplaceMP4Editor {
     public void copy(File file, File file2, MP4Edit mP4Edit) throws IOException {
-        Movie createRefFullMovieFromFile = MP4Util.createRefFullMovieFromFile(file);
+        MP4Util.Movie createRefFullMovieFromFile = MP4Util.createRefFullMovieFromFile(file);
         mP4Edit.apply(createRefFullMovieFromFile.getMoov());
         new Flattern().flattern(createRefFullMovieFromFile, file2);
     }
@@ -20,10 +19,7 @@ public class ReplaceMP4Editor {
 
     public void replace(File file, MP4Edit mP4Edit) throws IOException {
         File parentFile = file.getParentFile();
-        StringBuilder sb = new StringBuilder();
-        sb.append(".");
-        sb.append(file.getName());
-        File file2 = new File(parentFile, sb.toString());
+        File file2 = new File(parentFile, "." + file.getName());
         copy(file, file2, mP4Edit);
         file2.renameTo(file);
     }

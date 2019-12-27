@@ -2,10 +2,10 @@ package com.android.camera.ui.vv;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import java.util.List;
 
 public class VVProgressView extends View {
@@ -38,7 +38,7 @@ public class VVProgressView extends View {
         super.onDetachedFromWindow();
         VVProgressDrawable vVProgressDrawable = this.progressDrawable;
         if (vVProgressDrawable != null) {
-            vVProgressDrawable.setCallback(null);
+            vVProgressDrawable.setCallback((Drawable.Callback) null);
         }
     }
 
@@ -53,12 +53,12 @@ public class VVProgressView extends View {
 
     /* access modifiers changed from: protected */
     public void onMeasure(int i, int i2) {
-        if (MeasureSpec.getMode(i) != 1073741824) {
+        if (View.MeasureSpec.getMode(i) != 1073741824) {
             super.onMeasure(i, i2);
             return;
         }
-        this.mWidth = MeasureSpec.getSize(i);
-        this.mHeight = MeasureSpec.getSize(i2);
+        this.mWidth = View.MeasureSpec.getSize(i);
+        this.mHeight = View.MeasureSpec.getSize(i2);
         setMeasuredDimension(this.mWidth, this.mHeight);
         VVProgressDrawable vVProgressDrawable = this.progressDrawable;
         if (vVProgressDrawable != null) {

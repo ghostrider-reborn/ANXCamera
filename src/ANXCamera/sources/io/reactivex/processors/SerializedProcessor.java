@@ -16,7 +16,7 @@ final class SerializedProcessor<T> extends FlowableProcessor<T> {
         this.actual = flowableProcessor;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void emitLoop() {
         AppendOnlyLinkedArrayList<Object> appendOnlyLinkedArrayList;
         while (true) {
@@ -155,10 +155,10 @@ final class SerializedProcessor<T> extends FlowableProcessor<T> {
         }
         if (z) {
             subscription.cancel();
-        } else {
-            this.actual.onSubscribe(subscription);
-            emitLoop();
+            return;
         }
+        this.actual.onSubscribe(subscription);
+        emitLoop();
     }
 
     /* access modifiers changed from: protected */

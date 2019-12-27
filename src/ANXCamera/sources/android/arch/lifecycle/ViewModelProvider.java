@@ -28,32 +28,19 @@ public class ViewModelProvider {
 
         @NonNull
         public <T extends ViewModel> T create(@NonNull Class<T> cls) {
-            String str = "Cannot create an instance of ";
             if (!AndroidViewModel.class.isAssignableFrom(cls)) {
                 return super.create(cls);
             }
             try {
                 return (ViewModel) cls.getConstructor(new Class[]{Application.class}).newInstance(new Object[]{this.mApplication});
             } catch (NoSuchMethodException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(cls);
-                throw new RuntimeException(sb.toString(), e2);
+                throw new RuntimeException("Cannot create an instance of " + cls, e2);
             } catch (IllegalAccessException e3) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(cls);
-                throw new RuntimeException(sb2.toString(), e3);
+                throw new RuntimeException("Cannot create an instance of " + cls, e3);
             } catch (InstantiationException e4) {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str);
-                sb3.append(cls);
-                throw new RuntimeException(sb3.toString(), e4);
+                throw new RuntimeException("Cannot create an instance of " + cls, e4);
             } catch (InvocationTargetException e5) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str);
-                sb4.append(cls);
-                throw new RuntimeException(sb4.toString(), e5);
+                throw new RuntimeException("Cannot create an instance of " + cls, e5);
             }
         }
     }
@@ -66,19 +53,12 @@ public class ViewModelProvider {
     public static class NewInstanceFactory implements Factory {
         @NonNull
         public <T extends ViewModel> T create(@NonNull Class<T> cls) {
-            String str = "Cannot create an instance of ";
             try {
                 return (ViewModel) cls.newInstance();
             } catch (InstantiationException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(cls);
-                throw new RuntimeException(sb.toString(), e2);
+                throw new RuntimeException("Cannot create an instance of " + cls, e2);
             } catch (IllegalAccessException e3) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(cls);
-                throw new RuntimeException(sb2.toString(), e3);
+                throw new RuntimeException("Cannot create an instance of " + cls, e3);
             }
         }
     }
@@ -97,10 +77,7 @@ public class ViewModelProvider {
     public <T extends ViewModel> T get(@NonNull Class<T> cls) {
         String canonicalName = cls.getCanonicalName();
         if (canonicalName != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("android.arch.lifecycle.ViewModelProvider.DefaultKey:");
-            sb.append(canonicalName);
-            return get(sb.toString(), cls);
+            return get("android.arch.lifecycle.ViewModelProvider.DefaultKey:" + canonicalName, cls);
         }
         throw new IllegalArgumentException("Local and anonymous classes can not be ViewModels");
     }

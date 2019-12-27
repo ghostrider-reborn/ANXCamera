@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import com.ss.android.ugc.effectmanager.common.EffectConstants;
 import com.ss.android.ugc.effectmanager.common.WeakHandler;
-import com.ss.android.ugc.effectmanager.common.WeakHandler.IHandler;
 import com.ss.android.ugc.effectmanager.common.listener.ICache;
 import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.common.task.NormalTask;
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-public class DownloadEffectListTask extends NormalTask implements IHandler {
+public class DownloadEffectListTask extends NormalTask implements WeakHandler.IHandler {
     private List<Effect> downloadedList;
     private Queue<Effect> effectList;
     private ICache mCache;
@@ -40,17 +39,12 @@ public class DownloadEffectListTask extends NormalTask implements IHandler {
     /* access modifiers changed from: private */
     public void downloadEffect(Effect effect) {
         if (TextUtils.isEmpty(effect.getZipPath()) || TextUtils.isEmpty(effect.getUnzipPath())) {
+            effect.setZipPath(this.mConfiguration.getEffectDir() + File.separator + effect.getId() + ".zip");
             StringBuilder sb = new StringBuilder();
             sb.append(this.mConfiguration.getEffectDir());
             sb.append(File.separator);
             sb.append(effect.getId());
-            sb.append(".zip");
-            effect.setZipPath(sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(this.mConfiguration.getEffectDir());
-            sb2.append(File.separator);
-            sb2.append(effect.getId());
-            effect.setUnzipPath(sb2.toString());
+            effect.setUnzipPath(sb.toString());
         }
         if (!this.mCache.has(effect.getId())) {
             try {
@@ -59,14 +53,14 @@ public class DownloadEffectListTask extends NormalTask implements IHandler {
                 throw e2;
             }
         } else {
-            EffectTaskResult effectTaskResult = new EffectTaskResult(effect, null);
+            EffectTaskResult effectTaskResult = new EffectTaskResult(effect, (ExceptionResult) null);
             Message obtainMessage = this.mChildrenTaskHandler.obtainMessage(15);
             obtainMessage.obj = effectTaskResult;
             obtainMessage.sendToTarget();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void enqueueEffect(final Effect effect) {
         this.mChildrenTaskHandler.post(new Runnable() {
             public void run() {
@@ -83,9 +77,9 @@ public class DownloadEffectListTask extends NormalTask implements IHandler {
         }
         try {
             this.mChildrenTaskHandler = new WeakHandler(myLooper, this);
-            Effect effect = (Effect) this.effectList.poll();
-            if (effect != null) {
-                enqueueEffect(effect);
+            Effect poll = this.effectList.poll();
+            if (poll != null) {
+                enqueueEffect(poll);
                 Looper.loop();
             }
         } catch (Throwable th) {
@@ -107,10 +101,10 @@ public class DownloadEffectListTask extends NormalTask implements IHandler {
             }
             this.downloadedList.add(effect);
             if (!this.effectList.isEmpty()) {
-                enqueueEffect((Effect) this.effectList.poll());
+                enqueueEffect(this.effectList.poll());
                 return;
             }
-            sendMessage(17, new EffectListTaskResult(this.downloadedList, null));
+            sendMessage(17, new EffectListTaskResult(this.downloadedList, (ExceptionResult) null));
             Looper.myLooper().quit();
         }
     }

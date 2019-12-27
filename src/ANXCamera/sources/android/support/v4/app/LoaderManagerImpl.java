@@ -5,16 +5,14 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
-import android.arch.lifecycle.ViewModelProvider.Factory;
 import android.arch.lifecycle.ViewModelStore;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.content.Loader.OnLoadCompleteListener;
 import android.support.v4.util.DebugUtils;
 import android.support.v4.util.SparseArrayCompat;
 import android.util.Log;
@@ -30,7 +28,7 @@ class LoaderManagerImpl extends LoaderManager {
     @NonNull
     private final LoaderViewModel mLoaderViewModel;
 
-    public static class LoaderInfo<D> extends MutableLiveData<D> implements OnLoadCompleteListener<D> {
+    public static class LoaderInfo<D> extends MutableLiveData<D> implements Loader.OnLoadCompleteListener<D> {
         @Nullable
         private final Bundle mArgs;
         private final int mId;
@@ -48,14 +46,11 @@ class LoaderManagerImpl extends LoaderManager {
             this.mLoader.registerListener(i, this);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @MainThread
         public Loader<D> destroy(boolean z) {
             if (LoaderManagerImpl.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("  Destroying: ");
-                sb.append(this);
-                Log.v(LoaderManagerImpl.TAG, sb.toString());
+                Log.v(LoaderManagerImpl.TAG, "  Destroying: " + this);
             }
             this.mLoader.cancelLoad();
             this.mLoader.abandon();
@@ -84,20 +79,13 @@ class LoaderManagerImpl extends LoaderManager {
             printWriter.print("mLoader=");
             printWriter.println(this.mLoader);
             Loader<D> loader = this.mLoader;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            String str2 = "  ";
-            sb.append(str2);
-            loader.dump(sb.toString(), fileDescriptor, printWriter, strArr);
+            loader.dump(str + "  ", fileDescriptor, printWriter, strArr);
             if (this.mObserver != null) {
                 printWriter.print(str);
                 printWriter.print("mCallbacks=");
                 printWriter.println(this.mObserver);
                 LoaderObserver<D> loaderObserver = this.mObserver;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(str2);
-                loaderObserver.dump(sb2.toString(), printWriter);
+                loaderObserver.dump(str + "  ", printWriter);
             }
             printWriter.print(str);
             printWriter.print("mData=");
@@ -107,26 +95,22 @@ class LoaderManagerImpl extends LoaderManager {
             printWriter.println(hasActiveObservers());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public Loader<D> getLoader() {
             return this.mLoader;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isCallbackWaitingForData() {
-            boolean z = false;
             if (!hasActiveObservers()) {
                 return false;
             }
             LoaderObserver<D> loaderObserver = this.mObserver;
-            if (loaderObserver != null && !loaderObserver.hasDeliveredData()) {
-                z = true;
-            }
-            return z;
+            return loaderObserver != null && !loaderObserver.hasDeliveredData();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void markForRedelivery() {
             LifecycleOwner lifecycleOwner = this.mLifecycleOwner;
             LoaderObserver<D> loaderObserver = this.mObserver;
@@ -139,10 +123,7 @@ class LoaderManagerImpl extends LoaderManager {
         /* access modifiers changed from: protected */
         public void onActive() {
             if (LoaderManagerImpl.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("  Starting: ");
-                sb.append(this);
-                Log.v(LoaderManagerImpl.TAG, sb.toString());
+                Log.v(LoaderManagerImpl.TAG, "  Starting: " + this);
             }
             this.mLoader.startLoading();
         }
@@ -150,29 +131,21 @@ class LoaderManagerImpl extends LoaderManager {
         /* access modifiers changed from: protected */
         public void onInactive() {
             if (LoaderManagerImpl.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("  Stopping: ");
-                sb.append(this);
-                Log.v(LoaderManagerImpl.TAG, sb.toString());
+                Log.v(LoaderManagerImpl.TAG, "  Stopping: " + this);
             }
             this.mLoader.stopLoading();
         }
 
         public void onLoadComplete(@NonNull Loader<D> loader, @Nullable D d2) {
-            boolean z = LoaderManagerImpl.DEBUG;
-            String str = LoaderManagerImpl.TAG;
-            if (z) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onLoadComplete: ");
-                sb.append(this);
-                Log.v(str, sb.toString());
+            if (LoaderManagerImpl.DEBUG) {
+                Log.v(LoaderManagerImpl.TAG, "onLoadComplete: " + this);
             }
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 setValue(d2);
                 return;
             }
             if (LoaderManagerImpl.DEBUG) {
-                Log.w(str, "onLoadComplete was incorrectly called on a background thread");
+                Log.w(LoaderManagerImpl.TAG, "onLoadComplete was incorrectly called on a background thread");
             }
             postValue(d2);
         }
@@ -183,10 +156,10 @@ class LoaderManagerImpl extends LoaderManager {
             this.mObserver = null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @MainThread
         @NonNull
-        public Loader<D> setCallback(@NonNull LifecycleOwner lifecycleOwner, @NonNull LoaderCallbacks<D> loaderCallbacks) {
+        public Loader<D> setCallback(@NonNull LifecycleOwner lifecycleOwner, @NonNull LoaderManager.LoaderCallbacks<D> loaderCallbacks) {
             LoaderObserver<D> loaderObserver = new LoaderObserver<>(this.mLoader, loaderCallbacks);
             observe(lifecycleOwner, loaderObserver);
             LoaderObserver<D> loaderObserver2 = this.mObserver;
@@ -222,12 +195,12 @@ class LoaderManagerImpl extends LoaderManager {
 
     static class LoaderObserver<D> implements Observer<D> {
         @NonNull
-        private final LoaderCallbacks<D> mCallback;
+        private final LoaderManager.LoaderCallbacks<D> mCallback;
         private boolean mDeliveredData = false;
         @NonNull
         private final Loader<D> mLoader;
 
-        LoaderObserver(@NonNull Loader<D> loader, @NonNull LoaderCallbacks<D> loaderCallbacks) {
+        LoaderObserver(@NonNull Loader<D> loader, @NonNull LoaderManager.LoaderCallbacks<D> loaderCallbacks) {
             this.mLoader = loader;
             this.mCallback = loaderCallbacks;
         }
@@ -238,33 +211,25 @@ class LoaderManagerImpl extends LoaderManager {
             printWriter.println(this.mDeliveredData);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasDeliveredData() {
             return this.mDeliveredData;
         }
 
         public void onChanged(@Nullable D d2) {
             if (LoaderManagerImpl.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("  onLoadFinished in ");
-                sb.append(this.mLoader);
-                sb.append(": ");
-                sb.append(this.mLoader.dataToString(d2));
-                Log.v(LoaderManagerImpl.TAG, sb.toString());
+                Log.v(LoaderManagerImpl.TAG, "  onLoadFinished in " + this.mLoader + ": " + this.mLoader.dataToString(d2));
             }
             this.mCallback.onLoadFinished(this.mLoader, d2);
             this.mDeliveredData = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @MainThread
         public void reset() {
             if (this.mDeliveredData) {
                 if (LoaderManagerImpl.DEBUG) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("  Resetting: ");
-                    sb.append(this.mLoader);
-                    Log.v(LoaderManagerImpl.TAG, sb.toString());
+                    Log.v(LoaderManagerImpl.TAG, "  Resetting: " + this.mLoader);
                 }
                 this.mCallback.onLoaderReset(this.mLoader);
             }
@@ -276,7 +241,7 @@ class LoaderManagerImpl extends LoaderManager {
     }
 
     static class LoaderViewModel extends ViewModel {
-        private static final Factory FACTORY = new Factory() {
+        private static final ViewModelProvider.Factory FACTORY = new ViewModelProvider.Factory() {
             @NonNull
             public <T extends ViewModel> T create(@NonNull Class<T> cls) {
                 return new LoaderViewModel();
@@ -297,53 +262,50 @@ class LoaderManagerImpl extends LoaderManager {
             if (this.mLoaders.size() > 0) {
                 printWriter.print(str);
                 printWriter.println("Loaders:");
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append("    ");
-                String sb2 = sb.toString();
+                String str2 = str + "    ";
                 for (int i = 0; i < this.mLoaders.size(); i++) {
-                    LoaderInfo loaderInfo = (LoaderInfo) this.mLoaders.valueAt(i);
+                    LoaderInfo valueAt = this.mLoaders.valueAt(i);
                     printWriter.print(str);
                     printWriter.print("  #");
                     printWriter.print(this.mLoaders.keyAt(i));
                     printWriter.print(": ");
-                    printWriter.println(loaderInfo.toString());
-                    loaderInfo.dump(sb2, fileDescriptor, printWriter, strArr);
+                    printWriter.println(valueAt.toString());
+                    valueAt.dump(str2, fileDescriptor, printWriter, strArr);
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void finishCreatingLoader() {
             this.mCreatingLoader = false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public <D> LoaderInfo<D> getLoader(int i) {
-            return (LoaderInfo) this.mLoaders.get(i);
+            return this.mLoaders.get(i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasRunningLoaders() {
             int size = this.mLoaders.size();
             for (int i = 0; i < size; i++) {
-                if (((LoaderInfo) this.mLoaders.valueAt(i)).isCallbackWaitingForData()) {
+                if (this.mLoaders.valueAt(i).isCallbackWaitingForData()) {
                     return true;
                 }
             }
             return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isCreatingLoader() {
             return this.mCreatingLoader;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void markForRedelivery() {
             int size = this.mLoaders.size();
             for (int i = 0; i < size; i++) {
-                ((LoaderInfo) this.mLoaders.valueAt(i)).markForRedelivery();
+                this.mLoaders.valueAt(i).markForRedelivery();
             }
         }
 
@@ -352,22 +314,22 @@ class LoaderManagerImpl extends LoaderManager {
             super.onCleared();
             int size = this.mLoaders.size();
             for (int i = 0; i < size; i++) {
-                ((LoaderInfo) this.mLoaders.valueAt(i)).destroy(true);
+                this.mLoaders.valueAt(i).destroy(true);
             }
             this.mLoaders.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void putLoader(int i, @NonNull LoaderInfo loaderInfo) {
             this.mLoaders.put(i, loaderInfo);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void removeLoader(int i) {
             this.mLoaders.remove(i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void startCreatingLoader() {
             this.mCreatingLoader = true;
         }
@@ -381,26 +343,19 @@ class LoaderManagerImpl extends LoaderManager {
     /* JADX INFO: finally extract failed */
     @MainThread
     @NonNull
-    private <D> Loader<D> createAndInstallLoader(int i, @Nullable Bundle bundle, @NonNull LoaderCallbacks<D> loaderCallbacks, @Nullable Loader<D> loader) {
+    private <D> Loader<D> createAndInstallLoader(int i, @Nullable Bundle bundle, @NonNull LoaderManager.LoaderCallbacks<D> loaderCallbacks, @Nullable Loader<D> loader) {
         try {
             this.mLoaderViewModel.startCreatingLoader();
-            Loader onCreateLoader = loaderCallbacks.onCreateLoader(i, bundle);
+            Loader<D> onCreateLoader = loaderCallbacks.onCreateLoader(i, bundle);
             if (onCreateLoader != null) {
                 if (onCreateLoader.getClass().isMemberClass()) {
                     if (!Modifier.isStatic(onCreateLoader.getClass().getModifiers())) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Object returned from onCreateLoader must not be a non-static inner member class: ");
-                        sb.append(onCreateLoader);
-                        throw new IllegalArgumentException(sb.toString());
+                        throw new IllegalArgumentException("Object returned from onCreateLoader must not be a non-static inner member class: " + onCreateLoader);
                     }
                 }
                 LoaderInfo loaderInfo = new LoaderInfo(i, bundle, onCreateLoader, loader);
                 if (DEBUG) {
-                    String str = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("  Created new loader ");
-                    sb2.append(loaderInfo);
-                    Log.v(str, sb2.toString());
+                    Log.v(TAG, "  Created new loader " + loaderInfo);
                 }
                 this.mLoaderViewModel.putLoader(i, loaderInfo);
                 this.mLoaderViewModel.finishCreatingLoader();
@@ -419,12 +374,7 @@ class LoaderManagerImpl extends LoaderManager {
             throw new IllegalStateException("Called while creating a loader");
         } else if (Looper.getMainLooper() == Looper.myLooper()) {
             if (DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("destroyLoader in ");
-                sb.append(this);
-                sb.append(" of ");
-                sb.append(i);
-                Log.v(TAG, sb.toString());
+                Log.v(TAG, "destroyLoader in " + this + " of " + i);
             }
             LoaderInfo loader = this.mLoaderViewModel.getLoader(i);
             if (loader != null) {
@@ -459,29 +409,19 @@ class LoaderManagerImpl extends LoaderManager {
 
     @MainThread
     @NonNull
-    public <D> Loader<D> initLoader(int i, @Nullable Bundle bundle, @NonNull LoaderCallbacks<D> loaderCallbacks) {
+    public <D> Loader<D> initLoader(int i, @Nullable Bundle bundle, @NonNull LoaderManager.LoaderCallbacks<D> loaderCallbacks) {
         if (this.mLoaderViewModel.isCreatingLoader()) {
             throw new IllegalStateException("Called while creating a loader");
         } else if (Looper.getMainLooper() == Looper.myLooper()) {
             LoaderInfo loader = this.mLoaderViewModel.getLoader(i);
-            boolean z = DEBUG;
-            String str = TAG;
-            if (z) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("initLoader in ");
-                sb.append(this);
-                sb.append(": args=");
-                sb.append(bundle);
-                Log.v(str, sb.toString());
+            if (DEBUG) {
+                Log.v(TAG, "initLoader in " + this + ": args=" + bundle);
             }
             if (loader == null) {
-                return createAndInstallLoader(i, bundle, loaderCallbacks, null);
+                return createAndInstallLoader(i, bundle, loaderCallbacks, (Loader) null);
             }
             if (DEBUG) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("  Re-using existing loader ");
-                sb2.append(loader);
-                Log.v(str, sb2.toString());
+                Log.v(TAG, "  Re-using existing loader " + loader);
             }
             return loader.setCallback(this.mLifecycleOwner, loaderCallbacks);
         } else {
@@ -495,17 +435,12 @@ class LoaderManagerImpl extends LoaderManager {
 
     @MainThread
     @NonNull
-    public <D> Loader<D> restartLoader(int i, @Nullable Bundle bundle, @NonNull LoaderCallbacks<D> loaderCallbacks) {
+    public <D> Loader<D> restartLoader(int i, @Nullable Bundle bundle, @NonNull LoaderManager.LoaderCallbacks<D> loaderCallbacks) {
         if (this.mLoaderViewModel.isCreatingLoader()) {
             throw new IllegalStateException("Called while creating a loader");
         } else if (Looper.getMainLooper() == Looper.myLooper()) {
             if (DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("restartLoader in ");
-                sb.append(this);
-                sb.append(": args=");
-                sb.append(bundle);
-                Log.v(TAG, sb.toString());
+                Log.v(TAG, "restartLoader in " + this + ": args=" + bundle);
             }
             LoaderInfo loader = this.mLoaderViewModel.getLoader(i);
             Loader loader2 = null;

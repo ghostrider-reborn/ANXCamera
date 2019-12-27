@@ -8,17 +8,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Images;
-import android.provider.MediaStore.Images.Media;
-import android.provider.MediaStore.Video;
-import android.provider.MediaStore.Video.Thumbnails;
+import android.provider.MediaStore;
 import com.android.camera.storage.Storage;
 import com.ss.android.ugc.effectmanager.common.EffectConstants;
 import java.io.File;
@@ -31,22 +26,22 @@ import java.util.List;
 public class h {
     private static final String[] D = {"max(_id) as newId", "_data", "_size", "datetaken", a.f192e, "bucket_id", "mime_type", "date_modified", "media_type", "resolution", "tags", "width", "height", "orientation", "duration"};
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     public static final String f182a = e(t);
 
-    /* renamed from: b reason: collision with root package name */
-    public static final Uri f183b = Files.getContentUri("external");
+    /* renamed from: b  reason: collision with root package name */
+    public static final Uri f183b = MediaStore.Files.getContentUri("external");
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     public static final int f184c = 1;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     public static final int f185d = 3;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     public static final int f186e = 0;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     public static final int f187f = 1;
     public static final int g = 2;
     public static final int h = 3;
@@ -61,7 +56,7 @@ public class h {
     public static final int q = 12;
     public static final int r = 13;
     public static final int s = 14;
-    private static String t;
+    private static String t = (Environment.getExternalStorageDirectory().toString() + "/DCIM/WideSelfie/");
     private static h u = null;
     private final String A = "video/mp4";
     private final String[] B = {"_id", "bucket_id", "bucket_display_name", "_data", "_display_name", "width", "height", "_size", "mime_type", "datetaken", "date_modified", "date_added", "latitude", "longitude", "duration", "resolution"};
@@ -75,22 +70,22 @@ public class h {
     /* compiled from: MediaManager */
     private static final class a {
 
-        /* renamed from: a reason: collision with root package name */
+        /* renamed from: a  reason: collision with root package name */
         public static final String f188a = "_id";
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         public static final String f189b = "_data";
 
-        /* renamed from: c reason: collision with root package name */
+        /* renamed from: c  reason: collision with root package name */
         public static final String f190c = "_size";
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         public static final String f191d = "datetaken";
 
-        /* renamed from: e reason: collision with root package name */
-        public static final String f192e;
+        /* renamed from: e  reason: collision with root package name */
+        public static final String f192e = ("case media_type when 1 then \"" + MediaStore.Images.Media.EXTERNAL_CONTENT_URI + "\" else \"" + MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "\" end");
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         public static final String f193f = "bucket_id";
         public static final String g = "mime_type";
         public static final String h = "date_modified";
@@ -106,16 +101,6 @@ public class h {
         public static final String r = "title";
         public static final String s = "_display_name";
 
-        static {
-            StringBuilder sb = new StringBuilder();
-            sb.append("case media_type when 1 then \"");
-            sb.append(Media.EXTERNAL_CONTENT_URI);
-            sb.append("\" else \"");
-            sb.append(Video.Media.EXTERNAL_CONTENT_URI);
-            sb.append("\" end");
-            f192e = sb.toString();
-        }
-
         private a() {
         }
     }
@@ -124,27 +109,27 @@ public class h {
     public static class b {
         /* access modifiers changed from: private */
 
-        /* renamed from: a reason: collision with root package name */
+        /* renamed from: a  reason: collision with root package name */
         public boolean f194a;
         /* access modifiers changed from: private */
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         public Uri f195b;
         /* access modifiers changed from: private */
 
-        /* renamed from: c reason: collision with root package name */
+        /* renamed from: c  reason: collision with root package name */
         public long f196c;
         /* access modifiers changed from: private */
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         public long f197d;
         /* access modifiers changed from: private */
 
-        /* renamed from: e reason: collision with root package name */
+        /* renamed from: e  reason: collision with root package name */
         public String f198e;
         /* access modifiers changed from: private */
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         public String f199f;
         /* access modifiers changed from: private */
         public String g;
@@ -174,13 +159,6 @@ public class h {
         public String s;
     }
 
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().toString());
-        sb.append("/DCIM/WideSelfie/");
-        t = sb.toString();
-    }
-
     private h(Context context) {
         this.v = context;
         this.w = this.v.getContentResolver();
@@ -201,58 +179,44 @@ public class h {
             return null;
         }
         b bVar = new b();
-        bVar.f194a = z3;
-        String str = "date_added";
-        String str2 = "date_modified";
-        String str3 = "datetaken";
-        String str4 = "mime_type";
-        String str5 = "_size";
-        String str6 = "height";
-        String str7 = "width";
-        String str8 = "_display_name";
-        String str9 = "_data";
-        String str10 = "bucket_display_name";
-        String str11 = "longitude";
-        String str12 = "bucket_id";
-        String str13 = "latitude";
-        String str14 = "_id";
+        boolean unused = bVar.f194a = z3;
+        Object obj = "longitude";
+        Object obj2 = "latitude";
         if (z3) {
-            String str15 = str;
-            bVar.f196c = cursor2.getLong(e.b(this.B, str14));
-            bVar.f195b = ContentUris.withAppendedId(Video.Media.EXTERNAL_CONTENT_URI, bVar.f196c);
-            bVar.f197d = (long) cursor2.getInt(e.b(this.B, str12));
-            bVar.f198e = cursor2.getString(e.b(this.B, str10));
-            bVar.f199f = cursor2.getString(e.b(this.B, str9));
-            bVar.g = cursor2.getString(e.b(this.B, str8));
-            bVar.h = cursor2.getInt(e.b(this.B, str7));
-            bVar.i = cursor2.getInt(e.b(this.B, str6));
-            bVar.j = cursor2.getLong(e.b(this.B, str5));
-            bVar.k = cursor2.getString(e.b(this.B, str4));
-            bVar.l = cursor2.getString(e.b(this.B, str3));
-            bVar.m = cursor2.getString(e.b(this.B, str2));
-            bVar.n = cursor2.getString(e.b(this.B, str15));
-            bVar.o = cursor2.getDouble(e.b(this.B, str13));
-            bVar.p = cursor2.getDouble(e.b(this.B, str11));
-            bVar.r = cursor2.getLong(e.b(this.B, "duration"));
-            bVar.s = cursor2.getString(e.b(this.B, "resolution"));
+            long unused2 = bVar.f196c = cursor2.getLong(e.b(this.B, "_id"));
+            Uri unused3 = bVar.f195b = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, bVar.f196c);
+            long unused4 = bVar.f197d = (long) cursor2.getInt(e.b(this.B, "bucket_id"));
+            String unused5 = bVar.f198e = cursor2.getString(e.b(this.B, "bucket_display_name"));
+            String unused6 = bVar.f199f = cursor2.getString(e.b(this.B, "_data"));
+            String unused7 = bVar.g = cursor2.getString(e.b(this.B, "_display_name"));
+            int unused8 = bVar.h = cursor2.getInt(e.b(this.B, "width"));
+            int unused9 = bVar.i = cursor2.getInt(e.b(this.B, "height"));
+            long unused10 = bVar.j = cursor2.getLong(e.b(this.B, "_size"));
+            String unused11 = bVar.k = cursor2.getString(e.b(this.B, "mime_type"));
+            String unused12 = bVar.l = cursor2.getString(e.b(this.B, "datetaken"));
+            String unused13 = bVar.m = cursor2.getString(e.b(this.B, "date_modified"));
+            String unused14 = bVar.n = cursor2.getString(e.b(this.B, "date_added"));
+            double unused15 = bVar.o = cursor2.getDouble(e.b(this.B, obj2));
+            double unused16 = bVar.p = cursor2.getDouble(e.b(this.B, obj));
+            long unused17 = bVar.r = cursor2.getLong(e.b(this.B, "duration"));
+            String unused18 = bVar.s = cursor2.getString(e.b(this.B, "resolution"));
         } else {
-            String str16 = str;
-            bVar.f196c = cursor2.getLong(e.b(this.C, str14));
-            bVar.f195b = ContentUris.withAppendedId(Media.EXTERNAL_CONTENT_URI, bVar.f196c);
-            bVar.f197d = (long) cursor2.getInt(e.b(this.C, str12));
-            bVar.f198e = cursor2.getString(e.b(this.C, str10));
-            bVar.f199f = cursor2.getString(e.b(this.C, str9));
-            bVar.g = cursor2.getString(e.b(this.C, str8));
-            bVar.h = cursor2.getInt(e.b(this.C, str7));
-            bVar.i = cursor2.getInt(e.b(this.C, str6));
-            bVar.j = cursor2.getLong(e.b(this.C, str5));
-            bVar.k = cursor2.getString(e.b(this.C, str4));
-            bVar.l = cursor2.getString(e.b(this.C, str3));
-            bVar.m = cursor2.getString(e.b(this.C, str2));
-            bVar.n = cursor2.getString(e.b(this.C, str16));
-            bVar.o = cursor2.getDouble(e.b(this.C, str13));
-            bVar.p = cursor2.getDouble(e.b(this.C, str11));
-            bVar.q = cursor2.getInt(e.b(this.C, "orientation"));
+            long unused19 = bVar.f196c = cursor2.getLong(e.b(this.C, "_id"));
+            Uri unused20 = bVar.f195b = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, bVar.f196c);
+            long unused21 = bVar.f197d = (long) cursor2.getInt(e.b(this.C, "bucket_id"));
+            String unused22 = bVar.f198e = cursor2.getString(e.b(this.C, "bucket_display_name"));
+            String unused23 = bVar.f199f = cursor2.getString(e.b(this.C, "_data"));
+            String unused24 = bVar.g = cursor2.getString(e.b(this.C, "_display_name"));
+            int unused25 = bVar.h = cursor2.getInt(e.b(this.C, "width"));
+            int unused26 = bVar.i = cursor2.getInt(e.b(this.C, "height"));
+            long unused27 = bVar.j = cursor2.getLong(e.b(this.C, "_size"));
+            String unused28 = bVar.k = cursor2.getString(e.b(this.C, "mime_type"));
+            String unused29 = bVar.l = cursor2.getString(e.b(this.C, "datetaken"));
+            String unused30 = bVar.m = cursor2.getString(e.b(this.C, "date_modified"));
+            String unused31 = bVar.n = cursor2.getString(e.b(this.C, "date_added"));
+            double unused32 = bVar.o = cursor2.getDouble(e.b(this.C, obj2));
+            double unused33 = bVar.p = cursor2.getDouble(e.b(this.C, obj));
+            int unused34 = bVar.q = cursor2.getInt(e.b(this.C, "orientation"));
         }
         return bVar;
     }
@@ -284,7 +248,7 @@ public class h {
         if (str == null) {
             return null;
         }
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         int i2 = (int) (((float) options.outHeight) / f2);
         if (i2 <= 0) {
@@ -294,7 +258,7 @@ public class h {
         return BitmapFactory.decodeFile(str, options);
     }
 
-    public Bitmap a(String str, Options options) {
+    public Bitmap a(String str, BitmapFactory.Options options) {
         b a2 = a(str);
         if (a2 == null) {
             int i2 = 20;
@@ -313,15 +277,15 @@ public class h {
             }
             return null;
         }
-        return a2.f194a ? Thumbnails.getThumbnail(this.w, a2.f196c, 3, options) : Images.Thumbnails.getThumbnail(this.w, a2.f196c, 3, options);
+        return a2.f194a ? MediaStore.Video.Thumbnails.getThumbnail(this.w, a2.f196c, 3, options) : MediaStore.Images.Thumbnails.getThumbnail(this.w, a2.f196c, 3, options);
     }
 
     public Uri a(String str, int i2, int i3) {
-        return a(str, i2, i3, null, 0);
+        return a(str, i2, i3, (Location) null, 0);
     }
 
     public Uri a(String str, int i2, int i3, int i4) {
-        return a(str, i2, i3, null, i4);
+        return a(str, i2, i3, (Location) null, i4);
     }
 
     public Uri a(String str, int i2, int i3, Location location) {
@@ -348,8 +312,8 @@ public class h {
             contentValues.put("longitude", Double.valueOf(location.getLongitude()));
         }
         contentValues.put("orientation", Integer.valueOf(i4));
-        Uri insert = this.w.insert(Media.EXTERNAL_CONTENT_URI, contentValues);
-        if (VERSION.SDK_INT >= 14) {
+        Uri insert = this.w.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+        if (Build.VERSION.SDK_INT >= 14) {
             this.v.sendBroadcast(new Intent("android.hardware.action.NEW_PICTURE", insert));
         }
         return insert;
@@ -363,9 +327,9 @@ public class h {
         }
         boolean isVideoFile = a.isVideoFile(str);
         if (isVideoFile) {
-            cursor = this.w.query(Video.Media.EXTERNAL_CONTENT_URI, this.B, "_data=?", new String[]{str}, "_id DESC");
+            cursor = this.w.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, this.B, "_data=?", new String[]{str}, "_id DESC");
         } else {
-            cursor = this.w.query(Media.EXTERNAL_CONTENT_URI, this.C, "_data=?", new String[]{str}, "_id DESC");
+            cursor = this.w.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, this.C, "_data=?", new String[]{str}, "_id DESC");
         }
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -405,9 +369,9 @@ public class h {
             str = str.substring(lastIndexOf + 1);
         }
         if (z2) {
-            cursor = this.w.query(Video.Media.EXTERNAL_CONTENT_URI, this.B, "bucket_display_name=?", new String[]{str}, "_id ASC");
+            cursor = this.w.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, this.B, "bucket_display_name=?", new String[]{str}, "_id ASC");
         } else {
-            cursor = this.w.query(Media.EXTERNAL_CONTENT_URI, this.C, "bucket_display_name=?", new String[]{str}, "_id ASC");
+            cursor = this.w.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, this.C, "bucket_display_name=?", new String[]{str}, "_id ASC");
         }
         ArrayList arrayList = null;
         if (cursor != null && cursor.getCount() > 0) {
@@ -434,30 +398,23 @@ public class h {
         if (-1 != lastIndexOf) {
             str2 = str2.substring(lastIndexOf + 1);
         }
-        String str4 = ".";
-        int lastIndexOf2 = str2.lastIndexOf(str4);
+        int lastIndexOf2 = str2.lastIndexOf(".");
         if (-1 != lastIndexOf2) {
-            String str5 = str2;
+            String str4 = str2;
             str2 = str2.substring(0, lastIndexOf2);
-            str3 = str5;
+            str3 = str4;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(str4);
-            sb.append(a.getExtension(str));
-            str3 = sb.toString();
+            str3 = str2 + "." + a.getExtension(str);
         }
         ContentValues contentValues = new ContentValues();
-        String str6 = "title";
-        String str7 = "_display_name";
         if (a2.f194a) {
-            contentValues.put(str7, str3);
-            contentValues.put(str6, str2);
+            contentValues.put("_display_name", str3);
+            contentValues.put("title", str2);
         } else {
-            contentValues.put(str7, str3);
-            contentValues.put(str6, str2);
+            contentValues.put("_display_name", str3);
+            contentValues.put("title", str2);
         }
-        return this.w.update(a2.f195b, contentValues, null, null) > 0;
+        return this.w.update(a2.f195b, contentValues, (String) null, (String[]) null) > 0;
     }
 
     public Uri b() {
@@ -477,21 +434,19 @@ public class h {
 
     public boolean b(String str) {
         b a2 = a(str);
-        return a2 != null && this.w.delete(a2.f195b, null, null) > 0;
+        return a2 != null && this.w.delete(a2.f195b, (String) null, (String[]) null) > 0;
     }
 
     public int c(String str) {
-        int i2 = 0;
         try {
             int attributeInt = new ExifInterface(str).getAttributeInt("Orientation", 1);
             if (attributeInt == 3) {
-                i2 = 180;
-            } else if (attributeInt == 6) {
-                i2 = 90;
-            } else if (attributeInt == 8) {
-                i2 = 270;
+                return 180;
             }
-            return i2;
+            if (attributeInt != 6) {
+                return attributeInt != 8 ? 0 : 270;
+            }
+            return 90;
         } catch (IOException e2) {
             e2.printStackTrace();
             return 0;

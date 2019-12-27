@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
 import com.android.camera.ActivityBase;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
@@ -15,12 +14,10 @@ import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.module.BaseModule;
 import com.android.camera.ui.HorizontalSlideView;
-import com.android.camera.ui.HorizontalSlideView.HorizontalDrawAdapter;
-import com.android.camera.ui.HorizontalSlideView.OnPositionSelectListener;
 import java.util.Arrays;
 import java.util.List;
 
-public class ExtraSlideFNumberAdapter extends HorizontalDrawAdapter implements OnPositionSelectListener {
+public class ExtraSlideFNumberAdapter extends HorizontalSlideView.HorizontalDrawAdapter implements HorizontalSlideView.OnPositionSelectListener {
     private static final int ENTRY_COUNT_TOTAL = F_NUMBERS.length;
     public static final String[] F_NUMBERS = {"1.0", "1.1", "1.2", "1.4", "1.6", "1.8", "2", "2.2", "2.5", "2.8", "3.2", "3.5", "4", "4.5", "5.0", "5.6", "6.3", "7.1", "8", "9", "10", ComponentRunningShine.SHINE_LIVE_BEAUTY, "13", "14", "16"};
     private ComponentData mComponentData;
@@ -66,7 +63,7 @@ public class ExtraSlideFNumberAdapter extends HorizontalDrawAdapter implements O
         this.mPaint.setAntiAlias(true);
         this.mPaint.setStrokeWidth((float) this.mLineWidth);
         this.mPaint.setTextSize((float) this.mTextSize);
-        this.mPaint.setTextAlign(Align.LEFT);
+        this.mPaint.setTextAlign(Paint.Align.LEFT);
     }
 
     private String mapPositionToFNumber(float f2) {
@@ -87,8 +84,8 @@ public class ExtraSlideFNumberAdapter extends HorizontalDrawAdapter implements O
         canvas.drawLine(0.0f, -f2, 0.0f, f2, this.mPaint);
     }
 
-    public Align getAlign(int i) {
-        return Align.CENTER;
+    public Paint.Align getAlign(int i) {
+        return Paint.Align.CENTER;
     }
 
     public int getCount() {

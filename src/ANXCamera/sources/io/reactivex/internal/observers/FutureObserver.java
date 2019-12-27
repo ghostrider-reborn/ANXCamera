@@ -27,13 +27,14 @@ public final class FutureObserver<T> extends CountDownLatch implements Observer<
         Disposable disposable;
         DisposableHelper disposableHelper;
         do {
-            disposable = (Disposable) this.s.get();
-            if (disposable != this) {
-                disposableHelper = DisposableHelper.DISPOSED;
-                if (disposable == disposableHelper) {
-                }
+            disposable = this.s.get();
+            if (disposable == this) {
+                return false;
             }
-            return false;
+            disposableHelper = DisposableHelper.DISPOSED;
+            if (disposable == disposableHelper) {
+                return false;
+            }
         } while (!this.s.compareAndSet(disposable, disposableHelper));
         if (disposable != null) {
             disposable.dispose();
@@ -78,7 +79,7 @@ public final class FutureObserver<T> extends CountDownLatch implements Observer<
     }
 
     public boolean isCancelled() {
-        return DisposableHelper.isDisposed((Disposable) this.s.get());
+        return DisposableHelper.isDisposed(this.s.get());
     }
 
     public boolean isDisposed() {
@@ -90,21 +91,18 @@ public final class FutureObserver<T> extends CountDownLatch implements Observer<
     }
 
     public void onComplete() {
+        Disposable disposable;
         if (this.value == null) {
             onError(new NoSuchElementException("The source is empty"));
             return;
         }
-        while (true) {
-            Disposable disposable = (Disposable) this.s.get();
-            if (disposable != this && disposable != DisposableHelper.DISPOSED) {
-                if (this.s.compareAndSet(disposable, this)) {
-                    countDown();
-                    break;
-                }
-            } else {
-                break;
+        do {
+            disposable = this.s.get();
+            if (disposable == this || disposable == DisposableHelper.DISPOSED) {
+                return;
             }
-        }
+        } while (!this.s.compareAndSet(disposable, this));
+        countDown();
     }
 
     public void onError(Throwable th) {
@@ -112,7 +110,7 @@ public final class FutureObserver<T> extends CountDownLatch implements Observer<
         if (this.error == null) {
             this.error = th;
             do {
-                disposable = (Disposable) this.s.get();
+                disposable = this.s.get();
                 if (disposable == this || disposable == DisposableHelper.DISPOSED) {
                     RxJavaPlugins.onError(th);
                     return;
@@ -126,7 +124,7 @@ public final class FutureObserver<T> extends CountDownLatch implements Observer<
 
     public void onNext(T t) {
         if (this.value != null) {
-            ((Disposable) this.s.get()).dispose();
+            this.s.get().dispose();
             onError(new IndexOutOfBoundsException("More than one element received"));
             return;
         }

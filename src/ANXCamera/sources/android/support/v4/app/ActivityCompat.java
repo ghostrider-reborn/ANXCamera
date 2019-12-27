@@ -2,16 +2,14 @@ package android.support.v4.app;
 
 import android.app.Activity;
 import android.app.SharedElementCallback;
-import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.IntentSender.SendIntentException;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,8 +20,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v13.view.DragAndDropPermissionsCompat;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.ContextCompat;
 import android.view.DragEvent;
 import android.view.View;
@@ -43,7 +41,7 @@ public class ActivityCompat extends ContextCompat {
         boolean requestPermissions(@NonNull Activity activity, @NonNull String[] strArr, @IntRange(from = 0) int i);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public interface RequestPermissionsRequestCodeValidator {
         void validateRequestPermissionsRequestCode(int i);
     }
@@ -87,7 +85,7 @@ public class ActivityCompat extends ContextCompat {
             super(sharedElementCallback);
         }
 
-        public void onSharedElementsArrived(List<String> list, List<View> list2, final OnSharedElementsReadyListener onSharedElementsReadyListener) {
+        public void onSharedElementsArrived(List<String> list, List<View> list2, final SharedElementCallback.OnSharedElementsReadyListener onSharedElementsReadyListener) {
             this.mCallback.onSharedElementsArrived(list, list2, new SharedElementCallback.OnSharedElementsReadyListener() {
                 public void onSharedElementsReady() {
                     onSharedElementsReadyListener.onSharedElementsReady();
@@ -100,7 +98,7 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static void finishAffinity(@NonNull Activity activity) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             activity.finishAffinity();
         } else {
             activity.finish();
@@ -108,21 +106,21 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static void finishAfterTransition(@NonNull Activity activity) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             activity.finishAfterTransition();
         } else {
             activity.finish();
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static PermissionCompatDelegate getPermissionCompatDelegate() {
         return sDelegate;
     }
 
     @Nullable
     public static Uri getReferrer(@NonNull Activity activity) {
-        if (VERSION.SDK_INT >= 22) {
+        if (Build.VERSION.SDK_INT >= 22) {
             return activity.getReferrer();
         }
         Intent intent = activity.getIntent();
@@ -144,7 +142,7 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static void postponeEnterTransition(@NonNull Activity activity) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             activity.postponeEnterTransition();
         }
     }
@@ -156,26 +154,27 @@ public class ActivityCompat extends ContextCompat {
 
     public static void requestPermissions(@NonNull final Activity activity, @NonNull final String[] strArr, @IntRange(from = 0) final int i) {
         PermissionCompatDelegate permissionCompatDelegate = sDelegate;
-        if (permissionCompatDelegate == null || !permissionCompatDelegate.requestPermissions(activity, strArr, i)) {
-            if (VERSION.SDK_INT >= 23) {
-                if (activity instanceof RequestPermissionsRequestCodeValidator) {
-                    ((RequestPermissionsRequestCodeValidator) activity).validateRequestPermissionsRequestCode(i);
-                }
-                activity.requestPermissions(strArr, i);
-            } else if (activity instanceof OnRequestPermissionsResultCallback) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    public void run() {
-                        int[] iArr = new int[strArr.length];
-                        PackageManager packageManager = activity.getPackageManager();
-                        String packageName = activity.getPackageName();
-                        int length = strArr.length;
-                        for (int i = 0; i < length; i++) {
-                            iArr[i] = packageManager.checkPermission(strArr[i], packageName);
-                        }
-                        ((OnRequestPermissionsResultCallback) activity).onRequestPermissionsResult(i, strArr, iArr);
-                    }
-                });
+        if (permissionCompatDelegate != null && permissionCompatDelegate.requestPermissions(activity, strArr, i)) {
+            return;
+        }
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (activity instanceof RequestPermissionsRequestCodeValidator) {
+                ((RequestPermissionsRequestCodeValidator) activity).validateRequestPermissionsRequestCode(i);
             }
+            activity.requestPermissions(strArr, i);
+        } else if (activity instanceof OnRequestPermissionsResultCallback) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                public void run() {
+                    int[] iArr = new int[strArr.length];
+                    PackageManager packageManager = activity.getPackageManager();
+                    String packageName = activity.getPackageName();
+                    int length = strArr.length;
+                    for (int i = 0; i < length; i++) {
+                        iArr[i] = packageManager.checkPermission(strArr[i], packageName);
+                    }
+                    ((OnRequestPermissionsResultCallback) activity).onRequestPermissionsResult(i, strArr, iArr);
+                }
+            });
         }
     }
 
@@ -189,8 +188,8 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static void setEnterSharedElementCallback(@NonNull Activity activity, @Nullable SharedElementCallback sharedElementCallback) {
-        int i = VERSION.SDK_INT;
-        SharedElementCallback sharedElementCallback2 = null;
+        int i = Build.VERSION.SDK_INT;
+        android.app.SharedElementCallback sharedElementCallback2 = null;
         if (i >= 23) {
             if (sharedElementCallback != null) {
                 sharedElementCallback2 = new SharedElementCallback23Impl(sharedElementCallback);
@@ -205,8 +204,8 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static void setExitSharedElementCallback(@NonNull Activity activity, @Nullable SharedElementCallback sharedElementCallback) {
-        int i = VERSION.SDK_INT;
-        SharedElementCallback sharedElementCallback2 = null;
+        int i = Build.VERSION.SDK_INT;
+        android.app.SharedElementCallback sharedElementCallback2 = null;
         if (i >= 23) {
             if (sharedElementCallback != null) {
                 sharedElementCallback2 = new SharedElementCallback23Impl(sharedElementCallback);
@@ -225,22 +224,22 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static boolean shouldShowRequestPermissionRationale(@NonNull Activity activity, @NonNull String str) {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             return activity.shouldShowRequestPermissionRationale(str);
         }
         return false;
     }
 
     public static void startActivityForResult(@NonNull Activity activity, @NonNull Intent intent, int i, @Nullable Bundle bundle) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             activity.startActivityForResult(intent, i, bundle);
         } else {
             activity.startActivityForResult(intent, i);
         }
     }
 
-    public static void startIntentSenderForResult(@NonNull Activity activity, @NonNull IntentSender intentSender, int i, @Nullable Intent intent, int i2, int i3, int i4, @Nullable Bundle bundle) throws SendIntentException {
-        if (VERSION.SDK_INT >= 16) {
+    public static void startIntentSenderForResult(@NonNull Activity activity, @NonNull IntentSender intentSender, int i, @Nullable Intent intent, int i2, int i3, int i4, @Nullable Bundle bundle) throws IntentSender.SendIntentException {
+        if (Build.VERSION.SDK_INT >= 16) {
             activity.startIntentSenderForResult(intentSender, i, intent, i2, i3, i4, bundle);
         } else {
             activity.startIntentSenderForResult(intentSender, i, intent, i2, i3, i4);
@@ -248,7 +247,7 @@ public class ActivityCompat extends ContextCompat {
     }
 
     public static void startPostponedEnterTransition(@NonNull Activity activity) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             activity.startPostponedEnterTransition();
         }
     }

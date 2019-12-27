@@ -26,37 +26,31 @@ class ExifReader {
                 } else {
                     exifData.getIfdData(tag.getIfd()).setTag(tag);
                 }
-            } else if (next != 2) {
-                String str = TAG;
-                if (next == 3) {
-                    int compressedImageSize = parse.getCompressedImageSize();
-                    if (compressedImageSize > 0) {
-                        byte[] bArr = new byte[compressedImageSize];
-                        if (bArr.length == parse.read(bArr)) {
-                            exifData.setCompressedThumbnail(bArr);
-                        } else {
-                            Log.w(str, "Failed to read the compressed thumbnail");
-                        }
-                    } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("compressedImageSize=");
-                        sb.append(compressedImageSize);
-                        Log.d(str, sb.toString());
-                    }
-                } else if (next == 4) {
-                    byte[] bArr2 = new byte[parse.getStripSize()];
-                    if (bArr2.length == parse.read(bArr2)) {
-                        exifData.setStripBytes(parse.getStripIndex(), bArr2);
-                    } else {
-                        Log.w(str, "Failed to read the strip bytes");
-                    }
-                }
-            } else {
+            } else if (next == 2) {
                 ExifTag tag2 = parse.getTag();
                 if (tag2.getDataType() == 7) {
                     parse.readFullTagValue(tag2);
                 }
                 exifData.getIfdData(tag2.getIfd()).setTag(tag2);
+            } else if (next == 3) {
+                int compressedImageSize = parse.getCompressedImageSize();
+                if (compressedImageSize > 0) {
+                    byte[] bArr = new byte[compressedImageSize];
+                    if (bArr.length == parse.read(bArr)) {
+                        exifData.setCompressedThumbnail(bArr);
+                    } else {
+                        Log.w(TAG, "Failed to read the compressed thumbnail");
+                    }
+                } else {
+                    Log.d(TAG, "compressedImageSize=" + compressedImageSize);
+                }
+            } else if (next == 4) {
+                byte[] bArr2 = new byte[parse.getStripSize()];
+                if (bArr2.length == parse.read(bArr2)) {
+                    exifData.setStripBytes(parse.getStripIndex(), bArr2);
+                } else {
+                    Log.w(TAG, "Failed to read the strip bytes");
+                }
             }
         }
         return exifData;

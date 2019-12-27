@@ -2,7 +2,6 @@ package com.android.camera.network.resource;
 
 import com.android.camera.log.Log;
 import com.android.camera.network.download.GalleryDownloadManager;
-import com.android.camera.network.download.GalleryDownloadManager.OnCompleteListener;
 import com.android.camera.network.download.Request;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +13,7 @@ public class LiveResourceDownloadManager {
     /* access modifiers changed from: private */
     public Map<String, Integer> mDownloadState;
     private List<OnLiveDownloadListener> mListeners;
-    private OnCompleteListener mOnCompleteListener;
+    private GalleryDownloadManager.OnCompleteListener mOnCompleteListener;
     /* access modifiers changed from: private */
     public Object object;
 
@@ -29,12 +28,9 @@ public class LiveResourceDownloadManager {
         this.mDownloadState = new HashMap();
         this.object = new Object();
         this.mListeners = new ArrayList();
-        this.mOnCompleteListener = new OnCompleteListener() {
+        this.mOnCompleteListener = new GalleryDownloadManager.OnCompleteListener() {
             public void onRequestComplete(Request request, int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("download finish ");
-                sb.append(i);
-                Log.v(LiveResourceDownloadManager.TAG, sb.toString());
+                Log.v(LiveResourceDownloadManager.TAG, "download finish " + i);
                 String tag = request.getTag();
                 synchronized (LiveResourceDownloadManager.this.object) {
                     LiveResourceDownloadManager.this.mDownloadState.remove(tag);
@@ -65,17 +61,9 @@ public class LiveResourceDownloadManager {
 
     public <T extends LiveResource> void download(T t, LiveDownloadHelper<T> liveDownloadHelper) {
         String str = t.id;
-        StringBuilder sb = new StringBuilder();
-        sb.append("downloading ");
-        sb.append(str);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        Log.v(str2, sb2);
+        Log.v(TAG, "downloading " + str);
         if (liveDownloadHelper.isDownloaded(t)) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("file downloaded ");
-            sb3.append(str);
-            Log.v(str2, sb3.toString());
+            Log.v(TAG, "file downloaded " + str);
             dispatchListener(str, 1);
             return;
         }
@@ -86,7 +74,7 @@ public class LiveResourceDownloadManager {
 
     public int getDownloadState(String str) {
         if (this.mDownloadState.containsKey(str)) {
-            return ((Integer) this.mDownloadState.get(str)).intValue();
+            return this.mDownloadState.get(str).intValue();
         }
         return 0;
     }

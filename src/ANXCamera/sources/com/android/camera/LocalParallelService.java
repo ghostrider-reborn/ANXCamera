@@ -13,7 +13,6 @@ import com.android.camera.storage.ImageSaver;
 import com.mi.config.b;
 import com.xiaomi.camera.core.ParallelTaskData;
 import com.xiaomi.camera.core.PostProcessor;
-import com.xiaomi.camera.core.PostProcessor.PostProcessStatusCallback;
 import com.xiaomi.camera.imagecodec.ReprocessorFactory;
 import com.xiaomi.engine.BufferFormat;
 import com.xiaomi.engine.MiCameraAlgo;
@@ -33,7 +32,7 @@ public class LocalParallelService extends Service {
     /* access modifiers changed from: private */
     public int mMaxParallelRequestNumber;
     /* access modifiers changed from: private */
-    public PostProcessStatusCallback mPostProcessStatusCallback = new PostProcessStatusCallback() {
+    public PostProcessor.PostProcessStatusCallback mPostProcessStatusCallback = new PostProcessor.PostProcessStatusCallback() {
         public void onImagePostProcessEnd(ParallelTaskData parallelTaskData) {
             if (LocalParallelService.this.mServiceStatusListenerRef != null && LocalParallelService.this.mServiceStatusListenerRef.get() != null) {
                 ((ServiceStatusListener) LocalParallelService.this.mServiceStatusListenerRef.get()).onImagePostProcessEnd(parallelTaskData);
@@ -76,41 +75,30 @@ public class LocalParallelService extends Service {
             this.mCurrentPostProcessor = new PostProcessor(localParallelService, localParallelService.mPostProcessStatusCallback);
             this.mCurrentPostProcessor.setMaxParallelRequestNumber(LocalParallelService.this.mMaxParallelRequestNumber);
             String access$400 = LocalParallelService.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("initCurrentPostProcessor: create a new PostProcessor: ");
-            sb.append(this.mCurrentPostProcessor);
-            sb.append(" | maxParallelRequestNumber: ");
-            sb.append(LocalParallelService.this.mMaxParallelRequestNumber);
-            Log.d(access$400, sb.toString());
+            Log.d(access$400, "initCurrentPostProcessor: create a new PostProcessor: " + this.mCurrentPostProcessor + " | maxParallelRequestNumber: " + LocalParallelService.this.mMaxParallelRequestNumber);
             this.mCurrentBufferFormat = null;
             this.mAlivePostProcessor.add(this.mCurrentPostProcessor);
         }
 
         private boolean isSetsEquals(List<IImageReaderParameterSets> list, List<IImageReaderParameterSets> list2) {
-            boolean z = false;
-            if (!(list == null || list2 == null)) {
-                if (list.size() != list2.size()) {
-                    return false;
-                }
-                int i = 0;
-                for (IImageReaderParameterSets iImageReaderParameterSets : list) {
-                    Iterator it = list2.iterator();
-                    while (true) {
-                        if (it.hasNext()) {
-                            if (iImageReaderParameterSets.equals((IImageReaderParameterSets) it.next())) {
-                                i++;
-                                break;
-                            }
-                        } else {
+            if (list == null || list2 == null || list.size() != list2.size()) {
+                return false;
+            }
+            int i = 0;
+            for (IImageReaderParameterSets next : list) {
+                Iterator<IImageReaderParameterSets> it = list2.iterator();
+                while (true) {
+                    if (it.hasNext()) {
+                        if (next.equals(it.next())) {
+                            i++;
                             break;
                         }
+                    } else {
+                        break;
                     }
                 }
-                if (list.size() == i) {
-                    z = true;
-                }
             }
-            return z;
+            return list.size() == i;
         }
 
         /* access modifiers changed from: private */
@@ -143,17 +131,14 @@ public class LocalParallelService extends Service {
                 long currentTimeMillis = System.currentTimeMillis();
                 this.mCurrentPostProcessor.configCaptureSession(this.mCurrentBufferFormat);
                 String access$400 = LocalParallelService.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("configCaptureSession: cost: ");
-                sb.append(System.currentTimeMillis() - currentTimeMillis);
-                Log.d(access$400, sb.toString());
+                Log.d(access$400, "configCaptureSession: cost: " + (System.currentTimeMillis() - currentTimeMillis));
                 return;
             }
             Log.d(LocalParallelService.TAG, "configCaptureSession: bufferFormat keeps unchanged");
         }
 
         public void configMaxParallelRequestNumber(int i) {
-            LocalParallelService.this.mMaxParallelRequestNumber = i;
+            int unused = LocalParallelService.this.mMaxParallelRequestNumber = i;
             PostProcessor postProcessor = this.mCurrentPostProcessor;
             if (postProcessor != null) {
                 postProcessor.setMaxParallelRequestNumber(LocalParallelService.this.mMaxParallelRequestNumber);
@@ -206,7 +191,7 @@ public class LocalParallelService extends Service {
         }
 
         public void setOnPictureTakenListener(ServiceStatusListener serviceStatusListener) {
-            LocalParallelService.this.mServiceStatusListenerRef = new WeakReference(serviceStatusListener);
+            WeakReference unused = LocalParallelService.this.mServiceStatusListenerRef = new WeakReference(serviceStatusListener);
         }
 
         public void setOnSessionStatusCallBackListener(ISessionStatusCallBackListener iSessionStatusCallBackListener) {
@@ -220,10 +205,7 @@ public class LocalParallelService extends Service {
             PostProcessor postProcessor = this.mCurrentPostProcessor;
             if (postProcessor != null && !postProcessor.isStopping()) {
                 String access$400 = LocalParallelService.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("stopPostProcessor: ");
-                sb.append(this.mCurrentPostProcessor);
-                Log.d(access$400, sb.toString());
+                Log.d(access$400, "stopPostProcessor: " + this.mCurrentPostProcessor);
                 int token = this.mCurrentPostProcessor.getToken();
                 if (token == -1 || i == token) {
                     this.mCurrentPostProcessor.destroyWhenTasksFinished();

@@ -20,12 +20,12 @@ public final class SpscArrayQueue<E> extends AtomicReferenceArray<E> implements 
         this.lookAheadStep = Math.min(i / 4, MAX_LOOK_AHEAD_STEP.intValue());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int calcElementOffset(long j) {
         return this.mask & ((int) j);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int calcElementOffset(long j, int i) {
         return ((int) j) & i;
     }
@@ -42,7 +42,7 @@ public final class SpscArrayQueue<E> extends AtomicReferenceArray<E> implements 
         return this.producerIndex.get() == this.consumerIndex.get();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public E lvElement(int i) {
         return get(i);
     }
@@ -80,21 +80,21 @@ public final class SpscArrayQueue<E> extends AtomicReferenceArray<E> implements 
             return null;
         }
         soConsumerIndex(j + 1);
-        soElement(calcElementOffset, null);
+        soElement(calcElementOffset, (Object) null);
         return lvElement;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void soConsumerIndex(long j) {
         this.consumerIndex.lazySet(j);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void soElement(int i, E e2) {
         lazySet(i, e2);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void soProducerIndex(long j) {
         this.producerIndex.lazySet(j);
     }

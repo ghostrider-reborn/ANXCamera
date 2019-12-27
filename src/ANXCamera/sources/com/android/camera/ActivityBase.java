@@ -19,11 +19,10 @@ import android.support.annotation.UiThread;
 import android.support.v4.app.FragmentActivity;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.android.camera.CameraScreenNail.NailListener;
-import com.android.camera.CameraScreenNail.RequestRenderListener;
+import com.android.camera.CameraScreenNail;
 import com.android.camera.data.DataRepository;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.lib.compatibility.util.CompatibilityUtils;
@@ -31,10 +30,10 @@ import com.android.camera.log.Log;
 import com.android.camera.module.Module;
 import com.android.camera.module.loader.SurfaceStateListener;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.statistic.ScenarioTrackUtil;
-import com.android.camera.storage.ImageSaver.ImageSaverCallback;
+import com.android.camera.storage.ImageSaver;
 import com.android.camera.ui.CameraRootView;
 import com.android.camera.ui.PopupManager;
 import com.android.camera.ui.ScreenHint;
@@ -56,7 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
-public abstract class ActivityBase extends FragmentActivity implements AppController, SurfaceStateListener, ImageSaverCallback {
+public abstract class ActivityBase extends FragmentActivity implements AppController, SurfaceStateListener, ImageSaver.ImageSaverCallback {
     public static final int MSG_CAMERA_OPEN_EXCEPTION = 10;
     protected static final int MSG_DEBUG_INFO = 0;
     protected static final int MSG_KEYGUARD_TWICE_RESUME = 1;
@@ -119,15 +118,14 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
             if (activityBase != null) {
                 int i = message.what;
                 if (i != 0) {
-                    String str = ActivityBase.TAG;
                     if (i == 1) {
-                        Log.d(str, "handleMessage:  set mIsFinishInKeyguard = true;");
-                        activityBase.mIsFinishInKeyguard = true;
+                        Log.d(ActivityBase.TAG, "handleMessage:  set mIsFinishInKeyguard = true;");
+                        boolean unused = activityBase.mIsFinishInKeyguard = true;
                     } else if (i == 2) {
                         CameraStatUtil.trackModeSwitch();
                     } else if (i == 10) {
                         int i2 = message.arg1;
-                        Log.d(str, String.format(Locale.ENGLISH, "exception occurs, msg = %s , exception = 0x%x", new Object[]{message, Integer.valueOf(i2)}));
+                        Log.d(ActivityBase.TAG, String.format(Locale.ENGLISH, "exception occurs, msg = %s , exception = 0x%x", new Object[]{message, Integer.valueOf(i2)}));
                         if (!(i2 == 230 || i2 == 231 || i2 == 236 || i2 == 237)) {
                             switch (i2) {
                                 case 226:
@@ -136,11 +134,12 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                                 case 227:
                                     Util.showErrorAndFinish(activityBase, R.string.camera_disabled);
                                     activityBase.showErrorDialog();
-                                    break;
+                                    return;
+                                default:
+                                    return;
                             }
                         }
-                        int i3 = Util.isInVideoCall(activityBase) ? R.string.cannot_connect_camera_volte_call : CameraSettings.updateOpenCameraFailTimes() > 1 ? R.string.cannot_connect_camera_twice : R.string.cannot_connect_camera_once;
-                        Util.showErrorAndFinish(activityBase, i3);
+                        Util.showErrorAndFinish(activityBase, Util.isInVideoCall(activityBase) ? R.string.cannot_connect_camera_volte_call : CameraSettings.updateOpenCameraFailTimes() > 1 ? R.string.cannot_connect_camera_twice : R.string.cannot_connect_camera_once);
                         activityBase.showErrorDialog();
                     }
                 } else if (!activityBase.isActivityPaused()) {
@@ -190,11 +189,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
         if (this.mSecureUriList == null) {
             str = TEDefine.FACE_BEAUTY_NULL;
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("not null (");
-            sb2.append(this.mSecureUriList.size());
-            sb2.append(")");
-            str = sb2.toString();
+            str = "not null (" + this.mSecureUriList.size() + ")";
         }
         sb.append(str);
         Log.v(TAG, sb.toString());
@@ -218,9 +213,9 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
             return new long[0];
         }
         long[] jArr = new long[this.mSecureUriList.size()];
-        Iterator it = this.mSecureUriList.iterator();
+        Iterator<Uri> it = this.mSecureUriList.iterator();
         while (it.hasNext()) {
-            jArr[i] = ContentUris.parseId((Uri) it.next());
+            jArr[i] = ContentUris.parseId(it.next());
             i++;
         }
         return jArr;
@@ -229,7 +224,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
     /* access modifiers changed from: private */
     public void showBlurView(Bitmap bitmap) {
         Rect displayRect = Util.getDisplayRect(getApplicationContext());
-        ((MarginLayoutParams) this.mGLCoverView.getLayoutParams()).topMargin = displayRect.top;
+        ((ViewGroup.MarginLayoutParams) this.mGLCoverView.getLayoutParams()).topMargin = displayRect.top;
         this.mGLCoverView.setMaxWidth(displayRect.right - displayRect.left);
         this.mGLCoverView.setMaxHeight(displayRect.bottom - displayRect.top);
         this.mGLCoverView.setImageBitmap(bitmap);
@@ -250,7 +245,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
 
     public void createCameraScreenNail(boolean z, boolean z2) {
         if (this.mCameraScreenNail == null) {
-            this.mCameraScreenNail = new CameraScreenNail(new NailListener() {
+            this.mCameraScreenNail = new CameraScreenNail(new CameraScreenNail.NailListener() {
                 public int getOrientation() {
                     return ActivityBase.this.mOrientation;
                 }
@@ -260,7 +255,6 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                 }
 
                 public void onFrameAvailable(int i) {
-                    String str = ActivityBase.TAG;
                     if (1 == i && ActivityBase.this.mAppStartTime != 0) {
                         try {
                             long currentTimeMillis = System.currentTimeMillis() - ActivityBase.this.mAppStartTime;
@@ -270,18 +264,9 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                             } else {
                                 ScenarioTrackUtil.trackScenarioAbort(ScenarioTrackUtil.sLaunchTimeScenario);
                             }
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("onFrameAvailable: trackStartAppCost: ");
-                            sb.append(currentTimeMillis);
-                            Log.d(str, sb.toString());
+                            Log.d(ActivityBase.TAG, "onFrameAvailable: trackStartAppCost: " + currentTimeMillis);
                         } catch (IllegalArgumentException e2) {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append(e2.getMessage());
-                            sb2.append(", start time: ");
-                            sb2.append(ActivityBase.this.mAppStartTime);
-                            sb2.append(", now: ");
-                            sb2.append(System.currentTimeMillis());
-                            Log.w(str, sb2.toString());
+                            Log.w(ActivityBase.TAG, e2.getMessage() + ", start time: " + ActivityBase.this.mAppStartTime + ", now: " + System.currentTimeMillis());
                         }
                         ActivityBase.this.mAppStartTime = 0;
                     }
@@ -312,7 +297,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                         module.onSurfaceTextureUpdated(drawExtTexAttribute);
                     }
                 }
-            }, new RequestRenderListener() {
+            }, new CameraScreenNail.RequestRenderListener() {
                 public void requestRender() {
                     if (ActivityBase.this.mCameraScreenNail.isAnimationRunning() || ActivityBase.this.mCameraScreenNail.getExternalFrameProcessor() == null || !ActivityBase.this.mCameraScreenNail.getExternalFrameProcessor().isProcessorReady()) {
                         ActivityBase.this.mGLView.requestRender();
@@ -418,23 +403,17 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
             Thumbnail thumbnail = this.mThumbnailUpdater.getThumbnail();
             if (thumbnail != null) {
                 Uri uri = thumbnail.getUri();
-                boolean isUriValid = Util.isUriValid(uri, getContentResolver());
-                String str = TAG;
-                if (!isUriValid) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Uri invalid. uri=");
-                    sb.append(uri);
-                    Log.e(str, sb.toString());
+                if (!Util.isUriValid(uri, getContentResolver())) {
+                    Log.e(TAG, "Uri invalid. uri=" + uri);
                     if (!thumbnail.isWaitingForUri()) {
                         getThumbnailUpdater().getLastThumbnailUncached();
+                        return;
                     }
                     return;
                 }
                 try {
                     Intent intent = new Intent(Util.REVIEW_ACTION, uri);
-                    boolean Sa = DataRepository.dataItemFeature().Sa();
-                    String str2 = Util.REVIEW_ACTIVITY_PACKAGE;
-                    intent.setPackage(Sa ? Util.ANDROID_ONE_REVIEW_ACTIVITY_PACKAGE : str2);
+                    intent.setPackage(DataRepository.dataItemFeature().Sa() ? Util.ANDROID_ONE_REVIEW_ACTIVITY_PACKAGE : Util.REVIEW_ACTIVITY_PACKAGE);
                     intent.putExtra(Util.KEY_REVIEW_FROM_MIUICAMERA, true);
                     if (b.Nh()) {
                         if (this.mCameraBrightness.getCurrentBrightnessAuto() != 0.0f) {
@@ -451,7 +430,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                             intent.putExtra(CameraIntentManager.EXTRA_START_WHEN_LOCKED, true);
                         }
                     }
-                    if (Util.isAppLocked(this, str2)) {
+                    if (Util.isAppLocked(this, Util.REVIEW_ACTIVITY_PACKAGE)) {
                         intent.putExtra(Util.EXTRAS_SKIP_LOCK, true);
                     }
                     if (this.mSecureUriList != null) {
@@ -469,14 +448,11 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                         CameraStatUtil.trackGotoGallery(this.mCurrentModule.getModuleIndex());
                     }
                 } catch (ActivityNotFoundException e2) {
-                    Log.e(str, "review activity not found!", e2);
+                    Log.e(TAG, "review activity not found!", e2);
                     try {
                         startActivity(new Intent("android.intent.action.VIEW", uri));
                     } catch (ActivityNotFoundException e3) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("review image fail. uri=");
-                        sb2.append(uri);
-                        Log.e(str, sb2.toString(), e3);
+                        Log.e(TAG, "review image fail. uri=" + uri, e3);
                     }
                 }
             }
@@ -546,13 +522,11 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
 
     /* access modifiers changed from: protected */
     public boolean isShowBottomIntentDone() {
-        if (getCameraIntentManager().isImageCaptureIntent() || getCameraIntentManager().isVideoCaptureIntent()) {
-            BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
-            if (baseDelegate != null && baseDelegate.getActiveFragment(R.id.bottom_action) == 4083) {
-                return true;
-            }
+        if (!getCameraIntentManager().isImageCaptureIntent() && !getCameraIntentManager().isVideoCaptureIntent()) {
+            return false;
         }
-        return false;
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        return baseDelegate != null && baseDelegate.getActiveFragment(R.id.bottom_action) == 4083;
     }
 
     public boolean isSwitchingModule() {
@@ -592,9 +566,8 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
         if (!this.mStartFromKeyguard || (getIntent().getFlags() & 8388608) != 0) {
             z = false;
         }
-        String str = TAG;
         if (z) {
-            Log.d(str, "onCreate: addFlag --> FLAG_TURN_SCREEN_ON");
+            Log.d(TAG, "onCreate: addFlag --> FLAG_TURN_SCREEN_ON");
             getWindow().addFlags(2097152);
         }
         this.mApplication.addActivity(this);
@@ -609,7 +582,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
         try {
             this.mCloseActivityThread.start();
         } catch (IllegalThreadStateException e2) {
-            Log.e(str, e2.getMessage());
+            Log.e(TAG, e2.getMessage());
         }
     }
 
@@ -678,10 +651,8 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
     public void onPause() {
         super.onPause();
         getWindow().clearFlags(1024);
-        CameraScreenNail cameraScreenNail = this.mCameraScreenNail;
-        String str = TAG;
-        if (cameraScreenNail != null && !isShowBottomIntentDone() && !DataRepository.dataItemFeature().fc()) {
-            Log.d(str, "onPause: readLastFrameGaussian...");
+        if (this.mCameraScreenNail != null && !isShowBottomIntentDone() && !DataRepository.dataItemFeature().fc()) {
+            Log.d(TAG, "onPause: readLastFrameGaussian...");
             this.mCameraScreenNail.readLastFrameGaussian();
         }
         Disposable disposable = this.mGLCoverDisposable;
@@ -694,7 +665,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
         }
         pause();
         if (startFromKeyguard() && this.mIsFinishInKeyguard) {
-            Log.d(str, "onPause: clearFlag --> FLAG_TURN_SCREEN_ON");
+            Log.d(TAG, "onPause: clearFlag --> FLAG_TURN_SCREEN_ON");
             getWindow().clearFlags(2097152);
             if (this.mJumpFlag == 0) {
                 finish();
@@ -702,7 +673,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
         }
         if (this.mJumpFlag == 0 && (startFromSecureKeyguard() || isGalleryLocked())) {
             this.mSecureUriList = null;
-            this.mThumbnailUpdater.setThumbnail(null, true, false);
+            this.mThumbnailUpdater.setThumbnail((Thumbnail) null, true, false);
         } else if (this.mJumpFlag == 1) {
             clearNotification();
         }
@@ -749,7 +720,7 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
     }
 
     public void pause() {
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         this.mCameraBrightness.onPause();
         Thread thread = this.mCloseActivityThread;
         if (thread != null) {
@@ -837,34 +808,30 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                                 Log.d(ActivityBase.TAG, "showBlurCover: blur bitmap from user blur file!");
                                 singleObserver.onSuccess(decodeFile);
                             }
-                        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe((Consumer<? super T>) new Consumer<Bitmap>() {
+                        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Bitmap>() {
                             public void accept(Bitmap bitmap) {
                                 if (bitmap == null || bitmap.isRecycled()) {
                                     ActivityBase.this.mGLCoverView.setVisibility(8);
                                 } else {
                                     ActivityBase.this.showBlurView(bitmap);
                                 }
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("showBlurCover: show... cost time = ");
-                                sb.append(System.currentTimeMillis() - currentTimeMillis);
-                                sb.append("ms");
-                                Log.d(ActivityBase.TAG, sb.toString());
+                                Log.d(ActivityBase.TAG, "showBlurCover: show... cost time = " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
                             }
                         });
-                    } else {
-                        Log.d(TAG, "showBlurCover: blur bitmap from memory!");
-                        showBlurView(bitmap);
+                        return;
                     }
-                } else {
-                    Rect displayRect = Util.getDisplayRect(getApplicationContext());
-                    MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mGLCoverView.getLayoutParams();
-                    int i = displayRect.top;
-                    marginLayoutParams.topMargin = i;
-                    marginLayoutParams.height = displayRect.bottom - i;
-                    this.mGLCoverView.setBackgroundColor(2130706432);
-                    this.mGLCoverView.setAlpha(1.0f);
-                    this.mGLCoverView.setVisibility(0);
+                    Log.d(TAG, "showBlurCover: blur bitmap from memory!");
+                    showBlurView(bitmap);
+                    return;
                 }
+                Rect displayRect = Util.getDisplayRect(getApplicationContext());
+                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.mGLCoverView.getLayoutParams();
+                int i = displayRect.top;
+                marginLayoutParams.topMargin = i;
+                marginLayoutParams.height = displayRect.bottom - i;
+                this.mGLCoverView.setBackgroundColor(2130706432);
+                this.mGLCoverView.setAlpha(1.0f);
+                this.mGLCoverView.setVisibility(0);
             }
         }
     }
@@ -915,19 +882,15 @@ public abstract class ActivityBase extends FragmentActivity implements AppContro
                     }
                 }
             }
-        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe((Consumer<? super T>) new Consumer<HashMap>() {
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<HashMap>() {
             public void accept(HashMap hashMap) {
-                ActivityBase.this.mAppLunchMap = hashMap;
+                HashMap unused = ActivityBase.this.mAppLunchMap = hashMap;
             }
         });
     }
 
     public synchronized void updateSurfaceState(int i) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateSurfaceState: ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "updateSurfaceState: " + i);
         this.mCurrentSurfaceState = i;
     }
 }

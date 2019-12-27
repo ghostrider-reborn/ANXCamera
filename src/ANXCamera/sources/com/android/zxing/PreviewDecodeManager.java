@@ -2,8 +2,7 @@ package com.android.zxing;
 
 import android.media.Image;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.PreviewCallback;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PreviewDecodeManager {
@@ -12,7 +11,7 @@ public class PreviewDecodeManager {
     public static final int DECODE_TYPE_QR = 0;
     /* access modifiers changed from: private */
     public ConcurrentHashMap<Integer, Decoder> mDecoders;
-    private PreviewCallback mPreviewCallback;
+    private Camera2Proxy.PreviewCallback mPreviewCallback;
 
     private static class Singleton {
         public static final PreviewDecodeManager INSTANCE = new PreviewDecodeManager();
@@ -22,9 +21,9 @@ public class PreviewDecodeManager {
     }
 
     private PreviewDecodeManager() {
-        this.mPreviewCallback = new PreviewCallback() {
+        this.mPreviewCallback = new Camera2Proxy.PreviewCallback() {
             public boolean onPreviewFrame(Image image, Camera2Proxy camera2Proxy, int i) {
-                for (Entry value : PreviewDecodeManager.this.mDecoders.entrySet()) {
+                for (Map.Entry value : PreviewDecodeManager.this.mDecoders.entrySet()) {
                     Decoder decoder = (Decoder) value.getValue();
                     if (decoder.needPreviewFrame()) {
                         if (decoder.isNeedImage()) {
@@ -44,33 +43,33 @@ public class PreviewDecodeManager {
         return Singleton.INSTANCE;
     }
 
-    public PreviewCallback getPreviewCallback() {
+    public Camera2Proxy.PreviewCallback getPreviewCallback() {
         return this.mPreviewCallback;
     }
 
     public String getScanResult() {
-        return ((QrDecoder) this.mDecoders.get(Integer.valueOf(0))).getScanResult();
+        return ((QrDecoder) this.mDecoders.get(0)).getScanResult();
     }
 
     public void init(int i, int i2) {
         if (i2 != 0) {
             if (i2 != 1) {
-                if (i2 == 2 && this.mDecoders.get(Integer.valueOf(2)) == null) {
-                    this.mDecoders.put(Integer.valueOf(2), new GoogleLensDecoder());
+                if (i2 == 2 && this.mDecoders.get(2) == null) {
+                    this.mDecoders.put(2, new GoogleLensDecoder());
                 }
-            } else if (this.mDecoders.get(Integer.valueOf(1)) == null) {
-                this.mDecoders.put(Integer.valueOf(1), new HandGestureDecoder());
+            } else if (this.mDecoders.get(1) == null) {
+                this.mDecoders.put(1, new HandGestureDecoder());
             }
-        } else if (this.mDecoders.get(Integer.valueOf(0)) == null) {
-            this.mDecoders.put(Integer.valueOf(0), new QrDecoder());
+        } else if (this.mDecoders.get(0) == null) {
+            this.mDecoders.put(0, new QrDecoder());
         }
-        for (Entry value : this.mDecoders.entrySet()) {
+        for (Map.Entry<Integer, Decoder> value : this.mDecoders.entrySet()) {
             ((Decoder) value.getValue()).init(i);
         }
     }
 
     public void quit() {
-        for (Entry value : this.mDecoders.entrySet()) {
+        for (Map.Entry<Integer, Decoder> value : this.mDecoders.entrySet()) {
             Decoder decoder = (Decoder) value.getValue();
             decoder.stopDecode();
             decoder.quit();
@@ -79,27 +78,27 @@ public class PreviewDecodeManager {
     }
 
     public void reset() {
-        for (Entry value : this.mDecoders.entrySet()) {
+        for (Map.Entry<Integer, Decoder> value : this.mDecoders.entrySet()) {
             ((Decoder) value.getValue()).reset();
         }
     }
 
     public void resetScanResult() {
-        Decoder decoder = (Decoder) this.mDecoders.get(Integer.valueOf(0));
+        Decoder decoder = this.mDecoders.get(0);
         if (decoder != null) {
             ((QrDecoder) decoder).resetScanResult();
         }
     }
 
     public void startDecode() {
-        for (Entry value : this.mDecoders.entrySet()) {
+        for (Map.Entry<Integer, Decoder> value : this.mDecoders.entrySet()) {
             ((Decoder) value.getValue()).startDecode();
         }
     }
 
     public void stopDecode(int i) {
         if (this.mDecoders.get(Integer.valueOf(i)) != null) {
-            ((Decoder) this.mDecoders.get(Integer.valueOf(i))).stopDecode();
+            this.mDecoders.get(Integer.valueOf(i)).stopDecode();
         }
     }
 }

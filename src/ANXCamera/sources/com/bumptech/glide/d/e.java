@@ -35,7 +35,7 @@ public class e {
         if (!this.yk.contains(str)) {
             this.yk.add(str);
         }
-        list = (List) this.gf.get(str);
+        list = this.gf.get(str);
         if (list == null) {
             list = new ArrayList<>();
             this.gf.put(str, list);
@@ -67,7 +67,7 @@ public class e {
         ArrayList arrayList;
         arrayList = new ArrayList();
         for (String str : this.yk) {
-            List<a> list = (List) this.gf.get(str);
+            List<a> list = this.gf.get(str);
             if (list != null) {
                 for (a aVar : list) {
                     if (aVar.c(cls, cls2)) {
@@ -84,7 +84,7 @@ public class e {
         ArrayList arrayList;
         arrayList = new ArrayList();
         for (String str : this.yk) {
-            List<a> list = (List) this.gf.get(str);
+            List<a> list = this.gf.get(str);
             if (list != null) {
                 for (a aVar : list) {
                     if (aVar.c(cls, cls2) && !arrayList.contains(aVar.Be)) {

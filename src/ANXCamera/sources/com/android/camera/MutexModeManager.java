@@ -69,18 +69,7 @@ public class MutexModeManager {
 
     public String getAlgorithmName() {
         int i = this.mCurrentMutexMode;
-        if (i != 1) {
-            if (i == 2) {
-                return "AO_HDR";
-            }
-            if (i == 3) {
-                return CameraStat.PARAM_HHT;
-            }
-            if (i != 5) {
-                return "";
-            }
-        }
-        return CameraStat.PARAM_HDR;
+        return i != 1 ? i != 2 ? i != 3 ? i != 5 ? "" : CameraStat.PARAM_HDR : CameraStat.PARAM_HHT : "AO_HDR" : CameraStat.PARAM_HDR;
     }
 
     public int getMutexMode() {
@@ -91,23 +80,11 @@ public class MutexModeManager {
         if (this.mCurrentMutexMode == 4) {
             return "_RAW";
         }
-        String str = "";
         if (!b.Oh() && !Util.isForceNameSuffix()) {
-            return str;
+            return "";
         }
         int i = this.mCurrentMutexMode;
-        if (i != 1) {
-            if (i == 2) {
-                return "_AO_HDR";
-            }
-            if (i == 3) {
-                return "_HHT";
-            }
-            if (i != 5) {
-                return str;
-            }
-        }
-        return "_HDR";
+        return i != 1 ? i != 2 ? i != 3 ? i != 5 ? "" : "_HDR" : "_HHT" : "_AO_HDR" : "_HDR";
     }
 
     public boolean inMandatoryMode() {

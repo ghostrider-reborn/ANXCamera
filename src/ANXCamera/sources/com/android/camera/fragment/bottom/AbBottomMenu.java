@@ -2,7 +2,7 @@ package com.android.camera.fragment.bottom;
 
 import android.content.Context;
 import android.util.SparseArray;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import com.android.camera.fragment.beauty.MenuItem;
 import com.android.camera.ui.ColorActivateTextView;
@@ -21,21 +21,21 @@ public abstract class AbBottomMenu {
         this.mBeautyMenuAnimator = beautyMenuAnimator;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract void addAllView();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract SparseArray<ColorActivateTextView> getChildMenuViewList();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract int getDefaultType();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract SparseArray<MenuItem> getMenuData();
 
     /* access modifiers changed from: protected */
     public void hideAdvance() {
-        this.mContainerView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+        this.mContainerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             public void onGlobalLayout() {
                 BeautyMenuAnimator beautyMenuAnimator = AbBottomMenu.this.mBeautyMenuAnimator;
                 if (beautyMenuAnimator != null) {
@@ -56,18 +56,18 @@ public abstract class AbBottomMenu {
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract boolean isRefreshUI();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void selectBeautyType(int i) {
         ColorActivateTextView colorActivateTextView = this.mCurrentBeautyTextView;
         if (colorActivateTextView != null) {
             colorActivateTextView.setActivated(false);
         }
-        SparseArray childMenuViewList = getChildMenuViewList();
+        SparseArray<ColorActivateTextView> childMenuViewList = getChildMenuViewList();
         if (childMenuViewList != null) {
-            ColorActivateTextView colorActivateTextView2 = (ColorActivateTextView) childMenuViewList.get(i);
+            ColorActivateTextView colorActivateTextView2 = childMenuViewList.get(i);
             if (colorActivateTextView2 != null) {
                 colorActivateTextView2.setActivated(true);
                 this.mCurrentBeautyTextView = colorActivateTextView2;
@@ -75,6 +75,6 @@ public abstract class AbBottomMenu {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract void switchMenu();
 }

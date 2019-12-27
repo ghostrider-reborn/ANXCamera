@@ -28,17 +28,17 @@ public class VEPreviewSettings {
         }
 
         public Builder enableAudioRecord(boolean z) {
-            this.mExportPreviewSettings.mEnableAudioRecord = z;
+            boolean unused = this.mExportPreviewSettings.mEnableAudioRecord = z;
             return this;
         }
 
         public Builder setAsyncDetection(boolean z) {
-            this.mExportPreviewSettings.mIsAsyncDetection = z;
+            boolean unused = this.mExportPreviewSettings.mIsAsyncDetection = z;
             return this;
         }
 
         public Builder setRenderSize(@NonNull VESize vESize) {
-            this.mExportPreviewSettings.mRenderSize = vESize;
+            VESize unused = this.mExportPreviewSettings.mRenderSize = vESize;
             return this;
         }
     }

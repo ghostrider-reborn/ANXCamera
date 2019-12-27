@@ -4,9 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
-import android.support.v7.util.ThreadUtil.BackgroundCallback;
-import android.support.v7.util.ThreadUtil.MainThreadCallback;
-import android.support.v7.util.TileList.Tile;
+import android.support.v7.util.ThreadUtil;
+import android.support.v7.util.TileList;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -15,25 +14,25 @@ public class AsyncListUtil<T> {
     static final boolean DEBUG = false;
     static final String TAG = "AsyncListUtil";
     boolean mAllowScrollHints;
-    private final BackgroundCallback<T> mBackgroundCallback = new BackgroundCallback<T>() {
+    private final ThreadUtil.BackgroundCallback<T> mBackgroundCallback = new ThreadUtil.BackgroundCallback<T>() {
         private int mFirstRequiredTileStart;
         private int mGeneration;
         private int mItemCount;
         private int mLastRequiredTileStart;
         final SparseBooleanArray mLoadedTiles = new SparseBooleanArray();
-        private Tile<T> mRecycledRoot;
+        private TileList.Tile<T> mRecycledRoot;
 
-        private Tile<T> acquireTile() {
-            Tile<T> tile = this.mRecycledRoot;
+        private TileList.Tile<T> acquireTile() {
+            TileList.Tile<T> tile = this.mRecycledRoot;
             if (tile != null) {
                 this.mRecycledRoot = tile.mNext;
                 return tile;
             }
             AsyncListUtil asyncListUtil = AsyncListUtil.this;
-            return new Tile<>(asyncListUtil.mTClass, asyncListUtil.mTileSize);
+            return new TileList.Tile<>(asyncListUtil.mTClass, asyncListUtil.mTileSize);
         }
 
-        private void addTile(Tile<T> tile) {
+        private void addTile(TileList.Tile<T> tile) {
             this.mLoadedTiles.put(tile.mStartPosition, true);
             AsyncListUtil.this.mMainThreadProxy.addTile(this.mGeneration, tile);
         }
@@ -69,10 +68,7 @@ public class AsyncListUtil<T> {
         }
 
         private void log(String str, Object... objArr) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("[BKGR] ");
-            sb.append(String.format(str, objArr));
-            Log.d(AsyncListUtil.TAG, sb.toString());
+            Log.d(AsyncListUtil.TAG, "[BKGR] " + String.format(str, objArr));
         }
 
         private void removeTile(int i) {
@@ -90,7 +86,7 @@ public class AsyncListUtil<T> {
 
         public void loadTile(int i, int i2) {
             if (!isTileLoaded(i)) {
-                Tile acquireTile = acquireTile();
+                TileList.Tile acquireTile = acquireTile();
                 acquireTile.mStartPosition = i;
                 acquireTile.mItemCount = Math.min(AsyncListUtil.this.mTileSize, this.mItemCount - acquireTile.mStartPosition);
                 AsyncListUtil.this.mDataCallback.fillData(acquireTile.mItems, acquireTile.mStartPosition, acquireTile.mItemCount);
@@ -99,7 +95,7 @@ public class AsyncListUtil<T> {
             }
         }
 
-        public void recycleTile(Tile<T> tile) {
+        public void recycleTile(TileList.Tile<T> tile) {
             AsyncListUtil.this.mDataCallback.recycleData(tile.mItems, tile.mItemCount);
             tile.mNext = this.mRecycledRoot;
             this.mRecycledRoot = tile;
@@ -121,18 +117,18 @@ public class AsyncListUtil<T> {
                 if (i5 == 1) {
                     requestTiles(this.mFirstRequiredTileStart, tileStart2, i5, true);
                     requestTiles(tileStart2 + AsyncListUtil.this.mTileSize, this.mLastRequiredTileStart, i5, false);
-                } else {
-                    requestTiles(tileStart, this.mLastRequiredTileStart, i5, false);
-                    requestTiles(this.mFirstRequiredTileStart, tileStart - AsyncListUtil.this.mTileSize, i5, true);
+                    return;
                 }
+                requestTiles(tileStart, this.mLastRequiredTileStart, i5, false);
+                requestTiles(this.mFirstRequiredTileStart, tileStart - AsyncListUtil.this.mTileSize, i5, true);
             }
         }
     };
-    final BackgroundCallback<T> mBackgroundProxy;
+    final ThreadUtil.BackgroundCallback<T> mBackgroundProxy;
     final DataCallback<T> mDataCallback;
     int mDisplayedGeneration = 0;
     int mItemCount = 0;
-    private final MainThreadCallback<T> mMainThreadCallback = new MainThreadCallback<T>() {
+    private final ThreadUtil.MainThreadCallback<T> mMainThreadCallback = new ThreadUtil.MainThreadCallback<T>() {
         private boolean isRequestedGeneration(int i) {
             return i == AsyncListUtil.this.mRequestedGeneration;
         }
@@ -145,17 +141,14 @@ public class AsyncListUtil<T> {
             AsyncListUtil.this.mTileList.clear();
         }
 
-        public void addTile(int i, Tile<T> tile) {
+        public void addTile(int i, TileList.Tile<T> tile) {
             if (!isRequestedGeneration(i)) {
                 AsyncListUtil.this.mBackgroundProxy.recycleTile(tile);
                 return;
             }
-            Tile addOrReplace = AsyncListUtil.this.mTileList.addOrReplace(tile);
+            TileList.Tile<T> addOrReplace = AsyncListUtil.this.mTileList.addOrReplace(tile);
             if (addOrReplace != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("duplicate tile @");
-                sb.append(addOrReplace.mStartPosition);
-                Log.e(AsyncListUtil.TAG, sb.toString());
+                Log.e(AsyncListUtil.TAG, "duplicate tile @" + addOrReplace.mStartPosition);
                 AsyncListUtil.this.mBackgroundProxy.recycleTile(addOrReplace);
             }
             int i2 = tile.mStartPosition + tile.mItemCount;
@@ -173,12 +166,9 @@ public class AsyncListUtil<T> {
 
         public void removeTile(int i, int i2) {
             if (isRequestedGeneration(i)) {
-                Tile removeAtPos = AsyncListUtil.this.mTileList.removeAtPos(i2);
+                TileList.Tile<T> removeAtPos = AsyncListUtil.this.mTileList.removeAtPos(i2);
                 if (removeAtPos == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("tile not found @");
-                    sb.append(i2);
-                    Log.e(AsyncListUtil.TAG, sb.toString());
+                    Log.e(AsyncListUtil.TAG, "tile not found @" + i2);
                     return;
                 }
                 AsyncListUtil.this.mBackgroundProxy.recycleTile(removeAtPos);
@@ -199,7 +189,7 @@ public class AsyncListUtil<T> {
             }
         }
     };
-    final MainThreadCallback<T> mMainThreadProxy;
+    final ThreadUtil.MainThreadCallback<T> mMainThreadProxy;
     final SparseIntArray mMissingPositions = new SparseIntArray();
     final int[] mPrevRange = new int[2];
     int mRequestedGeneration = this.mDisplayedGeneration;
@@ -274,11 +264,7 @@ public class AsyncListUtil<T> {
     @Nullable
     public T getItem(int i) {
         if (i < 0 || i >= this.mItemCount) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(i);
-            sb.append(" is not within 0 and ");
-            sb.append(this.mItemCount);
-            throw new IndexOutOfBoundsException(sb.toString());
+            throw new IndexOutOfBoundsException(i + " is not within 0 and " + this.mItemCount);
         }
         T itemAt = this.mTileList.getItemAt(i);
         if (itemAt == null && !isRefreshPending()) {
@@ -291,12 +277,9 @@ public class AsyncListUtil<T> {
         return this.mItemCount;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void log(String str, Object... objArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[MAIN] ");
-        sb.append(String.format(str, objArr));
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "[MAIN] " + String.format(str, objArr));
     }
 
     public void onRangeChanged() {
@@ -308,13 +291,13 @@ public class AsyncListUtil<T> {
 
     public void refresh() {
         this.mMissingPositions.clear();
-        BackgroundCallback<T> backgroundCallback = this.mBackgroundProxy;
+        ThreadUtil.BackgroundCallback<T> backgroundCallback = this.mBackgroundProxy;
         int i = this.mRequestedGeneration + 1;
         this.mRequestedGeneration = i;
         backgroundCallback.refresh(i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void updateRange() {
         this.mViewCallback.getItemRangeInto(this.mTmpRange);
         int[] iArr = this.mTmpRange;
@@ -341,7 +324,7 @@ public class AsyncListUtil<T> {
             iArr5[0] = Math.min(this.mTmpRange[0], Math.max(iArr5[0], 0));
             int[] iArr6 = this.mTmpRangeExtended;
             iArr6[1] = Math.max(this.mTmpRange[1], Math.min(iArr6[1], this.mItemCount - 1));
-            BackgroundCallback<T> backgroundCallback = this.mBackgroundProxy;
+            ThreadUtil.BackgroundCallback<T> backgroundCallback = this.mBackgroundProxy;
             int[] iArr7 = this.mTmpRange;
             int i2 = iArr7[0];
             int i3 = iArr7[1];

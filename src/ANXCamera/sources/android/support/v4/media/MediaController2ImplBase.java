@@ -8,7 +8,6 @@ import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
@@ -16,15 +15,14 @@ import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.mediacompat.Rating2;
-import android.support.v4.media.IMediaSession2.Stub;
-import android.support.v4.media.MediaController2.ControllerCallback;
-import android.support.v4.media.MediaController2.PlaybackInfo;
-import android.support.v4.media.MediaSession2.CommandButton;
+import android.support.v4.media.IMediaSession2;
+import android.support.v4.media.MediaController2;
+import android.support.v4.media.MediaSession2;
 import android.util.Log;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-class MediaController2ImplBase implements SupportLibraryImpl {
+class MediaController2ImplBase implements MediaController2.SupportLibraryImpl {
     static final boolean DEBUG = Log.isLoggable(TAG, 3);
     static final String TAG = "MC2ImplBase";
     @GuardedBy("mLock")
@@ -34,13 +32,13 @@ class MediaController2ImplBase implements SupportLibraryImpl {
     @GuardedBy("mLock")
     private int mBufferingState;
     /* access modifiers changed from: private */
-    public final ControllerCallback mCallback;
+    public final MediaController2.ControllerCallback mCallback;
     private final Executor mCallbackExecutor;
     private final Context mContext;
     final MediaController2Stub mControllerStub;
     @GuardedBy("mLock")
     private MediaItem2 mCurrentMediaItem;
-    private final DeathRecipient mDeathRecipient;
+    private final IBinder.DeathRecipient mDeathRecipient;
     @GuardedBy("mLock")
     private volatile IMediaSession2 mISession2;
     /* access modifiers changed from: private */
@@ -49,7 +47,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
     private boolean mIsReleased;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
-    private PlaybackInfo mPlaybackInfo;
+    private MediaController2.PlaybackInfo mPlaybackInfo;
     @GuardedBy("mLock")
     private float mPlaybackSpeed;
     @GuardedBy("mLock")
@@ -82,41 +80,24 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         }
 
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            boolean z = MediaController2ImplBase.DEBUG;
-            String str = MediaController2ImplBase.TAG;
-            if (z) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onServiceConnected ");
-                sb.append(componentName);
-                sb.append(" ");
-                sb.append(this);
-                Log.d(str, sb.toString());
+            if (MediaController2ImplBase.DEBUG) {
+                Log.d(MediaController2ImplBase.TAG, "onServiceConnected " + componentName + " " + this);
             }
             if (!MediaController2ImplBase.this.mToken.getPackageName().equals(componentName.getPackageName())) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(componentName);
-                sb2.append(" was connected, but expected pkg=");
-                sb2.append(MediaController2ImplBase.this.mToken.getPackageName());
-                sb2.append(" with id=");
-                sb2.append(MediaController2ImplBase.this.mToken.getId());
-                Log.wtf(str, sb2.toString());
+                Log.wtf(MediaController2ImplBase.TAG, componentName + " was connected, but expected pkg=" + MediaController2ImplBase.this.mToken.getPackageName() + " with id=" + MediaController2ImplBase.this.mToken.getId());
                 return;
             }
-            MediaController2ImplBase.this.connectToSession(Stub.asInterface(iBinder));
+            MediaController2ImplBase.this.connectToSession(IMediaSession2.Stub.asInterface(iBinder));
         }
 
         public void onServiceDisconnected(ComponentName componentName) {
             if (MediaController2ImplBase.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Session service ");
-                sb.append(componentName);
-                sb.append(" is disconnected.");
-                Log.w(MediaController2ImplBase.TAG, sb.toString());
+                Log.w(MediaController2ImplBase.TAG, "Session service " + componentName + " is disconnected.");
             }
         }
     }
 
-    MediaController2ImplBase(Context context, MediaController2 mediaController2, SessionToken2 sessionToken2, Executor executor, ControllerCallback controllerCallback) {
+    MediaController2ImplBase(Context context, MediaController2 mediaController2, SessionToken2 sessionToken2, Executor executor, MediaController2.ControllerCallback controllerCallback) {
         this.mInstance = mediaController2;
         if (context == null) {
             throw new IllegalArgumentException("context shouldn't be null");
@@ -130,12 +111,12 @@ class MediaController2ImplBase implements SupportLibraryImpl {
             this.mToken = sessionToken2;
             this.mCallback = controllerCallback;
             this.mCallbackExecutor = executor;
-            this.mDeathRecipient = new DeathRecipient() {
+            this.mDeathRecipient = new IBinder.DeathRecipient() {
                 public void binderDied() {
                     MediaController2ImplBase.this.mInstance.close();
                 }
             };
-            IMediaSession2 asInterface = Stub.asInterface((IBinder) this.mToken.getBinder());
+            IMediaSession2 asInterface = IMediaSession2.Stub.asInterface((IBinder) this.mToken.getBinder());
             if (this.mToken.getType() == 0) {
                 this.mServiceConnection = null;
                 connectToSession(asInterface);
@@ -153,19 +134,9 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         intent.setClassName(this.mToken.getPackageName(), this.mToken.getServiceName());
         synchronized (this.mLock) {
             if (!this.mContext.bindService(intent, this.mServiceConnection, 1)) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("bind to ");
-                sb.append(this.mToken);
-                sb.append(" failed");
-                Log.w(str, sb.toString());
+                Log.w(TAG, "bind to " + this.mToken + " failed");
             } else if (DEBUG) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("bind to ");
-                sb2.append(this.mToken);
-                sb2.append(" success");
-                Log.d(str2, sb2.toString());
+                Log.d(TAG, "bind to " + this.mToken + " success");
             }
         }
     }
@@ -210,10 +181,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
      */
     public void close() {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("release from ");
-            sb.append(this.mToken);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "release from " + this.mToken);
         }
         synchronized (this.mLock) {
             IMediaSession2 iMediaSession2 = this.mISession2;
@@ -275,7 +243,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
     }
 
     @NonNull
-    public ControllerCallback getCallback() {
+    public MediaController2.ControllerCallback getCallback() {
         return this.mCallback;
     }
 
@@ -308,7 +276,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:12:0x001e, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:11:0x001c, code lost:
         return -1;
      */
     public long getDuration() {
@@ -326,8 +294,8 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         return this.mInstance;
     }
 
-    public PlaybackInfo getPlaybackInfo() {
-        PlaybackInfo playbackInfo;
+    public MediaController2.PlaybackInfo getPlaybackInfo() {
+        MediaController2.PlaybackInfo playbackInfo;
         synchronized (this.mLock) {
             playbackInfo = this.mPlaybackInfo;
         }
@@ -385,15 +353,11 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         return pendingIntent;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public IMediaSession2 getSessionInterfaceIfAble(int i) {
         synchronized (this.mLock) {
             if (!this.mAllowedCommands.hasCommand(i)) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Controller isn't allowed to call command, commandCode=");
-                sb.append(i);
-                Log.w(str, sb.toString());
+                Log.w(TAG, "Controller isn't allowed to call command, commandCode=" + i);
                 return null;
             }
             IMediaSession2 iMediaSession2 = this.mISession2;
@@ -401,15 +365,11 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public IMediaSession2 getSessionInterfaceIfAble(SessionCommand2 sessionCommand2) {
         synchronized (this.mLock) {
             if (!this.mAllowedCommands.hasCommand(sessionCommand2)) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Controller isn't allowed to call command, command=");
-                sb.append(sessionCommand2);
-                Log.w(str, sb.toString());
+                Log.w(TAG, "Controller isn't allowed to call command, command=" + sessionCommand2);
                 return null;
             }
             IMediaSession2 iMediaSession2 = this.mISession2;
@@ -437,7 +397,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         return z;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyBufferingStateChanged(final MediaItem2 mediaItem2, final int i, long j) {
         synchronized (this.mLock) {
             this.mBufferingState = i;
@@ -452,7 +412,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyCurrentMediaItemChanged(final MediaItem2 mediaItem2) {
         synchronized (this.mLock) {
             this.mCurrentMediaItem = mediaItem2;
@@ -466,7 +426,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyError(final int i, final Bundle bundle) {
         this.mCallbackExecutor.execute(new Runnable() {
             public void run() {
@@ -477,8 +437,8 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
-    public void notifyPlaybackInfoChanges(final PlaybackInfo playbackInfo) {
+    /* access modifiers changed from: package-private */
+    public void notifyPlaybackInfoChanges(final MediaController2.PlaybackInfo playbackInfo) {
         synchronized (this.mLock) {
             this.mPlaybackInfo = playbackInfo;
         }
@@ -491,7 +451,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyPlaybackSpeedChanges(long j, long j2, final float f2) {
         synchronized (this.mLock) {
             this.mPositionEventTimeMs = j;
@@ -507,7 +467,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyPlayerStateChanges(long j, long j2, final int i) {
         synchronized (this.mLock) {
             this.mPositionEventTimeMs = j;
@@ -523,7 +483,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyPlaylistChanges(final List<MediaItem2> list, final MediaMetadata2 mediaMetadata2) {
         synchronized (this.mLock) {
             this.mPlaylist = list;
@@ -538,7 +498,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyPlaylistMetadataChanges(final MediaMetadata2 mediaMetadata2) {
         synchronized (this.mLock) {
             this.mPlaylistMetadata = mediaMetadata2;
@@ -552,7 +512,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyRepeatModeChanges(final int i) {
         synchronized (this.mLock) {
             this.mRepeatMode = i;
@@ -566,7 +526,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyRoutesInfoChanged(final List<Bundle> list) {
         this.mCallbackExecutor.execute(new Runnable() {
             public void run() {
@@ -577,7 +537,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifySeekCompleted(long j, long j2, final long j3) {
         synchronized (this.mLock) {
             this.mPositionEventTimeMs = j;
@@ -592,7 +552,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void notifyShuffleModeChanges(final int i) {
         synchronized (this.mLock) {
             this.mShuffleMode = i;
@@ -606,7 +566,7 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onAllowedCommandsChanged(final SessionCommandGroup2 sessionCommandGroup2) {
         this.mCallbackExecutor.execute(new Runnable() {
             public void run() {
@@ -615,17 +575,12 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
-    public void onConnectedNotLocked(IMediaSession2 iMediaSession2, final SessionCommandGroup2 sessionCommandGroup2, int i, MediaItem2 mediaItem2, long j, long j2, float f2, long j3, PlaybackInfo playbackInfo, int i2, int i3, List<MediaItem2> list, PendingIntent pendingIntent) {
+    /* access modifiers changed from: package-private */
+    public void onConnectedNotLocked(IMediaSession2 iMediaSession2, final SessionCommandGroup2 sessionCommandGroup2, int i, MediaItem2 mediaItem2, long j, long j2, float f2, long j3, MediaController2.PlaybackInfo playbackInfo, int i2, int i3, List<MediaItem2> list, PendingIntent pendingIntent) {
         IMediaSession2 iMediaSession22 = iMediaSession2;
         SessionCommandGroup2 sessionCommandGroup22 = sessionCommandGroup2;
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onConnectedNotLocked sessionBinder=");
-            sb.append(iMediaSession2);
-            sb.append(", allowedCommands=");
-            sb.append(sessionCommandGroup2);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "onConnectedNotLocked sessionBinder=" + iMediaSession2 + ", allowedCommands=" + sessionCommandGroup2);
         }
         if (iMediaSession22 == null || sessionCommandGroup22 == null) {
             this.mInstance.close();
@@ -685,13 +640,10 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onCustomCommand(final SessionCommand2 sessionCommand2, final Bundle bundle, final ResultReceiver resultReceiver) {
         if (DEBUG) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onCustomCommand cmd=");
-            sb.append(sessionCommand2);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "onCustomCommand cmd=" + sessionCommand2);
         }
         this.mCallbackExecutor.execute(new Runnable() {
             public void run() {
@@ -700,8 +652,8 @@ class MediaController2ImplBase implements SupportLibraryImpl {
         });
     }
 
-    /* access modifiers changed from: 0000 */
-    public void onCustomLayoutChanged(final List<CommandButton> list) {
+    /* access modifiers changed from: package-private */
+    public void onCustomLayoutChanged(final List<MediaSession2.CommandButton> list) {
         this.mCallbackExecutor.execute(new Runnable() {
             public void run() {
                 MediaController2ImplBase.this.mCallback.onCustomLayoutChanged(MediaController2ImplBase.this.mInstance, list);

@@ -31,14 +31,8 @@ public class ReprocessData {
         this.mImageTag = str;
         this.mTotalCaptureResult = iCustomCaptureResult;
         this.mIsFrontCamera = z;
-        if (i == 0) {
-            i = image.getWidth();
-        }
-        this.mOutputWidth = i;
-        if (i2 == 0) {
-            i2 = image.getHeight();
-        }
-        this.mOutputHeight = i2;
+        this.mOutputWidth = i == 0 ? image.getWidth() : i;
+        this.mOutputHeight = i2 == 0 ? image.getHeight() : i2;
         this.mOutputFormat = i3;
         this.mResultListener = onDataAvailableListener;
         this.mJpegQuality = 100;

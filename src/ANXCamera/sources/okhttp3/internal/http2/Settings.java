@@ -14,24 +14,23 @@ public final class Settings {
     private int set;
     private final int[] values = new int[10];
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void clear() {
         this.set = 0;
         Arrays.fill(this.values, 0);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int get(int i) {
         return this.values[i];
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean getEnablePush(boolean z) {
-        int i = (this.set & 4) != 0 ? this.values[2] : z ? 1 : 0;
-        return i == 1;
+        return ((this.set & 4) != 0 ? this.values[2] : z ? 1 : 0) == 1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getHeaderTableSize() {
         if ((this.set & 2) != 0) {
             return this.values[1];
@@ -39,7 +38,7 @@ public final class Settings {
         return -1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getInitialWindowSize() {
         if ((this.set & 128) != 0) {
             return this.values[7];
@@ -47,27 +46,27 @@ public final class Settings {
         return 65535;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getMaxConcurrentStreams(int i) {
         return (this.set & 16) != 0 ? this.values[4] : i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getMaxFrameSize(int i) {
         return (this.set & 32) != 0 ? this.values[5] : i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getMaxHeaderListSize(int i) {
         return (this.set & 64) != 0 ? this.values[6] : i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isSet(int i) {
         return (this.set & (1 << i)) != 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void merge(Settings settings) {
         for (int i = 0; i < 10; i++) {
             if (settings.isSet(i)) {
@@ -76,7 +75,7 @@ public final class Settings {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Settings set(int i, int i2) {
         if (i >= 0) {
             int[] iArr = this.values;
@@ -88,7 +87,7 @@ public final class Settings {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int size() {
         return Integer.bitCount(this.set);
     }

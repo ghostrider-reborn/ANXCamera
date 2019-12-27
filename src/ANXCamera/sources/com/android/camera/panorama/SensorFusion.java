@@ -4,7 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import com.android.camera.log.Log;
-import com.android.camera.panorama.MorphoSensorFusion.SensorData;
+import com.android.camera.panorama.MorphoSensorFusion;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -33,15 +33,15 @@ public class SensorFusion implements SensorEventListener {
     public static final int STATE_PROCESS = 1;
     public static final Object SensorSynchronizedObject = new Object();
     private int camera_rotation = 1;
-    private ArrayList<ArrayList<SensorData>> mAllValueList;
+    private ArrayList<ArrayList<MorphoSensorFusion.SensorData>> mAllValueList;
     private int mGyroCalibratedMode = 0;
     private int mMode;
     private MorphoSensorFusion mMorphoSensorFusion;
-    private final ArrayList<SensorData> mPartOfAccelerometerList = new ArrayList<>();
-    private final ArrayList<SensorData> mPartOfGyroscopeList = new ArrayList<>();
-    private final ArrayList<SensorData> mPartOfGyroscopeUncalibratedList = new ArrayList<>();
-    private final ArrayList<SensorData> mPartOfMagneticFieldList = new ArrayList<>();
-    private final ArrayList<SensorData> mPartOfRotationVectorList = new ArrayList<>();
+    private final ArrayList<MorphoSensorFusion.SensorData> mPartOfAccelerometerList = new ArrayList<>();
+    private final ArrayList<MorphoSensorFusion.SensorData> mPartOfGyroscopeList = new ArrayList<>();
+    private final ArrayList<MorphoSensorFusion.SensorData> mPartOfGyroscopeUncalibratedList = new ArrayList<>();
+    private final ArrayList<MorphoSensorFusion.SensorData> mPartOfMagneticFieldList = new ArrayList<>();
+    private final ArrayList<MorphoSensorFusion.SensorData> mPartOfRotationVectorList = new ArrayList<>();
     private final double[][] mSensorMatrix;
     private final boolean mStock;
 
@@ -95,11 +95,11 @@ public class SensorFusion implements SensorEventListener {
         return new double[]{1.0d, 0.0d, 0.0d, 0.0d, 1.0d, 0.0d, 0.0d, 0.0d, 1.0d};
     }
 
-    private Object[] getSensorDataArray(ArrayList<SensorData> arrayList) {
+    private Object[] getSensorDataArray(ArrayList<MorphoSensorFusion.SensorData> arrayList) {
         int size = arrayList.size();
         Object[] objArr = new Object[size];
         for (int i = 0; i < size; i++) {
-            objArr[i] = new SensorData(((SensorData) arrayList.get(i)).mTimeStamp, ((SensorData) arrayList.get(i)).mValues);
+            objArr[i] = new MorphoSensorFusion.SensorData(arrayList.get(i).mTimeStamp, arrayList.get(i).mValues);
         }
         arrayList.clear();
         return objArr;
@@ -215,13 +215,13 @@ public class SensorFusion implements SensorEventListener {
         }
         if (this.mStock) {
             if (this.mGyroCalibratedMode == 0) {
-                ((ArrayList) this.mAllValueList.get(0)).addAll(arrayList);
+                this.mAllValueList.get(0).addAll(arrayList);
             } else {
-                ((ArrayList) this.mAllValueList.get(0)).addAll(arrayList2);
+                this.mAllValueList.get(0).addAll(arrayList2);
             }
-            ((ArrayList) this.mAllValueList.get(1)).addAll(arrayList3);
-            ((ArrayList) this.mAllValueList.get(2)).addAll(arrayList4);
-            ((ArrayList) this.mAllValueList.get(3)).addAll(arrayList5);
+            this.mAllValueList.get(1).addAll(arrayList3);
+            this.mAllValueList.get(2).addAll(arrayList4);
+            this.mAllValueList.get(3).addAll(arrayList5);
         }
         if (this.mGyroCalibratedMode == 0) {
             if (!arrayList.isEmpty()) {
@@ -276,7 +276,7 @@ public class SensorFusion implements SensorEventListener {
         synchronized (this) {
             if (this.mStock) {
                 for (int i = 0; i < this.mAllValueList.size(); i++) {
-                    ((ArrayList) this.mAllValueList.get(i)).clear();
+                    this.mAllValueList.get(i).clear();
                 }
             }
         }
@@ -297,15 +297,15 @@ public class SensorFusion implements SensorEventListener {
             }
             if (this.mStock && iArr != null && iArr.length == this.mAllValueList.size()) {
                 for (int i = 0; i < this.mAllValueList.size(); i++) {
-                    iArr[i] = ((ArrayList) this.mAllValueList.get(i)).size() - 1;
+                    iArr[i] = this.mAllValueList.get(i).size() - 1;
                 }
             }
         }
         return updateSensorMatrix;
     }
 
-    public ArrayList<ArrayList<SensorData>> getStockData() {
-        ArrayList<ArrayList<SensorData>> arrayList;
+    public ArrayList<ArrayList<MorphoSensorFusion.SensorData>> getStockData() {
+        ArrayList<ArrayList<MorphoSensorFusion.SensorData>> arrayList;
         if (!this.mStock) {
             return new ArrayList<>();
         }
@@ -320,7 +320,7 @@ public class SensorFusion implements SensorEventListener {
 
     public void onSensorChanged(SensorEvent sensorEvent) {
         synchronized (SensorSynchronizedObject) {
-            SensorData sensorData = new SensorData(sensorEvent.timestamp, sensorEvent.values);
+            MorphoSensorFusion.SensorData sensorData = new MorphoSensorFusion.SensorData(sensorEvent.timestamp, sensorEvent.values);
             int type = sensorEvent.sensor.getType();
             if (type == 1) {
                 this.mPartOfAccelerometerList.add(sensorData);
@@ -400,7 +400,7 @@ public class SensorFusion implements SensorEventListener {
         return mode;
     }
 
-    public int setOffset(SensorData sensorData, int i) {
+    public int setOffset(MorphoSensorFusion.SensorData sensorData, int i) {
         int offset;
         synchronized (this) {
             offset = this.mMode == 4 ? this.mMorphoSensorFusion.setOffset(sensorData, i) | 0 : -2147483646;

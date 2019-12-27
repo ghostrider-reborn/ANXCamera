@@ -16,7 +16,7 @@ public final class MaybeIgnoreElementCompletable<T> extends Completable implemen
     static final class IgnoreMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f295d;
 
         IgnoreMaybeObserver(CompletableObserver completableObserver) {
@@ -60,7 +60,7 @@ public final class MaybeIgnoreElementCompletable<T> extends Completable implemen
     }
 
     public Maybe<T> fuseToMaybe() {
-        return RxJavaPlugins.onAssembly((Maybe<T>) new MaybeIgnoreElement<T>(this.source));
+        return RxJavaPlugins.onAssembly(new MaybeIgnoreElement(this.source));
     }
 
     /* access modifiers changed from: protected */

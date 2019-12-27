@@ -39,22 +39,22 @@ public class NotifyMessage {
     public static final int MSG_PROCESS_CHANGED = 33;
     public static final int MSG_RESOURCE_ERROR_BROKEN = 769;
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final int f153a = 0;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static final int f154b = 0;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private static final int f155c = 16;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private static final int f156d = 32;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private static final int f157e = 256;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private static final int f158f = 256;
     private static final int g = 512;
     private static final int h = 768;

@@ -23,15 +23,15 @@ public class c extends InputStream {
 
     @NonNull
     public static c h(@NonNull InputStream inputStream) {
-        c cVar;
+        c poll;
         synchronized (QUEUE) {
-            cVar = (c) QUEUE.poll();
+            poll = QUEUE.poll();
         }
-        if (cVar == null) {
-            cVar = new c();
+        if (poll == null) {
+            poll = new c();
         }
-        cVar.setInputStream(inputStream);
-        return cVar;
+        poll.setInputStream(inputStream);
+        return poll;
     }
 
     public int available() throws IOException {
@@ -94,7 +94,7 @@ public class c extends InputStream {
         this.wa.reset();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setInputStream(@NonNull InputStream inputStream) {
         this.wa = inputStream;
     }

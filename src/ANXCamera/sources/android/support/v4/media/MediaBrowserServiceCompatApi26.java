@@ -1,12 +1,12 @@
 package android.support.v4.media;
 
 import android.content.Context;
-import android.media.browse.MediaBrowser.MediaItem;
+import android.media.browse.MediaBrowser;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.service.media.MediaBrowserService;
-import android.service.media.MediaBrowserService.Result;
 import android.support.annotation.RequiresApi;
+import android.support.v4.media.MediaBrowserServiceCompatApi23;
 import android.util.Log;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -18,20 +18,20 @@ class MediaBrowserServiceCompatApi26 {
     /* access modifiers changed from: private */
     public static Field sResultFlags;
 
-    static class MediaBrowserServiceAdaptor extends MediaBrowserServiceAdaptor {
+    static class MediaBrowserServiceAdaptor extends MediaBrowserServiceCompatApi23.MediaBrowserServiceAdaptor {
         MediaBrowserServiceAdaptor(Context context, ServiceCompatProxy serviceCompatProxy) {
             super(context, serviceCompatProxy);
         }
 
-        public void onLoadChildren(String str, Result<List<MediaItem>> result, Bundle bundle) {
+        public void onLoadChildren(String str, MediaBrowserService.Result<List<MediaBrowser.MediaItem>> result, Bundle bundle) {
             ((ServiceCompatProxy) this.mServiceProxy).onLoadChildren(str, new ResultWrapper(result), bundle);
         }
     }
 
     static class ResultWrapper {
-        Result mResultObj;
+        MediaBrowserService.Result mResultObj;
 
-        ResultWrapper(Result result) {
+        ResultWrapper(MediaBrowserService.Result result) {
             this.mResultObj = result;
         }
 
@@ -39,16 +39,16 @@ class MediaBrowserServiceCompatApi26 {
             this.mResultObj.detach();
         }
 
-        /* access modifiers changed from: 0000 */
-        public List<MediaItem> parcelListToItemList(List<Parcel> list) {
+        /* access modifiers changed from: package-private */
+        public List<MediaBrowser.MediaItem> parcelListToItemList(List<Parcel> list) {
             if (list == null) {
                 return null;
             }
             ArrayList arrayList = new ArrayList();
-            for (Parcel parcel : list) {
-                parcel.setDataPosition(0);
-                arrayList.add(MediaItem.CREATOR.createFromParcel(parcel));
-                parcel.recycle();
+            for (Parcel next : list) {
+                next.setDataPosition(0);
+                arrayList.add(MediaBrowser.MediaItem.CREATOR.createFromParcel(next));
+                next.recycle();
             }
             return arrayList;
         }
@@ -63,13 +63,13 @@ class MediaBrowserServiceCompatApi26 {
         }
     }
 
-    public interface ServiceCompatProxy extends android.support.v4.media.MediaBrowserServiceCompatApi23.ServiceCompatProxy {
+    public interface ServiceCompatProxy extends MediaBrowserServiceCompatApi23.ServiceCompatProxy {
         void onLoadChildren(String str, ResultWrapper resultWrapper, Bundle bundle);
     }
 
     static {
         try {
-            sResultFlags = Result.class.getDeclaredField("mFlags");
+            sResultFlags = MediaBrowserService.Result.class.getDeclaredField("mFlags");
             sResultFlags.setAccessible(true);
         } catch (NoSuchFieldException e2) {
             Log.w(TAG, e2);

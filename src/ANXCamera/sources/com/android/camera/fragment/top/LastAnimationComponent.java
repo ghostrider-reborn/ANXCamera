@@ -36,13 +36,13 @@ public class LastAnimationComponent {
             } else {
                 list2.clear();
             }
-            for (View view : list) {
-                TopConfigItem topConfigItem = (TopConfigItem) view.getTag();
-                if ((topConfigItem == null || topConfigItem.configItem != i) && view.getVisibility() == 0 && view.getAlpha() != 0.0f) {
-                    this.mHidedViews.add(view);
-                    ViewCompat.setAlpha(view, 1.0f);
-                    ViewCompat.animate(view).setStartDelay(0).setDuration(this.mShowDelay > 0 ? 140 : 280).alpha(0.0f).translationXBy((float) this.mExpandOffset).setInterpolator(this.mShowDelay > 0 ? this.mQuartEaseIn : this.mQuartEaseOut).start();
-                    view.setEnabled(false);
+            for (View next : list) {
+                TopConfigItem topConfigItem = (TopConfigItem) next.getTag();
+                if ((topConfigItem == null || topConfigItem.configItem != i) && next.getVisibility() == 0 && next.getAlpha() != 0.0f) {
+                    this.mHidedViews.add(next);
+                    ViewCompat.setAlpha(next, 1.0f);
+                    ViewCompat.animate(next).setStartDelay(0).setDuration(this.mShowDelay > 0 ? 140 : 280).alpha(0.0f).translationXBy((float) this.mExpandOffset).setInterpolator(this.mShowDelay > 0 ? this.mQuartEaseIn : this.mQuartEaseOut).start();
+                    next.setEnabled(false);
                 }
             }
         }
@@ -55,25 +55,25 @@ public class LastAnimationComponent {
         this.mShown = false;
         List<View> list = this.mHidedViews;
         if (list != null) {
-            for (View view : list) {
+            for (View next : list) {
                 if (z) {
-                    ViewCompat.setAlpha(view, 0.0f);
-                    ViewCompat.animate(view).setStartDelay(0).setDuration(280).alpha(1.0f).translationX(0.0f).setInterpolator(this.mQuartEaseOut).start();
-                    view.setEnabled(true);
+                    ViewCompat.setAlpha(next, 0.0f);
+                    ViewCompat.animate(next).setStartDelay(0).setDuration(280).alpha(1.0f).translationX(0.0f).setInterpolator(this.mQuartEaseOut).start();
+                    next.setEnabled(true);
                 } else {
-                    ViewCompat.setTranslationX(view, 0.0f);
-                    AlphaInOnSubscribe.directSetResult(view);
+                    ViewCompat.setTranslationX(next, 0.0f);
+                    AlphaInOnSubscribe.directSetResult(next);
                 }
             }
             this.mHidedViews.clear();
             this.mHidedViews = null;
         }
-        View view2 = this.mAnchorView;
-        if (view2 != null) {
+        View view = this.mAnchorView;
+        if (view != null) {
             if (z) {
-                ViewCompat.animate(view2).translationX((float) (this.mReverseLeft - this.mAnchorView.getLeft())).setStartDelay(0).setDuration(280).setInterpolator(this.mQuartEaseOut).start();
+                ViewCompat.animate(view).translationX((float) (this.mReverseLeft - this.mAnchorView.getLeft())).setStartDelay(0).setDuration(280).setInterpolator(this.mQuartEaseOut).start();
             } else {
-                TranslateXOnSubscribe.directSetResult(view2, this.mReverseLeft - view2.getLeft());
+                TranslateXOnSubscribe.directSetResult(view, this.mReverseLeft - view.getLeft());
             }
             this.mAnchorView = null;
         }

@@ -28,7 +28,7 @@ public final class DaoConfig implements Cloneable {
         this.db = database;
         try {
             Property property = null;
-            this.tablename = (String) cls.getField("TABLENAME").get(null);
+            this.tablename = (String) cls.getField("TABLENAME").get((Object) null);
             Property[] reflectProperties = reflectProperties(cls);
             this.properties = reflectProperties;
             this.allColumns = new String[reflectProperties.length];
@@ -49,10 +49,7 @@ public final class DaoConfig implements Cloneable {
             this.nonPkColumns = (String[]) arrayList2.toArray(new String[arrayList2.size()]);
             this.pkColumns = (String[]) arrayList.toArray(new String[arrayList.size()]);
             boolean z = true;
-            if (this.pkColumns.length == 1) {
-                property = property2;
-            }
-            this.pkProperty = property;
+            this.pkProperty = this.pkColumns.length == 1 ? property2 : property;
             this.statements = new TableStatements(database, this.tablename, this.allColumns, this.pkColumns);
             if (this.pkProperty != null) {
                 Class<?> cls2 = this.pkProperty.type;
@@ -83,14 +80,11 @@ public final class DaoConfig implements Cloneable {
     }
 
     private static Property[] reflectProperties(Class<? extends AbstractDao<?, ?>> cls) throws ClassNotFoundException, IllegalArgumentException, IllegalAccessException {
-        StringBuilder sb = new StringBuilder();
-        sb.append(cls.getName());
-        sb.append("$Properties");
-        Field[] declaredFields = Class.forName(sb.toString()).getDeclaredFields();
+        Field[] declaredFields = Class.forName(cls.getName() + "$Properties").getDeclaredFields();
         ArrayList arrayList = new ArrayList();
         for (Field field : declaredFields) {
             if ((field.getModifiers() & 9) == 9) {
-                Object obj = field.get(null);
+                Object obj = field.get((Object) null);
                 if (obj instanceof Property) {
                     arrayList.add((Property) obj);
                 }
@@ -129,10 +123,7 @@ public final class DaoConfig implements Cloneable {
         if (identityScopeType == IdentityScopeType.None) {
             this.identityScope = null;
         } else if (identityScopeType != IdentityScopeType.Session) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unsupported type: ");
-            sb.append(identityScopeType);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unsupported type: " + identityScopeType);
         } else if (this.keyIsNumeric) {
             this.identityScope = new IdentityScopeLong();
         } else {

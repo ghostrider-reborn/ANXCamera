@@ -27,7 +27,7 @@ public class BaseFragmentPagerAdapter extends FragmentPagerAdapter {
     }
 
     public Fragment getItem(int i) {
-        return (Fragment) this.mFragmentList.get(i);
+        return this.mFragmentList.get(i);
     }
 
     public long getItemId(int i) {

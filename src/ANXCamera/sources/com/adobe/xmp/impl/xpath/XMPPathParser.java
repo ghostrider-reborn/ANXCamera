@@ -23,15 +23,11 @@ public final class XMPPathParser {
             int i = pathPosition.stepBegin;
             pathPosition.stepEnd = i;
             XMPPathSegment parseStructSegment = str2.charAt(i) != '[' ? parseStructSegment(pathPosition) : parseIndexSegment(pathPosition);
-            String str3 = "Only xml:lang allowed with '@'";
             if (parseStructSegment.getKind() == 1) {
                 if (parseStructSegment.getName().charAt(0) == '@') {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("?");
-                    sb.append(parseStructSegment.getName().substring(1));
-                    parseStructSegment.setName(sb.toString());
+                    parseStructSegment.setName("?" + parseStructSegment.getName().substring(1));
                     if (!"?xml:lang".equals(parseStructSegment.getName())) {
-                        throw new XMPException(str3, 102);
+                        throw new XMPException("Only xml:lang allowed with '@'", 102);
                     }
                 }
                 if (parseStructSegment.getName().charAt(0) == '?') {
@@ -43,12 +39,9 @@ public final class XMPPathParser {
                 continue;
             } else {
                 if (parseStructSegment.getName().charAt(1) == '@') {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("[?");
-                    sb2.append(parseStructSegment.getName().substring(2));
-                    parseStructSegment.setName(sb2.toString());
+                    parseStructSegment.setName("[?" + parseStructSegment.getName().substring(2));
                     if (!parseStructSegment.getName().startsWith("[?xml:lang=")) {
-                        throw new XMPException(str3, 102);
+                        throw new XMPException("Only xml:lang allowed with '@'", 102);
                     }
                 }
                 if (parseStructSegment.getName().charAt(1) == '?') {
@@ -71,13 +64,7 @@ public final class XMPPathParser {
             }
             if (pathPosition.stepEnd >= pathPosition.path.length()) {
                 throw new XMPException("Missing ']' or '=' for array index", 102);
-            } else if (pathPosition.path.charAt(pathPosition.stepEnd) == ']') {
-                if ("[last()".equals(pathPosition.path.substring(pathPosition.stepBegin, pathPosition.stepEnd))) {
-                    xMPPathSegment = new XMPPathSegment(null, 4);
-                } else {
-                    throw new XMPException("Invalid non-numeric array index", 102);
-                }
-            } else {
+            } else if (pathPosition.path.charAt(pathPosition.stepEnd) != ']') {
                 pathPosition.nameStart = pathPosition.stepBegin + 1;
                 int i = pathPosition.stepEnd;
                 pathPosition.nameEnd = i;
@@ -96,19 +83,23 @@ public final class XMPPathParser {
                     }
                     if (pathPosition.stepEnd < pathPosition.path.length()) {
                         pathPosition.stepEnd++;
-                        xMPPathSegment = new XMPPathSegment(null, 6);
+                        xMPPathSegment = new XMPPathSegment((String) null, 6);
                     } else {
                         throw new XMPException("No terminating quote for array selector", 102);
                     }
                 } else {
                     throw new XMPException("Invalid quote in array selector", 102);
                 }
+            } else if ("[last()".equals(pathPosition.path.substring(pathPosition.stepBegin, pathPosition.stepEnd))) {
+                xMPPathSegment = new XMPPathSegment((String) null, 4);
+            } else {
+                throw new XMPException("Invalid non-numeric array index", 102);
             }
         } else {
             while (pathPosition.stepEnd < pathPosition.path.length() && '0' <= pathPosition.path.charAt(pathPosition.stepEnd) && pathPosition.path.charAt(pathPosition.stepEnd) <= '9') {
                 pathPosition.stepEnd++;
             }
-            xMPPathSegment = new XMPPathSegment(null, 3);
+            xMPPathSegment = new XMPPathSegment((String) null, 3);
         }
         if (pathPosition.stepEnd >= pathPosition.path.length() || pathPosition.path.charAt(pathPosition.stepEnd) != ']') {
             throw new XMPException("Missing ']' for array index", 102);
@@ -119,10 +110,7 @@ public final class XMPPathParser {
     }
 
     private static void parseRootNode(String str, PathPosition pathPosition, XMPPath xMPPath) throws XMPException {
-        while (pathPosition.stepEnd < pathPosition.path.length()) {
-            if ("/[*".indexOf(pathPosition.path.charAt(pathPosition.stepEnd)) >= 0) {
-                break;
-            }
+        while (pathPosition.stepEnd < pathPosition.path.length() && "/[*".indexOf(pathPosition.path.charAt(pathPosition.stepEnd)) < 0) {
             pathPosition.stepEnd++;
         }
         int i = pathPosition.stepEnd;
@@ -158,10 +146,7 @@ public final class XMPPathParser {
 
     private static XMPPathSegment parseStructSegment(PathPosition pathPosition) throws XMPException {
         pathPosition.nameStart = pathPosition.stepBegin;
-        while (pathPosition.stepEnd < pathPosition.path.length()) {
-            if ("/[*".indexOf(pathPosition.path.charAt(pathPosition.stepEnd)) >= 0) {
-                break;
-            }
+        while (pathPosition.stepEnd < pathPosition.path.length() && "/[*".indexOf(pathPosition.path.charAt(pathPosition.stepEnd)) < 0) {
             pathPosition.stepEnd++;
         }
         int i = pathPosition.stepEnd;
@@ -221,10 +206,7 @@ public final class XMPPathParser {
                 int indexOf = str2.indexOf(58);
                 if (indexOf < 0) {
                     verifySimpleXMLName(str2);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(namespacePrefix);
-                    sb.append(str2);
-                    return sb.toString();
+                    return namespacePrefix + str2;
                 }
                 verifySimpleXMLName(str2.substring(0, indexOf));
                 verifySimpleXMLName(str2.substring(indexOf));

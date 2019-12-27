@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import com.bumptech.glide.load.c;
 import java.security.MessageDigest;
 
-/* renamed from: com.bumptech.glide.load.engine.d reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.engine.d  reason: case insensitive filesystem */
 /* compiled from: DataCacheKey */
 final class C0098d implements c {
     private final c signature;
@@ -15,7 +15,7 @@ final class C0098d implements c {
         this.signature = cVar2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public c cg() {
         return this.we;
     }
@@ -33,13 +33,7 @@ final class C0098d implements c {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DataCacheKey{sourceKey=");
-        sb.append(this.we);
-        sb.append(", signature=");
-        sb.append(this.signature);
-        sb.append('}');
-        return sb.toString();
+        return "DataCacheKey{sourceKey=" + this.we + ", signature=" + this.signature + '}';
     }
 
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {

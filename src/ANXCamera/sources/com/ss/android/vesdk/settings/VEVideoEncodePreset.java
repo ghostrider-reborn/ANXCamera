@@ -2,7 +2,6 @@ package com.ss.android.vesdk.settings;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public enum VEVideoEncodePreset implements Parcelable {
     ENCODE_LEVEL_ULTRAFAST,
@@ -16,10 +15,10 @@ public enum VEVideoEncodePreset implements Parcelable {
     ENCODE_LEVEL_VERYSLOW,
     ENCODE_LEVEL_PLACEBO;
     
-    public static final Creator<VEVideoEncodePreset> CREATOR = null;
+    public static final Parcelable.Creator<VEVideoEncodePreset> CREATOR = null;
 
     static {
-        CREATOR = new Creator<VEVideoEncodePreset>() {
+        CREATOR = new Parcelable.Creator<VEVideoEncodePreset>() {
             public VEVideoEncodePreset createFromParcel(Parcel parcel) {
                 return VEVideoEncodePreset.values()[parcel.readInt()];
             }

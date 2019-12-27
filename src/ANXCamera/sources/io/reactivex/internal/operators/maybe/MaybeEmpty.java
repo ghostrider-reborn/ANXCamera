@@ -14,6 +14,6 @@ public final class MaybeEmpty extends Maybe<Object> implements ScalarCallable<Ob
 
     /* access modifiers changed from: protected */
     public void subscribeActual(MaybeObserver<? super Object> maybeObserver) {
-        EmptyDisposable.complete(maybeObserver);
+        EmptyDisposable.complete((MaybeObserver<?>) maybeObserver);
     }
 }

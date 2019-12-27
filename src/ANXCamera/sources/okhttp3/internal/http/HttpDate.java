@@ -25,7 +25,7 @@ public final class HttpDate {
     }
 
     public static String format(Date date) {
-        return ((DateFormat) STANDARD_DATE_FORMAT.get()).format(date);
+        return STANDARD_DATE_FORMAT.get().format(date);
     }
 
     public static Date parse(String str) {
@@ -33,7 +33,7 @@ public final class HttpDate {
             return null;
         }
         ParsePosition parsePosition = new ParsePosition(0);
-        Date parse = ((DateFormat) STANDARD_DATE_FORMAT.get()).parse(str, parsePosition);
+        Date parse = STANDARD_DATE_FORMAT.get().parse(str, parsePosition);
         if (parsePosition.getIndex() == str.length()) {
             return parse;
         }

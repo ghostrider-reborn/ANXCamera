@@ -1,16 +1,14 @@
 package com.arcsoft.supernight;
 
 import android.graphics.Rect;
-import com.arcsoft.supernight.SuperNightProcess.FaceInfo;
-import com.arcsoft.supernight.SuperNightProcess.InputInfo;
-import com.arcsoft.supernight.SuperNightProcess.RawInfo;
+import com.arcsoft.supernight.SuperNightProcess;
 
 public class SuperNightJni {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private SuperNightJni f230a;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private long f231b = 0;
 
     static {
@@ -20,7 +18,7 @@ public class SuperNightJni {
         System.loadLibrary("arcsoft_super_night_raw_mpbase");
     }
 
-    private native int nativeAddOneInputInfo(long j, RawInfo rawInfo, InputInfo inputInfo);
+    private native int nativeAddOneInputInfo(long j, SuperNightProcess.RawInfo rawInfo, SuperNightProcess.InputInfo inputInfo);
 
     private native int nativeCancelSuperNight();
 
@@ -30,15 +28,15 @@ public class SuperNightJni {
 
     private native int nativePreProcess(long j);
 
-    private native int nativeProcess(long j, FaceInfo faceInfo, InputInfo inputInfo, int i, Rect rect, ProgressCallback progressCallback);
+    private native int nativeProcess(long j, SuperNightProcess.FaceInfo faceInfo, SuperNightProcess.InputInfo inputInfo, int i, Rect rect, ProgressCallback progressCallback);
 
-    private native int nativeProcessEx(long j, FaceInfo faceInfo, byte[] bArr, int i, int i2, int i3, int i4, int i5, Rect rect);
+    private native int nativeProcessEx(long j, SuperNightProcess.FaceInfo faceInfo, byte[] bArr, int i, int i2, int i3, int i4, int i5, Rect rect);
 
     private native int nativeSetDumpImageFile(boolean z);
 
     private native int nativeUninit(long j);
 
-    public synchronized int addOneInputInfo(RawInfo rawInfo, InputInfo inputInfo) {
+    public synchronized int addOneInputInfo(SuperNightProcess.RawInfo rawInfo, SuperNightProcess.InputInfo inputInfo) {
         int nativeAddOneInputInfo;
         TimeConsumingUtil.startTheTimer("SN addOneInputInfo");
         nativeAddOneInputInfo = nativeAddOneInputInfo(this.f231b, rawInfo, inputInfo);
@@ -51,37 +49,33 @@ public class SuperNightJni {
     }
 
     public void init(int i, int i2, int i3, int i4) {
-        String str = "SN init";
-        TimeConsumingUtil.startTheTimer(str);
+        TimeConsumingUtil.startTheTimer("SN init");
         this.f231b = nativeInit(i, i2, i3, i4);
-        TimeConsumingUtil.stopTiming(str);
+        TimeConsumingUtil.stopTiming("SN init");
     }
 
     public int postProcess() {
-        String str = "SN postProcess";
-        TimeConsumingUtil.startTheTimer(str);
+        TimeConsumingUtil.startTheTimer("SN postProcess");
         int nativePostProcess = nativePostProcess(this.f231b);
-        TimeConsumingUtil.stopTiming(str);
+        TimeConsumingUtil.stopTiming("SN postProcess");
         return nativePostProcess;
     }
 
     public int preProcess() {
-        String str = "SN preProcess";
-        TimeConsumingUtil.startTheTimer(str);
+        TimeConsumingUtil.startTheTimer("SN preProcess");
         int nativePreProcess = nativePreProcess(this.f231b);
-        TimeConsumingUtil.stopTiming(str);
+        TimeConsumingUtil.stopTiming("SN preProcess");
         return nativePreProcess;
     }
 
-    public int process(FaceInfo faceInfo, InputInfo inputInfo, int i, Rect rect, ProgressCallback progressCallback) {
-        String str = "SN process";
-        TimeConsumingUtil.startTheTimer(str);
+    public int process(SuperNightProcess.FaceInfo faceInfo, SuperNightProcess.InputInfo inputInfo, int i, Rect rect, ProgressCallback progressCallback) {
+        TimeConsumingUtil.startTheTimer("SN process");
         int nativeProcess = nativeProcess(this.f231b, faceInfo, inputInfo, i, rect, progressCallback);
-        TimeConsumingUtil.stopTiming(str);
+        TimeConsumingUtil.stopTiming("SN process");
         return nativeProcess;
     }
 
-    public int processEx(FaceInfo faceInfo, byte[] bArr, int i, int i2, int i3, int i4, int i5, Rect rect) {
+    public int processEx(SuperNightProcess.FaceInfo faceInfo, byte[] bArr, int i, int i2, int i3, int i4, int i5, Rect rect) {
         return nativeProcessEx(this.f231b, faceInfo, bArr, i, i2, i3, i4, i5, rect);
     }
 
@@ -90,10 +84,9 @@ public class SuperNightJni {
     }
 
     public int unInit() {
-        String str = "SN unInit";
-        TimeConsumingUtil.startTheTimer(str);
+        TimeConsumingUtil.startTheTimer("SN unInit");
         int nativeUninit = nativeUninit(this.f231b);
-        TimeConsumingUtil.stopTiming(str);
+        TimeConsumingUtil.stopTiming("SN unInit");
         return nativeUninit;
     }
 }

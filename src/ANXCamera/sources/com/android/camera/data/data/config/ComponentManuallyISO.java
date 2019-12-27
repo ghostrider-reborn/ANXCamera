@@ -40,10 +40,10 @@ public class ComponentManuallyISO extends ComponentData {
             Log.w(TAG, "initItems: CameraCapabilities is null!!!");
             return arrayList;
         }
-        Range isoRange = currentCameraCapabilities.getIsoRange();
+        Range<Integer> isoRange = currentCameraCapabilities.getIsoRange();
         if (isoRange != null) {
-            int intValue = ((Integer) isoRange.getLower()).intValue();
-            int intValue2 = ((Integer) isoRange.getUpper()).intValue();
+            int intValue = isoRange.getLower().intValue();
+            int intValue2 = isoRange.getUpper().intValue();
             for (int i = 1; i < fullItems.length; i++) {
                 ComponentDataItem componentDataItem = fullItems[i];
                 int parseInt = Integer.parseInt(componentDataItem.mValue);
@@ -62,11 +62,11 @@ public class ComponentManuallyISO extends ComponentData {
 
     public String getComponentValue(int i) {
         String componentValue = super.getComponentValue(i);
-        List items = getItems();
+        List<ComponentDataItem> items = getItems();
         if (items.isEmpty()) {
             return componentValue;
         }
-        String str = ((ComponentDataItem) items.get(items.size() - 1)).mValue;
+        String str = items.get(items.size() - 1).mValue;
         return Integer.parseInt(componentValue) > Integer.parseInt(str) ? str : componentValue;
     }
 

@@ -59,11 +59,11 @@ public final class FlowableCountSingle<T> extends Single<Long> implements FuseTo
     }
 
     public Flowable<Long> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableCount<T>(this.source));
+        return RxJavaPlugins.onAssembly(new FlowableCount(this.source));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super Long> singleObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new CountSubscriber<Object>(singleObserver));
+        this.source.subscribe(new CountSubscriber(singleObserver));
     }
 }

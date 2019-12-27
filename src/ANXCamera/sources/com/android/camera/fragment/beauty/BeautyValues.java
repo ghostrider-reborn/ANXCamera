@@ -2,13 +2,12 @@ package com.android.camera.fragment.beauty;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import com.android.camera.constant.BeautyConstant;
 import com.mi.config.b;
 import java.util.Locale;
 
 public class BeautyValues implements Parcelable {
-    public static final Creator<BeautyValues> CREATOR = new Creator<BeautyValues>() {
+    public static final Parcelable.Creator<BeautyValues> CREATOR = new Parcelable.Creator<BeautyValues>() {
         public BeautyValues createFromParcel(Parcel parcel) {
             return new BeautyValues(parcel);
         }
@@ -108,6 +107,7 @@ public class BeautyValues implements Parcelable {
         return 0;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public int getValueByType(String str) {
         char c2;
         switch (str.hashCode()) {

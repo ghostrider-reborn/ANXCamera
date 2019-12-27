@@ -2,38 +2,37 @@ package com.android.camera2;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.view.ViewTreeObserver.OnWindowAttachListener;
+import android.view.ViewTreeObserver;
 import com.android.camera.log.Log;
 
-public final class DetachableClickListener implements OnClickListener {
+public final class DetachableClickListener implements DialogInterface.OnClickListener {
     /* access modifiers changed from: private */
     public static final String TAG = "DetachableClickListener";
     /* access modifiers changed from: private */
-    public OnClickListener delegateOrNull;
+    public DialogInterface.OnClickListener delegateOrNull;
 
-    private DetachableClickListener(OnClickListener onClickListener) {
+    private DetachableClickListener(DialogInterface.OnClickListener onClickListener) {
         this.delegateOrNull = onClickListener;
     }
 
-    public static DetachableClickListener wrap(OnClickListener onClickListener) {
+    public static DetachableClickListener wrap(DialogInterface.OnClickListener onClickListener) {
         return new DetachableClickListener(onClickListener);
     }
 
     public void clearOnDetach(Dialog dialog) {
-        dialog.getWindow().getDecorView().getViewTreeObserver().addOnWindowAttachListener(new OnWindowAttachListener() {
+        dialog.getWindow().getDecorView().getViewTreeObserver().addOnWindowAttachListener(new ViewTreeObserver.OnWindowAttachListener() {
             public void onWindowAttached() {
                 Log.v(DetachableClickListener.TAG, "dialog attach to window");
             }
 
             public void onWindowDetached() {
-                DetachableClickListener.this.delegateOrNull = null;
+                DialogInterface.OnClickListener unused = DetachableClickListener.this.delegateOrNull = null;
             }
         });
     }
 
     public void onClick(DialogInterface dialogInterface, int i) {
-        OnClickListener onClickListener = this.delegateOrNull;
+        DialogInterface.OnClickListener onClickListener = this.delegateOrNull;
         if (onClickListener != null) {
             onClickListener.onClick(dialogInterface, i);
         }

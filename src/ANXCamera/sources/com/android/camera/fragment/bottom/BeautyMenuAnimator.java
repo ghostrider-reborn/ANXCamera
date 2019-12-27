@@ -64,9 +64,8 @@ public class BeautyMenuAnimator {
             arrayList.add(ViewCompat.animate(childAt).translationX((float) (((viewGroup.getWidth() - childAt.getWidth()) / 2) - childAt.getLeft())).setDuration(300));
             for (int i = 1; i < childCount; i++) {
                 final View childAt2 = viewGroup.getChildAt(i);
-                float width = (float) (((viewGroup.getWidth() - childAt2.getWidth()) / 2) - childAt2.getLeft());
                 arrayList.add(ViewCompat.animate(childAt2).alpha(0.0f).setDuration(200));
-                arrayList.add(ViewCompat.animate(childAt2).translationX(width).setDuration(300).setInterpolator(this.mCubicEaseOut).setListener(new ViewPropertyAnimatorListener() {
+                arrayList.add(ViewCompat.animate(childAt2).translationX((float) (((viewGroup.getWidth() - childAt2.getWidth()) / 2) - childAt2.getLeft())).setDuration(300).setInterpolator(this.mCubicEaseOut).setListener(new ViewPropertyAnimatorListener() {
                     public void onAnimationCancel(View view) {
                         AnimationMonitor.get().animationStop(view);
                     }
@@ -166,7 +165,7 @@ public class BeautyMenuAnimator {
 
     private List<ViewPropertyAnimatorCompat> getChildExpandAnimations() {
         for (ChildAnimationsProvider expandAnimation : this.mAnimationsProviders) {
-            ArrayList expandAnimation2 = expandAnimation.expandAnimation(this.mViewGroup);
+            ArrayList<ViewPropertyAnimatorCompat> expandAnimation2 = expandAnimation.expandAnimation(this.mViewGroup);
             if (expandAnimation2 != null) {
                 return expandAnimation2;
             }
@@ -176,7 +175,7 @@ public class BeautyMenuAnimator {
 
     private List<ViewPropertyAnimatorCompat> getChildShrinkAnimations() {
         for (ChildAnimationsProvider shrinkAnimation : this.mAnimationsProviders) {
-            ArrayList shrinkAnimation2 = shrinkAnimation.shrinkAnimation(this.mViewGroup);
+            ArrayList<ViewPropertyAnimatorCompat> shrinkAnimation2 = shrinkAnimation.shrinkAnimation(this.mViewGroup);
             if (shrinkAnimation2 != null) {
                 return shrinkAnimation2;
             }
@@ -192,7 +191,7 @@ public class BeautyMenuAnimator {
 
     public void expandAnimate() {
         if (!this.mExpand && getChildCount() > 1) {
-            List childExpandAnimations = getChildExpandAnimations();
+            List<ViewPropertyAnimatorCompat> childExpandAnimations = getChildExpandAnimations();
             if (childExpandAnimations != null) {
                 triggerAnimators(childExpandAnimations);
                 this.mExpand = true;
@@ -210,7 +209,7 @@ public class BeautyMenuAnimator {
 
     public void shrinkAnimate() {
         if (this.mExpand && getChildCount() > 1) {
-            List childShrinkAnimations = getChildShrinkAnimations();
+            List<ViewPropertyAnimatorCompat> childShrinkAnimations = getChildShrinkAnimations();
             if (childShrinkAnimations != null) {
                 triggerAnimators(childShrinkAnimations);
                 this.mExpand = false;

@@ -1,12 +1,13 @@
 package com.bumptech.glide.load.engine.prefill;
 
-import android.graphics.Bitmap.Config;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.a.o;
 import com.bumptech.glide.load.engine.bitmap_recycle.d;
+import com.bumptech.glide.load.engine.prefill.c;
 import com.bumptech.glide.util.l;
 import java.util.HashMap;
 
@@ -28,17 +29,17 @@ public final class a {
         return l.g(cVar.getWidth(), cVar.getHeight(), cVar.getConfig());
     }
 
-    public void b(com.bumptech.glide.load.engine.prefill.c.a... aVarArr) {
+    public void b(c.a... aVarArr) {
         BitmapPreFillRunner bitmapPreFillRunner = this.current;
         if (bitmapPreFillRunner != null) {
             bitmapPreFillRunner.cancel();
         }
         c[] cVarArr = new c[aVarArr.length];
         for (int i = 0; i < aVarArr.length; i++) {
-            com.bumptech.glide.load.engine.prefill.c.a aVar = aVarArr[i];
+            c.a aVar = aVarArr[i];
             if (aVar.getConfig() == null) {
                 DecodeFormat decodeFormat = this.Bh;
-                aVar.setConfig((decodeFormat == DecodeFormat.PREFER_ARGB_8888 || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE) ? Config.ARGB_8888 : Config.RGB_565);
+                aVar.setConfig((decodeFormat == DecodeFormat.PREFER_ARGB_8888 || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE) ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
             }
             cVarArr[i] = aVar.build();
         }
@@ -46,7 +47,7 @@ public final class a {
         this.handler.post(this.current);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public b generateAllocationOrder(c... cVarArr) {
         long maxSize = (this.Cb.getMaxSize() - this.Cb.J()) + this.Bb.getMaxSize();

@@ -13,10 +13,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 1.7777777f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 1.7777777f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -31,10 +31,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 2.0833333f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 2.0833333f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -49,10 +49,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 2.0f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 2.0f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -67,10 +67,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 2.1666667f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 2.1666667f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -85,10 +85,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 2.1111112f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 2.1111112f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -103,10 +103,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 1.0f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 1.0f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -121,10 +121,10 @@ public class PictureSizeManager {
         CameraSize cameraSize;
         int i = 0;
         int i2 = 0;
-        for (CameraSize cameraSize2 : list) {
-            if (((double) Math.abs(cameraSize2.getRatio() - 1.3333333f)) < 0.02d && cameraSize2.area() > i * i2) {
-                i = cameraSize2.getWidth();
-                i2 = cameraSize2.getHeight();
+        for (CameraSize next : list) {
+            if (((double) Math.abs(next.getRatio() - 1.3333333f)) < 0.02d && next.area() > i * i2) {
+                i = next.getWidth();
+                i2 = next.getHeight();
             }
         }
         if (i != 0) {
@@ -147,7 +147,7 @@ public class PictureSizeManager {
         } else {
             cameraSize = _findMaxRatio16_9(sPictureList);
         }
-        return (cameraSize == null || cameraSize.isEmpty()) ? new CameraSize(((CameraSize) sPictureList.get(0)).width, ((CameraSize) sPictureList.get(0)).height) : cameraSize;
+        return (cameraSize == null || cameraSize.isEmpty()) ? new CameraSize(sPictureList.get(0).width, sPictureList.get(0).height) : cameraSize;
     }
 
     public static CameraSize getBestPictureSize() {
@@ -173,10 +173,7 @@ public class PictureSizeManager {
         } else if (((double) Math.abs(f2 - 2.1666667f)) < 0.02d) {
             cameraSize = _findMaxRatio19_5_9(sPictureList);
         }
-        if (cameraSize == null || cameraSize.isEmpty()) {
-            cameraSize = new CameraSize(((CameraSize) sPictureList.get(0)).width, ((CameraSize) sPictureList.get(0)).height);
-        }
-        return cameraSize;
+        return (cameraSize == null || cameraSize.isEmpty()) ? new CameraSize(sPictureList.get(0).width, sPictureList.get(0).height) : cameraSize;
     }
 
     public static CameraSize getBestPictureSize(List<CameraSize> list) {
@@ -200,10 +197,7 @@ public class PictureSizeManager {
         } else if (((double) Math.abs(ratio - 2.0833333f)) < 0.02d) {
             cameraSize = _findMaxRatio18_7_5_9(list);
         }
-        if (cameraSize == null || cameraSize.isEmpty()) {
-            cameraSize = new CameraSize(((CameraSize) list.get(0)).width, ((CameraSize) list.get(0)).height);
-        }
-        return cameraSize;
+        return (cameraSize == null || cameraSize.isEmpty()) ? new CameraSize(list.get(0).width, list.get(0).height) : cameraSize;
     }
 
     public static CameraSize getBestSquareSize(List<CameraSize> list) {
@@ -211,9 +205,9 @@ public class PictureSizeManager {
         if (list == null || list.isEmpty()) {
             return new CameraSize(0, 0);
         }
-        for (CameraSize cameraSize : list) {
-            if (cameraSize.getWidth() == cameraSize.getHeight() && i < cameraSize.getWidth()) {
-                i = cameraSize.getWidth();
+        for (CameraSize next : list) {
+            if (next.getWidth() == next.getHeight() && i < next.getWidth()) {
+                i = next.getWidth();
             }
         }
         return new CameraSize(i, i);
@@ -223,27 +217,24 @@ public class PictureSizeManager {
         initializeBase(list, 0, i, i2, i3);
     }
 
-    /* JADX WARNING: type inference failed for: r1v2, types: [java.util.List] */
-    /* JADX WARNING: type inference failed for: r1v7 */
-    /* JADX WARNING: Multi-variable type inference failed */
     static void initializeBase(List<CameraSize> list, int i, int i2, int i3, int i4) {
         sPictureList.clear();
-        if (list == 0 || list.size() == 0) {
+        if (list == null || list.size() == 0) {
             throw new IllegalArgumentException("The supported picture size list return from hal is null!");
         }
         DataRepository.dataItemConfig().getComponentConfigRatio().initSensorRatio(list, i3, i4);
         if (i2 != 0) {
             ArrayList arrayList = new ArrayList();
             if (i == 0) {
-                for (CameraSize cameraSize : list) {
-                    if (cameraSize.area() <= i2) {
-                        arrayList.add(cameraSize);
+                for (CameraSize next : list) {
+                    if (next.area() <= i2) {
+                        arrayList.add(next);
                     }
                 }
             } else if (i == 1) {
-                for (CameraSize cameraSize2 : list) {
-                    if (cameraSize2.width <= i2) {
-                        arrayList.add(cameraSize2);
+                for (CameraSize next2 : list) {
+                    if (next2.width <= i2) {
+                        arrayList.add(next2);
                     }
                 }
             }

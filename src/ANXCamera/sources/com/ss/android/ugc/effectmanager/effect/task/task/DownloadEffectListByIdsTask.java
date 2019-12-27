@@ -26,7 +26,7 @@ public class DownloadEffectListByIdsTask extends NormalTask {
     private List<String> mEffectIds;
 
     public DownloadEffectListByIdsTask(EffectContext effectContext, List<String> list, Handler handler, String str) {
-        this(effectContext, list, handler, str, null);
+        this(effectContext, list, handler, str, (Map<String, String>) null);
     }
 
     public DownloadEffectListByIdsTask(EffectContext effectContext, List<String> list, Handler handler, String str, Map<String, String> map) {
@@ -87,11 +87,7 @@ public class DownloadEffectListByIdsTask extends NormalTask {
             hashMap.putAll(map);
         }
         hashMap.put(EffectConfiguration.KEY_EFFECT_IDS, NetworkUtils.toJson(list));
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mContext.getLinkSelector().getBestHostUrl());
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_LIST);
-        return new EffectRequest("GET", NetworkUtils.buildRequestUrl(hashMap, sb.toString()));
+        return new EffectRequest("GET", NetworkUtils.buildRequestUrl(hashMap, this.mContext.getLinkSelector().getBestHostUrl() + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_LIST));
     }
 
     public void execute() {
@@ -103,7 +99,7 @@ public class DownloadEffectListByIdsTask extends NormalTask {
                     EffectListResponse effectListResponse = (EffectListResponse) this.mConfiguration.getEffectNetWorker().execute(buildRequest(this.mEffectIds), this.mConfiguration.getJsonConverter(), EffectListResponse.class);
                     if (!(effectListResponse == null || effectListResponse.getData() == null)) {
                         if (effectListResponse.getData().size() > 0) {
-                            sendMessage(17, new EffectListTaskResult(effectListResponse.getData(), null));
+                            sendMessage(17, new EffectListTaskResult(effectListResponse.getData(), (ExceptionResult) null));
                             return;
                         } else if (this.mCurCnt == 0) {
                             sendMessage(17, new EffectListTaskResult(new ArrayList(), new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_ID)));

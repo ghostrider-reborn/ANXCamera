@@ -74,7 +74,7 @@ public class RecyclerViewAccessibilityDelegate extends AccessibilityDelegateComp
         return this.mRecyclerView.getLayoutManager().performAccessibilityAction(i, bundle);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean shouldIgnore() {
         return this.mRecyclerView.hasPendingAdapterUpdates();
     }

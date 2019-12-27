@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.jcodec.common.io.NIOUtils;
 import org.jcodec.containers.mp4.demuxer.MP4Demuxer;
 import org.jcodec.platform.Platform;
@@ -33,10 +32,10 @@ public class JCodecUtil {
     public static Format detectFormatBuffer(ByteBuffer byteBuffer) {
         int i = 0;
         Format format = null;
-        for (Entry entry : demuxers.entrySet()) {
-            int probe = probe(byteBuffer.duplicate(), (Class) entry.getValue());
+        for (Map.Entry next : demuxers.entrySet()) {
+            int probe = probe(byteBuffer.duplicate(), (Class) next.getValue());
             if (probe > i) {
-                format = (Format) entry.getKey();
+                format = (Format) next.getKey();
                 i = probe;
             }
         }

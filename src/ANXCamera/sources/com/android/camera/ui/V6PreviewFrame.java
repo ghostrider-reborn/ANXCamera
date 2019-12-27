@@ -2,7 +2,7 @@ package com.android.camera.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import com.android.camera.ActivityBase;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
@@ -60,7 +60,7 @@ public class V6PreviewFrame extends V6RelativeLayout {
     }
 
     public void updateReferenceLineAccordSquare() {
-        LayoutParams layoutParams = (LayoutParams) this.mReferenceGrid.getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) this.mReferenceGrid.getLayoutParams();
         if (ModuleManager.isSquareModule()) {
             int i = Util.sWindowWidth / 6;
             layoutParams.topMargin = i;

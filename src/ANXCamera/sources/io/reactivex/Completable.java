@@ -82,14 +82,14 @@ public abstract class Completable implements CompletableSource {
     @SchedulerSupport("none")
     public static Completable amb(Iterable<? extends CompletableSource> iterable) {
         ObjectHelper.requireNonNull(iterable, "sources is null");
-        return RxJavaPlugins.onAssembly((Completable) new CompletableAmb(null, iterable));
+        return RxJavaPlugins.onAssembly((Completable) new CompletableAmb((CompletableSource[]) null, iterable));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public static Completable ambArray(CompletableSource... completableSourceArr) {
         ObjectHelper.requireNonNull(completableSourceArr, "sources is null");
-        return completableSourceArr.length == 0 ? complete() : completableSourceArr.length == 1 ? wrap(completableSourceArr[0]) : RxJavaPlugins.onAssembly((Completable) new CompletableAmb(completableSourceArr, null));
+        return completableSourceArr.length == 0 ? complete() : completableSourceArr.length == 1 ? wrap(completableSourceArr[0]) : RxJavaPlugins.onAssembly((Completable) new CompletableAmb(completableSourceArr, (Iterable<? extends CompletableSource>) null));
     }
 
     @CheckReturnValue
@@ -369,28 +369,28 @@ public abstract class Completable implements CompletableSource {
     @SchedulerSupport("none")
     public final <T> Flowable<T> andThen(Publisher<T> publisher) {
         ObjectHelper.requireNonNull(publisher, "next is null");
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableDelaySubscriptionOther<T>(publisher, toFlowable()));
+        return RxJavaPlugins.onAssembly(new FlowableDelaySubscriptionOther(publisher, toFlowable()));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Maybe<T> andThen(MaybeSource<T> maybeSource) {
         ObjectHelper.requireNonNull(maybeSource, "next is null");
-        return RxJavaPlugins.onAssembly((Maybe<T>) new MaybeDelayWithCompletable<T>(maybeSource, this));
+        return RxJavaPlugins.onAssembly(new MaybeDelayWithCompletable(maybeSource, this));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Observable<T> andThen(ObservableSource<T> observableSource) {
         ObjectHelper.requireNonNull(observableSource, "next is null");
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableDelaySubscriptionOther<T>(observableSource, toObservable()));
+        return RxJavaPlugins.onAssembly(new ObservableDelaySubscriptionOther(observableSource, toObservable()));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Single<T> andThen(SingleSource<T> singleSource) {
         ObjectHelper.requireNonNull(singleSource, "next is null");
-        return RxJavaPlugins.onAssembly((Single<T>) new SingleDelayWithCompletable<T>(singleSource, this));
+        return RxJavaPlugins.onAssembly(new SingleDelayWithCompletable(singleSource, this));
     }
 
     @CheckReturnValue
@@ -757,7 +757,7 @@ public abstract class Completable implements CompletableSource {
     @CheckReturnValue
     @SchedulerSupport("io.reactivex:computation")
     public final Completable timeout(long j, TimeUnit timeUnit) {
-        return timeout0(j, timeUnit, Schedulers.computation(), null);
+        return timeout0(j, timeUnit, Schedulers.computation(), (CompletableSource) null);
     }
 
     @CheckReturnValue
@@ -770,7 +770,7 @@ public abstract class Completable implements CompletableSource {
     @CheckReturnValue
     @SchedulerSupport("custom")
     public final Completable timeout(long j, TimeUnit timeUnit, Scheduler scheduler) {
-        return timeout0(j, timeUnit, scheduler, null);
+        return timeout0(j, timeUnit, scheduler, (CompletableSource) null);
     }
 
     @CheckReturnValue
@@ -796,33 +796,33 @@ public abstract class Completable implements CompletableSource {
     @BackpressureSupport(BackpressureKind.FULL)
     @SchedulerSupport("none")
     public final <T> Flowable<T> toFlowable() {
-        return this instanceof FuseToFlowable ? ((FuseToFlowable) this).fuseToFlowable() : RxJavaPlugins.onAssembly((Flowable<T>) new CompletableToFlowable<T>(this));
+        return this instanceof FuseToFlowable ? ((FuseToFlowable) this).fuseToFlowable() : RxJavaPlugins.onAssembly(new CompletableToFlowable(this));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Maybe<T> toMaybe() {
-        return this instanceof FuseToMaybe ? ((FuseToMaybe) this).fuseToMaybe() : RxJavaPlugins.onAssembly((Maybe<T>) new MaybeFromCompletable<T>(this));
+        return this instanceof FuseToMaybe ? ((FuseToMaybe) this).fuseToMaybe() : RxJavaPlugins.onAssembly(new MaybeFromCompletable(this));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Observable<T> toObservable() {
-        return this instanceof FuseToObservable ? ((FuseToObservable) this).fuseToObservable() : RxJavaPlugins.onAssembly((Observable<T>) new CompletableToObservable<T>(this));
+        return this instanceof FuseToObservable ? ((FuseToObservable) this).fuseToObservable() : RxJavaPlugins.onAssembly(new CompletableToObservable(this));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Single<T> toSingle(Callable<? extends T> callable) {
         ObjectHelper.requireNonNull(callable, "completionValueSupplier is null");
-        return RxJavaPlugins.onAssembly((Single<T>) new CompletableToSingle<T>(this, callable, null));
+        return RxJavaPlugins.onAssembly(new CompletableToSingle(this, callable, null));
     }
 
     @CheckReturnValue
     @SchedulerSupport("none")
     public final <T> Single<T> toSingleDefault(T t) {
         ObjectHelper.requireNonNull(t, "completionValue is null");
-        return RxJavaPlugins.onAssembly((Single<T>) new CompletableToSingle<T>(this, null, t));
+        return RxJavaPlugins.onAssembly(new CompletableToSingle(this, (Callable) null, t));
     }
 
     @CheckReturnValue

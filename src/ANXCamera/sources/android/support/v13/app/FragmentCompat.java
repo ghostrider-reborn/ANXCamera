@@ -3,13 +3,12 @@ package android.support.v13.app;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.pm.PackageManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.util.Arrays;
 
 @Deprecated
@@ -104,7 +103,7 @@ public class FragmentCompat {
     }
 
     static {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 24) {
             IMPL = new FragmentCompatApi24Impl();
         } else if (i >= 23) {
@@ -116,7 +115,7 @@ public class FragmentCompat {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Deprecated
     public static PermissionCompatDelegate getPermissionCompatDelegate() {
         return sDelegate;

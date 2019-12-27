@@ -8,16 +8,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.constant.BeautyConstant;
-import com.android.camera.fragment.beauty.SingleCheckAdapter.LevelItem;
+import com.android.camera.fragment.beauty.SingleCheckAdapter;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomMenuProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,10 +35,9 @@ public class BeautyLevelFragment extends BaseBeautyFragment {
         myLayoutManager.setOrientation(0);
         this.mLevelItemList.setLayoutManager(myLayoutManager);
         this.mLevelItemList.setFocusable(false);
-        List initBeautyItems = initBeautyItems();
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mLevelItemList.getLayoutParams();
+        List<SingleCheckAdapter.LevelItem> initBeautyItems = initBeautyItems();
         int provideItemHorizontalMargin = provideItemHorizontalMargin();
-        marginLayoutParams.setMarginStart((getResources().getDisplayMetrics().widthPixels - ((getResources().getDimensionPixelSize(R.dimen.beautycamera_beauty_level_item_size) + (provideItemHorizontalMargin * 2)) * initBeautyItems.size())) / 2);
+        ((ViewGroup.MarginLayoutParams) this.mLevelItemList.getLayoutParams()).setMarginStart((getResources().getDisplayMetrics().widthPixels - ((getResources().getDimensionPixelSize(R.dimen.beautycamera_beauty_level_item_size) + (provideItemHorizontalMargin * 2)) * initBeautyItems.size())) / 2);
         this.mSingleCheckAdapter = new SingleCheckAdapter(getActivity(), initBeautyItems, provideItemHorizontalMargin);
         this.mSingleCheckAdapter.setOnItemClickListener(initOnItemClickListener());
         this.mSingleCheckAdapter.setSelectedPosition(beautyLevelToPosition(CameraSettings.getBeautyShowLevel(), initBeautyItems.size() - 1));
@@ -51,7 +48,7 @@ public class BeautyLevelFragment extends BaseBeautyFragment {
     /* access modifiers changed from: private */
     public void onLevelClick(AdapterView<?> adapterView, View view, int i, long j) {
         boolean z = !BeautyConstant.LEVEL_CLOSE.equals(CameraSettings.getFaceBeautifyLevel());
-        BottomMenuProtocol bottomMenuProtocol = (BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197);
+        ModeProtocol.BottomMenuProtocol bottomMenuProtocol = (ModeProtocol.BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197);
         if (bottomMenuProtocol != null) {
             if (!z && i > 0) {
                 bottomMenuProtocol.animateShineBeauty(false);
@@ -74,21 +71,21 @@ public class BeautyLevelFragment extends BaseBeautyFragment {
     }
 
     /* access modifiers changed from: protected */
-    public List<LevelItem> initBeautyItems() {
+    public List<SingleCheckAdapter.LevelItem> initBeautyItems() {
         String[] stringArray = getResources().getStringArray(R.array.beauty_level_list);
         ArrayList arrayList = new ArrayList();
-        arrayList.add(new LevelItem((int) R.drawable.ic_config_front_beauty_off));
-        arrayList.add(new LevelItem(stringArray[0]));
-        arrayList.add(new LevelItem(stringArray[1]));
-        arrayList.add(new LevelItem(stringArray[2]));
-        arrayList.add(new LevelItem(stringArray[3]));
-        arrayList.add(new LevelItem(stringArray[4]));
+        arrayList.add(new SingleCheckAdapter.LevelItem((int) R.drawable.ic_config_front_beauty_off));
+        arrayList.add(new SingleCheckAdapter.LevelItem(stringArray[0]));
+        arrayList.add(new SingleCheckAdapter.LevelItem(stringArray[1]));
+        arrayList.add(new SingleCheckAdapter.LevelItem(stringArray[2]));
+        arrayList.add(new SingleCheckAdapter.LevelItem(stringArray[3]));
+        arrayList.add(new SingleCheckAdapter.LevelItem(stringArray[4]));
         return arrayList;
     }
 
     /* access modifiers changed from: protected */
-    public OnItemClickListener initOnItemClickListener() {
-        return new OnItemClickListener() {
+    public AdapterView.OnItemClickListener initOnItemClickListener() {
+        return new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
                 BeautyLevelFragment.this.onLevelClick(adapterView, view, i, j);
             }

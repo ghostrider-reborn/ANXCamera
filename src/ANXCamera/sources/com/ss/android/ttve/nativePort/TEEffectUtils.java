@@ -2,7 +2,6 @@ package com.ss.android.ttve.nativePort;
 
 import android.support.annotation.Keep;
 import java.util.Map;
-import java.util.Map.Entry;
 
 @Keep
 public class TEEffectUtils {
@@ -23,9 +22,9 @@ public class TEEffectUtils {
         if (map != null) {
             iArr = new int[(map.size() * 2)];
             int i = 0;
-            for (Entry entry : map.entrySet()) {
-                iArr[i] = ((Integer) entry.getKey()).intValue();
-                iArr[i + 1] = ((Integer) entry.getValue()).intValue();
+            for (Map.Entry next : map.entrySet()) {
+                iArr[i] = ((Integer) next.getKey()).intValue();
+                iArr[i + 1] = ((Integer) next.getValue()).intValue();
                 i += 2;
             }
         } else {

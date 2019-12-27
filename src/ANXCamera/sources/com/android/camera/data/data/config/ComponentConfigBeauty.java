@@ -6,6 +6,7 @@ import com.android.camera.constant.BeautyConstant;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.log.Log;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,13 +18,14 @@ public class ComponentConfigBeauty extends ComponentData {
 
     public ComponentConfigBeauty(DataItemConfig dataItemConfig, int i) {
         super(dataItemConfig);
+        this.mItems = new ArrayList();
         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_beauty_off, (int) R.drawable.ic_config_beauty_off, (int) R.string.pref_camera_beauty, SWITCHABLE_BEAUTY_LEVELS[0]));
         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_beauty_off, (int) R.drawable.ic_config_beauty_low, (int) R.string.pref_camera_beauty, SWITCHABLE_BEAUTY_LEVELS[1]));
         this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_beauty_off, (int) R.drawable.ic_config_beauty_height, (int) R.string.pref_camera_beauty_deep, SWITCHABLE_BEAUTY_LEVELS[2]));
     }
 
     private static final void logd(String str, int i, String str2) {
-        Log.d(TAG, String.format(Locale.ENGLISH, "%s: legacy=%b, mode=%d, value=%s", new Object[]{str, Boolean.valueOf(false), Integer.valueOf(i), str2}));
+        Log.d(TAG, String.format(Locale.ENGLISH, "%s: legacy=%b, mode=%d, value=%s", new Object[]{str, false, Integer.valueOf(i), str2}));
     }
 
     public void clearClosed() {
@@ -32,9 +34,8 @@ public class ComponentConfigBeauty extends ComponentData {
 
     public String getComponentValue(int i) {
         if (isClosed()) {
-            String str = BeautyConstant.LEVEL_CLOSE;
-            logd("1: getComponentValue()", i, str);
-            return str;
+            logd("1: getComponentValue()", i, BeautyConstant.LEVEL_CLOSE);
+            return BeautyConstant.LEVEL_CLOSE;
         }
         String componentValue = super.getComponentValue(i);
         logd("2: getComponentValue()", i, componentValue);

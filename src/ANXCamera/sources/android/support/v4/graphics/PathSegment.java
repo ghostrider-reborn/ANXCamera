@@ -20,7 +20,6 @@ public final class PathSegment {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -28,10 +27,7 @@ public final class PathSegment {
             return false;
         }
         PathSegment pathSegment = (PathSegment) obj;
-        if (Float.compare(this.mStartFraction, pathSegment.mStartFraction) != 0 || Float.compare(this.mEndFraction, pathSegment.mEndFraction) != 0 || !this.mStart.equals(pathSegment.mStart) || !this.mEnd.equals(pathSegment.mEnd)) {
-            z = false;
-        }
-        return z;
+        return Float.compare(this.mStartFraction, pathSegment.mStartFraction) == 0 && Float.compare(this.mEndFraction, pathSegment.mEndFraction) == 0 && this.mStart.equals(pathSegment.mStart) && this.mEnd.equals(pathSegment.mEnd);
     }
 
     @NonNull
@@ -65,16 +61,6 @@ public final class PathSegment {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("PathSegment{start=");
-        sb.append(this.mStart);
-        sb.append(", startFraction=");
-        sb.append(this.mStartFraction);
-        sb.append(", end=");
-        sb.append(this.mEnd);
-        sb.append(", endFraction=");
-        sb.append(this.mEndFraction);
-        sb.append('}');
-        return sb.toString();
+        return "PathSegment{start=" + this.mStart + ", startFraction=" + this.mStartFraction + ", end=" + this.mEnd + ", endFraction=" + this.mEndFraction + '}';
     }
 }

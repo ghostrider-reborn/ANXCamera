@@ -16,7 +16,7 @@ public final class MaybeDelayOtherPublisher<T, U> extends AbstractMaybeWithUpstr
 
     static final class DelayMaybeObserver<T, U> implements MaybeObserver<T>, Disposable {
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f280d;
         final OtherSubscriber<T> other;
         final Publisher<U> otherSource;
@@ -60,7 +60,7 @@ public final class MaybeDelayOtherPublisher<T, U> extends AbstractMaybeWithUpstr
             subscribeNext();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             this.otherSource.subscribe(this.other);
         }

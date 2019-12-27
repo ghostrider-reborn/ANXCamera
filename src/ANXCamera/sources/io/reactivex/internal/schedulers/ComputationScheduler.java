@@ -1,14 +1,13 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.EmptyDisposable;
 import io.reactivex.internal.disposables.ListCompositeDisposable;
 import io.reactivex.internal.functions.ObjectHelper;
-import io.reactivex.internal.schedulers.SchedulerMultiWorkerSupport.WorkerCallback;
+import io.reactivex.internal.schedulers.SchedulerMultiWorkerSupport;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,7 +23,7 @@ public final class ComputationScheduler extends Scheduler implements SchedulerMu
     final AtomicReference<FixedSchedulerPool> pool;
     final ThreadFactory threadFactory;
 
-    static final class EventLoopWorker extends Worker {
+    static final class EventLoopWorker extends Scheduler.Worker {
         private final ListCompositeDisposable both = new ListCompositeDisposable();
         volatile boolean disposed;
         private final PoolWorker poolWorker;
@@ -78,7 +77,7 @@ public final class ComputationScheduler extends Scheduler implements SchedulerMu
             }
         }
 
-        public void createWorkers(int i, WorkerCallback workerCallback) {
+        public void createWorkers(int i, SchedulerMultiWorkerSupport.WorkerCallback workerCallback) {
             int i2 = this.cores;
             if (i2 == 0) {
                 for (int i3 = 0; i3 < i; i3++) {
@@ -141,30 +140,30 @@ public final class ComputationScheduler extends Scheduler implements SchedulerMu
     }
 
     @NonNull
-    public Worker createWorker() {
-        return new EventLoopWorker(((FixedSchedulerPool) this.pool.get()).getEventLoop());
+    public Scheduler.Worker createWorker() {
+        return new EventLoopWorker(this.pool.get().getEventLoop());
     }
 
-    public void createWorkers(int i, WorkerCallback workerCallback) {
+    public void createWorkers(int i, SchedulerMultiWorkerSupport.WorkerCallback workerCallback) {
         ObjectHelper.verifyPositive(i, "number > 0 required");
-        ((FixedSchedulerPool) this.pool.get()).createWorkers(i, workerCallback);
+        this.pool.get().createWorkers(i, workerCallback);
     }
 
     @NonNull
     public Disposable scheduleDirect(@NonNull Runnable runnable, long j, TimeUnit timeUnit) {
-        return ((FixedSchedulerPool) this.pool.get()).getEventLoop().scheduleDirect(runnable, j, timeUnit);
+        return this.pool.get().getEventLoop().scheduleDirect(runnable, j, timeUnit);
     }
 
     @NonNull
     public Disposable schedulePeriodicallyDirect(@NonNull Runnable runnable, long j, long j2, TimeUnit timeUnit) {
-        return ((FixedSchedulerPool) this.pool.get()).getEventLoop().schedulePeriodicallyDirect(runnable, j, j2, timeUnit);
+        return this.pool.get().getEventLoop().schedulePeriodicallyDirect(runnable, j, j2, timeUnit);
     }
 
     public void shutdown() {
         FixedSchedulerPool fixedSchedulerPool;
         FixedSchedulerPool fixedSchedulerPool2;
         do {
-            fixedSchedulerPool = (FixedSchedulerPool) this.pool.get();
+            fixedSchedulerPool = this.pool.get();
             fixedSchedulerPool2 = NONE;
             if (fixedSchedulerPool == fixedSchedulerPool2) {
                 return;

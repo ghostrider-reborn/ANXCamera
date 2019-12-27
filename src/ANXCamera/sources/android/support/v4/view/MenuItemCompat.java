@@ -1,8 +1,8 @@
 package android.support.v4.view;
 
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff.Mode;
-import android.os.Build.VERSION;
+import android.graphics.PorterDuff;
+import android.os.Build;
 import android.support.v4.internal.view.SupportMenuItem;
 import android.util.Log;
 import android.view.MenuItem;
@@ -58,7 +58,7 @@ public final class MenuItemCompat {
         if (menuItem instanceof SupportMenuItem) {
             return ((SupportMenuItem) menuItem).getAlphabeticModifiers();
         }
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return menuItem.getAlphabeticModifiers();
         }
         return 0;
@@ -68,7 +68,7 @@ public final class MenuItemCompat {
         if (menuItem instanceof SupportMenuItem) {
             return ((SupportMenuItem) menuItem).getContentDescription();
         }
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return menuItem.getContentDescription();
         }
         return null;
@@ -78,17 +78,17 @@ public final class MenuItemCompat {
         if (menuItem instanceof SupportMenuItem) {
             return ((SupportMenuItem) menuItem).getIconTintList();
         }
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return menuItem.getIconTintList();
         }
         return null;
     }
 
-    public static Mode getIconTintMode(MenuItem menuItem) {
+    public static PorterDuff.Mode getIconTintMode(MenuItem menuItem) {
         if (menuItem instanceof SupportMenuItem) {
             return ((SupportMenuItem) menuItem).getIconTintMode();
         }
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return menuItem.getIconTintMode();
         }
         return null;
@@ -98,7 +98,7 @@ public final class MenuItemCompat {
         if (menuItem instanceof SupportMenuItem) {
             return ((SupportMenuItem) menuItem).getNumericModifiers();
         }
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return menuItem.getNumericModifiers();
         }
         return 0;
@@ -108,7 +108,7 @@ public final class MenuItemCompat {
         if (menuItem instanceof SupportMenuItem) {
             return ((SupportMenuItem) menuItem).getTooltipText();
         }
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return menuItem.getTooltipText();
         }
         return null;
@@ -140,7 +140,7 @@ public final class MenuItemCompat {
     public static void setAlphabeticShortcut(MenuItem menuItem, char c2, int i) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setAlphabeticShortcut(c2, i);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setAlphabeticShortcut(c2, i);
         }
     }
@@ -148,7 +148,7 @@ public final class MenuItemCompat {
     public static void setContentDescription(MenuItem menuItem, CharSequence charSequence) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setContentDescription(charSequence);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setContentDescription(charSequence);
         }
     }
@@ -156,15 +156,15 @@ public final class MenuItemCompat {
     public static void setIconTintList(MenuItem menuItem, ColorStateList colorStateList) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setIconTintList(colorStateList);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setIconTintList(colorStateList);
         }
     }
 
-    public static void setIconTintMode(MenuItem menuItem, Mode mode) {
+    public static void setIconTintMode(MenuItem menuItem, PorterDuff.Mode mode) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setIconTintMode(mode);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setIconTintMode(mode);
         }
     }
@@ -172,14 +172,14 @@ public final class MenuItemCompat {
     public static void setNumericShortcut(MenuItem menuItem, char c2, int i) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setNumericShortcut(c2, i);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setNumericShortcut(c2, i);
         }
     }
 
     @Deprecated
     public static MenuItem setOnActionExpandListener(MenuItem menuItem, final OnActionExpandListener onActionExpandListener) {
-        return menuItem.setOnActionExpandListener(new android.view.MenuItem.OnActionExpandListener() {
+        return menuItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                 return onActionExpandListener.onMenuItemActionCollapse(menuItem);
             }
@@ -193,7 +193,7 @@ public final class MenuItemCompat {
     public static void setShortcut(MenuItem menuItem, char c2, char c3, int i, int i2) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setShortcut(c2, c3, i, i2);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setShortcut(c2, c3, i, i2);
         }
     }
@@ -206,7 +206,7 @@ public final class MenuItemCompat {
     public static void setTooltipText(MenuItem menuItem, CharSequence charSequence) {
         if (menuItem instanceof SupportMenuItem) {
             ((SupportMenuItem) menuItem).setTooltipText(charSequence);
-        } else if (VERSION.SDK_INT >= 26) {
+        } else if (Build.VERSION.SDK_INT >= 26) {
             menuItem.setTooltipText(charSequence);
         }
     }

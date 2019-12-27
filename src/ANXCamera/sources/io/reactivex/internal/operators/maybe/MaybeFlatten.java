@@ -16,7 +16,7 @@ public final class MaybeFlatten<T, R> extends AbstractMaybeWithUpstream<T, R> {
         private static final long serialVersionUID = 4375739915521278546L;
         final MaybeObserver<? super R> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f290d;
         final Function<? super T, ? extends MaybeSource<? extends R>> mapper;
 

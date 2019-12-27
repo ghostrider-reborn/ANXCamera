@@ -1,11 +1,12 @@
 package com.bumptech.glide.load.engine;
 
 import com.bumptech.glide.load.EncodeStrategy;
+import com.bumptech.glide.load.engine.DecodeJob;
 
 /* compiled from: DecodeJob */
 /* synthetic */ class h {
-    static final /* synthetic */ int[] Ie = new int[RunReason.values().length];
-    static final /* synthetic */ int[] Je = new int[Stage.values().length];
+    static final /* synthetic */ int[] Ie = new int[DecodeJob.RunReason.values().length];
+    static final /* synthetic */ int[] Je = new int[DecodeJob.Stage.values().length];
     static final /* synthetic */ int[] Ke = new int[EncodeStrategy.values().length];
 
     /* JADX WARNING: Can't wrap try/catch for region: R(25:0|1|2|3|(2:5|6)|7|9|10|11|12|13|15|16|17|18|19|20|21|23|24|25|26|27|28|30) */
@@ -25,15 +26,15 @@ import com.bumptech.glide.load.EncodeStrategy;
             Ke[EncodeStrategy.TRANSFORMED.ordinal()] = 2;
         } catch (NoSuchFieldError unused2) {
         }
-        Je[Stage.RESOURCE_CACHE.ordinal()] = 1;
-        Je[Stage.DATA_CACHE.ordinal()] = 2;
-        Je[Stage.SOURCE.ordinal()] = 3;
-        Je[Stage.FINISHED.ordinal()] = 4;
-        Je[Stage.INITIALIZE.ordinal()] = 5;
-        Ie[RunReason.INITIALIZE.ordinal()] = 1;
-        Ie[RunReason.SWITCH_TO_SOURCE_SERVICE.ordinal()] = 2;
+        Je[DecodeJob.Stage.RESOURCE_CACHE.ordinal()] = 1;
+        Je[DecodeJob.Stage.DATA_CACHE.ordinal()] = 2;
+        Je[DecodeJob.Stage.SOURCE.ordinal()] = 3;
+        Je[DecodeJob.Stage.FINISHED.ordinal()] = 4;
+        Je[DecodeJob.Stage.INITIALIZE.ordinal()] = 5;
+        Ie[DecodeJob.RunReason.INITIALIZE.ordinal()] = 1;
+        Ie[DecodeJob.RunReason.SWITCH_TO_SOURCE_SERVICE.ordinal()] = 2;
         try {
-            Ie[RunReason.DECODE_DATA.ordinal()] = 3;
+            Ie[DecodeJob.RunReason.DECODE_DATA.ordinal()] = 3;
         } catch (NoSuchFieldError unused3) {
         }
     }

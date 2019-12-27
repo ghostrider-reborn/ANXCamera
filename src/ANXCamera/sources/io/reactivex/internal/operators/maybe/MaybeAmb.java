@@ -77,7 +77,7 @@ public final class MaybeAmb<T> extends Maybe<T> {
                 i = 0;
                 for (MaybeSource<? extends T> maybeSource : this.sourcesIterable) {
                     if (maybeSource == null) {
-                        EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), maybeObserver);
+                        EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), (MaybeObserver<?>) maybeObserver);
                         return;
                     }
                     if (i == maybeSourceArr.length) {
@@ -91,7 +91,7 @@ public final class MaybeAmb<T> extends Maybe<T> {
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, maybeObserver);
+                EmptyDisposable.error(th, (MaybeObserver<?>) maybeObserver);
                 return;
             }
         } else {

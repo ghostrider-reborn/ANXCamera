@@ -1,9 +1,8 @@
 package com.google.android.apps.gsa.search.shared.service.proto;
 
-import com.google.protobuf.Internal.EnumLite;
-import com.google.protobuf.Internal.EnumLiteMap;
+import com.google.protobuf.Internal;
 
-public enum ClientEventId implements EnumLite {
+public enum ClientEventId implements Internal.EnumLite {
     UNKNOWN(0),
     SEARCH_TOOLS_CLICKED(1),
     WINDOW_FOCUS_CHANGED(2),
@@ -641,11 +640,11 @@ public enum ClientEventId implements EnumLite {
     public static final int WEBVIEW_VISIBLE_VALUE = 74;
     public static final int WIDGET_INTENT_RECEIVED_VALUE = 194;
     public static final int WINDOW_FOCUS_CHANGED_VALUE = 2;
-    private static final EnumLiteMap<ClientEventId> internalValueMap = null;
+    private static final Internal.EnumLiteMap<ClientEventId> internalValueMap = null;
     private final int value;
 
     static {
-        internalValueMap = new EnumLiteMap<ClientEventId>() {
+        internalValueMap = new Internal.EnumLiteMap<ClientEventId>() {
             public ClientEventId findValueByNumber(int i) {
                 return ClientEventId.forNumber(i);
             }
@@ -1299,7 +1298,7 @@ public enum ClientEventId implements EnumLite {
         }
     }
 
-    public static EnumLiteMap<ClientEventId> internalGetValueMap() {
+    public static Internal.EnumLiteMap<ClientEventId> internalGetValueMap() {
         return internalValueMap;
     }
 

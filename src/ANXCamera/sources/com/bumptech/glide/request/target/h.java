@@ -6,10 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 import com.bumptech.glide.request.a.f;
-import com.bumptech.glide.request.a.f.a;
 
 /* compiled from: ImageViewTarget */
-public abstract class h<Z> extends ViewTarget<ImageView, Z> implements a {
+public abstract class h<Z> extends ViewTarget<ImageView, Z> implements f.a {
     @Nullable
     private Animatable Hl;
 
@@ -50,19 +49,19 @@ public abstract class h<Z> extends ViewTarget<ImageView, Z> implements a {
         if (animatable != null) {
             animatable.stop();
         }
-        y(null);
+        y((Object) null);
         setDrawable(drawable);
     }
 
     public void c(@Nullable Drawable drawable) {
         super.c(drawable);
-        y(null);
+        y((Object) null);
         setDrawable(drawable);
     }
 
     public void d(@Nullable Drawable drawable) {
         super.d(drawable);
-        y(null);
+        y((Object) null);
         setDrawable(drawable);
     }
 

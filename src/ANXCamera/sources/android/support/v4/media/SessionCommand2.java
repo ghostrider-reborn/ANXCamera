@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.text.TextUtils;
 
 public final class SessionCommand2 {
@@ -76,7 +75,7 @@ public final class SessionCommand2 {
         throw new IllegalArgumentException("action shouldn't be null");
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static SessionCommand2 fromBundle(@NonNull Bundle bundle) {
         if (bundle != null) {
             int i = bundle.getInt(KEY_COMMAND_CODE);
@@ -93,15 +92,11 @@ public final class SessionCommand2 {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (!(obj instanceof SessionCommand2)) {
             return false;
         }
         SessionCommand2 sessionCommand2 = (SessionCommand2) obj;
-        if (this.mCommandCode == sessionCommand2.mCommandCode && TextUtils.equals(this.mCustomCommand, sessionCommand2.mCustomCommand)) {
-            z = true;
-        }
-        return z;
+        return this.mCommandCode == sessionCommand2.mCommandCode && TextUtils.equals(this.mCustomCommand, sessionCommand2.mCustomCommand);
     }
 
     public int getCommandCode() {
@@ -123,7 +118,7 @@ public final class SessionCommand2 {
         return ((str != null ? str.hashCode() : 0) * 31) + this.mCommandCode;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
         bundle.putInt(KEY_COMMAND_CODE, this.mCommandCode);

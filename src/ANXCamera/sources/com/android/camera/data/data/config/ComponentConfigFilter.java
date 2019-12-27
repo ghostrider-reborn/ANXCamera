@@ -6,7 +6,7 @@ import com.android.camera.constant.ModeConstant;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.data.data.runing.DataItemRunning;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.effect.FilterInfo;
 import com.android.camera.log.Log;
 import java.util.ArrayList;
@@ -20,8 +20,7 @@ public class ComponentConfigFilter extends ComponentData {
         super(dataItemRunning);
     }
 
-    public void clearFilterSelected(ProviderEditor providerEditor) {
-        int[] allModes;
+    public void clearFilterSelected(DataProvider.ProviderEditor providerEditor) {
         if (providerEditor != null) {
             for (int i : ModeConstant.getAllModes()) {
                 providerEditor.putString(getKey(i), getDefaultValue(i));
@@ -30,12 +29,7 @@ public class ComponentConfigFilter extends ComponentData {
     }
 
     public String getComponentValue(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("getComponentValue: isClosed(mode) = ");
-        sb.append(isClosed(i));
-        sb.append(", mode = ");
-        sb.append(i);
-        Log.d("ComponentConfigFilter", sb.toString());
+        Log.d("ComponentConfigFilter", "getComponentValue: isClosed(mode) = " + isClosed(i) + ", mode = " + i);
         return isClosed(i) ? String.valueOf(FilterInfo.FILTER_ID_NONE) : super.getComponentValue(i);
     }
 
@@ -64,20 +58,15 @@ public class ComponentConfigFilter extends ComponentData {
 
     public void mapToItems(ArrayList<FilterInfo> arrayList) {
         this.mItems = new ArrayList(arrayList.size());
-        Iterator it = arrayList.iterator();
+        Iterator<FilterInfo> it = arrayList.iterator();
         while (it.hasNext()) {
-            FilterInfo filterInfo = (FilterInfo) it.next();
-            this.mItems.add(new ComponentDataItem(filterInfo.getIconResId(), filterInfo.getIconResId(), filterInfo.getNameResId(), String.valueOf(filterInfo.getId())));
+            FilterInfo next = it.next();
+            this.mItems.add(new ComponentDataItem(next.getIconResId(), next.getIconResId(), next.getNameResId(), String.valueOf(next.getId())));
         }
     }
 
     public void setClosed(boolean z, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setClosed: mode = ");
-        sb.append(i);
-        sb.append(", close = ");
-        sb.append(z);
-        Log.d("ComponentConfigFilter", sb.toString());
+        Log.d("ComponentConfigFilter", "setClosed: mode = " + i + ", close = " + z);
         if (this.mIsClosed == null) {
             this.mIsClosed = new SparseBooleanArray();
         }

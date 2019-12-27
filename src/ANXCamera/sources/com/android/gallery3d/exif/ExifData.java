@@ -57,7 +57,7 @@ class ExifData {
             ExifData exifData = (ExifData) obj;
             if (exifData.mByteOrder == this.mByteOrder && exifData.mStripBytes.size() == this.mStripBytes.size() && Arrays.equals(exifData.mThumbnail, this.mThumbnail)) {
                 for (int i = 0; i < this.mStripBytes.size(); i++) {
-                    if (!Arrays.equals((byte[]) exifData.mStripBytes.get(i), (byte[]) this.mStripBytes.get(i))) {
+                    if (!Arrays.equals(exifData.mStripBytes.get(i), this.mStripBytes.get(i))) {
                         return false;
                     }
                 }
@@ -76,7 +76,6 @@ class ExifData {
 
     /* access modifiers changed from: protected */
     public List<ExifTag> getAllTags() {
-        IfdData[] ifdDataArr;
         ArrayList arrayList = new ArrayList();
         for (IfdData ifdData : this.mIfdDatas) {
             if (ifdData != null) {
@@ -112,7 +111,6 @@ class ExifData {
 
     /* access modifiers changed from: protected */
     public List<ExifTag> getAllTagsForTagId(short s) {
-        IfdData[] ifdDataArr;
         ArrayList arrayList = new ArrayList();
         for (IfdData ifdData : this.mIfdDatas) {
             if (ifdData != null) {
@@ -159,7 +157,7 @@ class ExifData {
 
     /* access modifiers changed from: protected */
     public byte[] getStrip(int i) {
-        return (byte[]) this.mStripBytes.get(i);
+        return this.mStripBytes.get(i);
     }
 
     /* access modifiers changed from: protected */
@@ -219,8 +217,7 @@ class ExifData {
         }
         byte[] stringByte = tag.getStringByte();
         try {
-            String str = "US-ASCII";
-            return stringByte[stringByte.length - 1] == 0 ? new String(stringByte, 0, stringByte.length - 1, str) : new String(stringByte, str);
+            return stringByte[stringByte.length - 1] == 0 ? new String(stringByte, 0, stringByte.length - 1, "US-ASCII") : new String(stringByte, "US-ASCII");
         } catch (UnsupportedEncodingException unused) {
             Log.w(TAG, "Failed to decode the xiaomicomment");
             return null;
@@ -263,7 +260,7 @@ class ExifData {
             return;
         }
         for (int size = this.mStripBytes.size(); size < i; size++) {
-            this.mStripBytes.add(null);
+            this.mStripBytes.add((Object) null);
         }
         this.mStripBytes.add(bArr);
     }

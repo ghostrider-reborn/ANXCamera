@@ -1,7 +1,6 @@
 package com.xiaomi.camera.base;
 
 import android.media.Image;
-import android.media.Image.Plane;
 import android.util.Size;
 import com.android.camera.log.Log;
 import java.io.FileOutputStream;
@@ -22,40 +21,20 @@ public final class ImageUtil {
     /* JADX WARNING: Removed duplicated region for block: B:23:0x00df A[SYNTHETIC, Splitter:B:23:0x00df] */
     /* JADX WARNING: Removed duplicated region for block: B:27:0x00e8 A[SYNTHETIC, Splitter:B:27:0x00e8] */
     public static boolean dumpYuvImage(Image image, String str) {
-        String str2 = "Failed to flush/close stream";
         Log.d(TAG, "dumpYuvImage start");
-        StringBuilder sb = new StringBuilder();
-        sb.append("sdcard/DCIM/Camera/");
-        sb.append(str);
-        sb.append("_");
-        sb.append(image.getWidth());
-        String str3 = "x";
-        sb.append(str3);
-        sb.append(image.getHeight());
-        String sb2 = sb.toString();
+        String str2 = "sdcard/DCIM/Camera/" + str + "_" + image.getWidth() + "x" + image.getHeight();
         int format = image.getFormat();
         boolean z = false;
         if (format == 17 || format == 35) {
             FileOutputStream fileOutputStream = null;
             try {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(sb2);
-                sb3.append(".yuv");
-                FileOutputStream fileOutputStream2 = new FileOutputStream(sb3.toString());
+                FileOutputStream fileOutputStream2 = new FileOutputStream(str2 + ".yuv");
                 try {
                     ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                     ByteBuffer buffer2 = image.getPlanes()[2].getBuffer();
                     int limit = buffer.limit();
                     int limit2 = buffer2.limit();
-                    String str4 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("dumpingYuvImage: size=");
-                    sb4.append(image.getWidth());
-                    sb4.append(str3);
-                    sb4.append(image.getHeight());
-                    sb4.append(" stride=");
-                    sb4.append(image.getPlanes()[2].getRowStride());
-                    Log.d(str4, sb4.toString());
+                    Log.d(TAG, "dumpingYuvImage: size=" + image.getWidth() + "x" + image.getHeight() + " stride=" + image.getPlanes()[2].getRowStride());
                     byte[] bArr = new byte[(limit + limit2)];
                     buffer.get(bArr, 0, limit);
                     buffer2.get(bArr, limit, limit2);
@@ -67,7 +46,7 @@ public final class ImageUtil {
                         fileOutputStream2.flush();
                         fileOutputStream2.close();
                     } catch (Exception e2) {
-                        Log.e(TAG, str2, e2);
+                        Log.e(TAG, "Failed to flush/close stream", e2);
                     }
                 } catch (Exception e3) {
                     e = e3;
@@ -87,7 +66,7 @@ public final class ImageUtil {
                                 fileOutputStream2.flush();
                                 fileOutputStream2.close();
                             } catch (Exception e4) {
-                                Log.e(TAG, str2, e4);
+                                Log.e(TAG, "Failed to flush/close stream", e4);
                             }
                         }
                         throw th;
@@ -135,7 +114,7 @@ public final class ImageUtil {
     }
 
     public static byte[] getFirstPlane(Image image) {
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         if (planes.length <= 0) {
             return null;
         }
@@ -148,10 +127,7 @@ public final class ImageUtil {
     public static byte[] getYuvData(Image image) {
         if (image == null || 35 != image.getFormat()) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("getYuvData: ");
-            sb.append(image);
-            Log.e(str, sb.toString());
+            Log.e(str, "getYuvData: " + image);
             return null;
         }
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
@@ -173,11 +149,9 @@ public final class ImageUtil {
         } else if (image.getFormat() == 34 || image2.getFormat() == 34) {
             throw new IllegalArgumentException("PRIVATE format images are not copyable");
         } else if (image.getFormat() != 36) {
-            Size size = new Size(image.getWidth(), image.getHeight());
-            Size size2 = new Size(image2.getWidth(), image2.getHeight());
-            if (size.equals(size2)) {
-                Plane[] planes = image.getPlanes();
-                Plane[] planes2 = image2.getPlanes();
+            if (new Size(image.getWidth(), image.getHeight()).equals(new Size(image2.getWidth(), image2.getHeight()))) {
+                Image.Plane[] planes = image.getPlanes();
+                Image.Plane[] planes2 = image2.getPlanes();
                 int i = 0;
                 while (i < planes.length) {
                     int rowStride = planes[i].getRowStride();
@@ -215,28 +189,18 @@ public final class ImageUtil {
                         buffer2.rewind();
                         i++;
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Source plane image pixel stride ");
-                        sb.append(planes[i].getPixelStride());
-                        sb.append(" must be same as destination image pixel stride ");
-                        sb.append(planes2[i].getPixelStride());
-                        throw new IllegalArgumentException(sb.toString());
+                        throw new IllegalArgumentException("Source plane image pixel stride " + planes[i].getPixelStride() + " must be same as destination image pixel stride " + planes2[i].getPixelStride());
                     }
                 }
                 return;
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("source image size ");
-            sb2.append(size);
-            sb2.append(" is different with destination image size ");
-            sb2.append(size2);
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("source image size " + r0 + " is different with destination image size " + r1);
         } else {
             throw new IllegalArgumentException("Copy of RAW_OPAQUE format has not been implemented");
         }
     }
 
-    public static ByteBuffer removePadding(Plane plane, int i, int i2) {
+    public static ByteBuffer removePadding(Image.Plane plane, int i, int i2) {
         long currentTimeMillis = System.currentTimeMillis();
         ByteBuffer buffer = plane.getBuffer();
         int rowStride = plane.getRowStride();
@@ -255,12 +219,7 @@ public final class ImageUtil {
                 int remaining = buffer.remaining() - position;
                 if (i3 > remaining) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("removePadding: ");
-                    sb.append(remaining);
-                    sb.append("/");
-                    sb.append(i3);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "removePadding: " + remaining + "/" + i3);
                     i3 = remaining;
                 }
             }
@@ -270,26 +229,18 @@ public final class ImageUtil {
         }
         if (position2 < i4) {
             String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("removePadding: add data: ");
-            sb2.append(position2);
-            sb2.append("|");
-            sb2.append(i4);
-            Log.d(str2, sb2.toString());
+            Log.d(str2, "removePadding: add data: " + position2 + "|" + i4);
             while (position2 < i4) {
                 allocateDirect.put(position2, allocateDirect.get(position2 - 2));
                 position2++;
             }
         }
         String str3 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("removePadding: cost=");
-        sb3.append(System.currentTimeMillis() - currentTimeMillis);
-        Log.v(str3, sb3.toString());
+        Log.v(str3, "removePadding: cost=" + (System.currentTimeMillis() - currentTimeMillis));
         return allocateDirect;
     }
 
-    private static void updateImagePlane(Plane plane, int i, int i2, byte[] bArr, boolean z, int i3) {
+    private static void updateImagePlane(Image.Plane plane, int i, int i2, byte[] bArr, boolean z, int i3) {
         int i4 = i2;
         byte[] bArr2 = bArr;
         int i5 = i3;
@@ -302,14 +253,10 @@ public final class ImageUtil {
         int i7 = i6 * i4;
         int length = bArr2.length - i5;
         if (length >= i7) {
-            String str = "updateImagePlane: ";
             if (rowStride == i6) {
                 int min = Math.min(buffer.remaining(), i7);
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(min);
-                Log.d(str2, sb.toString());
+                String str = TAG;
+                Log.d(str, "updateImagePlane: " + min);
                 buffer.put(bArr2, i5, min);
             } else if (z) {
                 buffer.put(bArr2, i5, Math.min(buffer.remaining(), (rowStride * (i4 - 1)) + i));
@@ -321,13 +268,8 @@ public final class ImageUtil {
                     if (i9 == i4 - 1) {
                         i8 = Math.min(buffer.remaining(), i6);
                         if (i8 < i6) {
-                            String str3 = TAG;
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append(str);
-                            sb2.append(i8);
-                            sb2.append("/");
-                            sb2.append(i6);
-                            Log.d(str3, sb2.toString());
+                            String str2 = TAG;
+                            Log.d(str2, "updateImagePlane: " + i8 + "/" + i6);
                             i8 = buffer.remaining();
                         }
                     }
@@ -345,13 +287,10 @@ public final class ImageUtil {
     public static void updateYuvImage(Image image, byte[] bArr, boolean z) {
         if (image == null || 35 != image.getFormat()) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("updateYuvImage: ");
-            sb.append(image);
-            Log.e(str, sb.toString());
+            Log.e(str, "updateYuvImage: " + image);
             return;
         }
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         updateImagePlane(planes[0], image.getWidth(), image.getHeight(), bArr, z, 0);
         int width = image.getWidth() * image.getHeight();
         if (z) {

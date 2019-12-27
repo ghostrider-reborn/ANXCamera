@@ -53,11 +53,11 @@ public class ExecutorDelivery implements ResponseDelivery {
 
     public void postError(Request<?> request, VolleyError volleyError) {
         request.addMarker("post-error");
-        this.mResponsePoster.execute(new ResponseDeliveryRunnable(request, Response.error(volleyError), null));
+        this.mResponsePoster.execute(new ResponseDeliveryRunnable(request, Response.error(volleyError), (Runnable) null));
     }
 
     public void postResponse(Request<?> request, Response<?> response) {
-        postResponse(request, response, null);
+        postResponse(request, response, (Runnable) null);
     }
 
     public void postResponse(Request<?> request, Response<?> response, Runnable runnable) {

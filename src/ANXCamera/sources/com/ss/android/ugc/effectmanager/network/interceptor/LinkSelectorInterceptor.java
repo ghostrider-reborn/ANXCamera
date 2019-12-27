@@ -13,9 +13,10 @@ public class LinkSelectorInterceptor extends BaseInterceptor {
     }
 
     public boolean intercept(BaseTask baseTask) {
-        if ((baseTask instanceof NormalTask) && ((NormalTask) baseTask).getType().equals(EffectConstants.NETWORK)) {
-            this.mLinkSelector.updateBestHost();
+        if (!(baseTask instanceof NormalTask) || !((NormalTask) baseTask).getType().equals(EffectConstants.NETWORK)) {
+            return false;
         }
+        this.mLinkSelector.updateBestHost();
         return false;
     }
 }

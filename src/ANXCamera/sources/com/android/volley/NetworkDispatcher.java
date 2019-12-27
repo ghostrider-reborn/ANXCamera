@@ -2,7 +2,7 @@ package com.android.volley;
 
 import android.annotation.TargetApi;
 import android.net.TrafficStats;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Process;
 import android.os.SystemClock;
 import android.support.annotation.VisibleForTesting;
@@ -24,7 +24,7 @@ public class NetworkDispatcher extends Thread {
 
     @TargetApi(14)
     private void addTrafficStatsTag(Request<?> request) {
-        if (VERSION.SDK_INT >= 14) {
+        if (Build.VERSION.SDK_INT >= 14) {
             TrafficStats.setThreadStatsTag(request.getTrafficStatsTag());
         }
     }
@@ -34,10 +34,10 @@ public class NetworkDispatcher extends Thread {
     }
 
     private void processRequest() throws InterruptedException {
-        processRequest((Request) this.mQueue.take());
+        processRequest(this.mQueue.take());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void processRequest(Request<?> request) {
         long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -52,7 +52,7 @@ public class NetworkDispatcher extends Thread {
             NetworkResponse performRequest = this.mNetwork.performRequest(request);
             request.addMarker("network-http-complete");
             if (!performRequest.notModified || !request.hasHadResponseDelivered()) {
-                Response parseNetworkResponse = request.parseNetworkResponse(performRequest);
+                Response<?> parseNetworkResponse = request.parseNetworkResponse(performRequest);
                 request.addMarker("network-parse-complete");
                 if (request.shouldCache() && parseNetworkResponse.cacheEntry != null) {
                     this.mCache.put(request.getCacheKey(), parseNetworkResponse.cacheEntry);
@@ -92,9 +92,8 @@ public class NetworkDispatcher extends Thread {
                 if (this.mQuit) {
                     Thread.currentThread().interrupt();
                     return;
-                } else {
-                    VolleyLog.e("Ignoring spurious interrupt of NetworkDispatcher thread; use quit() to terminate it", new Object[0]);
                 }
+                VolleyLog.e("Ignoring spurious interrupt of NetworkDispatcher thread; use quit() to terminate it", new Object[0]);
             }
         }
     }

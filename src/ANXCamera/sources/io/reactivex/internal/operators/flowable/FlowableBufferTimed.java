@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.internal.disposables.DisposableHelper;
@@ -44,9 +43,9 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
         Disposable timer;
         final long timespan;
         final TimeUnit unit;
-        final Worker w;
+        final Scheduler.Worker w;
 
-        BufferExactBoundedSubscriber(Subscriber<? super U> subscriber, Callable<U> callable, long j, TimeUnit timeUnit, int i, boolean z, Worker worker) {
+        BufferExactBoundedSubscriber(Subscriber<? super U> subscriber, Callable<U> callable, long j, TimeUnit timeUnit, int i, boolean z, Scheduler.Worker worker) {
             super(subscriber, new MpscLinkedQueue());
             this.bufferSupplier = callable;
             this.timespan = j;
@@ -127,25 +126,28 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
             monitor-exit(r7);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:23:0x0044, code lost:
-            if (r7.restartTimerOnMaxSize == false) goto L_0x0054;
+            if (r7.restartTimerOnMaxSize == false) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:24:0x0046, code lost:
             r0 = r7.w;
             r4 = r7.timespan;
             r7.timer = r0.schedulePeriodically(r7, r4, r4, r7.unit);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:25:0x0054, code lost:
-            return;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:30:0x0058, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:29:0x0058, code lost:
             r8 = move-exception;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:31:0x0059, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:30:0x0059, code lost:
             io.reactivex.exceptions.Exceptions.throwIfFatal(r8);
             cancel();
             r7.actual.onError(r8);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:32:0x0064, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:31:0x0064, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:42:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:43:?, code lost:
             return;
          */
         public void onNext(T t) {
@@ -169,7 +171,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
                     ObjectHelper.requireNonNull(call, "The supplied buffer is null");
                     this.buffer = (Collection) call;
                     this.actual.onSubscribe(this);
-                    Worker worker = this.w;
+                    Scheduler.Worker worker = this.w;
                     long j = this.timespan;
                     this.timer = worker.schedulePeriodically(this, j, j, this.unit);
                     subscription.request(Long.MAX_VALUE);
@@ -244,12 +246,15 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
         }
 
         /* JADX WARNING: Code restructure failed: missing block: B:10:0x001c, code lost:
-            if (enter() == false) goto L_0x0026;
+            if (enter() == false) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:11:0x001e, code lost:
-            io.reactivex.internal.util.QueueDrainHelper.drainMaxLoop(r4.queue, r4.actual, false, null, r4);
+            io.reactivex.internal.util.QueueDrainHelper.drainMaxLoop(r4.queue, r4.actual, false, (io.reactivex.disposables.Disposable) null, r4);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:12:0x0026, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:19:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:20:?, code lost:
             return;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:9:0x0010, code lost:
@@ -296,7 +301,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
                         Scheduler scheduler2 = this.scheduler;
                         long j = this.timespan;
                         Disposable schedulePeriodicallyDirect = scheduler2.schedulePeriodicallyDirect(this, j, j, this.unit);
-                        if (!this.timer.compareAndSet(null, schedulePeriodicallyDirect)) {
+                        if (!this.timer.compareAndSet((Object) null, schedulePeriodicallyDirect)) {
                             schedulePeriodicallyDirect.dispose();
                         }
                     }
@@ -344,7 +349,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
         final long timeskip;
         final long timespan;
         final TimeUnit unit;
-        final Worker w;
+        final Scheduler.Worker w;
 
         final class RemoveFromBuffer implements Runnable {
             private final U buffer;
@@ -362,7 +367,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
             }
         }
 
-        BufferSkipBoundedSubscriber(Subscriber<? super U> subscriber, Callable<U> callable, long j, long j2, TimeUnit timeUnit, Worker worker) {
+        BufferSkipBoundedSubscriber(Subscriber<? super U> subscriber, Callable<U> callable, long j, long j2, TimeUnit timeUnit, Scheduler.Worker worker) {
             super(subscriber, new MpscLinkedQueue());
             this.bufferSupplier = callable;
             this.timespan = j;
@@ -382,7 +387,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
             this.w.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
             synchronized (this) {
                 this.buffers.clear();
@@ -423,13 +428,13 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
             if (SubscriptionHelper.validate(this.s, subscription)) {
                 this.s = subscription;
                 try {
-                    Object call = this.bufferSupplier.call();
+                    U call = this.bufferSupplier.call();
                     ObjectHelper.requireNonNull(call, "The supplied buffer is null");
                     Collection collection = (Collection) call;
                     this.buffers.add(collection);
                     this.actual.onSubscribe(this);
                     subscription.request(Long.MAX_VALUE);
-                    Worker worker = this.w;
+                    Scheduler.Worker worker = this.w;
                     long j = this.timeskip;
                     worker.schedulePeriodically(this, j, j, this.unit);
                     this.w.schedule(new RemoveFromBuffer(collection), this.timespan, this.unit);
@@ -449,7 +454,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
         public void run() {
             if (!this.cancelled) {
                 try {
-                    Object call = this.bufferSupplier.call();
+                    U call = this.bufferSupplier.call();
                     ObjectHelper.requireNonNull(call, "The supplied buffer is null");
                     Collection collection = (Collection) call;
                     synchronized (this) {
@@ -486,7 +491,7 @@ public final class FlowableBufferTimed<T, U extends Collection<? super T>> exten
             flowable.subscribe((FlowableSubscriber<? super T>) bufferExactUnboundedSubscriber);
             return;
         }
-        Worker createWorker = this.scheduler.createWorker();
+        Scheduler.Worker createWorker = this.scheduler.createWorker();
         if (this.timespan == this.timeskip) {
             Flowable<T> flowable2 = this.source;
             BufferExactBoundedSubscriber bufferExactBoundedSubscriber = new BufferExactBoundedSubscriber(new SerializedSubscriber(subscriber), this.bufferSupplier, this.timespan, this.unit, this.maxSize, this.restartTimerOnMaxSize, createWorker);

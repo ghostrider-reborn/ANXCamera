@@ -6,12 +6,9 @@ import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.StateCallback;
 import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
-import android.hardware.camera2.CaptureRequest.Key;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -22,11 +19,8 @@ import android.hardware.camera2.utils.SurfaceUtils;
 import android.location.Location;
 import android.media.Image;
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.media.ImageWriter;
-import android.media.ImageWriter.OnImageReleasedListener;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -42,7 +36,7 @@ import android.view.SurfaceHolder;
 import com.android.camera.CameraSettings;
 import com.android.camera.CameraSize;
 import com.android.camera.HybridZoomingSystem;
-import com.android.camera.LocalParallelService.LocalBinder;
+import com.android.camera.LocalParallelService;
 import com.android.camera.Thumbnail;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
@@ -54,23 +48,15 @@ import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.module.loader.camera2.FocusTask;
 import com.android.camera.parallel.AlgoConnector;
 import com.android.camera.statistic.CameraStat;
-import com.android.camera2.Camera2Proxy.CameraMetaDataCallback;
-import com.android.camera2.Camera2Proxy.CameraPreviewCallback;
-import com.android.camera2.Camera2Proxy.CaptureBusyCallback;
-import com.android.camera2.Camera2Proxy.CaptureCallback;
-import com.android.camera2.Camera2Proxy.FocusCallback;
-import com.android.camera2.Camera2Proxy.PictureCallback;
-import com.android.camera2.Camera2Proxy.PreviewCallback;
-import com.android.camera2.Camera2Proxy.ScreenLightCallback;
-import com.android.camera2.Camera2Proxy.VideoRecordStateCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.compat.MiCameraCompat;
 import com.android.camera2.vendortag.CaptureRequestVendorTags;
 import com.android.camera2.vendortag.CaptureResultVendorTags;
 import com.android.camera2.vendortag.VendorTagHelper;
 import com.android.camera2.vendortag.struct.AWBFrameControl;
-import com.android.camera2.vendortag.struct.MarshalQueryableASDScene.ASDScene;
+import com.android.camera2.vendortag.struct.MarshalQueryableASDScene;
 import com.mi.config.b;
-import com.xiaomi.camera.base.Constants.ShotType;
+import com.xiaomi.camera.base.Constants;
 import com.xiaomi.camera.core.ParallelCallback;
 import com.xiaomi.protocol.IImageReaderParameterSets;
 import java.lang.ref.WeakReference;
@@ -89,7 +75,7 @@ public class MiCamera2 extends Camera2Proxy {
     private static final int DEF_QUICK_SHOT_THRESHOLD_INTERVAL_TIME = 50;
     private static final int DEF_QUICK_SHOT_THRESHOLD_SHOT_CACHE_COUNT = 10;
     private static final int DEF_QUICK_SHOT_THRESHOLD_SHOT_CACHE_TIME_OUT = 10000;
-    private static final int MAX_IMAGE_BUFFER_SIZE;
+    private static final int MAX_IMAGE_BUFFER_SIZE = ((b.hi() || "tucana".equals(b.km)) ? 12 : 10);
     private static final int MSG_CHECK_CAMERA_ALIVE = 3;
     private static final int MSG_WAITING_AF_LOCK_TIMEOUT = 1;
     private static final int MSG_WAITING_LOCAL_PARALLEL_SERVICE_READY = 2;
@@ -109,7 +95,7 @@ public class MiCamera2 extends Camera2Proxy {
     private Handler mCameraPreviewHandler;
     /* access modifiers changed from: private */
     public final CameraCapabilities mCapabilities;
-    private CaptureBusyCallback mCaptureBusyCallback;
+    private Camera2Proxy.CaptureBusyCallback mCaptureBusyCallback;
     private PictureCaptureCallback mCaptureCallback;
     /* access modifiers changed from: private */
     public CameraCaptureSession mCaptureSession;
@@ -128,7 +114,7 @@ public class MiCamera2 extends Camera2Proxy {
     private SurfaceTexture mFakeOutputTexture;
     /* access modifiers changed from: private */
     public int mFocusLockRequestHashCode;
-    private CaptureCallback mFrontQuickCaptureCallback;
+    private Camera2Proxy.CaptureCallback mFrontQuickCaptureCallback;
     /* access modifiers changed from: private */
     public Handler mHelperHandler;
     private Range<Integer> mHighSpeedFpsRange;
@@ -156,7 +142,7 @@ public class MiCamera2 extends Camera2Proxy {
     private ImageReader mPreviewImageReader;
     private CaptureRequest mPreviewRequest;
     /* access modifiers changed from: private */
-    public Builder mPreviewRequestBuilder;
+    public CaptureRequest.Builder mPreviewRequestBuilder;
     /* access modifiers changed from: private */
     public Surface mPreviewSurface;
     private int mQcfaParallelSurfaceIndex;
@@ -182,7 +168,7 @@ public class MiCamera2 extends Camera2Proxy {
     private int mUltraTeleParallelSurfaceIndex;
     private int mUltraWideParallelSurfaceIndex;
     /* access modifiers changed from: private */
-    public VideoRecordStateCallback mVideoRecordStateCallback;
+    public Camera2Proxy.VideoRecordStateCallback mVideoRecordStateCallback;
     /* access modifiers changed from: private */
     public final Object mVideoRecordStateLock;
     /* access modifiers changed from: private */
@@ -190,27 +176,22 @@ public class MiCamera2 extends Camera2Proxy {
     private ImageReader mVideoSnapshotImageReader;
     private int mWideParallelSurfaceIndex;
 
-    private class CaptureSessionStateCallback extends StateCallback {
-        private WeakReference<CameraPreviewCallback> mClientCb;
+    private class CaptureSessionStateCallback extends CameraCaptureSession.StateCallback {
+        private WeakReference<Camera2Proxy.CameraPreviewCallback> mClientCb;
         private int mId;
 
-        public CaptureSessionStateCallback(int i, CameraPreviewCallback cameraPreviewCallback) {
+        public CaptureSessionStateCallback(int i, Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
             this.mId = i;
             this.mClientCb = new WeakReference<>(cameraPreviewCallback);
         }
 
         public void onClosed(@NonNull CameraCaptureSession cameraCaptureSession) {
             String access$000 = MiCamera2.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onClosed: id=");
-            sb.append(this.mId);
-            sb.append(" sessionId=");
-            sb.append(MiCamera2.this.mSessionId);
-            Log.e(access$000, sb.toString());
+            Log.e(access$000, "onClosed: id=" + this.mId + " sessionId=" + MiCamera2.this.mSessionId);
             if (this.mId == MiCamera2.this.mSessionId) {
-                WeakReference<CameraPreviewCallback> weakReference = this.mClientCb;
+                WeakReference<Camera2Proxy.CameraPreviewCallback> weakReference = this.mClientCb;
                 if (weakReference != null) {
-                    CameraPreviewCallback cameraPreviewCallback = (CameraPreviewCallback) weakReference.get();
+                    Camera2Proxy.CameraPreviewCallback cameraPreviewCallback = (Camera2Proxy.CameraPreviewCallback) weakReference.get();
                     if (cameraPreviewCallback != null) {
                         cameraPreviewCallback.onPreviewSessionClosed(cameraCaptureSession);
                     }
@@ -220,16 +201,11 @@ public class MiCamera2 extends Camera2Proxy {
 
         public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
             String access$000 = MiCamera2.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onConfigureFailed: id=");
-            sb.append(this.mId);
-            sb.append(" sessionId=");
-            sb.append(MiCamera2.this.mSessionId);
-            Log.e(access$000, sb.toString());
+            Log.e(access$000, "onConfigureFailed: id=" + this.mId + " sessionId=" + MiCamera2.this.mSessionId);
             if (this.mId == MiCamera2.this.mSessionId) {
-                WeakReference<CameraPreviewCallback> weakReference = this.mClientCb;
+                WeakReference<Camera2Proxy.CameraPreviewCallback> weakReference = this.mClientCb;
                 if (weakReference != null) {
-                    CameraPreviewCallback cameraPreviewCallback = (CameraPreviewCallback) weakReference.get();
+                    Camera2Proxy.CameraPreviewCallback cameraPreviewCallback = (Camera2Proxy.CameraPreviewCallback) weakReference.get();
                     if (cameraPreviewCallback != null) {
                         cameraPreviewCallback.onPreviewSessionFailed(cameraCaptureSession);
                     }
@@ -242,31 +218,21 @@ public class MiCamera2 extends Camera2Proxy {
             if (this.mId == MiCamera2.this.mSessionId) {
                 synchronized (MiCamera2.this.mSessionLock) {
                     String access$000 = MiCamera2.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onConfigured: id = ");
-                    sb.append(this.mId);
-                    sb.append(", session = ");
-                    sb.append(cameraCaptureSession);
-                    sb.append(", reprocessable = ");
-                    sb.append(cameraCaptureSession.isReprocessable());
-                    Log.d(access$000, sb.toString());
-                    MiCamera2.this.mCaptureSession = cameraCaptureSession;
+                    Log.d(access$000, "onConfigured: id = " + this.mId + ", session = " + cameraCaptureSession + ", reprocessable = " + cameraCaptureSession.isReprocessable());
+                    CameraCaptureSession unused = MiCamera2.this.mCaptureSession = cameraCaptureSession;
                     if (MiCamera2.this.mCaptureSession.isReprocessable()) {
                         MiCamera2.this.prepareRawImageWriter(MiCamera2.this.mConfigs.getSensorRawImageSize(), MiCamera2.this.mCaptureSession.getInputSurface());
                     }
                 }
-                MiCamera2.this.mIsCaptureSessionClosed = false;
+                boolean unused2 = MiCamera2.this.mIsCaptureSessionClosed = false;
                 if (MiCamera2.this.mPendingNotifyVideoEnd && this.mId == MiCamera2.this.mVideoSessionId) {
                     MiCamera2.this.notifyVideoStreamEnd();
-                    MiCamera2.this.mPendingNotifyVideoEnd = false;
+                    boolean unused3 = MiCamera2.this.mPendingNotifyVideoEnd = false;
                 }
                 synchronized (MiCamera2.this.mSessionLock) {
                     isEmpty = MiCamera2.this.mDeferOutputConfigurations.isEmpty();
                     String access$0002 = MiCamera2.TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("onConfigured: is mDeferOutputConfigurations null: ");
-                    sb2.append(isEmpty);
-                    Log.d(access$0002, sb2.toString());
+                    Log.d(access$0002, "onConfigured: is mDeferOutputConfigurations null: " + isEmpty);
                 }
                 if (isEmpty) {
                     onPreviewSessionSuccess();
@@ -286,9 +252,9 @@ public class MiCamera2 extends Camera2Proxy {
                 isEmpty = MiCamera2.this.mDeferOutputConfigurations.isEmpty();
             }
             if (isEmpty && this.mId == MiCamera2.this.mSessionId) {
-                WeakReference<CameraPreviewCallback> weakReference = this.mClientCb;
+                WeakReference<Camera2Proxy.CameraPreviewCallback> weakReference = this.mClientCb;
                 if (weakReference != null) {
-                    CameraPreviewCallback cameraPreviewCallback = (CameraPreviewCallback) weakReference.get();
+                    Camera2Proxy.CameraPreviewCallback cameraPreviewCallback = (Camera2Proxy.CameraPreviewCallback) weakReference.get();
                     if (cameraPreviewCallback != null) {
                         cameraPreviewCallback.onPreviewSessionSuccess(MiCamera2.this.mCaptureSession);
                     }
@@ -296,46 +262,38 @@ public class MiCamera2 extends Camera2Proxy {
             }
         }
 
-        public void setClientCb(CameraPreviewCallback cameraPreviewCallback) {
+        public void setClientCb(Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
             this.mClientCb = new WeakReference<>(cameraPreviewCallback);
         }
     }
 
-    private class HighSpeedCaptureSessionStateCallback extends StateCallback {
-        private final WeakReference<CameraPreviewCallback> mClientCb;
+    private class HighSpeedCaptureSessionStateCallback extends CameraCaptureSession.StateCallback {
+        private final WeakReference<Camera2Proxy.CameraPreviewCallback> mClientCb;
         private final int mId;
 
-        public HighSpeedCaptureSessionStateCallback(int i, CameraPreviewCallback cameraPreviewCallback) {
+        public HighSpeedCaptureSessionStateCallback(int i, Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
             this.mId = i;
             this.mClientCb = new WeakReference<>(cameraPreviewCallback);
         }
 
         public void onClosed(@NonNull CameraCaptureSession cameraCaptureSession) {
             String access$000 = MiCamera2.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onHighSpeedClosed: ");
-            sb.append(cameraCaptureSession);
-            Log.d(access$000, sb.toString());
+            Log.d(access$000, "onHighSpeedClosed: " + cameraCaptureSession);
             synchronized (MiCamera2.this.mSessionLock) {
                 if (MiCamera2.this.mCaptureSession != null && MiCamera2.this.mCaptureSession.equals(cameraCaptureSession)) {
-                    MiCamera2.this.mCaptureSession = null;
+                    CameraCaptureSession unused = MiCamera2.this.mCaptureSession = null;
                 }
             }
             if (this.mClientCb.get() != null) {
-                ((CameraPreviewCallback) this.mClientCb.get()).onPreviewSessionClosed(cameraCaptureSession);
+                ((Camera2Proxy.CameraPreviewCallback) this.mClientCb.get()).onPreviewSessionClosed(cameraCaptureSession);
             }
         }
 
         public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
             String access$000 = MiCamera2.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onHighSpeedConfigureFailed: id=");
-            sb.append(this.mId);
-            sb.append(" sessionId=");
-            sb.append(MiCamera2.this.mSessionId);
-            Log.e(access$000, sb.toString());
+            Log.e(access$000, "onHighSpeedConfigureFailed: id=" + this.mId + " sessionId=" + MiCamera2.this.mSessionId);
             if (this.mClientCb.get() != null) {
-                ((CameraPreviewCallback) this.mClientCb.get()).onPreviewSessionFailed(cameraCaptureSession);
+                ((Camera2Proxy.CameraPreviewCallback) this.mClientCb.get()).onPreviewSessionFailed(cameraCaptureSession);
             }
         }
 
@@ -343,20 +301,15 @@ public class MiCamera2 extends Camera2Proxy {
             if (this.mId == MiCamera2.this.mSessionId) {
                 synchronized (MiCamera2.this.mSessionLock) {
                     String access$000 = MiCamera2.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onHighSpeedConfigured: id=");
-                    sb.append(this.mId);
-                    sb.append(" highSpeedSession=");
-                    sb.append(cameraCaptureSession);
-                    Log.d(access$000, sb.toString());
-                    MiCamera2.this.mCaptureSession = cameraCaptureSession;
+                    Log.d(access$000, "onHighSpeedConfigured: id=" + this.mId + " highSpeedSession=" + cameraCaptureSession);
+                    CameraCaptureSession unused = MiCamera2.this.mCaptureSession = cameraCaptureSession;
                 }
-                MiCamera2.this.mIsCaptureSessionClosed = false;
+                boolean unused2 = MiCamera2.this.mIsCaptureSessionClosed = false;
                 MiCamera2 miCamera2 = MiCamera2.this;
                 miCamera2.applySettingsForVideo(miCamera2.mPreviewRequestBuilder);
                 MiCameraCompat.applyIsHfrPreview(MiCamera2.this.mPreviewRequestBuilder, true);
                 if (this.mClientCb.get() != null) {
-                    ((CameraPreviewCallback) this.mClientCb.get()).onPreviewSessionSuccess(cameraCaptureSession);
+                    ((Camera2Proxy.CameraPreviewCallback) this.mClientCb.get()).onPreviewSessionSuccess(cameraCaptureSession);
                 }
             }
         }
@@ -412,7 +365,7 @@ public class MiCamera2 extends Camera2Proxy {
                 MiCamera2.this.setOpticalZoomToTele(false);
                 MiCamera2.this.resumePreview();
             }
-            CameraMetaDataCallback metadataCallback = MiCamera2.this.getMetadataCallback();
+            Camera2Proxy.CameraMetaDataCallback metadataCallback = MiCamera2.this.getMetadataCallback();
             int state = getState();
             if (state != 1) {
                 switch (state) {
@@ -454,7 +407,7 @@ public class MiCamera2 extends Camera2Proxy {
         private void processAeResult(CaptureResult captureResult) {
             Integer num = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
             if (num != null) {
-                FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
+                Camera2Proxy.FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
                 if (focusCallback != null && this.mManuallyFocusTask != null) {
                     Log.d(MiCamera2.TAG, String.format(Locale.ENGLISH, "aeState changed from %s to %s,", new Object[]{Util.controlAEStateToString(Integer.valueOf(this.mLastResultAEState)), Util.controlAEStateToString(num)}));
                     this.mLastResultAEState = num.intValue();
@@ -462,19 +415,12 @@ public class MiCamera2 extends Camera2Proxy {
                         this.mAutoFocusTask = null;
                     } else if (!this.mManuallyFocusTask.isTaskProcessed()) {
                         String access$000 = MiCamera2.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("the task's request is not process yet. task=");
-                        sb.append(this.mManuallyFocusTask.hashCode());
-                        sb.append(", request=");
-                        sb.append(captureResult.getRequest().hashCode());
-                        Log.d(access$000, sb.toString());
-                    } else {
-                        if (isAeLocked(num)) {
-                            Log.d(MiCamera2.TAG, "AE has been already converged, lock AE");
-                            this.mManuallyFocusTask.setResult(true);
-                            focusCallback.onFocusStateChanged(this.mManuallyFocusTask);
-                            this.mManuallyFocusTask = null;
-                        }
+                        Log.d(access$000, "the task's request is not process yet. task=" + this.mManuallyFocusTask.hashCode() + ", request=" + captureResult.getRequest().hashCode());
+                    } else if (isAeLocked(num)) {
+                        Log.d(MiCamera2.TAG, "AE has been already converged, lock AE");
+                        this.mManuallyFocusTask.setResult(true);
+                        focusCallback.onFocusStateChanged(this.mManuallyFocusTask);
+                        this.mManuallyFocusTask = null;
                     }
                 }
             }
@@ -483,7 +429,7 @@ public class MiCamera2 extends Camera2Proxy {
         private void processAfResult(CaptureResult captureResult) {
             Integer num = (Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE);
             if (num != null) {
-                FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
+                Camera2Proxy.FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
                 if (focusCallback != null && num.intValue() != this.mLastResultAFState) {
                     Log.d(MiCamera2.TAG, String.format(Locale.ENGLISH, "afState changed from %d to %d", new Object[]{Integer.valueOf(this.mLastResultAFState), Integer.valueOf(num.intValue())}));
                     this.mLastResultAFState = num.intValue();
@@ -491,15 +437,15 @@ public class MiCamera2 extends Camera2Proxy {
                         if (isAutoFocusing(num).booleanValue()) {
                             this.mAutoFocusTask = FocusTask.create(2);
                             focusCallback.onFocusStateChanged(this.mAutoFocusTask);
-                        } else {
-                            Boolean isFocusLocked = isFocusLocked(num);
-                            if (isFocusLocked != null) {
-                                FocusTask focusTask = this.mAutoFocusTask;
-                                if (focusTask != null) {
-                                    focusTask.setResult(isFocusLocked.booleanValue());
-                                    focusCallback.onFocusStateChanged(this.mAutoFocusTask);
-                                    this.mAutoFocusTask = null;
-                                }
+                            return;
+                        }
+                        Boolean isFocusLocked = isFocusLocked(num);
+                        if (isFocusLocked != null) {
+                            FocusTask focusTask = this.mAutoFocusTask;
+                            if (focusTask != null) {
+                                focusTask.setResult(isFocusLocked.booleanValue());
+                                focusCallback.onFocusStateChanged(this.mAutoFocusTask);
+                                this.mAutoFocusTask = null;
                             }
                         }
                     } else if (this.mAutoFocusTask != null) {
@@ -542,60 +488,38 @@ public class MiCamera2 extends Camera2Proxy {
                             }
                         }
                     } else if (MiCamera2.this.mFocusLockRequestHashCode == captureResult.getRequest().hashCode()) {
-                        MiCamera2.this.mFocusLockRequestHashCode = 0;
+                        int unused = MiCamera2.this.mFocusLockRequestHashCode = 0;
                     }
                 }
             } else if (state == 4) {
-                Integer num2 = (Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                Integer num3 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
-                Integer num4 = (Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE);
+                Integer num2 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
                 String access$000 = MiCamera2.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("STATE_WAITING_AE_LOCK:  AF = ");
-                sb.append(Util.controlAFStateToString(num2));
-                Log.d(access$000, sb.toString());
+                Log.d(access$000, "STATE_WAITING_AE_LOCK:  AF = " + Util.controlAFStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE)));
                 String access$0002 = MiCamera2.TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("STATE_WAITING_AE_LOCK:  AE = ");
-                sb2.append(Util.controlAEStateToString(num3));
-                Log.d(access$0002, sb2.toString());
+                Log.d(access$0002, "STATE_WAITING_AE_LOCK:  AE = " + Util.controlAEStateToString(num2));
                 String access$0003 = MiCamera2.TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("STATE_WAITING_AE_LOCK: AWB = ");
-                sb3.append(Util.controlAWBStateToString(num4));
-                Log.d(access$0003, sb3.toString());
-                if (num3 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
-                    num3 = Integer.valueOf(-1);
+                Log.d(access$0003, "STATE_WAITING_AE_LOCK: AWB = " + Util.controlAWBStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE)));
+                if (num2 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
+                    num2 = -1;
                 }
-                if (num3 == null || num3.intValue() == 3) {
+                if (num2 == null || num2.intValue() == 3) {
                     Log.d(MiCamera2.TAG, "STATE_WAITING_AE_LOCK: runCaptureSequence()");
                     MiCamera2.this.runCaptureSequence();
                     return;
                 }
                 Log.d(MiCamera2.TAG, "STATE_WAITING_AE_LOCK: keep stay in STATE_WAITING_AE_LOCK");
             } else if (state == 5) {
-                Integer num5 = (Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                Integer num6 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
-                Integer num7 = (Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE);
+                Integer num3 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
                 String access$0004 = MiCamera2.TAG;
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("STATE_WAITING_AE_CONVERGED:  AF = ");
-                sb4.append(Util.controlAFStateToString(num5));
-                Log.d(access$0004, sb4.toString());
+                Log.d(access$0004, "STATE_WAITING_AE_CONVERGED:  AF = " + Util.controlAFStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE)));
                 String access$0005 = MiCamera2.TAG;
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("STATE_WAITING_AE_CONVERGED:  AE = ");
-                sb5.append(Util.controlAEStateToString(num6));
-                Log.d(access$0005, sb5.toString());
+                Log.d(access$0005, "STATE_WAITING_AE_CONVERGED:  AE = " + Util.controlAEStateToString(num3));
                 String access$0006 = MiCamera2.TAG;
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append("STATE_WAITING_AE_CONVERGED: AWB = ");
-                sb6.append(Util.controlAWBStateToString(num7));
-                Log.d(access$0006, sb6.toString());
-                if (num6 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
-                    num6 = Integer.valueOf(-1);
+                Log.d(access$0006, "STATE_WAITING_AE_CONVERGED: AWB = " + Util.controlAWBStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE)));
+                if (num3 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
+                    num3 = -1;
                 }
-                if (num6 != null && num6.intValue() != 2 && num6.intValue() != 4) {
+                if (num3 != null && num3.intValue() != 2 && num3.intValue() != 4) {
                     Log.d(MiCamera2.TAG, "STATE_WAITING_AE_CONVERGED: keep stay in STATE_WAITING_AE_CONVERGED");
                 } else if (!MiCamera2.this.mCapabilities.isAutoFocusSupported() || MiCamera2.this.mConfigs.getFocusMode() == 0) {
                     Log.d(MiCamera2.TAG, "STATE_WAITING_AE_CONVERGED: runCaptureSequence()");
@@ -605,28 +529,17 @@ public class MiCamera2 extends Camera2Proxy {
                     MiCamera2.this.lockFocus();
                 }
             } else if (state == 6) {
-                Integer num8 = (Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                Integer num9 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
-                Integer num10 = (Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE);
+                Integer num4 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
                 String access$0007 = MiCamera2.TAG;
-                StringBuilder sb7 = new StringBuilder();
-                sb7.append("STATE_WAITING_PRECAPTURE:  AF = ");
-                sb7.append(Util.controlAFStateToString(num8));
-                Log.d(access$0007, sb7.toString());
+                Log.d(access$0007, "STATE_WAITING_PRECAPTURE:  AF = " + Util.controlAFStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE)));
                 String access$0008 = MiCamera2.TAG;
-                StringBuilder sb8 = new StringBuilder();
-                sb8.append("STATE_WAITING_PRECAPTURE:  AE = ");
-                sb8.append(Util.controlAEStateToString(num9));
-                Log.d(access$0008, sb8.toString());
+                Log.d(access$0008, "STATE_WAITING_PRECAPTURE:  AE = " + Util.controlAEStateToString(num4));
                 String access$0009 = MiCamera2.TAG;
-                StringBuilder sb9 = new StringBuilder();
-                sb9.append("STATE_WAITING_PRECAPTURE: AWB = ");
-                sb9.append(Util.controlAWBStateToString(num10));
-                Log.d(access$0009, sb9.toString());
-                if (num9 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
-                    num9 = Integer.valueOf(-1);
+                Log.d(access$0009, "STATE_WAITING_PRECAPTURE: AWB = " + Util.controlAWBStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE)));
+                if (num4 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
+                    num4 = -1;
                 }
-                if (num9 == null || num9.intValue() == 5 || (num9.intValue() == 4 && !MiCamera2.this.WAITING_AE_STATE_STRICT)) {
+                if (num4 == null || num4.intValue() == 5 || (num4.intValue() == 4 && !MiCamera2.this.WAITING_AE_STATE_STRICT)) {
                     Log.d(MiCamera2.TAG, "STATE_WAITING_PRECAPTURE: switch to STATE_WAITING_NON_PRECAPTURE(1)");
                     setState(7);
                 } else if (MiCamera2.this.mPreCaptureRequestHashCode == captureResult.getRequest().hashCode()) {
@@ -636,28 +549,17 @@ public class MiCamera2 extends Camera2Proxy {
                     Log.d(MiCamera2.TAG, "STATE_WAITING_PRECAPTURE: keep stay in STATE_WAITING_PRECAPTURE");
                 }
             } else if (state == 7) {
-                Integer num11 = (Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE);
-                Integer num12 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
-                Integer num13 = (Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE);
+                Integer num5 = (Integer) captureResult.get(CaptureResult.CONTROL_AE_STATE);
                 String access$00010 = MiCamera2.TAG;
-                StringBuilder sb10 = new StringBuilder();
-                sb10.append("STATE_WAITING_NON_PRECAPTURE:  AF = ");
-                sb10.append(Util.controlAFStateToString(num11));
-                Log.d(access$00010, sb10.toString());
+                Log.d(access$00010, "STATE_WAITING_NON_PRECAPTURE:  AF = " + Util.controlAFStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE)));
                 String access$00011 = MiCamera2.TAG;
-                StringBuilder sb11 = new StringBuilder();
-                sb11.append("STATE_WAITING_NON_PRECAPTURE:  AE = ");
-                sb11.append(Util.controlAEStateToString(num12));
-                Log.d(access$00011, sb11.toString());
+                Log.d(access$00011, "STATE_WAITING_NON_PRECAPTURE:  AE = " + Util.controlAEStateToString(num5));
                 String access$00012 = MiCamera2.TAG;
-                StringBuilder sb12 = new StringBuilder();
-                sb12.append("STATE_WAITING_NON_PRECAPTURE: AWB = ");
-                sb12.append(Util.controlAWBStateToString(num13));
-                Log.d(access$00012, sb12.toString());
-                if (num12 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
-                    num12 = Integer.valueOf(5);
+                Log.d(access$00012, "STATE_WAITING_NON_PRECAPTURE: AWB = " + Util.controlAWBStateToString((Integer) captureResult.get(CaptureResult.CONTROL_AWB_STATE)));
+                if (num5 == null && MiCamera2.this.WAITING_AE_STATE_STRICT) {
+                    num5 = 5;
                 }
-                if (num12 != null && num12.intValue() == 5) {
+                if (num5 != null && num5.intValue() == 5) {
                     Log.d(MiCamera2.TAG, "STATE_WAITING_NON_PRECAPTURE: keep stay in STATE_WAITING_NON_PRECAPTURE");
                 } else if (MiCamera2.this.needOptimizedFlash() || (b.isMTKPlatform() && !MiCamera2.this.needScreenLight())) {
                     setState(5);
@@ -674,13 +576,13 @@ public class MiCamera2 extends Camera2Proxy {
                     Integer num = (Integer) VendorTagHelper.getValue(captureResult, CaptureResultVendorTags.VIDEO_RECORD_STATE);
                     if (num != null && 2 == num.intValue()) {
                         MiCamera2.this.mVideoRecordStateCallback.onVideoRecordStopped();
-                        MiCamera2.this.mVideoRecordStateCallback = null;
+                        Camera2Proxy.VideoRecordStateCallback unused = MiCamera2.this.mVideoRecordStateCallback = null;
                     }
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Integer getCurrentAEState() {
             if (getPreviewCaptureResult() == null) {
                 return null;
@@ -688,35 +590,31 @@ public class MiCamera2 extends Camera2Proxy {
             return (Integer) getPreviewCaptureResult().get(CaptureResult.CONTROL_AE_STATE);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getCurrentColorTemperature() {
             CaptureResult previewCaptureResult = getPreviewCaptureResult();
-            int i = 0;
             if (previewCaptureResult == null) {
                 return 0;
             }
             AWBFrameControl aWBFrameControl = CaptureResultParser.getAWBFrameControl(previewCaptureResult);
             if (aWBFrameControl != null) {
-                i = aWBFrameControl.getColorTemperature();
+                return aWBFrameControl.getColorTemperature();
             }
-            return i;
+            return 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public FocusTask getFocusTask() {
             return this.mManuallyFocusTask;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public CaptureResult getPreviewCaptureResult() {
             CaptureResult captureResult;
             synchronized (this.mPreviewCaptureResultLock) {
                 if (this.mPreviewCaptureResult == null) {
                     String access$000 = MiCamera2.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("returned a null PreviewCaptureResult, mState is ");
-                    sb.append(this.mState);
-                    Log.w(access$000, sb.toString());
+                    Log.w(access$000, "returned a null PreviewCaptureResult, mState is " + this.mState);
                 }
                 captureResult = this.mPreviewCaptureResult;
             }
@@ -731,7 +629,7 @@ public class MiCamera2 extends Camera2Proxy {
             return i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onCapabilityChanged(CameraCapabilities cameraCapabilities) {
             this.mFocusAreaSupported = cameraCapabilities.isAFRegionSupported();
             this.mAELockOnlySupported = DataRepository.dataItemFeature()._a() && !this.mFocusAreaSupported && cameraCapabilities.isAERegionSupported() && cameraCapabilities.isAELockSupported();
@@ -740,11 +638,7 @@ public class MiCamera2 extends Camera2Proxy {
         public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
             if (totalCaptureResult.getFrameNumber() == 0) {
                 String access$000 = MiCamera2.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted Sequence: ");
-                sb.append(totalCaptureResult.getSequenceId());
-                sb.append(" first frame received");
-                Log.d(access$000, sb.toString());
+                Log.d(access$000, "onCaptureCompleted Sequence: " + totalCaptureResult.getSequenceId() + " first frame received");
                 MiCamera2.this.triggerDeviceChecking(true, false);
             }
             if (getState() == 0) {
@@ -761,27 +655,24 @@ public class MiCamera2 extends Camera2Proxy {
             processPartial(captureResult);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setFocusTask(FocusTask focusTask) {
             this.mManuallyFocusTask = focusTask;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setState(int i) {
             synchronized (this.mStateLock) {
                 String access$000 = MiCamera2.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("setState: ");
-                sb.append(i);
-                Log.d(access$000, sb.toString());
+                Log.d(access$000, "setState: " + i);
                 this.mState = i;
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void showAutoFocusFinish(boolean z) {
             if (this.mTorchFocusTask != null) {
-                FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
+                Camera2Proxy.FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
                 if (focusCallback != null) {
                     this.mTorchFocusTask.setResult(z);
                     focusCallback.onFocusStateChanged(this.mTorchFocusTask);
@@ -790,9 +681,9 @@ public class MiCamera2 extends Camera2Proxy {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void showAutoFocusStart() {
-            FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
+            Camera2Proxy.FocusCallback focusCallback = MiCamera2.this.getFocusCallback();
             if (focusCallback != null) {
                 this.mTorchFocusTask = FocusTask.create(3);
                 focusCallback.onFocusStateChanged(this.mTorchFocusTask);
@@ -801,17 +692,8 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     static {
-        int i;
         MeteringRectangle meteringRectangle = new MeteringRectangle(0, 0, 0, 0, 0);
         ZERO_WEIGHT_3A_REGION = new MeteringRectangle[]{meteringRectangle};
-        if (!b.hi()) {
-            if (!"tucana".equals(b.km)) {
-                i = 10;
-                MAX_IMAGE_BUFFER_SIZE = i;
-            }
-        }
-        i = 12;
-        MAX_IMAGE_BUFFER_SIZE = i;
     }
 
     public MiCamera2(CameraDevice cameraDevice, int i, CameraCapabilities cameraCapabilities, @NonNull Handler handler, @NonNull Handler handler2, @NonNull Handler handler3) {
@@ -867,8 +749,8 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    private void applyCommonSettings(Builder builder, int i) {
-        builder.set(CaptureRequest.CONTROL_MODE, Integer.valueOf(1));
+    private void applyCommonSettings(CaptureRequest.Builder builder, int i) {
+        builder.set(CaptureRequest.CONTROL_MODE, 1);
         CaptureRequestBuilder.applyFocusMode(builder, this.mConfigs);
         CaptureRequestBuilder.applyFaceDetection(builder, this.mConfigs);
         CaptureRequestBuilder.applyAntiBanding(builder, this.mConfigs);
@@ -950,74 +832,70 @@ public class MiCamera2 extends Camera2Proxy {
     /* JADX WARNING: Removed duplicated region for block: B:33:0x00a5  */
     /* JADX WARNING: Removed duplicated region for block: B:36:0x00ab  */
     /* JADX WARNING: Removed duplicated region for block: B:77:0x01e5  */
-    private void applyFlashMode(Builder builder, int i) {
+    private void applyFlashMode(CaptureRequest.Builder builder, int i) {
         boolean z;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("applyFlashMode: request = ");
-        sb.append(builder);
-        sb.append(", applyType = ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "applyFlashMode: request = " + builder + ", applyType = " + i);
         if (builder != null) {
             int flashMode = this.mConfigs.getFlashMode();
             if (i != 3) {
                 if (i == 6 && needOptimizedFlash()) {
                 }
                 z = false;
-                ScreenLightCallback screenLightCallback = getScreenLightCallback();
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("applyFlashMode: flashMode = ");
-                sb2.append(flashMode);
-                sb2.append(", mScreenLightCallback = ");
-                sb2.append(screenLightCallback);
-                Log.d(str2, sb2.toString());
+                Camera2Proxy.ScreenLightCallback screenLightCallback = getScreenLightCallback();
+                Log.d(TAG, "applyFlashMode: flashMode = " + flashMode + ", mScreenLightCallback = " + screenLightCallback);
                 CaptureRequestBuilder.applyScreenLightHint(this.mCapabilities, builder, flashMode != 101);
                 if (!(flashMode == 200 || flashMode == 0)) {
                     CaptureRequestBuilder.applyBackSoftLight(this.mCapabilities, builder, flashMode != 5);
                 }
                 if (flashMode != 0) {
-                    builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
-                    builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(0));
+                    builder.set(CaptureRequest.CONTROL_AE_MODE, 1);
+                    builder.set(CaptureRequest.FLASH_MODE, 0);
+                    return;
                 } else if (flashMode == 1) {
-                    builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(3));
-                    builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(1));
+                    builder.set(CaptureRequest.CONTROL_AE_MODE, 3);
+                    builder.set(CaptureRequest.FLASH_MODE, 1);
+                    return;
                 } else if (flashMode == 2) {
                     if (this.mCapabilities.isSupportSnapShotTorch()) {
                         MiCameraCompat.applySnapshotTorch(builder, z);
                     }
-                    builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
-                    builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(2));
+                    builder.set(CaptureRequest.CONTROL_AE_MODE, 1);
+                    builder.set(CaptureRequest.FLASH_MODE, 2);
+                    return;
                 } else if (flashMode == 3) {
-                    builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(2));
+                    builder.set(CaptureRequest.CONTROL_AE_MODE, 2);
                     if (b.isMTKPlatform()) {
-                        builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(0));
+                        builder.set(CaptureRequest.FLASH_MODE, 0);
+                        return;
                     } else {
-                        builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(1));
+                        builder.set(CaptureRequest.FLASH_MODE, 1);
+                        return;
                     }
                 } else if (flashMode == 4) {
-                    builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(4));
+                    builder.set(CaptureRequest.CONTROL_AE_MODE, 4);
+                    return;
                 } else if (flashMode == 5) {
-                    builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
-                    builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(2));
+                    builder.set(CaptureRequest.CONTROL_AE_MODE, 1);
+                    builder.set(CaptureRequest.FLASH_MODE, 2);
+                    return;
                 } else if (flashMode != 101) {
                     if (flashMode == 103) {
-                        String str3 = TAG;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("applyFlashMode: FLASH_MODE_SCREEN_LIGHT_AUTO applyType = ");
-                        sb3.append(i);
-                        Log.d(str3, sb3.toString());
+                        Log.d(TAG, "applyFlashMode: FLASH_MODE_SCREEN_LIGHT_AUTO applyType = " + i);
                         if (screenLightCallback != null) {
                             screenLightCallback.stopScreenLight();
+                            return;
                         }
+                        return;
                     } else if (flashMode == 200) {
                         if (b.isMTKPlatform()) {
-                            builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(0));
+                            builder.set(CaptureRequest.CONTROL_AE_MODE, 0);
                         } else {
-                            builder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
+                            builder.set(CaptureRequest.CONTROL_AE_MODE, 1);
                         }
-                        builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(0));
+                        builder.set(CaptureRequest.FLASH_MODE, 0);
+                        return;
+                    } else {
+                        return;
                     }
                 } else if (screenLightCallback != null) {
                     if (i == 6) {
@@ -1026,70 +904,50 @@ public class MiCamera2 extends Camera2Proxy {
                     int screenLightColor = Util.getScreenLightColor(SystemProperties.getInt("camera_screen_light_wb", this.mScreenLightColorTemperature));
                     int screenLightBrightness = CameraSettings.getScreenLightBrightness();
                     int i2 = SystemProperties.getInt("camera_screen_light_delay", 0);
-                    String str4 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("applyFlashMode: FLASH_MODE_SCREEN_LIGHT_ON color = ");
-                    sb4.append(screenLightColor);
-                    sb4.append(", brightness = ");
-                    sb4.append(screenLightBrightness);
-                    sb4.append(", delay = ");
-                    sb4.append(i2);
-                    sb4.append(", mCameraHandler = ");
-                    sb4.append(this.mCameraHandler);
-                    Log.d(str4, sb4.toString());
+                    Log.d(TAG, "applyFlashMode: FLASH_MODE_SCREEN_LIGHT_ON color = " + screenLightColor + ", brightness = " + screenLightBrightness + ", delay = " + i2 + ", mCameraHandler = " + this.mCameraHandler);
                     if (i == 6 || i == 3) {
                         screenLightCallback.startScreenLight(screenLightColor, screenLightBrightness);
-                    } else if (i == 7) {
+                        return;
+                    } else if (i != 7) {
+                        return;
+                    } else {
                         if (i2 == 0) {
                             screenLightCallback.stopScreenLight();
+                            return;
                         } else {
                             this.mCameraHandler.postDelayed(new c(screenLightCallback), (long) i2);
+                            return;
                         }
                     }
+                } else {
+                    return;
                 }
-            }
-            if (!needOptimizedFlash()) {
-                if (flashMode == 3) {
+            } else {
+                if (!needOptimizedFlash()) {
+                    if (flashMode == 3) {
+                    }
+                    z = false;
+                    Camera2Proxy.ScreenLightCallback screenLightCallback2 = getScreenLightCallback();
+                    Log.d(TAG, "applyFlashMode: flashMode = " + flashMode + ", mScreenLightCallback = " + screenLightCallback2);
+                    CaptureRequestBuilder.applyScreenLightHint(this.mCapabilities, builder, flashMode != 101);
+                    CaptureRequestBuilder.applyBackSoftLight(this.mCapabilities, builder, flashMode != 5);
+                    if (flashMode != 0) {
+                    }
+                } else if (getExposureTime() <= 0) {
                 }
+                flashMode = 0;
                 z = false;
-                ScreenLightCallback screenLightCallback2 = getScreenLightCallback();
-                String str22 = TAG;
-                StringBuilder sb22 = new StringBuilder();
-                sb22.append("applyFlashMode: flashMode = ");
-                sb22.append(flashMode);
-                sb22.append(", mScreenLightCallback = ");
-                sb22.append(screenLightCallback2);
-                Log.d(str22, sb22.toString());
+                Camera2Proxy.ScreenLightCallback screenLightCallback22 = getScreenLightCallback();
+                Log.d(TAG, "applyFlashMode: flashMode = " + flashMode + ", mScreenLightCallback = " + screenLightCallback22);
                 CaptureRequestBuilder.applyScreenLightHint(this.mCapabilities, builder, flashMode != 101);
                 CaptureRequestBuilder.applyBackSoftLight(this.mCapabilities, builder, flashMode != 5);
                 if (flashMode != 0) {
                 }
-            } else if (getExposureTime() <= 0) {
-            }
-            flashMode = 0;
-            z = false;
-            ScreenLightCallback screenLightCallback22 = getScreenLightCallback();
-            String str222 = TAG;
-            StringBuilder sb222 = new StringBuilder();
-            sb222.append("applyFlashMode: flashMode = ");
-            sb222.append(flashMode);
-            sb222.append(", mScreenLightCallback = ");
-            sb222.append(screenLightCallback22);
-            Log.d(str222, sb222.toString());
-            CaptureRequestBuilder.applyScreenLightHint(this.mCapabilities, builder, flashMode != 101);
-            CaptureRequestBuilder.applyBackSoftLight(this.mCapabilities, builder, flashMode != 5);
-            if (flashMode != 0) {
             }
             flashMode = 2;
             z = true;
-            ScreenLightCallback screenLightCallback222 = getScreenLightCallback();
-            String str2222 = TAG;
-            StringBuilder sb2222 = new StringBuilder();
-            sb2222.append("applyFlashMode: flashMode = ");
-            sb2222.append(flashMode);
-            sb2222.append(", mScreenLightCallback = ");
-            sb2222.append(screenLightCallback222);
-            Log.d(str2222, sb2222.toString());
+            Camera2Proxy.ScreenLightCallback screenLightCallback222 = getScreenLightCallback();
+            Log.d(TAG, "applyFlashMode: flashMode = " + flashMode + ", mScreenLightCallback = " + screenLightCallback222);
             CaptureRequestBuilder.applyScreenLightHint(this.mCapabilities, builder, flashMode != 101);
             CaptureRequestBuilder.applyBackSoftLight(this.mCapabilities, builder, flashMode != 5);
             if (flashMode != 0) {
@@ -1097,7 +955,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    private void applySettingsForFocusCapture(Builder builder) {
+    private void applySettingsForFocusCapture(CaptureRequest.Builder builder) {
         CaptureRequestBuilder.applyAFRegions(builder, this.mConfigs);
         CaptureRequestBuilder.applyAERegions(builder, this.mConfigs);
         CaptureRequestBuilder.applyZoomRatio(builder, this.mCapabilities, this.mConfigs);
@@ -1117,23 +975,21 @@ public class MiCamera2 extends Camera2Proxy {
         if (this.mPreviewControl.needForVideo()) {
             CaptureRequestBuilder.applyVideoFpsRange(builder, this.mConfigs);
         }
-        builder.set(CaptureRequest.CONTROL_AF_MODE, Integer.valueOf(1));
-        builder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(0));
+        builder.set(CaptureRequest.CONTROL_AF_MODE, 1);
+        builder.set(CaptureRequest.CONTROL_AF_TRIGGER, 0);
         applyFlashMode(builder, 1);
         CaptureRequestBuilder.applyFpsRange(builder, this.mConfigs);
         CaptureRequestBuilder.applyUltraWideLDC(builder, this.mCapabilities, this.mConfigs);
     }
 
-    private void applySettingsForLockFocus(Builder builder) {
-        Key key = CaptureRequest.CONTROL_AF_TRIGGER;
-        Integer valueOf = Integer.valueOf(1);
-        builder.set(key, valueOf);
+    private void applySettingsForLockFocus(CaptureRequest.Builder builder) {
+        builder.set(CaptureRequest.CONTROL_AF_TRIGGER, 1);
         CaptureRequestBuilder.applyAFRegions(builder, this.mConfigs);
         CaptureRequestBuilder.applyAERegions(builder, this.mConfigs);
         CaptureRequestBuilder.applyFpsRange(builder, this.mConfigs);
         applyCommonSettings(builder, 1);
         if (!useLegacyFlashStrategy()) {
-            builder.set(CaptureRequest.CONTROL_AF_MODE, valueOf);
+            builder.set(CaptureRequest.CONTROL_AF_MODE, 1);
         }
         if (needOptimizedFlash() || needScreenLight() || b.isMTKPlatform()) {
             applyFlashMode(builder, 6);
@@ -1141,19 +997,16 @@ public class MiCamera2 extends Camera2Proxy {
         CaptureRequestBuilder.applySessionParameters(builder, this.mSessionConfigs);
     }
 
-    private void applySettingsForPreCapture(Builder builder) {
+    private void applySettingsForPreCapture(CaptureRequest.Builder builder) {
         applyCommonSettings(builder, 1);
         applyFlashMode(builder, 6);
-        builder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, Integer.valueOf(1));
+        builder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, 1);
         CaptureRequestBuilder.applySessionParameters(builder, this.mSessionConfigs);
     }
 
-    private void applySettingsForPreview(Builder builder) {
+    private void applySettingsForPreview(CaptureRequest.Builder builder) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("applySettingsForPreview: ");
-        sb.append(builder);
-        Log.d(str, sb.toString());
+        Log.d(str, "applySettingsForPreview: " + builder);
         if (builder != null) {
             applyFlashMode(builder, 1);
             applyCommonSettings(builder, 1);
@@ -1161,15 +1014,15 @@ public class MiCamera2 extends Camera2Proxy {
             CaptureRequestBuilder.applyAELock(builder, this.mConfigs.isAELocked());
             CaptureRequestBuilder.applyAWBLock(builder, this.mConfigs.isAWBLocked());
             CaptureRequestBuilder.applyAntiShake(builder, this.mCapabilities, this.mConfigs);
-            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(0));
+            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, 0);
             CaptureRequestBuilder.applySessionParameters(builder, this.mSessionConfigs);
         }
     }
 
     /* access modifiers changed from: private */
-    public void applySettingsForVideo(Builder builder) {
+    public void applySettingsForVideo(CaptureRequest.Builder builder) {
         if (builder != null) {
-            builder.set(CaptureRequest.CONTROL_MODE, Integer.valueOf(1));
+            builder.set(CaptureRequest.CONTROL_MODE, 1);
             applyFlashMode(builder, 1);
             CaptureRequestBuilder.applyLensDirtyDetect(builder, this.mCapabilities, this.mConfigs);
             CaptureRequestBuilder.applyFocusMode(builder, this.mConfigs);
@@ -1193,10 +1046,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     private void assertRemoteSurfaceIndexIsValid(int i) {
         if (i < 0 || i > this.mParallelCaptureSurfaceList.size() - 1) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("invalid remote surface index ");
-            sb.append(i);
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException("invalid remote surface index " + i);
         }
     }
 
@@ -1220,9 +1070,9 @@ public class MiCamera2 extends Camera2Proxy {
         if (checkCaptureSession(CameraStat.CATEGORY_CAMERA)) {
             MiCamera2Shot miCamera2Shot = null;
             switch (this.mConfigs.getShotType()) {
-                case ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
-                case ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
-                case ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
+                case Constants.ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
+                case Constants.ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
+                case Constants.ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
                 case 5:
                 case 6:
                 case 7:
@@ -1250,10 +1100,7 @@ public class MiCamera2 extends Camera2Proxy {
                         this.mSuperNightReprocessHandler = new SuperNightReprocessHandler(handlerThread.getLooper(), this);
                     }
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("SuperNightReprocessHandler@");
-                    sb.append(this.mSuperNightReprocessHandler.hashCode());
-                    Log.d(str, sb.toString());
+                    Log.d(str, "SuperNightReprocessHandler@" + this.mSuperNightReprocessHandler.hashCode());
                     miCamera2Shot = new MiCamera2ShotRawBurst(this, this.mSuperNightReprocessHandler);
                     miCamera2Shot.setQuickShotAnimation(this.mConfigs.isQuickShotAnimation());
                     break;
@@ -1262,25 +1109,16 @@ public class MiCamera2 extends Camera2Proxy {
                 if (this.mMiCamera2ShotQueue.offerLast(miCamera2Shot)) {
                     this.mCaptureTime = System.currentTimeMillis();
                     String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("capture: mMiCamera2ShotQueue.offer, size: ");
-                    sb2.append(this.mMiCamera2ShotQueue.size());
-                    Log.d(str2, sb2.toString());
+                    Log.d(str2, "capture: mMiCamera2ShotQueue.offer, size: " + this.mMiCamera2ShotQueue.size());
                 } else {
                     String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("capture: mMiCamera2ShotQueue.offer failure, size: ");
-                    sb3.append(this.mMiCamera2ShotQueue.size());
-                    Log.e(str3, sb3.toString());
+                    Log.e(str3, "capture: mMiCamera2ShotQueue.offer failure, size: " + this.mMiCamera2ShotQueue.size());
                 }
             }
             this.mMiCamera2Shot = miCamera2Shot;
             if (this.mMiCamera2Shot != null) {
                 String str4 = TAG;
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("startShot holder: ");
-                sb4.append(this.mMiCamera2Shot.hashCode());
-                Log.d(str4, sb4.toString());
+                Log.d(str4, "startShot holder: " + this.mMiCamera2Shot.hashCode());
                 this.mMiCamera2Shot.setPictureCallback(getPictureCallback());
                 this.mMiCamera2Shot.setParallelCallback(getParallelCallback());
                 this.mMiCamera2Shot.startShot();
@@ -1293,19 +1131,14 @@ public class MiCamera2 extends Camera2Proxy {
         if (this.mCameraDevice != null) {
             return true;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("camera ");
-        sb.append(getId());
-        sb.append(" is closed when ");
-        sb.append(str);
-        String sb2 = sb.toString();
+        String str2 = "camera " + getId() + " is closed when " + str;
         if (this.mIsCameraClosed) {
-            Log.d(TAG, sb2);
+            Log.d(TAG, str2);
             return false;
         }
-        RuntimeException runtimeException = new RuntimeException(sb2);
+        RuntimeException runtimeException = new RuntimeException(str2);
         if (!Build.IS_DEBUGGABLE) {
-            Log.w(TAG, sb2, runtimeException);
+            Log.w(TAG, str2, runtimeException);
             return false;
         }
         throw runtimeException;
@@ -1316,19 +1149,14 @@ public class MiCamera2 extends Camera2Proxy {
             if (this.mCaptureSession != null) {
                 return true;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("session for camera ");
-            sb.append(getId());
-            sb.append(" is closed when ");
-            sb.append(str);
-            String sb2 = sb.toString();
+            String str2 = "session for camera " + getId() + " is closed when " + str;
             if (this.mIsCaptureSessionClosed) {
-                Log.d(TAG, sb2);
+                Log.d(TAG, str2);
                 return false;
             }
-            RuntimeException runtimeException = new RuntimeException(sb2);
+            RuntimeException runtimeException = new RuntimeException(str2);
             if (!Build.IS_DEBUGGABLE) {
-                Log.w(TAG, sb2, runtimeException);
+                Log.w(TAG, str2, runtimeException);
                 return false;
             }
             throw runtimeException;
@@ -1384,7 +1212,7 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     private void configMaxParallelRequestNumberLock() {
-        LocalBinder localBinder = AlgoConnector.getInstance().getLocalBinder(true);
+        LocalParallelService.LocalBinder localBinder = AlgoConnector.getInstance().getLocalBinder(true);
         if (localBinder != null) {
             int Ia = DataRepository.dataItemFeature().Ia();
             if (Ia <= 0 || DataRepository.dataItemGlobal().getCurrentCameraId() != 1) {
@@ -1400,25 +1228,22 @@ public class MiCamera2 extends Camera2Proxy {
             Collection targets = captureRequest.getTargets();
             Range range = (Range) captureRequest.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("createHighSpeedRequestList() fpsRange = ");
-            sb.append(range);
-            Log.d(str, sb.toString());
+            Log.d(str, "createHighSpeedRequestList() fpsRange = " + range);
             int intValue = ((Integer) range.getUpper()).intValue() / 30;
             ArrayList arrayList = new ArrayList();
-            Builder constructCaptureRequestBuilder = CompatibilityUtils.constructCaptureRequestBuilder(new CameraMetadataNative(captureRequest.getNativeCopy()), false, -1, captureRequest);
+            CaptureRequest.Builder constructCaptureRequestBuilder = CompatibilityUtils.constructCaptureRequestBuilder(new CameraMetadataNative(captureRequest.getNativeCopy()), false, -1, captureRequest);
             Iterator it = targets.iterator();
             Surface surface = (Surface) it.next();
             if (targets.size() != 1 || SurfaceUtils.isSurfaceForHwVideoEncoder(surface)) {
-                constructCaptureRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, Integer.valueOf(3));
+                constructCaptureRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, 3);
             } else {
-                constructCaptureRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, Integer.valueOf(1));
+                constructCaptureRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, 1);
             }
             constructCaptureRequestBuilder.setPartOfCHSRequestList(true);
-            Builder builder = null;
+            CaptureRequest.Builder builder = null;
             if (targets.size() == 2) {
                 builder = CompatibilityUtils.constructCaptureRequestBuilder(new CameraMetadataNative(captureRequest.getNativeCopy()), false, -1, captureRequest);
-                builder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, Integer.valueOf(3));
+                builder.set(CaptureRequest.CONTROL_CAPTURE_INTENT, 3);
                 builder.addTarget(surface);
                 Surface surface2 = (Surface) it.next();
                 builder.addTarget(surface2);
@@ -1449,10 +1274,7 @@ public class MiCamera2 extends Camera2Proxy {
             this.mSessionId = 0;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("generateSessionId: id=");
-        sb.append(this.mSessionId);
-        Log.v(str, sb.toString());
+        Log.v(str, "generateSessionId: id=" + this.mSessionId);
         return this.mSessionId;
     }
 
@@ -1468,10 +1290,7 @@ public class MiCamera2 extends Camera2Proxy {
             Ma += 800;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getCaptureInterval: return ");
-        sb.append(Ma);
-        Log.d(str, sb.toString());
+        Log.d(str, "getCaptureInterval: return " + Ma);
         if (Ma > 0) {
             return Ma;
         }
@@ -1484,25 +1303,22 @@ public class MiCamera2 extends Camera2Proxy {
 
     private Surface getRemoteSurface(int i) {
         assertRemoteSurfaceIndexIsValid(i);
-        return (Surface) this.mParallelCaptureSurfaceList.get(i);
+        return this.mParallelCaptureSurfaceList.get(i);
     }
 
-    private Builder initFocusRequestBuilder(int i) throws CameraAccessException {
+    private CaptureRequest.Builder initFocusRequestBuilder(int i) throws CameraAccessException {
         if (i == 160) {
             throw new IllegalArgumentException("Module index is error!");
         } else if (i == 166) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("initFocusRequestBuilder: error caller for ");
-            sb.append(i);
-            Log.e(str, sb.toString());
+            Log.e(str, "initFocusRequestBuilder: error caller for " + i);
             return null;
         } else {
             CameraDevice cameraDevice = this.mCameraDevice;
             if (cameraDevice == null) {
                 return null;
             }
-            Builder createCaptureRequest = (i == 162 || i == 169 || i == 172) ? this.mCameraDevice.createCaptureRequest(3) : cameraDevice.createCaptureRequest(1);
+            CaptureRequest.Builder createCaptureRequest = (i == 162 || i == 169 || i == 172) ? this.mCameraDevice.createCaptureRequest(3) : cameraDevice.createCaptureRequest(1);
             createCaptureRequest.addTarget(this.mPreviewSurface);
             if (isHighSpeedRecording()) {
                 createCaptureRequest.addTarget(this.mRecordSurface);
@@ -1524,10 +1340,7 @@ public class MiCamera2 extends Camera2Proxy {
                     MiCamera2 miCamera2 = MiCamera2.this;
                     boolean updateDeferPreviewSession = miCamera2.updateDeferPreviewSession(miCamera2.mPreviewSurface);
                     String access$000 = MiCamera2.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("handleMessage: MSG_WAITING_LOCAL_PARALLEL_SERVICE_READY updateDeferPreviewSession result = ");
-                    sb.append(updateDeferPreviewSession);
-                    Log.d(access$000, sb.toString());
+                    Log.d(access$000, "handleMessage: MSG_WAITING_LOCAL_PARALLEL_SERVICE_READY updateDeferPreviewSession result = " + updateDeferPreviewSession);
                 } else if (i == 3) {
                     if (message.arg1 == 1 && MiCamera2.this.mPreviewControl.needForManually() && MiCamera2.this.mConfigs.getExposureTime() / 1000000 >= 5000) {
                         removeMessages(3);
@@ -1553,10 +1366,7 @@ public class MiCamera2 extends Camera2Proxy {
             return true;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("camera device maybe dead, current framenum is ");
-        sb.append(this.mLastFrameNum);
-        Log.e(str, sb.toString());
+        Log.e(str, "camera device maybe dead, current framenum is " + this.mLastFrameNum);
         return false;
     }
 
@@ -1565,14 +1375,7 @@ public class MiCamera2 extends Camera2Proxy {
             return true;
         }
         CaptureSessionConfigurations captureSessionConfigurations = this.mSessionConfigs;
-        boolean z = false;
-        if (captureSessionConfigurations == null) {
-            return false;
-        }
-        if (((int[]) captureSessionConfigurations.get(CaptureRequestVendorTags.SMVR_MODE)) != null) {
-            z = true;
-        }
-        return z;
+        return (captureSessionConfigurations == null || ((int[]) captureSessionConfigurations.get(CaptureRequestVendorTags.SMVR_MODE)) == null) ? false : true;
     }
 
     private boolean isLocalParallelServiceReady() {
@@ -1581,12 +1384,11 @@ public class MiCamera2 extends Camera2Proxy {
 
     /* access modifiers changed from: private */
     public void lockFocus() {
-        String str = "lockFocus";
-        if (checkCaptureSession(str)) {
+        if (checkCaptureSession("lockFocus")) {
             if (this.mCaptureCallback.getFocusTask() == null || !useLegacyFlashStrategy()) {
-                Log.v(TAG, str);
+                Log.v(TAG, "lockFocus");
                 try {
-                    Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(1);
+                    CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(1);
                     createCaptureRequest.addTarget(this.mPreviewSurface);
                     applySettingsForLockFocus(createCaptureRequest);
                     CaptureRequest build = createCaptureRequest.build();
@@ -1605,10 +1407,10 @@ public class MiCamera2 extends Camera2Proxy {
                     e2.printStackTrace();
                     notifyOnError(-1);
                 }
-                return;
+            } else {
+                this.mFocusLockRequestHashCode = 0;
+                this.mCaptureCallback.setState(3);
             }
-            this.mFocusLockRequestHashCode = 0;
-            this.mCaptureCallback.setState(3);
         }
     }
 
@@ -1637,7 +1439,7 @@ public class MiCamera2 extends Camera2Proxy {
             }
             z2 = true;
         }
-        CaptureBusyCallback captureBusyCallback = this.mCaptureBusyCallback;
+        Camera2Proxy.CaptureBusyCallback captureBusyCallback = this.mCaptureBusyCallback;
         if (captureBusyCallback != null && z2) {
             captureBusyCallback.onCaptureCompleted(z);
             this.mCaptureBusyCallback = null;
@@ -1646,7 +1448,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     private void prepareDepthImageReader(CameraSize cameraSize) {
         closeDepthImageReader();
-        AnonymousClass6 r0 = new OnImageAvailableListener() {
+        AnonymousClass6 r0 = new ImageReader.OnImageAvailableListener() {
             public void onImageAvailable(ImageReader imageReader) {
                 Image acquireNextImage = imageReader.acquireNextImage();
                 if (acquireNextImage != null) {
@@ -1670,7 +1472,7 @@ public class MiCamera2 extends Camera2Proxy {
     private void preparePhotoImageReader(@NonNull CameraSize cameraSize, int i, int i2) {
         closePhotoImageReader();
         this.mPhotoImageReader = ImageReader.newInstance(cameraSize.getWidth(), cameraSize.getHeight(), i, i2);
-        this.mPhotoImageReader.setOnImageAvailableListener(new OnImageAvailableListener() {
+        this.mPhotoImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
             public void onImageAvailable(ImageReader imageReader) {
                 MiCamera2Shot miCamera2Shot;
                 Log.d(MiCamera2.TAG, "onImageAvailable: main");
@@ -1682,20 +1484,15 @@ public class MiCamera2 extends Camera2Proxy {
                 synchronized (MiCamera2.this.mShotQueueLock) {
                     if (!MiCamera2.this.mMiCamera2ShotQueue.isEmpty()) {
                         miCamera2Shot = (MiCamera2Shot) MiCamera2.this.mMiCamera2ShotQueue.peek();
-                        if (miCamera2Shot instanceof MiCamera2ShotStill) {
-                            if (acquireNextImage.getTimestamp() != ((MiCamera2ShotStill) miCamera2Shot).getTimeStamp()) {
-                                miCamera2Shot = MiCamera2.this.replaceCorrectShot(acquireNextImage);
-                            } else {
-                                MiCamera2.this.mMiCamera2ShotQueue.removeFirst();
-                            }
+                        if (!(miCamera2Shot instanceof MiCamera2ShotStill)) {
+                            MiCamera2.this.mMiCamera2ShotQueue.removeFirst();
+                        } else if (acquireNextImage.getTimestamp() != ((MiCamera2ShotStill) miCamera2Shot).getTimeStamp()) {
+                            miCamera2Shot = MiCamera2.this.replaceCorrectShot(acquireNextImage);
                         } else {
                             MiCamera2.this.mMiCamera2ShotQueue.removeFirst();
                         }
                         String access$000 = MiCamera2.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("onImageAvailable: mMiCamera2ShotQueue.poll, size:");
-                        sb.append(MiCamera2.this.mMiCamera2ShotQueue.size());
-                        Log.d(access$000, sb.toString());
+                        Log.d(access$000, "onImageAvailable: mMiCamera2ShotQueue.poll, size:" + MiCamera2.this.mMiCamera2ShotQueue.size());
                         MiCamera2.this.notifyCaptureBusyCallback(true);
                     } else {
                         miCamera2Shot = MiCamera2.this.mMiCamera2Shot;
@@ -1703,17 +1500,17 @@ public class MiCamera2 extends Camera2Proxy {
                 }
                 if (miCamera2Shot != null) {
                     miCamera2Shot.onImageReceived(acquireNextImage, 0);
-                } else {
-                    acquireNextImage.close();
-                    Log.w(MiCamera2.TAG, "onImageAvailable: NO main image processor!");
+                    return;
                 }
+                acquireNextImage.close();
+                Log.w(MiCamera2.TAG, "onImageAvailable: NO main image processor!");
             }
         }, this.mCameraHandler);
     }
 
     private void preparePortraitRawImageReader(CameraSize cameraSize) {
         closePortraitRawImageReader();
-        AnonymousClass7 r0 = new OnImageAvailableListener() {
+        AnonymousClass7 r0 = new ImageReader.OnImageAvailableListener() {
             public void onImageAvailable(ImageReader imageReader) {
                 Image acquireNextImage = imageReader.acquireNextImage();
                 if (acquireNextImage != null) {
@@ -1742,7 +1539,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     private void prepareRawImageReader(@NonNull CameraSize cameraSize, boolean z) {
         closeRawImageReader();
-        AnonymousClass3 r0 = new OnImageAvailableListener() {
+        AnonymousClass3 r0 = new ImageReader.OnImageAvailableListener() {
             public void onImageAvailable(ImageReader imageReader) {
                 Image acquireNextImage = imageReader.acquireNextImage();
                 if (acquireNextImage != null) {
@@ -1765,7 +1562,7 @@ public class MiCamera2 extends Camera2Proxy {
         if (imageWriter != null) {
             imageWriter.close();
         }
-        AnonymousClass4 r2 = new OnImageReleasedListener() {
+        AnonymousClass4 r2 = new ImageWriter.OnImageReleasedListener() {
             public void onImageReleased(ImageWriter imageWriter) {
                 Log.d(MiCamera2.TAG, "The enqueued imaged has be consumed");
             }
@@ -1803,64 +1600,44 @@ public class MiCamera2 extends Camera2Proxy {
                     Log.d(TAG, String.format(Locale.ENGLISH, "[3SAT]prepareRemoteImageReader:uwSize = %s wideSize = %s teleSize = %s", new Object[]{ultraWidePhotoSize, widePhotoSize, telePhotoSize}));
                     i = 3;
                 }
+            } else if (!"tucana".equals(b.km) || !this.mCapabilities.isQcfaMode()) {
+                CameraSize photoSize = this.mConfigs.getPhotoSize();
+                IImageReaderParameterSets iImageReaderParameterSets6 = new IImageReaderParameterSets(photoSize.getWidth(), photoSize.getHeight(), 35, MAX_IMAGE_BUFFER_SIZE, 0);
+                arrayList.add(iImageReaderParameterSets6);
+                this.mWideParallelSurfaceIndex = 0;
+                Log.d(TAG, "prepareRemoteImageReader: mainSize = " + photoSize);
+                i = 1;
             } else {
-                if (!"tucana".equals(b.km) || !this.mCapabilities.isQcfaMode()) {
-                    CameraSize photoSize = this.mConfigs.getPhotoSize();
-                    IImageReaderParameterSets iImageReaderParameterSets6 = new IImageReaderParameterSets(photoSize.getWidth(), photoSize.getHeight(), 35, MAX_IMAGE_BUFFER_SIZE, 0);
-                    arrayList.add(iImageReaderParameterSets6);
-                    this.mWideParallelSurfaceIndex = 0;
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("prepareRemoteImageReader: mainSize = ");
-                    sb.append(photoSize);
-                    Log.d(str, sb.toString());
-                    i = 1;
-                } else {
-                    i = 0;
-                }
+                i = 0;
             }
             if (this.mConfigs.isParallelDualShotType()) {
                 CameraSize subPhotoSize = this.mConfigs.getSubPhotoSize();
                 IImageReaderParameterSets iImageReaderParameterSets7 = new IImageReaderParameterSets(subPhotoSize.getWidth(), subPhotoSize.getHeight(), 35, MAX_IMAGE_BUFFER_SIZE, 1);
                 arrayList.add(iImageReaderParameterSets7);
                 this.mSubParallelSurfaceIndex = i;
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("prepareRemoteImageReader: subSize = ");
-                sb2.append(subPhotoSize);
-                Log.d(str2, sb2.toString());
+                Log.d(TAG, "prepareRemoteImageReader: subSize = " + subPhotoSize);
             } else if (isQcfaEnable() && !alwaysUseRemosaicSize()) {
                 int width = this.mConfigs.getPhotoSize().getWidth() / 2;
                 int height = this.mConfigs.getPhotoSize().getHeight() / 2;
-                String str3 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("prepareRemoteImageReader: qcfaSize = ");
-                sb3.append(width);
-                sb3.append("x");
-                sb3.append(height);
-                Log.d(str3, sb3.toString());
+                Log.d(TAG, "prepareRemoteImageReader: qcfaSize = " + width + "x" + height);
                 IImageReaderParameterSets iImageReaderParameterSets8 = new IImageReaderParameterSets(width, height, 35, MAX_IMAGE_BUFFER_SIZE, 0);
                 iImageReaderParameterSets8.setShouldHoldImages(false);
                 arrayList.add(iImageReaderParameterSets8);
                 this.mQcfaParallelSurfaceIndex = i;
             }
-            LocalBinder localBinder = AlgoConnector.getInstance().getLocalBinder(true);
+            LocalParallelService.LocalBinder localBinder = AlgoConnector.getInstance().getLocalBinder(true);
             if (localBinder == null) {
                 Log.d(TAG, "prepareRemoteImageReader: ParallelService is not ready");
                 ArrayList arrayList2 = new ArrayList();
-                for (IImageReaderParameterSets iImageReaderParameterSets9 : arrayList) {
-                    ImageReader newInstance = ImageReader.newInstance(iImageReaderParameterSets9.width, iImageReaderParameterSets9.height, iImageReaderParameterSets9.format, iImageReaderParameterSets9.maxImages);
+                for (IImageReaderParameterSets next : arrayList) {
+                    ImageReader newInstance = ImageReader.newInstance(next.width, next.height, next.format, next.maxImages);
                     arrayList2.add(newInstance.getSurface());
                     this.mRemoteImageReaderList.add(newInstance);
                 }
                 return arrayList2;
             }
             try {
-                String str4 = TAG;
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("prepareRemoteImageReader: configurations: ");
-                sb4.append(arrayList);
-                Log.d(str4, sb4.toString());
+                Log.d(TAG, "prepareRemoteImageReader: configurations: " + arrayList);
                 List<Surface> configCaptureOutputBuffer = localBinder.configCaptureOutputBuffer(arrayList);
                 if (configCaptureOutputBuffer != null) {
                     return configCaptureOutputBuffer;
@@ -1877,7 +1654,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     private void prepareVideoSnapshotImageReader(CameraSize cameraSize) {
         closeVideoSnapshotImageReader();
-        AnonymousClass5 r0 = new OnImageAvailableListener() {
+        AnonymousClass5 r0 = new ImageReader.OnImageAvailableListener() {
             public void onImageAvailable(ImageReader imageReader) {
                 Image acquireNextImage = imageReader.acquireNextImage();
                 if (acquireNextImage != null) {
@@ -1896,15 +1673,15 @@ public class MiCamera2 extends Camera2Proxy {
 
     /* access modifiers changed from: private */
     public MiCamera2Shot replaceCorrectShot(Image image) {
-        Iterator it = this.mMiCamera2ShotQueue.iterator();
+        Iterator<MiCamera2Shot> it = this.mMiCamera2ShotQueue.iterator();
         while (it.hasNext()) {
-            MiCamera2Shot miCamera2Shot = (MiCamera2Shot) it.next();
-            if ((miCamera2Shot instanceof MiCamera2ShotStill) && ((MiCamera2ShotStill) miCamera2Shot).getTimeStamp() == image.getTimestamp()) {
+            MiCamera2Shot next = it.next();
+            if ((next instanceof MiCamera2ShotStill) && ((MiCamera2ShotStill) next).getTimeStamp() == image.getTimestamp()) {
                 it.remove();
-                return miCamera2Shot;
+                return next;
             }
         }
-        return (MiCamera2Shot) this.mMiCamera2ShotQueue.pollFirst();
+        return this.mMiCamera2ShotQueue.pollFirst();
     }
 
     private void reset() {
@@ -1924,7 +1701,7 @@ public class MiCamera2 extends Camera2Proxy {
         this.mVideoSnapshotImageReader = null;
         this.mDepthReader = null;
         this.mPortraitRawImageReader = null;
-        releaseCameraPreviewCallback(null);
+        releaseCameraPreviewCallback((Camera2Proxy.CameraPreviewCallback) null);
         resetShotQueue("reset");
         Log.v(TAG, "X: reset");
     }
@@ -1933,15 +1710,10 @@ public class MiCamera2 extends Camera2Proxy {
         synchronized (this.mShotQueueLock) {
             if (!this.mMiCamera2ShotQueue.isEmpty()) {
                 String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("resetShotQueue !!! ");
-                sb.append(str);
-                sb.append(" size:");
-                sb.append(this.mMiCamera2ShotQueue.size());
-                Log.d(str2, sb.toString());
-                Iterator it = this.mMiCamera2ShotQueue.iterator();
+                Log.d(str2, "resetShotQueue !!! " + str + " size:" + this.mMiCamera2ShotQueue.size());
+                Iterator<MiCamera2Shot> it = this.mMiCamera2ShotQueue.iterator();
                 while (it.hasNext()) {
-                    ((MiCamera2Shot) it.next()).makeClobber();
+                    it.next().makeClobber();
                 }
                 this.mMiCamera2ShotQueue.clear();
                 notifyCaptureBusyCallback(false);
@@ -1964,7 +1736,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void runPreCaptureSequence() {
         Log.v(TAG, "runPreCaptureSequence");
         try {
-            Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(1);
+            CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(1);
             createCaptureRequest.addTarget(this.mPreviewSurface);
             applySettingsForPreCapture(createCaptureRequest);
             CaptureRequest build = createCaptureRequest.build();
@@ -1979,12 +1751,9 @@ public class MiCamera2 extends Camera2Proxy {
 
     private void setAFModeToPreview(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setAFModeToPreview: focusMode=");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "setAFModeToPreview: focusMode=" + i);
         this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, Integer.valueOf(i));
-        this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(0));
+        this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, 0);
         CaptureRequestBuilder.applyAFRegions(this.mPreviewRequestBuilder, this.mConfigs);
         CaptureRequestBuilder.applyAERegions(this.mPreviewRequestBuilder, this.mConfigs);
         CaptureRequestBuilder.applySessionParameters(this.mPreviewRequestBuilder, this.mSessionConfigs);
@@ -1993,11 +1762,8 @@ public class MiCamera2 extends Camera2Proxy {
 
     private void setVideoRecordControl(int i) throws CameraAccessException {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setVideoRecordControl: ");
-        sb.append(i);
-        Log.d(str, sb.toString());
-        Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
+        Log.d(str, "setVideoRecordControl: " + i);
+        CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
         if (1 == i) {
             createCaptureRequest.addTarget(this.mPreviewSurface);
         } else {
@@ -2013,13 +1779,11 @@ public class MiCamera2 extends Camera2Proxy {
             setFlashMode(5);
             resumePreview();
             this.mCaptureCallback.setState(10);
-            return;
-        }
-        if (isNeedFlashOn()) {
+        } else if (isNeedFlashOn()) {
             this.mConfigs.setNeedFlash(true);
             if (needOptimizedFlash()) {
-                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
-                this.mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(2));
+                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, 1);
+                this.mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, 2);
                 CaptureRequestBuilder.applyAELock(this.mPreviewRequestBuilder, false);
                 if (this.mCapabilities.isSupportSnapShotTorch()) {
                     MiCameraCompat.applySnapshotTorch(this.mPreviewRequestBuilder, true);
@@ -2027,7 +1791,7 @@ public class MiCamera2 extends Camera2Proxy {
                 resumePreview();
                 this.mCaptureCallback.setState(10);
             } else if (needScreenLight()) {
-                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
+                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, 1);
                 resumePreview();
                 triggerPrecapture();
             } else {
@@ -2043,10 +1807,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void triggerDeviceChecking(boolean z, boolean z2) {
         if (b.Pn && DataRepository.dataItemFeature().Gb() && this.mHelperHandler != null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("triggerDeviceChecking ");
-            sb.append(z);
-            Log.d(str, sb.toString());
+            Log.d(str, "triggerDeviceChecking " + z);
             if (z) {
                 Handler handler = this.mHelperHandler;
                 handler.sendMessage(handler.obtainMessage(3, z2 ? 1 : 0, 0));
@@ -2075,30 +1836,26 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     private void unlockFocusForCapture() {
-        String str = "unlockFocusForCapture";
-        if (checkCaptureSession(str)) {
-            Log.d(TAG, str);
+        if (checkCaptureSession("unlockFocusForCapture")) {
+            Log.d(TAG, "unlockFocusForCapture");
             try {
-                Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(1);
+                CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(1);
                 createCaptureRequest.addTarget(this.mPreviewSurface);
-                createCaptureRequest.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(2));
+                createCaptureRequest.set(CaptureRequest.CONTROL_AF_TRIGGER, 2);
                 applyCommonSettings(createCaptureRequest, 1);
                 CaptureRequestBuilder.applySessionParameters(createCaptureRequest, this.mSessionConfigs);
                 capture(createCaptureRequest.build(), this.mCaptureCallback, this.mCameraHandler);
                 CaptureRequestBuilder.applyFocusMode(this.mPreviewRequestBuilder, this.mConfigs);
                 applyFlashMode(this.mPreviewRequestBuilder, 1);
                 CaptureRequestBuilder.applyAELock(this.mPreviewRequestBuilder, this.mConfigs.isAELocked());
-                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(0));
-                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, Integer.valueOf(0));
+                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, 0);
+                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, 0);
                 this.mCaptureCallback.setState(1);
                 setAFModeToPreview(this.mConfigs.getFocusMode());
             } catch (CameraAccessException e2) {
                 e2.printStackTrace();
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("unlockFocusForCapture: ");
-                sb.append(e2.getMessage());
-                Log.e(str2, sb.toString());
+                String str = TAG;
+                Log.e(str, "unlockFocusForCapture: " + e2.getMessage());
                 notifyOnError(e2.getReason());
             } catch (IllegalStateException e3) {
                 Log.e(TAG, "Failed to unlock focus, IllegalState", e3);
@@ -2108,8 +1865,8 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     private void waitFlashClosed() {
-        this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, Integer.valueOf(1));
-        this.mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(0));
+        this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, 1);
+        this.mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, 0);
         resumePreview();
         this.mCaptureCallback.setState(9);
     }
@@ -2118,7 +1875,7 @@ public class MiCamera2 extends Camera2Proxy {
         Image acquireNextImage = imageReader.acquireNextImage();
         if (acquireNextImage != null) {
             boolean z = true;
-            PreviewCallback previewCallback = getPreviewCallback();
+            Camera2Proxy.PreviewCallback previewCallback = getPreviewCallback();
             if (previewCallback != null) {
                 z = previewCallback.onPreviewFrame(acquireNextImage, this, this.mConfigs.getDeviceOrientation());
             }
@@ -2132,10 +1889,10 @@ public class MiCamera2 extends Camera2Proxy {
         return b.isMTKPlatform();
     }
 
-    /* access modifiers changed from: 0000 */
-    public void applySettingsForCapture(Builder builder, int i) {
+    /* access modifiers changed from: package-private */
+    public void applySettingsForCapture(CaptureRequest.Builder builder, int i) {
         if (builder != null) {
-            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(0));
+            builder.set(CaptureRequest.CONTROL_AF_TRIGGER, 0);
             applyFlashMode(builder, i);
             applyCommonSettings(builder, i);
             applySettingsForJpeg(builder);
@@ -2162,17 +1919,14 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public void applySettingsForJpeg(Builder builder) {
+    public void applySettingsForJpeg(CaptureRequest.Builder builder) {
         if (builder != null) {
             Location gpsLocation = this.mConfigs.getGpsLocation();
             if (gpsLocation != null) {
                 builder.set(CaptureRequest.JPEG_GPS_LOCATION, new Location(gpsLocation));
             }
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("jpegRotation=");
-            sb.append(this.mConfigs.getJpegRotation());
-            Log.d(str, sb.toString());
+            Log.d(str, "jpegRotation=" + this.mConfigs.getJpegRotation());
             builder.set(CaptureRequest.JPEG_ORIENTATION, Integer.valueOf(this.mConfigs.getJpegRotation()));
             CameraSize thumbnailSize = this.mConfigs.getThumbnailSize();
             if (thumbnailSize != null) {
@@ -2184,8 +1938,8 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    public void applySettingsForVideoShot(Builder builder, int i) {
+    /* access modifiers changed from: package-private */
+    public void applySettingsForVideoShot(CaptureRequest.Builder builder, int i) {
         applySettingsForJpeg(builder);
         CaptureRequestBuilder.applyVideoFlash(builder, this.mConfigs);
         CaptureRequestBuilder.applyExposureCompensation(builder, i, this.mCapabilities, this.mConfigs);
@@ -2206,9 +1960,9 @@ public class MiCamera2 extends Camera2Proxy {
     public void cancelFocus(int i) {
         if (checkCaptureSession("cancelFocus")) {
             try {
-                Builder initFocusRequestBuilder = initFocusRequestBuilder(i);
-                initFocusRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, Integer.valueOf(1));
-                initFocusRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(2));
+                CaptureRequest.Builder initFocusRequestBuilder = initFocusRequestBuilder(i);
+                initFocusRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, 1);
+                initFocusRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, 2);
                 CaptureRequestBuilder.applyZoomRatio(initFocusRequestBuilder, this.mCapabilities, this.mConfigs);
                 applyFlashMode(initFocusRequestBuilder, 1);
                 CaptureRequestBuilder.applyAWBMode(initFocusRequestBuilder, this.mConfigs.getAWBMode());
@@ -2226,16 +1980,13 @@ public class MiCamera2 extends Camera2Proxy {
                 }
                 CaptureRequestBuilder.applyFpsRange(initFocusRequestBuilder, this.mConfigs);
                 capture(initFocusRequestBuilder.build(), this.mCaptureCallback, this.mCameraHandler);
-                this.mConfigs.setAERegions(null);
-                this.mConfigs.setAFRegions(null);
+                this.mConfigs.setAERegions((MeteringRectangle[]) null);
+                this.mConfigs.setAFRegions((MeteringRectangle[]) null);
                 setAFModeToPreview(this.mConfigs.getFocusMode());
             } catch (CameraAccessException e2) {
                 e2.printStackTrace();
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("cancelFocus: ");
-                sb.append(e2.getMessage());
-                Log.e(str, sb.toString());
+                Log.e(str, "cancelFocus: " + e2.getMessage());
                 notifyOnError(e2.getReason());
             } catch (IllegalStateException e3) {
                 Log.e(TAG, "Failed to cancel focus, IllegalState", e3);
@@ -2246,10 +1997,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void cancelSession() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("cancelSession: id=");
-        sb.append(getId());
-        Log.d(str, sb.toString());
+        Log.d(str, "cancelSession: id=" + getId());
         this.mIsCaptureSessionClosed = true;
         try {
             this.mSessionId = genSessionId();
@@ -2263,10 +2011,7 @@ public class MiCamera2 extends Camera2Proxy {
                         this.mCaptureSession.replaceSessionClose();
                     }
                     String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("cancelSession: reset session ");
-                    sb2.append(this.mCaptureSession);
-                    Log.d(str2, sb2.toString());
+                    Log.d(str2, "cancelSession: reset session " + this.mCaptureSession);
                     this.mCaptureSession = null;
                 }
             }
@@ -2280,10 +2025,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void captureAbortBurst() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("captureAbortBurst: shot queue size: ");
-        sb.append(this.mMiCamera2ShotQueue.size());
-        Log.d(str, sb.toString());
+        Log.d(str, "captureAbortBurst: shot queue size: " + this.mMiCamera2ShotQueue.size());
         synchronized (this.mSessionLock) {
             if (this.mCaptureSession == null) {
                 Log.w(TAG, "captureAbortBurst: null session");
@@ -2301,7 +2043,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public void captureBurstPictures(int i, @NonNull PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback) {
+    public void captureBurstPictures(int i, @NonNull Camera2Proxy.PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback) {
         if (this.mConfigs.getShotType() == 9) {
             this.mMiCamera2Shot = new MiCamera2ShotParallelRepeating(this, i);
             this.mMiCamera2Shot.setPictureCallback(pictureCallback);
@@ -2317,14 +2059,14 @@ public class MiCamera2 extends Camera2Proxy {
         this.mMiCamera2Shot.startShot();
     }
 
-    public void captureGroupShotPictures(@NonNull PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback, int i, Context context) {
+    public void captureGroupShotPictures(@NonNull Camera2Proxy.PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback, int i, Context context) {
         this.mMiCamera2Shot = new MiCamera2ShotGroup(this, i, context, this.mCaptureCallback.getPreviewCaptureResult());
         this.mMiCamera2Shot.setPictureCallback(pictureCallback);
         this.mMiCamera2Shot.setParallelCallback(parallelCallback);
         this.mMiCamera2Shot.startShot();
     }
 
-    public void captureVideoSnapshot(PictureCallback pictureCallback) {
+    public void captureVideoSnapshot(Camera2Proxy.PictureCallback pictureCallback) {
         this.mMiCamera2Shot = new MiCamera2ShotVideo(this);
         this.mMiCamera2Shot.setPictureCallback(pictureCallback);
         this.mMiCamera2Shot.startShot();
@@ -2332,10 +2074,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void close() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("E: close: cameraId = ");
-        sb.append(getId());
-        Log.d(str, sb.toString());
+        Log.d(str, "E: close: cameraId = " + getId());
         SuperNightReprocessHandler superNightReprocessHandler = this.mSuperNightReprocessHandler;
         if (superNightReprocessHandler != null) {
             superNightReprocessHandler.cancel();
@@ -2367,10 +2106,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
         reset();
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("X: close: cameraId = ");
-        sb2.append(getId());
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "X: close: cameraId = " + getId());
     }
 
     public void forceTurnFlashONAndPausePreview() {
@@ -2454,10 +2190,7 @@ public class MiCamera2 extends Camera2Proxy {
             return getUltraTeleRemoteSurface();
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getMainCaptureSurface: invalid satMasterCameraId ");
-        sb.append(satMasterCameraId);
-        Log.e(str, sb.toString());
+        Log.e(str, "getMainCaptureSurface: invalid satMasterCameraId " + satMasterCameraId);
         return getWideRemoteSurface();
     }
 
@@ -2492,7 +2225,7 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     /* access modifiers changed from: protected */
-    public Builder getPreviewRequestBuilder() {
+    public CaptureRequest.Builder getPreviewRequestBuilder() {
         return this.mPreviewRequestBuilder;
     }
 
@@ -2608,10 +2341,7 @@ public class MiCamera2 extends Camera2Proxy {
         } else {
             long currentTimeMillis = System.currentTimeMillis() - this.mCaptureTime;
             if (currentTimeMillis > FunctionParseBeautyBodySlimCount.TIP_INTERVAL_TIME) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("isCaptureBusy: timeout:");
-                sb.append(currentTimeMillis);
-                resetShotQueue(sb.toString());
+                resetShotQueue("isCaptureBusy: timeout:" + currentTimeMillis);
                 return false;
             } else if (z) {
                 Log.d(TAG, "isCaptureBusy: simple return true");
@@ -2622,29 +2352,20 @@ public class MiCamera2 extends Camera2Proxy {
                     Integer num = (Integer) this.mCaptureCallback.getPreviewCaptureResult().get(CaptureResult.SENSOR_SENSITIVITY);
                     if (num == null || num.intValue() >= 800) {
                         String str = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("isCaptureBusy: iso:");
-                        sb2.append(num);
-                        Log.d(str, sb2.toString());
+                        Log.d(str, "isCaptureBusy: iso:" + num);
                         return true;
                     } else if (this.mCapabilities.isSensorHdrSupported()) {
                         Byte b2 = (Byte) VendorTagHelper.getValue(this.mCaptureCallback.getPreviewCaptureResult(), CaptureResultVendorTags.SENSOR_HDR_ENABLE);
                         if (b2 != null && b2.byteValue() > 0) {
                             String str2 = TAG;
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("isCaptureBusy: sensorHdr:");
-                            sb3.append(b2);
-                            Log.d(str2, sb3.toString());
+                            Log.d(str2, "isCaptureBusy: sensorHdr:" + b2);
                             return true;
                         }
                     }
                 }
                 if (currentTimeMillis < 50) {
                     String str3 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("isCaptureBusy: time:");
-                    sb4.append(currentTimeMillis);
-                    Log.d(str3, sb4.toString());
+                    Log.d(str3, "isCaptureBusy: time:" + currentTimeMillis);
                     return true;
                 }
                 int size = this.mMiCamera2ShotQueue.size();
@@ -2652,10 +2373,7 @@ public class MiCamera2 extends Camera2Proxy {
                     return false;
                 }
                 String str4 = TAG;
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("isCaptureBusy: size:");
-                sb5.append(size);
-                Log.d(str4, sb5.toString());
+                Log.d(str4, "isCaptureBusy: size:" + size);
                 return true;
             }
         }
@@ -2675,7 +2393,6 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     public boolean isNeedFlashOn() {
-        boolean z = true;
         if (this.mConfigs.getFlashMode() == 1 || this.mConfigs.getFlashMode() == 101) {
             return true;
         }
@@ -2683,10 +2400,7 @@ public class MiCamera2 extends Camera2Proxy {
             return false;
         }
         Integer currentAEState = this.mCaptureCallback.getCurrentAEState();
-        if (currentAEState == null || currentAEState.intValue() != 4) {
-            z = false;
-        }
-        return z;
+        return currentAEState != null && currentAEState.intValue() == 4;
     }
 
     public boolean isNeedPreviewThumbnail() {
@@ -2737,7 +2451,7 @@ public class MiCamera2 extends Camera2Proxy {
     public /* synthetic */ void n(boolean z) {
         boolean z2 = false;
         boolean z3 = this.mMiCamera2ShotQueue.size() < DataRepository.dataItemFeature().La();
-        CaptureCallback captureCallback = this.mFrontQuickCaptureCallback;
+        Camera2Proxy.CaptureCallback captureCallback = this.mFrontQuickCaptureCallback;
         if (z && z3) {
             z2 = true;
         }
@@ -2754,16 +2468,13 @@ public class MiCamera2 extends Camera2Proxy {
                     return;
                 }
                 this.mCaptureSession.stopRepeating();
-                Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
+                CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
                 createCaptureRequest.addTarget(this.mRecordSurface);
                 applySettingsForVideo(createCaptureRequest);
                 MiCameraCompat.applyVideoStreamState(createCaptureRequest, false);
                 int capture = capture(createCaptureRequest.build(), this.mCaptureCallback, this.mCameraHandler);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("notifyVideoStreamEnd: requestId=");
-                sb.append(capture);
-                Log.v(str, sb.toString());
+                Log.v(str, "notifyVideoStreamEnd: requestId=" + capture);
             }
         } catch (CameraAccessException e2) {
             Log.e(TAG, e2.getMessage(), e2);
@@ -2797,7 +2508,7 @@ public class MiCamera2 extends Camera2Proxy {
         if (needResumePreviewAfterCapture) {
             resumePreview();
         }
-        PictureCallback pictureCallback = miCamera2Shot.getPictureCallback();
+        Camera2Proxy.PictureCallback pictureCallback = miCamera2Shot.getPictureCallback();
         if (!z && pictureCallback != null) {
             pictureCallback.onPictureTakenFinished(false);
         }
@@ -2805,12 +2516,7 @@ public class MiCamera2 extends Camera2Proxy {
             synchronized (this.mShotQueueLock) {
                 boolean remove = this.mMiCamera2ShotQueue.remove(miCamera2Shot);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCapturePictureFinished failure: mMiCamera2ShotQueue.poll, size: ");
-                sb.append(this.mMiCamera2ShotQueue.size());
-                sb.append(" removeResult: ");
-                sb.append(remove);
-                Log.d(str, sb.toString());
+                Log.d(str, "onCapturePictureFinished failure: mMiCamera2ShotQueue.poll, size: " + this.mMiCamera2ShotQueue.size() + " removeResult: " + remove);
                 notifyCaptureBusyCallback(z);
             }
         }
@@ -2818,12 +2524,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void onMultiSnapEnd(boolean z, MiCamera2Shot miCamera2Shot) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onMultiSnapEnd: ");
-        sb.append(z);
-        sb.append(" | ");
-        sb.append(miCamera2Shot);
-        Log.d(str, sb.toString());
+        Log.d(str, "onMultiSnapEnd: " + z + " | " + miCamera2Shot);
         if (this.mMiCamera2ShotQueue.remove(miCamera2Shot)) {
             notifyCaptureBusyCallback(z);
         }
@@ -2832,10 +2533,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void onParallelImagePostProcStart() {
         synchronized (this.mShotQueueLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onParallelImagePostProcStart: mMiCamera2ShotQueue.poll, size:");
-            sb.append(this.mMiCamera2ShotQueue.size());
-            Log.d(str, sb.toString());
+            Log.d(str, "onParallelImagePostProcStart: mMiCamera2ShotQueue.poll, size:" + this.mMiCamera2ShotQueue.size());
             if (!this.mMiCamera2ShotQueue.isEmpty()) {
                 this.mMiCamera2ShotQueue.pollFirst();
                 notifyCaptureBusyCallback(true);
@@ -2846,9 +2544,9 @@ public class MiCamera2 extends Camera2Proxy {
     public void onPreviewComing() {
         synchronized (this.mShotQueueLock) {
             if (!this.mMiCamera2ShotQueue.isEmpty()) {
-                Iterator it = this.mMiCamera2ShotQueue.iterator();
+                Iterator<MiCamera2Shot> it = this.mMiCamera2ShotQueue.iterator();
                 while (it.hasNext()) {
-                    ((MiCamera2Shot) it.next()).onPreviewComing();
+                    it.next().onPreviewComing();
                 }
             }
         }
@@ -2865,10 +2563,7 @@ public class MiCamera2 extends Camera2Proxy {
         triggerDeviceChecking(false, false);
         if (checkCaptureSession("pausePreview")) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("pausePreview: cameraId=");
-            sb.append(getId());
-            Log.v(str, sb.toString());
+            Log.v(str, "pausePreview: cameraId=" + getId());
             synchronized (this.mSessionLock) {
                 if (this.mCaptureSession == null) {
                     Log.w(TAG, "pausePreview: null session");
@@ -2888,7 +2583,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public boolean registerCaptureCallback(CaptureCallback captureCallback) {
+    public boolean registerCaptureCallback(Camera2Proxy.CaptureCallback captureCallback) {
         boolean z = false;
         if (this.mConfigs.getShotType() == 0) {
             this.mFrontQuickCaptureCallback = captureCallback;
@@ -2896,14 +2591,11 @@ public class MiCamera2 extends Camera2Proxy {
             z = true;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("registerCaptureCallback: ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "registerCaptureCallback: " + z);
         return z;
     }
 
-    public void releaseCameraPreviewCallback(@Nullable CameraPreviewCallback cameraPreviewCallback) {
+    public void releaseCameraPreviewCallback(@Nullable Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
         CaptureSessionStateCallback captureSessionStateCallback = this.mCaptureSessionStateCallback;
         if (captureSessionStateCallback != null) {
             captureSessionStateCallback.setClientCb(cameraPreviewCallback);
@@ -2919,7 +2611,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void releasePreview(int i) {
         Handler handler = this.mHelperHandler;
         if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+            handler.removeCallbacksAndMessages((Object) null);
             this.mHelperHandler = null;
         }
         if (i == 0) {
@@ -2967,7 +2659,7 @@ public class MiCamera2 extends Camera2Proxy {
             captureSessionConfigurations.reset();
         }
         this.mSessionId = 0;
-        releaseCameraPreviewCallback(null);
+        releaseCameraPreviewCallback((Camera2Proxy.CameraPreviewCallback) null);
         Log.v(TAG, "X: resetConfigs");
     }
 
@@ -2975,12 +2667,7 @@ public class MiCamera2 extends Camera2Proxy {
         if (checkCaptureSession("resumePreview")) {
             boolean z = this.mCaptureSession instanceof CameraConstrainedHighSpeedCaptureSession;
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("resumePreview: cameraId=");
-            sb.append(getId());
-            sb.append(" highSpeed=");
-            sb.append(z);
-            Log.v(str, sb.toString());
+            Log.v(str, "resumePreview: cameraId=" + getId() + " highSpeed=" + z);
             synchronized (this.mSessionLock) {
                 if (this.mCaptureSession != null) {
                     try {
@@ -2988,17 +2675,11 @@ public class MiCamera2 extends Camera2Proxy {
                         if (z) {
                             int repeatingBurst = this.mCaptureSession.setRepeatingBurst(createHighSpeedRequestList(this.mPreviewRequest), this.mCaptureCallback, this.mCameraHandler);
                             String str2 = TAG;
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("high speed repeating sequenceId: ");
-                            sb2.append(repeatingBurst);
-                            Log.d(str2, sb2.toString());
+                            Log.d(str2, "high speed repeating sequenceId: " + repeatingBurst);
                         } else {
                             int repeatingRequest = this.mCaptureSession.setRepeatingRequest(this.mPreviewRequest, this.mCaptureCallback, this.mCameraHandler);
                             String str3 = TAG;
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("repeating sequenceId: ");
-                            sb3.append(repeatingRequest);
-                            Log.d(str3, sb3.toString());
+                            Log.d(str3, "repeating sequenceId: " + repeatingRequest);
                         }
                     } catch (CameraAccessException e2) {
                         Log.e(TAG, "Failed to resume preview", e2);
@@ -3014,10 +2695,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setAELock(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setAELock: ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "setAELock: " + z);
         if (this.mConfigs.setAELock(z)) {
             CaptureRequestBuilder.applyAELock(this.mPreviewRequestBuilder, z);
         }
@@ -3057,10 +2735,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setAWBLock(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setAWBLock: ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "setAWBLock: " + z);
         if (this.mConfigs.setAWBLock(z)) {
             CaptureRequestBuilder.applyAWBLock(this.mPreviewRequestBuilder, z);
         }
@@ -3068,10 +2743,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setAWBMode(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setAWBMode: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setAWBMode: " + i);
         if (this.mConfigs.setAWBMode(i)) {
             CaptureRequestBuilder.applyAWBMode(this.mPreviewRequestBuilder, this.mConfigs.getAWBMode());
         }
@@ -3097,10 +2769,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setAntiBanding(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setAntiBanding: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setAntiBanding: " + i);
         if (this.mConfigs.setAntiBanding(i)) {
             CaptureRequestBuilder.applyAntiBanding(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3119,7 +2788,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void setAutoZoomStartCapture(float[] fArr) {
         if (checkCameraDevice("setAutoZoomStartCapture")) {
             try {
-                Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
+                CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
                 createCaptureRequest.addTarget(this.mPreviewSurface);
                 createCaptureRequest.addTarget(this.mRecordSurface);
                 applySettingsForVideo(createCaptureRequest);
@@ -3134,7 +2803,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void setAutoZoomStopCapture(int i) {
         if (checkCameraDevice("setAutoZoomStopCapture")) {
             try {
-                Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
+                CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(3);
                 createCaptureRequest.addTarget(this.mPreviewSurface);
                 createCaptureRequest.addTarget(this.mRecordSurface);
                 applySettingsForVideo(createCaptureRequest);
@@ -3160,12 +2829,9 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public void setCaptureBusyCallback(CaptureBusyCallback captureBusyCallback) {
+    public void setCaptureBusyCallback(Camera2Proxy.CaptureBusyCallback captureBusyCallback) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setCaptureBusyCallback: ");
-        sb.append(captureBusyCallback);
-        Log.d(str, sb.toString());
+        Log.d(str, "setCaptureBusyCallback: " + captureBusyCallback);
         if (captureBusyCallback == null) {
             this.mCaptureBusyCallback = null;
             return;
@@ -3182,12 +2848,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setCaptureEnable(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setCaptureEnable: ");
-        sb.append(z);
-        sb.append(" | ");
-        sb.append(this.mFrontQuickCaptureCallback);
-        Log.d(str, sb.toString());
+        Log.d(str, "setCaptureEnable: " + z + " | " + this.mFrontQuickCaptureCallback);
         if (this.mFrontQuickCaptureCallback != null) {
             this.mCameraHandler.postDelayed(new b(this, z), getCaptureInterval());
         }
@@ -3199,10 +2860,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setColorEffect(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setColorEffect: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setColorEffect: " + i);
         if (this.mConfigs.setColorEffect(i)) {
             CaptureRequestBuilder.applyColorEffect(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3210,10 +2868,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setContrast(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setContrast: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setContrast: " + i);
         if (this.mConfigs.setContrastLevel(i)) {
             CaptureRequestBuilder.applyContrast(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
         }
@@ -3221,10 +2876,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setCustomAWB(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setCustomAWB: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setCustomAWB: " + i);
         if (this.mConfigs.setCustomAWB(i)) {
             CaptureRequestBuilder.applyCustomAWB(this.mPreviewRequestBuilder, this.mConfigs.getAwbCustomValue());
         }
@@ -3232,10 +2884,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setDeviceOrientation(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setDeviceOrientation: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setDeviceOrientation: " + i);
         if (this.mConfigs.setDeviceOrientation(i)) {
             CaptureRequestBuilder.applyDeviceOrientation(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
         }
@@ -3243,10 +2892,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setDisplayOrientation(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setDisplayOrientation: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setDisplayOrientation: " + i);
         this.mDisplayOrientation = i;
     }
 
@@ -3256,10 +2902,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setEnableEIS(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setEnableEIS: ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "setEnableEIS: " + z);
         if (this.mConfigs.setEnableEIS(z)) {
             CaptureRequestBuilder.applyAntiShake(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
         }
@@ -3268,10 +2911,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void setEnableOIS(boolean z) {
         if (this.mCapabilities.isSupportOIS()) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setEnableOIS ");
-            sb.append(z);
-            Log.v(str, sb.toString());
+            Log.v(str, "setEnableOIS " + z);
             this.mConfigs.setEnableOIS(z);
             CaptureRequestBuilder.applyAntiShake(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
         }
@@ -3279,20 +2919,14 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setEnableZsl(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setEnableZsl ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "setEnableZsl " + z);
         this.mConfigs.setEnableZsl(z);
         CaptureRequestBuilder.applyZsl(this.mPreviewRequestBuilder, this.mConfigs);
     }
 
     public void setExposureCompensation(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setExposureCompensation: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setExposureCompensation: " + i);
         if (this.mConfigs.setExposureCompensationIndex(i)) {
             CaptureRequestBuilder.applyExposureCompensation(this.mPreviewRequestBuilder, 1, this.mCapabilities, this.mConfigs);
         }
@@ -3300,10 +2934,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setExposureMeteringMode(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setExposureMeteringMode: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setExposureMeteringMode: " + i);
         if (this.mConfigs.setExposureMeteringMode(i)) {
             CaptureRequestBuilder.applyExposureMeteringMode(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3327,12 +2958,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setFNumber(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFNumber ");
-        sb.append(str);
-        sb.append(" for ");
-        sb.append(this.mPreviewRequestBuilder);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "setFNumber " + str + " for " + this.mPreviewRequestBuilder);
         this.mConfigs.setFNumber(str);
         CaptureRequestBuilder.applyFNumber(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
     }
@@ -3359,10 +2985,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setFlashMode(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFlashMode: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setFlashMode: " + i);
         if (this.mConfigs.setFlashMode(i)) {
             applyFlashMode(this.mPreviewRequestBuilder, 1);
         }
@@ -3374,10 +2997,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setFocusDistance(float f2) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFocusDistance: ");
-        sb.append(f2);
-        Log.v(str, sb.toString());
+        Log.v(str, "setFocusDistance: " + f2);
         if (this.mConfigs.setFocusDistance(f2)) {
             CaptureRequestBuilder.applyFocusDistance(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3385,10 +3005,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setFocusMode(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFocusMode: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setFocusMode: " + i);
         if (this.mConfigs.setFocusMode(i)) {
             CaptureRequestBuilder.applyFocusMode(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3400,20 +3017,14 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setFpsRange(Range<Integer> range) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFpsRange: ");
-        sb.append(range);
-        Log.v(str, sb.toString());
+        Log.v(str, "setFpsRange: " + range);
         this.mConfigs.setPreviewFpsRange(range);
         CaptureRequestBuilder.applyFpsRange(this.mPreviewRequestBuilder, this.mConfigs);
     }
 
     public void setFrontMirror(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFrontMirror: ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "setFrontMirror: " + z);
         this.mConfigs.setFrontMirror(z);
     }
 
@@ -3447,10 +3058,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setISO(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setISO: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setISO: " + i);
         if (this.mConfigs.setISO(i)) {
             applyFlashMode(this.mPreviewRequestBuilder, 1);
             CaptureRequestBuilder.applyExposureCompensation(this.mPreviewRequestBuilder, 1, this.mCapabilities, this.mConfigs);
@@ -3509,16 +3117,13 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setNormalWideLDC(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setNormalWideLDC: ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "setNormalWideLDC: " + z);
         if (this.mConfigs.setNormalWideLDCEnabled(z)) {
             CaptureRequestBuilder.applyNormalWideLDC(this.mPreviewRequestBuilder, 1, this.mCapabilities, this.mConfigs);
         }
     }
 
-    public void setOnTripodModeStatus(ASDScene[] aSDSceneArr) {
+    public void setOnTripodModeStatus(MarshalQueryableASDScene.ASDScene[] aSDSceneArr) {
         this.mConfigs.setOnTripodScenes(aSDSceneArr);
         CaptureRequestBuilder.applyOnTripodModeStatus(this.mPreviewRequestBuilder, this.mConfigs);
     }
@@ -3526,10 +3131,7 @@ public class MiCamera2 extends Camera2Proxy {
     public void setOpticalZoomToTele(boolean z) {
         if (DataRepository.dataItemFeature().qc() && this.mCapabilities.isSupportFastZoomIn()) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setOpticalZoomToTele: toTele = ");
-            sb.append(z);
-            Log.d(str, sb.toString());
+            Log.d(str, "setOpticalZoomToTele: toTele = " + z);
             this.mToTele = z;
         }
         MiCameraCompat.applyStFastZoomIn(this.mPreviewRequestBuilder, z);
@@ -3595,10 +3197,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setSaturation(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSaturation: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setSaturation: " + i);
         if (this.mConfigs.setSaturationLevel(i)) {
             CaptureRequestBuilder.applySaturation(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3606,10 +3205,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setSceneMode(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSceneMode: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setSceneMode: " + i);
         if (this.mConfigs.setSceneMode(i)) {
             CaptureRequestBuilder.applySceneMode(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3624,10 +3220,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setSharpness(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSharpness: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "setSharpness: " + i);
         if (this.mConfigs.setSharpnessLevel(i)) {
             CaptureRequestBuilder.applySharpness(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3635,30 +3228,19 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setShot2Gallery(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setShot2Gallery: isShot2Gallery=");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "setShot2Gallery: isShot2Gallery=" + z);
         this.mConfigs.setShot2Gallery(z);
     }
 
     public void setShotSavePath(String str, boolean z) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setShotSavePath: ");
-        sb.append(str);
-        sb.append(", isParallel:");
-        sb.append(z);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "setShotSavePath: " + str + ", isParallel:" + z);
         this.mConfigs.setShotPath(str, z);
     }
 
     public void setShotType(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setShotType: algo=");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "setShotType: algo=" + i);
         this.mConfigs.setShotType(i);
     }
 
@@ -3712,10 +3294,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setUltraWideLDC(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setUltraWideLDC: ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "setUltraWideLDC: " + z);
         if (this.mConfigs.setUltraWideLDCEnabled(z)) {
             CaptureRequestBuilder.applyUltraWideLDC(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
         }
@@ -3731,8 +3310,8 @@ public class MiCamera2 extends Camera2Proxy {
         this.mConfigs.setUseLegacyFlashMode(z);
     }
 
-    public <T> void setVendorSetting(Key<T> key, T t) {
-        Builder builder = this.mPreviewRequestBuilder;
+    public <T> void setVendorSetting(CaptureRequest.Key<T> key, T t) {
+        CaptureRequest.Builder builder = this.mPreviewRequestBuilder;
         if (builder != null) {
             builder.set(key, t);
         }
@@ -3740,10 +3319,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setVideoFpsRange(Range<Integer> range) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setVideoFpsRange: ");
-        sb.append(range);
-        Log.v(str, sb.toString());
+        Log.v(str, "setVideoFpsRange: " + range);
         if (this.mConfigs.setVideoFpsRange(range)) {
             CaptureRequestBuilder.applyVideoFpsRange(this.mPreviewRequestBuilder, this.mConfigs);
         }
@@ -3761,10 +3337,7 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void setZoomRatio(float f2) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setZoomRatio(): ");
-        sb.append(f2);
-        Log.v(str, sb.toString());
+        Log.v(str, "setZoomRatio(): " + f2);
         if (this.mConfigs.setZoomRatio(f2)) {
             CaptureRequestBuilder.applyZoomRatio(this.mPreviewRequestBuilder, this.mCapabilities, this.mConfigs);
         }
@@ -3778,21 +3351,18 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void startFocus(FocusTask focusTask, int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startFocus: ");
-        sb.append(i);
-        Log.v(str, sb.toString());
+        Log.v(str, "startFocus: " + i);
         try {
             this.mCaptureCallback.setFocusTask(focusTask);
-            Builder initFocusRequestBuilder = initFocusRequestBuilder(i);
-            initFocusRequestBuilder.set(CaptureRequest.CONTROL_MODE, Integer.valueOf(1));
+            CaptureRequest.Builder initFocusRequestBuilder = initFocusRequestBuilder(i);
+            initFocusRequestBuilder.set(CaptureRequest.CONTROL_MODE, 1);
             applySettingsForFocusCapture(initFocusRequestBuilder);
-            initFocusRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, Integer.valueOf(1));
+            initFocusRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, 1);
             CaptureRequest build = initFocusRequestBuilder.build();
             focusTask.setRequest(build);
             capture(build, this.mCaptureCallback, this.mCameraHandler);
             this.mConfigs.setFocusMode(1);
-            this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, Integer.valueOf(1));
+            this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE, 1);
             if (this.mPreviewControl.needForVideo()) {
                 applySettingsForVideo(this.mPreviewRequestBuilder);
             } else {
@@ -3807,27 +3377,19 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     public void startHighSpeedRecordPreview() {
-        String str = "startHighSpeedRecordPreview";
-        if (checkCameraDevice(str)) {
-            Log.d(TAG, str);
+        if (checkCameraDevice("startHighSpeedRecordPreview")) {
+            Log.d(TAG, "startHighSpeedRecordPreview");
             applySettingsForVideo(this.mPreviewRequestBuilder);
             MiCameraCompat.applyIsHfrPreview(this.mPreviewRequestBuilder, true);
             resumePreview();
         }
     }
 
-    public void startHighSpeedRecordSession(@NonNull Surface surface, @NonNull Surface surface2, Range<Integer> range, CameraPreviewCallback cameraPreviewCallback) {
+    public void startHighSpeedRecordSession(@NonNull Surface surface, @NonNull Surface surface2, Range<Integer> range, Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
         int[] iArr;
         if (checkCameraDevice("startHighSpeedRecordSession")) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("startHighSpeedRecordSession: previewSurface = ");
-            sb.append(surface);
-            sb.append(" recordSurface = ");
-            sb.append(surface2);
-            sb.append(" fpsRange = ");
-            sb.append(range);
-            Log.d(str, sb.toString());
+            Log.d(str, "startHighSpeedRecordSession: previewSurface = " + surface + " recordSurface = " + surface2 + " fpsRange = " + range);
             this.mPreviewSurface = surface;
             this.mRecordSurface = surface2;
             this.mHighSpeedFpsRange = range;
@@ -3839,38 +3401,29 @@ public class MiCamera2 extends Camera2Proxy {
                 this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, this.mHighSpeedFpsRange);
                 synchronized (this.mSessionLock) {
                     String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("startHighSpeedRecordSession: reset session ");
-                    sb2.append(this.mCaptureSession);
-                    Log.d(str2, sb2.toString());
+                    Log.d(str2, "startHighSpeedRecordSession: reset session " + this.mCaptureSession);
                     this.mCaptureSession = null;
                 }
                 List<Surface> asList = Arrays.asList(new Surface[]{this.mPreviewSurface, this.mRecordSurface});
                 if (b.isMTKPlatform()) {
-                    int intValue = ((Integer) this.mHighSpeedFpsRange.getUpper()).intValue();
+                    int intValue = this.mHighSpeedFpsRange.getUpper().intValue();
                     if (DataRepository.dataItemFeature().wc()) {
                         if (intValue == 120) {
                             iArr = CaptureRequestVendorTags.VALUE_SMVR_MODE_120FPS;
                         } else if (intValue == 240) {
                             iArr = CaptureRequestVendorTags.VALUE_SMVR_MODE_240FPS;
                         } else {
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("Unsupported Slow Motion Recording: ");
-                            sb3.append(this.mHighSpeedFpsRange);
-                            throw new UnsupportedOperationException(sb3.toString());
+                            throw new UnsupportedOperationException("Unsupported Slow Motion Recording: " + this.mHighSpeedFpsRange);
                         }
                         this.mSessionConfigs.set(CaptureRequestVendorTags.SMVR_MODE, iArr);
                         MiCameraCompat.applySlowMotionVideoRecordingMode(this.mPreviewRequestBuilder, iArr);
                         String str3 = TAG;
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("startHighSpeedRecordSession: turns smvrmode to ");
-                        sb4.append(intValue);
-                        Log.d(str3, sb4.toString());
+                        Log.d(str3, "startHighSpeedRecordSession: turns smvrmode to " + intValue);
                         ArrayList arrayList = new ArrayList();
                         for (Surface outputConfiguration : asList) {
                             arrayList.add(new OutputConfiguration(outputConfiguration));
                         }
-                        CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, 0, null, arrayList, this.mPreviewRequestBuilder.build(), new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
+                        CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, 0, (InputConfiguration) null, arrayList, this.mPreviewRequestBuilder.build(), new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
                     } else if (intValue == 120) {
                         this.mCameraDevice.createConstrainedHighSpeedCaptureSession(asList, new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
                     } else if (intValue == 240) {
@@ -3881,25 +3434,22 @@ public class MiCamera2 extends Camera2Proxy {
                         for (Surface outputConfiguration2 : asList) {
                             arrayList2.add(new OutputConfiguration(outputConfiguration2));
                         }
-                        CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, 0, null, arrayList2, this.mPreviewRequestBuilder.build(), new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
+                        CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, 0, (InputConfiguration) null, arrayList2, this.mPreviewRequestBuilder.build(), new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
                     } else {
-                        StringBuilder sb5 = new StringBuilder();
-                        sb5.append("Unsupported Slow Motion Recording: ");
-                        sb5.append(this.mHighSpeedFpsRange);
-                        throw new UnsupportedOperationException(sb5.toString());
+                        throw new UnsupportedOperationException("Unsupported Slow Motion Recording: " + this.mHighSpeedFpsRange);
                     }
-                } else if (((Integer) this.mHighSpeedFpsRange.getUpper()).intValue() == 120 && !DataRepository.dataItemFeature().wc()) {
+                } else if (this.mHighSpeedFpsRange.getUpper().intValue() == 120 && !DataRepository.dataItemFeature().wc()) {
                     ArrayList arrayList3 = new ArrayList();
                     for (Surface outputConfiguration3 : asList) {
                         arrayList3.add(new OutputConfiguration(outputConfiguration3));
                     }
-                    this.mCameraDevice.createCustomCaptureSession(null, arrayList3, 32888, new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
+                    this.mCameraDevice.createCustomCaptureSession((InputConfiguration) null, arrayList3, 32888, new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
                 } else if (DataRepository.dataItemFeature().Xa()) {
                     ArrayList arrayList4 = new ArrayList();
                     for (Surface outputConfiguration4 : asList) {
                         arrayList4.add(new OutputConfiguration(outputConfiguration4));
                     }
-                    CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, 1, null, arrayList4, this.mPreviewRequestBuilder.build(), new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
+                    CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, 1, (InputConfiguration) null, arrayList4, this.mPreviewRequestBuilder.build(), new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
                 } else {
                     this.mCameraDevice.createConstrainedHighSpeedCaptureSession(asList, new HighSpeedCaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
                 }
@@ -3911,13 +3461,12 @@ public class MiCamera2 extends Camera2Proxy {
     }
 
     public void startHighSpeedRecording() {
-        String str = "startHighSpeedRecording";
-        if (checkCaptureSession(str)) {
-            Log.d(TAG, str);
+        if (checkCaptureSession("startHighSpeedRecording")) {
+            Log.d(TAG, "startHighSpeedRecording");
             MiCameraCompat.applyIsHfrPreview(this.mPreviewRequestBuilder, false);
             if (DataRepository.dataItemFeature().ua()) {
                 Log.d(TAG, "startHighSpeedRecording: CAF is disabled");
-                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, Integer.valueOf(1));
+                this.mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, 1);
             }
             CaptureRequestBuilder.applySessionParameters(this.mPreviewRequestBuilder, this.mSessionConfigs);
             resumePreview();
@@ -3927,10 +3476,9 @@ public class MiCamera2 extends Camera2Proxy {
     public void startObjectTrack(RectF rectF) {
     }
 
-    public void startPreviewCallback(@NonNull PreviewCallback previewCallback) {
-        String str = "startPreviewCallback";
-        if (checkCaptureSession(str)) {
-            Log.v(TAG, str);
+    public void startPreviewCallback(@NonNull Camera2Proxy.PreviewCallback previewCallback) {
+        if (checkCaptureSession("startPreviewCallback")) {
+            Log.v(TAG, "startPreviewCallback");
             if (this.mIsPreviewCallbackEnabled) {
                 setPreviewCallback(previewCallback);
                 if (!this.mIsPreviewCallbackStarted) {
@@ -3945,7 +3493,7 @@ public class MiCamera2 extends Camera2Proxy {
     /* JADX WARNING: Removed duplicated region for block: B:51:0x0291 A[Catch:{ CameraAccessException -> 0x035d, IllegalStateException -> 0x034e, IllegalArgumentException -> 0x033f, all -> 0x036f }] */
     /* JADX WARNING: Removed duplicated region for block: B:54:0x02cf A[ADDED_TO_REGION, Catch:{ CameraAccessException -> 0x035d, IllegalStateException -> 0x034e, IllegalArgumentException -> 0x033f, all -> 0x036f }] */
     /* JADX WARNING: Removed duplicated region for block: B:62:0x0325 A[Catch:{ CameraAccessException -> 0x035d, IllegalStateException -> 0x034e, IllegalArgumentException -> 0x033f, all -> 0x036f }] */
-    public void startPreviewSession(Surface surface, boolean z, boolean z2, boolean z3, int i, boolean z4, CameraPreviewCallback cameraPreviewCallback) {
+    public void startPreviewSession(Surface surface, boolean z, boolean z2, boolean z3, int i, boolean z4, Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
         InputConfiguration inputConfiguration;
         boolean z5;
         OutputConfiguration outputConfiguration;
@@ -3985,33 +3533,20 @@ public class MiCamera2 extends Camera2Proxy {
                         int size = this.mParallelCaptureSurfaceList.size();
                         int i4 = 0;
                         while (i4 < size) {
-                            OutputConfiguration outputConfiguration2 = new OutputConfiguration((Surface) this.mParallelCaptureSurfaceList.get(i4));
-                            if (b.isMTKPlatform() && VERSION.SDK_INT >= 28 && this.mConfigs.isParallelDualShotType() && this.mCapabilities.getFacing() == i2 && i4 < i3) {
+                            OutputConfiguration outputConfiguration2 = new OutputConfiguration(this.mParallelCaptureSurfaceList.get(i4));
+                            if (b.isMTKPlatform() && Build.VERSION.SDK_INT >= 28 && this.mConfigs.isParallelDualShotType() && this.mCapabilities.getFacing() == i2 && i4 < i3) {
                                 int i5 = ((IImageReaderParameterSets) arrayList2.get(i4)).targetCamera;
                                 if (i5 == 0) {
                                     int mainBackCameraId = Camera2DataContainer.getInstance().getMainBackCameraId();
-                                    String str = TAG;
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append("Binds main output stream to camera ");
-                                    sb.append(mainBackCameraId);
-                                    Log.d(str, sb.toString());
+                                    Log.d(TAG, "Binds main output stream to camera " + mainBackCameraId);
                                 } else if (i5 == i2) {
-                                    int auxCameraId = Camera2DataContainer.getInstance().getAuxCameraId();
-                                    CompatibilityUtils.setPhysicalCameraId(outputConfiguration2, String.valueOf(auxCameraId));
-                                    String str2 = TAG;
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append("Binds sub output stream to camera ");
-                                    sb2.append(auxCameraId);
-                                    Log.d(str2, sb2.toString());
+                                    CompatibilityUtils.setPhysicalCameraId(outputConfiguration2, String.valueOf(Camera2DataContainer.getInstance().getAuxCameraId()));
+                                    Log.d(TAG, "Binds sub output stream to camera " + r10);
                                 }
                             }
                             if (!isLocalParallelServiceReady) {
                                 outputConfiguration2.enableSurfaceSharing();
-                                String str3 = TAG;
-                                StringBuilder sb3 = new StringBuilder();
-                                sb3.append("add surface to deferredOutputConfig: ");
-                                sb3.append(outputConfiguration2.getSurface());
-                                Log.d(str3, sb3.toString());
+                                Log.d(TAG, "add surface to deferredOutputConfig: " + outputConfiguration2.getSurface());
                                 this.mDeferOutputConfigurations.add(outputConfiguration2);
                             }
                             arrayList.add(outputConfiguration2);
@@ -4031,28 +3566,10 @@ public class MiCamera2 extends Camera2Proxy {
                     if (z7) {
                         prepareRawImageReader(this.mConfigs.getSensorRawImageSize(), z8);
                         arrayList.add(new OutputConfiguration(this.mRawImageReader.getSurface()));
-                        String str4 = TAG;
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("startPreviewSession: needsRawStream = ");
-                        sb4.append(z7);
-                        sb4.append(", size = ");
-                        sb4.append(this.mRawImageReader.getWidth());
-                        sb4.append("x");
-                        sb4.append(this.mRawImageReader.getHeight());
-                        Log.d(str4, sb4.toString());
+                        Log.d(TAG, "startPreviewSession: needsRawStream = " + z7 + ", size = " + this.mRawImageReader.getWidth() + "x" + this.mRawImageReader.getHeight());
                         if (z8) {
-                            int i6 = this.mConfigs.getSensorRawImageSize().width;
-                            int i7 = this.mConfigs.getSensorRawImageSize().height;
-                            inputConfiguration = new InputConfiguration(i6, i7, 32);
-                            String str5 = TAG;
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append("startPreviewSession: setup input configuration: w = ");
-                            sb5.append(i6);
-                            sb5.append(", h = ");
-                            sb5.append(i7);
-                            sb5.append(", fmt = ");
-                            sb5.append(32);
-                            Log.d(str5, sb5.toString());
+                            inputConfiguration = new InputConfiguration(this.mConfigs.getSensorRawImageSize().width, this.mConfigs.getSensorRawImageSize().height, 32);
+                            Log.d(TAG, "startPreviewSession: setup input configuration: w = " + r2 + ", h = " + r5 + ", fmt = " + 32);
                             this.mCaptureSessionStateCallback = new CaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback);
                             if (this.mPreviewSurface != null) {
                                 CameraSize previewSize = getPreviewSize();
@@ -4070,13 +3587,7 @@ public class MiCamera2 extends Camera2Proxy {
                                 arrayList.add(0, outputConfiguration);
                                 z5 = false;
                             } else {
-                                String str6 = TAG;
-                                StringBuilder sb6 = new StringBuilder();
-                                sb6.append("startPreviewSession: add preview surface to HAL: ");
-                                sb6.append(this.mPreviewSurface);
-                                sb6.append("->");
-                                sb6.append(SurfaceUtils.getSurfaceSize(this.mPreviewSurface));
-                                Log.d(str6, sb6.toString());
+                                Log.d(TAG, "startPreviewSession: add preview surface to HAL: " + this.mPreviewSurface + "->" + SurfaceUtils.getSurfaceSize(this.mPreviewSurface));
                                 z5 = false;
                                 arrayList.add(0, new OutputConfiguration(this.mPreviewSurface));
                                 this.mPreviewRequestBuilder.addTarget(this.mPreviewSurface);
@@ -4087,7 +3598,7 @@ public class MiCamera2 extends Camera2Proxy {
                                 }
                                 if (z5) {
                                     Log.d(TAG, "turns capture.zsl.mode on");
-                                    this.mSessionConfigs.set(CaptureRequestVendorTags.ZSL_CAPTURE_MODE, Byte.valueOf(1));
+                                    this.mSessionConfigs.set(CaptureRequestVendorTags.ZSL_CAPTURE_MODE, (byte) 1);
                                     MiCameraCompat.applyZsd(this.mPreviewRequestBuilder, true);
                                 }
                                 Log.d(TAG, "turns quick preview on");
@@ -4133,7 +3644,7 @@ public class MiCamera2 extends Camera2Proxy {
                 this.mPreviewRequestBuilder = this.mCameraDevice.createCaptureRequest(3);
                 this.mPreviewRequestBuilder.addTarget(this.mPreviewSurface);
                 if (this.mConfigs.isEISEnabled()) {
-                    VendorTagHelper.setValue(this.mPreviewRequestBuilder, CaptureRequestVendorTags.VIDEO_RECORD_CONTROL, Integer.valueOf(0));
+                    VendorTagHelper.setValue(this.mPreviewRequestBuilder, CaptureRequestVendorTags.VIDEO_RECORD_CONTROL, 0);
                 }
                 applySettingsForVideo(this.mPreviewRequestBuilder);
                 resumePreview();
@@ -4147,16 +3658,10 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public void startRecordSession(@NonNull Surface surface, @NonNull Surface surface2, boolean z, int i, CameraPreviewCallback cameraPreviewCallback) {
+    public void startRecordSession(@NonNull Surface surface, @NonNull Surface surface2, boolean z, int i, Camera2Proxy.CameraPreviewCallback cameraPreviewCallback) {
         List<Surface> list;
         if (checkCameraDevice("startRecordSession")) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("startRecordSession: previewSurface=");
-            sb.append(surface);
-            sb.append(" recordSurface=");
-            sb.append(surface2);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "startRecordSession: previewSurface=" + surface + " recordSurface=" + surface2);
             this.mPreviewSurface = surface;
             this.mRecordSurface = surface2;
             this.mSessionId = genSessionId();
@@ -4166,14 +3671,10 @@ public class MiCamera2 extends Camera2Proxy {
                 this.mPreviewRequestBuilder.addTarget(this.mPreviewSurface);
                 boolean z2 = false;
                 if (this.mConfigs.isEISEnabled()) {
-                    VendorTagHelper.setValue(this.mPreviewRequestBuilder, CaptureRequestVendorTags.VIDEO_RECORD_CONTROL, Integer.valueOf(0));
+                    VendorTagHelper.setValue(this.mPreviewRequestBuilder, CaptureRequestVendorTags.VIDEO_RECORD_CONTROL, 0);
                 }
                 synchronized (this.mSessionLock) {
-                    String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("startRecordSession: reset session ");
-                    sb2.append(this.mCaptureSession);
-                    Log.d(str2, sb2.toString());
+                    Log.d(TAG, "startRecordSession: reset session " + this.mCaptureSession);
                     this.mCaptureSession = null;
                 }
                 if (z) {
@@ -4186,24 +3687,20 @@ public class MiCamera2 extends Camera2Proxy {
                 for (Surface outputConfiguration : list) {
                     arrayList.add(new OutputConfiguration(outputConfiguration));
                 }
-                String str3 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("startRecordSession: operatingMode is ");
-                sb3.append(Integer.toHexString(i));
-                Log.d(str3, sb3.toString());
+                Log.d(TAG, "startRecordSession: operatingMode is " + Integer.toHexString(i));
                 if (b.isMTKPlatform()) {
                     if (i == 32828) {
                         z2 = true;
                     }
                     if (z2) {
-                        this.mSessionConfigs.set(CaptureRequestVendorTags.HFPSVR_MODE, Integer.valueOf(1));
+                        this.mSessionConfigs.set(CaptureRequestVendorTags.HFPSVR_MODE, 1);
                         MiCameraCompat.applyHighFpsVideoRecordingMode(this.mPreviewRequestBuilder, true);
                         Log.d(TAG, "startRecordSession: turns hfpsmode on");
                     }
-                    CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, i, null, arrayList, this.mPreviewRequestBuilder.build(), new CaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
-                } else {
-                    this.mCameraDevice.createCustomCaptureSession(null, arrayList, i, new CaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
+                    CompatibilityUtils.createCaptureSessionWithSessionConfiguration(this.mCameraDevice, i, (InputConfiguration) null, arrayList, this.mPreviewRequestBuilder.build(), new CaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
+                    return;
                 }
+                this.mCameraDevice.createCustomCaptureSession((InputConfiguration) null, arrayList, i, new CaptureSessionStateCallback(this.mSessionId, cameraPreviewCallback), this.mCameraHandler);
             } catch (CameraAccessException e2) {
                 Log.e(TAG, "Failed to start recording session", e2);
                 notifyOnError(e2.getReason());
@@ -4248,13 +3745,10 @@ public class MiCamera2 extends Camera2Proxy {
 
     public void stopPreviewCallback(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("stopPreviewCallback(): isRelease = ");
-        sb.append(z);
-        Log.v(str, sb.toString());
+        Log.v(str, "stopPreviewCallback(): isRelease = " + z);
         if (this.mIsPreviewCallbackEnabled && this.mIsPreviewCallbackStarted && this.mPreviewImageReader != null) {
             this.mIsPreviewCallbackStarted = false;
-            setPreviewCallback(null);
+            setPreviewCallback((Camera2Proxy.PreviewCallback) null);
             Surface surface = this.mPreviewImageReader.getSurface();
             this.mPreviewRequestBuilder.removeTarget(surface);
             surface.release();
@@ -4264,7 +3758,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public void stopRecording(VideoRecordStateCallback videoRecordStateCallback) {
+    public void stopRecording(Camera2Proxy.VideoRecordStateCallback videoRecordStateCallback) {
         if (checkCaptureSession("stopRecording")) {
             Log.d(TAG, "stopRecording");
             if (this.mConfigs.isEISEnabled()) {
@@ -4285,7 +3779,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    public void takePicture(@NonNull PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback) {
+    public void takePicture(@NonNull Camera2Proxy.PictureCallback pictureCallback, @NonNull ParallelCallback parallelCallback) {
         Log.v(TAG, "takePicture");
         setPictureCallback(pictureCallback);
         setParallelCallback(parallelCallback);
@@ -4306,7 +3800,7 @@ public class MiCamera2 extends Camera2Proxy {
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:54:0x00f4, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:53:0x00f3, code lost:
         return true;
      */
     public boolean updateDeferPreviewSession(Surface surface) {
@@ -4331,7 +3825,7 @@ public class MiCamera2 extends Camera2Proxy {
                     try {
                         ArrayList arrayList = new ArrayList();
                         if (this.mFakeOutputTexture != null) {
-                            OutputConfiguration outputConfiguration = (OutputConfiguration) this.mDeferOutputConfigurations.get(0);
+                            OutputConfiguration outputConfiguration = this.mDeferOutputConfigurations.get(0);
                             this.mDeferOutputConfigurations.remove(0);
                             if (this.mSetRepeatingEarly) {
                                 this.mPreviewRequestBuilder.removeTarget(outputConfiguration.getSurface());
@@ -4340,11 +3834,11 @@ public class MiCamera2 extends Camera2Proxy {
                             arrayList.add(outputConfiguration);
                         }
                         if (this.mEnableParallelSession && !this.mRemoteImageReaderList.isEmpty()) {
-                            this.mParallelCaptureSurfaceList = prepareRemoteImageReader(null);
+                            this.mParallelCaptureSurfaceList = prepareRemoteImageReader((List<IImageReaderParameterSets>) null);
                             if (this.mParallelCaptureSurfaceList != null) {
                                 for (int i = 0; i < this.mDeferOutputConfigurations.size(); i++) {
-                                    OutputConfiguration outputConfiguration2 = (OutputConfiguration) this.mDeferOutputConfigurations.get(i);
-                                    outputConfiguration2.addSurface((Surface) this.mParallelCaptureSurfaceList.get(i));
+                                    OutputConfiguration outputConfiguration2 = this.mDeferOutputConfigurations.get(i);
+                                    outputConfiguration2.addSurface(this.mParallelCaptureSurfaceList.get(i));
                                     arrayList.add(outputConfiguration2);
                                 }
                             }

@@ -58,7 +58,7 @@ public final class GzipSource implements Source {
             this.source.skip(readShortLe);
         }
         if (((b2 >> 3) & 1) == 1) {
-            long indexOf = this.source.indexOf(0);
+            long indexOf = this.source.indexOf((byte) 0);
             if (indexOf != -1) {
                 if (z) {
                     updateCrc(this.source.buffer(), 0, indexOf + 1);
@@ -69,7 +69,7 @@ public final class GzipSource implements Source {
             }
         }
         if (((b2 >> FCOMMENT) & 1) == 1) {
-            long indexOf2 = this.source.indexOf(0);
+            long indexOf2 = this.source.indexOf((byte) 0);
             if (indexOf2 != -1) {
                 if (z) {
                     updateCrc(this.source.buffer(), 0, indexOf2 + 1);
@@ -118,10 +118,7 @@ public final class GzipSource implements Source {
     public long read(Buffer buffer, long j) throws IOException {
         int i = (j > 0 ? 1 : (j == 0 ? 0 : -1));
         if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + j);
         } else if (i == 0) {
             return 0;
         } else {

@@ -30,8 +30,6 @@ public final class Http2 {
     static final byte TYPE_WINDOW_UPDATE = 8;
 
     static {
-        String str;
-        int[] iArr;
         int i = 0;
         int i2 = 0;
         while (true) {
@@ -45,52 +43,27 @@ public final class Http2 {
         String[] strArr2 = FLAGS;
         strArr2[0] = "";
         strArr2[1] = "END_STREAM";
-        int[] iArr2 = {1};
+        int[] iArr = {1};
         strArr2[8] = "PADDED";
-        int length = iArr2.length;
-        int i3 = 0;
-        while (true) {
-            str = "|PADDED";
-            if (i3 >= length) {
-                break;
-            }
-            int i4 = iArr2[i3];
-            String[] strArr3 = FLAGS;
-            int i5 = i4 | 8;
-            StringBuilder sb = new StringBuilder();
-            sb.append(FLAGS[i4]);
-            sb.append(str);
-            strArr3[i5] = sb.toString();
-            i3++;
+        for (int i3 : iArr) {
+            FLAGS[i3 | 8] = FLAGS[iArr[r5]] + "|PADDED";
         }
-        String[] strArr4 = FLAGS;
-        strArr4[4] = "END_HEADERS";
-        strArr4[32] = "PRIORITY";
-        strArr4[36] = "END_HEADERS|PRIORITY";
-        for (int i6 : new int[]{4, 32, 36}) {
-            for (int i7 : iArr2) {
-                String[] strArr5 = FLAGS;
-                int i8 = i7 | i6;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(FLAGS[i7]);
-                sb2.append('|');
-                sb2.append(FLAGS[i6]);
-                strArr5[i8] = sb2.toString();
-                String[] strArr6 = FLAGS;
-                int i9 = i8 | 8;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(FLAGS[i7]);
-                sb3.append('|');
-                sb3.append(FLAGS[i6]);
-                sb3.append(str);
-                strArr6[i9] = sb3.toString();
+        String[] strArr3 = FLAGS;
+        strArr3[4] = "END_HEADERS";
+        strArr3[32] = "PRIORITY";
+        strArr3[36] = "END_HEADERS|PRIORITY";
+        for (int i4 : new int[]{4, 32, 36}) {
+            for (int i5 : iArr) {
+                int i6 = i5 | i4;
+                FLAGS[i6] = FLAGS[iArr[r9]] + '|' + FLAGS[i4];
+                FLAGS[i6 | 8] = FLAGS[i5] + '|' + FLAGS[i4] + "|PADDED";
             }
         }
         while (true) {
-            String[] strArr7 = FLAGS;
-            if (i < strArr7.length) {
-                if (strArr7[i] == null) {
-                    strArr7[i] = BINARY[i];
+            String[] strArr4 = FLAGS;
+            if (i < strArr4.length) {
+                if (strArr4[i] == null) {
+                    strArr4[i] = BINARY[i];
                 }
                 i++;
             } else {
@@ -109,7 +82,8 @@ public final class Http2 {
         if (!(b2 == 2 || b2 == 3)) {
             if (b2 == 4 || b2 == 6) {
                 return b3 == 1 ? "ACK" : BINARY[b3];
-            } else if (!(b2 == 7 || b2 == 8)) {
+            }
+            if (!(b2 == 7 || b2 == 8)) {
                 String[] strArr = FLAGS;
                 String str = b3 < strArr.length ? strArr[b3] : BINARY[b3];
                 return (b2 != 5 || (b3 & 4) == 0) ? (b2 != 0 || (b3 & 32) == 0) ? str : str.replace("PRIORITY", "COMPRESSED") : str.replace("HEADERS", "PUSH_PROMISE");

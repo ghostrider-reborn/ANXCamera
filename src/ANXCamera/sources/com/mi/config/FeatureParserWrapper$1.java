@@ -27,24 +27,13 @@ class FeatureParserWrapper$1 extends HashMap<String, String> {
     }
 
     public String put(String str, String str2) {
-        String str3 = "The key \"";
         if (str2 == null || !str2.startsWith("o_0x")) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str3);
-            sb.append(str);
-            sb.append("\" must be mapped to non-null string starting with \"o_0x\"");
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("The key \"" + str + "\" must be mapped to non-null string starting with \"o_0x\"");
         }
-        String str4 = (String) super.put(str, str2);
-        if (str4 == null) {
+        String str3 = (String) super.put(str, str2);
+        if (str3 == null) {
             return null;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str3);
-        sb2.append(str);
-        sb2.append("\" has already be mapped to \"");
-        sb2.append(str4);
-        sb2.append("\"");
-        throw new IllegalStateException(sb2.toString());
+        throw new IllegalStateException("The key \"" + str + "\" has already be mapped to \"" + str3 + "\"");
     }
 }

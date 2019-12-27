@@ -20,7 +20,7 @@ public final class CompletableDoFinally extends Completable {
         private static final long serialVersionUID = 4109457741734051389L;
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f273d;
         final Action onFinally;
 
@@ -55,7 +55,7 @@ public final class CompletableDoFinally extends Completable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runFinally() {
             if (compareAndSet(0, 1)) {
                 try {

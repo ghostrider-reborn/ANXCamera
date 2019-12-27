@@ -2,7 +2,7 @@ package com.bumptech.glide.load.a.a;
 
 import android.net.Uri;
 import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 
 /* compiled from: MediaStoreUtil */
 public final class b {
@@ -17,14 +17,7 @@ public final class b {
     }
 
     public static boolean e(Uri uri) {
-        if (uri != null) {
-            if (ComposerHelper.COMPOSER_CONTENT.equals(uri.getScheme())) {
-                if ("media".equals(uri.getAuthority())) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return uri != null && ComposerHelper.COMPOSER_CONTENT.equals(uri.getScheme()) && "media".equals(uri.getAuthority());
     }
 
     public static boolean f(Uri uri) {
@@ -32,7 +25,7 @@ public final class b {
     }
 
     private static boolean j(Uri uri) {
-        return uri.getPathSegments().contains(MVConsts.TYPE_VIDEO);
+        return uri.getPathSegments().contains(VEEditor.MVConsts.TYPE_VIDEO);
     }
 
     public static boolean k(int i, int i2) {

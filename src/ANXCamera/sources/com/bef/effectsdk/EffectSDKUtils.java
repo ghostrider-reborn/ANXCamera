@@ -36,22 +36,18 @@ public class EffectSDKUtils {
             needRemoveFiles.clear();
         }
         needRemoveFiles.addAll(localFiles);
-        String str2 = "/";
-        if (!str.endsWith(str2)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(str2);
-            str = sb.toString();
+        if (!str.endsWith("/")) {
+            str = str + "/";
         }
-        for (String str3 : assetFiles) {
-            final String fileName = getFileName(str3);
+        for (String next : assetFiles) {
+            final String fileName = getFileName(next);
             File takeFirstMatchingOrNull = takeFirstMatchingOrNull(needRemoveFiles, new FileFilter() {
                 public boolean accept(File file) {
                     return file.getName().contains(fileName);
                 }
             });
             boolean z3 = false;
-            if (takeFirstMatchingOrNull == null || !new File(str, getAssetRelativePath(str3)).exists()) {
+            if (takeFirstMatchingOrNull == null || !new File(str, getAssetRelativePath(next)).exists()) {
                 z2 = true;
             } else {
                 needRemoveFiles.remove(takeFirstMatchingOrNull);
@@ -73,62 +69,39 @@ public class EffectSDKUtils {
                     }
                 }
                 if (z3 && z) {
-                    copyFile(context, str3, str);
+                    copyFile(context, next, str);
                 }
                 if (!z3 && !z) {
-                    copyFile(context, str3, str);
+                    copyFile(context, next, str);
                 }
             }
         }
     }
 
-    /* JADX WARNING: type inference failed for: r1v0 */
-    /* JADX WARNING: type inference failed for: r4v1, types: [java.io.Closeable] */
-    /* JADX WARNING: type inference failed for: r1v1, types: [java.io.Closeable] */
-    /* JADX WARNING: type inference failed for: r4v3 */
-    /* JADX WARNING: type inference failed for: r1v2 */
-    /* JADX WARNING: type inference failed for: r1v3 */
-    /* JADX WARNING: type inference failed for: r1v4 */
-    /* JADX WARNING: type inference failed for: r4v7 */
-    /* JADX WARNING: type inference failed for: r4v8 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v0, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v1, resolved type: java.io.InputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r5v6, resolved type: java.io.FileOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v2, resolved type: java.io.InputStream} */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 3 */
     private static void copyFile(Context context, String str, String str2) throws Throwable {
-        ? r4;
-        ? r1;
-        FileOutputStream fileOutputStream;
-        String str3 = "/";
-        ? r12 = 0;
+        InputStream inputStream = null;
         try {
             InputStream open = context.getAssets().open(str);
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(str.substring(str.indexOf(MonitorUtils.KEY_MODEL) + 6, str.lastIndexOf(str3)));
-                String sb2 = sb.toString();
-                File file = new File(sb2);
+                File file = new File(str2 + str.substring(str.indexOf(MonitorUtils.KEY_MODEL) + 6, str.lastIndexOf("/")));
                 if (!file.exists()) {
                     if (!file.mkdirs()) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Can not mkdirs ");
-                        sb3.append(file.getPath());
-                        throw new IOException(sb3.toString());
+                        throw new IOException("Can not mkdirs " + file.getPath());
                     }
                 }
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(sb2);
-                sb4.append(str3);
-                sb4.append(getFileName(str));
-                fileOutputStream = new FileOutputStream(new File(sb4.toString()));
+                open = new FileOutputStream(new File(r6 + "/" + getFileName(str)));
             } catch (Throwable th) {
                 th = th;
-                r1 = r12;
-                r4 = open;
                 try {
-                    closeQuietly(r4);
+                    closeQuietly(inputStream);
                     throw th;
                 } finally {
-                    closeQuietly(r1);
+                    closeQuietly(inputStream);
                 }
             }
             try {
@@ -136,36 +109,34 @@ public class EffectSDKUtils {
                 while (true) {
                     int read = open.read(bArr);
                     if (read > 0) {
-                        fileOutputStream.write(bArr, 0, read);
+                        open.write(bArr, 0, read);
                     } else {
                         try {
                             closeQuietly(open);
                             return;
                         } finally {
-                            closeQuietly(fileOutputStream);
+                            closeQuietly(open);
                         }
                     }
                 }
             } catch (Throwable th2) {
-                r1 = fileOutputStream;
+                inputStream = open;
                 th = th2;
-                r4 = open;
-                closeQuietly(r4);
+                closeQuietly(inputStream);
                 throw th;
             }
         } catch (Throwable th3) {
             th = th3;
-            r4 = r12;
-            r1 = r12;
-            closeQuietly(r4);
+            InputStream inputStream2 = inputStream;
+            closeQuietly(inputStream);
             throw th;
         }
     }
 
     private static void deleteNoUseModel() {
-        for (File file : localFiles) {
-            if (needRemoveFiles.contains(file) && file.exists()) {
-                file.delete();
+        for (File next : localFiles) {
+            if (needRemoveFiles.contains(next) && next.exists()) {
+                next.delete();
             }
         }
     }
@@ -175,7 +146,7 @@ public class EffectSDKUtils {
             localFiles.clear();
         }
         scanRecursive(str, localFiles);
-        copyAssets(context, str, null, false);
+        copyAssets(context, str, (String[]) null, false);
         deleteNoUseModel();
         localFiles.clear();
     }
@@ -215,14 +186,14 @@ public class EffectSDKUtils {
             if (assetFiles.size() > localFiles.size()) {
                 return true;
             }
-            for (final String str2 : assetFiles) {
+            for (final String next : assetFiles) {
                 if (takeFirstMatchingOrNull(localFiles, new FileFilter() {
                     public boolean accept(File file) {
                         boolean z = false;
-                        if (str2.contains(file.getName())) {
+                        if (next.contains(file.getName())) {
                             InputStream inputStream = null;
                             try {
-                                inputStream = context.getAssets().open(str2);
+                                inputStream = context.getAssets().open(next);
                                 if (file.length() == ((long) inputStream.available())) {
                                     z = true;
                                 }
@@ -262,9 +233,9 @@ public class EffectSDKUtils {
     }
 
     private static File takeFirstMatchingOrNull(Set<File> set, FileFilter fileFilter) {
-        for (File file : set) {
-            if (fileFilter.accept(file)) {
-                return file;
+        for (File next : set) {
+            if (fileFilter.accept(next)) {
+                return next;
             }
         }
         return null;

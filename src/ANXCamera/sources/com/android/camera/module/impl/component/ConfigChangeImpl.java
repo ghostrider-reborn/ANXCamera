@@ -2,7 +2,7 @@ package com.android.camera.module.impl.component;
 
 import android.content.Context;
 import android.content.Intent;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.support.annotation.StringRes;
 import android.text.TextUtils;
 import com.android.camera.ActivityBase;
@@ -44,6 +44,7 @@ import com.android.camera.data.data.runing.DataItemRunning;
 import com.android.camera.data.observeable.VMProcessing;
 import com.android.camera.effect.EffectController;
 import com.android.camera.effect.FilterInfo;
+import com.android.camera.fragment.beauty.BeautyValues;
 import com.android.camera.fragment.manually.ManuallyListener;
 import com.android.camera.fragment.vv.VVItem;
 import com.android.camera.log.Log;
@@ -53,24 +54,7 @@ import com.android.camera.module.ModuleManager;
 import com.android.camera.module.VideoModule;
 import com.android.camera.module.loader.StartControl;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.BokehFNumberController;
-import com.android.camera.protocol.ModeProtocol.BottomMenuProtocol;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.FilterProtocol;
-import com.android.camera.protocol.ModeProtocol.LiveVVChooser;
-import com.android.camera.protocol.ModeProtocol.LiveVVProcess;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.ManuallyAdjust;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
-import com.android.camera.protocol.ModeProtocol.OnFaceBeautyChangedProtocol;
-import com.android.camera.protocol.ModeProtocol.StandaloneMacroProtocol;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
-import com.android.camera.protocol.ModeProtocol.UltraWideProtocol;
-import com.android.camera.protocol.ModeProtocol.VerticalProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera2.Camera2Proxy;
@@ -78,7 +62,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class ConfigChangeImpl implements ConfigChanges {
+public class ConfigChangeImpl implements ModeProtocol.ConfigChanges {
     private static final String TAG = "ConfigChangeImpl";
     private ActivityBase mActivity;
     private int[] mRecordingClosedElements;
@@ -89,13 +73,9 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     static /* synthetic */ void a(boolean z, BaseModule baseModule) {
         if (baseModule instanceof Camera2Module) {
-            Camera2Module camera2Module = (Camera2Module) baseModule;
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("(moon_mode) config moon:");
-            sb.append(z);
-            Log.d(str, sb.toString());
-            camera2Module.updateMoon(z);
+            Log.d(str, "(moon_mode) config moon:" + z);
+            ((Camera2Module) baseModule).updateMoon(z);
         }
     }
 
@@ -259,46 +239,42 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void configAiSceneSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             boolean aiSceneOpen = CameraSettings.getAiSceneOpen(moduleIndex);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("configAiSceneSwitch: ");
-            sb.append(!aiSceneOpen);
-            Log.d(str, sb.toString());
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            Log.d(str, "configAiSceneSwitch: " + (!aiSceneOpen));
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (i == 1) {
-                String str2 = "pref_camera_ai_scene_mode_key";
                 if (!aiSceneOpen) {
                     topAlert.alertSwitchHint(1, (int) R.string.pref_camera_front_ai_scene_entry_on);
                     CameraSettings.setAiSceneOpen(moduleIndex, true);
-                    CameraStatUtil.trackPreferenceChange(str2, "on");
+                    CameraStatUtil.trackPreferenceChange("pref_camera_ai_scene_mode_key", "on");
                 } else {
                     topAlert.alertSwitchHint(1, (int) R.string.pref_camera_front_ai_scene_entry_off);
                     CameraSettings.setAiSceneOpen(moduleIndex, false);
-                    CameraStatUtil.trackPreferenceChange(str2, "off");
-                    BaseModule baseModule2 = (BaseModule) baseModule.get();
+                    CameraStatUtil.trackPreferenceChange("pref_camera_ai_scene_mode_key", "off");
+                    BaseModule baseModule2 = baseModule.get();
                     if (baseModule2 != null && (baseModule2 instanceof Camera2Module)) {
                         ((Camera2Module) baseModule2).closeMoonMode(0, 8);
                     }
                 }
                 topAlert.updateConfigItem(201);
                 if (CameraSettings.isGroupShotOn()) {
-                    ((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).configGroupSwitch(4);
+                    ((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).configGroupSwitch(4);
                     topAlert.refreshExtraMenu();
                 }
             } else if (i != 2 && i == 3) {
                 CameraSettings.setAiSceneOpen(moduleIndex, false);
                 topAlert.updateConfigItem(201);
             }
-            ((BaseModule) baseModule.get()).updatePreferenceTrampoline(36);
-            ((BaseModule) baseModule.get()).getCameraDevice().resumePreview();
+            baseModule.get().updatePreferenceTrampoline(36);
+            baseModule.get().getCameraDevice().resumePreview();
             if (i == 1 && CameraSettings.isUltraPixelOn()) {
                 configSwitchUltraPixel(3);
             }
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (bottomPopupTips != null) {
                 bottomPopupTips.reConfigQrCodeTip();
             }
@@ -309,11 +285,11 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void configAutoZoom() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (topAlert != null) {
-                int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+                int moduleIndex = baseModule.get().getModuleIndex();
                 boolean isAutoZoomEnabled = CameraSettings.isAutoZoomEnabled(moduleIndex);
                 HybridZoomingSystem.clearZoomRatioHistory();
                 if (isAutoZoomEnabled) {
@@ -332,7 +308,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                     componentRunningMacroMode.setSwitchOff(moduleIndex);
                 }
                 this.mActivity.onModeSelected(StartControl.create(162).setViewConfigType(2).setResetType(7).setNeedBlurAnimation(true).setNeedReConfigureData(false).setNeedReConfigureCamera(true));
-                BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                 if (CameraSettings.isAutoZoomEnabled(162)) {
                     topAlert.alertSwitchHint(2, (int) R.string.autozoom_hint);
                 } else {
@@ -345,13 +321,13 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void configMacroMode() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             boolean z = false;
             boolean z2 = 169 == moduleIndex;
             boolean z3 = !CameraSettings.isMacroModeEnabled(moduleIndex);
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (z3 && z2) {
                 DataRepository.dataItemGlobal().setCurrentMode(162);
             }
@@ -373,19 +349,19 @@ public class ConfigChangeImpl implements ConfigChanges {
                 Boolean.valueOf(false);
             }
             if (DataRepository.dataItemFeature().ad()) {
-                StandaloneMacroProtocol standaloneMacroProtocol = (StandaloneMacroProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(202);
+                ModeProtocol.StandaloneMacroProtocol standaloneMacroProtocol = (ModeProtocol.StandaloneMacroProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(202);
                 if (standaloneMacroProtocol != null) {
                     standaloneMacroProtocol.onSwitchStandaloneMacro(true);
                 }
             } else {
-                UltraWideProtocol ultraWideProtocol = (UltraWideProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(200);
+                ModeProtocol.UltraWideProtocol ultraWideProtocol = (ModeProtocol.UltraWideProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(200);
                 if (ultraWideProtocol != null) {
                     ultraWideProtocol.onSwitchUltraWide(false);
                 }
             }
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-            DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
-            MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+            ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
             if (z3) {
                 if (bottomPopupTips != null) {
                     bottomPopupTips.directHideTipImage();
@@ -393,21 +369,22 @@ public class ConfigChangeImpl implements ConfigChanges {
                 }
                 if (dualController != null && !DataRepository.dataItemFeature().mb()) {
                     dualController.hideZoomButton();
+                    return;
                 }
-            } else {
-                if (miBeautyProtocol != null) {
-                    z = miBeautyProtocol.isBeautyPanelShow();
+                return;
+            }
+            if (miBeautyProtocol != null) {
+                z = miBeautyProtocol.isBeautyPanelShow();
+            }
+            if (bottomPopupTips != null && !z) {
+                bottomPopupTips.reInitTipImage();
+            }
+            if (dualController != null && !z && !DataRepository.dataItemFeature().mb()) {
+                if (!CameraSettings.isUltraWideConfigOpen(moduleIndex) && (moduleIndex != 172 || !DataRepository.dataItemFeature().Ub())) {
+                    dualController.showZoomButton();
                 }
-                if (bottomPopupTips != null && !z) {
-                    bottomPopupTips.reInitTipImage();
-                }
-                if (dualController != null && !z && !DataRepository.dataItemFeature().mb()) {
-                    if (!CameraSettings.isUltraWideConfigOpen(moduleIndex) && (moduleIndex != 172 || !DataRepository.dataItemFeature().Ub())) {
-                        dualController.showZoomButton();
-                    }
-                    if (topAlert != null) {
-                        topAlert.clearAlertStatus();
-                    }
+                if (topAlert != null) {
+                    topAlert.clearAlertStatus();
                 }
             }
         }
@@ -440,11 +417,11 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void configSuperEIS() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule != null) {
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (topAlert != null) {
-                int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+                int moduleIndex = baseModule.get().getModuleIndex();
                 boolean isSuperEISEnabled = CameraSettings.isSuperEISEnabled(moduleIndex);
                 HybridZoomingSystem.clearZoomRatioHistory();
                 if (isSuperEISEnabled) {
@@ -464,7 +441,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                 }
                 trackSuperEISChanged(!isSuperEISEnabled);
                 this.mActivity.onModeSelected(StartControl.create(162).setViewConfigType(2).setNeedBlurAnimation(true).setNeedReConfigureData(false).setNeedReConfigureCamera(true));
-                BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                 if (CameraSettings.isSuperEISEnabled(162)) {
                     topAlert.alertSwitchHint(2, (int) R.string.super_eis);
                 } else {
@@ -478,13 +455,13 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     private void configSwitchHandGesture() {
         if (DataRepository.dataItemRunning().supportHandGesture()) {
-            Optional baseModule = getBaseModule();
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                BaseModule baseModule2 = (BaseModule) baseModule.get();
+                BaseModule baseModule2 = baseModule.get();
                 if (baseModule2 != null) {
                     boolean z = !CameraSettings.isHandGestureOpen();
                     CameraSettings.setHandGestureStatus(z);
-                    BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                    ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                     if (z) {
                         bottomPopupTips.showTips(16, (int) R.string.hand_gesture_open_tip, 2);
                     }
@@ -495,27 +472,27 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void configSwitchUltraWide() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             boolean z = !CameraSettings.isUltraWideConfigOpen(moduleIndex);
             if (CameraSettings.isUltraPixelOn()) {
                 CameraSettings.switchOffUltraPixel();
             }
             HybridZoomingSystem.clearZoomRatioHistory();
             CameraSettings.setUltraWideConfig(moduleIndex, z);
-            UltraWideProtocol ultraWideProtocol = (UltraWideProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(200);
+            ModeProtocol.UltraWideProtocol ultraWideProtocol = (ModeProtocol.UltraWideProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(200);
             if (ultraWideProtocol != null) {
                 ultraWideProtocol.onSwitchUltraWide(true);
             }
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (bottomPopupTips != null) {
                 if (!z) {
                     bottomPopupTips.showTips(13, (int) R.string.ultra_wide_close_tip, 6);
                 } else if (CameraSettings.shouldShowUltraWideStickyTip(moduleIndex)) {
-                    bottomPopupTips.showTips(13, R.string.ultra_wide_open_tip, 4, System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT);
+                    bottomPopupTips.showTips(13, R.string.ultra_wide_open_tip, 4, MiuiSettings.System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT);
                 } else {
-                    bottomPopupTips.showTips(13, R.string.ultra_wide_open_tip, 7, System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT);
+                    bottomPopupTips.showTips(13, R.string.ultra_wide_open_tip, 7, MiuiSettings.System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT);
                 }
                 bottomPopupTips.reConfigQrCodeTip();
             }
@@ -523,59 +500,54 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void configSwitchUltraWideBokeh() {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        if (!(topAlert == null || this.mActivity == null)) {
-            Optional baseModule = getBaseModule();
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        if (topAlert != null && this.mActivity != null) {
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                String str = "pref_ultra_wide_bokeh_enabled";
-                if (DataRepository.dataItemRunning().isSwitchOn(str)) {
-                    DataRepository.dataItemRunning().switchOff(str);
+                if (DataRepository.dataItemRunning().isSwitchOn("pref_ultra_wide_bokeh_enabled")) {
+                    DataRepository.dataItemRunning().switchOff("pref_ultra_wide_bokeh_enabled");
                     topAlert.alertSwitchHint(2, (int) R.string.ultra_wide_bokeh_close_tip);
                 } else {
-                    DataRepository.dataItemRunning().switchOn(str);
+                    DataRepository.dataItemRunning().switchOn("pref_ultra_wide_bokeh_enabled");
                     topAlert.alertSwitchHint(2, (int) R.string.ultra_wide_bokeh_open_tip);
                 }
-                ((BaseModule) baseModule.get()).restartModule();
+                baseModule.get().restartModule();
             }
         }
     }
 
     private void configVV() {
-        ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(15);
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(15);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null) {
             topAlert.updateConfigItem(216);
         }
     }
 
     private void configVVBack() {
-        LiveVVProcess liveVVProcess = (LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230);
+        ModeProtocol.LiveVVProcess liveVVProcess = (ModeProtocol.LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230);
         if (liveVVProcess != null) {
             liveVVProcess.showExitConfirm();
         }
     }
 
     private void configVideoBokehSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             DataItemConfig dataItemConfig = DataRepository.dataItemConfig();
-            String str = "pref_video_bokeh_key";
-            boolean isSwitchOn = dataItemConfig.isSwitchOn(str);
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("configVideoBokehSwitch: switchOn = ");
-            sb.append(!isSwitchOn);
-            Log.d(str2, sb.toString());
+            boolean isSwitchOn = dataItemConfig.isSwitchOn("pref_video_bokeh_key");
+            String str = TAG;
+            Log.d(str, "configVideoBokehSwitch: switchOn = " + (!isSwitchOn));
             if (!isSwitchOn) {
-                dataItemConfig.switchOn(str);
-                CameraStatUtil.trackPreferenceChange(str, "on");
+                dataItemConfig.switchOn("pref_video_bokeh_key");
+                CameraStatUtil.trackPreferenceChange("pref_video_bokeh_key", "on");
             } else {
-                dataItemConfig.switchOff(str);
-                CameraStatUtil.trackPreferenceChange(str, "off");
+                dataItemConfig.switchOff("pref_video_bokeh_key");
+                CameraStatUtil.trackPreferenceChange("pref_video_bokeh_key", "off");
             }
             topAlert.updateConfigItem(243);
-            this.mActivity.onModeSelected(StartControl.create(((BaseModule) baseModule.get()).getModuleIndex()).setViewConfigType(2).setNeedBlurAnimation(true).setNeedReConfigureCamera(true).setNeedReConfigureData(false));
+            this.mActivity.onModeSelected(StartControl.create(baseModule.get().getModuleIndex()).setViewConfigType(2).setNeedBlurAnimation(true).setNeedReConfigureCamera(true).setNeedReConfigureData(false));
             topAlert.alertSwitchHint(2, !isSwitchOn ? R.string.pref_camera_video_bokeh_on : R.string.pref_camera_video_bokeh_off);
         }
     }
@@ -585,7 +557,7 @@ public class ConfigChangeImpl implements ConfigChanges {
         dataItemRunning.switchOff("pref_camera_hand_night_key");
         dataItemRunning.switchOff("pref_camera_groupshot_mode_key");
         dataItemRunning.switchOff("pref_camera_super_resolution_key");
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         int activeModuleIndex = ModuleManager.getActiveModuleIndex();
         if (CameraSettings.shouldShowUltraWideStickyTip(activeModuleIndex) && bottomPopupTips.getCurrentBottomTipType() == 13) {
             return;
@@ -624,7 +596,7 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void hideTipMessage(@StringRes int i) {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (i <= 0 || bottomPopupTips.containTips(i)) {
             bottomPopupTips.directlyHideTips();
         }
@@ -639,7 +611,7 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private boolean isBeautyPanelShow() {
-        MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+        ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
         if (miBeautyProtocol != null) {
             return miBeautyProtocol.isBeautyPanelShow();
         }
@@ -714,7 +686,7 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (!componentConfigAi.isEmpty() && componentConfigAi.isClosed() != z) {
             componentConfigAi.setClosed(z);
             getBaseModule().ifPresent(new q(z));
-            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(201);
+            ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(201);
         }
     }
 
@@ -727,12 +699,12 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (!componentConfigBeauty.isEmpty() && componentConfigBeauty.isClosed() != z) {
             componentConfigBeauty.setClosed(z);
             if (z) {
-                MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+                ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
                 if (miBeautyProtocol != null && miBeautyProtocol.isBeautyPanelShow()) {
                     miBeautyProtocol.dismiss(2);
                 }
             }
-            OnFaceBeautyChangedProtocol onFaceBeautyChangedProtocol = (OnFaceBeautyChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(199);
+            ModeProtocol.OnFaceBeautyChangedProtocol onFaceBeautyChangedProtocol = (ModeProtocol.OnFaceBeautyChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(199);
             if (onFaceBeautyChangedProtocol != null) {
                 onFaceBeautyChangedProtocol.onBeautyChanged(true);
             }
@@ -741,17 +713,14 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     private void updateComponentFilter(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateComponentFilter: close = ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "updateComponentFilter: close = " + z);
         ComponentConfigFilter componentConfigFilter = DataRepository.dataItemRunning().getComponentConfigFilter();
         int currentMode = DataRepository.dataItemGlobal().getCurrentMode();
         if (!componentConfigFilter.isEmpty() && componentConfigFilter.isClosed(currentMode) != z) {
             componentConfigFilter.setClosed(z, currentMode);
-            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(212);
+            ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(212);
             if (z) {
-                MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+                ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
                 if (miBeautyProtocol != null && miBeautyProtocol.isBeautyPanelShow()) {
                     miBeautyProtocol.dismiss(2);
                 }
@@ -762,9 +731,11 @@ public class ConfigChangeImpl implements ConfigChanges {
     private void updateComponentFlash(String str, boolean z) {
         ComponentConfigFlash componentFlash = DataRepository.dataItemConfig().getComponentFlash();
         int currentMode = DataRepository.dataItemGlobal().getCurrentMode();
-        if (!componentFlash.isEmpty() && componentFlash.isClosed() != z && (!z || !componentFlash.getComponentValue(currentMode).equals("2") || !SupportedConfigFactory.CLOSE_BY_BURST_SHOOT.equals(str))) {
-            componentFlash.setClosed(z);
-            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(193);
+        if (!componentFlash.isEmpty() && componentFlash.isClosed() != z) {
+            if (!z || !componentFlash.getComponentValue(currentMode).equals("2") || !SupportedConfigFactory.CLOSE_BY_BURST_SHOOT.equals(str)) {
+                componentFlash.setClosed(z);
+                ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(193);
+            }
         }
     }
 
@@ -773,7 +744,7 @@ public class ConfigChangeImpl implements ConfigChanges {
         DataRepository.dataItemGlobal().getCurrentMode();
         if (!componentHdr.isEmpty() && componentHdr.isClosed() != z) {
             componentHdr.setClosed(z);
-            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(194);
+            ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(194);
         }
     }
 
@@ -789,16 +760,16 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (componentRunningEyeLight.isClosed() != z) {
             componentRunningEyeLight.setClosed(z);
             String eyeLightType = CameraSettings.getEyeLightType();
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (topAlert != null && bottomPopupTips != null) {
                 if (!"-1".equals(eyeLightType)) {
                     topAlert.alertTopHint(0, (int) R.string.eye_light);
                     bottomPopupTips.showTips(10, EyeLightConstant.getString(eyeLightType), 4);
-                } else {
-                    topAlert.alertTopHint(8, (int) R.string.eye_light);
-                    bottomPopupTips.directlyHideTips();
+                    return;
                 }
+                topAlert.alertTopHint(8, (int) R.string.eye_light);
+                bottomPopupTips.directlyHideTips();
             }
         }
     }
@@ -806,27 +777,23 @@ public class ConfigChangeImpl implements ConfigChanges {
     private void updateFlashModeAndRefreshUI(BaseModule baseModule, String str) {
         int moduleIndex = baseModule.getModuleIndex();
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateFlashModeAndRefreshUI flashMode = ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "updateFlashModeAndRefreshUI flashMode = " + str);
         if (!TextUtils.isEmpty(str)) {
             CameraSettings.setFlashMode(moduleIndex, str);
         }
-        String str3 = "0";
-        if (str3.equals(str)) {
+        if ("0".equals(str)) {
             if (CameraSettings.isFrontCamera()) {
                 ToastUtils.showToast((Context) this.mActivity, (int) R.string.close_front_flash_toast);
             } else {
                 ToastUtils.showToast((Context) this.mActivity, (int) R.string.close_back_flash_toast);
             }
         }
-        if (!baseModule.isDoingAction() || str3.equals(str)) {
+        if (!baseModule.isDoingAction() || "0".equals(str)) {
             baseModule.updatePreferenceInWorkThread(10);
         } else {
             baseModule.updatePreferenceTrampoline(10);
         }
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null) {
             topAlert.updateConfigItem(193);
         }
@@ -839,7 +806,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                 ComponentRunningLiveShot componentRunningLiveShot = DataRepository.dataItemRunning().getComponentRunningLiveShot();
                 if (componentRunningLiveShot.isClosed() != z) {
                     componentRunningLiveShot.setClosed(z);
-                    ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(206);
+                    ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(206);
                 }
             }
         }
@@ -854,7 +821,7 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     private void updateTipMessage(int i, @StringRes int i2, int i3) {
-        ((BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).showTips(i, i2, i3);
+        ((ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).showTips(i, i2, i3);
     }
 
     private void updateUltraPixel(boolean z) {
@@ -921,30 +888,27 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configBeautySwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             boolean z = moduleIndex == 162 || moduleIndex == 169;
             if (moduleIndex == 163 || moduleIndex == 165 || moduleIndex == 171 || moduleIndex == 161 || z) {
                 ComponentConfigBeauty componentConfigBeauty = DataRepository.dataItemConfig().getComponentConfigBeauty();
                 String nextValue = componentConfigBeauty.getNextValue(moduleIndex);
-                String componentValue = componentConfigBeauty.getComponentValue(moduleIndex);
-                String str = BeautyConstant.LEVEL_CLOSE;
-                boolean z2 = (!str.equals(componentValue)) ^ (!str.equals(nextValue));
+                boolean z2 = (!BeautyConstant.LEVEL_CLOSE.equals(componentConfigBeauty.getComponentValue(moduleIndex))) ^ (!BeautyConstant.LEVEL_CLOSE.equals(nextValue));
                 componentConfigBeauty.setComponentValue(moduleIndex, nextValue);
                 CameraStatUtil.trackBeautySwitchChanged(moduleIndex, nextValue);
                 if (z2 && z) {
                     if (moduleIndex != 162) {
-                        DataItemGlobal dataItemGlobal = (DataItemGlobal) DataRepository.provider().dataGlobal();
                         DataRepository.dataItemRunning().switchOff("pref_video_speed_fast_key");
                         CameraSettings.setAutoZoomEnabled(moduleIndex, false);
-                        dataItemGlobal.setCurrentMode(162);
+                        ((DataItemGlobal) DataRepository.provider().dataGlobal()).setCurrentMode(162);
                         DataRepository.getInstance().backUp().removeOtherVideoMode();
                         CameraStatUtil.trackVideoModeChanged("normal");
                     }
                     this.mActivity.onModeSelected(StartControl.create(162).setViewConfigType(2).setNeedBlurAnimation(true).setNeedReConfigureData(false).setNeedReConfigureCamera(true));
                 } else if (!z2 || moduleIndex != 161) {
-                    ((BaseModule) baseModule.get()).updatePreferenceInWorkThread(13);
+                    baseModule.get().updatePreferenceInWorkThread(13);
                 } else {
                     this.mActivity.onModeSelected(StartControl.create(161).setViewConfigType(2).setNeedBlurAnimation(true).setNeedReConfigureData(false).setNeedReConfigureCamera(true));
                 }
@@ -982,7 +946,7 @@ public class ConfigChangeImpl implements ConfigChanges {
         HashMap hashMap = new HashMap();
         hashMap.put(CameraStat.NEW_SLOW_MOTION_SWITCH_FPS, CameraStatUtil.slowMotionConfigToName(nextValue));
         CameraStat.recordCountEvent(CameraStat.CATEGORY_COUNTER, CameraStat.KEY_NEW_SLOW_MOTION, hashMap);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips == null) {
             return;
         }
@@ -1009,34 +973,33 @@ public class ConfigChangeImpl implements ConfigChanges {
             EffectController.getInstance().setDrawPeaking(false);
         } else if (!state) {
             EffectController.getInstance().setDrawPeaking(state);
-        } else {
-            if ("manual".equals(CameraSettings.getFocusMode())) {
-                EffectController.getInstance().setDrawPeaking(state);
-            }
+        } else if ("manual".equals(CameraSettings.getFocusMode())) {
+            EffectController.getInstance().setDrawPeaking(state);
         }
     }
 
     public void configGenderAgeSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             boolean state = getState(i, "pref_camera_show_gender_age_key");
             if (1 == i) {
                 trackGenderAgeChanged(state);
             }
-            ((MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).setShowGenderAndAge(state);
-            ((BaseModule) baseModule.get()).updatePreferenceInWorkThread(38);
+            ((ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).setShowGenderAndAge(state);
+            baseModule.get().updatePreferenceInWorkThread(38);
             if (state) {
-                Camera2Proxy cameraDevice = ((BaseModule) baseModule.get()).getCameraDevice();
+                Camera2Proxy cameraDevice = baseModule.get().getCameraDevice();
                 if (cameraDevice != null) {
                     String string = CameraAppImpl.getAndroidContext().getResources().getString(R.string.face_age_info);
                     cameraDevice.setFaceWaterMarkEnable(true);
                     cameraDevice.setFaceWaterMarkFormat(string);
+                    return;
                 }
-            } else {
-                Camera2Proxy cameraDevice2 = ((BaseModule) baseModule.get()).getCameraDevice();
-                if (cameraDevice2 != null) {
-                    cameraDevice2.setFaceWaterMarkEnable(false);
-                }
+                return;
+            }
+            Camera2Proxy cameraDevice2 = baseModule.get().getCameraDevice();
+            if (cameraDevice2 != null) {
+                cameraDevice2.setFaceWaterMarkEnable(false);
             }
         }
     }
@@ -1046,12 +1009,12 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (1 == i) {
             trackGradienterChanged(state);
         }
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             ((Camera2Module) baseModule.get()).onGradienterSwitched(state);
             EffectController.getInstance().setDrawGradienter(state);
             ((Camera2Module) baseModule.get()).showOrHideChip(!state);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (bottomPopupTips != null) {
                 bottomPopupTips.reConfigQrCodeTip();
             }
@@ -1059,17 +1022,16 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configGroupSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             boolean state = getState(i, "pref_camera_groupshot_mode_key");
             if (1 == i) {
                 trackGroupChanged(state);
             }
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             Camera2Module camera2Module = (Camera2Module) baseModule.get();
             camera2Module.showOrHideChip(!state);
             boolean isBeautyPanelShow = isBeautyPanelShow();
-            String str = SupportedConfigFactory.CLOSE_BY_GROUP;
             if (state) {
                 if (!isBeautyPanelShow) {
                     updateTipMessage(17, R.string.hint_groupshot, 2);
@@ -1077,16 +1039,16 @@ public class ConfigChangeImpl implements ConfigChanges {
                 if (CameraSettings.shouldShowUltraWideStickyTip(camera2Module.getModuleIndex()) && !isBeautyPanelShow) {
                     bottomPopupTips.showTips(13, R.string.ultra_wide_open_tip, 4, 5000);
                 }
-                closeMutexElement(str, 193, 194, 196, 201, 254);
+                closeMutexElement(SupportedConfigFactory.CLOSE_BY_GROUP, 193, 194, 196, 201, 254);
             } else {
-                restoreAllMutexElement(str);
+                restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_GROUP);
                 hideTipMessage(R.string.hint_groupshot);
                 if (CameraSettings.shouldShowUltraWideStickyTip(camera2Module.getModuleIndex()) && !isBeautyPanelShow) {
                     bottomPopupTips.directlyShowTips(13, R.string.ultra_wide_open_tip);
                 }
             }
             camera2Module.onSharedPreferenceChanged();
-            ((BaseModule) baseModule.get()).updatePreferenceInWorkThread(42, 34, 30);
+            baseModule.get().updatePreferenceInWorkThread(42, 34, 30);
             bottomPopupTips.reConfigQrCodeTip();
         }
     }
@@ -1096,43 +1058,41 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (1 == i) {
             trackHHTChanged(state);
         }
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            MutexModeManager mutexModePicker = ((BaseModule) baseModule.get()).getMutexModePicker();
-            String str = SupportedConfigFactory.CLOSE_BY_HHT;
+            MutexModeManager mutexModePicker = baseModule.get().getMutexModePicker();
             if (state) {
                 updateTipMessage(4, R.string.hine_hht, 2);
-                closeMutexElement(str, 193, 194);
+                closeMutexElement(SupportedConfigFactory.CLOSE_BY_HHT, 193, 194);
                 mutexModePicker.setMutexModeMandatory(3);
-            } else {
-                hideTipMessage(R.string.hine_hht);
-                mutexModePicker.clearMandatoryFlag();
-                ((BaseModule) baseModule.get()).resetMutexModeManually();
-                restoreAllMutexElement(str);
+                return;
             }
+            hideTipMessage(R.string.hine_hht);
+            mutexModePicker.clearMandatoryFlag();
+            baseModule.get().resetMutexModeManually();
+            restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_HHT);
         }
     }
 
     public void configHdr(String str) {
         conflictWithFlashAndHdr();
         getBaseModule().ifPresent(j.INSTANCE);
-        String str2 = "off";
-        if (str2 != str && CameraSettings.isUltraPixelRearOn()) {
+        if ("off" != str && CameraSettings.isUltraPixelRearOn()) {
             configSwitchUltraPixel(3);
         }
-        if (str2 != str && CameraSettings.isUltraPixelPortraitFrontOn()) {
+        if ("off" != str && CameraSettings.isUltraPixelPortraitFrontOn()) {
             configUltraPixelPortrait(3);
         }
     }
 
     public void configLiveShotSwitch(int i) {
         if (isAlive()) {
-            Optional baseModule = getBaseModule();
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                BaseModule baseModule2 = (BaseModule) baseModule.get();
+                BaseModule baseModule2 = baseModule.get();
                 if (baseModule2.isFrameAvailable()) {
                     if ((baseModule2.getModuleIndex() == 163 || baseModule2.getModuleIndex() == 165) && DataRepository.dataItemFeature().Sb()) {
-                        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                         if (topAlert != null) {
                             Camera2Module camera2Module = (Camera2Module) baseModule2;
                             if (i == 1) {
@@ -1170,8 +1130,8 @@ public class ConfigChangeImpl implements ConfigChanges {
     public void configLiveVV(VVItem vVItem, boolean z, boolean z2) {
         ((VMProcessing) DataRepository.dataItemObservable().get(VMProcessing.class)).reset();
         if (z) {
-            ((LiveVVChooser) ModeCoordinatorImpl.getInstance().getAttachProtocol(229)).hide();
-            ((LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230)).prepare(vVItem);
+            ((ModeProtocol.LiveVVChooser) ModeCoordinatorImpl.getInstance().getAttachProtocol(229)).hide();
+            ((ModeProtocol.LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230)).prepare(vVItem);
             DataRepository.dataItemLive().setCurrentVVItem(vVItem);
             changeMode(179);
             return;
@@ -1179,8 +1139,8 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (z2) {
             configVV();
         } else {
-            ((LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230)).quit();
-            ((LiveVVChooser) ModeCoordinatorImpl.getInstance().getAttachProtocol(229)).show();
+            ((ModeProtocol.LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230)).quit();
+            ((ModeProtocol.LiveVVChooser) ModeCoordinatorImpl.getInstance().getAttachProtocol(229)).show();
         }
         changeMode(162);
     }
@@ -1190,26 +1150,27 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configMagicMirrorSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             boolean state = getState(i, "pref_camera_magic_mirror_key");
             if (1 == i) {
                 trackMagicMirrorChanged(state);
             }
-            ((MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).setShowMagicMirror(state);
-            ((BaseModule) baseModule.get()).updatePreferenceInWorkThread(39);
+            ((ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).setShowMagicMirror(state);
+            baseModule.get().updatePreferenceInWorkThread(39);
             if (state) {
-                Camera2Proxy cameraDevice = ((BaseModule) baseModule.get()).getCameraDevice();
+                Camera2Proxy cameraDevice = baseModule.get().getCameraDevice();
                 if (cameraDevice != null) {
                     String string = CameraAppImpl.getAndroidContext().getResources().getString(R.string.face_score_info);
                     cameraDevice.setFaceWaterMarkEnable(true);
                     cameraDevice.setFaceWaterMarkFormat(string);
+                    return;
                 }
-            } else {
-                Camera2Proxy cameraDevice2 = ((BaseModule) baseModule.get()).getCameraDevice();
-                if (cameraDevice2 != null) {
-                    cameraDevice2.setFaceWaterMarkEnable(false);
-                }
+                return;
+            }
+            Camera2Proxy cameraDevice2 = baseModule.get().getCameraDevice();
+            if (cameraDevice2 != null) {
+                cameraDevice2.setFaceWaterMarkEnable(false);
             }
         }
     }
@@ -1229,9 +1190,9 @@ public class ConfigChangeImpl implements ConfigChanges {
         String str;
         boolean z2;
         if (isAlive()) {
-            Optional baseModule = getBaseModule();
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                BaseModule baseModule2 = (BaseModule) baseModule.get();
+                BaseModule baseModule2 = baseModule.get();
                 if (baseModule2.isFrameAvailable()) {
                     int moduleIndex = baseModule2.getModuleIndex();
                     ComponentConfigRatio componentConfigRatio = DataRepository.dataItemConfig().getComponentConfigRatio();
@@ -1369,41 +1330,37 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configRawSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             ComponentConfigRaw componentConfigRaw = DataRepository.dataItemConfig().getComponentConfigRaw();
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             boolean isSwitchOn = componentConfigRaw.isSwitchOn(moduleIndex);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("configRawSwitch: ");
-            sb.append(!isSwitchOn);
-            Log.d(str, sb.toString());
-            if (i == 1) {
-                String str2 = "pref_camera_raw_key";
-                if (isSwitchOn) {
-                    componentConfigRaw.setRaw(moduleIndex, false);
-                    ((BaseModule) baseModule.get()).updatePreferenceInWorkThread(44);
-                    CameraStatUtil.trackPreferenceChange(str2, "off");
-                    reCheckRaw();
-                } else {
-                    componentConfigRaw.setRaw(moduleIndex, true);
-                    if (DataRepository.dataItemFeature().rb()) {
-                        closeMutexElement(SupportedConfigFactory.CLOSE_BY_RAW, 209);
-                    }
-                    ((BaseModule) baseModule.get()).restartModule();
-                    CameraStatUtil.trackPreferenceChange(str2, "on");
-                    reCheckRaw();
+            Log.d(str, "configRawSwitch: " + (!isSwitchOn));
+            if (i != 1) {
+                if (i == 2) {
                 }
-            } else if (i != 2) {
+            } else if (isSwitchOn) {
+                componentConfigRaw.setRaw(moduleIndex, false);
+                baseModule.get().updatePreferenceInWorkThread(44);
+                CameraStatUtil.trackPreferenceChange("pref_camera_raw_key", "off");
+                reCheckRaw();
+            } else {
+                componentConfigRaw.setRaw(moduleIndex, true);
+                if (DataRepository.dataItemFeature().rb()) {
+                    closeMutexElement(SupportedConfigFactory.CLOSE_BY_RAW, 209);
+                }
+                baseModule.get().restartModule();
+                CameraStatUtil.trackPreferenceChange("pref_camera_raw_key", "on");
+                reCheckRaw();
             }
         }
     }
 
     public void configRotationChange(int i, int i2) {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         boolean z = true;
         if (i2 != 0) {
             if (i2 != 90) {
@@ -1456,12 +1413,13 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configScene(int i) {
-        final Optional baseModule = getBaseModule();
+        final Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            ManuallyAdjust manuallyAdjust = (ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-            MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
-            if (getState(i, "pref_camera_scenemode_setting_key")) {
+            boolean state = getState(i, "pref_camera_scenemode_setting_key");
+            ModeProtocol.ManuallyAdjust manuallyAdjust = (ModeProtocol.ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+            if (state) {
                 bottomPopupTips.hideTipImage();
                 if (miBeautyProtocol != null && miBeautyProtocol.isBeautyPanelShow()) {
                     miBeautyProtocol.dismiss(2);
@@ -1474,10 +1432,10 @@ public class ConfigChangeImpl implements ConfigChanges {
                 });
             } else {
                 bottomPopupTips.reInitTipImage();
-                manuallyAdjust.setManuallyVisible(2, i == 1 ? 4 : 3, null);
+                manuallyAdjust.setManuallyVisible(2, i == 1 ? 4 : 3, (ManuallyListener) null);
             }
-            ((BaseModule) baseModule.get()).onSharedPreferenceChanged();
-            ((BaseModule) baseModule.get()).updatePreferenceInWorkThread(4);
+            baseModule.get().onSharedPreferenceChanged();
+            baseModule.get().updatePreferenceInWorkThread(4);
         }
     }
 
@@ -1486,41 +1444,39 @@ public class ConfigChangeImpl implements ConfigChanges {
         if (1 == i) {
             trackSuperResolutionChanged(state);
         }
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            MutexModeManager mutexModePicker = ((BaseModule) baseModule.get()).getMutexModePicker();
-            String str = SupportedConfigFactory.CLOSE_BY_SUPER_RESOLUTION;
+            MutexModeManager mutexModePicker = baseModule.get().getMutexModePicker();
             if (state) {
-                closeMutexElement(str, 193, 194);
+                closeMutexElement(SupportedConfigFactory.CLOSE_BY_SUPER_RESOLUTION, 193, 194);
                 mutexModePicker.setMutexModeMandatory(10);
-            } else {
-                mutexModePicker.clearMandatoryFlag();
-                ((BaseModule) baseModule.get()).resetMutexModeManually();
-                restoreAllMutexElement(str);
+                return;
             }
+            mutexModePicker.clearMandatoryFlag();
+            baseModule.get().resetMutexModeManually();
+            restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_SUPER_RESOLUTION);
         }
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public void configSwitchUltraPixel(int i) {
         char c2;
         int i2 = i;
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        if (!(topAlert == null || this.mActivity == null)) {
-            Optional baseModule = getBaseModule();
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        if (topAlert != null && this.mActivity != null) {
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                BaseModule baseModule2 = (BaseModule) baseModule.get();
+                BaseModule baseModule2 = baseModule.get();
                 int moduleIndex = baseModule2.getModuleIndex();
                 boolean isUltraPixelOn = CameraSettings.isUltraPixelOn();
                 boolean z = !isUltraPixelOn;
                 ComponentRunningUltraPixel componentUltraPixel = DataRepository.dataItemRunning().getComponentUltraPixel();
                 String currentSupportUltraPixel = componentUltraPixel.getCurrentSupportUltraPixel();
-                String str = ComponentRunningUltraPixel.ULTRA_PIXEL_ON_REAR_48M;
-                String str2 = SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL;
                 boolean z2 = false;
                 if (i2 == 1) {
                     if (CameraSettings.isUltraWideConfigOpen(moduleIndex)) {
                         CameraSettings.setUltraWideConfig(moduleIndex, false);
-                        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                         bottomPopupTips.updateLeftTipImage();
                         bottomPopupTips.directlyHideTips();
                     }
@@ -1532,7 +1488,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                                     break;
                                 }
                             case -70725169:
-                                if (currentSupportUltraPixel.equals(str)) {
+                                if (currentSupportUltraPixel.equals(ComponentRunningUltraPixel.ULTRA_PIXEL_ON_REAR_48M)) {
                                     c2 = 0;
                                     break;
                                 }
@@ -1551,17 +1507,17 @@ public class ConfigChangeImpl implements ConfigChanges {
                                 iArr = Arrays.copyOf(iArr, iArr.length + 1);
                                 iArr[iArr.length - 1] = 237;
                             }
-                            closeMutexElement(str2, iArr);
+                            closeMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL, iArr);
                         } else if (c2 == 1) {
-                            closeMutexElement(str2, 196, 201, 206);
+                            closeMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL, 196, 201, 206);
                         } else if (c2 == 2 && DataRepository.dataItemFeature().rb()) {
-                            closeMutexElement(str2, 237);
+                            closeMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL, 237);
                         }
                         DataRepository.dataItemRunning().setRecordingClosedElements(this.mRecordingClosedElements);
                         CameraSettings.switchOnUltraPixel(currentSupportUltraPixel);
                     } else {
                         this.mRecordingClosedElements = DataRepository.dataItemRunning().getRecordingClosedElements();
-                        restoreAllMutexElement(str2);
+                        restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL);
                         CameraSettings.switchOffUltraPixel();
                     }
                     if (baseModule2.getModuleIndex() == 165) {
@@ -1580,7 +1536,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                 } else if (i2 == 3 && isUltraPixelOn) {
                     this.mRecordingClosedElements = DataRepository.dataItemRunning().getRecordingClosedElements();
                     if (this.mRecordingClosedElements != null) {
-                        restoreAllMutexElement(str2);
+                        restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL);
                     }
                     CameraSettings.switchOffUltraPixel();
                     if (DataRepository.dataItemRunning().getLastUiStyle() == 3) {
@@ -1590,32 +1546,33 @@ public class ConfigChangeImpl implements ConfigChanges {
                     }
                     topAlert.alertTopHint(8, componentUltraPixel.getUltraPixelCloseTip());
                 }
-                BottomPopupTips bottomPopupTips2 = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-                DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
-                MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+                ModeProtocol.BottomPopupTips bottomPopupTips2 = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+                ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
                 if (z) {
-                    if (str.equals(currentSupportUltraPixel) && bottomPopupTips2 != null) {
+                    if (ComponentRunningUltraPixel.ULTRA_PIXEL_ON_REAR_48M.equals(currentSupportUltraPixel) && bottomPopupTips2 != null) {
                         bottomPopupTips2.directHideTipImage();
                         bottomPopupTips2.directShowOrHideLeftTipImage(false);
                         bottomPopupTips2.hideQrCodeTip();
                     }
                     if (dualController != null) {
                         dualController.hideZoomButton();
+                        return;
                     }
-                } else {
-                    if (miBeautyProtocol != null) {
-                        z2 = miBeautyProtocol.isBeautyPanelShow();
+                    return;
+                }
+                if (miBeautyProtocol != null) {
+                    z2 = miBeautyProtocol.isBeautyPanelShow();
+                }
+                if (bottomPopupTips2 != null && !z2) {
+                    bottomPopupTips2.reInitTipImage();
+                }
+                if (dualController != null && !z2) {
+                    if (moduleIndex != 167) {
+                        dualController.showZoomButton();
                     }
-                    if (bottomPopupTips2 != null && !z2) {
-                        bottomPopupTips2.reInitTipImage();
-                    }
-                    if (dualController != null && !z2) {
-                        if (moduleIndex != 167) {
-                            dualController.showZoomButton();
-                        }
-                        if (topAlert != null) {
-                            topAlert.clearAlertStatus();
-                        }
+                    if (topAlert != null) {
+                        topAlert.clearAlertStatus();
                     }
                 }
             }
@@ -1623,27 +1580,24 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configTiltSwitch(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             DataItemRunning dataItemRunning = DataRepository.dataItemRunning();
-            String str = "pref_camera_tilt_shift_mode";
-            boolean isSwitchOn = dataItemRunning.isSwitchOn(str);
+            boolean isSwitchOn = dataItemRunning.isSwitchOn("pref_camera_tilt_shift_mode");
             ComponentRunningTiltValue componentRunningTiltValue = dataItemRunning.getComponentRunningTiltValue();
             boolean z = false;
             if (i == 1) {
-                String str2 = ComponentRunningTiltValue.TILT_CIRCLE;
                 if (!isSwitchOn) {
-                    CameraStatUtil.trackTiltShiftChanged(str2);
-                    dataItemRunning.switchOn(str);
-                    componentRunningTiltValue.setComponentValue(160, str2);
+                    CameraStatUtil.trackTiltShiftChanged(ComponentRunningTiltValue.TILT_CIRCLE);
+                    dataItemRunning.switchOn("pref_camera_tilt_shift_mode");
+                    componentRunningTiltValue.setComponentValue(160, ComponentRunningTiltValue.TILT_CIRCLE);
                     isSwitchOn = true;
-                } else if (str2.equals(componentRunningTiltValue.getComponentValue(160))) {
-                    String str3 = ComponentRunningTiltValue.TILT_PARALLEL;
-                    CameraStatUtil.trackTiltShiftChanged(str3);
-                    componentRunningTiltValue.setComponentValue(160, str3);
+                } else if (ComponentRunningTiltValue.TILT_CIRCLE.equals(componentRunningTiltValue.getComponentValue(160))) {
+                    CameraStatUtil.trackTiltShiftChanged(ComponentRunningTiltValue.TILT_PARALLEL);
+                    componentRunningTiltValue.setComponentValue(160, ComponentRunningTiltValue.TILT_PARALLEL);
                 } else {
                     CameraStatUtil.trackTiltShiftChanged("off");
-                    dataItemRunning.switchOff(str);
+                    dataItemRunning.switchOff("pref_camera_tilt_shift_mode");
                     isSwitchOn = false;
                 }
                 Camera2Module camera2Module = (Camera2Module) baseModule.get();
@@ -1652,12 +1606,12 @@ public class ConfigChangeImpl implements ConfigChanges {
                 }
                 camera2Module.showOrHideChip(z);
             } else if (i != 2 && i == 3) {
-                dataItemRunning.switchOff(str);
+                dataItemRunning.switchOff("pref_camera_tilt_shift_mode");
                 isSwitchOn = false;
             }
             ((Camera2Module) baseModule.get()).onTiltShiftSwitched(isSwitchOn);
             EffectController.getInstance().setDrawTilt(isSwitchOn);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (bottomPopupTips != null) {
                 bottomPopupTips.reConfigQrCodeTip();
             }
@@ -1672,24 +1626,22 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void configUltraPixelPortrait(int i) {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             DataItemRunning dataItemRunning = DataRepository.dataItemRunning();
-            String str = "pref_camera_ultra_pixel_portrait_mode_key";
-            boolean isSwitchOn = dataItemRunning.isSwitchOn(str);
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-            String str2 = SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL_PORTRAIT;
+            boolean isSwitchOn = dataItemRunning.isSwitchOn("pref_camera_ultra_pixel_portrait_mode_key");
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (i == 1) {
                 if (isSwitchOn) {
-                    dataItemRunning.switchOff(str);
+                    dataItemRunning.switchOff("pref_camera_ultra_pixel_portrait_mode_key");
                     topAlert.alertTopHint(8, (int) R.string.ultra_pixel_portrait_hint);
                     this.mRecordingClosedElements = DataRepository.dataItemRunning().getRecordingClosedElements();
-                    restoreAllMutexElement(str2);
+                    restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL_PORTRAIT);
                 } else {
-                    dataItemRunning.switchOn(str);
-                    closeMutexElement(str2, 194, 196, 201, 239, 254);
+                    dataItemRunning.switchOn("pref_camera_ultra_pixel_portrait_mode_key");
+                    closeMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL_PORTRAIT, 194, 196, 201, 239, 254);
                     dataItemRunning.setRecordingClosedElements(this.mRecordingClosedElements);
-                    MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+                    ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
                     if (miBeautyProtocol != null && miBeautyProtocol.isBeautyPanelShow()) {
                         miBeautyProtocol.dismiss(2);
                     }
@@ -1700,22 +1652,22 @@ public class ConfigChangeImpl implements ConfigChanges {
                 topAlert.alertTopHint(8, (int) R.string.ultra_pixel_portrait_hint);
                 this.mRecordingClosedElements = DataRepository.dataItemRunning().getRecordingClosedElements();
                 if (this.mRecordingClosedElements != null) {
-                    restoreAllMutexElement(str2);
+                    restoreAllMutexElement(SupportedConfigFactory.CLOSE_BY_ULTRA_PIXEL_PORTRAIT);
                 }
-                dataItemRunning.switchOff(str);
+                dataItemRunning.switchOff("pref_camera_ultra_pixel_portrait_mode_key");
             }
-            ((BaseModule) baseModule.get()).updatePreferenceTrampoline(57);
-            ((BaseModule) baseModule.get()).getCameraDevice().resumePreview();
-            ((BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).updateTipImage();
+            baseModule.get().updatePreferenceTrampoline(57);
+            baseModule.get().getCameraDevice().resumePreview();
+            ((ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).updateTipImage();
             topAlert.updateConfigItem(215);
         }
     }
 
     public void configVideoFast() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
             DataItemRunning dataItemRunning = DataRepository.dataItemRunning();
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             if (moduleIndex != 169) {
                 CameraStatUtil.trackVideoModeChanged(CameraSettings.VIDEO_SPEED_FAST);
                 switchOffElementsSilent(216);
@@ -1727,13 +1679,13 @@ public class ConfigChangeImpl implements ConfigChanges {
                 }
                 changeMode(169);
                 updateTipMessage(4, R.string.hint_fast_motion, 2);
-            } else {
-                hideTipMessage(R.string.hint_fast_motion);
-                dataItemRunning.switchOff("pref_video_speed_fast_key");
-                CameraStatUtil.trackVideoModeChanged("normal");
-                DataRepository.dataItemGlobal().setCurrentMode(162);
-                changeMode(162);
+                return;
             }
+            hideTipMessage(R.string.hint_fast_motion);
+            dataItemRunning.switchOff("pref_video_speed_fast_key");
+            CameraStatUtil.trackVideoModeChanged("normal");
+            DataRepository.dataItemGlobal().setCurrentMode(162);
+            changeMode(162);
         }
     }
 
@@ -1749,15 +1701,13 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     public /* synthetic */ void h(BaseModule baseModule) {
         if (baseModule instanceof Camera2Module) {
-            Camera2Module camera2Module = (Camera2Module) baseModule;
             configMoon(false);
             Log.d(TAG, "(moon_mode) config moon night");
-            camera2Module.updateMoonNight();
+            ((Camera2Module) baseModule).updateMoonNight();
         }
     }
 
     public void onConfigChanged(int i) {
-        int[] iArr;
         if (isAlive()) {
             if (SupportedConfigFactory.isMutexConfig(i)) {
                 DataItemRunning dataItemRunning = DataRepository.dataItemRunning();
@@ -1779,7 +1729,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                                 }
                             }
                             i2 = i3;
-                        } else if (((ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).isShowLightingView()) {
+                        } else if (((ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).isShowLightingView()) {
                             showOrHideLighting(false);
                         }
                     }
@@ -1789,26 +1739,27 @@ public class ConfigChangeImpl implements ConfigChanges {
                         applyConfig(i2, 3);
                     }
                     applyConfig(i, 1);
-                } else {
-                    applyConfig(i, 1);
-                    if (i2 != 176) {
-                        applyConfig(i2, 3);
-                    }
+                    return;
                 }
-            } else {
                 applyConfig(i, 1);
+                if (i2 != 176) {
+                    applyConfig(i2, 3);
+                    return;
+                }
+                return;
             }
+            applyConfig(i, 1);
         }
     }
 
     public void onThermalNotification(int i) {
         if (isAlive()) {
-            Optional baseModule = getBaseModule();
+            Optional<BaseModule> baseModule = getBaseModule();
             if (!baseModule.isPresent()) {
                 Log.w(TAG, "onThermalNotification current module is null");
                 return;
             }
-            BaseModule baseModule2 = (BaseModule) baseModule.get();
+            BaseModule baseModule2 = baseModule.get();
             if (!baseModule2.isFrameAvailable() || baseModule2.isSelectingCapturedResult()) {
                 Log.w(TAG, "onThermalNotification current module has not ready");
                 return;
@@ -1831,12 +1782,12 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void reCheckBeauty() {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        if (!(topAlert == null || this.mActivity == null)) {
-            Optional baseModule = getBaseModule();
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        if (topAlert != null && this.mActivity != null) {
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
-                if (moduleIndex == 162 && CameraSettings.isFaceBeautyOn(moduleIndex, null)) {
+                int moduleIndex = baseModule.get().getModuleIndex();
+                if (moduleIndex == 162 && CameraSettings.isFaceBeautyOn(moduleIndex, (BeautyValues) null)) {
                     topAlert.alertTopHint(0, R.string.video_beauty_tip, 3000);
                 }
             }
@@ -1845,17 +1796,17 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     public void reCheckEyeLight() {
         String eyeLightType = CameraSettings.getEyeLightType();
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-        if (!(topAlert == null || bottomPopupTips == null || "-1".equals(eyeLightType))) {
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        if (topAlert != null && bottomPopupTips != null && !"-1".equals(eyeLightType)) {
             topAlert.alertTopHint(0, (int) R.string.eye_light);
         }
     }
 
     public void reCheckFocusPeakConfig() {
         if (isAlive()) {
-            Optional baseModule = getBaseModule();
-            if (baseModule.isPresent() && ((BaseModule) baseModule.get()).isCreated() && DataRepository.dataItemRunning().isSwitchOn("pref_camera_peak_key")) {
+            Optional<BaseModule> baseModule = getBaseModule();
+            if (baseModule.isPresent() && baseModule.get().isCreated() && DataRepository.dataItemRunning().isSwitchOn("pref_camera_peak_key")) {
                 Log.d(TAG, "reCheckFocusPeakConfig: configFocusPeakSwitch");
                 configFocusPeakSwitch(2);
             }
@@ -1863,19 +1814,17 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void reCheckFrontBokenTip() {
-        if (DataRepository.dataItemFeature().Lb() && ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)) != null) {
-            Optional baseModule = getBaseModule();
-            if (baseModule.isPresent()) {
-                if ("on".equals(DataRepository.dataItemConfig().getComponentBokeh().getComponentValue(((BaseModule) baseModule.get()).getModuleIndex()))) {
-                    updateTipMessage(4, R.string.bokeh_use_hint, 2);
-                }
+        if (DataRepository.dataItemFeature().Lb() && ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)) != null) {
+            Optional<BaseModule> baseModule = getBaseModule();
+            if (baseModule.isPresent() && "on".equals(DataRepository.dataItemConfig().getComponentBokeh().getComponentValue(baseModule.get().getModuleIndex()))) {
+                updateTipMessage(4, R.string.bokeh_use_hint, 2);
             }
         }
     }
 
     public void reCheckHandGesture() {
         if (getBaseModule().isPresent() && CameraSettings.isHandGestureOpen()) {
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (topAlert != null) {
                 topAlert.alertTopHint(0, (int) R.string.hand_gesture_tip);
             }
@@ -1884,22 +1833,21 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     public void reCheckLighting() {
         String componentValue = DataRepository.dataItemRunning().getComponentRunningLighting().getComponentValue(171);
-        String str = "0";
-        if (!componentValue.equals(str)) {
-            ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+        if (!componentValue.equals("0")) {
+            ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
             if (!actionProcessing.isShowLightingView()) {
                 actionProcessing.showOrHideLightingView();
             }
-            setLighting(false, str, componentValue, false);
+            setLighting(false, "0", componentValue, false);
         }
     }
 
     public void reCheckLiveShot() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            BaseModule baseModule2 = (BaseModule) baseModule.get();
+            BaseModule baseModule2 = baseModule.get();
             if ((baseModule2.getModuleIndex() == 163 || baseModule2.getModuleIndex() == 165) && DataRepository.dataItemFeature().Sb()) {
-                TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                 if (topAlert != null && CameraSettings.isLiveShotOn()) {
                     topAlert.alertSwitchHint(1, (int) R.string.camera_liveshot_on_tip);
                 }
@@ -1908,11 +1856,11 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void reCheckMacroMode() {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null) {
-            Optional baseModule = getBaseModule();
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                BaseModule baseModule2 = (BaseModule) baseModule.get();
+                BaseModule baseModule2 = baseModule.get();
                 if ((baseModule2.getModuleIndex() == 163 || baseModule2.getModuleIndex() == 162 || baseModule2.getModuleIndex() == 165 || baseModule2.getModuleIndex() == 172) && !topAlert.isExtraMenuShowing() && CameraSettings.isMacroModeEnabled(baseModule2.getModuleIndex())) {
                     topAlert.alertTopHint(0, (int) R.string.macro_mode);
                 }
@@ -1921,10 +1869,9 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void reCheckMutexConfigs(int i) {
-        int[] iArr;
         if (isAlive()) {
-            Optional baseModule = getBaseModule();
-            if (baseModule.isPresent() && ((BaseModule) baseModule.get()).isCreated()) {
+            Optional<BaseModule> baseModule = getBaseModule();
+            if (baseModule.isPresent() && baseModule.get().isCreated()) {
                 DataItemRunning dataItemRunning = DataRepository.dataItemRunning();
                 for (int i2 : SupportedConfigFactory.MUTEX_MENU_CONFIGS) {
                     if (i2 != 203) {
@@ -1940,11 +1887,11 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void reCheckRaw() {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        if (!(topAlert == null || this.mActivity == null)) {
-            Optional baseModule = getBaseModule();
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        if (topAlert != null && this.mActivity != null) {
+            Optional<BaseModule> baseModule = getBaseModule();
             if (baseModule.isPresent()) {
-                int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+                int moduleIndex = baseModule.get().getModuleIndex();
                 if (moduleIndex == 167) {
                     if (DataRepository.dataItemConfig().getComponentConfigRaw().isSwitchOn(moduleIndex)) {
                         topAlert.alertRaw(0);
@@ -1957,27 +1904,27 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void reCheckUltraPixel() {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null && this.mActivity != null && getBaseModule().isPresent() && CameraSettings.isUltraPixelOn()) {
             topAlert.alertTopHint(0, DataRepository.dataItemRunning().getComponentUltraPixel().getUltraPixelOpenTip());
         }
     }
 
     public void reCheckUltraPixelPortrait() {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null && this.mActivity != null && getBaseModule().isPresent() && CameraSettings.isUltraPixelPortraitFrontOn()) {
             topAlert.alertTopHint(0, (int) R.string.ultra_pixel_portrait_hint);
         }
     }
 
     public void reCheckVideoUltraClearTip() {
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             if (moduleIndex == 162 || moduleIndex == 169) {
                 CameraSize videoSize = ((VideoModule) baseModule.get()).getVideoSize();
                 if (is4KQuality(videoSize.width, videoSize.height)) {
-                    TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                    ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                     if (topAlert != null && !topAlert.isExtraMenuShowing()) {
                         topAlert.alertVideoUltraClear(0, R.string.video_ultra_clear_tip);
                     }
@@ -2000,7 +1947,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                 if (i < iArr3.length) {
                     int i2 = iArr3[i];
                     if (i2 == 193) {
-                        updateComponentFlash(null, false);
+                        updateComponentFlash((String) null, false);
                         iArr2[i] = 10;
                     } else if (i2 == 194) {
                         updateComponentHdr(false);
@@ -2058,7 +2005,7 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     public void setEyeLight(String str) {
         CameraSettings.setEyeLight(str);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.showTips(10, EyeLightConstant.getString(str), 4);
         }
@@ -2067,19 +2014,14 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     public void setFilter(int i) {
         EffectController.getInstance().setInvertFlag(0);
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (CameraSettings.isGroupShotOn()) {
-            ((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).configGroupSwitch(4);
+            ((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).configGroupSwitch(4);
             topAlert.refreshExtraMenu();
         }
-        FilterProtocol filterProtocol = (FilterProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(165);
+        ModeProtocol.FilterProtocol filterProtocol = (ModeProtocol.FilterProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(165);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFilter: filterId = ");
-        sb.append(i);
-        sb.append(", FilterProtocol = ");
-        sb.append(filterProtocol);
-        Log.d(str, sb.toString());
+        Log.d(str, "setFilter: filterId = " + i + ", FilterProtocol = " + filterProtocol);
         if (filterProtocol != null) {
             filterProtocol.onFilterChanged(FilterInfo.getCategory(i), FilterInfo.getIndex(i));
         }
@@ -2090,15 +2032,15 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void setLighting(boolean z, String str, String str2, boolean z2) {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-        VerticalProtocol verticalProtocol = (VerticalProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(198);
-        String str3 = "0";
-        if (str.equals(str3) || str2.equals(str3)) {
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.VerticalProtocol verticalProtocol = (ModeProtocol.VerticalProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(198);
+        if (str.equals("0") || str2.equals("0")) {
             topAlert.updateConfigItem(203);
-            MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
-            ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
-            if (str2.equals(str3)) {
+            boolean equals = str2.equals("0");
+            ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+            ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+            if (equals) {
                 if (!z) {
                     topAlert.alertLightingTitle(true);
                 }
@@ -2111,7 +2053,7 @@ public class ConfigChangeImpl implements ConfigChanges {
         }
         bottomPopupTips.setLightingPattern(str2);
         verticalProtocol.setLightingPattern(str2);
-        if (str2 == str3) {
+        if (str2 == "0") {
             topAlert.alertLightingHint(-1);
             verticalProtocol.alertLightingHint(-1);
         }
@@ -2122,21 +2064,20 @@ public class ConfigChangeImpl implements ConfigChanges {
     }
 
     public void showCloseTip(int i, boolean z) {
-        ((BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).showCloseTip(i, z);
+        ((ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).showCloseTip(i, z);
     }
 
     public void showOrHideFilter() {
-        if (((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)) != null) {
-            ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+        if (((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)) != null) {
+            ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
             boolean isShowLightingView = actionProcessing.isShowLightingView();
             boolean showOrHideFilterView = actionProcessing.showOrHideFilterView();
-            BokehFNumberController bokehFNumberController = (BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BokehFNumberController bokehFNumberController = (ModeProtocol.BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (showOrHideFilterView && isShowLightingView) {
                 String componentValue = DataRepository.dataItemRunning().getComponentRunningLighting().getComponentValue(171);
-                String str = "0";
-                DataRepository.dataItemRunning().getComponentRunningLighting().setComponentValue(171, str);
-                setLighting(true, componentValue, str, false);
+                DataRepository.dataItemRunning().getComponentRunningLighting().setComponentValue(171, "0");
+                setLighting(true, componentValue, "0", false);
                 if (bottomPopupTips != null) {
                     bottomPopupTips.reInitTipImage();
                 }
@@ -2144,8 +2085,8 @@ public class ConfigChangeImpl implements ConfigChanges {
             if (showOrHideFilterView && bokehFNumberController != null && DataRepository.dataItemGlobal().getCurrentMode() == 171) {
                 bokehFNumberController.showFNumberPanel(true);
             }
-            BottomPopupTips bottomPopupTips2 = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-            MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+            ModeProtocol.BottomPopupTips bottomPopupTips2 = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
             if (bottomPopupTips2 != null) {
                 if (showOrHideFilterView) {
                     bottomPopupTips2.updateLeftTipImage();
@@ -2159,17 +2100,17 @@ public class ConfigChangeImpl implements ConfigChanges {
 
     public void showOrHideLighting(boolean z) {
         beautyMutexHandle();
-        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
         if (baseDelegate != null) {
-            boolean showOrHideLightingView = ((ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).showOrHideLightingView();
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-            BokehFNumberController bokehFNumberController = (BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
+            boolean showOrHideLightingView = ((ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).showOrHideLightingView();
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BokehFNumberController bokehFNumberController = (ModeProtocol.BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
             if (showOrHideLightingView) {
                 reCheckLighting();
-                Optional baseModule = getBaseModule();
+                Optional<BaseModule> baseModule = getBaseModule();
                 if (baseModule.isPresent()) {
-                    DataRepository.dataItemRunning().getComponentConfigFilter().reset(((BaseModule) baseModule.get()).getModuleIndex());
+                    DataRepository.dataItemRunning().getComponentConfigFilter().reset(baseModule.get().getModuleIndex());
                     setFilter(FilterInfo.FILTER_ID_NONE);
                     topAlert.alertLightingTitle(true);
                     if (bokehFNumberController != null) {
@@ -2182,9 +2123,8 @@ public class ConfigChangeImpl implements ConfigChanges {
                 }
             } else {
                 String componentValue = DataRepository.dataItemRunning().getComponentRunningLighting().getComponentValue(171);
-                String str = "0";
-                DataRepository.dataItemRunning().getComponentRunningLighting().setComponentValue(171, str);
-                setLighting(true, componentValue, str, false);
+                DataRepository.dataItemRunning().getComponentRunningLighting().setComponentValue(171, "0");
+                setLighting(true, componentValue, "0", false);
                 bottomPopupTips.reInitTipImage();
                 topAlert.alertLightingTitle(false);
                 if (bokehFNumberController != null) {
@@ -2197,32 +2137,33 @@ public class ConfigChangeImpl implements ConfigChanges {
             if (z) {
                 CameraStat.recordCountEvent(CameraStat.CATEGORY_COUNTER, CameraStat.KEY_LIGHTING_BUTTON);
             }
-            BottomPopupTips bottomPopupTips2 = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-            if (bottomPopupTips2 != null) {
-                if (showOrHideLightingView) {
-                    bottomPopupTips2.showCloseTip(2, true);
-                } else {
-                    bottomPopupTips2.updateLeftTipImage();
-                }
+            ModeProtocol.BottomPopupTips bottomPopupTips2 = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            if (bottomPopupTips2 == null) {
+                return;
+            }
+            if (showOrHideLightingView) {
+                bottomPopupTips2.showCloseTip(2, true);
+            } else {
+                bottomPopupTips2.updateLeftTipImage();
             }
         }
     }
 
     public void showOrHideShine() {
         boolean z;
-        Optional baseModule = getBaseModule();
+        Optional<BaseModule> baseModule = getBaseModule();
         if (baseModule.isPresent()) {
-            int moduleIndex = ((BaseModule) baseModule.get()).getModuleIndex();
+            int moduleIndex = baseModule.get().getModuleIndex();
             boolean z2 = true;
             if (moduleIndex == 162) {
                 z = false;
             } else if (moduleIndex != 169) {
-                MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+                ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
                 if (miBeautyProtocol != null && miBeautyProtocol.isBeautyPanelShow()) {
                     z2 = false;
                 }
                 if (z2) {
-                    BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                    ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                     if (bottomPopupTips != null) {
                         bottomPopupTips.directlyHideTips();
                         bottomPopupTips.setPortraitHintVisible(8);
@@ -2233,67 +2174,68 @@ public class ConfigChangeImpl implements ConfigChanges {
                         bottomPopupTips.directHideLyingDirectHint();
                         bottomPopupTips.reConfigQrCodeTip();
                     }
-                    DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+                    ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
                     if (dualController != null) {
                         dualController.hideZoomButton();
                         if (moduleIndex != 171) {
-                            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                             if (topAlert != null) {
                                 topAlert.alertUpdateValue(2);
                             }
                         }
                     }
                     if (moduleIndex == 163) {
-                        ManuallyAdjust manuallyAdjust = (ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
+                        ModeProtocol.ManuallyAdjust manuallyAdjust = (ModeProtocol.ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
                         if (manuallyAdjust != null) {
-                            manuallyAdjust.setManuallyVisible(0, 4, null);
+                            manuallyAdjust.setManuallyVisible(0, 4, (ManuallyListener) null);
                         }
                     } else if (moduleIndex == 167) {
-                        ManuallyAdjust manuallyAdjust2 = (ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
+                        ModeProtocol.ManuallyAdjust manuallyAdjust2 = (ModeProtocol.ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
                         if (manuallyAdjust2 != null) {
                             manuallyAdjust2.setManuallyLayoutVisible(false);
                         }
                     } else if (moduleIndex == 171) {
-                        BokehFNumberController bokehFNumberController = (BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
+                        ModeProtocol.BokehFNumberController bokehFNumberController = (ModeProtocol.BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
                         if (bokehFNumberController != null && bokehFNumberController.isFNumberVisible()) {
                             bokehFNumberController.hideFNumberPanel(false, false);
                         }
                     }
-                    ((BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).expandShineBottomMenu(DataRepository.dataItemRunning().getComponentRunningShine());
+                    ((ModeProtocol.BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).expandShineBottomMenu(DataRepository.dataItemRunning().getComponentRunningShine());
                     if (miBeautyProtocol != null) {
                         miBeautyProtocol.show();
-                    } else {
-                        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
-                        if (baseDelegate != null) {
-                            baseDelegate.delegateEvent(2);
-                        }
+                        return;
                     }
-                } else {
-                    miBeautyProtocol.dismiss(2);
+                    ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+                    if (baseDelegate != null) {
+                        baseDelegate.delegateEvent(2);
+                        return;
+                    }
+                    return;
                 }
+                miBeautyProtocol.dismiss(2);
                 return;
             } else {
                 closeVideoFast();
                 z = true;
             }
-            boolean z3 = !CameraSettings.isFaceBeautyOn(moduleIndex, null);
+            boolean z3 = !CameraSettings.isFaceBeautyOn(moduleIndex, (BeautyValues) null);
             ComponentRunningShine componentRunningShine = DataRepository.dataItemRunning().getComponentRunningShine();
             if (z3) {
                 DataRepository.dataItemConfig().getComponentConfigBeauty().setClosed(false);
                 switchOffElementsSilent(216);
                 if (CameraSettings.isAutoZoomEnabled(moduleIndex)) {
                     CameraSettings.setAutoZoomEnabled(moduleIndex, false);
-                    BottomPopupTips bottomPopupTips2 = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                    ModeProtocol.BottomPopupTips bottomPopupTips2 = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                     bottomPopupTips2.updateLeftTipImage();
                     bottomPopupTips2.updateTipImage();
-                    ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).hideSwitchHint();
+                    ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).hideSwitchHint();
                 }
                 if (CameraSettings.isSuperEISEnabled(moduleIndex)) {
                     CameraSettings.setSuperEISEnabled(moduleIndex, false);
-                    BottomPopupTips bottomPopupTips3 = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                    ModeProtocol.BottomPopupTips bottomPopupTips3 = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                     bottomPopupTips3.updateLeftTipImage();
                     bottomPopupTips3.updateTipImage();
-                    ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).hideSwitchHint();
+                    ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).hideSwitchHint();
                 }
                 ComponentRunningMacroMode componentRunningMacroMode = DataRepository.dataItemRunning().getComponentRunningMacroMode();
                 if (componentRunningMacroMode.isSwitchOn(moduleIndex)) {
@@ -2312,11 +2254,11 @@ public class ConfigChangeImpl implements ConfigChanges {
             }
             if (z) {
                 changeMode(162);
-            } else {
-                OnFaceBeautyChangedProtocol onFaceBeautyChangedProtocol = (OnFaceBeautyChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(199);
-                if (onFaceBeautyChangedProtocol != null) {
-                    onFaceBeautyChangedProtocol.onBeautyChanged(false);
-                }
+                return;
+            }
+            ModeProtocol.OnFaceBeautyChangedProtocol onFaceBeautyChangedProtocol = (ModeProtocol.OnFaceBeautyChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(199);
+            if (onFaceBeautyChangedProtocol != null) {
+                onFaceBeautyChangedProtocol.onBeautyChanged(false);
             }
         }
     }
@@ -2351,7 +2293,7 @@ public class ConfigChangeImpl implements ConfigChanges {
                 }
                 CameraSettings.switchOffUltraPixel();
             } else if (i == 216) {
-                BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+                ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
                 if (baseDelegate != null && baseDelegate.getActiveFragment(R.id.bottom_action) == 65523) {
                     baseDelegate.delegateEvent(15);
                 }

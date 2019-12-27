@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.reactivex.internal.disposables.DisposableHelper;
@@ -43,7 +42,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
         final long timespan;
         final TimeUnit unit;
         UnicastProcessor<T> window;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         static final class ConsumerIndexHolder implements Runnable {
             final long index;
@@ -89,13 +88,13 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
 
         public void dispose() {
             DisposableHelper.dispose(this.timer);
-            Worker worker2 = this.worker;
+            Scheduler.Worker worker2 = this.worker;
             if (worker2 != null) {
                 worker2.dispose();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             Subscriber<? super V> subscriber = this.actual;
@@ -103,7 +102,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             int i = 1;
             while (!this.terminated) {
                 boolean z = this.done;
-                Object poll = simplePlainQueue.poll();
+                U poll = simplePlainQueue.poll();
                 boolean z2 = poll == null;
                 boolean z3 = poll instanceof ConsumerIndexHolder;
                 if (z && (z2 || z3)) {
@@ -165,7 +164,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
                                 if (this.restartTimerOnMaxSize) {
                                     Disposable disposable = (Disposable) this.timer.get();
                                     disposable.dispose();
-                                    Worker worker2 = this.worker;
+                                    Scheduler.Worker worker2 = this.worker;
                                     ConsumerIndexHolder consumerIndexHolder2 = new ConsumerIndexHolder(this.producerIndex, this);
                                     long j2 = this.timespan;
                                     Disposable schedulePeriodically = worker2.schedulePeriodically(consumerIndexHolder2, j2, j2, this.unit);
@@ -233,7 +232,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
                             if (this.restartTimerOnMaxSize) {
                                 Disposable disposable = (Disposable) this.timer.get();
                                 disposable.dispose();
-                                Worker worker2 = this.worker;
+                                Scheduler.Worker worker2 = this.worker;
                                 ConsumerIndexHolder consumerIndexHolder = new ConsumerIndexHolder(this.producerIndex, this);
                                 long j2 = this.timespan;
                                 Disposable schedulePeriodically = worker2.schedulePeriodically(consumerIndexHolder, j2, j2, this.unit);
@@ -283,7 +282,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
                         }
                         ConsumerIndexHolder consumerIndexHolder = new ConsumerIndexHolder(this.producerIndex, this);
                         if (this.restartTimerOnMaxSize) {
-                            Worker worker2 = this.worker;
+                            Scheduler.Worker worker2 = this.worker;
                             long j = this.timespan;
                             disposable = worker2.schedulePeriodically(consumerIndexHolder, j, j, this.unit);
                         } else {
@@ -293,12 +292,13 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
                         }
                         if (this.timer.replace(disposable)) {
                             subscription.request(Long.MAX_VALUE);
+                            return;
                         }
-                    } else {
-                        this.cancelled = true;
-                        subscription.cancel();
-                        subscriber.onError(new MissingBackpressureException("Could not deliver initial window due to lack of requests."));
+                        return;
                     }
+                    this.cancelled = true;
+                    subscription.cancel();
+                    subscriber.onError(new MissingBackpressureException("Could not deliver initial window due to lack of requests."));
                 }
             }
         }
@@ -335,7 +335,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             DisposableHelper.dispose(this.timer);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             Subscriber<? super V> subscriber = this.actual;
@@ -344,7 +344,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             while (true) {
                 boolean z = this.terminated;
                 boolean z2 = this.done;
-                Object poll = simplePlainQueue.poll();
+                U poll = simplePlainQueue.poll();
                 if (!z2 || !(poll == null || poll == NEXT)) {
                     if (poll == null) {
                         i = leave(-i);
@@ -482,7 +482,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
         final long timespan;
         final TimeUnit unit;
         final List<UnicastProcessor<T>> windows = new LinkedList();
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         final class Completion implements Runnable {
             private final UnicastProcessor<T> processor;
@@ -506,7 +506,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             }
         }
 
-        WindowSkipSubscriber(Subscriber<? super Flowable<T>> subscriber, long j, long j2, TimeUnit timeUnit, Worker worker2, int i) {
+        WindowSkipSubscriber(Subscriber<? super Flowable<T>> subscriber, long j, long j2, TimeUnit timeUnit, Scheduler.Worker worker2, int i) {
             super(subscriber, new MpscLinkedQueue());
             this.timespan = j;
             this.timeskip = j2;
@@ -519,7 +519,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void complete(UnicastProcessor<T> unicastProcessor) {
             this.queue.offer(new SubjectWork(unicastProcessor, false));
             if (enter()) {
@@ -531,7 +531,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             this.worker.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             Subscriber<? super V> subscriber = this.actual;
@@ -539,18 +539,18 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
             int i = 1;
             while (!this.terminated) {
                 boolean z = this.done;
-                Object poll = simplePlainQueue.poll();
+                U poll = simplePlainQueue.poll();
                 boolean z2 = poll == null;
                 boolean z3 = poll instanceof SubjectWork;
                 if (z && (z2 || z3)) {
                     simplePlainQueue.clear();
                     Throwable th = this.error;
                     if (th != null) {
-                        for (UnicastProcessor onError : list) {
+                        for (UnicastProcessor<T> onError : list) {
                             onError.onError(th);
                         }
                     } else {
-                        for (UnicastProcessor onComplete : list) {
+                        for (UnicastProcessor<T> onComplete : list) {
                             onComplete.onComplete();
                         }
                     }
@@ -585,7 +585,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
                         }
                     }
                 } else {
-                    for (UnicastProcessor onNext : list) {
+                    for (UnicastProcessor<T> onNext : list) {
                         onNext.onNext(poll);
                     }
                 }
@@ -617,7 +617,7 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
 
         public void onNext(T t) {
             if (fastEnter()) {
-                for (UnicastProcessor onNext : this.windows) {
+                for (UnicastProcessor<T> onNext : this.windows) {
                     onNext.onNext(t);
                 }
                 if (leave(-1) == 0) {
@@ -646,14 +646,14 @@ public final class FlowableWindowTimed<T> extends AbstractFlowableWithUpstream<T
                             produced(1);
                         }
                         this.worker.schedule(new Completion(create), this.timespan, this.unit);
-                        Worker worker2 = this.worker;
+                        Scheduler.Worker worker2 = this.worker;
                         long j = this.timeskip;
                         worker2.schedulePeriodically(this, j, j, this.unit);
                         subscription.request(Long.MAX_VALUE);
-                    } else {
-                        subscription.cancel();
-                        this.actual.onError(new MissingBackpressureException("Could not emit the first window due to lack of requests"));
+                        return;
                     }
+                    subscription.cancel();
+                    this.actual.onError(new MissingBackpressureException("Could not emit the first window due to lack of requests"));
                 }
             }
         }

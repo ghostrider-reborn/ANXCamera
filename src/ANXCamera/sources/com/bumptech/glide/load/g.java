@@ -30,10 +30,10 @@ public final class g implements c {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof g)) {
-            return false;
+        if (obj instanceof g) {
+            return this.values.equals(((g) obj).values);
         }
-        return this.values.equals(((g) obj).values);
+        return false;
     }
 
     public int hashCode() {
@@ -41,16 +41,12 @@ public final class g implements c {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Options{values=");
-        sb.append(this.values);
-        sb.append('}');
-        return sb.toString();
+        return "Options{values=" + this.values + '}';
     }
 
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
         for (int i = 0; i < this.values.size(); i++) {
-            a((f) this.values.keyAt(i), this.values.valueAt(i), messageDigest);
+            a(this.values.keyAt(i), this.values.valueAt(i), messageDigest);
         }
     }
 }

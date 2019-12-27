@@ -2,7 +2,7 @@ package android.support.v4.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.widget.EdgeEffect;
 
@@ -15,7 +15,7 @@ public final class EdgeEffectCompat {
     }
 
     public static void onPull(@NonNull EdgeEffect edgeEffect, float f2, float f3) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             edgeEffect.onPull(f2, f3);
         } else {
             edgeEffect.onPull(f2);

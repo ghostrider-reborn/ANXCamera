@@ -30,7 +30,7 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
             this.index = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancel() {
             SubscriptionHelper.cancel(this);
         }
@@ -83,19 +83,19 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
                 this.cancelled = true;
                 cancelAll();
                 if (getAndIncrement() == 0) {
-                    Arrays.fill(this.lists, null);
+                    Arrays.fill(this.lists, (Object) null);
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             for (SortedJoinInnerSubscriber<T> cancel : this.subscribers) {
                 cancel.cancel();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:41:0x00a3, code lost:
             if (r13 != 0) goto L_0x00df;
          */
@@ -103,20 +103,20 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
             if (r1.cancelled == false) goto L_0x00ad;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:44:0x00a9, code lost:
-            java.util.Arrays.fill(r3, null);
+            java.util.Arrays.fill(r3, (java.lang.Object) null);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:45:0x00ac, code lost:
             return;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:46:0x00ad, code lost:
-            r5 = (java.lang.Throwable) r1.error.get();
+            r5 = r1.error.get();
          */
         /* JADX WARNING: Code restructure failed: missing block: B:47:0x00b5, code lost:
             if (r5 == null) goto L_0x00c1;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:48:0x00b7, code lost:
             cancelAll();
-            java.util.Arrays.fill(r3, null);
+            java.util.Arrays.fill(r3, (java.lang.Object) null);
             r2.onError(r5);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:49:0x00c0, code lost:
@@ -144,7 +144,7 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
             if (r16 == false) goto L_0x00df;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:58:0x00d8, code lost:
-            java.util.Arrays.fill(r3, null);
+            java.util.Arrays.fill(r3, (java.lang.Object) null);
             r2.onComplete();
          */
         /* JADX WARNING: Code restructure failed: missing block: B:59:0x00de, code lost:
@@ -176,7 +176,7 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
          */
         public void drain() {
             int i;
-            Object obj;
+            T t;
             if (getAndIncrement() == 0) {
                 Subscriber<? super T> subscriber = this.actual;
                 List<T>[] listArr = this.lists;
@@ -191,50 +191,50 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
                         if (i3 == 0) {
                             break;
                         } else if (this.cancelled) {
-                            Arrays.fill(listArr, null);
+                            Arrays.fill(listArr, (Object) null);
                             return;
                         } else {
-                            Throwable th = (Throwable) this.error.get();
+                            Throwable th = this.error.get();
                             if (th != null) {
                                 cancelAll();
-                                Arrays.fill(listArr, null);
+                                Arrays.fill(listArr, (Object) null);
                                 subscriber.onError(th);
                                 return;
                             }
                             int i4 = -1;
-                            Object obj2 = null;
+                            T t2 = null;
                             for (int i5 = 0; i5 < length; i5++) {
                                 List<T> list = listArr[i5];
                                 int i6 = iArr[i5];
                                 if (list.size() != i6) {
-                                    if (obj2 == null) {
-                                        obj = list.get(i6);
+                                    if (t2 == null) {
+                                        t = list.get(i6);
                                     } else {
-                                        obj = list.get(i6);
+                                        t = list.get(i6);
                                         try {
-                                            if (!(this.comparator.compare(obj2, obj) > 0)) {
+                                            if (!(this.comparator.compare(t2, t) > 0)) {
                                             }
                                         } catch (Throwable th2) {
                                             Exceptions.throwIfFatal(th2);
                                             cancelAll();
-                                            Arrays.fill(listArr, null);
-                                            if (!this.error.compareAndSet(null, th2)) {
+                                            Arrays.fill(listArr, (Object) null);
+                                            if (!this.error.compareAndSet((Object) null, th2)) {
                                                 RxJavaPlugins.onError(th2);
                                             }
-                                            subscriber.onError((Throwable) this.error.get());
+                                            subscriber.onError(this.error.get());
                                             return;
                                         }
                                     }
-                                    obj2 = obj;
+                                    t2 = t;
                                     i4 = i5;
                                 }
                             }
-                            if (obj2 == null) {
-                                Arrays.fill(listArr, null);
+                            if (t2 == null) {
+                                Arrays.fill(listArr, (Object) null);
                                 subscriber.onComplete();
                                 return;
                             }
-                            subscriber.onNext(obj2);
+                            subscriber.onNext(t2);
                             iArr[i4] = iArr[i4] + 1;
                             j2++;
                         }
@@ -244,16 +244,16 @@ public final class ParallelSortedJoin<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(Throwable th) {
-            if (this.error.compareAndSet(null, th)) {
+            if (this.error.compareAndSet((Object) null, th)) {
                 drain();
             } else if (th != this.error.get()) {
                 RxJavaPlugins.onError(th);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerNext(List<T> list, int i) {
             this.lists[i] = list;
             if (this.remaining.decrementAndGet() == 0) {

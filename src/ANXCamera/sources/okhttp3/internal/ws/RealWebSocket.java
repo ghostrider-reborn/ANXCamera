@@ -25,12 +25,12 @@ import okhttp3.WebSocketListener;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.StreamAllocation;
-import okhttp3.internal.ws.WebSocketReader.FrameCallback;
+import okhttp3.internal.ws.WebSocketReader;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.ByteString;
 
-public final class RealWebSocket implements WebSocket, FrameCallback {
+public final class RealWebSocket implements WebSocket, WebSocketReader.FrameCallback {
     static final /* synthetic */ boolean $assertionsDisabled = false;
     private static final long CANCEL_AFTER_CLOSE_MILLIS = 60000;
     private static final long MAX_QUEUE_SIZE = 16777216;
@@ -121,7 +121,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
                     do {
                         try {
                         } catch (IOException e2) {
-                            RealWebSocket.this.failWebSocket(e2, null);
+                            RealWebSocket.this.failWebSocket(e2, (Response) null);
                             return;
                         }
                     } while (RealWebSocket.this.writeOneFrame());
@@ -129,10 +129,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
             };
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Request must be GET: ");
-        sb.append(request.method());
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Request must be GET: " + request.method());
     }
 
     private void runWriter() {
@@ -149,7 +146,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         if (!this.failed) {
             if (!this.enqueuedClose) {
                 if (this.queueSize + ((long) byteString.size()) > MAX_QUEUE_SIZE) {
-                    close(1001, null);
+                    close(1001, (String) null);
                     return false;
                 }
                 this.queueSize += (long) byteString.size();
@@ -160,7 +157,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void awaitTermination(int i, TimeUnit timeUnit) throws InterruptedException {
         this.executor.awaitTermination((long) i, timeUnit);
     }
@@ -169,67 +166,39 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         this.call.cancel();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void checkResponse(Response response) throws ProtocolException {
-        String str = "'";
         if (response.code() == 101) {
             String header = response.header(HTTP.CONN_DIRECTIVE);
-            String str2 = "Upgrade";
-            if (str2.equalsIgnoreCase(header)) {
-                String header2 = response.header(str2);
+            if ("Upgrade".equalsIgnoreCase(header)) {
+                String header2 = response.header("Upgrade");
                 if ("websocket".equalsIgnoreCase(header2)) {
                     String header3 = response.header("Sec-WebSocket-Accept");
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(this.key);
-                    sb.append("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-                    String base64 = ByteString.encodeUtf8(sb.toString()).sha1().base64();
+                    String base64 = ByteString.encodeUtf8(this.key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").sha1().base64();
                     if (!base64.equals(header3)) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Expected 'Sec-WebSocket-Accept' header value '");
-                        sb2.append(base64);
-                        sb2.append("' but was '");
-                        sb2.append(header3);
-                        sb2.append(str);
-                        throw new ProtocolException(sb2.toString());
+                        throw new ProtocolException("Expected 'Sec-WebSocket-Accept' header value '" + base64 + "' but was '" + header3 + "'");
                     }
                     return;
                 }
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Expected 'Upgrade' header value 'websocket' but was '");
-                sb3.append(header2);
-                sb3.append(str);
-                throw new ProtocolException(sb3.toString());
+                throw new ProtocolException("Expected 'Upgrade' header value 'websocket' but was '" + header2 + "'");
             }
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("Expected 'Connection' header value 'Upgrade' but was '");
-            sb4.append(header);
-            sb4.append(str);
-            throw new ProtocolException(sb4.toString());
+            throw new ProtocolException("Expected 'Connection' header value 'Upgrade' but was '" + header + "'");
         }
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append("Expected HTTP 101 response but was '");
-        sb5.append(response.code());
-        sb5.append(" ");
-        sb5.append(response.message());
-        sb5.append(str);
-        throw new ProtocolException(sb5.toString());
+        throw new ProtocolException("Expected HTTP 101 response but was '" + response.code() + " " + response.message() + "'");
     }
 
     public boolean close(int i, String str) {
         return close(i, str, CANCEL_AFTER_CLOSE_MILLIS);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized boolean close(int i, String str, long j) {
         WebSocketProtocol.validateCloseCode(i);
         ByteString byteString = null;
         if (str != null) {
             byteString = ByteString.encodeUtf8(str);
             if (((long) byteString.size()) > 123) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("reason.size() > 123: ");
-                sb.append(str);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("reason.size() > 123: " + str);
             }
         }
         if (!this.failed) {
@@ -246,12 +215,11 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
     public void connect(OkHttpClient okHttpClient) {
         OkHttpClient build = okHttpClient.newBuilder().eventListener(EventListener.NONE).protocols(ONLY_HTTP1).build();
         final int pingIntervalMillis = build.pingIntervalMillis();
-        String str = "Upgrade";
-        final Request build2 = this.originalRequest.newBuilder().header(str, "websocket").header(HTTP.CONN_DIRECTIVE, str).header("Sec-WebSocket-Key", this.key).header("Sec-WebSocket-Version", "13").build();
+        final Request build2 = this.originalRequest.newBuilder().header("Upgrade", "websocket").header(HTTP.CONN_DIRECTIVE, "Upgrade").header("Sec-WebSocket-Key", this.key).header("Sec-WebSocket-Version", "13").build();
         this.call = Internal.instance.newWebSocketCall(build, build2);
         this.call.enqueue(new Callback() {
             public void onFailure(Call call, IOException iOException) {
-                RealWebSocket.this.failWebSocket(iOException, null);
+                RealWebSocket.this.failWebSocket(iOException, (Response) null);
             }
 
             public void onResponse(Call call, Response response) {
@@ -262,14 +230,11 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
                     Streams newWebSocketStreams = streamAllocation.connection().newWebSocketStreams(streamAllocation);
                     try {
                         RealWebSocket.this.listener.onOpen(RealWebSocket.this, response);
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("OkHttp WebSocket ");
-                        sb.append(build2.url().redact());
-                        RealWebSocket.this.initReaderAndWriter(sb.toString(), (long) pingIntervalMillis, newWebSocketStreams);
+                        RealWebSocket.this.initReaderAndWriter("OkHttp WebSocket " + build2.url().redact(), (long) pingIntervalMillis, newWebSocketStreams);
                         streamAllocation.connection().socket().setSoTimeout(0);
                         RealWebSocket.this.loopReader();
                     } catch (Exception e2) {
-                        RealWebSocket.this.failWebSocket(e2, null);
+                        RealWebSocket.this.failWebSocket(e2, (Response) null);
                     }
                 } catch (ProtocolException e3) {
                     RealWebSocket.this.failWebSocket(e3, response);
@@ -332,16 +297,16 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
     }
 
     public void onReadClose(int i, String str) {
-        Closeable closeable;
+        Streams streams2;
         if (i != -1) {
             synchronized (this) {
                 if (this.receivedCloseCode == -1) {
                     this.receivedCloseCode = i;
                     this.receivedCloseReason = str;
                     if (!this.enqueuedClose || !this.messageAndCloseQueue.isEmpty()) {
-                        closeable = null;
+                        streams2 = null;
                     } else {
-                        closeable = this.streams;
+                        streams2 = this.streams;
                         this.streams = null;
                         if (this.cancelFuture != null) {
                             this.cancelFuture.cancel(false);
@@ -354,11 +319,11 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
             }
             try {
                 this.listener.onClosing(this, i, str);
-                if (closeable != null) {
+                if (streams2 != null) {
                     this.listener.onClosed(this, i, str);
                 }
             } finally {
-                Util.closeQuietly(closeable);
+                Util.closeQuietly((Closeable) streams2);
             }
         } else {
             throw new IllegalArgumentException();
@@ -390,12 +355,12 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         this.pongCount++;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized int pingCount() {
         return this.pingCount;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized boolean pong(ByteString byteString) {
         if (!this.failed) {
             if (!this.enqueuedClose || !this.messageAndCloseQueue.isEmpty()) {
@@ -407,22 +372,18 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         return false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized int pongCount() {
         return this.pongCount;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean processNextFrame() throws IOException {
-        boolean z = false;
         try {
             this.reader.processNextFrame();
-            if (this.receivedCloseCode == -1) {
-                z = true;
-            }
-            return z;
+            return this.receivedCloseCode == -1;
         } catch (Exception e2) {
-            failWebSocket(e2, null);
+            this.failWebSocket(e2, (Response) null);
             return false;
         }
     }
@@ -449,7 +410,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         throw new NullPointerException("bytes == null");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void tearDown() throws InterruptedException {
         ScheduledFuture<?> scheduledFuture = this.cancelFuture;
         if (scheduledFuture != null) {
@@ -459,7 +420,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         this.executor.awaitTermination(10, TimeUnit.SECONDS);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     /* JADX WARNING: Code restructure failed: missing block: B:20:0x0051, code lost:
         if (r2 == null) goto L_0x0057;
      */
@@ -498,7 +459,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         r11.listener.onClosed(r11, r1, r6);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:40:0x009b, code lost:
-        okhttp3.internal.Util.closeQuietly(r4);
+        okhttp3.internal.Util.closeQuietly((java.io.Closeable) r4);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:41:0x009f, code lost:
         return true;
@@ -510,7 +471,7 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         r11 = move-exception;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:46:0x00a7, code lost:
-        okhttp3.internal.Util.closeQuietly(r4);
+        okhttp3.internal.Util.closeQuietly((java.io.Closeable) r4);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:47:0x00aa, code lost:
         throw r11;
@@ -524,18 +485,18 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
                 return false;
             }
             WebSocketWriter webSocketWriter = this.writer;
-            ByteString byteString = (ByteString) this.pongQueue.poll();
-            Closeable closeable = null;
-            if (byteString == null) {
+            ByteString poll = this.pongQueue.poll();
+            Streams streams2 = null;
+            if (poll == null) {
                 obj = this.messageAndCloseQueue.poll();
                 if (obj instanceof Close) {
                     i = this.receivedCloseCode;
                     str = this.receivedCloseReason;
                     if (i != -1) {
-                        Streams streams2 = this.streams;
+                        Streams streams3 = this.streams;
                         this.streams = null;
                         this.executor.shutdown();
-                        closeable = streams2;
+                        streams2 = streams3;
                     } else {
                         this.cancelFuture = this.executor.schedule(new CancelRunnable(), ((Close) obj).cancelAfterCloseMillis, TimeUnit.MILLISECONDS);
                     }
@@ -553,20 +514,16 @@ public final class RealWebSocket implements WebSocket, FrameCallback {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    /* JADX WARNING: Code restructure failed: missing block: B:10:0x0010, code lost:
-        r0 = move-exception;
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:11:0x0011, code lost:
-        failWebSocket(r0, null);
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:9:?, code lost:
-        r0.writePing(okio.ByteString.EMPTY);
-     */
+    /* access modifiers changed from: package-private */
     public void writePingFrame() {
         synchronized (this) {
             if (!this.failed) {
                 WebSocketWriter webSocketWriter = this.writer;
+                try {
+                    webSocketWriter.writePing(ByteString.EMPTY);
+                } catch (IOException e2) {
+                    failWebSocket(e2, (Response) null);
+                }
             }
         }
     }

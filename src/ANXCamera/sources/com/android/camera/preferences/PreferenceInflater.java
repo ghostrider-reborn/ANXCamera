@@ -54,31 +54,18 @@ public class PreferenceInflater {
     }
 
     private CameraPreference newPreference(String str, Object[] objArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PACKAGE_NAME);
-        sb.append(".");
-        sb.append(str);
-        String sb2 = sb.toString();
-        Constructor constructor = (Constructor) sConstructorMap.get(sb2);
+        String str2 = PACKAGE_NAME + "." + str;
+        Constructor<?> constructor = sConstructorMap.get(str2);
         if (constructor == null) {
             try {
-                constructor = this.mContext.getClassLoader().loadClass(sb2).getConstructor(CTOR_SIGNATURE);
-                sConstructorMap.put(sb2, constructor);
+                constructor = this.mContext.getClassLoader().loadClass(str2).getConstructor(CTOR_SIGNATURE);
+                sConstructorMap.put(str2, constructor);
             } catch (NoSuchMethodException e2) {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Error inflating class ");
-                sb3.append(sb2);
-                throw new InflateException(sb3.toString(), e2);
+                throw new InflateException("Error inflating class " + str2, e2);
             } catch (ClassNotFoundException e3) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("No such class: ");
-                sb4.append(sb2);
-                throw new InflateException(sb4.toString(), e3);
+                throw new InflateException("No such class: " + str2, e3);
             } catch (Exception e4) {
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("While create instance of");
-                sb5.append(sb2);
-                throw new InflateException(sb5.toString(), e4);
+                throw new InflateException("While create instance of" + str2, e4);
             }
         }
         return (CameraPreference) constructor.newInstance(objArr);

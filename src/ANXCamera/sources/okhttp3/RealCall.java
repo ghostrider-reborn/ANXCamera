@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.cache.CacheInterceptor;
 import okhttp3.internal.connection.ConnectInterceptor;
+import okhttp3.internal.connection.RealConnection;
 import okhttp3.internal.connection.StreamAllocation;
 import okhttp3.internal.http.BridgeInterceptor;
 import okhttp3.internal.http.CallServerInterceptor;
+import okhttp3.internal.http.HttpCodec;
 import okhttp3.internal.http.RealInterceptorChain;
 import okhttp3.internal.http.RetryAndFollowUpInterceptor;
 import okhttp3.internal.platform.Platform;
@@ -55,11 +57,7 @@ final class RealCall implements Call {
                 z = false;
                 if (!z) {
                     try {
-                        Platform platform = Platform.get();
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Callback failure for ");
-                        sb.append(RealCall.this.toLoggableString());
-                        platform.log(4, sb.toString(), e2);
+                        Platform.get().log(4, "Callback failure for " + RealCall.this.toLoggableString(), e2);
                     } catch (Throwable th) {
                         RealCall.this.client.dispatcher().finished(this);
                         throw th;
@@ -73,17 +71,17 @@ final class RealCall implements Call {
             RealCall.this.client.dispatcher().finished(this);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public RealCall get() {
             return RealCall.this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public String host() {
             return RealCall.this.originalRequest.url().host();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Request request() {
             return RealCall.this.originalRequest;
         }
@@ -154,7 +152,7 @@ final class RealCall implements Call {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Response getResponseWithInterceptorChain() throws IOException {
         ArrayList arrayList = new ArrayList();
         arrayList.addAll(this.client.interceptors());
@@ -166,7 +164,7 @@ final class RealCall implements Call {
             arrayList.addAll(this.client.networkInterceptors());
         }
         arrayList.add(new CallServerInterceptor(this.forWebSocket));
-        RealInterceptorChain realInterceptorChain = new RealInterceptorChain(arrayList, null, null, null, 0, this.originalRequest, this, this.eventListener, this.client.connectTimeoutMillis(), this.client.readTimeoutMillis(), this.client.writeTimeoutMillis());
+        RealInterceptorChain realInterceptorChain = new RealInterceptorChain(arrayList, (StreamAllocation) null, (HttpCodec) null, (RealConnection) null, 0, this.originalRequest, this, this.eventListener, this.client.connectTimeoutMillis(), this.client.readTimeoutMillis(), this.client.writeTimeoutMillis());
         return realInterceptorChain.proceed(this.originalRequest);
     }
 
@@ -178,7 +176,7 @@ final class RealCall implements Call {
         return this.executed;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String redactedUrl() {
         return this.originalRequest.url().redact();
     }
@@ -187,12 +185,12 @@ final class RealCall implements Call {
         return this.originalRequest;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public StreamAllocation streamAllocation() {
         return this.retryAndFollowUpInterceptor.streamAllocation();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String toLoggableString() {
         StringBuilder sb = new StringBuilder();
         sb.append(isCanceled() ? "canceled " : "");

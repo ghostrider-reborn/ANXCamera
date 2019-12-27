@@ -1,10 +1,10 @@
 package com.bumptech.glide.load.engine.a;
 
-import com.bumptech.glide.load.engine.a.a.C0007a;
+import com.bumptech.glide.load.engine.a.a;
 import java.io.File;
 
 /* compiled from: DiskLruCacheFactory */
-public class f implements C0007a {
+public class f implements a.C0007a {
     private final long Fg;
     private final a Gg;
 

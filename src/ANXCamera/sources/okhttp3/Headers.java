@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -45,11 +44,7 @@ public final class Headers {
                     }
                     return;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("value for name ");
-                sb.append(str);
-                sb.append(" == null");
-                throw new NullPointerException(sb.toString());
+                throw new NullPointerException("value for name " + str + " == null");
             } else {
                 throw new IllegalArgumentException("name is empty");
             }
@@ -60,10 +55,7 @@ public final class Headers {
             if (indexOf != -1) {
                 return add(str.substring(0, indexOf).trim(), str.substring(indexOf + 1));
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unexpected header: ");
-            sb.append(str);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unexpected header: " + str);
         }
 
         public Builder add(String str, String str2) {
@@ -71,18 +63,13 @@ public final class Headers {
             return addLenient(str, str2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Builder addLenient(String str) {
-            String str2 = ":";
-            int indexOf = str.indexOf(str2, 1);
-            if (indexOf != -1) {
-                return addLenient(str.substring(0, indexOf), str.substring(indexOf + 1));
-            }
-            String str3 = "";
-            return str.startsWith(str2) ? addLenient(str3, str.substring(1)) : addLenient(str3, str);
+            int indexOf = str.indexOf(":", 1);
+            return indexOf != -1 ? addLenient(str.substring(0, indexOf), str.substring(indexOf + 1)) : str.startsWith(":") ? addLenient("", str.substring(1)) : addLenient("", str);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Builder addLenient(String str, String str2) {
             this.namesAndValues.add(str);
             this.namesAndValues.add(str2.trim());
@@ -95,8 +82,8 @@ public final class Headers {
 
         public String get(String str) {
             for (int size = this.namesAndValues.size() - 2; size >= 0; size -= 2) {
-                if (str.equalsIgnoreCase((String) this.namesAndValues.get(size))) {
-                    return (String) this.namesAndValues.get(size + 1);
+                if (str.equalsIgnoreCase(this.namesAndValues.get(size))) {
+                    return this.namesAndValues.get(size + 1);
                 }
             }
             return null;
@@ -105,7 +92,7 @@ public final class Headers {
         public Builder removeAll(String str) {
             int i = 0;
             while (i < this.namesAndValues.size()) {
-                if (str.equalsIgnoreCase((String) this.namesAndValues.get(i))) {
+                if (str.equalsIgnoreCase(this.namesAndValues.get(i))) {
                     this.namesAndValues.remove(i);
                     this.namesAndValues.remove(i);
                     i -= 2;
@@ -145,23 +132,18 @@ public final class Headers {
         if (map != null) {
             String[] strArr = new String[(map.size() * 2)];
             int i = 0;
-            for (Entry entry : map.entrySet()) {
-                if (entry.getKey() == null || entry.getValue() == null) {
+            for (Map.Entry next : map.entrySet()) {
+                if (next.getKey() == null || next.getValue() == null) {
                     throw new IllegalArgumentException("Headers cannot be null");
                 }
-                String trim = ((String) entry.getKey()).trim();
-                String trim2 = ((String) entry.getValue()).trim();
+                String trim = ((String) next.getKey()).trim();
+                String trim2 = ((String) next.getValue()).trim();
                 if (trim.length() != 0 && trim.indexOf(0) == -1 && trim2.indexOf(0) == -1) {
                     strArr[i] = trim;
                     strArr[i + 1] = trim2;
                     i += 2;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unexpected header: ");
-                    sb.append(trim);
-                    sb.append(": ");
-                    sb.append(trim2);
-                    throw new IllegalArgumentException(sb.toString());
+                    throw new IllegalArgumentException("Unexpected header: " + trim + ": " + trim2);
                 }
             }
             return new Headers(strArr);
@@ -190,12 +172,7 @@ public final class Headers {
                 if (str.length() != 0 && str.indexOf(0) == -1 && str2.indexOf(0) == -1) {
                     i2 += 2;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unexpected header: ");
-                    sb.append(str);
-                    sb.append(": ");
-                    sb.append(str2);
-                    throw new IllegalArgumentException(sb.toString());
+                    throw new IllegalArgumentException("Unexpected header: " + str + ": " + str2);
                 }
             }
             return new Headers(strArr2);
@@ -207,7 +184,8 @@ public final class Headers {
     public long byteCount() {
         String[] strArr = this.namesAndValues;
         long length = (long) (strArr.length * 2);
-        for (int i = 0; i < strArr.length; i++) {
+        int length2 = strArr.length;
+        for (int i = 0; i < length2; i++) {
             length += (long) this.namesAndValues[i].length();
         }
         return length;

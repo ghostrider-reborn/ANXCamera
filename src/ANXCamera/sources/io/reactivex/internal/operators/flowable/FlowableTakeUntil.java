@@ -19,7 +19,7 @@ public final class FlowableTakeUntil<T, U> extends AbstractFlowableWithUpstream<
         private static final long serialVersionUID = -4945480365982832967L;
         final Subscriber<? super T> actual;
         final AtomicThrowable error = new AtomicThrowable();
-        final OtherSubscriber other = new OtherSubscriber<>();
+        final TakeUntilMainSubscriber<T>.OtherSubscriber other = new OtherSubscriber();
         final AtomicLong requested = new AtomicLong();
         final AtomicReference<Subscription> s = new AtomicReference<>();
 
@@ -32,13 +32,13 @@ public final class FlowableTakeUntil<T, U> extends AbstractFlowableWithUpstream<
             public void onComplete() {
                 SubscriptionHelper.cancel(TakeUntilMainSubscriber.this.s);
                 TakeUntilMainSubscriber takeUntilMainSubscriber = TakeUntilMainSubscriber.this;
-                HalfSerializer.onComplete(takeUntilMainSubscriber.actual, (AtomicInteger) takeUntilMainSubscriber, takeUntilMainSubscriber.error);
+                HalfSerializer.onComplete((Subscriber<?>) takeUntilMainSubscriber.actual, (AtomicInteger) takeUntilMainSubscriber, takeUntilMainSubscriber.error);
             }
 
             public void onError(Throwable th) {
                 SubscriptionHelper.cancel(TakeUntilMainSubscriber.this.s);
                 TakeUntilMainSubscriber takeUntilMainSubscriber = TakeUntilMainSubscriber.this;
-                HalfSerializer.onError(takeUntilMainSubscriber.actual, th, (AtomicInteger) takeUntilMainSubscriber, takeUntilMainSubscriber.error);
+                HalfSerializer.onError((Subscriber<?>) takeUntilMainSubscriber.actual, th, (AtomicInteger) takeUntilMainSubscriber, takeUntilMainSubscriber.error);
             }
 
             public void onNext(Object obj) {
@@ -64,12 +64,12 @@ public final class FlowableTakeUntil<T, U> extends AbstractFlowableWithUpstream<
 
         public void onComplete() {
             SubscriptionHelper.cancel(this.other);
-            HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+            HalfSerializer.onComplete((Subscriber<?>) this.actual, (AtomicInteger) this, this.error);
         }
 
         public void onError(Throwable th) {
             SubscriptionHelper.cancel(this.other);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Subscriber<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
         public void onNext(T t) {
@@ -95,6 +95,6 @@ public final class FlowableTakeUntil<T, U> extends AbstractFlowableWithUpstream<
         TakeUntilMainSubscriber takeUntilMainSubscriber = new TakeUntilMainSubscriber(subscriber);
         subscriber.onSubscribe(takeUntilMainSubscriber);
         this.other.subscribe(takeUntilMainSubscriber.other);
-        this.source.subscribe((FlowableSubscriber<? super T>) takeUntilMainSubscriber);
+        this.source.subscribe(takeUntilMainSubscriber);
     }
 }

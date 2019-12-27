@@ -4,12 +4,11 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public class WaterMarkData implements Parcelable {
-    public static final Creator<WaterMarkData> CREATOR = new Creator<WaterMarkData>() {
+    public static final Parcelable.Creator<WaterMarkData> CREATOR = new Parcelable.Creator<WaterMarkData>() {
         public WaterMarkData createFromParcel(Parcel parcel) {
             return new WaterMarkData(parcel);
         }
@@ -40,10 +39,7 @@ public class WaterMarkData implements Parcelable {
 
     protected WaterMarkData(Parcel parcel) {
         boolean z = false;
-        if (parcel.readByte() != 0) {
-            z = true;
-        }
-        this.isFemale = z;
+        this.isFemale = parcel.readByte() != 0 ? true : z;
         this.image = (Bitmap) parcel.readParcelable(Bitmap.class.getClassLoader());
         this.faceRectF = (RectF) parcel.readParcelable(RectF.class.getClassLoader());
         this.info = parcel.readString();

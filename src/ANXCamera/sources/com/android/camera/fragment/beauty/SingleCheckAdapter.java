@@ -3,30 +3,25 @@ package com.android.camera.fragment.beauty;
 import android.animation.ArgbEvaluator;
 import android.animation.FloatEvaluator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.LinearInterpolator;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ColorImageView;
 import java.util.List;
 
-public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
+public class SingleCheckAdapter extends RecyclerView.Adapter<SingleCheckViewHolder> {
     /* access modifiers changed from: private */
     public ArgbEvaluator mArgbEvaluator;
     /* access modifiers changed from: private */
@@ -41,7 +36,7 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
     public FloatEvaluator mFloatEvaluator;
     /* access modifiers changed from: private */
     public int mItemHorizontalMargin = 0;
-    private OnItemClickListener mOnItemClickListener;
+    private AdapterView.OnItemClickListener mOnItemClickListener;
     /* access modifiers changed from: private */
     public int mPreSelectedItem = 0;
     /* access modifiers changed from: private */
@@ -72,7 +67,7 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         }
     }
 
-    class SingleCheckViewHolder extends ViewHolder implements OnClickListener {
+    class SingleCheckViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private SingleCheckAdapter mAdapter;
         private ColorImageView mBase;
         private ImageView mImageView;
@@ -85,7 +80,7 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             this.mImageView = (ImageView) view.findViewById(R.id.second_image);
             this.mBase = (ColorImageView) view.findViewById(R.id.second_base);
             this.mBase.setIsNeedTransparent(false);
-            MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mBase.getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.mBase.getLayoutParams();
             marginLayoutParams.setMarginStart(SingleCheckAdapter.this.mItemHorizontalMargin);
             marginLayoutParams.setMarginEnd(SingleCheckAdapter.this.mItemHorizontalMargin);
             view.setOnClickListener(this);
@@ -122,7 +117,7 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         private void colorAnimate(final ColorImageView colorImageView, int i, int i2) {
             ValueAnimator ofObject = ValueAnimator.ofObject(new ArgbEvaluator(), new Object[]{Integer.valueOf(i), Integer.valueOf(i2)});
             ofObject.setDuration(200);
-            ofObject.addUpdateListener(new AnimatorUpdateListener() {
+            ofObject.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     colorImageView.setColorAndRefresh(((Integer) valueAnimator.getAnimatedValue()).intValue());
                 }
@@ -132,13 +127,13 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
 
         public void onClick(View view) {
             if (SingleCheckAdapter.this.mEnableClick) {
-                CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+                ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
                 if (cameraAction != null && !cameraAction.isDoingAction() && !cameraAction.isRecording()) {
                     int adapterPosition = getAdapterPosition();
                     if (adapterPosition != SingleCheckAdapter.this.mSelectedItem) {
                         SingleCheckAdapter singleCheckAdapter = SingleCheckAdapter.this;
-                        singleCheckAdapter.mPreSelectedItem = singleCheckAdapter.mSelectedItem;
-                        SingleCheckAdapter.this.mSelectedItem = adapterPosition;
+                        int unused = singleCheckAdapter.mPreSelectedItem = singleCheckAdapter.mSelectedItem;
+                        int unused2 = SingleCheckAdapter.this.mSelectedItem = adapterPosition;
                         SingleCheckViewHolder singleCheckViewHolder = (SingleCheckViewHolder) SingleCheckAdapter.this.mRecyclerView.findViewHolderForAdapterPosition(SingleCheckAdapter.this.mPreSelectedItem);
                         SingleCheckViewHolder singleCheckViewHolder2 = (SingleCheckViewHolder) SingleCheckAdapter.this.mRecyclerView.findViewHolderForAdapterPosition(SingleCheckAdapter.this.mSelectedItem);
                         animateOut(singleCheckViewHolder.mBase, singleCheckViewHolder.mText);
@@ -172,15 +167,9 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             }
             TextView textView = this.mText;
             if (i == SingleCheckAdapter.this.mSelectedItem) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(i);
-                sb.append(SingleCheckAdapter.this.mContext.getString(R.string.accessibility_open));
-                str = sb.toString();
+                str = i + SingleCheckAdapter.this.mContext.getString(R.string.accessibility_open);
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(i);
-                sb2.append(SingleCheckAdapter.this.mContext.getString(R.string.accessibility_closed));
-                str = sb2.toString();
+                str = i + SingleCheckAdapter.this.mContext.getString(R.string.accessibility_closed);
             }
             textView.setContentDescription(str);
         }
@@ -207,7 +196,7 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
 
     public void onBindViewHolder(SingleCheckViewHolder singleCheckViewHolder, int i) {
         try {
-            singleCheckViewHolder.setDateToView((LevelItem) this.mSingleCheckList.get(i), i);
+            singleCheckViewHolder.setDateToView(this.mSingleCheckList.get(i), i);
         } catch (Exception e2) {
             e2.printStackTrace();
         }
@@ -218,9 +207,9 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
     }
 
     public void onItemHolderClick(SingleCheckViewHolder singleCheckViewHolder) {
-        OnItemClickListener onItemClickListener = this.mOnItemClickListener;
+        AdapterView.OnItemClickListener onItemClickListener = this.mOnItemClickListener;
         if (onItemClickListener != null) {
-            onItemClickListener.onItemClick(null, singleCheckViewHolder.itemView, singleCheckViewHolder.getAdapterPosition(), singleCheckViewHolder.getItemId());
+            onItemClickListener.onItemClick((AdapterView) null, singleCheckViewHolder.itemView, singleCheckViewHolder.getAdapterPosition(), singleCheckViewHolder.getItemId());
         }
     }
 
@@ -228,7 +217,7 @@ public class SingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         this.mEnableClick = z;
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    public void setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
 

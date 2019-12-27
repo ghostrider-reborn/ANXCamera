@@ -4,7 +4,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.util.SparseArray;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.runing.DataItemRunning;
-import com.android.camera.data.provider.DataProvider.ProviderEvent;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.effect.FilterInfo;
 
 public class DataActionBackUpImpl implements DataBackUp {
@@ -14,7 +14,7 @@ public class DataActionBackUpImpl implements DataBackUp {
         if (this.mBackupArrays == null) {
             this.mBackupArrays = new SparseArray<>();
         }
-        SparseArray sparseArray = (SparseArray) this.mBackupArrays.get(i);
+        SparseArray sparseArray = this.mBackupArrays.get(i);
         if (sparseArray == null) {
             sparseArray = new SparseArray();
         }
@@ -38,10 +38,7 @@ public class DataActionBackUpImpl implements DataBackUp {
             return String.valueOf(FilterInfo.FILTER_ID_NONE);
         }
         String str = (String) backupRunning.get("pref_camera_shader_coloreffect_key");
-        if (str == null) {
-            str = String.valueOf(FilterInfo.FILTER_ID_NONE);
-        }
-        return str;
+        return str == null ? String.valueOf(FilterInfo.FILTER_ID_NONE) : str;
     }
 
     public SimpleArrayMap getBackupRunning(int i, int i2) {
@@ -49,7 +46,7 @@ public class DataActionBackUpImpl implements DataBackUp {
         if (sparseArray == null) {
             return null;
         }
-        SparseArray sparseArray2 = (SparseArray) sparseArray.get(i);
+        SparseArray sparseArray2 = sparseArray.get(i);
         if (sparseArray2 == null) {
             return null;
         }
@@ -90,13 +87,13 @@ public class DataActionBackUpImpl implements DataBackUp {
         dataItemRunning.clearArrayMap();
         SparseArray<SparseArray<SimpleArrayMap>> sparseArray = this.mBackupArrays;
         if (sparseArray != null) {
-            SparseArray sparseArray2 = (SparseArray) sparseArray.get(i);
-            if (!(sparseArray2 == null || sparseArray2.get(i2) == null)) {
+            SparseArray sparseArray2 = sparseArray.get(i);
+            if (sparseArray2 != null && sparseArray2.get(i2) != null) {
                 dataItemRunning.restoreArrayMap((SimpleArrayMap) sparseArray2.get(i2));
             }
         }
     }
 
-    public <P extends ProviderEvent> void startBackup(P p, int i) {
+    public <P extends DataProvider.ProviderEvent> void startBackup(P p, int i) {
     }
 }

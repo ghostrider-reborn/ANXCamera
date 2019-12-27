@@ -19,14 +19,14 @@ public class BackgroundWorker {
             public void run() {
                 Thread.currentThread().setName(str);
                 Looper.prepare();
-                BackgroundWorker.this.mLooper = Looper.myLooper();
+                Looper unused = BackgroundWorker.this.mLooper = Looper.myLooper();
                 synchronized (BackgroundWorker.this.mLock) {
-                    BackgroundWorker.this.mReady = true;
+                    boolean unused2 = BackgroundWorker.this.mReady = true;
                     BackgroundWorker.this.mLock.notifyAll();
                 }
                 Looper.loop();
                 synchronized (BackgroundWorker.this.mLock) {
-                    BackgroundWorker.this.mReady = false;
+                    boolean unused3 = BackgroundWorker.this.mReady = false;
                 }
             }
         });

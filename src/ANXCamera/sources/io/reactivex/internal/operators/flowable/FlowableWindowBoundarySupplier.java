@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.exceptions.MissingBackpressureException;
@@ -80,7 +79,7 @@ public final class FlowableWindowBoundarySupplier<T, B> extends AbstractFlowable
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             Subscriber<? super V> subscriber = this.actual;
@@ -88,17 +87,18 @@ public final class FlowableWindowBoundarySupplier<T, B> extends AbstractFlowable
             int i = 1;
             while (true) {
                 boolean z = this.done;
-                Object poll = simplePlainQueue.poll();
+                U poll = simplePlainQueue.poll();
                 boolean z2 = poll == null;
                 if (z && z2) {
                     DisposableHelper.dispose(this.boundary);
                     Throwable th = this.error;
                     if (th != null) {
                         unicastProcessor.onError(th);
+                        return;
                     } else {
                         unicastProcessor.onComplete();
+                        return;
                     }
-                    return;
                 } else if (z2) {
                     i = leave(-i);
                     if (i == 0) {
@@ -147,7 +147,7 @@ public final class FlowableWindowBoundarySupplier<T, B> extends AbstractFlowable
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void next() {
             this.queue.offer(NEXT);
             if (enter()) {
@@ -222,15 +222,16 @@ public final class FlowableWindowBoundarySupplier<T, B> extends AbstractFlowable
                             }
                             this.window = create;
                             WindowBoundaryInnerSubscriber windowBoundaryInnerSubscriber = new WindowBoundaryInnerSubscriber(this);
-                            if (this.boundary.compareAndSet(null, windowBoundaryInnerSubscriber)) {
+                            if (this.boundary.compareAndSet((Object) null, windowBoundaryInnerSubscriber)) {
                                 this.windows.getAndIncrement();
                                 subscription.request(Long.MAX_VALUE);
                                 publisher.subscribe(windowBoundaryInnerSubscriber);
+                                return;
                             }
-                        } else {
-                            subscription.cancel();
-                            subscriber.onError(new MissingBackpressureException("Could not deliver first window due to lack of requests"));
+                            return;
                         }
+                        subscription.cancel();
+                        subscriber.onError(new MissingBackpressureException("Could not deliver first window due to lack of requests"));
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         subscription.cancel();
@@ -253,6 +254,6 @@ public final class FlowableWindowBoundarySupplier<T, B> extends AbstractFlowable
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super Flowable<T>> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new WindowBoundaryMainSubscriber<Object>(new SerializedSubscriber(subscriber), this.other, this.bufferSize));
+        this.source.subscribe(new WindowBoundaryMainSubscriber(new SerializedSubscriber(subscriber), this.other, this.bufferSize));
     }
 }

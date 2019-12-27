@@ -28,7 +28,7 @@ public final class f<T> {
 
     @NonNull
     public static <T> f<T> a(@NonNull String str, @NonNull a<T> aVar) {
-        return new f<>(str, null, aVar);
+        return new f<>(str, (T) null, aVar);
     }
 
     @NonNull
@@ -56,7 +56,7 @@ public final class f<T> {
 
     @NonNull
     public static <T> f<T> q(@NonNull String str) {
-        return new f<>(str, null, ak());
+        return new f<>(str, (T) null, ak());
     }
 
     public void a(@NonNull T t, @NonNull MessageDigest messageDigest) {
@@ -64,10 +64,10 @@ public final class f<T> {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof f)) {
-            return false;
+        if (obj instanceof f) {
+            return this.key.equals(((f) obj).key);
         }
-        return this.key.equals(((f) obj).key);
+        return false;
     }
 
     @Nullable
@@ -80,11 +80,6 @@ public final class f<T> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Option{key='");
-        sb.append(this.key);
-        sb.append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "Option{key='" + this.key + '\'' + '}';
     }
 }

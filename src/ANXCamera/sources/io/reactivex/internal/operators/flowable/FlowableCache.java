@@ -50,7 +50,7 @@ public final class FlowableCache<T> extends AbstractFlowableWithUpstream<T, T> {
         }
 
         public void connect() {
-            this.source.subscribe((FlowableSubscriber<? super T>) this);
+            this.source.subscribe(this);
             this.isConnected = true;
         }
 
@@ -245,17 +245,17 @@ public final class FlowableCache<T> extends AbstractFlowableWithUpstream<T, T> {
         this.state = new CacheState<>(flowable, i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int cachedEventCount() {
         return this.state.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean hasSubscribers() {
         return ((ReplaySubscription[]) this.state.subscribers.get()).length != 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isConnected() {
         return this.state.isConnected;
     }

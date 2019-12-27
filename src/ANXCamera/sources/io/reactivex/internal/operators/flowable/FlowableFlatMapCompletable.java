@@ -79,14 +79,14 @@ public final class FlowableFlatMapCompletable<T> extends AbstractFlowableWithUps
         public void clear() {
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerComplete(InnerConsumer innerConsumer) {
+        /* access modifiers changed from: package-private */
+        public void innerComplete(FlatMapCompletableMainSubscriber<T>.InnerConsumer innerConsumer) {
             this.set.delete(innerConsumer);
             onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerError(InnerConsumer innerConsumer, Throwable th) {
+        /* access modifiers changed from: package-private */
+        public void innerError(FlatMapCompletableMainSubscriber<T>.InnerConsumer innerConsumer, Throwable th) {
             this.set.delete(innerConsumer);
             onError(th);
         }
@@ -175,6 +175,6 @@ public final class FlowableFlatMapCompletable<T> extends AbstractFlowableWithUps
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new FlatMapCompletableMainSubscriber<Object>(subscriber, this.mapper, this.delayErrors, this.maxConcurrency));
+        this.source.subscribe(new FlatMapCompletableMainSubscriber(subscriber, this.mapper, this.delayErrors, this.maxConcurrency));
     }
 }

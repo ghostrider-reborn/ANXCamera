@@ -2,8 +2,8 @@ package com.android.gallery3d.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint.FontMetricsInt;
-import android.os.Build.VERSION;
+import android.graphics.Paint;
+import android.os.Build;
 import android.text.TextPaint;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.Util;
@@ -20,10 +20,10 @@ public class MixStringTexture extends CanvasTexture {
     public static final int WATER_MARK_SHADOW_Y_COLOR = 771751936;
     private final TextPaint mCNPaint;
     private final TextPaint mENPaint;
-    private final FontMetricsInt mMetrics;
+    private final Paint.FontMetricsInt mMetrics;
     private final String mText;
 
-    private MixStringTexture(String str, TextPaint textPaint, TextPaint textPaint2, FontMetricsInt fontMetricsInt, int i, int i2) {
+    private MixStringTexture(String str, TextPaint textPaint, TextPaint textPaint2, Paint.FontMetricsInt fontMetricsInt, int i, int i2) {
         super(i, i2);
         this.mText = str;
         this.mCNPaint = textPaint;
@@ -52,7 +52,7 @@ public class MixStringTexture extends CanvasTexture {
     }
 
     private static MixStringTexture newInstance(String str, TextPaint textPaint, TextPaint textPaint2) {
-        FontMetricsInt fontMetricsInt = textPaint2.getFontMetricsInt();
+        Paint.FontMetricsInt fontMetricsInt = textPaint2.getFontMetricsInt();
         int ceil = (int) (Math.ceil((double) textPaint2.measureText(str)) * 1.5d);
         int i = fontMetricsInt.descent - fontMetricsInt.ascent;
         MixStringTexture mixStringTexture = new MixStringTexture(str, textPaint, textPaint2, fontMetricsInt, ceil <= 0 ? 1 : ceil, i <= 0 ? 1 : i);
@@ -60,7 +60,7 @@ public class MixStringTexture extends CanvasTexture {
     }
 
     private static void setLongshotMode(TextPaint textPaint, float f2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             CompatibilityUtils.setTextPaintLetterSpacing(textPaint, f2);
         }
     }
@@ -87,9 +87,6 @@ public class MixStringTexture extends CanvasTexture {
             i = (int) (f3 + f2);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Custom watermark cost time = ");
-        sb.append(System.nanoTime() - nanoTime);
-        Log.v(str, sb.toString());
+        Log.v(str, "Custom watermark cost time = " + (System.nanoTime() - nanoTime));
     }
 }

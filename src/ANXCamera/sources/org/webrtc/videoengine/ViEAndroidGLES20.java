@@ -3,9 +3,6 @@ package org.webrtc.videoengine;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLSurfaceView.EGLConfigChooser;
-import android.opengl.GLSurfaceView.EGLContextFactory;
-import android.opengl.GLSurfaceView.Renderer;
 import android.util.Log;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.microedition.khronos.egl.EGL10;
@@ -14,7 +11,7 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 
-public class ViEAndroidGLES20 extends GLSurfaceView implements Renderer {
+public class ViEAndroidGLES20 extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static final boolean DEBUG = true;
     /* access modifiers changed from: private */
     public static String TAG = "WEBRTC-JR-ViEAndroidGLES20";
@@ -26,7 +23,7 @@ public class ViEAndroidGLES20 extends GLSurfaceView implements Renderer {
     private int viewHeight = 0;
     private int viewWidth = 0;
 
-    private static class ConfigChooser implements EGLConfigChooser {
+    private static class ConfigChooser implements GLSurfaceView.EGLConfigChooser {
         private static int EGL_OPENGL_ES2_BIT = 4;
         private static int[] s_configAttribs2 = {12324, 4, 12323, 4, 12322, 4, 12352, EGL_OPENGL_ES2_BIT, 12344};
         protected int mAlphaSize;
@@ -77,7 +74,7 @@ public class ViEAndroidGLES20 extends GLSurfaceView implements Renderer {
 
         public EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay) {
             int[] iArr = new int[1];
-            egl10.eglChooseConfig(eGLDisplay, s_configAttribs2, null, 0, iArr);
+            egl10.eglChooseConfig(eGLDisplay, s_configAttribs2, (EGLConfig[]) null, 0, iArr);
             int i = iArr[0];
             if (i > 0) {
                 EGLConfig[] eGLConfigArr = new EGLConfig[i];
@@ -112,7 +109,7 @@ public class ViEAndroidGLES20 extends GLSurfaceView implements Renderer {
         }
     }
 
-    private static class ContextFactory implements EGLContextFactory {
+    private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
         private static int EGL_CONTEXT_CLIENT_VERSION = 12440;
 
         private ContextFactory() {

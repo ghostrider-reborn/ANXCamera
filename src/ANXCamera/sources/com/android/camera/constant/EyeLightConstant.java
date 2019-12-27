@@ -12,15 +12,16 @@ public class EyeLightConstant {
     public static final String STAR = "2";
     public static final String WINDOW = "6";
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Removed duplicated region for block: B:29:0x0061 A[RETURN] */
-    /* JADX WARNING: Removed duplicated region for block: B:30:0x0062  */
-    /* JADX WARNING: Removed duplicated region for block: B:32:0x0066  */
-    /* JADX WARNING: Removed duplicated region for block: B:34:0x006a  */
-    /* JADX WARNING: Removed duplicated region for block: B:36:0x006e  */
-    /* JADX WARNING: Removed duplicated region for block: B:38:0x0072  */
-    /* JADX WARNING: Removed duplicated region for block: B:40:0x0076  */
-    /* JADX WARNING: Removed duplicated region for block: B:42:0x007a  */
-    /* JADX WARNING: Removed duplicated region for block: B:44:0x007e  */
+    /* JADX WARNING: Removed duplicated region for block: B:30:0x0062 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:31:0x0066 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:32:0x006a A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:33:0x006e A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:34:0x0072 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:35:0x0076 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:36:0x007a A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:37:0x007e A[RETURN] */
     public static int getDrawable(String str) {
         char c2;
         int hashCode = str.hashCode();
@@ -106,15 +107,16 @@ public class EyeLightConstant {
         }
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Removed duplicated region for block: B:29:0x0061 A[RETURN] */
-    /* JADX WARNING: Removed duplicated region for block: B:30:0x0062  */
-    /* JADX WARNING: Removed duplicated region for block: B:32:0x0066  */
-    /* JADX WARNING: Removed duplicated region for block: B:34:0x006a  */
-    /* JADX WARNING: Removed duplicated region for block: B:36:0x006e  */
-    /* JADX WARNING: Removed duplicated region for block: B:38:0x0072  */
-    /* JADX WARNING: Removed duplicated region for block: B:40:0x0076  */
-    /* JADX WARNING: Removed duplicated region for block: B:42:0x007a  */
-    /* JADX WARNING: Removed duplicated region for block: B:44:0x007e  */
+    /* JADX WARNING: Removed duplicated region for block: B:30:0x0062 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:31:0x0066 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:32:0x006a A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:33:0x006e A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:34:0x0072 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:35:0x0076 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:36:0x007a A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:37:0x007e A[RETURN] */
     public static int getString(String str) {
         char c2;
         int hashCode = str.hashCode();

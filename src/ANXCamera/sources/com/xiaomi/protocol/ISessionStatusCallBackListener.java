@@ -60,16 +60,15 @@ public interface ISessionStatusCallBackListener extends IInterface {
         }
 
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            String str = DESCRIPTOR;
             if (i == 1) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 onSessionStatusFlawResultData(parcel.readInt(), parcel.readInt());
                 parcel2.writeNoException();
                 return true;
             } else if (i != 1598968902) {
                 return super.onTransact(i, parcel, parcel2, i2);
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

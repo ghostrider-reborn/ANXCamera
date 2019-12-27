@@ -1,10 +1,10 @@
 package com.arcsoft.camera.utils;
 
 import android.os.Parcel;
-import android.os.Parcelable.Creator;
+import android.os.Parcelable;
 
 /* compiled from: MPoint */
-class f implements Creator {
+class f implements Parcelable.Creator {
     f() {
     }
 

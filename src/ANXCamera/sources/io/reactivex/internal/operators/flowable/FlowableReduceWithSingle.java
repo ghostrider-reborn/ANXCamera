@@ -6,6 +6,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.internal.disposables.EmptyDisposable;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.flowable.FlowableReduceSeedSingle;
 import java.util.concurrent.Callable;
 import org.reactivestreams.Publisher;
 
@@ -23,12 +24,12 @@ public final class FlowableReduceWithSingle<T, R> extends Single<R> {
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super R> singleObserver) {
         try {
-            Object call = this.seedSupplier.call();
+            R call = this.seedSupplier.call();
             ObjectHelper.requireNonNull(call, "The seedSupplier returned a null value");
-            this.source.subscribe(new ReduceSeedObserver(singleObserver, this.reducer, call));
+            this.source.subscribe(new FlowableReduceSeedSingle.ReduceSeedObserver(singleObserver, this.reducer, call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

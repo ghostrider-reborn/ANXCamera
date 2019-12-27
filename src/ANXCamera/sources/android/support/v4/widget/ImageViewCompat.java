@@ -1,9 +1,9 @@
 package android.support.v4.widget;
 
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -14,24 +14,30 @@ public class ImageViewCompat {
 
     @Nullable
     public static ColorStateList getImageTintList(@NonNull ImageView imageView) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return imageView.getImageTintList();
         }
-        return imageView instanceof TintableImageSourceView ? ((TintableImageSourceView) imageView).getSupportImageTintList() : null;
+        if (imageView instanceof TintableImageSourceView) {
+            return ((TintableImageSourceView) imageView).getSupportImageTintList();
+        }
+        return null;
     }
 
     @Nullable
-    public static Mode getImageTintMode(@NonNull ImageView imageView) {
-        if (VERSION.SDK_INT >= 21) {
+    public static PorterDuff.Mode getImageTintMode(@NonNull ImageView imageView) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return imageView.getImageTintMode();
         }
-        return imageView instanceof TintableImageSourceView ? ((TintableImageSourceView) imageView).getSupportImageTintMode() : null;
+        if (imageView instanceof TintableImageSourceView) {
+            return ((TintableImageSourceView) imageView).getSupportImageTintMode();
+        }
+        return null;
     }
 
     public static void setImageTintList(@NonNull ImageView imageView, @Nullable ColorStateList colorStateList) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             imageView.setImageTintList(colorStateList);
-            if (VERSION.SDK_INT == 21) {
+            if (Build.VERSION.SDK_INT == 21) {
                 Drawable drawable = imageView.getDrawable();
                 boolean z = (imageView.getImageTintList() == null || imageView.getImageTintMode() == null) ? false : true;
                 if (drawable != null && z) {
@@ -46,10 +52,10 @@ public class ImageViewCompat {
         }
     }
 
-    public static void setImageTintMode(@NonNull ImageView imageView, @Nullable Mode mode) {
-        if (VERSION.SDK_INT >= 21) {
+    public static void setImageTintMode(@NonNull ImageView imageView, @Nullable PorterDuff.Mode mode) {
+        if (Build.VERSION.SDK_INT >= 21) {
             imageView.setImageTintMode(mode);
-            if (VERSION.SDK_INT == 21) {
+            if (Build.VERSION.SDK_INT == 21) {
                 Drawable drawable = imageView.getDrawable();
                 boolean z = (imageView.getImageTintList() == null || imageView.getImageTintMode() == null) ? false : true;
                 if (drawable != null && z) {

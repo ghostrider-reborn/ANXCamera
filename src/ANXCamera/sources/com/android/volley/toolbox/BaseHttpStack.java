@@ -22,8 +22,8 @@ public abstract class BaseHttpStack implements HttpStack {
         HttpResponse executeRequest = executeRequest(request, map);
         BasicHttpResponse basicHttpResponse = new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), executeRequest.getStatusCode(), ""));
         ArrayList arrayList = new ArrayList();
-        for (Header header : executeRequest.getHeaders()) {
-            arrayList.add(new BasicHeader(header.getName(), header.getValue()));
+        for (Header next : executeRequest.getHeaders()) {
+            arrayList.add(new BasicHeader(next.getName(), next.getValue()));
         }
         basicHttpResponse.setHeaders((org.apache.http.Header[]) arrayList.toArray(new org.apache.http.Header[arrayList.size()]));
         InputStream content = executeRequest.getContent();

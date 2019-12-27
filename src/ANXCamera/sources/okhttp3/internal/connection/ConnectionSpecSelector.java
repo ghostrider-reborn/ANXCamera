@@ -26,7 +26,7 @@ public final class ConnectionSpecSelector {
 
     private boolean isFallbackPossible(SSLSocket sSLSocket) {
         for (int i = this.nextModeIndex; i < this.connectionSpecs.size(); i++) {
-            if (((ConnectionSpec) this.connectionSpecs.get(i)).isCompatible(sSLSocket)) {
+            if (this.connectionSpecs.get(i).isCompatible(sSLSocket)) {
                 return true;
             }
         }
@@ -42,7 +42,7 @@ public final class ConnectionSpecSelector {
                 connectionSpec = null;
                 break;
             }
-            connectionSpec = (ConnectionSpec) this.connectionSpecs.get(i);
+            connectionSpec = this.connectionSpecs.get(i);
             if (connectionSpec.isCompatible(sSLSocket)) {
                 this.nextModeIndex = i + 1;
                 break;
@@ -54,29 +54,18 @@ public final class ConnectionSpecSelector {
             Internal.instance.apply(connectionSpec, sSLSocket, this.isFallback);
             return connectionSpec;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unable to find acceptable protocols. isFallback=");
-        sb.append(this.isFallback);
-        sb.append(", modes=");
-        sb.append(this.connectionSpecs);
-        sb.append(", supported protocols=");
-        sb.append(Arrays.toString(sSLSocket.getEnabledProtocols()));
-        throw new UnknownServiceException(sb.toString());
+        throw new UnknownServiceException("Unable to find acceptable protocols. isFallback=" + this.isFallback + ", modes=" + this.connectionSpecs + ", supported protocols=" + Arrays.toString(sSLSocket.getEnabledProtocols()));
     }
 
     public boolean connectionFailed(IOException iOException) {
-        boolean z = true;
         this.isFallback = true;
         if (!this.isFallbackPossible || (iOException instanceof ProtocolException) || (iOException instanceof InterruptedIOException)) {
             return false;
         }
-        boolean z2 = iOException instanceof SSLHandshakeException;
-        if ((z2 && (iOException.getCause() instanceof CertificateException)) || (iOException instanceof SSLPeerUnverifiedException)) {
-            return false;
+        boolean z = iOException instanceof SSLHandshakeException;
+        if ((!z || !(iOException.getCause() instanceof CertificateException)) && !(iOException instanceof SSLPeerUnverifiedException)) {
+            return z || (iOException instanceof SSLProtocolException);
         }
-        if (!z2 && !(iOException instanceof SSLProtocolException)) {
-            z = false;
-        }
-        return z;
+        return false;
     }
 }

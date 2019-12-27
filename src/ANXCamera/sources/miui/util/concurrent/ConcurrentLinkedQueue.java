@@ -1,7 +1,7 @@
 package miui.util.concurrent;
 
 import java.util.Iterator;
-import miui.util.concurrent.Queue.Predicate;
+import miui.util.concurrent.Queue;
 
 public class ConcurrentLinkedQueue<T> implements Queue<T> {
     private final java.util.concurrent.ConcurrentLinkedQueue<T> mQueue = new java.util.concurrent.ConcurrentLinkedQueue<>();
@@ -28,9 +28,9 @@ public class ConcurrentLinkedQueue<T> implements Queue<T> {
         return this.mQueue.offer(t);
     }
 
-    public int remove(Predicate<T> predicate) {
+    public int remove(Queue.Predicate<T> predicate) {
         int i = 0;
-        Iterator it = this.mQueue.iterator();
+        Iterator<T> it = this.mQueue.iterator();
         while (it.hasNext()) {
             if (predicate.apply(it.next())) {
                 it.remove();

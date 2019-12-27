@@ -34,7 +34,7 @@ public final class CertificatePinner {
         }
 
         public CertificatePinner build() {
-            return new CertificatePinner(new LinkedHashSet(this.pins), null);
+            return new CertificatePinner(new LinkedHashSet(this.pins), (CertificateChainCleaner) null);
         }
     }
 
@@ -48,80 +48,54 @@ public final class CertificatePinner {
         Pin(String str, String str2) {
             String str3;
             this.pattern = str;
-            String str4 = "http://";
             if (str.startsWith(WILDCARD)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str4);
-                sb.append(str.substring(2));
-                str3 = HttpUrl.parse(sb.toString()).host();
+                str3 = HttpUrl.parse("http://" + str.substring(2)).host();
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str4);
-                sb2.append(str);
-                str3 = HttpUrl.parse(sb2.toString()).host();
+                str3 = HttpUrl.parse("http://" + str).host();
             }
             this.canonicalHostname = str3;
-            String str5 = "sha1/";
-            if (str2.startsWith(str5)) {
-                this.hashAlgorithm = str5;
+            if (str2.startsWith("sha1/")) {
+                this.hashAlgorithm = "sha1/";
                 this.hash = ByteString.decodeBase64(str2.substring(5));
+            } else if (str2.startsWith("sha256/")) {
+                this.hashAlgorithm = "sha256/";
+                this.hash = ByteString.decodeBase64(str2.substring(7));
             } else {
-                String str6 = "sha256/";
-                if (str2.startsWith(str6)) {
-                    this.hashAlgorithm = str6;
-                    this.hash = ByteString.decodeBase64(str2.substring(7));
-                } else {
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("pins must start with 'sha256/' or 'sha1/': ");
-                    sb3.append(str2);
-                    throw new IllegalArgumentException(sb3.toString());
-                }
+                throw new IllegalArgumentException("pins must start with 'sha256/' or 'sha1/': " + str2);
             }
             if (this.hash == null) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("pins must be base64: ");
-                sb4.append(str2);
-                throw new IllegalArgumentException(sb4.toString());
+                throw new IllegalArgumentException("pins must be base64: " + str2);
             }
         }
 
         public boolean equals(Object obj) {
             if (obj instanceof Pin) {
                 Pin pin = (Pin) obj;
-                if (this.pattern.equals(pin.pattern) && this.hashAlgorithm.equals(pin.hashAlgorithm) && this.hash.equals(pin.hash)) {
-                    return true;
-                }
+                return this.pattern.equals(pin.pattern) && this.hashAlgorithm.equals(pin.hashAlgorithm) && this.hash.equals(pin.hash);
             }
-            return false;
         }
 
         public int hashCode() {
             return ((((527 + this.pattern.hashCode()) * 31) + this.hashAlgorithm.hashCode()) * 31) + this.hash.hashCode();
         }
 
-        /* access modifiers changed from: 0000 */
-        /* JADX WARNING: Code restructure failed: missing block: B:5:0x002e, code lost:
-            if (r11.regionMatches(false, r6, r7, 0, r7.length()) != false) goto L_0x0032;
-         */
+        /* access modifiers changed from: package-private */
         public boolean matches(String str) {
             if (!this.pattern.startsWith(WILDCARD)) {
                 return str.equals(this.canonicalHostname);
             }
             int indexOf = str.indexOf(46);
-            boolean z = true;
             if ((str.length() - indexOf) - 1 == this.canonicalHostname.length()) {
-                int i = indexOf + 1;
                 String str2 = this.canonicalHostname;
+                if (str.regionMatches(false, indexOf + 1, str2, 0, str2.length())) {
+                    return true;
+                }
             }
-            z = false;
-            return z;
+            return false;
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.hashAlgorithm);
-            sb.append(this.hash.base64());
-            return sb.toString();
+            return this.hashAlgorithm + this.hash.base64();
         }
     }
 
@@ -132,10 +106,7 @@ public final class CertificatePinner {
 
     public static String pin(Certificate certificate) {
         if (certificate instanceof X509Certificate) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("sha256/");
-            sb.append(sha256((X509Certificate) certificate).base64());
-            return sb.toString();
+            return "sha256/" + sha256((X509Certificate) certificate).base64();
         }
         throw new IllegalArgumentException("Certificate pinning requires X509 certificates");
     }
@@ -149,8 +120,7 @@ public final class CertificatePinner {
     }
 
     public void check(String str, List<Certificate> list) throws SSLPeerUnverifiedException {
-        String str2;
-        List findMatchingPins = findMatchingPins(str);
+        List<Pin> findMatchingPins = findMatchingPins(str);
         if (!findMatchingPins.isEmpty()) {
             CertificateChainCleaner certificateChainCleaner2 = this.certificateChainCleaner;
             if (certificateChainCleaner2 != null) {
@@ -163,7 +133,7 @@ public final class CertificatePinner {
                 ByteString byteString = null;
                 ByteString byteString2 = null;
                 for (int i2 = 0; i2 < size2; i2++) {
-                    Pin pin = (Pin) findMatchingPins.get(i2);
+                    Pin pin = findMatchingPins.get(i2);
                     if (pin.hashAlgorithm.equals("sha256/")) {
                         if (byteString == null) {
                             byteString = sha256(x509Certificate);
@@ -179,73 +149,56 @@ public final class CertificatePinner {
                             return;
                         }
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("unsupported hashAlgorithm: ");
-                        sb.append(pin.hashAlgorithm);
-                        throw new AssertionError(sb.toString());
+                        throw new AssertionError("unsupported hashAlgorithm: " + pin.hashAlgorithm);
                     }
                 }
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Certificate pinning failure!");
-            sb2.append("\n  Peer certificate chain:");
+            StringBuilder sb = new StringBuilder();
+            sb.append("Certificate pinning failure!");
+            sb.append("\n  Peer certificate chain:");
             int size3 = list.size();
-            int i3 = 0;
-            while (true) {
-                str2 = "\n    ";
-                if (i3 >= size3) {
-                    break;
-                }
+            for (int i3 = 0; i3 < size3; i3++) {
                 X509Certificate x509Certificate2 = (X509Certificate) list.get(i3);
-                sb2.append(str2);
-                sb2.append(pin(x509Certificate2));
-                sb2.append(": ");
-                sb2.append(x509Certificate2.getSubjectDN().getName());
-                i3++;
+                sb.append("\n    ");
+                sb.append(pin(x509Certificate2));
+                sb.append(": ");
+                sb.append(x509Certificate2.getSubjectDN().getName());
             }
-            sb2.append("\n  Pinned certificates for ");
-            sb2.append(str);
-            sb2.append(":");
+            sb.append("\n  Pinned certificates for ");
+            sb.append(str);
+            sb.append(":");
             int size4 = findMatchingPins.size();
             for (int i4 = 0; i4 < size4; i4++) {
-                Pin pin2 = (Pin) findMatchingPins.get(i4);
-                sb2.append(str2);
-                sb2.append(pin2);
+                sb.append("\n    ");
+                sb.append(findMatchingPins.get(i4));
             }
-            throw new SSLPeerUnverifiedException(sb2.toString());
+            throw new SSLPeerUnverifiedException(sb.toString());
         }
     }
 
     public void check(String str, Certificate... certificateArr) throws SSLPeerUnverifiedException {
-        check(str, Arrays.asList(certificateArr));
+        check(str, (List<Certificate>) Arrays.asList(certificateArr));
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:8:0x001c, code lost:
-        if (r3.pins.equals(r4.pins) != false) goto L_0x0020;
-     */
     public boolean equals(@Nullable Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
         if (obj instanceof CertificatePinner) {
             CertificatePinner certificatePinner = (CertificatePinner) obj;
-            if (Util.equal(this.certificateChainCleaner, certificatePinner.certificateChainCleaner)) {
-            }
+            return Util.equal(this.certificateChainCleaner, certificatePinner.certificateChainCleaner) && this.pins.equals(certificatePinner.pins);
         }
-        z = false;
-        return z;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public List<Pin> findMatchingPins(String str) {
         List<Pin> emptyList = Collections.emptyList();
-        for (Pin pin : this.pins) {
-            if (pin.matches(str)) {
+        for (Pin next : this.pins) {
+            if (next.matches(str)) {
                 if (emptyList.isEmpty()) {
                     emptyList = new ArrayList<>();
                 }
-                emptyList.add(pin);
+                emptyList.add(next);
             }
         }
         return emptyList;
@@ -256,7 +209,7 @@ public final class CertificatePinner {
         return ((certificateChainCleaner2 != null ? certificateChainCleaner2.hashCode() : 0) * 31) + this.pins.hashCode();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public CertificatePinner withCertificateChainCleaner(@Nullable CertificateChainCleaner certificateChainCleaner2) {
         return Util.equal(this.certificateChainCleaner, certificateChainCleaner2) ? this : new CertificatePinner(this.pins, certificateChainCleaner2);
     }

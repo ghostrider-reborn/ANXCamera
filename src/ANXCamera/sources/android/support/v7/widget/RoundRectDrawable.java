@@ -5,7 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -25,7 +25,7 @@ class RoundRectDrawable extends Drawable {
     private float mRadius;
     private ColorStateList mTint;
     private PorterDuffColorFilter mTintFilter;
-    private Mode mTintMode = Mode.SRC_IN;
+    private PorterDuff.Mode mTintMode = PorterDuff.Mode.SRC_IN;
 
     RoundRectDrawable(ColorStateList colorStateList, float f2) {
         this.mRadius = f2;
@@ -35,7 +35,7 @@ class RoundRectDrawable extends Drawable {
         this.mBoundsI = new Rect();
     }
 
-    private PorterDuffColorFilter createTintFilter(ColorStateList colorStateList, Mode mode) {
+    private PorterDuffColorFilter createTintFilter(ColorStateList colorStateList, PorterDuff.Mode mode) {
         if (colorStateList == null || mode == null) {
             return null;
         }
@@ -76,7 +76,7 @@ class RoundRectDrawable extends Drawable {
         float f2 = this.mRadius;
         canvas.drawRoundRect(rectF, f2, f2, paint);
         if (z) {
-            paint.setColorFilter(null);
+            paint.setColorFilter((ColorFilter) null);
         }
     }
 
@@ -92,7 +92,7 @@ class RoundRectDrawable extends Drawable {
         outline.setRoundRect(this.mBoundsI, this.mRadius);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public float getPadding() {
         return this.mPadding;
     }
@@ -128,7 +128,7 @@ class RoundRectDrawable extends Drawable {
         }
         ColorStateList colorStateList2 = this.mTint;
         if (colorStateList2 != null) {
-            Mode mode = this.mTintMode;
+            PorterDuff.Mode mode = this.mTintMode;
             if (mode != null) {
                 this.mTintFilter = createTintFilter(colorStateList2, mode);
                 return true;
@@ -150,22 +150,22 @@ class RoundRectDrawable extends Drawable {
         this.mPaint.setColorFilter(colorFilter);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setPadding(float f2, boolean z, boolean z2) {
         if (f2 != this.mPadding || this.mInsetForPadding != z || this.mInsetForRadius != z2) {
             this.mPadding = f2;
             this.mInsetForPadding = z;
             this.mInsetForRadius = z2;
-            updateBounds(null);
+            updateBounds((Rect) null);
             invalidateSelf();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setRadius(float f2) {
         if (f2 != this.mRadius) {
             this.mRadius = f2;
-            updateBounds(null);
+            updateBounds((Rect) null);
             invalidateSelf();
         }
     }
@@ -176,7 +176,7 @@ class RoundRectDrawable extends Drawable {
         invalidateSelf();
     }
 
-    public void setTintMode(Mode mode) {
+    public void setTintMode(PorterDuff.Mode mode) {
         this.mTintMode = mode;
         this.mTintFilter = createTintFilter(this.mTint, this.mTintMode);
         invalidateSelf();

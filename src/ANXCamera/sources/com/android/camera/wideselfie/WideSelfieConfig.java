@@ -33,12 +33,12 @@ public class WideSelfieConfig {
     public static WideSelfieConfig getInstance(Context context) {
         WideSelfieConfig wideSelfieConfig;
         do {
-            WideSelfieConfig wideSelfieConfig2 = (WideSelfieConfig) INSTANCE.get();
+            WideSelfieConfig wideSelfieConfig2 = INSTANCE.get();
             if (wideSelfieConfig2 != null) {
                 return wideSelfieConfig2;
             }
             wideSelfieConfig = new WideSelfieConfig(context);
-        } while (!INSTANCE.compareAndSet(null, wideSelfieConfig));
+        } while (!INSTANCE.compareAndSet((Object) null, wideSelfieConfig));
         return wideSelfieConfig;
     }
 
@@ -46,26 +46,14 @@ public class WideSelfieConfig {
         Resources resources = context.getResources();
         this.mStillPreviewWidth = resources.getDimensionPixelOffset(R.dimen.wide_selfie_still_preview_width);
         this.mStillPreviewHeight = (int) (((float) this.mStillPreviewWidth) * UI_RATE);
-        StringBuilder sb = new StringBuilder();
-        sb.append("mStillPreviewWidth ");
-        sb.append(this.mStillPreviewWidth);
-        sb.append(", mStillPreviewHeight = ");
-        sb.append(this.mStillPreviewHeight);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "mStillPreviewWidth " + this.mStillPreviewWidth + ", mStillPreviewHeight = " + this.mStillPreviewHeight);
         this.mThumbBgWidth = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_width) + 2;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("mThumbBgWidth ");
-        sb3.append(this.mThumbBgWidth);
-        sb3.append(", mStillPreviewWidth = ");
-        sb3.append(this.mStillPreviewWidth);
-        Log.d(str, sb3.toString());
+        Log.d(TAG, "mThumbBgWidth " + this.mThumbBgWidth + ", mStillPreviewWidth = " + this.mStillPreviewWidth);
         this.mThumbBgHeight = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_height) + 2;
-        this.mThumbBgTopMargin = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_top_margin) - 1;
+        this.mThumbBgTopMargin = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_top_margin) + -1;
         this.mThumbBgWidthVertical = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_width_vertical) + 2;
         this.mThumbBgHeightVertical = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_height_vertical) + 2;
-        this.mThumbBgTopMarginVertical = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_top_margin_vertical) - 1;
+        this.mThumbBgTopMarginVertical = resources.getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_top_margin_vertical) + -1;
         int i = this.mThumbBgWidth;
         int i2 = this.mStillPreviewWidth;
         this.mThumbViewWidth = i + i2;

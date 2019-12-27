@@ -19,10 +19,6 @@ public final class BooleanSubscription extends AtomicBoolean implements Subscrip
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("BooleanSubscription(cancelled=");
-        sb.append(get());
-        sb.append(")");
-        return sb.toString();
+        return "BooleanSubscription(cancelled=" + get() + ")";
     }
 }

@@ -25,10 +25,7 @@ public class j extends m<ParcelFileDescriptor> {
         if (openAssetFileDescriptor != null) {
             return openAssetFileDescriptor.getParcelFileDescriptor();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("FileDescriptor is null for: ");
-        sb.append(uri);
-        throw new FileNotFoundException(sb.toString());
+        throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }
 
     /* access modifiers changed from: protected */

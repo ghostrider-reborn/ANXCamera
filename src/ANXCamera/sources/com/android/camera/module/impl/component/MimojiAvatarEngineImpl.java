@@ -3,18 +3,20 @@ package com.android.camera.module.impl.component;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureResult;
 import android.location.Location;
 import android.media.Image;
+import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.util.Size;
 import android.widget.Toast;
 import com.android.camera.ActivityBase;
@@ -23,7 +25,7 @@ import com.android.camera.CameraSettings;
 import com.android.camera.FileCompat;
 import com.android.camera.LocationManager;
 import com.android.camera.R;
-import com.android.camera.SurfaceTextureScreenNail.ExternalFrameProcessor;
+import com.android.camera.SurfaceTextureScreenNail;
 import com.android.camera.Thumbnail;
 import com.android.camera.Util;
 import com.android.camera.constant.DurationConstant;
@@ -40,34 +42,23 @@ import com.android.camera.module.BaseModule;
 import com.android.camera.module.LiveModule;
 import com.android.camera.module.Module;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.MimojiAlert;
-import com.android.camera.protocol.ModeProtocol.MimojiAvatarEngine;
-import com.android.camera.protocol.ModeProtocol.MimojiEditor;
-import com.android.camera.protocol.ModeProtocol.RecordState;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.Storage;
 import com.android.camera.ui.V6CameraGLSurfaceView;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.PreviewCallback;
 import com.android.camera2.CameraCapabilities;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigValue;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarProcessInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarProfileResult;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.AvatarEngine;
 import com.arcsoft.avatar.RecordModule;
-import com.arcsoft.avatar.RecordModule.MediaResultCallback;
 import com.arcsoft.avatar.recoder.RecordingListener;
 import com.arcsoft.avatar.util.ASVLOFFSCREEN;
 import com.arcsoft.avatar.util.AsvloffscreenUtil;
 import com.arcsoft.avatar.util.LOG;
 import com.ss.android.ttve.common.TEDefine;
 import com.xiaomi.camera.core.ParallelTaskData;
-import com.xiaomi.camera.core.ParallelTaskDataParameter.Builder;
+import com.xiaomi.camera.core.ParallelTaskDataParameter;
 import com.xiaomi.camera.core.PictureInfo;
 import io.reactivex.annotations.SchedulerSupport;
 import java.io.FileDescriptor;
@@ -79,7 +70,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrameProcessor, PreviewCallback {
+public class MimojiAvatarEngineImpl implements ModeProtocol.MimojiAvatarEngine, SurfaceTextureScreenNail.ExternalFrameProcessor, Camera2Proxy.PreviewCallback {
     private static final int HANDLER_RECORDING_CURRENT_FILE_SIZE = 3;
     private static final int HANDLER_RECORDING_CURRENT_TIME = 1;
     private static final int HANDLER_RECORDING_MAX_DURATION_REACHED = 2;
@@ -98,7 +89,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
     public String mAvatarTemplatePath = "";
     private V6CameraGLSurfaceView mCameraView;
     /* access modifiers changed from: private */
-    public MediaResultCallback mCaptureCallback = new MediaResultCallback() {
+    public RecordModule.MediaResultCallback mCaptureCallback = new RecordModule.MediaResultCallback() {
         public void onCaptureResult(final ByteBuffer byteBuffer) {
             Log.d(MimojiAvatarEngineImpl.TAG, "onCapture Result");
             MimojiAvatarEngineImpl.this.mLoadHandler.post(new Runnable() {
@@ -110,8 +101,8 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
 
         public void onVideoResult() {
             Log.d(MimojiAvatarEngineImpl.TAG, "stop video record callback");
-            MimojiAvatarEngineImpl.this.mIsRecording = false;
-            MimojiAvatarEngineImpl.this.mIsRecordStopping = false;
+            boolean unused = MimojiAvatarEngineImpl.this.mIsRecording = false;
+            boolean unused2 = MimojiAvatarEngineImpl.this.mIsRecordStopping = false;
             MimojiAvatarEngineImpl.this.mActivityBase.getImageSaver().addVideo(MimojiAvatarEngineImpl.this.mSaveVideoPath, MimojiAvatarEngineImpl.this.mContentValues, true);
             if (MimojiAvatarEngineImpl.this.mVideoFileStream != null) {
                 try {
@@ -119,9 +110,9 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                 } catch (IOException e2) {
                     Log.e(MimojiAvatarEngineImpl.TAG, "fail to close file stream", e2);
                 }
-                MimojiAvatarEngineImpl.this.mVideoFileStream = null;
+                FileOutputStream unused3 = MimojiAvatarEngineImpl.this.mVideoFileStream = null;
             }
-            MimojiAvatarEngineImpl.this.mVideoFileDescriptor = null;
+            FileDescriptor unused4 = MimojiAvatarEngineImpl.this.mVideoFileDescriptor = null;
             if (MimojiAvatarEngineImpl.this.mGetThumCountDownLatch != null) {
                 MimojiAvatarEngineImpl.this.mGetThumCountDownLatch.countDown();
             }
@@ -166,9 +157,9 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
     private Handler mLoadResourceHandler;
     private HandlerThread mLoadResourceThread = new HandlerThread("LoadResource");
     private HandlerThread mLoadThread = new HandlerThread("LoadConfig");
-    private MainContentProtocol mMainProtocol;
+    private ModeProtocol.MainContentProtocol mMainProtocol;
     private int mMaxVideoDurationInMs = DurationConstant.DURATION_VIDEO_RECORDING_FUN;
-    private MimojiEditor mMimojiEditor;
+    private ModeProtocol.MimojiEditor mMimojiEditor;
     /* access modifiers changed from: private */
     public MimojiStatusManager mMimojiStatusManager;
     private boolean mNeedCapture = false;
@@ -194,10 +185,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                     long longValue = (((Long) obj).longValue() / 1000) / 1000;
                     obtainMessage.arg1 = (int) longValue;
                     String access$100 = MimojiAvatarEngineImpl.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onRecordingListener_time = ");
-                    sb.append(longValue);
-                    Log.d(access$100, sb.toString());
+                    Log.d(access$100, "onRecordingListener_time = " + longValue);
                     obtainMessage.what = 1;
                     break;
                 case 259:
@@ -228,7 +216,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         this.mActivityBase = activityBase;
         this.mCameraView = activityBase.getGLView();
         this.mContext = activityBase.getCameraAppImpl().getApplicationContext();
-        this.mMainProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        this.mMainProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         this.mLoadResourceThread.start();
         this.mLoadResourceHandler = new Handler(this.mLoadResourceThread.getLooper());
         this.mLoadThread.start();
@@ -254,7 +242,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
     public void CaptureCallback(ByteBuffer byteBuffer) {
         int i;
         int i2;
-        Bitmap createBitmap = Bitmap.createBitmap(this.mDrawSize.getWidth(), this.mDrawSize.getHeight(), Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(this.mDrawSize.getWidth(), this.mDrawSize.getHeight(), Bitmap.Config.ARGB_8888);
         createBitmap.copyPixelsFromBuffer(byteBuffer);
         Matrix matrix = new Matrix();
         boolean z = this.mIsFrontCamera;
@@ -273,46 +261,46 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             if (this.mIsFrontCamera) {
                 int i5 = this.mDeviceRotation;
                 if (i5 % 180 == 0) {
-                    i = (i5 + 180) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
-                    Thumbnail createThumbnail = Thumbnail.createThumbnail(null, this.mIsFrontCamera ? createBitmap : createBitmap2, i, this.mIsFrontCamera);
+                    i = (i5 + 180) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                    Thumbnail createThumbnail = Thumbnail.createThumbnail((Uri) null, this.mIsFrontCamera ? createBitmap : createBitmap2, i, this.mIsFrontCamera);
                     createThumbnail.startWaitingForUri();
                     this.mActivityBase.getThumbnailUpdater().setThumbnail(createThumbnail, true, true);
                     LiveModule liveModule = (LiveModule) this.mActivityBase.getCurrentModule();
-                    ParallelTaskData parallelTaskData = new ParallelTaskData(liveModule != null ? liveModule.getActualCameraId() : 0, System.currentTimeMillis(), -4, null);
+                    ParallelTaskData parallelTaskData = new ParallelTaskData(liveModule != null ? liveModule.getActualCameraId() : 0, System.currentTimeMillis(), -4, (String) null);
                     parallelTaskData.fillJpegData(bitmapData, 0);
-                    int jpegRotation = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                    int jpegRotation = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                     Size size = this.mDrawSize;
-                    Builder builder = new Builder(size, size, size);
+                    ParallelTaskDataParameter.Builder builder = new ParallelTaskDataParameter.Builder(size, size, size);
                     Location currentLocation = LocationManager.instance().getCurrentLocation();
-                    Builder filterId = builder.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
+                    ParallelTaskDataParameter.Builder filterId = builder.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
                     i2 = this.mOrientation;
                     if (-1 != i2) {
                         i4 = i2;
                     }
                     parallelTaskData.fillParameter(filterId.setOrientation(i4).setTimeWaterMarkString(CameraSettings.isTimeWaterMarkOpen() ? Util.getTimeWatermark() : null).setDeviceWatermarkParam(getDeviceWaterMarkParam()).setPictureInfo(getPictureInfo()).setLocation(currentLocation).build());
-                    this.mActivityBase.getImageSaver().onParallelProcessFinish(parallelTaskData, null, null);
+                    this.mActivityBase.getImageSaver().onParallelProcessFinish(parallelTaskData, (CaptureResult) null, (CameraCharacteristics) null);
                     createBitmap.recycle();
                     createBitmap2.recycle();
                     ((LiveModule) this.mActivityBase.getCurrentModule()).onMimojiCaptureCallback();
                 }
             }
             i = this.mDeviceRotation;
-            Thumbnail createThumbnail2 = Thumbnail.createThumbnail(null, this.mIsFrontCamera ? createBitmap : createBitmap2, i, this.mIsFrontCamera);
+            Thumbnail createThumbnail2 = Thumbnail.createThumbnail((Uri) null, this.mIsFrontCamera ? createBitmap : createBitmap2, i, this.mIsFrontCamera);
             createThumbnail2.startWaitingForUri();
             this.mActivityBase.getThumbnailUpdater().setThumbnail(createThumbnail2, true, true);
             LiveModule liveModule2 = (LiveModule) this.mActivityBase.getCurrentModule();
-            ParallelTaskData parallelTaskData2 = new ParallelTaskData(liveModule2 != null ? liveModule2.getActualCameraId() : 0, System.currentTimeMillis(), -4, null);
+            ParallelTaskData parallelTaskData2 = new ParallelTaskData(liveModule2 != null ? liveModule2.getActualCameraId() : 0, System.currentTimeMillis(), -4, (String) null);
             parallelTaskData2.fillJpegData(bitmapData, 0);
-            int jpegRotation2 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+            int jpegRotation2 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             Size size2 = this.mDrawSize;
-            Builder builder2 = new Builder(size2, size2, size2);
+            ParallelTaskDataParameter.Builder builder2 = new ParallelTaskDataParameter.Builder(size2, size2, size2);
             Location currentLocation2 = LocationManager.instance().getCurrentLocation();
-            Builder filterId2 = builder2.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation2).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
+            ParallelTaskDataParameter.Builder filterId2 = builder2.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation2).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
             i2 = this.mOrientation;
             if (-1 != i2) {
             }
             parallelTaskData2.fillParameter(filterId2.setOrientation(i4).setTimeWaterMarkString(CameraSettings.isTimeWaterMarkOpen() ? Util.getTimeWatermark() : null).setDeviceWatermarkParam(getDeviceWaterMarkParam()).setPictureInfo(getPictureInfo()).setLocation(currentLocation2).build());
-            this.mActivityBase.getImageSaver().onParallelProcessFinish(parallelTaskData2, null, null);
+            this.mActivityBase.getImageSaver().onParallelProcessFinish(parallelTaskData2, (CaptureResult) null, (CameraCharacteristics) null);
             createBitmap.recycle();
             createBitmap2.recycle();
             ((LiveModule) this.mActivityBase.getCurrentModule()).onMimojiCaptureCallback();
@@ -324,22 +312,22 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         if (this.mIsFrontCamera) {
         }
         i = this.mDeviceRotation;
-        Thumbnail createThumbnail22 = Thumbnail.createThumbnail(null, this.mIsFrontCamera ? createBitmap : createBitmap22, i, this.mIsFrontCamera);
+        Thumbnail createThumbnail22 = Thumbnail.createThumbnail((Uri) null, this.mIsFrontCamera ? createBitmap : createBitmap22, i, this.mIsFrontCamera);
         createThumbnail22.startWaitingForUri();
         this.mActivityBase.getThumbnailUpdater().setThumbnail(createThumbnail22, true, true);
         LiveModule liveModule22 = (LiveModule) this.mActivityBase.getCurrentModule();
-        ParallelTaskData parallelTaskData22 = new ParallelTaskData(liveModule22 != null ? liveModule22.getActualCameraId() : 0, System.currentTimeMillis(), -4, null);
+        ParallelTaskData parallelTaskData22 = new ParallelTaskData(liveModule22 != null ? liveModule22.getActualCameraId() : 0, System.currentTimeMillis(), -4, (String) null);
         parallelTaskData22.fillJpegData(bitmapData2, 0);
-        int jpegRotation22 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        int jpegRotation22 = (Util.getJpegRotation(this.mIsFrontCamera ? 1 : 0, this.mDeviceRotation) + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         Size size22 = this.mDrawSize;
-        Builder builder22 = new Builder(size22, size22, size22);
+        ParallelTaskDataParameter.Builder builder22 = new ParallelTaskDataParameter.Builder(size22, size22, size22);
         Location currentLocation22 = LocationManager.instance().getCurrentLocation();
-        Builder filterId22 = builder22.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation22).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
+        ParallelTaskDataParameter.Builder filterId22 = builder22.setHasDualWaterMark(CameraSettings.isDualCameraWaterMarkOpen()).setJpegRotation(jpegRotation22).setJpegQuality(BaseModule.getJpegQuality(false)).setFilterId(FilterInfo.FILTER_ID_NONE);
         i2 = this.mOrientation;
         if (-1 != i2) {
         }
         parallelTaskData22.fillParameter(filterId22.setOrientation(i42).setTimeWaterMarkString(CameraSettings.isTimeWaterMarkOpen() ? Util.getTimeWatermark() : null).setDeviceWatermarkParam(getDeviceWaterMarkParam()).setPictureInfo(getPictureInfo()).setLocation(currentLocation22).build());
-        this.mActivityBase.getImageSaver().onParallelProcessFinish(parallelTaskData22, null, null);
+        this.mActivityBase.getImageSaver().onParallelProcessFinish(parallelTaskData22, (CaptureResult) null, (CameraCharacteristics) null);
         createBitmap.recycle();
         createBitmap22.recycle();
         ((LiveModule) this.mActivityBase.getCurrentModule()).onMimojiCaptureCallback();
@@ -361,26 +349,16 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             this.mAvatarTemplatePath = str2;
             this.mAvatar.setTemplatePath(str2);
         }
-        ASAvatarProfileResult aSAvatarProfileResult = new ASAvatarProfileResult();
+        AvatarConfig.ASAvatarProfileResult aSAvatarProfileResult = new AvatarConfig.ASAvatarProfileResult();
         synchronized (this.mAvatarLock) {
-            avatarProfile = this.mAvatar.avatarProfile(AvatarEngineManager.PersonTemplatePath, i, i2, i * 4, bArr, 0, false, aSAvatarProfileResult, null, r.INSTANCE);
+            avatarProfile = this.mAvatar.avatarProfile(AvatarEngineManager.PersonTemplatePath, i, i2, i * 4, bArr, 0, false, aSAvatarProfileResult, (AvatarConfig.ASAvatarProfileInfo) null, r.INSTANCE);
         }
         String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("avatarProfile res: ");
-        sb.append(avatarProfile);
-        sb.append(", status:");
-        sb.append(aSAvatarProfileResult.status);
-        sb.append(", gender: ");
-        sb.append(aSAvatarProfileResult.gender);
-        LOG.d(str3, sb.toString());
+        LOG.d(str3, "avatarProfile res: " + avatarProfile + ", status:" + aSAvatarProfileResult.status + ", gender: " + aSAvatarProfileResult.gender);
         int i3 = aSAvatarProfileResult.status;
         if (i3 == 254 || i3 == 246) {
             String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("result = ");
-            sb2.append(avatarProfile);
-            Log.d(str4, sb2.toString());
+            Log.d(str4, "result = " + avatarProfile);
             this.mUiHandler.post(new Runnable() {
                 public void run() {
                     MimojiAvatarEngineImpl.this.setDisableSingleTapUp(true);
@@ -410,7 +388,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         }
         this.mActivityBase.runOnUiThread(new Runnable() {
             public void run() {
-                ((ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).showOrHideMimojiProgress(false);
+                ((ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).showOrHideMimojiProgress(false);
             }
         });
         ((LiveModule) this.mActivityBase.getCurrentModule()).onMimojiCreateCompleted(false);
@@ -455,16 +433,13 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
 
     private Map<String, String> getMimojiPara() {
         Map<String, String> hashMap = new HashMap<>();
-        boolean z = this.mShowAvatar;
-        String str = CameraStat.PARAM_MIMOJI_CATEGORY;
-        if (z) {
-            ASAvatarConfigValue aSAvatarConfigValue = new ASAvatarConfigValue();
+        if (this.mShowAvatar) {
+            AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue = new AvatarConfig.ASAvatarConfigValue();
             this.mAvatar.getConfigValue(aSAvatarConfigValue);
             hashMap = AvatarEngineManager.getMimojiConfigValue(aSAvatarConfigValue);
-            String str2 = this.mAvatarTemplatePath.equals(AvatarEngineManager.PersonTemplatePath) ? SchedulerSupport.CUSTOM : this.mAvatarTemplatePath.equals(AvatarEngineManager.PigTemplatePath) ? AvatarEngineManager.FAKE_PIG_CONFIGPATH : this.mAvatarTemplatePath.equals(AvatarEngineManager.BearTemplatePath) ? AvatarEngineManager.FAKE_BEAR_CONFIGPATH : this.mAvatarTemplatePath.equals(AvatarEngineManager.RoyanTemplatePath) ? AvatarEngineManager.FAKE_ROYAN_CONFIGPATH : this.mAvatarTemplatePath.equals(AvatarEngineManager.RabbitTemplatePath) ? AvatarEngineManager.FAKE_RABBIT_CONFIGPATH : "";
-            hashMap.put(str, str2);
+            hashMap.put(CameraStat.PARAM_MIMOJI_CATEGORY, this.mAvatarTemplatePath.equals(AvatarEngineManager.PersonTemplatePath) ? SchedulerSupport.CUSTOM : this.mAvatarTemplatePath.equals(AvatarEngineManager.PigTemplatePath) ? AvatarEngineManager.FAKE_PIG_CONFIGPATH : this.mAvatarTemplatePath.equals(AvatarEngineManager.BearTemplatePath) ? AvatarEngineManager.FAKE_BEAR_CONFIGPATH : this.mAvatarTemplatePath.equals(AvatarEngineManager.RoyanTemplatePath) ? AvatarEngineManager.FAKE_ROYAN_CONFIGPATH : this.mAvatarTemplatePath.equals(AvatarEngineManager.RabbitTemplatePath) ? AvatarEngineManager.FAKE_RABBIT_CONFIGPATH : "");
         } else {
-            hashMap.put(str, TEDefine.FACE_BEAUTY_NULL);
+            hashMap.put(CameraStat.PARAM_MIMOJI_CATEGORY, TEDefine.FACE_BEAUTY_NULL);
         }
         return hashMap;
     }
@@ -505,20 +480,14 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                         Log.e(MimojiAvatarEngineImpl.TAG, "verify asset model zip failed...", e2);
                     }
                     String access$100 = MimojiAvatarEngineImpl.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("init model spend time = ");
-                    sb.append(System.currentTimeMillis() - currentTimeMillis);
-                    Log.d(access$100, sb.toString());
+                    Log.d(access$100, "init model spend time = " + (System.currentTimeMillis() - currentTimeMillis));
                     DataRepository.dataItemLive().getMimojiStatusManager().setIsLoading(false);
                     CameraSettings.setMimojiModleVersion(Ca);
                     String access$1002 = MimojiAvatarEngineImpl.TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("mAvatarTemplatePath = ");
-                    sb2.append(MimojiAvatarEngineImpl.this.mAvatarTemplatePath);
-                    Log.i(access$1002, sb2.toString());
+                    Log.i(access$1002, "mAvatarTemplatePath = " + MimojiAvatarEngineImpl.this.mAvatarTemplatePath);
                     MimojiAvatarEngineImpl.this.mUiHandler.post(new Runnable() {
                         public void run() {
-                            MimojiAlert mimojiAlert = (MimojiAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(226);
+                            ModeProtocol.MimojiAlert mimojiAlert = (ModeProtocol.MimojiAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(226);
                             if (mimojiAlert != null) {
                                 mimojiAlert.firstProgressShow(false);
                             } else {
@@ -544,18 +513,18 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
     /* access modifiers changed from: private */
     public void onProfileFinish() {
         Log.d(TAG, "onProfileFinish");
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         if (recordState != null) {
             recordState.onPostSavingFinish();
         }
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null) {
             topAlert.alertMimojiFaceDetect(false, -1);
         }
         releaseRender();
         this.mMainProtocol.mimojiEnd();
         this.mMimojiStatusManager.setMode(MimojiStatusManager.MIMOJI_EDIT_MID);
-        MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+        ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
         if (mimojiEditor != null) {
             mimojiEditor.startMimojiEdit(true, 105);
         }
@@ -585,10 +554,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                 synchronized (MimojiAvatarEngineImpl.this.mAvatarLock) {
                     if (MimojiAvatarEngineImpl.this.mAvatar != null) {
                         String access$100 = MimojiAvatarEngineImpl.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("avatar destroy | ");
-                        sb.append(hashCode);
-                        Log.d(access$100, sb.toString());
+                        Log.d(access$100, "avatar destroy | " + hashCode);
                         MimojiAvatarEngineImpl.this.mAvatar.saveConfig(AvatarEngineManager.TempEditConfigPath);
                         MimojiAvatarEngineImpl.this.mAvatar.destroyOutlineEngine();
                         MimojiAvatarEngineImpl.this.mAvatar.unInit();
@@ -632,7 +598,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         } else if (mode == MimojiStatusManager.MIMOJI_EDIT_MID || mode == MimojiStatusManager.MIMOJI_EIDT) {
             this.mAvatar.setTemplatePath(AvatarEngineManager.PersonTemplatePath);
             this.mAvatarTemplatePath = AvatarEngineManager.PersonTemplatePath;
-            MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+            ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
             if (mimojiEditor != null) {
                 mimojiEditor.resetConfig();
             } else {
@@ -682,8 +648,8 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             this.mShowAvatar = true;
         }
         this.mIsStopRender = false;
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         bottomPopupTips.reInitTipImage();
         if (z2) {
             bottomPopupTips.hideCenterTipImage();
@@ -707,16 +673,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
 
     public void initAvatarEngine(int i, int i2, int i3, int i4, boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("initAvatarEngine with parameters : displayOrientation = ");
-        sb.append(i);
-        sb.append(", width = ");
-        sb.append(i3);
-        sb.append(", height = ");
-        sb.append(i4);
-        sb.append(", isFrontCamera = ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "initAvatarEngine with parameters : displayOrientation = " + i + ", width = " + i3 + ", height = " + i4 + ", isFrontCamera = " + z);
         this.mPreviewWidth = i3;
         this.mPreviewHeight = i4;
         this.mIsFrontCamera = z;
@@ -726,7 +683,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             if (!this.mMimojiStatusManager.IsInMimojiCreate()) {
                 this.mMimojiStatusManager.reset();
             }
-            MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+            ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
             if (mimojiEditor != null && mimojiEditor.isWorkForeground()) {
                 this.mMimojiStatusManager.setMode(MimojiStatusManager.MIMOJI_EIDT);
             }
@@ -741,20 +698,17 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             public void run() {
                 synchronized (MimojiAvatarEngineImpl.this.mAvatarLock) {
                     String access$100 = MimojiAvatarEngineImpl.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("avatar start init | ");
-                    sb.append(hashCode);
-                    Log.d(access$100, sb.toString());
+                    Log.d(access$100, "avatar start init | " + hashCode);
                     if (!MimojiAvatarEngineImpl.this.mIsAvatarInited || MimojiAvatarEngineImpl.this.mAvatar == null) {
                         Log.d(MimojiAvatarEngineImpl.TAG, "avatar need really init");
-                        MimojiAvatarEngineImpl.this.mAvatar = AvatarEngineManager.getInstance().queryAvatar();
+                        AvatarEngine unused = MimojiAvatarEngineImpl.this.mAvatar = AvatarEngineManager.getInstance().queryAvatar();
                         MimojiAvatarEngineImpl.this.mAvatar.init(AvatarEngineManager.TRACK_DATA, AvatarEngineManager.FACE_MODEL);
                         MimojiAvatarEngineImpl.this.mAvatar.setRenderScene(true, 1.0f);
                         MimojiAvatarEngineImpl.this.mAvatar.createOutlineEngine(AvatarEngineManager.TRACK_DATA);
                         MimojiAvatarEngineImpl.this.reloadConfig();
                     }
                     if (MimojiAvatarEngineImpl.this.mRecordModule == null) {
-                        MimojiAvatarEngineImpl.this.mRecordModule = new RecordModule(MimojiAvatarEngineImpl.this.mContext, MimojiAvatarEngineImpl.this.mCaptureCallback);
+                        RecordModule unused2 = MimojiAvatarEngineImpl.this.mRecordModule = new RecordModule(MimojiAvatarEngineImpl.this.mContext, MimojiAvatarEngineImpl.this.mCaptureCallback);
                         MimojiAvatarEngineImpl.this.mRecordModule.init(i5, i6, i7, MimojiAvatarEngineImpl.this.mAvatar, z2);
                     } else {
                         MimojiAvatarEngineImpl.this.mRecordModule.setmImageOrientation(i5);
@@ -763,9 +717,9 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                     }
                     Rect previewRect = Util.getPreviewRect(MimojiAvatarEngineImpl.this.mContext);
                     MimojiAvatarEngineImpl.this.mRecordModule.setDrawScope(0, Util.sWindowHeight - previewRect.bottom, previewRect.right, previewRect.bottom - previewRect.top);
-                    MimojiAvatarEngineImpl.this.mDrawSize = new Size(previewRect.right, previewRect.bottom - previewRect.top);
-                    MimojiAvatarEngineImpl.this.mIsStopRender = false;
-                    MimojiAvatarEngineImpl.this.mIsAvatarInited = true;
+                    Size unused3 = MimojiAvatarEngineImpl.this.mDrawSize = new Size(previewRect.right, previewRect.bottom - previewRect.top);
+                    boolean unused4 = MimojiAvatarEngineImpl.this.mIsStopRender = false;
+                    boolean unused5 = MimojiAvatarEngineImpl.this.mIsAvatarInited = true;
                 }
             }
         };
@@ -786,10 +740,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
 
     public boolean isRecording() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Recording = ");
-        sb.append(this.mIsRecording);
-        Log.d(str, sb.toString());
+        Log.d(str, "Recording = " + this.mIsRecording);
         return this.mIsRecording;
     }
 
@@ -807,12 +758,11 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         }
         Module currentModule = this.mActivityBase.getCurrentModule();
         if (currentModule instanceof LiveModule) {
-            LiveModule liveModule = (LiveModule) currentModule;
             CameraSettings.setFaceBeautyLevel(0);
-            liveModule.updatePreferenceInWorkThread(13);
+            ((LiveModule) currentModule).updatePreferenceInWorkThread(13);
         }
-        ((ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).showOrHideMimojiProgress(true);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ((ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162)).showOrHideMimojiProgress(true);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.showTips(19, (int) R.string.mimoji_start_create, 2);
         }
@@ -824,7 +774,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
     public void onDeviceRotationChange(int i) {
         this.mDeviceRotation = i;
         updateVideoOrientation(i);
-        MimojiEditor mimojiEditor = this.mMimojiEditor;
+        ModeProtocol.MimojiEditor mimojiEditor = this.mMimojiEditor;
         if (mimojiEditor != null) {
             mimojiEditor.onDeviceRotationChange(i);
         }
@@ -852,7 +802,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         }
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GLES20.glClear(16384);
-        this.mRecordModule.startRender(90, this.mIsFrontCamera, this.mDeviceRotation, 0, false, this.mTextureId, null, this.mShowAvatar);
+        this.mRecordModule.startRender(90, this.mIsFrontCamera, this.mDeviceRotation, 0, false, this.mTextureId, (byte[]) null, this.mShowAvatar);
     }
 
     public void onMimojiCreate() {
@@ -860,8 +810,8 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
         this.mShowAvatar = false;
         this.mMimojiStatusManager.setMode(MimojiStatusManager.MIMOJI_CREATE);
         this.mMainProtocol.mimojiStart();
-        ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).prepareCreateMimoji();
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).prepareCreateMimoji();
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.showTips(19, (int) R.string.mimoji_create_tips, 2);
         }
@@ -869,32 +819,27 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
 
     public void onMimojiDeleted() {
         this.mShowAvatar = false;
-        this.mMimojiStatusManager.setmCurrentMimojiInfo(null);
+        this.mMimojiStatusManager.setmCurrentMimojiInfo((MimojiInfo) null);
     }
 
     public void onMimojiSelect(final MimojiInfo mimojiInfo) {
         this.mLoadHandler.post(new Runnable() {
             public void run() {
                 if (mimojiInfo == null || MimojiAvatarEngineImpl.this.mAvatar == null) {
-                    MimojiAvatarEngineImpl.this.mShowAvatar = false;
-                    MimojiAvatarEngineImpl.this.mMimojiStatusManager.setmCurrentMimojiInfo(null);
+                    boolean unused = MimojiAvatarEngineImpl.this.mShowAvatar = false;
+                    MimojiAvatarEngineImpl.this.mMimojiStatusManager.setmCurrentMimojiInfo((MimojiInfo) null);
                     return;
                 }
-                MimojiAvatarEngineImpl.this.mShowAvatar = true;
+                boolean unused2 = MimojiAvatarEngineImpl.this.mShowAvatar = true;
                 MimojiAvatarEngineImpl.this.mMimojiStatusManager.setmCurrentMimojiInfo(mimojiInfo);
                 MimojiInfo mimojiInfo = mimojiInfo;
                 String str = mimojiInfo.mAvatarTemplatePath;
                 String str2 = mimojiInfo.mConfigPath;
                 String access$100 = MimojiAvatarEngineImpl.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("change mimoji with path = ");
-                sb.append(str);
-                sb.append(", and config = ");
-                sb.append(str2);
-                Log.d(access$100, sb.toString());
+                Log.d(access$100, "change mimoji with path = " + str + ", and config = " + str2);
                 synchronized (MimojiAvatarEngineImpl.this.mAvatarLock) {
                     boolean equals = MimojiAvatarEngineImpl.this.mAvatarTemplatePath.equals(str);
-                    MimojiAvatarEngineImpl.this.mAvatarTemplatePath = str;
+                    String unused3 = MimojiAvatarEngineImpl.this.mAvatarTemplatePath = str;
                     if (str2.isEmpty() || AvatarEngineManager.isPrefabModel(str2)) {
                         if (!equals) {
                             MimojiAvatarEngineImpl.this.mAvatar.setTemplatePath(str);
@@ -916,22 +861,15 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             return true;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("MimojiAvatarEngineImpl  onPreviewFrame mAvatar  updating.... mAvatar : ");
-        sb.append(this.mAvatar);
-        sb.append("       mRecordModule : ");
-        sb.append(this.mRecordModule);
-        sb.append(" , ");
-        sb.append(this.mRecordModule.getAvatarEngine());
-        Log.d(str, sb.toString());
+        Log.d(str, "MimojiAvatarEngineImpl  onPreviewFrame mAvatar  updating.... mAvatar : " + this.mAvatar + "       mRecordModule : " + this.mRecordModule + " , " + this.mRecordModule.getAvatarEngine());
         ASVLOFFSCREEN buildNV21SingleBuffer = AsvloffscreenUtil.buildNV21SingleBuffer(image);
         if (this.mRecordModule != null) {
             if (this.mMimojiStatusManager.IsInMimojiEditMid() || this.mMimojiStatusManager.IsInMimojiEdit()) {
                 if (this.mMimojiEditor == null) {
-                    this.mMimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+                    this.mMimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
                 }
                 if (this.mMimojiEditor != null) {
-                    ASAvatarProcessInfo aSAvatarProcessInfo = new ASAvatarProcessInfo();
+                    AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo = new AvatarConfig.ASAvatarProcessInfo();
                     synchronized (this.mAvatarLock) {
                         this.mAvatar.avatarProcessWithInfoEx(buildNV21SingleBuffer, 90, this.mIsFrontCamera, this.mOrientation, aSAvatarProcessInfo, true);
                     }
@@ -946,7 +884,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                 if ((z != this.mNeedShowNoFaceTips) && !this.mMimojiStatusManager.IsInMimojiCreate()) {
                     this.mUiHandler.post(new Runnable() {
                         public void run() {
-                            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                             if (topAlert != null) {
                                 topAlert.alertMimojiFaceDetect(MimojiAvatarEngineImpl.this.mNeedShowNoFaceTips, R.string.mimoji_check_no_face);
                             }
@@ -965,7 +903,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             synchronized (this.mAvatarLock) {
                 this.mFaceDectectResult = this.mAvatar.outlineProcessEx(buildNV21SingleBuffer, MimojiHelper.getOutlineOrientation(this.mOrientation, this.mDeviceRotation, this.mIsFrontCamera));
             }
-            MainContentProtocol mainContentProtocol = this.mMainProtocol;
+            ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
             if (mainContentProtocol != null) {
                 mainContentProtocol.mimojiFaceDetect(this.mFaceDectectResult);
             }
@@ -1054,10 +992,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
                     synchronized (MimojiAvatarEngineImpl.this.mAvatarLock) {
                         if (MimojiAvatarEngineImpl.this.mAvatar != null) {
                             String access$100 = MimojiAvatarEngineImpl.TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("releaseRender | ");
-                            sb.append(hashCode);
-                            Log.d(access$100, sb.toString());
+                            Log.d(access$100, "releaseRender | " + hashCode);
                             MimojiAvatarEngineImpl.this.mAvatar.releaseRender();
                         }
                     }
@@ -1065,7 +1000,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
             });
             return;
         }
-        MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+        ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
         if (mimojiEditor != null) {
             mimojiEditor.releaseRender();
         }
@@ -1099,7 +1034,7 @@ public class MimojiAvatarEngineImpl implements MimojiAvatarEngine, ExternalFrame
 
             public void onTick(long j) {
                 String millisecondToTimeString = Util.millisecondToTimeString((j + 950) - MimojiAvatarEngineImpl.START_OFFSET_MS, false);
-                TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                 if (topAlert != null) {
                     topAlert.updateRecordingTime(millisecondToTimeString);
                 }

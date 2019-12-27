@@ -2,8 +2,6 @@ package com.miui.extravideo.watermark.gles;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
@@ -28,15 +26,10 @@ public class OpenGlUtils {
     public static final int ON_DRAWN = 1;
 
     public static void checkGlError(String str) {
-        int glGetError = GLES20.glGetError();
-        if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": glError 0x");
-            sb.append(Integer.toHexString(glGetError));
-            String sb2 = sb.toString();
-            Log.e("OpenGlUtils", sb2);
-            throw new RuntimeException(sb2);
+        if (GLES20.glGetError() != 0) {
+            String str2 = str + ": glError 0x" + Integer.toHexString(r0);
+            Log.e("OpenGlUtils", str2);
+            throw new RuntimeException(str2);
         }
     }
 
@@ -66,7 +59,7 @@ public class OpenGlUtils {
         ByteBuffer allocate = ByteBuffer.allocate(i3 * i4 * 4);
         GLES20.glReadPixels(i, i2, i3, i4, 6408, 5121, allocate);
         if (allocate != null) {
-            saveBitmap(allocate, i3, i4, Config.ARGB_8888, str);
+            saveBitmap(allocate, i3, i4, Bitmap.Config.ARGB_8888, str);
         }
         allocate.rewind();
         return allocate;
@@ -96,20 +89,19 @@ public class OpenGlUtils {
 
     public static Bitmap getGPUYYY(int i, int i2, int i3, int i4) {
         int i5 = i3 >> 1;
-        int i6 = i4 >> 1;
         byte[] bArr = new byte[(i5 * i5 * 4)];
-        int i7 = i3 * i4;
-        int[] iArr = new int[i7];
+        int i6 = i3 * i4;
+        int[] iArr = new int[i6];
         ByteBuffer wrap = ByteBuffer.wrap(bArr);
         wrap.position(0);
-        GLES20.glReadPixels(i, i2, i5, i6, 6408, 5121, wrap);
-        int i8 = 0;
-        for (int i9 = 0; i9 < i7; i9++) {
-            byte b2 = bArr[i9];
-            iArr[i8] = (b2 & 255) | ((b2 << 8) & 65280) | -16777216 | ((b2 << 16) & 16711680);
-            i8++;
+        GLES20.glReadPixels(i, i2, i5, i4 >> 1, 6408, 5121, wrap);
+        int i7 = 0;
+        for (int i8 = 0; i8 < i6; i8++) {
+            byte b2 = bArr[i8];
+            iArr[i7] = (b2 & 255) | ((b2 << 8) & 65280) | -16777216 | ((b2 << 16) & 16711680);
+            i7++;
         }
-        return Bitmap.createBitmap(iArr, i3, i4, Config.ARGB_8888);
+        return Bitmap.createBitmap(iArr, i3, i4, Bitmap.Config.ARGB_8888);
     }
 
     public static Bitmap getImageFromAssetsFile(Context context, String str) {
@@ -128,14 +120,13 @@ public class OpenGlUtils {
     public static int loadProgram(String str, String str2) {
         int[] iArr = new int[1];
         int loadShader = loadShader(str, 35633);
-        String str3 = "Load Program";
         if (loadShader == 0) {
-            Log.d(str3, "Vertex Shader Failed");
+            Log.d("Load Program", "Vertex Shader Failed");
             return 0;
         }
         int loadShader2 = loadShader(str2, 35632);
         if (loadShader2 == 0) {
-            Log.d(str3, "Fragment Shader Failed");
+            Log.d("Load Program", "Fragment Shader Failed");
             return 0;
         }
         int glCreateProgram = GLES20.glCreateProgram();
@@ -144,7 +135,7 @@ public class OpenGlUtils {
         GLES20.glLinkProgram(glCreateProgram);
         GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
         if (iArr[0] <= 0) {
-            Log.d(str3, "Linking Failed");
+            Log.d("Load Program", "Linking Failed");
             return 0;
         }
         GLES20.glDeleteShader(loadShader);
@@ -176,10 +167,7 @@ public class OpenGlUtils {
         if (iArr[0] != 0) {
             return glCreateShader;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Compilation\n");
-        sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
-        Log.e("Load Shader Failed", sb.toString());
+        Log.e("Load Shader Failed", "Compilation\n" + GLES20.glGetShaderInfoLog(glCreateShader));
         return 0;
     }
 
@@ -298,7 +286,7 @@ public class OpenGlUtils {
         try {
             FileOutputStream fileOutputStream2 = new FileOutputStream(new File(str));
             try {
-                bitmap.compress(CompressFormat.PNG, 100, fileOutputStream2);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream2);
                 try {
                     fileOutputStream2.flush();
                     fileOutputStream2.close();
@@ -351,7 +339,7 @@ public class OpenGlUtils {
 
     /* JADX WARNING: Removed duplicated region for block: B:21:0x003d A[SYNTHETIC, Splitter:B:21:0x003d] */
     /* JADX WARNING: Removed duplicated region for block: B:27:0x004e A[SYNTHETIC, Splitter:B:27:0x004e] */
-    public static boolean saveBitmap(Buffer buffer, int i, int i2, Config config, String str) {
+    public static boolean saveBitmap(Buffer buffer, int i, int i2, Bitmap.Config config, String str) {
         if (buffer != null) {
             Bitmap createBitmap = Bitmap.createBitmap(i, i2, config);
             createBitmap.copyPixelsFromBuffer(buffer);
@@ -359,7 +347,7 @@ public class OpenGlUtils {
             try {
                 FileOutputStream fileOutputStream2 = new FileOutputStream(new File(str));
                 try {
-                    createBitmap.compress(CompressFormat.PNG, 100, fileOutputStream2);
+                    createBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream2);
                     try {
                         fileOutputStream2.flush();
                         fileOutputStream2.close();
@@ -424,9 +412,9 @@ public class OpenGlUtils {
         try {
             bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(str));
             try {
-                Bitmap createBitmap = Bitmap.createBitmap(i, i2, Config.ARGB_8888);
+                Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
                 createBitmap.copyPixelsFromBuffer(byteBuffer);
-                createBitmap.compress(CompressFormat.JPEG, 50, bufferedOutputStream);
+                createBitmap.compress(Bitmap.CompressFormat.JPEG, 50, bufferedOutputStream);
                 createBitmap.recycle();
                 bufferedOutputStream.close();
             } catch (Throwable th) {

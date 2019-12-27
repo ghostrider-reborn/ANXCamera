@@ -1,7 +1,6 @@
 package com.android.camera.backup;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.XmlResourceParser;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -11,7 +10,7 @@ import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.log.Log;
 import com.xiaomi.settingsdk.backup.data.DataPackage;
 import com.xiaomi.settingsdk.backup.data.KeyStringSettingItem;
-import com.xiaomi.settingsdk.backup.data.PrefsBackupHelper.PrefEntry;
+import com.xiaomi.settingsdk.backup.data.PrefsBackupHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,11 +62,7 @@ public class CameraBackupHelper {
         if (c2 == 3) {
             return String.valueOf(3);
         }
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unknown antibanding mode ");
-        sb.append(str);
-        Log.w(str2, sb.toString());
+        Log.w(TAG, "unknown antibanding mode " + str);
         return null;
     }
 
@@ -127,11 +122,7 @@ public class CameraBackupHelper {
         if (c2 == 4 || c2 == 5) {
             return "2";
         }
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unknown exposure mode ");
-        sb.append(str);
-        Log.w(str2, sb.toString());
+        Log.w(TAG, "unknown exposure mode " + str);
         return null;
     }
 
@@ -149,27 +140,23 @@ public class CameraBackupHelper {
         }
         char c2 = 65535;
         int hashCode = str.hashCode();
-        String str2 = "8";
-        String str3 = "6";
-        String str4 = "5";
-        String str5 = "4";
         if (hashCode != 56) {
             if (hashCode != 57) {
                 switch (hashCode) {
                     case 52:
-                        if (str.equals(str5)) {
+                        if (str.equals("4")) {
                             c2 = 0;
                             break;
                         }
                         break;
                     case 53:
-                        if (str.equals(str4)) {
+                        if (str.equals("5")) {
                             c2 = 2;
                             break;
                         }
                         break;
                     case 54:
-                        if (str.equals(str3)) {
+                        if (str.equals("6")) {
                             c2 = 4;
                             break;
                         }
@@ -199,28 +186,25 @@ public class CameraBackupHelper {
             } else if (str.equals("9")) {
                 c2 = 1;
             }
-        } else if (str.equals(str2)) {
+        } else if (str.equals("8")) {
             c2 = 6;
         }
         switch (c2) {
             case 0:
             case 1:
-                return str5;
+                return "4";
             case 2:
             case 3:
-                return str4;
+                return "5";
             case 4:
             case 5:
-                return str3;
+                return "6";
             case 6:
             case 7:
-                return str2;
+                return "8";
             default:
-                String str6 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("unknown video quality ");
-                sb.append(str);
-                Log.w(str6, sb.toString());
+                String str2 = TAG;
+                Log.w(str2, "unknown video quality " + str);
                 return null;
         }
     }
@@ -251,11 +235,10 @@ public class CameraBackupHelper {
         return arrayList;
     }
 
-    public static void restoreSettings(SharedPreferences sharedPreferences, DataPackage dataPackage, PrefEntry[] prefEntryArr, boolean z) {
-        PrefEntry[] prefEntryArr2 = prefEntryArr;
-        List settingsKeys = getSettingsKeys();
-        Editor edit = sharedPreferences.edit();
-        for (PrefEntry prefEntry : prefEntryArr2) {
+    public static void restoreSettings(SharedPreferences sharedPreferences, DataPackage dataPackage, PrefsBackupHelper.PrefEntry[] prefEntryArr, boolean z) {
+        List<String> settingsKeys = getSettingsKeys();
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        for (PrefsBackupHelper.PrefEntry prefEntry : prefEntryArr) {
             if (settingsKeys.contains(prefEntry.getLocalKey()) && ((!z || !CameraSettings.isCameraSpecific(prefEntry.getLocalKey())) && (z || CameraSettings.isCameraSpecific(prefEntry.getLocalKey())))) {
                 try {
                     try {
@@ -301,35 +284,25 @@ public class CameraBackupHelper {
                                     }
                                     break;
                             }
-                            String str = c2 != 0 ? c2 != 1 ? c2 != 2 ? c2 != 3 ? c2 != 4 ? c2 != 5 ? (String) keyStringSettingItem.getValue() : filterValue((String) keyStringSettingItem.getValue(), R.array.pref_front_mirror_entryvalues) : convertSharpness((String) keyStringSettingItem.getValue()) : convertSaturation((String) keyStringSettingItem.getValue()) : convertContrast((String) keyStringSettingItem.getValue()) : convertExposureMode((String) keyStringSettingItem.getValue()) : convertAntiBandingMode((String) keyStringSettingItem.getValue());
-                            if (str != null) {
+                            String filterValue = c2 != 0 ? c2 != 1 ? c2 != 2 ? c2 != 3 ? c2 != 4 ? c2 != 5 ? (String) keyStringSettingItem.getValue() : filterValue((String) keyStringSettingItem.getValue(), R.array.pref_front_mirror_entryvalues) : convertSharpness((String) keyStringSettingItem.getValue()) : convertSaturation((String) keyStringSettingItem.getValue()) : convertContrast((String) keyStringSettingItem.getValue()) : convertExposureMode((String) keyStringSettingItem.getValue()) : convertAntiBandingMode((String) keyStringSettingItem.getValue());
+                            if (filterValue != null) {
                                 if (prefEntry.getValueClass() == Integer.class) {
-                                    edit.putInt(prefEntry.getLocalKey(), Integer.parseInt(str));
+                                    edit.putInt(prefEntry.getLocalKey(), Integer.parseInt(filterValue));
                                 } else if (prefEntry.getValueClass() == Long.class) {
-                                    edit.putLong(prefEntry.getLocalKey(), Long.parseLong(str));
+                                    edit.putLong(prefEntry.getLocalKey(), Long.parseLong(filterValue));
                                 } else if (prefEntry.getValueClass() == Boolean.class) {
-                                    edit.putBoolean(prefEntry.getLocalKey(), Boolean.parseBoolean(str));
+                                    edit.putBoolean(prefEntry.getLocalKey(), Boolean.parseBoolean(filterValue));
                                 } else if (prefEntry.getValueClass() == String.class) {
-                                    edit.putString(prefEntry.getLocalKey(), str);
+                                    edit.putString(prefEntry.getLocalKey(), filterValue);
                                 }
                             }
                         }
                     } catch (ClassCastException unused) {
-                        String str2 = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("entry ");
-                        sb.append(prefEntry.getCloudKey());
-                        sb.append(" is not KeyStringSettingItem");
-                        Log.e(str2, sb.toString());
+                        Log.e(TAG, "entry " + prefEntry.getCloudKey() + " is not KeyStringSettingItem");
                     }
                 } catch (ClassCastException unused2) {
                     DataPackage dataPackage2 = dataPackage;
-                    String str22 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("entry ");
-                    sb2.append(prefEntry.getCloudKey());
-                    sb2.append(" is not KeyStringSettingItem");
-                    Log.e(str22, sb2.toString());
+                    Log.e(TAG, "entry " + prefEntry.getCloudKey() + " is not KeyStringSettingItem");
                 }
             } else {
                 DataPackage dataPackage3 = dataPackage;

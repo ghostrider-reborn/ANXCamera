@@ -3,7 +3,6 @@ package com.android.camera.fragment.mimoji;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.android.camera.R;
@@ -11,14 +10,14 @@ import com.android.camera.log.Log;
 import com.android.camera.ui.autoselectview.AutoSelectAdapter;
 import com.android.camera.ui.autoselectview.AutoSelectHorizontalView;
 import com.android.camera.ui.autoselectview.AutoSelectViewHolder;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
+import com.arcsoft.avatar.AvatarConfig;
 import java.util.ArrayList;
 
 public class MimojiTypeAdapter extends AutoSelectAdapter<MimojiTypeBean> {
     private OnSelectListener onSelectListener;
 
     public interface OnSelectListener {
-        void onSelectListener(ASAvatarConfigType aSAvatarConfigType, int i);
+        void onSelectListener(AvatarConfig.ASAvatarConfigType aSAvatarConfigType, int i);
     }
 
     public static class TypeViewHolder extends AutoSelectViewHolder<MimojiTypeBean> {
@@ -36,17 +35,14 @@ public class MimojiTypeAdapter extends AutoSelectAdapter<MimojiTypeBean> {
         public void setData(MimojiTypeBean mimojiTypeBean, final int i) {
             String replaceTabTitle = AvatarEngineManager.replaceTabTitle(this.itemView.getContext(), mimojiTypeBean.getASAvatarConfigType().configType);
             TextView textView = this.typeView;
-            StringBuilder sb = new StringBuilder();
-            sb.append(replaceTabTitle);
-            sb.append("");
-            textView.setText(sb.toString());
+            textView.setText(replaceTabTitle + "");
             TextView textView2 = this.typeView;
             boolean z = true;
             if (mimojiTypeBean.getAlpha() != 1) {
                 z = false;
             }
             setSelectState(textView2, z);
-            this.typeView.setOnClickListener(new OnClickListener() {
+            this.typeView.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     View view2 = TypeViewHolder.this.itemView;
                     if (view2 != null && view2.getParent() != null) {

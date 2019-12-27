@@ -15,7 +15,6 @@ public enum TEOAuthResult {
 
     static {
         int i;
-        TEOAuthResult[] values;
         valueMaps = new HashMap();
         for (TEOAuthResult tEOAuthResult : values()) {
             valueMaps.put(Integer.valueOf(tEOAuthResult.ordinal), tEOAuthResult);
@@ -27,6 +26,6 @@ public enum TEOAuthResult {
     }
 
     public static TEOAuthResult from(int i) {
-        return valueMaps.containsKey(Integer.valueOf(i)) ? (TEOAuthResult) valueMaps.get(Integer.valueOf(i)) : FAIL;
+        return valueMaps.containsKey(Integer.valueOf(i)) ? valueMaps.get(Integer.valueOf(i)) : FAIL;
     }
 }

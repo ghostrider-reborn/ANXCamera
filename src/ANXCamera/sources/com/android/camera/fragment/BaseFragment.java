@@ -12,21 +12,18 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.PathInterpolator;
 import com.android.camera.Util;
-import com.android.camera.animation.AnimationDelegate.AnimationResource;
+import com.android.camera.animation.AnimationDelegate;
 import com.android.camera.animation.type.AlphaInOnSubscribe;
 import com.android.camera.animation.type.AlphaOutOnSubscribe;
 import com.android.camera.data.DataRepository;
 import com.android.camera.fragment.lifeCircle.BaseLifecycleListener;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.BaseProtocol;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Completable;
 import java.util.List;
 
-public abstract class BaseFragment extends Fragment implements AnimationResource, BaseProtocol {
+public abstract class BaseFragment extends Fragment implements AnimationDelegate.AnimationResource, ModeProtocol.BaseProtocol {
     protected static final int LEFT_LANDSCAPE = 90;
     protected static final int RIGHT_LANDSCAPE = 270;
     protected static final int STATE_HIDE = -1;
@@ -196,12 +193,12 @@ public abstract class BaseFragment extends Fragment implements AnimationResource
 
     /* access modifiers changed from: protected */
     @CallSuper
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
     }
 
     /* access modifiers changed from: protected */
-    public final void registerBackStack(ModeCoordinator modeCoordinator, HandleBackTrace handleBackTrace) {
-        ((BackStack) modeCoordinator.getAttachProtocol(171)).addInBackStack(handleBackTrace);
+    public final void registerBackStack(ModeProtocol.ModeCoordinator modeCoordinator, ModeProtocol.HandleBackTrace handleBackTrace) {
+        ((ModeProtocol.BackStack) modeCoordinator.getAttachProtocol(171)).addInBackStack(handleBackTrace);
     }
 
     public final void registerProtocol() {
@@ -212,10 +209,7 @@ public abstract class BaseFragment extends Fragment implements AnimationResource
     @CallSuper
     public void setClickEnable(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setClickEnable: ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "setClickEnable: " + z);
         this.mEnableClick = z;
     }
 
@@ -263,12 +257,12 @@ public abstract class BaseFragment extends Fragment implements AnimationResource
 
     /* access modifiers changed from: protected */
     @CallSuper
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
     }
 
     /* access modifiers changed from: protected */
-    public final void unRegisterBackStack(ModeCoordinator modeCoordinator, HandleBackTrace handleBackTrace) {
-        BackStack backStack = (BackStack) modeCoordinator.getAttachProtocol(171);
+    public final void unRegisterBackStack(ModeProtocol.ModeCoordinator modeCoordinator, ModeProtocol.HandleBackTrace handleBackTrace) {
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) modeCoordinator.getAttachProtocol(171);
         if (backStack != null) {
             backStack.removeBackStack(handleBackTrace);
         }

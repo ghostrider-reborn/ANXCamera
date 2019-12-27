@@ -30,7 +30,7 @@ public class TrackFragmentHeaderBox extends FullBox {
         public Factory baseDataOffset(long j) {
             TrackFragmentHeaderBox trackFragmentHeaderBox = this.box;
             trackFragmentHeaderBox.flags |= 1;
-            trackFragmentHeaderBox.baseDataOffset = (long) ((int) j);
+            long unused = trackFragmentHeaderBox.baseDataOffset = (long) ((int) j);
             return this;
         }
 
@@ -45,28 +45,28 @@ public class TrackFragmentHeaderBox extends FullBox {
         public Factory defaultSampleDuration(long j) {
             TrackFragmentHeaderBox trackFragmentHeaderBox = this.box;
             trackFragmentHeaderBox.flags |= 8;
-            trackFragmentHeaderBox.defaultSampleDuration = (int) j;
+            int unused = trackFragmentHeaderBox.defaultSampleDuration = (int) j;
             return this;
         }
 
         public Factory defaultSampleFlags(long j) {
             TrackFragmentHeaderBox trackFragmentHeaderBox = this.box;
             trackFragmentHeaderBox.flags |= 32;
-            trackFragmentHeaderBox.defaultSampleFlags = (int) j;
+            int unused = trackFragmentHeaderBox.defaultSampleFlags = (int) j;
             return this;
         }
 
         public Factory defaultSampleSize(long j) {
             TrackFragmentHeaderBox trackFragmentHeaderBox = this.box;
             trackFragmentHeaderBox.flags |= 16;
-            trackFragmentHeaderBox.defaultSampleSize = (int) j;
+            int unused = trackFragmentHeaderBox.defaultSampleSize = (int) j;
             return this;
         }
 
         public Factory sampleDescriptionIndex(long j) {
             TrackFragmentHeaderBox trackFragmentHeaderBox = this.box;
             trackFragmentHeaderBox.flags |= 2;
-            trackFragmentHeaderBox.sampleDescriptionIndex = (int) j;
+            int unused = trackFragmentHeaderBox.sampleDescriptionIndex = (int) j;
             return this;
         }
     }

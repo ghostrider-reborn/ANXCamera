@@ -26,7 +26,7 @@ public final class ObserverFullArbiter<T> extends FullArbiterPad1 implements Dis
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void disposeResource() {
         Disposable disposable = this.resource;
         this.resource = null;
@@ -35,7 +35,7 @@ public final class ObserverFullArbiter<T> extends FullArbiterPad1 implements Dis
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drain() {
         if (this.wip.getAndIncrement() == 0) {
             SpscLinkedArrayQueue<Object> spscLinkedArrayQueue = this.queue;

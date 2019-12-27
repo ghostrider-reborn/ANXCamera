@@ -39,9 +39,8 @@ public class Base64 {
         for (byte b2 : bArr) {
             byte b3 = ascii[b2];
             if (b3 >= 0) {
-                int i3 = i2 + 1;
                 bArr[i2] = b3;
-                i2 = i3;
+                i2++;
             } else if (b3 == -1) {
                 throw new IllegalArgumentException("Invalid base 64 string");
             }
@@ -50,22 +49,22 @@ public class Base64 {
             i2--;
         }
         byte[] bArr2 = new byte[((i2 * 3) / 4)];
-        int i4 = 0;
+        int i3 = 0;
         while (i < bArr2.length - 2) {
-            int i5 = i4 + 1;
-            bArr2[i] = (byte) (((bArr[i4] << 2) & 255) | ((bArr[i5] >>> 4) & 3));
-            int i6 = i4 + 2;
-            bArr2[i + 1] = (byte) (((bArr[i5] << 4) & 255) | ((bArr[i6] >>> 2) & 15));
-            bArr2[i + 2] = (byte) (((bArr[i6] << 6) & INVALID) | (bArr[i4 + 3] & 63));
-            i4 += 4;
+            int i4 = i3 + 1;
+            bArr2[i] = (byte) (((bArr[i3] << 2) & 255) | ((bArr[i4] >>> 4) & 3));
+            int i5 = i3 + 2;
+            bArr2[i + 1] = (byte) (((bArr[i4] << 4) & 255) | ((bArr[i5] >>> 2) & 15));
+            bArr2[i + 2] = (byte) (((bArr[i5] << 6) & INVALID) | (bArr[i3 + 3] & 63));
+            i3 += 4;
             i += 3;
         }
         if (i < bArr2.length) {
-            bArr2[i] = (byte) (((bArr[i4] << 2) & 255) | ((bArr[i4 + 1] >>> 4) & 3));
+            bArr2[i] = (byte) (((bArr[i3] << 2) & 255) | ((bArr[i3 + 1] >>> 4) & 3));
         }
-        int i7 = i + 1;
-        if (i7 < bArr2.length) {
-            bArr2[i7] = (byte) (((bArr[i4 + 2] >>> 2) & 15) | ((bArr[i4 + 1] << 4) & 255));
+        int i6 = i + 1;
+        if (i6 < bArr2.length) {
+            bArr2[i6] = (byte) (((bArr[i3 + 2] >>> 2) & 15) | ((bArr[i3 + 1] << 4) & 255));
         }
         return bArr2;
     }
@@ -97,46 +96,40 @@ public class Base64 {
             int i8 = ((bArr[i3] & INVALID) << 16) | ((bArr[i6] & INVALID) << 8);
             int i9 = i7 + 1;
             int i10 = i8 | ((bArr[i7] & INVALID) << 0);
-            int i11 = (i10 & 16515072) >> 18;
-            int i12 = i4 + 1;
+            int i11 = i4 + 1;
             byte[] bArr3 = base64;
-            bArr2[i4] = bArr3[i11];
+            bArr2[i4] = bArr3[(i10 & 16515072) >> 18];
+            int i12 = i11 + 1;
+            bArr2[i11] = bArr3[(i10 & 258048) >> 12];
             int i13 = i12 + 1;
-            bArr2[i12] = bArr3[(i10 & 258048) >> 12];
-            int i14 = i13 + 1;
-            bArr2[i13] = bArr3[(i10 & 4032) >> 6];
-            i4 = i14 + 1;
-            bArr2[i14] = bArr3[i10 & 63];
+            bArr2[i12] = bArr3[(i10 & 4032) >> 6];
+            i4 = i13 + 1;
+            bArr2[i13] = bArr3[i10 & 63];
             i5 += 4;
             if (i4 < length && i2 > 0 && i5 % i2 == 0) {
-                int i15 = i4 + 1;
                 bArr2[i4] = 10;
-                i4 = i15;
+                i4++;
             }
             i3 = i9;
         }
         if (bArr.length - i3 == 2) {
-            int i16 = ((bArr[i3 + 1] & INVALID) << 8) | ((bArr[i3] & INVALID) << 16);
-            int i17 = (i16 & 16515072) >> 18;
-            int i18 = i4 + 1;
+            int i14 = ((bArr[i3 + 1] & INVALID) << 8) | ((bArr[i3] & INVALID) << 16);
+            int i15 = i4 + 1;
             byte[] bArr4 = base64;
-            bArr2[i4] = bArr4[i17];
-            int i19 = i18 + 1;
-            bArr2[i18] = bArr4[(i16 & 258048) >> 12];
-            int i20 = i19 + 1;
-            bArr2[i19] = bArr4[(i16 & 4032) >> 6];
-            bArr2[i20] = 61;
+            bArr2[i4] = bArr4[(i14 & 16515072) >> 18];
+            int i16 = i15 + 1;
+            bArr2[i15] = bArr4[(i14 & 258048) >> 12];
+            bArr2[i16] = bArr4[(i14 & 4032) >> 6];
+            bArr2[i16 + 1] = 61;
         } else if (bArr.length - i3 == 1) {
-            int i21 = (bArr[i3] & INVALID) << 16;
-            int i22 = (i21 & 16515072) >> 18;
-            int i23 = i4 + 1;
+            int i17 = (bArr[i3] & INVALID) << 16;
+            int i18 = i4 + 1;
             byte[] bArr5 = base64;
-            bArr2[i4] = bArr5[i22];
-            int i24 = i23 + 1;
-            bArr2[i23] = bArr5[(i21 & 258048) >> 12];
-            int i25 = i24 + 1;
-            bArr2[i24] = 61;
-            bArr2[i25] = 61;
+            bArr2[i4] = bArr5[(i17 & 16515072) >> 18];
+            int i19 = i18 + 1;
+            bArr2[i18] = bArr5[(i17 & 258048) >> 12];
+            bArr2[i19] = 61;
+            bArr2[i19 + 1] = 61;
         }
         return bArr2;
     }

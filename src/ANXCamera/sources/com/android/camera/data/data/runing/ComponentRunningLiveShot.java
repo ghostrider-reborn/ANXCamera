@@ -13,31 +13,19 @@ public class ComponentRunningLiveShot extends ComponentData {
     }
 
     public String getDefaultValue(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(TAG);
-        sb.append("#getDefaultValue() not supported");
-        throw new UnsupportedOperationException(sb.toString());
+        throw new UnsupportedOperationException(TAG + "#getDefaultValue() not supported");
     }
 
     public int getDisplayTitleString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(TAG);
-        sb.append("#getDisplayTitleString() not supported");
-        throw new UnsupportedOperationException(sb.toString());
+        throw new UnsupportedOperationException(TAG + "#getDisplayTitleString() not supported");
     }
 
     public List<ComponentDataItem> getItems() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(TAG);
-        sb.append("#getItems() not supported");
-        throw new UnsupportedOperationException(sb.toString());
+        throw new UnsupportedOperationException(TAG + "#getItems() not supported");
     }
 
     public String getKey(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(TAG);
-        sb.append("#getKey() not supported");
-        throw new UnsupportedOperationException(sb.toString());
+        throw new UnsupportedOperationException(TAG + "#getKey() not supported");
     }
 
     public boolean isClosed() {

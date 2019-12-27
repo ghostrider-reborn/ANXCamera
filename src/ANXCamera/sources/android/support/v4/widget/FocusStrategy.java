@@ -37,50 +37,37 @@ class FocusStrategy {
             this.mAdapter.obtainBounds(t2, rect2);
             int i = rect.top;
             int i2 = rect2.top;
-            int i3 = -1;
             if (i < i2) {
                 return -1;
             }
             if (i > i2) {
                 return 1;
             }
-            int i4 = rect.left;
-            int i5 = rect2.left;
-            if (i4 < i5) {
-                if (this.mIsLayoutRtl) {
-                    i3 = 1;
-                }
-                return i3;
-            } else if (i4 > i5) {
-                if (!this.mIsLayoutRtl) {
-                    i3 = 1;
-                }
-                return i3;
-            } else {
-                int i6 = rect.bottom;
-                int i7 = rect2.bottom;
-                if (i6 < i7) {
-                    return -1;
-                }
-                if (i6 > i7) {
-                    return 1;
-                }
-                int i8 = rect.right;
-                int i9 = rect2.right;
-                if (i8 < i9) {
-                    if (this.mIsLayoutRtl) {
-                        i3 = 1;
-                    }
-                    return i3;
-                } else if (i8 <= i9) {
-                    return 0;
-                } else {
-                    if (!this.mIsLayoutRtl) {
-                        i3 = 1;
-                    }
-                    return i3;
-                }
+            int i3 = rect.left;
+            int i4 = rect2.left;
+            if (i3 < i4) {
+                return this.mIsLayoutRtl ? 1 : -1;
             }
+            if (i3 > i4) {
+                return this.mIsLayoutRtl ? -1 : 1;
+            }
+            int i5 = rect.bottom;
+            int i6 = rect2.bottom;
+            if (i5 < i6) {
+                return -1;
+            }
+            if (i5 > i6) {
+                return 1;
+            }
+            int i7 = rect.right;
+            int i8 = rect2.right;
+            if (i7 < i8) {
+                return this.mIsLayoutRtl ? 1 : -1;
+            }
+            if (i7 > i8) {
+                return this.mIsLayoutRtl ? -1 : 1;
+            }
+            return 0;
         }
     }
 
@@ -92,18 +79,10 @@ class FocusStrategy {
         if (beamsOverlap(i, rect, rect3) || !beamsOverlap) {
             return false;
         }
-        boolean z = true;
-        if (!isToDirectionOf(i, rect, rect3)) {
-            return true;
-        }
-        if (!(i == 17 || i == 66 || majorAxisDistance(i, rect, rect2) < majorAxisDistanceToFarEdge(i, rect, rect3))) {
-            z = false;
-        }
-        return z;
+        return !isToDirectionOf(i, rect, rect3) || i == 17 || i == 66 || majorAxisDistance(i, rect, rect2) < majorAxisDistanceToFarEdge(i, rect, rect3);
     }
 
     private static boolean beamsOverlap(int i, @NonNull Rect rect, @NonNull Rect rect2) {
-        boolean z = true;
         if (i != 17) {
             if (i != 33) {
                 if (i != 66) {
@@ -112,15 +91,9 @@ class FocusStrategy {
                     }
                 }
             }
-            if (rect2.right < rect.left || rect2.left > rect.right) {
-                z = false;
-            }
-            return z;
+            return rect2.right >= rect.left && rect2.left <= rect.right;
         }
-        if (rect2.bottom < rect.top || rect2.top > rect.bottom) {
-            z = false;
-        }
-        return z;
+        return rect2.bottom >= rect.top && rect2.top <= rect.bottom;
     }
 
     public static <L, T> T findNextFocusInAbsoluteDirection(@NonNull L l, @NonNull CollectionAdapter<L, T> collectionAdapter, @NonNull BoundsAdapter<T> boundsAdapter, @Nullable T t, @NonNull Rect rect, int i) {
@@ -197,82 +170,51 @@ class FocusStrategy {
     }
 
     private static boolean isBetterCandidate(int i, @NonNull Rect rect, @NonNull Rect rect2, @NonNull Rect rect3) {
-        boolean z = false;
         if (!isCandidate(rect, rect2, i)) {
             return false;
         }
-        if (!isCandidate(rect, rect3, i) || beamBeats(i, rect, rect2, rect3)) {
-            return true;
+        if (isCandidate(rect, rect3, i) && !beamBeats(i, rect, rect2, rect3)) {
+            return !beamBeats(i, rect, rect3, rect2) && getWeightedDistanceFor(majorAxisDistance(i, rect, rect2), minorAxisDistance(i, rect, rect2)) < getWeightedDistanceFor(majorAxisDistance(i, rect, rect3), minorAxisDistance(i, rect, rect3));
         }
-        if (beamBeats(i, rect, rect3, rect2)) {
-            return false;
-        }
-        if (getWeightedDistanceFor(majorAxisDistance(i, rect, rect2), minorAxisDistance(i, rect, rect2)) < getWeightedDistanceFor(majorAxisDistance(i, rect, rect3), minorAxisDistance(i, rect, rect3))) {
-            z = true;
-        }
-        return z;
+        return true;
     }
 
     private static boolean isCandidate(@NonNull Rect rect, @NonNull Rect rect2, int i) {
-        boolean z = true;
         if (i == 17) {
             int i2 = rect.right;
             int i3 = rect2.right;
-            if ((i2 <= i3 && rect.left < i3) || rect.left <= rect2.left) {
-                z = false;
-            }
-            return z;
+            return (i2 > i3 || rect.left >= i3) && rect.left > rect2.left;
         } else if (i == 33) {
             int i4 = rect.bottom;
             int i5 = rect2.bottom;
-            if ((i4 <= i5 && rect.top < i5) || rect.top <= rect2.top) {
-                z = false;
-            }
-            return z;
+            return (i4 > i5 || rect.top >= i5) && rect.top > rect2.top;
         } else if (i == 66) {
             int i6 = rect.left;
             int i7 = rect2.left;
-            if ((i6 >= i7 && rect.right > i7) || rect.right >= rect2.right) {
-                z = false;
-            }
-            return z;
+            return (i6 < i7 || rect.right <= i7) && rect.right < rect2.right;
         } else if (i == 130) {
             int i8 = rect.top;
             int i9 = rect2.top;
-            if ((i8 >= i9 && rect.bottom > i9) || rect.bottom >= rect2.bottom) {
-                z = false;
-            }
-            return z;
+            return (i8 < i9 || rect.bottom <= i9) && rect.bottom < rect2.bottom;
         } else {
             throw new IllegalArgumentException("direction must be one of {FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
         }
     }
 
     private static boolean isToDirectionOf(int i, @NonNull Rect rect, @NonNull Rect rect2) {
-        boolean z = true;
         if (i == 17) {
-            if (rect.left < rect2.right) {
-                z = false;
-            }
-            return z;
-        } else if (i == 33) {
-            if (rect.top < rect2.bottom) {
-                z = false;
-            }
-            return z;
-        } else if (i == 66) {
-            if (rect.right > rect2.left) {
-                z = false;
-            }
-            return z;
-        } else if (i == 130) {
-            if (rect.bottom > rect2.top) {
-                z = false;
-            }
-            return z;
-        } else {
-            throw new IllegalArgumentException("direction must be one of {FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
+            return rect.left >= rect2.right;
         }
+        if (i == 33) {
+            return rect.top >= rect2.bottom;
+        }
+        if (i == 66) {
+            return rect.right <= rect2.left;
+        }
+        if (i == 130) {
+            return rect.bottom <= rect2.top;
+        }
+        throw new IllegalArgumentException("direction must be one of {FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
     }
 
     private static int majorAxisDistance(int i, @NonNull Rect rect, @NonNull Rect rect2) {

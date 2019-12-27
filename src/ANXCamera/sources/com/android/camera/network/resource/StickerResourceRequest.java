@@ -3,7 +3,7 @@ package com.android.camera.network.resource;
 import com.android.camera.network.net.BaseGalleryRequest;
 import com.android.camera.network.net.HttpManager;
 import com.android.camera.network.net.base.ErrorCode;
-import com.android.camera.network.resource.RequestContracts.Info;
+import com.android.camera.network.resource.RequestContracts;
 import com.android.camera.sticker.StickerInfo;
 import com.google.gson.JsonParseException;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class StickerResourceRequest extends BaseGalleryRequest {
     private static final long STICKER_PARENT_ID = 7326868816920608L;
 
     public StickerResourceRequest() {
-        super(0, Info.URL);
+        super(0, RequestContracts.Info.URL);
         addParam("id", Long.toString(STICKER_PARENT_ID));
         setUseCache(true);
         setCacheExpires(System.currentTimeMillis() + EXPIRE_TIME);
@@ -29,8 +29,8 @@ public class StickerResourceRequest extends BaseGalleryRequest {
     public void onRequestSuccess(JSONObject jSONObject) throws Exception {
         try {
             ArrayList arrayList = new ArrayList();
-            JSONArray jSONArray = jSONObject.getJSONArray(Info.JSON_KEY_ITEMS);
-            long optLong = jSONObject.optLong(Info.EXPIRE_AT);
+            JSONArray jSONArray = jSONObject.getJSONArray(RequestContracts.Info.JSON_KEY_ITEMS);
+            long optLong = jSONObject.optLong(RequestContracts.Info.EXPIRE_AT);
             if (optLong != 0) {
                 setCacheSoftTtl(optLong);
             }
@@ -40,7 +40,7 @@ public class StickerResourceRequest extends BaseGalleryRequest {
                     StickerInfo stickerInfo = new StickerInfo();
                     stickerInfo.id = jSONObject2.optLong("id");
                     stickerInfo.icon = jSONObject2.optString("icon");
-                    stickerInfo.extra = jSONObject2.optString(Info.JSON_KEY_EXTRA);
+                    stickerInfo.extra = jSONObject2.optString(RequestContracts.Info.JSON_KEY_EXTRA);
                     arrayList.add(stickerInfo);
                 }
             }

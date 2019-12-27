@@ -17,12 +17,7 @@ public abstract class FragmentPagerAdapter extends PagerAdapter {
     }
 
     private static String makeFragmentName(int i, long j) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("android:switcher:");
-        sb.append(i);
-        sb.append(":");
-        sb.append(j);
-        return sb.toString();
+        return "android:switcher:" + i + ":" + j;
     }
 
     public void destroyItem(ViewGroup viewGroup, int i, Object obj) {
@@ -94,11 +89,7 @@ public abstract class FragmentPagerAdapter extends PagerAdapter {
 
     public void startUpdate(ViewGroup viewGroup) {
         if (viewGroup.getId() == -1) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("ViewPager with adapter ");
-            sb.append(this);
-            sb.append(" requires a view id");
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("ViewPager with adapter " + this + " requires a view id");
         }
     }
 }

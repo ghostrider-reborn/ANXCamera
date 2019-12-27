@@ -6,6 +6,7 @@ import com.ss.android.ugc.effectmanager.common.model.UrlModel;
 import com.ss.android.ugc.effectmanager.common.utils.FileUtils;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -50,12 +51,8 @@ public class ComposerHelper {
 
     @Nullable
     public static ComposerNode parseComposerMaterial(@NonNull String str, @NonNull String str2, @NonNull String str3) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(File.separator);
-        sb.append(CONFIG_FILE_NAME);
         try {
-            JSONArray jSONArray = new JSONObject(FileUtils.getFileContent(sb.toString())).getJSONObject(CONFIG_EFFECT).getJSONArray(CONFIG_LINK);
+            JSONArray jSONArray = new JSONObject(FileUtils.getFileContent(str + File.separator + CONFIG_FILE_NAME)).getJSONObject(CONFIG_EFFECT).getJSONArray(CONFIG_LINK);
             if (jSONArray.length() <= 0) {
                 return null;
             }
@@ -63,12 +60,7 @@ public class ComposerHelper {
             if (!jSONArray.getJSONObject(0).getString("type").toLowerCase().equals(CONFIG_TYPE_COMPOSER)) {
                 return null;
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(File.separator);
-            sb2.append(string);
-            sb2.append(CONTENT_FILE_NAME);
-            JSONObject jSONObject = new JSONObject(FileUtils.getFileContent(sb2.toString()));
+            JSONObject jSONObject = new JSONObject(FileUtils.getFileContent(str + File.separator + string + CONTENT_FILE_NAME));
             ComposerNode composerNode = new ComposerNode();
             composerNode.tag_name = "root";
             composerNode.UI_name = "Composer";
@@ -92,24 +84,20 @@ public class ComposerHelper {
 
     @Nullable
     public static ComposerNode parseComposerNode(@NonNull JSONObject jSONObject, @NonNull String str, String str2) {
-        String str3 = "nodes";
         try {
             ComposerNode composerNode = new ComposerNode();
             composerNode.type = jSONObject.getInt("type");
             composerNode.file = jSONObject.optString(COMPOSER_PATH, "");
-            StringBuilder sb = new StringBuilder();
-            sb.append(DEFAULT_SERVER_URL1);
-            sb.append(jSONObject.optString("icon", null));
-            composerNode.icon = sb.toString();
-            composerNode.UI_name = jSONObject.optString(COMPOSER_UI_NAME, null);
+            composerNode.icon = DEFAULT_SERVER_URL1 + jSONObject.optString("icon", (String) null);
+            composerNode.UI_name = jSONObject.optString(COMPOSER_UI_NAME, (String) null);
             composerNode.tag_name = jSONObject.getString(COMPOSER_TAG_NAME);
             composerNode.default_value = (float) jSONObject.optDouble(COMPOSER_DEFAULT_VALUE, 0.0d);
             composerNode.min_value = (float) jSONObject.optDouble(COMPOSER_MIN_VALUE, 0.0d);
             composerNode.max_value = (float) jSONObject.optDouble(COMPOSER_MAX_VALUE, 0.0d);
             composerNode.switch_mode = jSONObject.optInt(COMPOSER_SWITCH_MODE, 0);
-            if (jSONObject.has(str3)) {
+            if (jSONObject.has("nodes")) {
                 composerNode.children = new ArrayList();
-                JSONArray jSONArray = jSONObject.getJSONArray(str3);
+                JSONArray jSONArray = jSONObject.getJSONArray("nodes");
                 for (int i = 0; i < jSONArray.length(); i++) {
                     ComposerNode parseComposerNode = parseComposerNode(jSONArray.getJSONObject(i), str, str2);
                     if (parseComposerNode != null) {
@@ -117,17 +105,15 @@ public class ComposerHelper {
                         composerNode.children.add(parseComposerNode);
                     }
                 }
-                if (composerNode.children.size() == 0 || (composerNode.children.size() == 1 && ((ComposerNode) composerNode.children.get(0)).type == -1)) {
+                if (composerNode.children.size() == 0 || (composerNode.children.size() == 1 && composerNode.children.get(0).type == -1)) {
                     return null;
                 }
             } else {
                 List<String> serverUrls = getServerUrls();
                 ArrayList arrayList = new ArrayList();
-                for (String str4 : serverUrls) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str4);
-                    sb2.append(composerNode.file);
-                    arrayList.add(sb2.toString());
+                Iterator<String> it = serverUrls.iterator();
+                while (it.hasNext()) {
+                    arrayList.add(it.next() + composerNode.file);
                 }
                 UrlModel urlModel = new UrlModel();
                 urlModel.setUrlList(arrayList);
@@ -136,24 +122,19 @@ public class ComposerHelper {
                 effect.setFileUrl(urlModel);
                 effect.setId(composerNode.file);
                 effect.setEffectId(composerNode.file);
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str2);
-                sb3.append(File.separator);
-                sb3.append(effect.getId());
-                sb3.append(".zip");
-                effect.setZipPath(sb3.toString());
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str2);
-                sb4.append(File.separator);
-                sb4.append(effect.getId());
-                effect.setUnzipPath(sb4.toString());
+                effect.setZipPath(str2 + File.separator + effect.getId() + ".zip");
+                StringBuilder sb = new StringBuilder();
+                sb.append(str2);
+                sb.append(File.separator);
+                sb.append(effect.getId());
+                effect.setUnzipPath(sb.toString());
                 composerNode.effect = effect;
                 JSONObject optJSONObject = jSONObject.optJSONObject(COMPOSER_EXTRA_INFO);
-                String str5 = "0";
+                String str3 = "0";
                 if (optJSONObject != null) {
-                    str5 = optJSONObject.optString("version", str5);
+                    str3 = optJSONObject.optString("version", str3);
                 }
-                if (versionCompare(str, str5) < 0) {
+                if (versionCompare(str, str3) < 0) {
                     return null;
                 }
             }
@@ -169,9 +150,8 @@ public class ComposerHelper {
     }
 
     public static int versionCompare(@NonNull String str, @NonNull String str2) {
-        String str3 = "\\.";
-        String[] split = str.split(str3);
-        String[] split2 = str2.split(str3);
+        String[] split = str.split("\\.");
+        String[] split2 = str2.split("\\.");
         int i = 0;
         while (i < split.length && i < split2.length && split[i].equals(split2[i])) {
             i++;

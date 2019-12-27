@@ -2,15 +2,14 @@ package com.android.camera.module.impl.component;
 
 import com.android.camera.ActivityBase;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.Iterator;
 import java.util.Stack;
 
-public class BackStackImpl implements BackStack {
+public class BackStackImpl implements ModeProtocol.BackStack {
     private static final String TAG = "BackStack";
     private ActivityBase mActivity;
-    private Stack<HandleBackTrace> mStacks = new Stack<>();
+    private Stack<ModeProtocol.HandleBackTrace> mStacks = new Stack<>();
 
     public BackStackImpl(ActivityBase activityBase) {
         this.mActivity = activityBase;
@@ -26,7 +25,7 @@ public class BackStackImpl implements BackStack {
         }
         Iterator it = this.mStacks.iterator();
         while (it.hasNext()) {
-            HandleBackTrace handleBackTrace = (HandleBackTrace) it.next();
+            ModeProtocol.HandleBackTrace handleBackTrace = (ModeProtocol.HandleBackTrace) it.next();
             if (handleBackTrace.canProvide() && handleBackTrace.onBackEvent(i)) {
                 return true;
             }
@@ -34,7 +33,7 @@ public class BackStackImpl implements BackStack {
         return false;
     }
 
-    public <P extends HandleBackTrace> void addInBackStack(P p) {
+    public <P extends ModeProtocol.HandleBackTrace> void addInBackStack(P p) {
         this.mStacks.add(p);
     }
 
@@ -46,7 +45,7 @@ public class BackStackImpl implements BackStack {
         if (!this.mStacks.isEmpty()) {
             Iterator it = this.mStacks.iterator();
             while (it.hasNext()) {
-                HandleBackTrace handleBackTrace = (HandleBackTrace) it.next();
+                ModeProtocol.HandleBackTrace handleBackTrace = (ModeProtocol.HandleBackTrace) it.next();
                 if (handleBackTrace.canProvide()) {
                     handleBackTrace.onBackEvent(3);
                 }
@@ -65,7 +64,7 @@ public class BackStackImpl implements BackStack {
         ModeCoordinatorImpl.getInstance().attachProtocol(171, this);
     }
 
-    public <P extends HandleBackTrace> void removeBackStack(P p) {
+    public <P extends ModeProtocol.HandleBackTrace> void removeBackStack(P p) {
         this.mStacks.remove(p);
     }
 

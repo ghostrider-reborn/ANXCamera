@@ -6,8 +6,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.text.Layout.Alignment;
+import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -86,13 +85,7 @@ public class FourSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         BaseModule baseModule = (BaseModule) ((ActivityBase) context).getCurrentModule();
         this.mZoomRatioMax = baseModule.getMaxZoomRatio();
         this.mZoomRatioMin = baseModule.getMinZoomRatio();
-        StringBuilder sb = new StringBuilder();
-        sb.append("ZOOM RATIO RANGE [");
-        sb.append(this.mZoomRatioMin);
-        sb.append(", ");
-        sb.append(this.mZoomRatioMax);
-        sb.append("]");
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "ZOOM RATIO RANGE [" + this.mZoomRatioMin + ", " + this.mZoomRatioMax + "]");
         float[] entryX = getEntryX();
         float[] zoomRatioY = getZoomRatioY(this.mZoomRatioMax);
         this.mRange10XToMaxEntryToZoomRatioSpline = Spline.createMonotoneCubicSpline(entryX, zoomRatioY);
@@ -102,7 +95,7 @@ public class FourSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         this.mEntryLayouts = new StaticLayout[charSequenceArr.length];
         for (int i2 = 0; i2 < charSequenceArr.length; i2++) {
             StaticLayout[] staticLayoutArr = this.mEntryLayouts;
-            StaticLayout staticLayout = new StaticLayout(charSequenceArr[i2], this.mTextPaint, Util.sWindowWidth, Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            StaticLayout staticLayout = new StaticLayout(charSequenceArr[i2], this.mTextPaint, Util.sWindowWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             staticLayoutArr[i2] = staticLayout;
         }
     }
@@ -121,9 +114,8 @@ public class FourSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
     }
 
     private void drawText(int i, Canvas canvas) {
-        float lineAscent = (float) (this.mEntryLayouts[i].getLineAscent(0) - this.mEntryLayouts[i].getLineDescent(0));
         canvas.save();
-        canvas.translate(0.0f, lineAscent / 2.0f);
+        canvas.translate(0.0f, ((float) (this.mEntryLayouts[i].getLineAscent(0) - this.mEntryLayouts[i].getLineDescent(0))) / 2.0f);
         this.mEntryLayouts[i].draw(canvas);
         canvas.restore();
     }
@@ -195,7 +187,7 @@ public class FourSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         this.mPaint.setAntiAlias(true);
         this.mPaint.setStrokeWidth((float) this.mLineWidth);
         this.mPaint.setTextSize((float) this.mTextSize);
-        this.mPaint.setTextAlign(Align.LEFT);
+        this.mPaint.setTextAlign(Paint.Align.LEFT);
         this.mTextPaint = new TextPaint(this.mPaint);
         this.mDigitsTextStyle = new TextAppearanceSpan(context, R.style.ZoomPopupDigitsTextStyle);
         this.mXTextStyle = new TextAppearanceSpan(context, R.style.ZoomPopupXTextStyle);
@@ -212,8 +204,8 @@ public class FourSatZoomSliderAdapter extends AbstractZoomSliderAdapter {
         canvas.drawLine(0.0f, -f2, 0.0f, f2, this.mPaint);
     }
 
-    public Align getAlign(int i) {
-        return drawTextForItemAt(i) ? Align.LEFT : Align.CENTER;
+    public Paint.Align getAlign(int i) {
+        return drawTextForItemAt(i) ? Paint.Align.LEFT : Paint.Align.CENTER;
     }
 
     public int getCount() {

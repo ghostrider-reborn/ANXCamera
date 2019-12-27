@@ -6,7 +6,6 @@ import com.android.camera.log.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
-import java.util.Map.Entry;
 import miui.os.Build;
 
 public class CameraStat {
@@ -331,10 +330,10 @@ public class CameraStat {
             sb.append("\n");
             sb.append("params:");
             sb.append("[");
-            for (Entry entry : map.entrySet()) {
-                sb.append((String) entry.getKey());
+            for (Map.Entry next : map.entrySet()) {
+                sb.append((String) next.getKey());
                 sb.append(":");
-                sb.append((String) entry.getValue());
+                sb.append((String) next.getValue());
                 sb.append(" ");
             }
             int length = sb.length();

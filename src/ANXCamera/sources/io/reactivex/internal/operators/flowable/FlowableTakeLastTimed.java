@@ -55,23 +55,26 @@ public final class FlowableTakeLastTimed<T> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, Subscriber<? super T> subscriber, boolean z2) {
             if (this.cancelled) {
                 this.queue.clear();
                 return true;
-            }
-            if (!z2) {
+            } else if (!z2) {
                 Throwable th = this.error;
                 if (th != null) {
                     this.queue.clear();
                     subscriber.onError(th);
                     return true;
-                } else if (z) {
+                } else if (!z) {
+                    return false;
+                } else {
                     subscriber.onComplete();
                     return true;
                 }
-            } else if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 Throwable th2 = this.error;
                 if (th2 != null) {
                     subscriber.onError(th2);
@@ -80,10 +83,9 @@ public final class FlowableTakeLastTimed<T> extends AbstractFlowableWithUpstream
                 }
                 return true;
             }
-            return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 Subscriber<? super T> subscriber = this.actual;
@@ -154,7 +156,7 @@ public final class FlowableTakeLastTimed<T> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trim(long j, SpscLinkedArrayQueue<Object> spscLinkedArrayQueue) {
             long j2 = this.time;
             long j3 = this.count;

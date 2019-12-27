@@ -28,7 +28,7 @@ public class ResponseDispatcher {
                     try {
                         ResponseDispatcher.this.mOnResponseListener.onResponse(objArr);
                     } catch (Exception unused) {
-                        ResponseDispatcher.this.onResponseError(ErrorCode.DATA_BIND_ERROR, null, null);
+                        ResponseDispatcher.this.onResponseError(ErrorCode.DATA_BIND_ERROR, (String) null, (Object) null);
                     }
                 }
             });
@@ -37,7 +37,7 @@ public class ResponseDispatcher {
         try {
             responseListener.onResponse(objArr);
         } catch (Exception unused) {
-            onResponseError(ErrorCode.DATA_BIND_ERROR, null, null);
+            onResponseError(ErrorCode.DATA_BIND_ERROR, (String) null, (Object) null);
         }
     }
 

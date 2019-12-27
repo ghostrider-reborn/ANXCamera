@@ -24,7 +24,7 @@ public final class ObservableFlatMapCompletable<T> extends AbstractObservableWit
         private static final long serialVersionUID = 8443155186132538303L;
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f312d;
         final boolean delayErrors;
         volatile boolean disposed;
@@ -75,14 +75,14 @@ public final class ObservableFlatMapCompletable<T> extends AbstractObservableWit
             this.set.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerComplete(InnerObserver innerObserver) {
+        /* access modifiers changed from: package-private */
+        public void innerComplete(FlatMapCompletableMainObserver<T>.InnerObserver innerObserver) {
             this.set.delete(innerObserver);
             onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerError(InnerObserver innerObserver, Throwable th) {
+        /* access modifiers changed from: package-private */
+        public void innerError(FlatMapCompletableMainObserver<T>.InnerObserver innerObserver, Throwable th) {
             this.set.delete(innerObserver);
             onError(th);
         }

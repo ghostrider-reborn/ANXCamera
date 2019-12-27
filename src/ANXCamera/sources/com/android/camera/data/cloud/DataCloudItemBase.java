@@ -1,13 +1,12 @@
 package com.android.camera.data.cloud;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.support.v4.util.SimpleArrayMap;
 import com.android.camera.CameraAppImpl;
-import com.android.camera.data.cloud.DataCloud.CloudItem;
+import com.android.camera.data.cloud.DataCloud;
 
-public abstract class DataCloudItemBase implements CloudItem {
-    private Editor mEditor;
+public abstract class DataCloudItemBase implements DataCloud.CloudItem {
+    private SharedPreferences.Editor mEditor;
     private SharedPreferences mPreferences;
     private boolean mReady;
     private SimpleArrayMap<String, Object> mValues = new SimpleArrayMap<>();
@@ -23,7 +22,7 @@ public abstract class DataCloudItemBase implements CloudItem {
         this.mPreferences = CameraAppImpl.getAndroidContext().getSharedPreferences(provideKey(), 0);
     }
 
-    public Editor editor() {
+    public SharedPreferences.Editor editor() {
         this.mEditor = getSharedPreferences().edit();
         return this.mEditor;
     }
@@ -36,10 +35,7 @@ public abstract class DataCloudItemBase implements CloudItem {
         if (bool == null) {
             bool = Boolean.valueOf(getSharedPreferences().getBoolean(str, z));
         }
-        if (bool != null) {
-            z = bool.booleanValue();
-        }
-        return z;
+        return bool == null ? z : bool.booleanValue();
     }
 
     public float getCloudFloatDefault(String str, float f2) {
@@ -50,10 +46,7 @@ public abstract class DataCloudItemBase implements CloudItem {
         if (f3 == null) {
             f3 = Float.valueOf(getSharedPreferences().getFloat(str, f2));
         }
-        if (f3 != null) {
-            f2 = f3.floatValue();
-        }
-        return f2;
+        return f3 == null ? f2 : f3.floatValue();
     }
 
     public int getCloudIntDefault(String str, int i) {
@@ -64,10 +57,7 @@ public abstract class DataCloudItemBase implements CloudItem {
         if (num == null) {
             num = Integer.valueOf(getSharedPreferences().getInt(str, i));
         }
-        if (num != null) {
-            i = num.intValue();
-        }
-        return i;
+        return num == null ? i : num.intValue();
     }
 
     public long getCloudLongDefault(String str, long j) {
@@ -78,10 +68,7 @@ public abstract class DataCloudItemBase implements CloudItem {
         if (l == null) {
             l = Long.valueOf(getSharedPreferences().getLong(str, j));
         }
-        if (l != null) {
-            j = l.longValue();
-        }
-        return j;
+        return l == null ? j : l.longValue();
     }
 
     public String getCloudStringDefault(String str, String str2) {
@@ -90,10 +77,7 @@ public abstract class DataCloudItemBase implements CloudItem {
         }
         String str3 = (String) this.mValues.get(str);
         String string = str3 == null ? getSharedPreferences().getString(str, str2) : str3;
-        if (string == null) {
-            string = str2;
-        }
-        return string;
+        return string == null ? str2 : string;
     }
 
     public void setReady(boolean z) {

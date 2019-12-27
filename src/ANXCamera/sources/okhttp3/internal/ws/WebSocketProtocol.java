@@ -33,26 +33,16 @@ public final class WebSocketProtocol {
     }
 
     public static String acceptHeader(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(ACCEPT_MAGIC);
-        return ByteString.encodeUtf8(sb.toString()).sha1().base64();
+        return ByteString.encodeUtf8(str + ACCEPT_MAGIC).sha1().base64();
     }
 
     static String closeCodeExceptionMessage(int i) {
         if (i < 1000 || i >= 5000) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Code must be in range [1000,5000): ");
-            sb.append(i);
-            return sb.toString();
+            return "Code must be in range [1000,5000): " + i;
         } else if ((i < 1004 || i > 1006) && (i < 1012 || i > 2999)) {
             return null;
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Code ");
-            sb2.append(i);
-            sb2.append(" is reserved and may not be used.");
-            return sb2.toString();
+            return "Code " + i + " is reserved and may not be used.";
         }
     }
 
@@ -60,8 +50,7 @@ public final class WebSocketProtocol {
         int length = bArr2.length;
         int i = 0;
         while (((long) i) < j) {
-            int i2 = (int) (j2 % ((long) length));
-            bArr[i] = (byte) (bArr2[i2] ^ bArr[i]);
+            bArr[i] = (byte) (bArr2[(int) (j2 % ((long) length))] ^ bArr[i]);
             i++;
             j2++;
         }

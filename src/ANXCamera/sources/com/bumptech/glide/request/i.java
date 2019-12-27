@@ -13,7 +13,7 @@ public class i implements d, c {
 
     @VisibleForTesting
     i() {
-        this(null);
+        this((d) null);
     }
 
     public i(@Nullable d dVar) {
@@ -45,6 +45,7 @@ public class i implements d, c {
         this.thumb = cVar2;
     }
 
+    /* JADX WARNING: Removed duplicated region for block: B:14:0x0029 A[ORIG_RETURN, RETURN, SYNTHETIC] */
     public boolean a(c cVar) {
         if (!(cVar instanceof i)) {
             return false;
@@ -60,13 +61,11 @@ public class i implements d, c {
         }
         c cVar3 = this.thumb;
         if (cVar3 == null) {
-            if (iVar.thumb != null) {
-                return false;
-            }
-        } else if (!cVar3.a(iVar.thumb)) {
+            return iVar.thumb == null;
+        }
+        if (!cVar3.a(iVar.thumb)) {
             return false;
         }
-        return true;
     }
 
     public void b(c cVar) {

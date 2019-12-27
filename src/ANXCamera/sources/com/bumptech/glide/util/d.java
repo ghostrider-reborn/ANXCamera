@@ -2,10 +2,10 @@ package com.bumptech.glide.util;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.bumptech.glide.f.b;
+import com.bumptech.glide.f;
 
 /* compiled from: FixedPreloadSizeProvider */
-public class d<T> implements b<T> {
+public class d<T> implements f.b<T> {
     private final int[] size;
 
     public d(int i, int i2) {

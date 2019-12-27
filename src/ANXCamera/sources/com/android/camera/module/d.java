@@ -1,12 +1,12 @@
 package com.android.camera.module;
 
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 
 /* compiled from: lambda */
 public final /* synthetic */ class d implements Runnable {
-    private final /* synthetic */ TopAlert ub;
+    private final /* synthetic */ ModeProtocol.TopAlert ub;
 
-    public /* synthetic */ d(TopAlert topAlert) {
+    public /* synthetic */ d(ModeProtocol.TopAlert topAlert) {
         this.ub = topAlert;
     }
 

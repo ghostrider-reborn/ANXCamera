@@ -7,7 +7,7 @@ import com.android.camera.CameraSize;
 import com.android.camera.Util;
 import com.android.camera.fragment.beauty.BeautyValues;
 import com.android.camera.log.Log;
-import com.android.camera2.vendortag.struct.MarshalQueryableASDScene.ASDScene;
+import com.android.camera2.vendortag.struct.MarshalQueryableASDScene;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +77,7 @@ public class CameraConfigs {
     private boolean mNeedSequence;
     private boolean mNormalWideLDCEnabled;
     private boolean mOISEnabled;
-    private ASDScene[] mOnTripodScene;
+    private MarshalQueryableASDScene.ASDScene[] mOnTripodScene;
     private int mPhotoFormat = 256;
     private int mPhotoMaxImages = 2;
     private CameraSize mPhotoSize;
@@ -235,7 +235,7 @@ public class CameraConfigs {
         return this.mNormalWideLDCEnabled;
     }
 
-    public ASDScene[] getOnTripodScenes() {
+    public MarshalQueryableASDScene.ASDScene[] getOnTripodScenes() {
         return this.mOnTripodScene;
     }
 
@@ -288,15 +288,10 @@ public class CameraConfigs {
         if (arrayDeque == null) {
             return null;
         }
-        String str = (String) arrayDeque.poll();
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getShotPath: ");
-        sb.append(str);
-        sb.append(", size:");
-        sb.append(this.mShotPath.size());
-        Log.d(str2, sb.toString());
-        return str;
+        String poll = arrayDeque.poll();
+        String str = TAG;
+        Log.d(str, "getShotPath: " + poll + ", size:" + this.mShotPath.size());
+        return poll;
     }
 
     public int getShotType() {
@@ -316,15 +311,10 @@ public class CameraConfigs {
     }
 
     public String getThumbnailShotPath() {
-        String str = (String) this.mShotPathThumbnail.poll();
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getThumbnailShotPath: ");
-        sb.append(str);
-        sb.append(", size:");
-        sb.append(this.mShotPathThumbnail.size());
-        Log.d(str2, sb.toString());
-        return str;
+        String poll = this.mShotPathThumbnail.poll();
+        String str = TAG;
+        Log.d(str, "getThumbnailShotPath: " + poll + ", size:" + this.mShotPathThumbnail.size());
+        return poll;
     }
 
     public CameraSize getThumbnailSize() {
@@ -656,14 +646,13 @@ public class CameraConfigs {
     }
 
     public boolean setDualCamWaterMarkEnable(boolean z) {
-        String str = "device";
-        boolean isStringValueContained = Util.isStringValueContained((Object) str, this.mWaterMarkAppliedList);
+        boolean isStringValueContained = Util.isStringValueContained((Object) "device", (List<? extends CharSequence>) this.mWaterMarkAppliedList);
         if (z) {
             if (!isStringValueContained) {
-                this.mWaterMarkAppliedList.add(str);
+                this.mWaterMarkAppliedList.add("device");
             }
         } else if (isStringValueContained) {
-            this.mWaterMarkAppliedList.remove(str);
+            this.mWaterMarkAppliedList.remove("device");
         }
         if (this.mDualCamWaterMarkEnabled == z) {
             return false;
@@ -749,14 +738,13 @@ public class CameraConfigs {
     }
 
     public boolean setFaceWaterMarkEnable(boolean z) {
-        String str = "beautify";
-        boolean isStringValueContained = Util.isStringValueContained((Object) str, this.mWaterMarkAppliedList);
+        boolean isStringValueContained = Util.isStringValueContained((Object) "beautify", (List<? extends CharSequence>) this.mWaterMarkAppliedList);
         if (z) {
             if (!isStringValueContained) {
-                this.mWaterMarkAppliedList.add(str);
+                this.mWaterMarkAppliedList.add("beautify");
             }
         } else if (isStringValueContained) {
-            this.mWaterMarkAppliedList.remove(str);
+            this.mWaterMarkAppliedList.remove("beautify");
         }
         if (this.mFaceWaterMarkEnabled == z) {
             return false;
@@ -860,10 +848,7 @@ public class CameraConfigs {
     public boolean setJpegQuality(int i) {
         if (i < 1 || i > 100) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setJpegQuality: invalid jpeg quality ");
-            sb.append(i);
-            Log.w(str, sb.toString());
+            Log.w(str, "setJpegQuality: invalid jpeg quality " + i);
             return false;
         } else if (this.mJpegQuality == i) {
             return false;
@@ -933,7 +918,7 @@ public class CameraConfigs {
         return true;
     }
 
-    public void setOnTripodScenes(ASDScene[] aSDSceneArr) {
+    public void setOnTripodScenes(MarshalQueryableASDScene.ASDScene[] aSDSceneArr) {
         this.mOnTripodScene = aSDSceneArr;
     }
 
@@ -1063,10 +1048,7 @@ public class CameraConfigs {
 
     public void setShotPath(String str, boolean z) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setShotPath: ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "setShotPath: " + str);
         if (z || this.mShotType == 8) {
             if (this.mShotPath == null) {
                 this.mShotPath = new ArrayDeque<>(5);
@@ -1134,14 +1116,13 @@ public class CameraConfigs {
     }
 
     public boolean setTimeWaterMarkEnable(boolean z) {
-        String str = "watermark";
-        boolean isStringValueContained = Util.isStringValueContained((Object) str, this.mWaterMarkAppliedList);
+        boolean isStringValueContained = Util.isStringValueContained((Object) "watermark", (List<? extends CharSequence>) this.mWaterMarkAppliedList);
         if (z) {
             if (!isStringValueContained) {
-                this.mWaterMarkAppliedList.add(str);
+                this.mWaterMarkAppliedList.add("watermark");
             }
         } else if (isStringValueContained) {
-            this.mWaterMarkAppliedList.remove(str);
+            this.mWaterMarkAppliedList.remove("watermark");
         }
         if (this.mTimeWaterMarkEnabled == z) {
             return false;
@@ -1217,10 +1198,7 @@ public class CameraConfigs {
     public boolean setZoomRatio(float f2) {
         float abs = Math.abs(this.mZoomRatio - f2);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("zoom ratio diff: ");
-        sb.append(abs);
-        Log.d(str, sb.toString());
+        Log.d(str, "zoom ratio diff: " + abs);
         this.mZoomRatio = f2;
         return true;
     }

@@ -5,12 +5,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -41,20 +38,15 @@ import com.android.camera.fragment.manually.adapter.ManuallySingleAdapter;
 import com.android.camera.lib.compatibility.related.vibrator.ViberatorContext;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ManuallyAdjust;
-import com.android.camera.protocol.ModeProtocol.ManuallyValueChanged;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera2.CameraCapabilities;
 import com.mi.config.b;
 import io.reactivex.Completable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentManually extends BaseFragment implements OnClickListener, HandleBackTrace, ManuallyAdjust, ManuallyListener {
-    private Adapter mAdapter;
+public class FragmentManually extends BaseFragment implements View.OnClickListener, ModeProtocol.HandleBackTrace, ModeProtocol.ManuallyAdjust, ManuallyListener {
+    private RecyclerView.Adapter mAdapter;
     private int mCurrentAdjustType = -1;
     private ManuallyDecoration mDecoration;
     private FragmentManuallyExtra mFragmentManuallyExtra;
@@ -87,7 +79,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
     }
 
     private void hideTips() {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.directlyHideTips();
         }
@@ -171,7 +163,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
     }
 
     private void notifyTipsMargin(int i) {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.updateTipBottomMargin(i, true);
         }
@@ -198,14 +190,15 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
             } else if (i == 1) {
                 initRecyclerView(1, this);
             }
-            if (i == 0) {
-                if (list == null) {
-                    AlphaOutOnSubscribe.directSetResult(this.mIndicatorButton);
-                } else if (this.mIndicatorButton.getVisibility() == 0) {
-                    list.add(Completable.create(new AlphaOutOnSubscribe(this.mIndicatorButton)));
-                } else {
-                    list.add(Completable.create(new SlideOutOnSubscribe(this.mManuallyParent, 80)));
-                }
+            if (i != 0) {
+                return;
+            }
+            if (list == null) {
+                AlphaOutOnSubscribe.directSetResult(this.mIndicatorButton);
+            } else if (this.mIndicatorButton.getVisibility() == 0) {
+                list.add(Completable.create(new AlphaOutOnSubscribe(this.mIndicatorButton)));
+            } else {
+                list.add(Completable.create(new SlideOutOnSubscribe(this.mManuallyParent, 80)));
             }
         }
     }
@@ -218,9 +211,9 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
                 if (this.mIndicatorButton.getVisibility() == 0) {
                     Completable.create(new AlphaOutOnSubscribe(this.mIndicatorButton)).subscribe();
                     AlphaOutOnSubscribe.directSetResult(this.mIndicatorButton);
-                } else {
-                    Completable.create(new SlideOutOnSubscribe(this.mManuallyParent, 80)).subscribe();
+                    return;
                 }
+                Completable.create(new SlideOutOnSubscribe(this.mManuallyParent, 80)).subscribe();
             } else if (i == 3) {
                 this.mCurrentAdjustType = 0;
                 if (this.mIndicatorButton.getVisibility() == 0) {
@@ -252,7 +245,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
 
     /* access modifiers changed from: protected */
     public void initView(View view) {
-        ((MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources());
+        ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources());
         this.mIndicatorButton = (ImageView) view.findViewById(R.id.manually_indicator);
         this.mIndicatorButton.setOnClickListener(this);
         this.mManuallyParent = (ViewGroup) view.findViewById(R.id.manually_adjust_layout);
@@ -263,7 +256,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
         linearLayoutManagerWrapper.setOrientation(0);
         this.mRecyclerView.setLayoutManager(linearLayoutManagerWrapper);
         adjustViewBackground(this.mCurrentMode);
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
     }
 
     public void notifyAfterFrameAvailable(int i) {
@@ -302,7 +295,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
         float height = (float) this.mManuallyParent.getHeight();
         ViewCompat.animate(this.mManuallyParent).setStartDelay(0).translationY(height).setInterpolator(new OvershootInterpolator()).withEndAction(new Runnable() {
             public void run() {
-                FragmentManually.this.mIsHiding = false;
+                boolean unused = FragmentManually.this.mIsHiding = false;
                 FragmentManually.this.mManuallyParent.setVisibility(4);
             }
         }).start();
@@ -315,46 +308,47 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
 
     public void onClick(View view) {
         if (isEnableClick()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
-            if (cameraAction == null || !cameraAction.isDoingAction()) {
-                if (view.getId() != R.id.manually_indicator) {
-                    ComponentData componentData = (ComponentData) view.getTag();
-                    int displayTitleString = componentData.getDisplayTitleString();
-                    if (displayTitleString != R.string.pref_camera_zoom_mode_title || HybridZoomingSystem.IS_4_OR_MORE_SAT) {
-                        this.mFragmentManuallyExtra = getExtraFragment();
-                        FragmentManuallyExtra fragmentManuallyExtra = this.mFragmentManuallyExtra;
-                        if (fragmentManuallyExtra == null) {
-                            hideTips();
-                            this.mFragmentManuallyExtra = new FragmentManuallyExtra();
-                            this.mFragmentManuallyExtra.setComponentData(componentData, this.mCurrentMode, true, this);
-                            FragmentManager childFragmentManager = getChildFragmentManager();
-                            FragmentManuallyExtra fragmentManuallyExtra2 = this.mFragmentManuallyExtra;
-                            FragmentUtils.addFragmentWithTag(childFragmentManager, (int) R.id.manually_popup, (Fragment) fragmentManuallyExtra2, fragmentManuallyExtra2.getFragmentTag());
-                            ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(displayTitleString);
-                        } else if (fragmentManuallyExtra.getCurrentTitle() == displayTitleString) {
-                            this.mFragmentManuallyExtra.animateOut();
-                            ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(-1);
-                        } else {
-                            hideTips();
-                            this.mFragmentManuallyExtra.resetData(componentData);
-                            ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(displayTitleString);
-                        }
-                    } else {
-                        FragmentUtils.removeFragmentByTag(getChildFragmentManager(), String.valueOf(254));
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            if (cameraAction != null && cameraAction.isDoingAction()) {
+                return;
+            }
+            if (view.getId() != R.id.manually_indicator) {
+                ComponentData componentData = (ComponentData) view.getTag();
+                int displayTitleString = componentData.getDisplayTitleString();
+                if (displayTitleString != R.string.pref_camera_zoom_mode_title || HybridZoomingSystem.IS_4_OR_MORE_SAT) {
+                    this.mFragmentManuallyExtra = getExtraFragment();
+                    FragmentManuallyExtra fragmentManuallyExtra = this.mFragmentManuallyExtra;
+                    if (fragmentManuallyExtra == null) {
+                        hideTips();
+                        this.mFragmentManuallyExtra = new FragmentManuallyExtra();
+                        this.mFragmentManuallyExtra.setComponentData(componentData, this.mCurrentMode, true, this);
+                        FragmentManager childFragmentManager = getChildFragmentManager();
+                        FragmentManuallyExtra fragmentManuallyExtra2 = this.mFragmentManuallyExtra;
+                        FragmentUtils.addFragmentWithTag(childFragmentManager, (int) R.id.manually_popup, (Fragment) fragmentManuallyExtra2, fragmentManuallyExtra2.getFragmentTag());
+                        ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(displayTitleString);
+                    } else if (fragmentManuallyExtra.getCurrentTitle() == displayTitleString) {
+                        this.mFragmentManuallyExtra.animateOut();
                         ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(-1);
-                        onManuallyDataChanged(componentData, null, null, false);
+                    } else {
+                        hideTips();
+                        this.mFragmentManuallyExtra.resetData(componentData);
+                        ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(displayTitleString);
                     }
                 } else {
-                    hideTips();
-                    this.mManuallyParent.setVisibility(0);
-                    ViewCompat.animate(this.mManuallyParent).setStartDelay(100).translationY(0.0f).setInterpolator(new DecelerateInterpolator()).start();
-                    ViewCompat.animate(this.mIndicatorButton).setInterpolator(new DecelerateInterpolator()).alpha(0.0f).setDuration(100).withEndAction(new Runnable() {
-                        public void run() {
-                            ViewCompat.setTranslationY(FragmentManually.this.mIndicatorButton, 0.0f);
-                            FragmentManually.this.mIndicatorButton.setVisibility(4);
-                        }
-                    }).start();
+                    FragmentUtils.removeFragmentByTag(getChildFragmentManager(), String.valueOf(254));
+                    ((ManuallyAdapter) this.mRecyclerView.getAdapter()).setSelectedTitle(-1);
+                    onManuallyDataChanged(componentData, (String) null, (String) null, false);
                 }
+            } else {
+                hideTips();
+                this.mManuallyParent.setVisibility(0);
+                ViewCompat.animate(this.mManuallyParent).setStartDelay(100).translationY(0.0f).setInterpolator(new DecelerateInterpolator()).start();
+                ViewCompat.animate(this.mIndicatorButton).setInterpolator(new DecelerateInterpolator()).alpha(0.0f).setDuration(100).withEndAction(new Runnable() {
+                    public void run() {
+                        ViewCompat.setTranslationY(FragmentManually.this.mIndicatorButton, 0.0f);
+                        FragmentManually.this.mIndicatorButton.setVisibility(4);
+                    }
+                }).start();
             }
         }
     }
@@ -365,25 +359,25 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
 
     public void onManuallyDataChanged(ComponentData componentData, String str, String str2, boolean z) {
         if (isEnableClick()) {
-            ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+            ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
             if (manuallyValueChanged != null) {
                 switch (componentData.getDisplayTitleString()) {
-                    case R.string.pref_camera_iso_title /*2131690057*/:
+                    case R.string.pref_camera_iso_title:
                         manuallyValueChanged.onISOValueChanged((ComponentManuallyISO) componentData, str2);
                         break;
-                    case R.string.pref_camera_whitebalance_title /*2131690214*/:
+                    case R.string.pref_camera_whitebalance_title:
                         if (str2.equals("manual")) {
                             getExtraFragment().showCustomWB((ComponentManuallyWB) componentData);
                         }
                         manuallyValueChanged.onWBValueChanged((ComponentManuallyWB) componentData, str2, z);
                         break;
-                    case R.string.pref_camera_zoom_mode_title /*2131690222*/:
+                    case R.string.pref_camera_zoom_mode_title:
                         manuallyValueChanged.onDualLensSwitch((ComponentManuallyDualLens) componentData, this.mCurrentMode);
                         break;
-                    case R.string.pref_manual_exposure_title /*2131690248*/:
+                    case R.string.pref_manual_exposure_title:
                         manuallyValueChanged.onETValueChanged((ComponentManuallyET) componentData, str2);
                         break;
-                    case R.string.pref_qc_focus_position_title /*2131690264*/:
+                    case R.string.pref_qc_focus_position_title:
                         manuallyValueChanged.onFocusValueChanged((ComponentManuallyFocus) componentData, str, str2);
                         performFocusValueChangedViberator(str, str2);
                         break;
@@ -415,7 +409,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(181, this);
         registerBackStack(modeCoordinator, this);
@@ -433,7 +427,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
 
     public int setManuallyVisible(int i, int i2, ManuallyListener manuallyListener) {
         int initRecyclerView = initRecyclerView(i, manuallyListener);
-        Adapter adapter = this.mAdapter;
+        RecyclerView.Adapter adapter = this.mAdapter;
         if (adapter != null) {
             this.mRecyclerView.setAdapter(adapter);
         }
@@ -442,7 +436,7 @@ public class FragmentManually extends BaseFragment implements OnClickListener, H
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(181, this);
         unRegisterBackStack(modeCoordinator, this);

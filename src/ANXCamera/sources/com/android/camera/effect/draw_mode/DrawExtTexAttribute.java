@@ -3,7 +3,7 @@ package com.android.camera.effect.draw_mode;
 import com.android.gallery3d.ui.ExtTexture;
 
 public class DrawExtTexAttribute extends DrawAttribute {
-    public boolean mEffectPopup;
+    public boolean mEffectPopup = false;
     public ExtTexture mExtTexture;
     public int mHeight;
     public float[] mTextureTransform;
@@ -12,12 +12,10 @@ public class DrawExtTexAttribute extends DrawAttribute {
     public int mY;
 
     public DrawExtTexAttribute() {
-        this.mEffectPopup = false;
         this.mTarget = 8;
     }
 
     public DrawExtTexAttribute(ExtTexture extTexture, float[] fArr, int i, int i2, int i3, int i4) {
-        this.mEffectPopup = false;
         this.mX = i;
         this.mY = i2;
         this.mWidth = i3;
@@ -28,7 +26,6 @@ public class DrawExtTexAttribute extends DrawAttribute {
     }
 
     public DrawExtTexAttribute(boolean z) {
-        this.mEffectPopup = false;
         this.mEffectPopup = z;
         this.mTarget = 8;
     }

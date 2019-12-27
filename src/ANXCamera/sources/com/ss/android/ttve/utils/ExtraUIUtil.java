@@ -30,9 +30,8 @@ public class ExtraUIUtil {
         float f2 = (float) i7;
         float f3 = (float) i6;
         float[] fArr = {0.0f, 0.0f, f2, f3};
-        String str = TAG;
         if (context == null) {
-            Log.e(str, "Context is null while calculating surface location!");
+            Log.e(TAG, "Context is null while calculating surface location!");
             return fArr;
         }
         if (f2 * 16.0f > f3 * 9.0f) {
@@ -52,35 +51,32 @@ public class ExtraUIUtil {
                 fArr[3] = ((f3 * 1.0f) * f6) / f2;
             }
         }
-        Log.d(str, String.format("video[%d, %d], max[%d, %d], screen[%d, %d], surface[%f, %f, %f, %f]", new Object[]{Integer.valueOf(i7), Integer.valueOf(i6), Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(UIUtils.getScreenWidth(context)), Integer.valueOf(UIUtils.getScreenHeight(context)), Float.valueOf(fArr[0]), Float.valueOf(fArr[1]), Float.valueOf(fArr[2]), Float.valueOf(fArr[3])}));
+        Log.d(TAG, String.format("video[%d, %d], max[%d, %d], screen[%d, %d], surface[%f, %f, %f, %f]", new Object[]{Integer.valueOf(i7), Integer.valueOf(i6), Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(UIUtils.getScreenWidth(context)), Integer.valueOf(UIUtils.getScreenHeight(context)), Float.valueOf(fArr[0]), Float.valueOf(fArr[1]), Float.valueOf(fArr[2]), Float.valueOf(fArr[3])}));
         return fArr;
     }
 
     public static int getNavigationBarHeight(Context context) {
-        int i = 0;
         if (context == null) {
             return 0;
         }
         int identifier = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
         if (identifier > 0) {
-            i = context.getResources().getDimensionPixelSize(identifier);
+            return context.getResources().getDimensionPixelSize(identifier);
         }
-        return i;
+        return 0;
     }
 
     @TargetApi(17)
     public static int getRealDisplayHeight(Context context) {
-        int i;
         if (context == null) {
             return 0;
         }
         DisplayMetrics displayMetrics = new DisplayMetrics();
         try {
             ((WindowManager) context.getSystemService("window")).getDefaultDisplay().getRealMetrics(displayMetrics);
-            i = displayMetrics.heightPixels;
+            return displayMetrics.heightPixels;
         } catch (Exception unused) {
-            i = UIUtils.getScreenHeight(context);
+            return UIUtils.getScreenHeight(context);
         }
-        return i;
     }
 }

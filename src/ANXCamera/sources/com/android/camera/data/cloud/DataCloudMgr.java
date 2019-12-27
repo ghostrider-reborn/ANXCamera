@@ -1,17 +1,15 @@
 package com.android.camera.data.cloud;
 
 import android.app.Application;
-import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences;
 import android.os.Build;
-import android.provider.MiuiSettings.SettingsCloudData;
+import android.provider.MiuiSettings;
 import android.text.TextUtils;
 import android.util.SparseArray;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.cloud.DataCloud.CloudFeature;
-import com.android.camera.data.cloud.DataCloud.CloudItem;
-import com.android.camera.data.cloud.DataCloud.CloudManager;
+import com.android.camera.data.cloud.DataCloud;
 import com.android.camera.log.Log;
 import com.android.camera.network.util.NetworkUtils;
 import com.android.camera.sensitive.SensitiveFilter;
@@ -27,7 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DataCloudMgr implements CloudManager {
+public class DataCloudMgr implements DataCloud.CloudManager {
     private static final String CLOUD_DATA_MODULE_NAME = "camera_settings_v3";
     private static final long CLOUD_DATA_UPDATE_INTERVAL = 86400000;
     private static final String FEA_SENSI_WORD = "pref_senstive_words";
@@ -42,36 +40,28 @@ public class DataCloudMgr implements CloudManager {
     private SparseArray<DataCloudItemConfig> mDataCloudItemConfigs = new SparseArray<>(2);
 
     private static void checkLastUpdateTimeFormat() {
-        String str = KEY_CLOUD_DATA_LAST_UPDATE;
         try {
             getCloudDataLastUpdateTime();
         } catch (Exception unused) {
-            String str2 = TAG;
-            Log.w(str2, "get cloud_data_last_update long value failed, try String type");
+            Log.w(TAG, "get cloud_data_last_update long value failed, try String type");
             try {
-                String string = DataRepository.dataItemGlobal().getString(str, "0");
-                Log.i(str2, "try to convert the string value type to long for field [cloud_data_last_update]");
-                DataRepository.dataItemGlobal().editor().remove(str).putLong(str, TextUtils.isEmpty(string) ? 0 : Long.parseLong(string)).commit();
+                String string = DataRepository.dataItemGlobal().getString(KEY_CLOUD_DATA_LAST_UPDATE, "0");
+                Log.i(TAG, "try to convert the string value type to long for field [cloud_data_last_update]");
+                DataRepository.dataItemGlobal().editor().remove(KEY_CLOUD_DATA_LAST_UPDATE).putLong(KEY_CLOUD_DATA_LAST_UPDATE, TextUtils.isEmpty(string) ? 0 : Long.parseLong(string)).commit();
             } catch (Exception unused2) {
-                Log.w(str2, "get cloud_data_last_update string value failed");
+                Log.w(TAG, "get cloud_data_last_update string value failed");
             }
         }
     }
 
     /* access modifiers changed from: private */
     public void fillPreference() {
-        CloudItem provideDataCloudConfig = provideDataCloudConfig(1);
-        CloudItem provideDataCloudConfig2 = provideDataCloudConfig(0);
+        DataCloud.CloudItem provideDataCloudConfig = provideDataCloudConfig(1);
+        DataCloud.CloudItem provideDataCloudConfig2 = provideDataCloudConfig(0);
         getCloudSensitiveWords();
-        String str = "version";
-        String str2 = CLOUD_DATA_MODULE_NAME;
-        String cloudDataString = getCloudDataString(str2, str, null);
+        String cloudDataString = getCloudDataString(CLOUD_DATA_MODULE_NAME, "version", (String) null);
         String cloudDataCommonVersion = getCloudDataCommonVersion();
-        StringBuilder sb = new StringBuilder();
-        String str3 = "camera_settings_v3_";
-        sb.append(str3);
-        sb.append(Build.DEVICE);
-        String cloudDataString2 = getCloudDataString(sb.toString(), str, null);
+        String cloudDataString2 = getCloudDataString("camera_settings_v3_" + Build.DEVICE, "version", (String) null);
         String cloudDataDeviceVersion = getCloudDataDeviceVersion();
         this.mDataCloudGlobal.setReady(false);
         DataCloudFeature().setReady(false);
@@ -82,28 +72,15 @@ public class DataCloudMgr implements CloudManager {
             DataCloudFeature().editor().clear().apply();
             provideDataCloudConfig.editor().clear().apply();
             provideDataCloudConfig2.editor().clear().apply();
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("updateSettingsFromCloudData common version ");
-            sb2.append(cloudDataCommonVersion);
-            String str4 = " -> ";
-            sb2.append(str4);
-            sb2.append(cloudDataString);
-            String sb3 = sb2.toString();
-            String str5 = TAG;
-            Log.d(str5, sb3);
+            Log.d(TAG, "updateSettingsFromCloudData common version " + cloudDataCommonVersion + " -> " + cloudDataString);
             setCloudDataCommonVersion(cloudDataString);
-            updateSettingsFromCloudData(str2);
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("updateSettingsFromCloudData device version ");
-            sb4.append(cloudDataDeviceVersion);
-            sb4.append(str4);
-            sb4.append(cloudDataString2);
-            Log.d(str5, sb4.toString());
+            updateSettingsFromCloudData(CLOUD_DATA_MODULE_NAME);
+            Log.d(TAG, "updateSettingsFromCloudData device version " + cloudDataDeviceVersion + " -> " + cloudDataString2);
             setCloudDataDeviceVersion(cloudDataString2);
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append(str3);
-            sb5.append(Build.DEVICE);
-            updateSettingsFromCloudData(sb5.toString());
+            StringBuilder sb = new StringBuilder();
+            sb.append("camera_settings_v3_");
+            sb.append(Build.DEVICE);
+            updateSettingsFromCloudData(sb.toString());
         }
         this.mDataCloudGlobal.setReady(true);
         DataCloudFeature().setReady(true);
@@ -112,15 +89,15 @@ public class DataCloudMgr implements CloudManager {
     }
 
     private static String getCloudDataCommonVersion() {
-        return DataRepository.dataItemGlobal().getString(KEY_CLOUD_DATA_VERSION, null);
+        return DataRepository.dataItemGlobal().getString(KEY_CLOUD_DATA_VERSION, (String) null);
     }
 
     private static String getCloudDataDeviceVersion() {
-        return DataRepository.dataItemGlobal().getString(KEY_CLOUD_DATA_DEVICE_VERSION, null);
+        return DataRepository.dataItemGlobal().getString(KEY_CLOUD_DATA_DEVICE_VERSION, (String) null);
     }
 
     private static final int getCloudDataInt(String str, String str2, int i) {
-        return SettingsCloudData.getCloudDataInt(CameraAppImpl.getAndroidContext().getContentResolver(), str, str2, i);
+        return MiuiSettings.SettingsCloudData.getCloudDataInt(CameraAppImpl.getAndroidContext().getContentResolver(), str, str2, i);
     }
 
     private static long getCloudDataLastUpdateTime() {
@@ -168,29 +145,24 @@ public class DataCloudMgr implements CloudManager {
     }
 
     private void updateSettingsFromCloudData(String str) {
-        String str2 = "type";
-        String str3 = TAG;
         try {
-            String cloudDataString = getCloudDataString(str, ComposerHelper.COMPOSER_CONTENT, null);
-            boolean isEmpty = TextUtils.isEmpty(cloudDataString);
-            String str4 = VALUE;
-            String str5 = "key";
-            if (!isEmpty) {
+            String cloudDataString = getCloudDataString(str, ComposerHelper.COMPOSER_CONTENT, (String) null);
+            if (!TextUtils.isEmpty(cloudDataString)) {
                 JSONArray jSONArray = new JSONArray(cloudDataString);
                 for (int i = 0; i < jSONArray.length(); i++) {
                     DataCloudItemBase dataCloudItemBase = this.mDataCloudGlobal;
                     JSONObject jSONObject = jSONArray.getJSONObject(i);
-                    if (jSONObject.has(str2)) {
-                        String string = jSONObject.getString(str2);
+                    if (jSONObject.has("type")) {
+                        String string = jSONObject.getString("type");
                         if (string.equals("front")) {
-                            dataCloudItemBase = (DataCloudItemBase) this.mDataCloudItemConfigs.get(1);
+                            dataCloudItemBase = this.mDataCloudItemConfigs.get(1);
                         } else if (string.equals("back")) {
-                            dataCloudItemBase = (DataCloudItemBase) this.mDataCloudItemConfigs.get(0);
+                            dataCloudItemBase = this.mDataCloudItemConfigs.get(0);
                         }
                     }
-                    String string2 = jSONObject.getString(str5);
-                    Editor editor = dataCloudItemBase.editor();
-                    Object obj = jSONObject.get(str4);
+                    String string2 = jSONObject.getString("key");
+                    SharedPreferences.Editor editor = dataCloudItemBase.editor();
+                    Object obj = jSONObject.get(VALUE);
                     if (obj instanceof Boolean) {
                         editor.putBoolean(string2, ((Boolean) obj).booleanValue());
                     } else if (obj instanceof Integer) {
@@ -202,32 +174,27 @@ public class DataCloudMgr implements CloudManager {
                     } else if (obj instanceof String) {
                         editor.putString(string2, (String) obj);
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Wrong camera setting type ");
-                        sb.append(string2);
-                        sb.append(": ");
-                        sb.append(obj);
-                        Log.e(str3, sb.toString());
+                        Log.e(TAG, "Wrong camera setting type " + string2 + ": " + obj);
                     }
                     editor.apply();
                 }
             }
-            String cloudDataString2 = getCloudDataString(str, "feature", null);
+            String cloudDataString2 = getCloudDataString(str, "feature", (String) null);
             if (!TextUtils.isEmpty(cloudDataString2)) {
-                Editor editor2 = DataCloudFeature().editor();
+                SharedPreferences.Editor editor2 = DataCloudFeature().editor();
                 JSONArray jSONArray2 = new JSONArray(cloudDataString2);
                 for (int i2 = 0; i2 < jSONArray2.length(); i2++) {
                     JSONObject jSONObject2 = jSONArray2.getJSONObject(i2);
-                    editor2.putBoolean(jSONObject2.getString(str5), jSONObject2.getBoolean(str4));
+                    editor2.putBoolean(jSONObject2.getString("key"), jSONObject2.getBoolean(VALUE));
                 }
                 editor2.apply();
             }
         } catch (JSONException e2) {
-            Log.e(str3, "JSONException when get camera settings !", e2);
+            Log.e(TAG, "JSONException when get camera settings !", e2);
         }
     }
 
-    public CloudFeature DataCloudFeature() {
+    public DataCloud.CloudFeature DataCloudFeature() {
         if (this.mDataCloudFeatureController == null) {
             this.mDataCloudFeatureController = new DataCloudFeatureController();
         }
@@ -252,8 +219,8 @@ public class DataCloudMgr implements CloudManager {
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
     }
 
-    public CloudItem provideDataCloudConfig(int i) {
-        DataCloudItemConfig dataCloudItemConfig = (DataCloudItemConfig) this.mDataCloudItemConfigs.get(i);
+    public DataCloud.CloudItem provideDataCloudConfig(int i) {
+        DataCloudItemConfig dataCloudItemConfig = this.mDataCloudItemConfigs.get(i);
         if (dataCloudItemConfig != null) {
             return dataCloudItemConfig;
         }
@@ -262,7 +229,7 @@ public class DataCloudMgr implements CloudManager {
         return dataCloudItemConfig2;
     }
 
-    public CloudItem provideDataCloudGlobal() {
+    public DataCloud.CloudItem provideDataCloudGlobal() {
         if (this.mDataCloudGlobal == null) {
             this.mDataCloudGlobal = new DataCloudItemGlobal();
         }

@@ -7,7 +7,7 @@ public class BeautyFragmentManager {
 
     public IBeautyFragmentBusiness getBeautyFragmentBusiness(int i) {
         IBeautyFragmentBusiness iBeautyFragmentBusiness;
-        IBeautyFragmentBusiness iBeautyFragmentBusiness2 = (IBeautyFragmentBusiness) this.mBeautyBusinessArray.get(i);
+        IBeautyFragmentBusiness iBeautyFragmentBusiness2 = this.mBeautyBusinessArray.get(i);
         if (iBeautyFragmentBusiness2 != null) {
             return iBeautyFragmentBusiness2;
         }

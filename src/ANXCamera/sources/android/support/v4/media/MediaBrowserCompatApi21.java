@@ -20,7 +20,7 @@ class MediaBrowserCompatApi21 {
         void onConnectionSuspended();
     }
 
-    static class ConnectionCallbackProxy<T extends ConnectionCallback> extends android.media.browse.MediaBrowser.ConnectionCallback {
+    static class ConnectionCallbackProxy<T extends ConnectionCallback> extends MediaBrowser.ConnectionCallback {
         protected final T mConnectionCallback;
 
         public ConnectionCallbackProxy(T t) {
@@ -45,11 +45,11 @@ class MediaBrowserCompatApi21 {
         }
 
         public static Object getDescription(Object obj) {
-            return ((android.media.browse.MediaBrowser.MediaItem) obj).getDescription();
+            return ((MediaBrowser.MediaItem) obj).getDescription();
         }
 
         public static int getFlags(Object obj) {
-            return ((android.media.browse.MediaBrowser.MediaItem) obj).getFlags();
+            return ((MediaBrowser.MediaItem) obj).getFlags();
         }
     }
 
@@ -59,14 +59,14 @@ class MediaBrowserCompatApi21 {
         void onError(@NonNull String str);
     }
 
-    static class SubscriptionCallbackProxy<T extends SubscriptionCallback> extends android.media.browse.MediaBrowser.SubscriptionCallback {
+    static class SubscriptionCallbackProxy<T extends SubscriptionCallback> extends MediaBrowser.SubscriptionCallback {
         protected final T mSubscriptionCallback;
 
         public SubscriptionCallbackProxy(T t) {
             this.mSubscriptionCallback = t;
         }
 
-        public void onChildrenLoaded(@NonNull String str, List<android.media.browse.MediaBrowser.MediaItem> list) {
+        public void onChildrenLoaded(@NonNull String str, List<MediaBrowser.MediaItem> list) {
             this.mSubscriptionCallback.onChildrenLoaded(str, list);
         }
 
@@ -83,7 +83,7 @@ class MediaBrowserCompatApi21 {
     }
 
     public static Object createBrowser(Context context, ComponentName componentName, Object obj, Bundle bundle) {
-        return new MediaBrowser(context, componentName, (android.media.browse.MediaBrowser.ConnectionCallback) obj, bundle);
+        return new MediaBrowser(context, componentName, (MediaBrowser.ConnectionCallback) obj, bundle);
     }
 
     public static Object createConnectionCallback(ConnectionCallback connectionCallback) {
@@ -119,7 +119,7 @@ class MediaBrowserCompatApi21 {
     }
 
     public static void subscribe(Object obj, String str, Object obj2) {
-        ((MediaBrowser) obj).subscribe(str, (android.media.browse.MediaBrowser.SubscriptionCallback) obj2);
+        ((MediaBrowser) obj).subscribe(str, (MediaBrowser.SubscriptionCallback) obj2);
     }
 
     public static void unsubscribe(Object obj, String str) {

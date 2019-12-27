@@ -15,13 +15,11 @@ import com.android.camera.module.BaseModule;
 import com.android.camera.module.loader.StartControl;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.ManuallyValueChanged;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.mi.config.b;
 
-public class ManuallyValueChangeImpl implements ManuallyValueChanged {
+public class ManuallyValueChangeImpl implements ModeProtocol.ManuallyValueChanged {
     private static final String TAG = "ManuallyValueChangeImpl";
     private ActivityBase mActivity;
 
@@ -80,14 +78,12 @@ public class ManuallyValueChangeImpl implements ManuallyValueChanged {
 
     public void onETValueChanged(ComponentManuallyET componentManuallyET, String str) {
         CameraStatUtil.trackExposureTimeChanged(str);
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
-        boolean isFlashSupportedInManualMode = CameraSettings.isFlashSupportedInManualMode();
-        String str2 = SupportedConfigFactory.CLOSE_BY_MANUAL_MODE;
-        if (!isFlashSupportedInManualMode) {
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        if (!CameraSettings.isFlashSupportedInManualMode()) {
             DataRepository.dataItemConfig().getComponentFlash().setComponentValue(getBaseModule().getModuleIndex(), "0");
-            configChanges.closeMutexElement(str2, 193);
+            configChanges.closeMutexElement(SupportedConfigFactory.CLOSE_BY_MANUAL_MODE, 193);
         } else {
-            configChanges.restoreMutexFlash(str2);
+            configChanges.restoreMutexFlash(SupportedConfigFactory.CLOSE_BY_MANUAL_MODE);
         }
         getBaseModule().updatePreferenceInWorkThread(16, 20, 10);
     }
@@ -97,7 +93,7 @@ public class ManuallyValueChangeImpl implements ManuallyValueChanged {
             CameraSettings.setFocusModeSwitching(true);
             boolean equals = str2.equals(componentManuallyFocus.getDefaultValue(167));
             if (b.qj()) {
-                TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                 if (equals) {
                     topAlert.removeConfigItem(199);
                     EffectController.getInstance().setDrawPeaking(false);
@@ -114,14 +110,12 @@ public class ManuallyValueChangeImpl implements ManuallyValueChanged {
 
     public void onISOValueChanged(ComponentManuallyISO componentManuallyISO, String str) {
         CameraStatUtil.trackIsoChanged(str);
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
-        boolean isFlashSupportedInManualMode = CameraSettings.isFlashSupportedInManualMode();
-        String str2 = SupportedConfigFactory.CLOSE_BY_MANUAL_MODE;
-        if (!isFlashSupportedInManualMode) {
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        if (!CameraSettings.isFlashSupportedInManualMode()) {
             DataRepository.dataItemConfig().getComponentFlash().setComponentValue(getBaseModule().getModuleIndex(), "0");
-            configChanges.closeMutexElement(str2, 193);
+            configChanges.closeMutexElement(SupportedConfigFactory.CLOSE_BY_MANUAL_MODE, 193);
         } else {
-            configChanges.restoreMutexFlash(str2);
+            configChanges.restoreMutexFlash(SupportedConfigFactory.CLOSE_BY_MANUAL_MODE);
         }
         getBaseModule().updatePreferenceInWorkThread(15, 10);
     }

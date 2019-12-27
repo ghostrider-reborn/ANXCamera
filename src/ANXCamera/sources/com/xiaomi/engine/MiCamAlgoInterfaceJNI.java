@@ -4,8 +4,7 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Surface;
-import com.xiaomi.engine.TaskSession.FrameCallback;
-import com.xiaomi.engine.TaskSession.SessionStatusCallback;
+import com.xiaomi.engine.TaskSession;
 import java.util.List;
 
 class MiCamAlgoInterfaceJNI {
@@ -19,19 +18,16 @@ class MiCamAlgoInterfaceJNI {
             Log.d(TAG, "static initializer: loadLibrary com.xiaomi.camera.algojni");
         } catch (UnsatisfiedLinkError e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("can not load library:com.xiaomi.camera.algojni : ");
-            sb.append(Log.getStackTraceString(e2));
-            Log.e(str, sb.toString());
+            Log.e(str, "can not load library:com.xiaomi.camera.algojni : " + Log.getStackTraceString(e2));
         }
     }
 
     MiCamAlgoInterfaceJNI() {
     }
 
-    static native long createSessionByOutputConfigurations(BufferFormat bufferFormat, List<OutputConfiguration> list, @NonNull SessionStatusCallback sessionStatusCallback);
+    static native long createSessionByOutputConfigurations(BufferFormat bufferFormat, List<OutputConfiguration> list, @NonNull TaskSession.SessionStatusCallback sessionStatusCallback);
 
-    static native long createSessionWithSurfaces(BufferFormat bufferFormat, List<Surface> list, @NonNull SessionStatusCallback sessionStatusCallback);
+    static native long createSessionWithSurfaces(BufferFormat bufferFormat, List<Surface> list, @NonNull TaskSession.SessionStatusCallback sessionStatusCallback);
 
     static native int deInit();
 
@@ -41,5 +37,5 @@ class MiCamAlgoInterfaceJNI {
 
     static native int init(String str);
 
-    static native int processFrame(long j, @NonNull FrameData frameData, @NonNull FrameCallback frameCallback);
+    static native int processFrame(long j, @NonNull FrameData frameData, @NonNull TaskSession.FrameCallback frameCallback);
 }

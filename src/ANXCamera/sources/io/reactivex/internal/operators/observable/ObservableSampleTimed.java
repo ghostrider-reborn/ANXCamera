@@ -24,7 +24,7 @@ public final class ObservableSampleTimed<T> extends AbstractObservableWithUpstre
             super(observer, j, timeUnit, scheduler);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void complete() {
             emit();
             if (this.wip.decrementAndGet() == 0) {
@@ -49,7 +49,7 @@ public final class ObservableSampleTimed<T> extends AbstractObservableWithUpstre
             super(observer, j, timeUnit, scheduler);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void complete() {
             this.actual.onComplete();
         }
@@ -75,12 +75,12 @@ public final class ObservableSampleTimed<T> extends AbstractObservableWithUpstre
             this.scheduler = scheduler2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelTimer() {
             DisposableHelper.dispose(this.timer);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void complete();
 
         public void dispose() {
@@ -88,9 +88,9 @@ public final class ObservableSampleTimed<T> extends AbstractObservableWithUpstre
             this.s.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit() {
-            Object andSet = getAndSet(null);
+            Object andSet = getAndSet((Object) null);
             if (andSet != null) {
                 this.actual.onNext(andSet);
             }

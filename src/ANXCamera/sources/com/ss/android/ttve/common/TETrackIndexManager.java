@@ -24,7 +24,7 @@ public class TETrackIndexManager {
             }
             if (this.mAudioTrackIndexList.size() > 0) {
                 List<Integer> list = this.mAudioTrackIndexList;
-                i2 = ((Integer) list.get(list.size() - 1)).intValue() + 1;
+                i2 = list.get(list.size() - 1).intValue() + 1;
             }
             this.mAudioTrackIndexList.add(Integer.valueOf(i2));
             return i2;
@@ -36,7 +36,7 @@ public class TETrackIndexManager {
             }
             if (this.mVideoTrackIndexList.size() > 0) {
                 List<Integer> list2 = this.mVideoTrackIndexList;
-                i2 = ((Integer) list2.get(list2.size() - 1)).intValue() + 1;
+                i2 = list2.get(list2.size() - 1).intValue() + 1;
             }
             this.mVideoTrackIndexList.add(Integer.valueOf(i2));
             return i2;
@@ -53,7 +53,7 @@ public class TETrackIndexManager {
                     return i2;
                 }
                 while (i4 < this.mVideoTrackIndexList.size()) {
-                    if (i2 == ((Integer) this.mVideoTrackIndexList.get(i4)).intValue()) {
+                    if (i2 == this.mVideoTrackIndexList.get(i4).intValue()) {
                         i3 = this.mFirstVideoIndex;
                     } else {
                         i4++;
@@ -65,7 +65,7 @@ public class TETrackIndexManager {
         int i6 = this.mFirstAudioIndex;
         if (i2 >= i6 && i6 != -1) {
             while (i4 < this.mAudioTrackIndexList.size()) {
-                if (i2 == ((Integer) this.mAudioTrackIndexList.get(i4)).intValue()) {
+                if (i2 == this.mAudioTrackIndexList.get(i4).intValue()) {
                     i3 = this.mFirstAudioIndex;
                 } else {
                     i4++;

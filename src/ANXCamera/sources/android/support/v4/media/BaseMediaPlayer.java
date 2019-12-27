@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -22,7 +21,7 @@ public abstract class BaseMediaPlayer implements AutoCloseable {
     public static final int PLAYER_STATE_PLAYING = 2;
     public static final long UNKNOWN_TIME = -1;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BuffState {
     }
@@ -47,7 +46,7 @@ public abstract class BaseMediaPlayer implements AutoCloseable {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerState {
     }

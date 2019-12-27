@@ -6,10 +6,9 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.SparseIntArray;
 
-@RestrictTo({Scope.LIBRARY})
+@RestrictTo({RestrictTo.Scope.LIBRARY})
 /* compiled from: VersionedParcelParcel */
 class g extends VersionedParcel {
     private static final boolean DEBUG = false;
@@ -78,9 +77,8 @@ class g extends VersionedParcel {
         if (i >= 0) {
             int i2 = this.Za.get(i);
             int dataPosition = this.mParcel.dataPosition();
-            int i3 = dataPosition - i2;
             this.mParcel.setDataPosition(i2);
-            this.mParcel.writeInt(i3);
+            this.mParcel.writeInt(dataPosition - i2);
             this.mParcel.setDataPosition(dataPosition);
         }
     }
@@ -93,10 +91,7 @@ class g extends VersionedParcel {
         if (i == this.mOffset) {
             i = this.mEnd;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mPrefix);
-        sb.append("  ");
-        return new g(parcel, dataPosition, i, sb.toString());
+        return new g(parcel, dataPosition, i, this.mPrefix + "  ");
     }
 
     public <T extends Parcelable> T ra() {

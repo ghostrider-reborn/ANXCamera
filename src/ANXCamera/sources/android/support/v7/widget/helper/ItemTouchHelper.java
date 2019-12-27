@@ -1,29 +1,19 @@
 package android.support.v7.widget.helper;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.recyclerview.R;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ChildDrawingOrderCallback;
-import android.support.v7.widget.RecyclerView.ItemAnimator;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.OnChildAttachStateChangeListener;
-import android.support.v7.widget.RecyclerView.OnItemTouchListener;
-import android.support.v7.widget.RecyclerView.State;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Log;
-import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -33,7 +23,7 @@ import android.view.animation.Interpolator;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStateChangeListener {
+public class ItemTouchHelper extends RecyclerView.ItemDecoration implements RecyclerView.OnChildAttachStateChangeListener {
     static final int ACTION_MODE_DRAG_MASK = 16711680;
     private static final int ACTION_MODE_IDLE_MASK = 255;
     static final int ACTION_MODE_SWIPE_MASK = 65280;
@@ -60,7 +50,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     /* access modifiers changed from: private */
     @NonNull
     public Callback mCallback;
-    private ChildDrawingOrderCallback mChildDrawingOrderCallback = null;
+    private RecyclerView.ChildDrawingOrderCallback mChildDrawingOrderCallback = null;
     private List<Integer> mDistances;
     private long mDragScrollStartTimeInMs;
     /* access modifiers changed from: private */
@@ -75,22 +65,22 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     public float mInitialTouchY;
     private ItemTouchHelperGestureListener mItemTouchHelperGestureListener;
     private float mMaxSwipeVelocity;
-    private final OnItemTouchListener mOnItemTouchListener = new OnItemTouchListener() {
+    private final RecyclerView.OnItemTouchListener mOnItemTouchListener = new RecyclerView.OnItemTouchListener() {
         public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent motionEvent) {
             ItemTouchHelper.this.mGestureDetector.onTouchEvent(motionEvent);
             int actionMasked = motionEvent.getActionMasked();
             if (actionMasked == 0) {
-                ItemTouchHelper.this.mActivePointerId = motionEvent.getPointerId(0);
-                ItemTouchHelper.this.mInitialTouchX = motionEvent.getX();
-                ItemTouchHelper.this.mInitialTouchY = motionEvent.getY();
+                int unused = ItemTouchHelper.this.mActivePointerId = motionEvent.getPointerId(0);
+                float unused2 = ItemTouchHelper.this.mInitialTouchX = motionEvent.getX();
+                float unused3 = ItemTouchHelper.this.mInitialTouchY = motionEvent.getY();
                 ItemTouchHelper.this.obtainVelocityTracker();
                 if (ItemTouchHelper.this.mSelected == null) {
                     RecoverAnimation access$1000 = ItemTouchHelper.this.findAnimation(motionEvent);
                     if (access$1000 != null) {
                         ItemTouchHelper itemTouchHelper = ItemTouchHelper.this;
-                        itemTouchHelper.mInitialTouchX = itemTouchHelper.mInitialTouchX - access$1000.mX;
+                        float unused4 = itemTouchHelper.mInitialTouchX = itemTouchHelper.mInitialTouchX - access$1000.mX;
                         ItemTouchHelper itemTouchHelper2 = ItemTouchHelper.this;
-                        itemTouchHelper2.mInitialTouchY = itemTouchHelper2.mInitialTouchY - access$1000.mY;
+                        float unused5 = itemTouchHelper2.mInitialTouchY = itemTouchHelper2.mInitialTouchY - access$1000.mY;
                         ItemTouchHelper.this.endRecoverAnimation(access$1000.mViewHolder, true);
                         if (ItemTouchHelper.this.mPendingCleanup.remove(access$1000.mViewHolder.itemView)) {
                             ItemTouchHelper.this.mCallback.clearView(ItemTouchHelper.this.mRecyclerView, access$1000.mViewHolder);
@@ -101,8 +91,8 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                     }
                 }
             } else if (actionMasked == 3 || actionMasked == 1) {
-                ItemTouchHelper.this.mActivePointerId = -1;
-                ItemTouchHelper.this.select(null, 0);
+                int unused6 = ItemTouchHelper.this.mActivePointerId = -1;
+                ItemTouchHelper.this.select((RecyclerView.ViewHolder) null, 0);
             } else if (ItemTouchHelper.this.mActivePointerId != -1) {
                 int findPointerIndex = motionEvent.findPointerIndex(ItemTouchHelper.this.mActivePointerId);
                 if (findPointerIndex >= 0) {
@@ -117,7 +107,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
 
         public void onRequestDisallowInterceptTouchEvent(boolean z) {
             if (z) {
-                ItemTouchHelper.this.select(null, 0);
+                ItemTouchHelper.this.select((RecyclerView.ViewHolder) null, 0);
             }
         }
 
@@ -132,7 +122,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                 if (findPointerIndex >= 0) {
                     ItemTouchHelper.this.checkSelectForSwipe(actionMasked, motionEvent, findPointerIndex);
                 }
-                ViewHolder access$000 = ItemTouchHelper.this.mSelected;
+                RecyclerView.ViewHolder access$000 = ItemTouchHelper.this.mSelected;
                 if (access$000 != null) {
                     int i = 0;
                     if (actionMasked != 1) {
@@ -144,11 +134,14 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                                         if (actionIndex == 0) {
                                             i = 1;
                                         }
-                                        ItemTouchHelper.this.mActivePointerId = motionEvent.getPointerId(i);
+                                        int unused = ItemTouchHelper.this.mActivePointerId = motionEvent.getPointerId(i);
                                         ItemTouchHelper itemTouchHelper = ItemTouchHelper.this;
                                         itemTouchHelper.updateDxDy(motionEvent, itemTouchHelper.mSelectedFlags, actionIndex);
+                                        return;
                                     }
+                                    return;
                                 }
+                                return;
                             } else if (ItemTouchHelper.this.mVelocityTracker != null) {
                                 ItemTouchHelper.this.mVelocityTracker.clear();
                             }
@@ -159,10 +152,13 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                             ItemTouchHelper.this.mRecyclerView.removeCallbacks(ItemTouchHelper.this.mScrollRunnable);
                             ItemTouchHelper.this.mScrollRunnable.run();
                             ItemTouchHelper.this.mRecyclerView.invalidate();
+                            return;
+                        } else {
+                            return;
                         }
                     }
-                    ItemTouchHelper.this.select(null, 0);
-                    ItemTouchHelper.this.mActivePointerId = -1;
+                    ItemTouchHelper.this.select((RecyclerView.ViewHolder) null, 0);
+                    int unused2 = ItemTouchHelper.this.mActivePointerId = -1;
                 }
             }
         }
@@ -189,13 +185,13 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     };
     /* access modifiers changed from: private */
-    public ViewHolder mSelected = null;
+    public RecyclerView.ViewHolder mSelected = null;
     /* access modifiers changed from: private */
     public int mSelectedFlags;
     private float mSelectedStartX;
     private float mSelectedStartY;
     private int mSlop;
-    private List<ViewHolder> mSwapTargets;
+    private List<RecyclerView.ViewHolder> mSwapTargets;
     private float mSwipeEscapeVelocity;
     private final float[] mTmpPosition = new float[2];
     private Rect mTmpRect;
@@ -255,23 +251,24 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
 
         public static int makeMovementFlags(int i, int i2) {
-            return makeFlag(2, i) | makeFlag(1, i2) | makeFlag(0, i2 | i);
+            int makeFlag = makeFlag(0, i2 | i);
+            return makeFlag(2, i) | makeFlag(1, i2) | makeFlag;
         }
 
-        public boolean canDropOver(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder, @NonNull ViewHolder viewHolder2) {
+        public boolean canDropOver(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder2) {
             return true;
         }
 
-        public ViewHolder chooseDropTarget(@NonNull ViewHolder viewHolder, @NonNull List<ViewHolder> list, int i, int i2) {
+        public RecyclerView.ViewHolder chooseDropTarget(@NonNull RecyclerView.ViewHolder viewHolder, @NonNull List<RecyclerView.ViewHolder> list, int i, int i2) {
             int width = viewHolder.itemView.getWidth() + i;
             int height = viewHolder.itemView.getHeight() + i2;
             int left = i - viewHolder.itemView.getLeft();
             int top = i2 - viewHolder.itemView.getTop();
             int size = list.size();
-            ViewHolder viewHolder2 = null;
+            RecyclerView.ViewHolder viewHolder2 = null;
             int i3 = -1;
             for (int i4 = 0; i4 < size; i4++) {
-                ViewHolder viewHolder3 = (ViewHolder) list.get(i4);
+                RecyclerView.ViewHolder viewHolder3 = list.get(i4);
                 if (left > 0) {
                     int right = viewHolder3.itemView.getRight() - width;
                     if (right < 0 && viewHolder3.itemView.getRight() > viewHolder.itemView.getRight()) {
@@ -316,7 +313,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             return viewHolder2;
         }
 
-        public void clearView(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder) {
+        public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             ItemTouchUIUtilImpl.INSTANCE.clearView(viewHolder.itemView);
         }
 
@@ -337,34 +334,31 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             return i3 | i5;
         }
 
-        /* access modifiers changed from: 0000 */
-        public final int getAbsoluteMovementFlags(RecyclerView recyclerView, ViewHolder viewHolder) {
+        /* access modifiers changed from: package-private */
+        public final int getAbsoluteMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
             return convertToAbsoluteDirection(getMovementFlags(recyclerView, viewHolder), ViewCompat.getLayoutDirection(recyclerView));
         }
 
         public long getAnimationDuration(@NonNull RecyclerView recyclerView, int i, float f2, float f3) {
-            ItemAnimator itemAnimator = recyclerView.getItemAnimator();
-            if (itemAnimator == null) {
-                return i == 8 ? 200 : 250;
-            }
-            return i == 8 ? itemAnimator.getMoveDuration() : itemAnimator.getRemoveDuration();
+            RecyclerView.ItemAnimator itemAnimator = recyclerView.getItemAnimator();
+            return itemAnimator == null ? i == 8 ? 200 : 250 : i == 8 ? itemAnimator.getMoveDuration() : itemAnimator.getRemoveDuration();
         }
 
         public int getBoundingBoxMargin() {
             return 0;
         }
 
-        public float getMoveThreshold(@NonNull ViewHolder viewHolder) {
+        public float getMoveThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
             return 0.5f;
         }
 
-        public abstract int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder);
+        public abstract int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder);
 
         public float getSwipeEscapeVelocity(float f2) {
             return f2;
         }
 
-        public float getSwipeThreshold(@NonNull ViewHolder viewHolder) {
+        public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
             return 0.5f;
         }
 
@@ -372,13 +366,13 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             return f2;
         }
 
-        /* access modifiers changed from: 0000 */
-        public boolean hasDragFlag(RecyclerView recyclerView, ViewHolder viewHolder) {
+        /* access modifiers changed from: package-private */
+        public boolean hasDragFlag(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
             return (getAbsoluteMovementFlags(recyclerView, viewHolder) & ItemTouchHelper.ACTION_MODE_DRAG_MASK) != 0;
         }
 
-        /* access modifiers changed from: 0000 */
-        public boolean hasSwipeFlag(RecyclerView recyclerView, ViewHolder viewHolder) {
+        /* access modifiers changed from: package-private */
+        public boolean hasSwipeFlag(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
             return (getAbsoluteMovementFlags(recyclerView, viewHolder) & 65280) != 0;
         }
 
@@ -400,20 +394,20 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             return true;
         }
 
-        public void onChildDraw(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder, float f2, float f3, int i, boolean z) {
+        public void onChildDraw(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float f2, float f3, int i, boolean z) {
             ItemTouchUIUtilImpl.INSTANCE.onDraw(canvas, recyclerView, viewHolder.itemView, f2, f3, i, z);
         }
 
-        public void onChildDrawOver(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView, ViewHolder viewHolder, float f2, float f3, int i, boolean z) {
+        public void onChildDrawOver(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float f2, float f3, int i, boolean z) {
             ItemTouchUIUtilImpl.INSTANCE.onDrawOver(canvas, recyclerView, viewHolder.itemView, f2, f3, i, z);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void onDraw(Canvas canvas, RecyclerView recyclerView, ViewHolder viewHolder, List<RecoverAnimation> list, int i, float f2, float f3) {
+        /* access modifiers changed from: package-private */
+        public void onDraw(Canvas canvas, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, List<RecoverAnimation> list, int i, float f2, float f3) {
             Canvas canvas2 = canvas;
             int size = list.size();
             for (int i2 = 0; i2 < size; i2++) {
-                RecoverAnimation recoverAnimation = (RecoverAnimation) list.get(i2);
+                RecoverAnimation recoverAnimation = list.get(i2);
                 recoverAnimation.update();
                 int save = canvas.save();
                 onChildDraw(canvas, recyclerView, recoverAnimation.mViewHolder, recoverAnimation.mX, recoverAnimation.mY, recoverAnimation.mActionState, false);
@@ -426,14 +420,14 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             }
         }
 
-        /* access modifiers changed from: 0000 */
-        public void onDrawOver(Canvas canvas, RecyclerView recyclerView, ViewHolder viewHolder, List<RecoverAnimation> list, int i, float f2, float f3) {
+        /* access modifiers changed from: package-private */
+        public void onDrawOver(Canvas canvas, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, List<RecoverAnimation> list, int i, float f2, float f3) {
             Canvas canvas2 = canvas;
             List<RecoverAnimation> list2 = list;
             int size = list.size();
             boolean z = false;
             for (int i2 = 0; i2 < size; i2++) {
-                RecoverAnimation recoverAnimation = (RecoverAnimation) list2.get(i2);
+                RecoverAnimation recoverAnimation = list2.get(i2);
                 int save = canvas.save();
                 onChildDrawOver(canvas, recyclerView, recoverAnimation.mViewHolder, recoverAnimation.mX, recoverAnimation.mY, recoverAnimation.mActionState, false);
                 canvas.restoreToCount(save);
@@ -444,7 +438,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                 canvas.restoreToCount(save2);
             }
             for (int i3 = size - 1; i3 >= 0; i3--) {
-                RecoverAnimation recoverAnimation2 = (RecoverAnimation) list2.get(i3);
+                RecoverAnimation recoverAnimation2 = list2.get(i3);
                 if (recoverAnimation2.mEnded && !recoverAnimation2.mIsPendingCleanup) {
                     list2.remove(i3);
                 } else if (!recoverAnimation2.mEnded) {
@@ -456,10 +450,10 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             }
         }
 
-        public abstract boolean onMove(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder, @NonNull ViewHolder viewHolder2);
+        public abstract boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder2);
 
-        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder, int i, @NonNull ViewHolder viewHolder2, int i2, int i3, int i4) {
-            LayoutManager layoutManager = recyclerView.getLayoutManager();
+        public void onMoved(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, int i, @NonNull RecyclerView.ViewHolder viewHolder2, int i2, int i3, int i4) {
+            RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
             if (layoutManager instanceof ViewDropHandler) {
                 ((ViewDropHandler) layoutManager).prepareForDrop(viewHolder.itemView, viewHolder2.itemView, i3, i4);
                 return;
@@ -482,22 +476,22 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             }
         }
 
-        public void onSelectedChanged(@Nullable ViewHolder viewHolder, int i) {
+        public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int i) {
             if (viewHolder != null) {
                 ItemTouchUIUtilImpl.INSTANCE.onSelected(viewHolder.itemView);
             }
         }
 
-        public abstract void onSwiped(@NonNull ViewHolder viewHolder, int i);
+        public abstract void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i);
     }
 
-    private class ItemTouchHelperGestureListener extends SimpleOnGestureListener {
+    private class ItemTouchHelperGestureListener extends GestureDetector.SimpleOnGestureListener {
         private boolean mShouldReactToLongPress = true;
 
         ItemTouchHelperGestureListener() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void doNotReactToLongPress() {
             this.mShouldReactToLongPress = false;
         }
@@ -510,16 +504,16 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             if (this.mShouldReactToLongPress) {
                 View access$2300 = ItemTouchHelper.this.findChildView(motionEvent);
                 if (access$2300 != null) {
-                    ViewHolder childViewHolder = ItemTouchHelper.this.mRecyclerView.getChildViewHolder(access$2300);
+                    RecyclerView.ViewHolder childViewHolder = ItemTouchHelper.this.mRecyclerView.getChildViewHolder(access$2300);
                     if (childViewHolder != null && ItemTouchHelper.this.mCallback.hasDragFlag(ItemTouchHelper.this.mRecyclerView, childViewHolder) && motionEvent.getPointerId(0) == ItemTouchHelper.this.mActivePointerId) {
                         int findPointerIndex = motionEvent.findPointerIndex(ItemTouchHelper.this.mActivePointerId);
                         float x = motionEvent.getX(findPointerIndex);
                         float y = motionEvent.getY(findPointerIndex);
-                        ItemTouchHelper.this.mInitialTouchX = x;
-                        ItemTouchHelper.this.mInitialTouchY = y;
+                        float unused = ItemTouchHelper.this.mInitialTouchX = x;
+                        float unused2 = ItemTouchHelper.this.mInitialTouchY = y;
                         ItemTouchHelper itemTouchHelper = ItemTouchHelper.this;
-                        itemTouchHelper.mDy = 0.0f;
-                        itemTouchHelper.mDx = 0.0f;
+                        float unused3 = itemTouchHelper.mDy = 0.0f;
+                        float unused4 = itemTouchHelper.mDx = 0.0f;
                         if (ItemTouchHelper.this.mCallback.isLongPressDragEnabled()) {
                             ItemTouchHelper.this.select(childViewHolder, 2);
                         }
@@ -529,7 +523,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     }
 
-    private static class RecoverAnimation implements AnimatorListener {
+    private static class RecoverAnimation implements Animator.AnimatorListener {
         final int mActionState;
         final int mAnimationType;
         boolean mEnded = false;
@@ -541,11 +535,11 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         final float mTargetX;
         final float mTargetY;
         private final ValueAnimator mValueAnimator;
-        final ViewHolder mViewHolder;
+        final RecyclerView.ViewHolder mViewHolder;
         float mX;
         float mY;
 
-        RecoverAnimation(ViewHolder viewHolder, int i, int i2, float f2, float f3, float f4, float f5) {
+        RecoverAnimation(RecyclerView.ViewHolder viewHolder, int i, int i2, float f2, float f3, float f4, float f5) {
             this.mActionState = i2;
             this.mAnimationType = i;
             this.mViewHolder = viewHolder;
@@ -554,7 +548,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             this.mTargetX = f4;
             this.mTargetY = f5;
             this.mValueAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
-            this.mValueAnimator.addUpdateListener(new AnimatorUpdateListener() {
+            this.mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     RecoverAnimation.this.setFraction(valueAnimator.getAnimatedFraction());
                 }
@@ -625,15 +619,15 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             this.mDefaultDragDirs = i;
         }
 
-        public int getDragDirs(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder) {
+        public int getDragDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             return this.mDefaultDragDirs;
         }
 
-        public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder) {
+        public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             return Callback.makeMovementFlags(getDragDirs(recyclerView, viewHolder), getSwipeDirs(recyclerView, viewHolder));
         }
 
-        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull ViewHolder viewHolder) {
+        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             return this.mDefaultSwipeDirs;
         }
 
@@ -655,9 +649,9 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     }
 
     private void addChildDrawingOrderCallback() {
-        if (VERSION.SDK_INT < 21) {
+        if (Build.VERSION.SDK_INT < 21) {
             if (this.mChildDrawingOrderCallback == null) {
-                this.mChildDrawingOrderCallback = new ChildDrawingOrderCallback() {
+                this.mChildDrawingOrderCallback = new RecyclerView.ChildDrawingOrderCallback() {
                     public int onGetChildDrawingOrder(int i, int i2) {
                         if (ItemTouchHelper.this.mOverdrawChild == null) {
                             return i2;
@@ -665,15 +659,9 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                         int access$2200 = ItemTouchHelper.this.mOverdrawChildPosition;
                         if (access$2200 == -1) {
                             access$2200 = ItemTouchHelper.this.mRecyclerView.indexOfChild(ItemTouchHelper.this.mOverdrawChild);
-                            ItemTouchHelper.this.mOverdrawChildPosition = access$2200;
+                            int unused = ItemTouchHelper.this.mOverdrawChildPosition = access$2200;
                         }
-                        if (i2 == i - 1) {
-                            return access$2200;
-                        }
-                        if (i2 >= access$2200) {
-                            i2++;
-                        }
-                        return i2;
+                        return i2 == i + -1 ? access$2200 : i2 < access$2200 ? i2 : i2 + 1;
                     }
                 };
             }
@@ -681,43 +669,45 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     }
 
-    private int checkHorizontalSwipe(ViewHolder viewHolder, int i) {
-        if ((i & 12) != 0) {
-            int i2 = 8;
-            int i3 = this.mDx > 0.0f ? 8 : 4;
-            VelocityTracker velocityTracker = this.mVelocityTracker;
-            if (velocityTracker != null && this.mActivePointerId > -1) {
-                velocityTracker.computeCurrentVelocity(1000, this.mCallback.getSwipeVelocityThreshold(this.mMaxSwipeVelocity));
-                float xVelocity = this.mVelocityTracker.getXVelocity(this.mActivePointerId);
-                float yVelocity = this.mVelocityTracker.getYVelocity(this.mActivePointerId);
-                if (xVelocity <= 0.0f) {
-                    i2 = 4;
-                }
-                float abs = Math.abs(xVelocity);
-                if ((i2 & i) != 0 && i3 == i2 && abs >= this.mCallback.getSwipeEscapeVelocity(this.mSwipeEscapeVelocity) && abs > Math.abs(yVelocity)) {
-                    return i2;
-                }
+    private int checkHorizontalSwipe(RecyclerView.ViewHolder viewHolder, int i) {
+        if ((i & 12) == 0) {
+            return 0;
+        }
+        int i2 = 8;
+        int i3 = this.mDx > 0.0f ? 8 : 4;
+        VelocityTracker velocityTracker = this.mVelocityTracker;
+        if (velocityTracker != null && this.mActivePointerId > -1) {
+            velocityTracker.computeCurrentVelocity(1000, this.mCallback.getSwipeVelocityThreshold(this.mMaxSwipeVelocity));
+            float xVelocity = this.mVelocityTracker.getXVelocity(this.mActivePointerId);
+            float yVelocity = this.mVelocityTracker.getYVelocity(this.mActivePointerId);
+            if (xVelocity <= 0.0f) {
+                i2 = 4;
             }
-            float width = ((float) this.mRecyclerView.getWidth()) * this.mCallback.getSwipeThreshold(viewHolder);
-            if ((i & i3) != 0 && Math.abs(this.mDx) > width) {
-                return i3;
+            float abs = Math.abs(xVelocity);
+            if ((i2 & i) != 0 && i3 == i2 && abs >= this.mCallback.getSwipeEscapeVelocity(this.mSwipeEscapeVelocity) && abs > Math.abs(yVelocity)) {
+                return i2;
             }
         }
-        return 0;
+        float width = ((float) this.mRecyclerView.getWidth()) * this.mCallback.getSwipeThreshold(viewHolder);
+        if ((i & i3) == 0 || Math.abs(this.mDx) <= width) {
+            return 0;
+        }
+        return i3;
     }
 
     /* access modifiers changed from: private */
     public void checkSelectForSwipe(int i, MotionEvent motionEvent, int i2) {
         if (this.mSelected == null && i == 2 && this.mActionState != 2 && this.mCallback.isItemViewSwipeEnabled() && this.mRecyclerView.getScrollState() != 1) {
-            ViewHolder findSwipedView = findSwipedView(motionEvent);
+            RecyclerView.ViewHolder findSwipedView = findSwipedView(motionEvent);
             if (findSwipedView != null) {
                 int absoluteMovementFlags = (this.mCallback.getAbsoluteMovementFlags(this.mRecyclerView, findSwipedView) & 65280) >> 8;
                 if (absoluteMovementFlags != 0) {
                     float x = motionEvent.getX(i2);
+                    float y = motionEvent.getY(i2);
                     float f2 = x - this.mInitialTouchX;
-                    float y = motionEvent.getY(i2) - this.mInitialTouchY;
+                    float f3 = y - this.mInitialTouchY;
                     float abs = Math.abs(f2);
-                    float abs2 = Math.abs(y);
+                    float abs2 = Math.abs(f3);
                     int i3 = this.mSlop;
                     if (abs >= ((float) i3) || abs2 >= ((float) i3)) {
                         if (abs > abs2) {
@@ -727,10 +717,10 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                             if (f2 > 0.0f && (absoluteMovementFlags & 8) == 0) {
                                 return;
                             }
-                        } else if (y < 0.0f && (absoluteMovementFlags & 1) == 0) {
+                        } else if (f3 < 0.0f && (absoluteMovementFlags & 1) == 0) {
                             return;
                         } else {
-                            if (y > 0.0f && (absoluteMovementFlags & 2) == 0) {
+                            if (f3 > 0.0f && (absoluteMovementFlags & 2) == 0) {
                                 return;
                             }
                         }
@@ -744,29 +734,30 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     }
 
-    private int checkVerticalSwipe(ViewHolder viewHolder, int i) {
-        if ((i & 3) != 0) {
-            int i2 = 2;
-            int i3 = this.mDy > 0.0f ? 2 : 1;
-            VelocityTracker velocityTracker = this.mVelocityTracker;
-            if (velocityTracker != null && this.mActivePointerId > -1) {
-                velocityTracker.computeCurrentVelocity(1000, this.mCallback.getSwipeVelocityThreshold(this.mMaxSwipeVelocity));
-                float xVelocity = this.mVelocityTracker.getXVelocity(this.mActivePointerId);
-                float yVelocity = this.mVelocityTracker.getYVelocity(this.mActivePointerId);
-                if (yVelocity <= 0.0f) {
-                    i2 = 1;
-                }
-                float abs = Math.abs(yVelocity);
-                if ((i2 & i) != 0 && i2 == i3 && abs >= this.mCallback.getSwipeEscapeVelocity(this.mSwipeEscapeVelocity) && abs > Math.abs(xVelocity)) {
-                    return i2;
-                }
+    private int checkVerticalSwipe(RecyclerView.ViewHolder viewHolder, int i) {
+        if ((i & 3) == 0) {
+            return 0;
+        }
+        int i2 = 2;
+        int i3 = this.mDy > 0.0f ? 2 : 1;
+        VelocityTracker velocityTracker = this.mVelocityTracker;
+        if (velocityTracker != null && this.mActivePointerId > -1) {
+            velocityTracker.computeCurrentVelocity(1000, this.mCallback.getSwipeVelocityThreshold(this.mMaxSwipeVelocity));
+            float xVelocity = this.mVelocityTracker.getXVelocity(this.mActivePointerId);
+            float yVelocity = this.mVelocityTracker.getYVelocity(this.mActivePointerId);
+            if (yVelocity <= 0.0f) {
+                i2 = 1;
             }
-            float height = ((float) this.mRecyclerView.getHeight()) * this.mCallback.getSwipeThreshold(viewHolder);
-            if ((i & i3) != 0 && Math.abs(this.mDy) > height) {
-                return i3;
+            float abs = Math.abs(yVelocity);
+            if ((i2 & i) != 0 && i2 == i3 && abs >= this.mCallback.getSwipeEscapeVelocity(this.mSwipeEscapeVelocity) && abs > Math.abs(xVelocity)) {
+                return i2;
             }
         }
-        return 0;
+        float height = ((float) this.mRecyclerView.getHeight()) * this.mCallback.getSwipeThreshold(viewHolder);
+        if ((i & i3) == 0 || Math.abs(this.mDy) <= height) {
+            return 0;
+        }
+        return i3;
     }
 
     private void destroyCallbacks() {
@@ -774,7 +765,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         this.mRecyclerView.removeOnItemTouchListener(this.mOnItemTouchListener);
         this.mRecyclerView.removeOnChildAttachStateChangeListener(this);
         for (int size = this.mRecoverAnimations.size() - 1; size >= 0; size--) {
-            this.mCallback.clearView(this.mRecyclerView, ((RecoverAnimation) this.mRecoverAnimations.get(0)).mViewHolder);
+            this.mCallback.clearView(this.mRecyclerView, this.mRecoverAnimations.get(0).mViewHolder);
         }
         this.mRecoverAnimations.clear();
         this.mOverdrawChild = null;
@@ -784,9 +775,9 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     }
 
     /* access modifiers changed from: private */
-    public void endRecoverAnimation(ViewHolder viewHolder, boolean z) {
+    public void endRecoverAnimation(RecyclerView.ViewHolder viewHolder, boolean z) {
         for (int size = this.mRecoverAnimations.size() - 1; size >= 0; size--) {
-            RecoverAnimation recoverAnimation = (RecoverAnimation) this.mRecoverAnimations.get(size);
+            RecoverAnimation recoverAnimation = this.mRecoverAnimations.get(size);
             if (recoverAnimation.mViewHolder == viewHolder) {
                 recoverAnimation.mOverridden |= z;
                 if (!recoverAnimation.mEnded) {
@@ -805,7 +796,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
         View findChildView = findChildView(motionEvent);
         for (int size = this.mRecoverAnimations.size() - 1; size >= 0; size--) {
-            RecoverAnimation recoverAnimation = (RecoverAnimation) this.mRecoverAnimations.get(size);
+            RecoverAnimation recoverAnimation = this.mRecoverAnimations.get(size);
             if (recoverAnimation.mViewHolder.itemView == findChildView) {
                 return recoverAnimation;
             }
@@ -817,7 +808,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     public View findChildView(MotionEvent motionEvent) {
         float x = motionEvent.getX();
         float y = motionEvent.getY();
-        ViewHolder viewHolder = this.mSelected;
+        RecyclerView.ViewHolder viewHolder = this.mSelected;
         if (viewHolder != null) {
             View view = viewHolder.itemView;
             if (hitTest(view, x, y, this.mSelectedStartX + this.mDx, this.mSelectedStartY + this.mDy)) {
@@ -825,7 +816,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
             }
         }
         for (int size = this.mRecoverAnimations.size() - 1; size >= 0; size--) {
-            RecoverAnimation recoverAnimation = (RecoverAnimation) this.mRecoverAnimations.get(size);
+            RecoverAnimation recoverAnimation = this.mRecoverAnimations.get(size);
             View view2 = recoverAnimation.mViewHolder.itemView;
             if (hitTest(view2, x, y, recoverAnimation.mX, recoverAnimation.mY)) {
                 return view2;
@@ -834,9 +825,9 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         return this.mRecyclerView.findChildViewUnder(x, y);
     }
 
-    private List<ViewHolder> findSwapTargets(ViewHolder viewHolder) {
-        ViewHolder viewHolder2 = viewHolder;
-        List<ViewHolder> list = this.mSwapTargets;
+    private List<RecyclerView.ViewHolder> findSwapTargets(RecyclerView.ViewHolder viewHolder) {
+        RecyclerView.ViewHolder viewHolder2 = viewHolder;
+        List<RecyclerView.ViewHolder> list = this.mSwapTargets;
         if (list == null) {
             this.mSwapTargets = new ArrayList();
             this.mDistances = new ArrayList();
@@ -852,13 +843,13 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         int height = viewHolder2.itemView.getHeight() + round2 + i;
         int i2 = (round + width) / 2;
         int i3 = (round2 + height) / 2;
-        LayoutManager layoutManager = this.mRecyclerView.getLayoutManager();
+        RecyclerView.LayoutManager layoutManager = this.mRecyclerView.getLayoutManager();
         int childCount = layoutManager.getChildCount();
         int i4 = 0;
         while (i4 < childCount) {
             View childAt = layoutManager.getChildAt(i4);
             if (childAt != viewHolder2.itemView && childAt.getBottom() >= round2 && childAt.getTop() <= height && childAt.getRight() >= round && childAt.getLeft() <= width) {
-                ViewHolder childViewHolder = this.mRecyclerView.getChildViewHolder(childAt);
+                RecyclerView.ViewHolder childViewHolder = this.mRecyclerView.getChildViewHolder(childAt);
                 if (this.mCallback.canDropOver(this.mRecyclerView, this.mSelected, childViewHolder)) {
                     int abs = Math.abs(i2 - ((childAt.getLeft() + childAt.getRight()) / 2));
                     int abs2 = Math.abs(i3 - ((childAt.getTop() + childAt.getBottom()) / 2));
@@ -866,10 +857,10 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                     int size = this.mSwapTargets.size();
                     int i6 = 0;
                     int i7 = 0;
-                    while (i6 < size && i5 > ((Integer) this.mDistances.get(i6)).intValue()) {
+                    while (i6 < size && i5 > this.mDistances.get(i6).intValue()) {
                         i7++;
                         i6++;
-                        ViewHolder viewHolder3 = viewHolder;
+                        RecyclerView.ViewHolder viewHolder3 = viewHolder;
                     }
                     this.mSwapTargets.add(i7, childViewHolder);
                     this.mDistances.add(i7, Integer.valueOf(i5));
@@ -881,17 +872,15 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         return this.mSwapTargets;
     }
 
-    private ViewHolder findSwipedView(MotionEvent motionEvent) {
-        LayoutManager layoutManager = this.mRecyclerView.getLayoutManager();
+    private RecyclerView.ViewHolder findSwipedView(MotionEvent motionEvent) {
+        RecyclerView.LayoutManager layoutManager = this.mRecyclerView.getLayoutManager();
         int i = this.mActivePointerId;
         if (i == -1) {
             return null;
         }
         int findPointerIndex = motionEvent.findPointerIndex(i);
-        float x = motionEvent.getX(findPointerIndex) - this.mInitialTouchX;
-        float y = motionEvent.getY(findPointerIndex) - this.mInitialTouchY;
-        float abs = Math.abs(x);
-        float abs2 = Math.abs(y);
+        float abs = Math.abs(motionEvent.getX(findPointerIndex) - this.mInitialTouchX);
+        float abs2 = Math.abs(motionEvent.getY(findPointerIndex) - this.mInitialTouchY);
         int i2 = this.mSlop;
         if (abs < ((float) i2) && abs2 < ((float) i2)) {
             return null;
@@ -926,7 +915,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     public boolean hasRunningRecoverAnim() {
         int size = this.mRecoverAnimations.size();
         for (int i = 0; i < size; i++) {
-            if (!((RecoverAnimation) this.mRecoverAnimations.get(i)).mEnded) {
+            if (!this.mRecoverAnimations.get(i).mEnded) {
                 return true;
             }
         }
@@ -938,15 +927,15 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     }
 
     /* access modifiers changed from: private */
-    public void moveIfNecessary(ViewHolder viewHolder) {
+    public void moveIfNecessary(RecyclerView.ViewHolder viewHolder) {
         if (!this.mRecyclerView.isLayoutRequested() && this.mActionState == 2) {
             float moveThreshold = this.mCallback.getMoveThreshold(viewHolder);
             int i = (int) (this.mSelectedStartX + this.mDx);
             int i2 = (int) (this.mSelectedStartY + this.mDy);
             if (((float) Math.abs(i2 - viewHolder.itemView.getTop())) >= ((float) viewHolder.itemView.getHeight()) * moveThreshold || ((float) Math.abs(i - viewHolder.itemView.getLeft())) >= ((float) viewHolder.itemView.getWidth()) * moveThreshold) {
-                List findSwapTargets = findSwapTargets(viewHolder);
+                List<RecyclerView.ViewHolder> findSwapTargets = findSwapTargets(viewHolder);
                 if (findSwapTargets.size() != 0) {
-                    ViewHolder chooseDropTarget = this.mCallback.chooseDropTarget(viewHolder, findSwapTargets, i, i2);
+                    RecyclerView.ViewHolder chooseDropTarget = this.mCallback.chooseDropTarget(viewHolder, findSwapTargets, i, i2);
                     if (chooseDropTarget == null) {
                         this.mSwapTargets.clear();
                         this.mDistances.clear();
@@ -978,8 +967,8 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                 if (ItemTouchHelper.this.mRecyclerView != null && ItemTouchHelper.this.mRecyclerView.isAttachedToWindow()) {
                     RecoverAnimation recoverAnimation = recoverAnimation;
                     if (!recoverAnimation.mOverridden && recoverAnimation.mViewHolder.getAdapterPosition() != -1) {
-                        ItemAnimator itemAnimator = ItemTouchHelper.this.mRecyclerView.getItemAnimator();
-                        if ((itemAnimator == null || !itemAnimator.isRunning(null)) && !ItemTouchHelper.this.hasRunningRecoverAnim()) {
+                        RecyclerView.ItemAnimator itemAnimator = ItemTouchHelper.this.mRecyclerView.getItemAnimator();
+                        if ((itemAnimator == null || !itemAnimator.isRunning((RecyclerView.ItemAnimator.ItemAnimatorFinishedListener) null)) && !ItemTouchHelper.this.hasRunningRecoverAnim()) {
                             ItemTouchHelper.this.mCallback.onSwiped(recoverAnimation.mViewHolder, i);
                         } else {
                             ItemTouchHelper.this.mRecyclerView.post(this);
@@ -1003,7 +992,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         if (view == this.mOverdrawChild) {
             this.mOverdrawChild = null;
             if (this.mChildDrawingOrderCallback != null) {
-                this.mRecyclerView.setChildDrawingOrderCallback(null);
+                this.mRecyclerView.setChildDrawingOrderCallback((RecyclerView.ChildDrawingOrderCallback) null);
             }
         }
     }
@@ -1029,7 +1018,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         long currentTimeMillis = System.currentTimeMillis();
         long j = this.mDragScrollStartTimeInMs;
         long j2 = j == Long.MIN_VALUE ? 0 : currentTimeMillis - j;
-        LayoutManager layoutManager = this.mRecyclerView.getLayoutManager();
+        RecyclerView.LayoutManager layoutManager = this.mRecyclerView.getLayoutManager();
         if (this.mTmpRect == null) {
             this.mTmpRect = new Rect();
         }
@@ -1067,11 +1056,8 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                             }
                             int i52 = i;
                             if (i2 == 0) {
-                                int i7 = i2;
-                                int i8 = i52;
-                                int interpolateOutOfBoundsScroll = this.mCallback.interpolateOutOfBoundsScroll(this.mRecyclerView, this.mSelected.itemView.getHeight(), i7, this.mRecyclerView.getHeight(), j2);
-                                i3 = i8;
-                                i2 = interpolateOutOfBoundsScroll;
+                                i3 = i52;
+                                i2 = this.mCallback.interpolateOutOfBoundsScroll(this.mRecyclerView, this.mSelected.itemView.getHeight(), i2, this.mRecyclerView.getHeight(), j2);
                             } else {
                                 i3 = i52;
                             }
@@ -1123,13 +1109,13 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
     /* access modifiers changed from: private */
     /* JADX WARNING: Removed duplicated region for block: B:46:0x012c  */
     /* JADX WARNING: Removed duplicated region for block: B:51:0x0136  */
-    public void select(@Nullable ViewHolder viewHolder, int i) {
+    public void select(@Nullable RecyclerView.ViewHolder viewHolder, int i) {
         boolean z;
         boolean z2;
         ViewParent parent;
         float f2;
         float f3;
-        ViewHolder viewHolder2 = viewHolder;
+        RecyclerView.ViewHolder viewHolder2 = viewHolder;
         int i2 = i;
         if (viewHolder2 != this.mSelected || i2 != this.mActionState) {
             this.mDragScrollStartTimeInMs = Long.MIN_VALUE;
@@ -1145,7 +1131,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                 }
             }
             int i4 = (1 << ((i2 * 8) + 8)) - 1;
-            ViewHolder viewHolder3 = this.mSelected;
+            RecyclerView.ViewHolder viewHolder3 = this.mSelected;
             if (viewHolder3 != null) {
                 if (viewHolder3.itemView.getParent() != null) {
                     int swipeIfNecessary = i3 == 2 ? 0 : swipeIfNecessary(viewHolder3);
@@ -1166,10 +1152,9 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                     float f4 = fArr[0];
                     float f5 = fArr[1];
                     AnonymousClass3 r14 = r0;
-                    int i6 = i5;
-                    ViewHolder viewHolder4 = viewHolder3;
-                    final int i7 = swipeIfNecessary;
-                    final ViewHolder viewHolder5 = viewHolder4;
+                    RecyclerView.ViewHolder viewHolder4 = viewHolder3;
+                    final int i6 = swipeIfNecessary;
+                    final RecyclerView.ViewHolder viewHolder5 = viewHolder4;
                     AnonymousClass3 r0 = new RecoverAnimation(this, viewHolder3, i5, i3, f4, f5, f3, f2) {
                         final /* synthetic */ ItemTouchHelper this$0;
 
@@ -1180,12 +1165,12 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                         public void onAnimationEnd(Animator animator) {
                             super.onAnimationEnd(animator);
                             if (!this.mOverridden) {
-                                if (i7 <= 0) {
+                                if (i6 <= 0) {
                                     this.this$0.mCallback.clearView(this.this$0.mRecyclerView, viewHolder5);
                                 } else {
                                     this.this$0.mPendingCleanup.add(viewHolder5.itemView);
                                     this.mIsPendingCleanup = true;
-                                    int i = i7;
+                                    int i = i6;
                                     if (i > 0) {
                                         this.this$0.postDispatchSwipe(this, i);
                                     }
@@ -1198,12 +1183,12 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
                             }
                         }
                     };
-                    r14.setDuration(this.mCallback.getAnimationDuration(this.mRecyclerView, i6, f3 - f4, f2 - f5));
+                    r14.setDuration(this.mCallback.getAnimationDuration(this.mRecyclerView, i5, f3 - f4, f2 - f5));
                     this.mRecoverAnimations.add(r14);
                     r14.start();
                     z = true;
                 } else {
-                    ViewHolder viewHolder6 = viewHolder3;
+                    RecyclerView.ViewHolder viewHolder6 = viewHolder3;
                     removeChildDrawingOrderCallbackIfNecessary(viewHolder6.itemView);
                     this.mCallback.clearView(this.mRecyclerView, viewHolder6);
                     z = false;
@@ -1269,7 +1254,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     }
 
-    private int swipeIfNecessary(ViewHolder viewHolder) {
+    private int swipeIfNecessary(RecyclerView.ViewHolder viewHolder) {
         if (this.mActionState == 2) {
             return 0;
         }
@@ -1337,7 +1322,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     }
 
-    public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+    public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
         rect.setEmpty();
     }
 
@@ -1346,21 +1331,22 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
 
     public void onChildViewDetachedFromWindow(@NonNull View view) {
         removeChildDrawingOrderCallbackIfNecessary(view);
-        ViewHolder childViewHolder = this.mRecyclerView.getChildViewHolder(view);
+        RecyclerView.ViewHolder childViewHolder = this.mRecyclerView.getChildViewHolder(view);
         if (childViewHolder != null) {
-            ViewHolder viewHolder = this.mSelected;
+            RecyclerView.ViewHolder viewHolder = this.mSelected;
             if (viewHolder == null || childViewHolder != viewHolder) {
                 endRecoverAnimation(childViewHolder, false);
                 if (this.mPendingCleanup.remove(childViewHolder.itemView)) {
                     this.mCallback.clearView(this.mRecyclerView, childViewHolder);
+                    return;
                 }
-            } else {
-                select(null, 0);
+                return;
             }
+            select((RecyclerView.ViewHolder) null, 0);
         }
     }
 
-    public void onDraw(Canvas canvas, RecyclerView recyclerView, State state) {
+    public void onDraw(Canvas canvas, RecyclerView recyclerView, RecyclerView.State state) {
         float f2;
         float f3;
         this.mOverdrawChildPosition = -1;
@@ -1377,7 +1363,7 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         this.mCallback.onDraw(canvas, recyclerView, this.mSelected, this.mRecoverAnimations, this.mActionState, f3, f2);
     }
 
-    public void onDrawOver(Canvas canvas, RecyclerView recyclerView, State state) {
+    public void onDrawOver(Canvas canvas, RecyclerView recyclerView, RecyclerView.State state) {
         float f2;
         float f3;
         if (this.mSelected != null) {
@@ -1393,13 +1379,11 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         this.mCallback.onDrawOver(canvas, recyclerView, this.mSelected, this.mRecoverAnimations, this.mActionState, f3, f2);
     }
 
-    public void startDrag(@NonNull ViewHolder viewHolder) {
-        boolean hasDragFlag = this.mCallback.hasDragFlag(this.mRecyclerView, viewHolder);
-        String str = TAG;
-        if (!hasDragFlag) {
-            Log.e(str, "Start drag has been called but dragging is not enabled");
+    public void startDrag(@NonNull RecyclerView.ViewHolder viewHolder) {
+        if (!this.mCallback.hasDragFlag(this.mRecyclerView, viewHolder)) {
+            Log.e(TAG, "Start drag has been called but dragging is not enabled");
         } else if (viewHolder.itemView.getParent() != this.mRecyclerView) {
-            Log.e(str, "Start drag has been called with a view holder which is not a child of the RecyclerView which is controlled by this ItemTouchHelper.");
+            Log.e(TAG, "Start drag has been called with a view holder which is not a child of the RecyclerView which is controlled by this ItemTouchHelper.");
         } else {
             obtainVelocityTracker();
             this.mDy = 0.0f;
@@ -1408,13 +1392,11 @@ public class ItemTouchHelper extends ItemDecoration implements OnChildAttachStat
         }
     }
 
-    public void startSwipe(@NonNull ViewHolder viewHolder) {
-        boolean hasSwipeFlag = this.mCallback.hasSwipeFlag(this.mRecyclerView, viewHolder);
-        String str = TAG;
-        if (!hasSwipeFlag) {
-            Log.e(str, "Start swipe has been called but swiping is not enabled");
+    public void startSwipe(@NonNull RecyclerView.ViewHolder viewHolder) {
+        if (!this.mCallback.hasSwipeFlag(this.mRecyclerView, viewHolder)) {
+            Log.e(TAG, "Start swipe has been called but swiping is not enabled");
         } else if (viewHolder.itemView.getParent() != this.mRecyclerView) {
-            Log.e(str, "Start swipe has been called with a view holder which is not a child of the RecyclerView controlled by this ItemTouchHelper.");
+            Log.e(TAG, "Start swipe has been called with a view holder which is not a child of the RecyclerView controlled by this ItemTouchHelper.");
         } else {
             obtainVelocityTracker();
             this.mDy = 0.0f;

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public final class CompositeException extends RuntimeException {
         PrintStreamOrWriter() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void println(Object obj);
     }
 
@@ -43,7 +44,7 @@ public final class CompositeException extends RuntimeException {
             this.printStream = printStream2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void println(Object obj) {
             this.printStream.println(obj);
         }
@@ -56,7 +57,7 @@ public final class CompositeException extends RuntimeException {
             this.printWriter = printWriter2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void println(Object obj) {
             this.printWriter.println(obj);
         }
@@ -81,27 +82,24 @@ public final class CompositeException extends RuntimeException {
         if (!linkedHashSet.isEmpty()) {
             arrayList.addAll(linkedHashSet);
             this.exceptions = Collections.unmodifiableList(arrayList);
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.exceptions.size());
-            sb.append(" exceptions occurred. ");
-            this.message = sb.toString();
+            this.message = this.exceptions.size() + " exceptions occurred. ";
             return;
         }
         throw new IllegalArgumentException("errors is empty");
     }
 
+    /* JADX INFO: this call moved to the top of the method (can break code semantics) */
     public CompositeException(@NonNull Throwable... thArr) {
         this((Iterable<? extends Throwable>) thArr == null ? Collections.singletonList(new NullPointerException("exceptions was null")) : Arrays.asList(thArr));
     }
 
     private void appendStackTrace(StringBuilder sb, Throwable th, String str) {
-        StackTraceElement[] stackTrace;
         sb.append(str);
         sb.append(th);
         sb.append(10);
-        for (StackTraceElement stackTraceElement : th.getStackTrace()) {
+        for (StackTraceElement append : th.getStackTrace()) {
             sb.append("\t\tat ");
-            sb.append(stackTraceElement);
+            sb.append(append);
             sb.append(10);
         }
         if (th.getCause() != null) {
@@ -142,21 +140,20 @@ public final class CompositeException extends RuntimeException {
     }
 
     private void printStackTrace(PrintStreamOrWriter printStreamOrWriter) {
-        StackTraceElement[] stackTrace;
         StringBuilder sb = new StringBuilder(128);
         sb.append(this);
         sb.append(10);
-        for (StackTraceElement stackTraceElement : getStackTrace()) {
+        for (StackTraceElement append : getStackTrace()) {
             sb.append("\tat ");
-            sb.append(stackTraceElement);
+            sb.append(append);
             sb.append(10);
         }
         int i = 1;
-        for (Throwable th : this.exceptions) {
+        for (Throwable appendStackTrace : this.exceptions) {
             sb.append("  ComposedException ");
             sb.append(i);
             sb.append(" :\n");
-            appendStackTrace(sb, th, "\t");
+            appendStackTrace(sb, appendStackTrace, "\t");
             i++;
         }
         printStreamOrWriter.println(sb.toString());
@@ -169,18 +166,20 @@ public final class CompositeException extends RuntimeException {
         if (this.cause == null) {
             Throwable compositeExceptionCausalChain = new CompositeExceptionCausalChain();
             HashSet hashSet = new HashSet();
+            Iterator<Throwable> it = this.exceptions.iterator();
             Throwable th = compositeExceptionCausalChain;
-            for (Throwable th2 : this.exceptions) {
-                if (!hashSet.contains(th2)) {
-                    hashSet.add(th2);
-                    for (Throwable th3 : getListOfCauses(th2)) {
-                        if (hashSet.contains(th3)) {
-                            th2 = new RuntimeException("Duplicate found in causal chain so cropping to prevent loop ...");
+            while (it.hasNext()) {
+                Throwable next = it.next();
+                if (!hashSet.contains(next)) {
+                    hashSet.add(next);
+                    for (Throwable next2 : getListOfCauses(next)) {
+                        if (hashSet.contains(next2)) {
+                            next = new RuntimeException("Duplicate found in causal chain so cropping to prevent loop ...");
                         } else {
-                            hashSet.add(th3);
+                            hashSet.add(next2);
                         }
                     }
-                    th.initCause(th2);
+                    th.initCause(next);
                     th = getRootCause(th);
                 }
             }

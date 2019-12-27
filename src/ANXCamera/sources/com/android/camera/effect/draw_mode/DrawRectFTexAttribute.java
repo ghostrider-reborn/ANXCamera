@@ -12,5 +12,6 @@ public class DrawRectFTexAttribute extends DrawAttribute {
         this.mSourceRectF = rectF;
         this.mTargetRectF = rectF2;
         this.mBasicTexture = basicTexture;
+        this.mTarget = 7;
     }
 }

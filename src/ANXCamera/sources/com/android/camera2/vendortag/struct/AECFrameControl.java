@@ -62,10 +62,10 @@ public class AECFrameControl {
                 AECExposureData[] aECExposureDataArr = new AECExposureData[3];
                 for (int i = 0; i < 3; i++) {
                     aECExposureDataArr[i] = new AECExposureData();
-                    aECExposureDataArr[i].mExposureTime = byteBuffer.getLong();
-                    aECExposureDataArr[i].mLinearGain = byteBuffer.getFloat();
-                    aECExposureDataArr[i].mSensitivity = byteBuffer.getFloat();
-                    aECExposureDataArr[i].mDeltaEVFromTarget = byteBuffer.getFloat();
+                    long unused = aECExposureDataArr[i].mExposureTime = byteBuffer.getLong();
+                    float unused2 = aECExposureDataArr[i].mLinearGain = byteBuffer.getFloat();
+                    float unused3 = aECExposureDataArr[i].mSensitivity = byteBuffer.getFloat();
+                    float unused4 = aECExposureDataArr[i].mDeltaEVFromTarget = byteBuffer.getFloat();
                     byteBuffer.getFloat();
                 }
                 return new AECFrameControl(aECExposureDataArr);

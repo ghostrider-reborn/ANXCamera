@@ -3,7 +3,6 @@ package org.greenrobot.greendao;
 import java.util.Collection;
 import org.greenrobot.greendao.internal.SqlUtils;
 import org.greenrobot.greendao.query.WhereCondition;
-import org.greenrobot.greendao.query.WhereCondition.PropertyCondition;
 
 public class Property {
     public final String columnName;
@@ -21,19 +20,19 @@ public class Property {
     }
 
     public WhereCondition between(Object obj, Object obj2) {
-        return new PropertyCondition(this, " BETWEEN ? AND ?", new Object[]{obj, obj2});
+        return new WhereCondition.PropertyCondition(this, " BETWEEN ? AND ?", new Object[]{obj, obj2});
     }
 
     public WhereCondition eq(Object obj) {
-        return new PropertyCondition(this, "=?", obj);
+        return new WhereCondition.PropertyCondition(this, "=?", obj);
     }
 
     public WhereCondition ge(Object obj) {
-        return new PropertyCondition(this, ">=?", obj);
+        return new WhereCondition.PropertyCondition(this, ">=?", obj);
     }
 
     public WhereCondition gt(Object obj) {
-        return new PropertyCondition(this, ">?", obj);
+        return new WhereCondition.PropertyCondition(this, ">?", obj);
     }
 
     public WhereCondition in(Collection<?> collection) {
@@ -44,31 +43,31 @@ public class Property {
         StringBuilder sb = new StringBuilder(" IN (");
         SqlUtils.appendPlaceholders(sb, objArr.length);
         sb.append(')');
-        return new PropertyCondition(this, sb.toString(), objArr);
+        return new WhereCondition.PropertyCondition(this, sb.toString(), objArr);
     }
 
     public WhereCondition isNotNull() {
-        return new PropertyCondition(this, " IS NOT NULL");
+        return new WhereCondition.PropertyCondition(this, " IS NOT NULL");
     }
 
     public WhereCondition isNull() {
-        return new PropertyCondition(this, " IS NULL");
+        return new WhereCondition.PropertyCondition(this, " IS NULL");
     }
 
     public WhereCondition le(Object obj) {
-        return new PropertyCondition(this, "<=?", obj);
+        return new WhereCondition.PropertyCondition(this, "<=?", obj);
     }
 
     public WhereCondition like(String str) {
-        return new PropertyCondition(this, " LIKE ?", (Object) str);
+        return new WhereCondition.PropertyCondition(this, " LIKE ?", (Object) str);
     }
 
     public WhereCondition lt(Object obj) {
-        return new PropertyCondition(this, "<?", obj);
+        return new WhereCondition.PropertyCondition(this, "<?", obj);
     }
 
     public WhereCondition notEq(Object obj) {
-        return new PropertyCondition(this, "<>?", obj);
+        return new WhereCondition.PropertyCondition(this, "<>?", obj);
     }
 
     public WhereCondition notIn(Collection<?> collection) {
@@ -79,6 +78,6 @@ public class Property {
         StringBuilder sb = new StringBuilder(" NOT IN (");
         SqlUtils.appendPlaceholders(sb, objArr.length);
         sb.append(')');
-        return new PropertyCondition(this, sb.toString(), objArr);
+        return new WhereCondition.PropertyCondition(this, sb.toString(), objArr);
     }
 }

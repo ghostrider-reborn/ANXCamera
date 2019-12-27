@@ -26,11 +26,7 @@ class Huffman {
         Node(int i, int i2) {
             this.children = null;
             this.symbol = i;
-            int i3 = i2 & 7;
-            if (i3 == 0) {
-                i3 = 8;
-            }
-            this.terminalBits = i3;
+            this.terminalBits = (i2 & 7) == 0 ? 8 : i2 & 7;
         }
     }
 
@@ -79,7 +75,7 @@ class Huffman {
         return INSTANCE;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public byte[] decode(byte[] bArr) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Node node = this.root;
@@ -111,38 +107,37 @@ class Huffman {
         return byteArrayOutputStream.toByteArray();
     }
 
-    /* JADX WARNING: type inference failed for: r0v6, types: [int] */
-    /* JADX WARNING: type inference failed for: r0v7, types: [int, long] */
-    /* JADX WARNING: type inference failed for: r0v8 */
-    /* JADX WARNING: type inference failed for: r0v9 */
-    /* JADX WARNING: type inference failed for: r0v10 */
-    /* access modifiers changed from: 0000 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v6, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v7, resolved type: long} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v8, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v9, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v10, resolved type: byte} */
+    /* access modifiers changed from: package-private */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 2 */
     public void encode(ByteString byteString, BufferedSink bufferedSink) throws IOException {
         int i = 0;
         long j = 0;
-        byte b2 = 0;
+        int i2 = 0;
         while (i < byteString.size()) {
-            byte b3 = byteString.getByte(i) & 255;
-            int i2 = CODES[b3];
-            byte b4 = CODE_LENGTHS[b3];
-            j = (j << b4) | ((long) i2);
-            ? r0 = b2 + b4;
-            while (r0 >= 8) {
-                ? r02 = r0 - 8;
-                bufferedSink.writeByte((int) (j >> r02));
-                r0 = r02;
+            byte b2 = byteString.getByte(i) & 255;
+            int i3 = CODES[b2];
+            byte b3 = CODE_LENGTHS[b2];
+            j = (j << b3) | ((long) i3);
+            int i4 = i2 + b3;
+            while (i4 >= 8) {
+                long j2 = i4 - 8;
+                bufferedSink.writeByte((int) (j >> j2));
+                i4 = j2;
             }
             i++;
-            b2 = r0;
+            i2 = i4;
         }
-        if (b2 > 0) {
-            bufferedSink.writeByte((int) ((j << (8 - b2)) | ((long) (255 >>> b2))));
+        if (i2 > 0) {
+            bufferedSink.writeByte((int) ((j << (8 - i2)) | ((long) (255 >>> i2))));
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int encodedLength(ByteString byteString) {
         long j = 0;
         for (int i = 0; i < byteString.size(); i++) {

@@ -2,7 +2,7 @@ package com.android.camera.network.download;
 
 import android.net.Uri;
 import android.text.TextUtils;
-import com.android.camera.fragment.CtaNoticeFragment.CTA;
+import com.android.camera.fragment.CtaNoticeFragment;
 import com.android.camera.log.Log;
 import com.android.camera.network.util.NetworkUtils;
 import java.io.IOException;
@@ -43,28 +43,21 @@ class ConnectionHelper {
         if (TextUtils.equals(scheme, "http") || TextUtils.equals(scheme, "https")) {
             return open(uri.toString(), i);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("not support scheme ");
-        sb.append(scheme);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("not support scheme " + scheme);
     }
 
     static Holder<HttpURLConnection> open(String str, int i) {
-        String str2 = TAG;
         int verify = verify(i);
         if (verify != 0) {
             return new Holder<>(verify);
         }
         try {
-            Log.d(str2, "try open http connection");
+            Log.d(TAG, "try open http connection");
             return new Holder<>((HttpURLConnection) new URL(str).openConnection());
         } catch (MalformedURLException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("invalid url ");
-            sb.append(str);
-            throw new IllegalArgumentException(sb.toString(), e2);
+            throw new IllegalArgumentException("invalid url " + str, e2);
         } catch (IOException e3) {
-            Log.w(str2, (Throwable) e3);
+            Log.w(TAG, (Throwable) e3);
             return new Holder<>(4);
         }
     }
@@ -74,7 +67,7 @@ class ConnectionHelper {
         if (!NetworkUtils.isNetworkConnected()) {
             return 1;
         }
-        if (!CTA.canConnectNetwork()) {
+        if (!CtaNoticeFragment.CTA.canConnectNetwork()) {
             return 2;
         }
         return (i != 1 || !NetworkUtils.isActiveNetworkMetered()) ? 0 : 3;

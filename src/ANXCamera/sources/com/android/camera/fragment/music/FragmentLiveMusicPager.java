@@ -2,12 +2,8 @@ package com.android.camera.fragment.music;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnKeyListener;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,8 +12,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,11 +21,10 @@ import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.data.DataRepository;
 import com.android.camera.fragment.CtaNoticeFragment;
-import com.android.camera.fragment.CtaNoticeFragment.OnCtaNoticeClickListener;
 import com.android.camera.fragment.DefaultItemAnimator;
 import com.android.camera.fragment.FragmentUtils;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
-import com.android.camera.fragment.music.FragmentLiveMusic.Mp3DownloadCallback;
+import com.android.camera.fragment.music.FragmentLiveMusic;
 import com.android.camera.log.Log;
 import com.android.camera.module.impl.component.FileUtils;
 import com.android.camera.network.NetworkDependencies;
@@ -40,9 +33,8 @@ import com.android.camera.network.live.TTLiveMusicResourceRequest;
 import com.android.camera.network.net.base.ErrorCode;
 import com.android.camera.network.net.base.ResponseListener;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.android.camera.protocol.ModeProtocol;
+import com.ss.android.vesdk.VEEditor;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
@@ -52,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import miui.app.ProgressDialog;
 
-public class FragmentLiveMusicPager extends Fragment implements OnClickListener, OnTouchListener, OnCtaNoticeClickListener {
+public class FragmentLiveMusicPager extends Fragment implements View.OnClickListener, View.OnTouchListener, CtaNoticeFragment.OnCtaNoticeClickListener {
     private static final long MAX_REQUEST_TIME = 10800000;
     /* access modifiers changed from: private */
     public static final String TAG = "FragmentLiveMusicPager";
@@ -60,7 +52,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
     public LiveMusicInfo mCurrentSelectMusic;
     /* access modifiers changed from: private */
     public LinearLayout mCurrentSelectedMusicLayout;
-    private OnAudioFocusChangeListener mFocusChangeListener = new OnAudioFocusChangeListener() {
+    private AudioManager.OnAudioFocusChangeListener mFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
         public void onAudioFocusChange(int i) {
             if (i == -3 && FragmentLiveMusicPager.this.mMediaPlayer != null) {
                 FragmentLiveMusicPager.this.mMediaPlayer.setVolume(0.2f, 0.2f);
@@ -78,7 +70,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
     public ProgressBar mMediaLoadingProgressBar;
     /* access modifiers changed from: private */
     public MediaPlayer mMediaPlayer;
-    private Mp3DownloadCallback mMp3DownloadCallback = new Mp3DownloadCallback() {
+    private FragmentLiveMusic.Mp3DownloadCallback mMp3DownloadCallback = new FragmentLiveMusic.Mp3DownloadCallback() {
         public void onCompleted() {
             FragmentLiveMusicPager.this.stopDownloadAnimation();
             FragmentLiveMusicPager fragmentLiveMusicPager = FragmentLiveMusicPager.this;
@@ -144,10 +136,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
                 } catch (BaseRequestException e2) {
                     this.mNetworkExceptionLayout.setVisibility(0);
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("request online music failed ");
-                    sb.append(e2.getMessage());
-                    Log.e(str, sb.toString());
+                    Log.e(str, "request online music failed " + e2.getMessage());
                 }
             } else {
                 tTLiveMusicResourceRequest.execute(new ResponseListener() {
@@ -172,10 +161,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
                             }
                         }).subscribeOn(AndroidSchedulers.mainThread()).subscribe();
                         String access$400 = FragmentLiveMusicPager.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("request online music failed, errorCode =  ");
-                        sb.append(errorCode);
-                        Log.e(access$400, sb.toString());
+                        Log.e(access$400, "request online music failed, errorCode =  " + errorCode);
                     }
                 });
             }
@@ -186,25 +172,17 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
     public void onSelectedMusic(LiveMusicInfo liveMusicInfo) {
         String str = liveMusicInfo.mPlayUrl;
         if (this.mItemType == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(FileUtils.MUSIC_ONLINE);
-            sb.append(liveMusicInfo.mTitle);
-            sb.append(".mp3");
-            str = sb.toString();
+            str = FileUtils.MUSIC_ONLINE + liveMusicInfo.mTitle + ".mp3";
         }
-        LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+        ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
         if (liveConfigChanges != null) {
             liveConfigChanges.onBGMChanged(str);
         }
-        final TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(liveMusicInfo.mTitle);
-        sb2.append("-");
-        sb2.append(liveMusicInfo.mAuthor);
-        CameraSettings.setCurrentLiveMusic(str, sb2.toString());
+        final ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        CameraSettings.setCurrentLiveMusic(str, liveMusicInfo.mTitle + "-" + liveMusicInfo.mAuthor);
         Completable.fromAction(new Action() {
             public void run() {
-                TopAlert topAlert = topAlert;
+                ModeProtocol.TopAlert topAlert = topAlert;
                 if (topAlert != null) {
                     topAlert.updateConfigItem(245);
                 }
@@ -217,18 +195,20 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
         this.mProgressDialog = new ProgressDialog(getActivity());
         String string = getString(R.string.live_music_downloading_tips);
         this.mProgressDialog.setCancelable(true);
-        this.mProgressDialog.setOnKeyListener(new OnKeyListener() {
+        this.mProgressDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
             public boolean onKey(DialogInterface dialogInterface, int i, KeyEvent keyEvent) {
                 if (i != 4) {
                     return false;
                 }
-                if (FragmentLiveMusicPager.this.mProgressDialog.isShowing()) {
-                    FragmentLiveMusicPager.this.mProgressDialog.dismiss();
-                    if (FragmentLiveMusicPager.this.mIsLoadingAnimationStart) {
-                        FragmentLiveMusicPager.this.mCurrentSelectedMusicLayout.setBackgroundColor(-1);
-                        FragmentLiveMusicPager.this.mCurrentSelectedMusicLayout.setAlpha(1.0f);
-                    }
+                if (!FragmentLiveMusicPager.this.mProgressDialog.isShowing()) {
+                    return true;
                 }
+                FragmentLiveMusicPager.this.mProgressDialog.dismiss();
+                if (!FragmentLiveMusicPager.this.mIsLoadingAnimationStart) {
+                    return true;
+                }
+                FragmentLiveMusicPager.this.mCurrentSelectedMusicLayout.setBackgroundColor(-1);
+                FragmentLiveMusicPager.this.mCurrentSelectedMusicLayout.setAlpha(1.0f);
                 return true;
             }
         });
@@ -239,15 +219,11 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
     private void startDownloadMuusic(LiveMusicInfo liveMusicInfo) {
         String str = liveMusicInfo.mPlayUrl;
         if (this.mItemType == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(FileUtils.MUSIC_ONLINE);
-            sb.append(liveMusicInfo.mTitle);
-            sb.append(".mp3");
-            String sb2 = sb.toString();
-            if (!new File(sb2).exists()) {
+            String str2 = FileUtils.MUSIC_ONLINE + liveMusicInfo.mTitle + ".mp3";
+            if (!new File(str2).exists()) {
                 if (NetworkDependencies.isConnected(getContext())) {
                     startDownloadAnimation();
-                    OkHttpUtils.downloadMp3Async(liveMusicInfo.mPlayUrl, sb2, this.mMp3DownloadCallback);
+                    OkHttpUtils.downloadMp3Async(liveMusicInfo.mPlayUrl, str2, this.mMp3DownloadCallback);
                 } else {
                     LinearLayout linearLayout = this.mCurrentSelectedMusicLayout;
                     if (linearLayout != null) {
@@ -267,7 +243,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
     }
 
     private void startPlayMusic(LiveMusicInfo liveMusicInfo) {
-        ((AudioManager) getContext().getSystemService(MVConsts.TYPE_AUDIO)).requestAudioFocus(this.mFocusChangeListener, 3, 1);
+        ((AudioManager) getContext().getSystemService(VEEditor.MVConsts.TYPE_AUDIO)).requestAudioFocus(this.mFocusChangeListener, 3, 1);
         if (liveMusicInfo != null && !liveMusicInfo.mPlayUrl.isEmpty() && !this.mIsDestroyed) {
             LiveMusicInfo liveMusicInfo2 = this.mCurrentSelectMusic;
             if (liveMusicInfo2 == null || !liveMusicInfo2.equals(liveMusicInfo) || !this.mMediaPlayer.isPlaying()) {
@@ -281,16 +257,16 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
                     this.mMediaPlayer.setDataSource(liveMusicInfo.mPlayUrl);
                     this.mMediaPlayer.prepareAsync();
                     this.mIsMediaPreparing = true;
-                    this.mMediaPlayer.setOnPreparedListener(new OnPreparedListener() {
+                    this.mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                         public void onPrepared(MediaPlayer mediaPlayer) {
                             FragmentLiveMusicPager.this.mMediaLoadingProgressBar.setVisibility(4);
                             FragmentLiveMusicPager.this.mPlayingImageView.setVisibility(0);
                             FragmentLiveMusicPager.this.mPlayingImageView.setBackgroundResource(R.drawable.ic_live_music_pause);
                             mediaPlayer.start();
-                            FragmentLiveMusicPager.this.mIsMediaPreparing = false;
+                            boolean unused = FragmentLiveMusicPager.this.mIsMediaPreparing = false;
                         }
                     });
-                    this.mMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+                    this.mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         public void onCompletion(MediaPlayer mediaPlayer) {
                             FragmentLiveMusicPager.this.mMediaPlayer.stop();
                             FragmentLiveMusicPager.this.mMediaPlayer.reset();
@@ -299,16 +275,13 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
                     });
                 } catch (IOException e2) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("mediaplayer play failed ");
-                    sb.append(e2.getMessage());
-                    Log.e(str, sb.toString());
+                    Log.e(str, "mediaplayer play failed " + e2.getMessage());
                 }
                 this.mCurrentSelectMusic = liveMusicInfo;
-            } else {
-                this.mMediaPlayer.stop();
-                this.mMediaPlayer.reset();
+                return;
             }
+            this.mMediaPlayer.stop();
+            this.mMediaPlayer.reset();
         }
     }
 
@@ -338,7 +311,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
         this.mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         this.mUpdateLayout = (LinearLayout) view.findViewById(R.id.music_updating_layout);
         this.mNetworkExceptionLayout = (LinearLayout) view.findViewById(R.id.music_network_exception);
-        this.mNetworkExceptionLayout.setOnClickListener(new OnClickListener() {
+        this.mNetworkExceptionLayout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 if (CtaNoticeFragment.checkCta(FragmentLiveMusicPager.this.getActivity().getFragmentManager(), false, FragmentLiveMusicPager.this)) {
                     FragmentLiveMusicPager.this.loadOnlineHotMusic();
@@ -354,25 +327,21 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
 
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.music_network_exception /*2131296468*/:
+            case R.id.music_network_exception:
                 this.mUpdateLayout.setVisibility(0);
                 this.mNetworkExceptionLayout.setVisibility(8);
                 loadOnlineHotMusic();
                 return;
-            case R.id.music_play /*2131296469*/:
+            case R.id.music_play:
                 if (!this.mIsMediaPreparing) {
                     LiveMusicInfo liveMusicInfo = (LiveMusicInfo) view.getTag();
                     if (this.mItemType == 0 && !NetworkDependencies.isConnected(getContext())) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(FileUtils.MUSIC_ONLINE);
-                        sb.append(liveMusicInfo.mTitle);
-                        sb.append(".mp3");
-                        String sb2 = sb.toString();
-                        if (!new File(sb2).exists()) {
+                        String str = FileUtils.MUSIC_ONLINE + liveMusicInfo.mTitle + ".mp3";
+                        if (!new File(str).exists()) {
                             Toast.makeText(getActivity(), R.string.live_music_network_exception, 1).show();
                             return;
                         }
-                        liveMusicInfo.mPlayUrl = sb2;
+                        liveMusicInfo.mPlayUrl = str;
                     }
                     ImageView imageView = this.mPlayingImageView;
                     if (imageView != null) {
@@ -403,7 +372,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
         super.onDestroy();
         this.mIsDestroyed = true;
         this.mMediaPlayer.release();
-        this.mRecyclerView.setAdapter(null);
+        this.mRecyclerView.setAdapter((RecyclerView.Adapter) null);
     }
 
     public void onNegativeClick(DialogInterface dialogInterface, int i) {
@@ -426,7 +395,7 @@ public class FragmentLiveMusicPager extends Fragment implements OnClickListener,
     public void onResume() {
         super.onResume();
         if (this.mMusicPlayPosition != 0) {
-            ((AudioManager) getContext().getSystemService(MVConsts.TYPE_AUDIO)).requestAudioFocus(this.mFocusChangeListener, 3, 1);
+            ((AudioManager) getContext().getSystemService(VEEditor.MVConsts.TYPE_AUDIO)).requestAudioFocus(this.mFocusChangeListener, 3, 1);
             this.mMediaPlayer.seekTo(this.mMusicPlayPosition);
             this.mMediaPlayer.start();
             this.mMusicPlayPosition = 0;

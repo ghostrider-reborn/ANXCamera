@@ -9,7 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import com.android.camera.ActivityBase;
 import com.android.camera.R;
 import com.android.camera.Util;
@@ -91,7 +91,7 @@ public class ObjectView extends FrameView {
         }
 
         public void run() {
-            ObjectView.this.mZoomAnimState = 5;
+            int unused = ObjectView.this.mZoomAnimState = 5;
         }
     }
 
@@ -148,7 +148,7 @@ public class ObjectView extends FrameView {
         }
 
         public void run() {
-            ObjectView.this.mZoomAnimState = 3;
+            int unused = ObjectView.this.mZoomAnimState = 3;
         }
     }
 
@@ -253,8 +253,8 @@ public class ObjectView extends FrameView {
     }
 
     private void resetView() {
-        LayoutParams layoutParams = (LayoutParams) getLayoutParams();
-        setBackground(null);
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) getLayoutParams();
+        setBackground((Drawable) null);
         animate().cancel();
         setScaleX(1.0f);
         setScaleY(1.0f);
@@ -274,7 +274,7 @@ public class ObjectView extends FrameView {
     }
 
     private void updateAnimateView() {
-        LayoutParams layoutParams = (LayoutParams) getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) getLayoutParams();
         layoutParams.width = (int) this.mObjectRect.width();
         layoutParams.height = (int) this.mObjectRect.height();
         RectF rectF = this.mObjectRect;
@@ -344,24 +344,7 @@ public class ObjectView extends FrameView {
     /* access modifiers changed from: protected */
     public void onDraw(Canvas canvas) {
         if (Util.sIsDumpLog) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onDraw(), mZoomAnimState:");
-            sb.append(this.mZoomAnimState);
-            sb.append(", mPause=");
-            sb.append(this.mPause);
-            sb.append(" mObjectRect=");
-            sb.append(this.mObjectRect);
-            sb.append(" mFace=");
-            sb.append(this.mFace);
-            sb.append(", mTrackIndicator=");
-            sb.append(this.mTrackIndicator);
-            sb.append(", getWidth=");
-            sb.append(getWidth());
-            sb.append(", getheight=");
-            sb.append(getHeight());
-            sb.append(", mDisplayBounds=");
-            sb.append(this.mDisplayBounds);
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "onDraw(), mZoomAnimState:" + this.mZoomAnimState + ", mPause=" + this.mPause + " mObjectRect=" + this.mObjectRect + " mFace=" + this.mFace + ", mTrackIndicator=" + this.mTrackIndicator + ", getWidth=" + getWidth() + ", getheight=" + getHeight() + ", mDisplayBounds=" + this.mDisplayBounds);
         }
         if (!this.mPause) {
             int i = this.mZoomAnimState;
@@ -435,7 +418,7 @@ public class ObjectView extends FrameView {
                         this.mZoomAnimState = 0;
                         this.mListener.stopObjectTracking(false);
                     }
-                    initializeTrackView(null, false);
+                    initializeTrackView((RectF) null, false);
                 }
                 this.mHandler.removeMessages(1);
                 detectMovingStyle(x, y, -1.0f, -1.0f);
@@ -452,33 +435,8 @@ public class ObjectView extends FrameView {
     }
 
     public void setObject(CameraHardwareFace cameraHardwareFace) {
-        boolean z = Util.sIsDumpLog;
-        String str = TAG;
-        if (z) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("setObject(), mZoomAnimState:");
-            sb.append(this.mZoomAnimState);
-            sb.append(" , face.rect:");
-            sb.append(cameraHardwareFace.rect);
-            sb.append(" , face.score:");
-            sb.append(cameraHardwareFace.score);
-            sb.append(" , face.t2tStop:");
-            sb.append(cameraHardwareFace.t2tStop);
-            sb.append(" , moving=");
-            sb.append(this.mFilter.mCurrentValue);
-            sb.append(" , mPause=");
-            sb.append(this.mPause);
-            sb.append(" , visible=");
-            sb.append(getVisibility());
-            sb.append(" , getWidth()=");
-            sb.append(getWidth());
-            sb.append(" ,mDisplayBounds.width()=");
-            sb.append(this.mDisplayBounds.width());
-            sb.append(" , getHeight()=");
-            sb.append(getHeight());
-            sb.append(" ,mDisplayBounds.height()=");
-            sb.append(this.mDisplayBounds.height());
-            Log.i(str, sb.toString());
+        if (Util.sIsDumpLog) {
+            Log.i(TAG, "setObject(), mZoomAnimState:" + this.mZoomAnimState + " , face.rect:" + cameraHardwareFace.rect + " , face.score:" + cameraHardwareFace.score + " , face.t2tStop:" + cameraHardwareFace.t2tStop + " , moving=" + this.mFilter.mCurrentValue + " , mPause=" + this.mPause + " , visible=" + getVisibility() + " , getWidth()=" + getWidth() + " ,mDisplayBounds.width()=" + this.mDisplayBounds.width() + " , getHeight()=" + getHeight() + " ,mDisplayBounds.height()=" + this.mDisplayBounds.height());
         }
         int i = this.mZoomAnimState;
         if (i > 2) {
@@ -504,11 +462,7 @@ public class ObjectView extends FrameView {
                     this.mLostTrackingNum++;
                     int i3 = this.mLostTrackingNum;
                     if (i3 % 5 == 0 || i3 == this.mLostTrackThreshold) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("lost ");
-                        sb2.append(this.mLostTrackingNum);
-                        sb2.append(" times");
-                        Log.v(str, sb2.toString());
+                        Log.v(TAG, "lost " + this.mLostTrackingNum + " times");
                     }
                     if (this.mLostTrackThreshold <= this.mLostTrackingNum) {
                         this.mListener.stopObjectTracking(true);

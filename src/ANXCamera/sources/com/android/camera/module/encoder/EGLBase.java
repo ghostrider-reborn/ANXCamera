@@ -7,7 +7,7 @@ import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -63,7 +63,7 @@ public class EGLBase {
         }
 
         public void makeCurrent() {
-            this.mEgl.makeCurrent(this.mEglSurface);
+            boolean unused = this.mEgl.makeCurrent(this.mEglSurface);
         }
 
         public void release() {
@@ -74,7 +74,7 @@ public class EGLBase {
         }
 
         public void swap() {
-            this.mEgl.swap(this.mEglSurface);
+            int unused = this.mEgl.swap(this.mEglSurface);
         }
     }
 
@@ -86,11 +86,7 @@ public class EGLBase {
     private void checkEglError(String str) {
         int eglGetError = EGL14.eglGetError();
         if (eglGetError != 12288) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": EGL error: 0x");
-            sb.append(Integer.toHexString(eglGetError));
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException(str + ": EGL error: 0x" + Integer.toHexString(eglGetError));
         }
     }
 
@@ -103,8 +99,7 @@ public class EGLBase {
 
     /* access modifiers changed from: private */
     public EGLSurface createOffscreenSurface(int i, int i2) {
-        String str = "createOffscreenSurface";
-        Log.v(TAG, str);
+        Log.v(TAG, "createOffscreenSurface");
         int[] iArr = {12375, i, 12374, i2, 12344};
         EGLSurface eGLSurface = null;
         try {
@@ -115,19 +110,16 @@ public class EGLBase {
             }
             throw new RuntimeException("surface was null");
         } catch (IllegalArgumentException e2) {
-            Log.e(TAG, str, e2);
+            Log.e(TAG, "createOffscreenSurface", e2);
         } catch (RuntimeException e3) {
-            Log.e(TAG, str, e3);
+            Log.e(TAG, "createOffscreenSurface", e3);
         }
     }
 
     /* access modifiers changed from: private */
     public EGLSurface createWindowSurface(Object obj) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("createWindowSurface: nativeWindow=");
-        sb.append(obj);
-        Log.v(str, sb.toString());
+        Log.v(str, "createWindowSurface: nativeWindow=" + obj);
         try {
             return EGL14.eglCreateWindowSurface(this.mEglDisplay, this.mEglConfig, obj, new int[]{12344}, 0);
         } catch (IllegalArgumentException e2) {
@@ -138,38 +130,27 @@ public class EGLBase {
 
     private void destroyContext() {
         Log.v(TAG, "destroyContext");
-        String str = " context=";
         if (!EGL14.eglDestroyContext(this.mEglDisplay, this.mEglContext)) {
+            String str = TAG;
+            Log.e(str, "destroyContext: display=" + this.mEglDisplay + " context=" + this.mEglContext);
             String str2 = TAG;
             StringBuilder sb = new StringBuilder();
-            sb.append("destroyContext: display=");
-            sb.append(this.mEglDisplay);
-            sb.append(str);
-            sb.append(this.mEglContext);
+            sb.append("destroyContext: err=");
+            sb.append(EGL14.eglGetError());
             Log.e(str2, sb.toString());
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("destroyContext: err=");
-            sb2.append(EGL14.eglGetError());
-            Log.e(str3, sb2.toString());
         }
         EGLContext eGLContext = EGL14.EGL_NO_CONTEXT;
         this.mEglContext = eGLContext;
         EGLContext eGLContext2 = this.mDefaultContext;
         if (eGLContext2 != eGLContext) {
             if (!EGL14.eglDestroyContext(this.mEglDisplay, eGLContext2)) {
+                String str3 = TAG;
+                Log.e(str3, "destroyDefaultContext: display=" + this.mEglDisplay + " context=" + this.mDefaultContext);
                 String str4 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("destroyDefaultContext: display=");
-                sb3.append(this.mEglDisplay);
-                sb3.append(str);
-                sb3.append(this.mDefaultContext);
-                Log.e(str4, sb3.toString());
-                String str5 = TAG;
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("destroyDefaultContext: err=");
-                sb4.append(EGL14.eglGetError());
-                Log.e(str5, sb4.toString());
+                StringBuilder sb2 = new StringBuilder();
+                sb2.append("destroyDefaultContext: err=");
+                sb2.append(EGL14.eglGetError());
+                Log.e(str4, sb2.toString());
             }
             this.mDefaultContext = EGL14.EGL_NO_CONTEXT;
         }
@@ -195,7 +176,7 @@ public class EGLBase {
             i = 12;
             iArr[11] = 16;
         }
-        if (z2 && VERSION.SDK_INT >= 18) {
+        if (z2 && Build.VERSION.SDK_INT >= 18) {
             int i2 = i + 1;
             iArr[i] = 12610;
             i = i2 + 1;
@@ -234,10 +215,7 @@ public class EGLBase {
                     int[] iArr2 = new int[1];
                     EGL14.eglQueryContext(this.mEglDisplay, this.mEglContext, 12440, iArr2, 0);
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("EGLContext created, client version ");
-                    sb.append(iArr2[0]);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "EGLContext created, client version " + iArr2[0]);
                     makeDefault();
                     return;
                 }
@@ -263,10 +241,7 @@ public class EGLBase {
             return true;
         } else {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("eglMakeCurrent: err=");
-            sb.append(EGL14.eglGetError());
-            Log.e(str, sb.toString());
+            Log.e(str, "eglMakeCurrent: err=" + EGL14.eglGetError());
             return false;
         }
     }
@@ -278,10 +253,7 @@ public class EGLBase {
         EGLSurface eGLSurface = EGL14.EGL_NO_SURFACE;
         if (!EGL14.eglMakeCurrent(eGLDisplay, eGLSurface, eGLSurface, EGL14.EGL_NO_CONTEXT)) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("makeDefault: err=");
-            sb.append(EGL14.eglGetError());
-            Log.w(str, sb.toString());
+            Log.w(str, "makeDefault: err=" + EGL14.eglGetError());
         }
     }
 
@@ -292,10 +264,7 @@ public class EGLBase {
         }
         int eglGetError = EGL14.eglGetError();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("swap: err=");
-        sb.append(eglGetError);
-        Log.w(str, sb.toString());
+        Log.w(str, "swap: err=" + eglGetError);
         return eglGetError;
     }
 

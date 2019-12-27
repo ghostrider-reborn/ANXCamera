@@ -4,7 +4,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import com.android.internal.app.IPerfShielder;
-import com.android.internal.app.IPerfShielder.Stub;
 
 public class PerfShielderManager {
     public static final String PerfShieldService = "perfshielder";
@@ -32,7 +31,7 @@ public class PerfShielderManager {
         if (sPerfManager == null) {
             synchronized (PerfShielderManager.class) {
                 if (sPerfManager == null) {
-                    IPerfShielder asInterface = Stub.asInterface(ServiceManager.getService(PerfShieldService));
+                    IPerfShielder asInterface = IPerfShielder.Stub.asInterface(ServiceManager.getService(PerfShieldService));
                     synchronized (PerfShielderManager.class) {
                         sPerfManager = asInterface;
                     }

@@ -4,19 +4,18 @@ import android.graphics.Rect;
 import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.animation.type.AlphaInOnSubscribe;
 import com.android.camera.animation.type.AlphaOutOnSubscribe;
 import com.android.camera.data.DataRepository;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.VerticalProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Completable;
 import java.util.List;
 
-public class FragmentVertical extends BaseFragment implements VerticalProtocol {
+public class FragmentVertical extends BaseFragment implements ModeProtocol.VerticalProtocol {
     private TextView mLeftAlertStatus;
     private TextView mLeftLightingPattern;
     private TextView mRightAlertStatus;
@@ -27,7 +26,7 @@ public class FragmentVertical extends BaseFragment implements VerticalProtocol {
     private int stringLightingRes;
 
     private void adjustViewHeight(View view) {
-        ((MarginLayoutParams) view.getLayoutParams()).topMargin = (Util.sWindowHeight - ((int) (((float) getResources().getDisplayMetrics().widthPixels) / 0.75f))) - Util.getBottomHeight(getContext().getResources());
+        ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).topMargin = (Util.sWindowHeight - ((int) (((float) getResources().getDisplayMetrics().widthPixels) / 0.75f))) - Util.getBottomHeight(getContext().getResources());
     }
 
     private void updateLightingRelativeView(boolean z, boolean z2) {
@@ -104,7 +103,7 @@ public class FragmentVertical extends BaseFragment implements VerticalProtocol {
         Rect displayRect = Util.getDisplayRect(getContext(), DataRepository.dataItemGlobal().getDisplayMode() == 2 ? 1 : 0);
         int i = displayRect.top;
         int height = displayRect.height();
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mVerticalViewMenu.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.mVerticalViewMenu.getLayoutParams();
         marginLayoutParams.topMargin = i;
         marginLayoutParams.height = height;
         this.mLeftAlertStatus = (TextView) view.findViewById(R.id.alert_status_value_left);
@@ -137,11 +136,12 @@ public class FragmentVertical extends BaseFragment implements VerticalProtocol {
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(198, this);
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public void setLightingPattern(String str) {
         char c2;
         switch (str.hashCode()) {
@@ -239,7 +239,7 @@ public class FragmentVertical extends BaseFragment implements VerticalProtocol {
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(198, this);
     }

@@ -6,7 +6,7 @@ import android.graphics.Rect;
 import android.media.Image;
 import android.text.format.DateFormat;
 import com.android.camera.log.Log;
-import com.android.camera.panorama.MorphoSensorFusion.SensorData;
+import com.android.camera.panorama.MorphoSensorFusion;
 import java.io.FileDescriptor;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -65,21 +65,7 @@ public class MorphoPanoramaGP3 {
         public int whole_width;
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("GalleryInfoData{whole_width=");
-            sb.append(this.whole_width);
-            sb.append(", whole_height=");
-            sb.append(this.whole_height);
-            sb.append(", crop_left=");
-            sb.append(this.crop_left);
-            sb.append(", crop_top=");
-            sb.append(this.crop_top);
-            sb.append(", crop_width=");
-            sb.append(this.crop_width);
-            sb.append(", crop_height=");
-            sb.append(this.crop_height);
-            sb.append('}');
-            return sb.toString();
+            return "GalleryInfoData{whole_width=" + this.whole_width + ", whole_height=" + this.whole_height + ", crop_left=" + this.crop_left + ", crop_top=" + this.crop_top + ", crop_width=" + this.crop_width + ", crop_height=" + this.crop_height + '}';
         }
     }
 
@@ -113,10 +99,7 @@ public class MorphoPanoramaGP3 {
         try {
             System.loadLibrary("morpho_panorama_gp3");
         } catch (UnsatisfiedLinkError e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("can't loadLibrary, ");
-            sb.append(e2.getMessage());
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "can't loadLibrary, " + e2.getMessage());
         }
     }
 
@@ -160,10 +143,7 @@ public class MorphoPanoramaGP3 {
         double[] dArr = new double[1];
         int nativeGetGain = nativeGetGain(image.getPlanes()[0].getBuffer(), image.getPlanes()[1].getBuffer(), image.getPlanes()[2].getBuffer(), image.getPlanes()[0].getRowStride(), image.getPlanes()[1].getRowStride(), image.getPlanes()[2].getRowStride(), image.getPlanes()[0].getPixelStride(), image.getPlanes()[1].getPixelStride(), image.getPlanes()[2].getPixelStride(), imageFormat, image.getWidth(), image.getHeight(), dArr);
         if (nativeGetGain != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("nativeGetGain error. ret=");
-            sb.append(nativeGetGain);
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "nativeGetGain error. ret=" + nativeGetGain);
             return 1.0d;
         }
         dArr[0] = GAIN_COEF * dArr[0];
@@ -232,7 +212,7 @@ public class MorphoPanoramaGP3 {
 
     private native int nativeSetDrawThreshold(long j, double d2);
 
-    private native int nativeSetGyroscopeData(long j, SensorData[] sensorDataArr);
+    private native int nativeSetGyroscopeData(long j, MorphoSensorFusion.SensorData[] sensorDataArr);
 
     private native int nativeSetImageFormat(long j, String str);
 
@@ -273,7 +253,7 @@ public class MorphoPanoramaGP3 {
     public static int saveNotPanorama(CaptureImage captureImage, FileDescriptor fileDescriptor) {
         int fd = getFD(fileDescriptor);
         if (fd >= 0) {
-            return saveNotPanorama_sub(captureImage, null, fd);
+            return saveNotPanorama_sub(captureImage, (String) null, fd);
         }
         return -2147483632;
     }
@@ -289,7 +269,7 @@ public class MorphoPanoramaGP3 {
             String imageFormat = captureImage.getImageFormat();
             int width = captureImage.getWidth();
             int height = captureImage.getHeight();
-            i2 = nativeSaveNotPanorama(null, image.getPlanes()[0].getBuffer(), image.getPlanes()[1].getBuffer(), image.getPlanes()[2].getBuffer(), image.getPlanes()[0].getRowStride(), image.getPlanes()[1].getRowStride(), image.getPlanes()[2].getRowStride(), image.getPlanes()[0].getPixelStride(), image.getPlanes()[1].getPixelStride(), image.getPlanes()[2].getPixelStride(), imageFormat, width, height, str, i);
+            i2 = nativeSaveNotPanorama((ByteBuffer) null, image.getPlanes()[0].getBuffer(), image.getPlanes()[1].getBuffer(), image.getPlanes()[2].getBuffer(), image.getPlanes()[0].getRowStride(), image.getPlanes()[1].getRowStride(), image.getPlanes()[2].getRowStride(), image.getPlanes()[0].getPixelStride(), image.getPlanes()[1].getPixelStride(), image.getPlanes()[2].getPixelStride(), imageFormat, width, height, str, i);
         } else {
             Camera1Image camera1Image = (Camera1Image) captureImage;
             String imageFormat2 = camera1Image.getImageFormat();
@@ -299,16 +279,12 @@ public class MorphoPanoramaGP3 {
             ByteBuffer allocateBuffer = NativeMemoryAllocator.allocateBuffer(raw.length);
             allocateBuffer.put(raw);
             allocateBuffer.clear();
-            ByteBuffer byteBuffer = allocateBuffer;
-            int nativeSaveNotPanorama = nativeSaveNotPanorama(allocateBuffer, null, null, null, 0, 0, 0, 0, 0, 0, imageFormat2, width2, height2, str, i);
-            NativeMemoryAllocator.freeBuffer(byteBuffer);
+            int nativeSaveNotPanorama = nativeSaveNotPanorama(allocateBuffer, (ByteBuffer) null, (ByteBuffer) null, (ByteBuffer) null, 0, 0, 0, 0, 0, 0, imageFormat2, width2, height2, str, i);
+            NativeMemoryAllocator.freeBuffer(allocateBuffer);
             i2 = nativeSaveNotPanorama;
         }
         if (i2 != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("nativeSaveNotPanorama error. ret=");
-            sb.append(i2);
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "nativeSaveNotPanorama error. ret=" + i2);
         }
         return i2;
     }
@@ -321,9 +297,9 @@ public class MorphoPanoramaGP3 {
         return nativeYuv2Bitmap8888(bArr, i, i2, bitmap, i3, 0);
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:16:0x00f0  */
-    /* JADX WARNING: Removed duplicated region for block: B:17:0x0110  */
-    /* JADX WARNING: Removed duplicated region for block: B:23:0x015a  */
+    /* JADX WARNING: Removed duplicated region for block: B:15:0x00f0  */
+    /* JADX WARNING: Removed duplicated region for block: B:16:0x0110  */
+    /* JADX WARNING: Removed duplicated region for block: B:22:0x015a  */
     public int attach(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, int i, int i2, int i3, int i4, int i5, int i6, SensorInfoManager sensorInfoManager, double[] dArr, Context context) {
         String str;
         long j;
@@ -339,15 +315,10 @@ public class MorphoPanoramaGP3 {
         long nanoTime = System.nanoTime();
         String str2 = null;
         if (this.mSaveInputImages) {
-            String str3 = "%s/%06d_";
             if (sensorInfoManager2 != null) {
                 String createName = createName(sensorInfoManager2.timeMillis);
-                String format = String.format(Locale.US, str3, new Object[]{this.mFolderPathInputImages, Long.valueOf(this.mAttachCount)});
-                StringBuilder sb = new StringBuilder();
-                sb.append(format);
-                sb.append(createName);
-                sb.append(String.format(Locale.US, "_sg%05d_sr%05d_sa%05d.yuv", new Object[]{Integer.valueOf(sensorInfoManager2.g_ix + this.mIndexBase[0]), Integer.valueOf(sensorInfoManager2.r_ix + this.mIndexBase[3]), Integer.valueOf(sensorInfoManager2.a_ix + this.mIndexBase[1])}));
-                str2 = sb.toString();
+                String format = String.format(Locale.US, "%s/%06d_", new Object[]{this.mFolderPathInputImages, Long.valueOf(this.mAttachCount)});
+                str2 = format + createName + String.format(Locale.US, "_sg%05d_sr%05d_sa%05d.yuv", new Object[]{Integer.valueOf(sensorInfoManager2.g_ix + this.mIndexBase[0]), Integer.valueOf(sensorInfoManager2.r_ix + this.mIndexBase[3]), Integer.valueOf(sensorInfoManager2.a_ix + this.mIndexBase[1])});
                 int[] iArr = this.mIndexBase;
                 iArr[0] = iArr[0] + sensorInfoManager2.sensorData[0].size();
                 int[] iArr2 = this.mIndexBase;
@@ -356,12 +327,8 @@ public class MorphoPanoramaGP3 {
                 iArr3[1] = iArr3[1] + sensorInfoManager2.sensorData[1].size();
             } else {
                 String createName2 = createName(System.currentTimeMillis());
-                String format2 = String.format(Locale.US, str3, new Object[]{this.mFolderPathInputImages, Long.valueOf(this.mAttachCount)});
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(format2);
-                sb2.append(createName2);
-                sb2.append(".yuv");
-                str = sb2.toString();
+                String format2 = String.format(Locale.US, "%s/%06d_", new Object[]{this.mFolderPathInputImages, Long.valueOf(this.mAttachCount)});
+                str = format2 + createName2 + ".yuv";
                 if (!this.mAttachEnabled) {
                     j = nanoTime;
                     i7 = 1;
@@ -437,10 +404,11 @@ public class MorphoPanoramaGP3 {
 
     public int deleteObject() {
         long j = this.mNative;
-        if (j != 0) {
-            deleteNativeObject(j);
-            this.mNative = 0;
+        if (j == 0) {
+            return 0;
         }
+        deleteNativeObject(j);
+        this.mNative = 0;
         return 0;
     }
 
@@ -503,10 +471,7 @@ public class MorphoPanoramaGP3 {
         if (j != 0) {
             int nativeGetDirection = nativeGetDirection(j, iArr);
             if (nativeGetDirection != 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("MorphoPanoramaGP3.getDirection error. ret=");
-                sb.append(nativeGetDirection);
-                Log.e(TAG, sb.toString());
+                Log.e(TAG, "MorphoPanoramaGP3.getDirection error. ret=" + nativeGetDirection);
             }
         }
         return iArr[0];
@@ -565,18 +530,15 @@ public class MorphoPanoramaGP3 {
     }
 
     public int initialize(InitParam initParam) {
-        int i;
         if (this.mNativeOutputInfo == 0) {
             return -2147483646;
         }
         this.mNative = createNativeObject();
         long j = this.mNative;
-        if (j != 0) {
-            i = nativeInitialize(j, initParam, this.mNativeOutputInfo);
-        } else {
-            i = -2147483644;
+        if (j == 0) {
+            return -2147483644;
         }
-        return i;
+        return nativeInitialize(j, initParam, this.mNativeOutputInfo);
     }
 
     public int inputSave(Image image) {
@@ -588,15 +550,20 @@ public class MorphoPanoramaGP3 {
         if (this.mSaveInputImages) {
             str = String.format(Locale.US, "%s/%06d.yuv", new Object[]{this.mFolderPathInputImages, Long.valueOf(this.mAttachCount)});
         }
-        String str2 = str;
-        int nativeSaveYuv = nativeSaveYuv(this.mNative, image.getPlanes()[0].getBuffer(), image.getPlanes()[1].getBuffer(), image.getPlanes()[2].getBuffer(), image.getPlanes()[0].getRowStride(), image.getPlanes()[1].getRowStride(), image.getPlanes()[2].getRowStride(), image.getPlanes()[0].getPixelStride(), image.getPlanes()[1].getPixelStride(), image.getPlanes()[2].getPixelStride(), str2);
+        long j = this.mNative;
+        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+        ByteBuffer buffer2 = image.getPlanes()[1].getBuffer();
+        ByteBuffer buffer3 = image.getPlanes()[2].getBuffer();
+        int rowStride = image.getPlanes()[0].getRowStride();
+        int rowStride2 = image.getPlanes()[1].getRowStride();
+        int rowStride3 = image.getPlanes()[2].getRowStride();
+        int pixelStride = image.getPlanes()[0].getPixelStride();
+        int pixelStride2 = image.getPlanes()[1].getPixelStride();
+        int pixelStride3 = image.getPlanes()[2].getPixelStride();
+        int nativeSaveYuv = nativeSaveYuv(j, buffer, buffer2, buffer3, rowStride, rowStride2, rowStride3, pixelStride, pixelStride2, pixelStride3, str);
         long currentTimeMillis2 = System.currentTimeMillis();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Performance.JNI ");
-        sb.append(currentTimeMillis2 - currentTimeMillis);
-        sb.append(" msec");
-        Log.v(TAG, sb.toString());
-        this.mAttachCount++;
+        Log.v(TAG, "Performance.JNI " + (currentTimeMillis2 - currentTimeMillis) + " msec");
+        this.mAttachCount = this.mAttachCount + 1;
         return nativeSaveYuv;
     }
 
@@ -624,7 +591,7 @@ public class MorphoPanoramaGP3 {
         if (fd < 0) {
             return -2147483632;
         }
-        return nativeSavePanorama360(this.mNative, i, i2, null, fd, i3, str, str2, z, galleryInfoData, z2);
+        return nativeSavePanorama360(this.mNative, i, i2, (String) null, fd, i3, str, str2, z, galleryInfoData, z2);
     }
 
     public int savePanorama360(int i, int i2, String str, int i3, String str2, String str3, boolean z, GalleryInfoData galleryInfoData, boolean z2) {
@@ -643,7 +610,7 @@ public class MorphoPanoramaGP3 {
         if (fd < 0) {
             return -2147483632;
         }
-        return nativeSavePanorama360Delay(this.mNativeOutputInfo, null, fd, z, i, z2);
+        return nativeSavePanorama360Delay(this.mNativeOutputInfo, (String) null, fd, z, i, z2);
     }
 
     public int savePanorama360Delay(String str, boolean z, int i, boolean z2) {
@@ -690,7 +657,7 @@ public class MorphoPanoramaGP3 {
         return -2147483646;
     }
 
-    public int setGyroscopeData(SensorData[] sensorDataArr) {
+    public int setGyroscopeData(MorphoSensorFusion.SensorData[] sensorDataArr) {
         long j = this.mNative;
         if (j != 0) {
             return nativeSetGyroscopeData(j, sensorDataArr);

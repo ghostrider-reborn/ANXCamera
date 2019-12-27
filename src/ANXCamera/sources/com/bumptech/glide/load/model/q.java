@@ -9,6 +9,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -49,8 +50,8 @@ public final class q implements t<Uri, File> {
             return File.class;
         }
 
-        public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super File> aVar) {
-            Cursor query = this.context.getContentResolver().query(this.uri, PROJECTION, null, null, null);
+        public void a(@NonNull Priority priority, @NonNull d.a<? super File> aVar) {
+            Cursor query = this.context.getContentResolver().query(this.uri, PROJECTION, (String) null, (String[]) null, (String) null);
             String str = null;
             if (query != null) {
                 try {
@@ -62,10 +63,7 @@ public final class q implements t<Uri, File> {
                 }
             }
             if (TextUtils.isEmpty(str)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to find file path for: ");
-                sb.append(this.uri);
-                aVar.b((Exception) new FileNotFoundException(sb.toString()));
+                aVar.b((Exception) new FileNotFoundException("Failed to find file path for: " + this.uri));
                 return;
             }
             aVar.b(new File(str));
@@ -87,8 +85,8 @@ public final class q implements t<Uri, File> {
         this.context = context2;
     }
 
-    public com.bumptech.glide.load.model.t.a<File> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(uri), new b(this.context, uri));
+    public t.a<File> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(uri), new b(this.context, uri));
     }
 
     /* renamed from: i */

@@ -2,7 +2,7 @@ package android.support.v4.provider;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.provider.DocumentsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,27 +19,27 @@ public abstract class DocumentFile {
 
     @NonNull
     public static DocumentFile fromFile(@NonNull File file) {
-        return new RawDocumentFile(null, file);
+        return new RawDocumentFile((DocumentFile) null, file);
     }
 
     @Nullable
     public static DocumentFile fromSingleUri(@NonNull Context context, @NonNull Uri uri) {
-        if (VERSION.SDK_INT >= 19) {
-            return new SingleDocumentFile(null, context, uri);
+        if (Build.VERSION.SDK_INT >= 19) {
+            return new SingleDocumentFile((DocumentFile) null, context, uri);
         }
         return null;
     }
 
     @Nullable
     public static DocumentFile fromTreeUri(@NonNull Context context, @NonNull Uri uri) {
-        if (VERSION.SDK_INT >= 21) {
-            return new TreeDocumentFile(null, context, DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri)));
+        if (Build.VERSION.SDK_INT >= 21) {
+            return new TreeDocumentFile((DocumentFile) null, context, DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri)));
         }
         return null;
     }
 
     public static boolean isDocumentUri(@NonNull Context context, @Nullable Uri uri) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return DocumentsContract.isDocumentUri(context, uri);
         }
         return false;
@@ -61,7 +61,6 @@ public abstract class DocumentFile {
 
     @Nullable
     public DocumentFile findFile(@NonNull String str) {
-        DocumentFile[] listFiles;
         for (DocumentFile documentFile : listFiles()) {
             if (str.equals(documentFile.getName())) {
                 return documentFile;

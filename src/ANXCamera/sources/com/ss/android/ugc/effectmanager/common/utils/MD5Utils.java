@@ -29,9 +29,8 @@ public class MD5Utils {
     /* JADX WARNING: Removed duplicated region for block: B:24:0x0045 A[SYNTHETIC, Splitter:B:24:0x0045] */
     /* JADX WARNING: Removed duplicated region for block: B:29:0x004b A[SYNTHETIC, Splitter:B:29:0x004b] */
     public static String getFileMD5(File file) {
-        String str = "";
         if (!file.isFile()) {
-            return str;
+            return "";
         }
         BufferedInputStream bufferedInputStream = null;
         byte[] bArr = new byte[1024];
@@ -56,7 +55,7 @@ public class MD5Utils {
                         e.printStackTrace();
                         if (bufferedInputStream != null) {
                         }
-                        return str;
+                        return "";
                     } catch (Throwable th) {
                         th = th;
                         if (bufferedInputStream != null) {
@@ -86,7 +85,7 @@ public class MD5Utils {
                 } catch (IOException unused3) {
                 }
             }
-            return str;
+            return "";
         }
     }
 

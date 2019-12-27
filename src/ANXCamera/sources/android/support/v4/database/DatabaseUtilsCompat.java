@@ -26,12 +26,6 @@ public final class DatabaseUtilsCompat {
         if (TextUtils.isEmpty(str2)) {
             return str;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        sb.append(str);
-        sb.append(") AND (");
-        sb.append(str2);
-        sb.append(")");
-        return sb.toString();
+        return "(" + str + ") AND (" + str2 + ")";
     }
 }

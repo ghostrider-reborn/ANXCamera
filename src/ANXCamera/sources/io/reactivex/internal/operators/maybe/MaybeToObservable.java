@@ -15,7 +15,7 @@ public final class MaybeToObservable<T> extends Observable<T> implements HasUpst
     static final class MaybeToFlowableSubscriber<T> extends DeferredScalarDisposable<T> implements MaybeObserver<T> {
         private static final long serialVersionUID = 7603343402964826922L;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f304d;
 
         MaybeToFlowableSubscriber(Observer<? super T> observer) {

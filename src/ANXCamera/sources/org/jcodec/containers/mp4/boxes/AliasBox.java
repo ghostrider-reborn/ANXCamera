@@ -97,10 +97,10 @@ public class AliasBox extends FullBox {
             byteBuffer.putInt(this.volumeAttributes);
             byteBuffer.putShort(this.fsId);
             byteBuffer.put(new byte[10]);
-            for (ExtraField extraField : this.extra) {
-                byteBuffer.putShort(extraField.type);
-                byteBuffer.putShort((short) extraField.len);
-                byteBuffer.put(extraField.data);
+            for (ExtraField next : this.extra) {
+                byteBuffer.putShort(next.type);
+                byteBuffer.putShort((short) next.len);
+                byteBuffer.put(next.data);
             }
             byteBuffer.putShort(-1);
             byteBuffer.putShort(0);
@@ -118,9 +118,9 @@ public class AliasBox extends FullBox {
     }
 
     public ExtraField getExtra(int i) {
-        for (ExtraField extraField : this.extra) {
-            if (extraField.type == i) {
-                return extraField;
+        for (ExtraField next : this.extra) {
+            if (next.type == i) {
+                return next;
             }
         }
         return null;
@@ -143,10 +143,7 @@ public class AliasBox extends FullBox {
         if (extra2 == null) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("/");
-        sb.append(extra2.toString());
-        return sb.toString();
+        return "/" + extra2.toString();
     }
 
     public boolean isSelfRef() {
@@ -178,15 +175,17 @@ public class AliasBox extends FullBox {
             this.extra = new ArrayList();
             while (true) {
                 short s = byteBuffer.getShort();
-                if (s == -1) {
-                    break;
+                if (s != -1) {
+                    short s2 = byteBuffer.getShort();
+                    byte[] array = NIOUtils.toArray(NIOUtils.read(byteBuffer, (s2 + 1) & -2));
+                    if (array != null) {
+                        this.extra.add(new ExtraField(s, s2, array));
+                    } else {
+                        return;
+                    }
+                } else {
+                    return;
                 }
-                short s2 = byteBuffer.getShort();
-                byte[] array = NIOUtils.toArray(NIOUtils.read(byteBuffer, (s2 + 1) & -2));
-                if (array == null) {
-                    break;
-                }
-                this.extra.add(new ExtraField(s, s2, array));
             }
         }
     }

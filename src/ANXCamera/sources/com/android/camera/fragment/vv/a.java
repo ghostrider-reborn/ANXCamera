@@ -1,6 +1,6 @@
 package com.android.camera.fragment.vv;
 
-import com.android.camera.data.observeable.RxData.DataWrap;
+import com.android.camera.data.observeable.RxData;
 import io.reactivex.functions.Consumer;
 
 /* compiled from: lambda */
@@ -12,6 +12,6 @@ public final /* synthetic */ class a implements Consumer {
     }
 
     public final void accept(Object obj) {
-        this.ub.a((DataWrap) obj);
+        this.ub.a((RxData.DataWrap) obj);
     }
 }

@@ -71,7 +71,7 @@ public final class MaybeDelay<T> extends AbstractMaybeWithUpstream<T, T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void schedule() {
             DisposableHelper.replace(this, this.scheduler.scheduleDirect(this, this.delay, this.unit));
         }

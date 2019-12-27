@@ -90,11 +90,10 @@ final class Segment {
             int i2 = segment.limit;
             if (i2 + i > 8192) {
                 if (!segment.shared) {
-                    int i3 = i2 + i;
-                    int i4 = segment.pos;
-                    if (i3 - i4 <= 8192) {
+                    int i3 = segment.pos;
+                    if ((i2 + i) - i3 <= 8192) {
                         byte[] bArr = segment.data;
-                        System.arraycopy(bArr, i4, bArr, 0, i2 - i4);
+                        System.arraycopy(bArr, i3, bArr, 0, i2 - i3);
                         segment.limit -= segment.pos;
                         segment.pos = 0;
                     } else {

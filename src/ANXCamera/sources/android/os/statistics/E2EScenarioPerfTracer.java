@@ -76,7 +76,7 @@ public final class E2EScenarioPerfTracer {
     }
 
     public static void asyncBeginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings) {
-        asyncBeginScenario(e2EScenario, e2EScenarioSettings, "", null);
+        asyncBeginScenario(e2EScenario, e2EScenarioSettings, "", (E2EScenarioPayload) null);
     }
 
     public static void asyncBeginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings, E2EScenarioPayload e2EScenarioPayload) {
@@ -84,7 +84,7 @@ public final class E2EScenarioPerfTracer {
     }
 
     public static void asyncBeginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings, String str) {
-        asyncBeginScenario(e2EScenario, e2EScenarioSettings, str, null);
+        asyncBeginScenario(e2EScenario, e2EScenarioSettings, str, (E2EScenarioPayload) null);
     }
 
     public static void asyncBeginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings, String str, E2EScenarioPayload e2EScenarioPayload) {
@@ -115,7 +115,7 @@ public final class E2EScenarioPerfTracer {
     }
 
     public static Bundle beginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings) {
-        return beginScenario(e2EScenario, e2EScenarioSettings, "", null);
+        return beginScenario(e2EScenario, e2EScenarioSettings, "", (E2EScenarioPayload) null);
     }
 
     public static Bundle beginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings, E2EScenarioPayload e2EScenarioPayload) {
@@ -123,7 +123,7 @@ public final class E2EScenarioPerfTracer {
     }
 
     public static Bundle beginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings, String str) {
-        return beginScenario(e2EScenario, e2EScenarioSettings, str, null);
+        return beginScenario(e2EScenario, e2EScenarioSettings, str, (E2EScenarioPayload) null);
     }
 
     public static Bundle beginScenario(E2EScenario e2EScenario, E2EScenarioSettings e2EScenarioSettings, String str, E2EScenarioPayload e2EScenarioPayload) {
@@ -171,7 +171,7 @@ public final class E2EScenarioPerfTracer {
     }
 
     public static void finishScenario(E2EScenario e2EScenario) {
-        finishScenario(e2EScenario, "", null);
+        finishScenario(e2EScenario, "", (E2EScenarioPayload) null);
     }
 
     public static void finishScenario(E2EScenario e2EScenario, E2EScenarioPayload e2EScenarioPayload) {
@@ -179,7 +179,7 @@ public final class E2EScenarioPerfTracer {
     }
 
     public static void finishScenario(E2EScenario e2EScenario, String str) {
-        finishScenario(e2EScenario, str, null);
+        finishScenario(e2EScenario, str, (E2EScenarioPayload) null);
     }
 
     public static void finishScenario(E2EScenario e2EScenario, String str, E2EScenarioPayload e2EScenarioPayload) {

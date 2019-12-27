@@ -3,10 +3,10 @@ package com.arcsoft.camera.utils;
 /* compiled from: MSize */
 public class g implements Comparable<g> {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private int f180a;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private int f181b;
 
     public g() {
@@ -28,13 +28,7 @@ public class g implements Comparable<g> {
     }
 
     public String a() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append(this.f180a);
-        sb.append(",");
-        sb.append(this.f181b);
-        sb.append("]");
-        return new String(sb.toString());
+        return new String("[" + this.f180a + "," + this.f181b + "]");
     }
 
     public boolean a(int i, int i2) {
@@ -49,14 +43,10 @@ public class g implements Comparable<g> {
         if (this == obj) {
             return true;
         }
-        boolean z = false;
-        if (obj == null) {
+        if (obj == null || !(obj instanceof g) || obj == null) {
             return false;
         }
-        if ((obj instanceof g) && obj != null) {
-            g gVar = (g) obj;
-            z = a(gVar.f180a, gVar.f181b);
-        }
-        return z;
+        g gVar = (g) obj;
+        return a(gVar.f180a, gVar.f181b);
     }
 }

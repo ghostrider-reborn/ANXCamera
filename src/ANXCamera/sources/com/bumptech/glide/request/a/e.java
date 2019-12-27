@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.a;
 
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.request.a.f;
 
 /* compiled from: NoTransition */
 public class e<R> implements f<R> {
@@ -22,7 +23,7 @@ public class e<R> implements f<R> {
         return Rl;
     }
 
-    public boolean a(Object obj, com.bumptech.glide.request.a.f.a aVar) {
+    public boolean a(Object obj, f.a aVar) {
         return false;
     }
 }

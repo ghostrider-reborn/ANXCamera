@@ -11,6 +11,6 @@ import com.bumptech.glide.util.a;
 public class d implements e<b, byte[]> {
     @Nullable
     public A<byte[]> a(@NonNull A<b> a2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.b.a.b(a.e(((b) a2.get()).getBuffer()));
+        return new com.bumptech.glide.load.b.a.b(a.e(a2.get().getBuffer()));
     }
 }

@@ -6,14 +6,16 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCaptureSession;
+import android.media.AudioManager;
 import android.os.CountDownTimer;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.annotation.MainThread;
 import android.telephony.TelephonyManager;
 import android.util.Range;
 import android.view.Surface;
+import android.view.View;
 import com.android.camera.AutoLockManager;
 import com.android.camera.CameraSettings;
 import com.android.camera.CameraSize;
@@ -22,26 +24,18 @@ import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.constant.AutoFocus;
 import com.android.camera.constant.UpdateConstant;
-import com.android.camera.constant.UpdateConstant.UpdateType;
 import com.android.camera.data.DataRepository;
 import com.android.camera.effect.EffectController;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.log.Log;
 import com.android.camera.module.encoder.MediaAudioEncoder;
 import com.android.camera.module.encoder.MediaEncoder;
-import com.android.camera.module.encoder.MediaEncoder.MediaEncoderListener;
 import com.android.camera.module.encoder.MediaMuxerWrapper;
 import com.android.camera.module.encoder.MediaVideoEncoder;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.module.loader.camera2.FocusManager2;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.FilterProtocol;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.RecordState;
-import com.android.camera.protocol.ModeProtocol.StickerProtocol;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.Storage;
 import com.android.camera.ui.PopupManager;
@@ -54,28 +48,22 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class FunModule extends VideoBase implements FilterProtocol, StickerProtocol {
+public class FunModule extends VideoBase implements ModeProtocol.FilterProtocol, ModeProtocol.StickerProtocol {
     private static final int FRAME_RATE = 30;
     private static final long START_OFFSET_MS = 450;
     private V6CameraGLSurfaceView mCameraView;
     private CountDownTimer mCountDownTimer;
     private MediaMuxerWrapper mLastMuxer;
     private MediaAudioEncoder mMediaAudioEncoder;
-    private final MediaEncoderListener mMediaEncoderListener = new MediaEncoderListener() {
+    private final MediaEncoder.MediaEncoderListener mMediaEncoderListener = new MediaEncoder.MediaEncoderListener() {
         public void onPrepared(MediaEncoder mediaEncoder) {
             String str = VideoBase.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onPrepared: encoder=");
-            sb.append(mediaEncoder);
-            Log.v(str, sb.toString());
+            Log.v(str, "onPrepared: encoder=" + mediaEncoder);
         }
 
         public void onStopped(MediaEncoder mediaEncoder, boolean z) {
             String str = VideoBase.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onStopped: encoder=");
-            sb.append(mediaEncoder);
-            Log.v(str, sb.toString());
+            Log.v(str, "onStopped: encoder=" + mediaEncoder);
             if (z) {
                 FunModule.this.executeSaveTask(true);
             }
@@ -99,6 +87,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     public FunModule() {
         super(FunModule.class.getSimpleName());
+        this.mOutputFormat = 2;
     }
 
     private void addSaveTask(String str, ContentValues contentValues) {
@@ -120,13 +109,10 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
                 if (this.mPendingSaveTaskList.isEmpty()) {
                     break;
                 }
-                SaveVideoTask saveVideoTask = (SaveVideoTask) this.mPendingSaveTaskList.remove(0);
+                SaveVideoTask remove = this.mPendingSaveTaskList.remove(0);
                 String str = VideoBase.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("executeSaveTask: ");
-                sb.append(saveVideoTask.videoPath);
-                Log.d(str, sb.toString());
-                this.mActivity.getImageSaver().addVideo(saveVideoTask.videoPath, saveVideoTask.contentValues, true);
+                Log.d(str, "executeSaveTask: " + remove.videoPath);
+                this.mActivity.getImageSaver().addVideo(remove.videoPath, remove.contentValues, true);
             } while (!z);
             doLaterReleaseIfNeed();
         }
@@ -160,10 +146,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
             this.mMediaAudioEncoder = new MediaAudioEncoder(this.mMuxer, this.mMediaEncoderListener);
             this.mMuxer.prepare();
             String str2 = VideoBase.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("rotation: ");
-            sb.append(this.mOrientationCompensation);
-            Log.d(str2, sb.toString());
+            Log.d(str2, "rotation: " + this.mOrientationCompensation);
             this.mMuxer.setOrientationHint(this.mOrientationCompensation);
             return true;
         } catch (IOException e2) {
@@ -182,9 +165,9 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     private void onStartRecorderFail() {
         enableCameraControls(true);
-        this.mAudioManager.abandonAudioFocus(null);
+        this.mAudioManager.abandonAudioFocus((AudioManager.OnAudioFocusChangeListener) null);
         restoreMusicSound();
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         if (recordState != null) {
             recordState.onFailed();
         }
@@ -280,23 +263,18 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
     private void updateFilter() {
         int shaderEffect = CameraSettings.getShaderEffect();
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateFilter: 0x");
-        sb.append(Integer.toHexString(shaderEffect));
-        Log.v(str, sb.toString());
+        Log.v(str, "updateFilter: 0x" + Integer.toHexString(shaderEffect));
         EffectController.getInstance().setEffect(shaderEffect);
     }
 
     private void updateFpsRange() {
-        boolean isMTKPlatform = b.isMTKPlatform();
-        Integer valueOf = Integer.valueOf(30);
-        if (isMTKPlatform) {
-            this.mCamera2Device.setVideoFpsRange(new Range(Integer.valueOf(5), valueOf));
-            this.mCamera2Device.setFpsRange(new Range(Integer.valueOf(5), valueOf));
+        if (b.isMTKPlatform()) {
+            this.mCamera2Device.setVideoFpsRange(new Range(5, 30));
+            this.mCamera2Device.setFpsRange(new Range(5, 30));
             return;
         }
-        this.mCamera2Device.setVideoFpsRange(new Range(valueOf, valueOf));
-        this.mCamera2Device.setFpsRange(new Range(valueOf, valueOf));
+        this.mCamera2Device.setVideoFpsRange(new Range(30, 30));
+        this.mCamera2Device.setFpsRange(new Range(30, 30));
     }
 
     private void updatePictureAndPreviewSize() {
@@ -304,10 +282,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
         CameraSize cameraSize = this.mPreviewSize;
         updateCameraScreenNailSize(cameraSize.width, cameraSize.height);
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("previewSize: ");
-        sb.append(this.mPreviewSize);
-        Log.d(str, sb.toString());
+        Log.d(str, "previewSize: " + this.mPreviewSize);
     }
 
     private void updateUltraWideLDC() {
@@ -316,36 +291,31 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     private void updateVideoStabilization() {
         if (isDeviceAlive()) {
-            if (!CameraSettings.isVideoBokehOn() || !isFrontCamera()) {
-                if (isEisOn()) {
-                    String str = VideoBase.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("videoStabilization: EIS isEISPreviewSupported = ");
-                    sb.append(this.mCameraCapabilities.isEISPreviewSupported());
-                    Log.d(str, sb.toString());
-                    this.mCamera2Device.setEnableEIS(true);
-                    this.mCamera2Device.setEnableOIS(false);
-                    if (!this.mCameraCapabilities.isEISPreviewSupported()) {
-                        this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(true);
-                    }
-                } else {
-                    this.mCamera2Device.setEnableEIS(false);
-                    this.mCamera2Device.setEnableOIS(true);
-                    this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
-                    if (b.isMTKPlatform() && this.mActualCameraId == Camera2DataContainer.getInstance().getUltraWideCameraId()) {
-                        this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(true);
-                    }
+            if (CameraSettings.isVideoBokehOn() && isFrontCamera()) {
+                Log.d(VideoBase.TAG, "videoStabilization: disabled EIS and OIS when VIDEO_BOKEH is opened");
+                this.mCamera2Device.setEnableEIS(false);
+                this.mCamera2Device.setEnableOIS(false);
+                this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
+            } else if (isEisOn()) {
+                String str = VideoBase.TAG;
+                Log.d(str, "videoStabilization: EIS isEISPreviewSupported = " + this.mCameraCapabilities.isEISPreviewSupported());
+                this.mCamera2Device.setEnableEIS(true);
+                this.mCamera2Device.setEnableOIS(false);
+                if (!this.mCameraCapabilities.isEISPreviewSupported()) {
+                    this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(true);
                 }
-                return;
+            } else {
+                this.mCamera2Device.setEnableEIS(false);
+                this.mCamera2Device.setEnableOIS(true);
+                this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
+                if (b.isMTKPlatform() && this.mActualCameraId == Camera2DataContainer.getInstance().getUltraWideCameraId()) {
+                    this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(true);
+                }
             }
-            Log.d(VideoBase.TAG, "videoStabilization: disabled EIS and OIS when VIDEO_BOKEH is opened");
-            this.mCamera2Device.setEnableEIS(false);
-            this.mCamera2Device.setEnableOIS(false);
-            this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
         }
     }
 
-    public void consumePreference(@UpdateType int... iArr) {
+    public void consumePreference(@UpdateConstant.UpdateType int... iArr) {
         for (int i : iArr) {
             if (i == 1) {
                 updatePictureAndPreviewSize();
@@ -406,19 +376,11 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
                                     updateVideoStabilization();
                                     break;
                                 default:
-                                    String str = "no consumer for this updateType: ";
                                     if (!BaseModule.DEBUG) {
-                                        String str2 = VideoBase.TAG;
-                                        StringBuilder sb = new StringBuilder();
-                                        sb.append(str);
-                                        sb.append(i);
-                                        Log.w(str2, sb.toString());
+                                        Log.w(VideoBase.TAG, "no consumer for this updateType: " + i);
                                         break;
                                     } else {
-                                        StringBuilder sb2 = new StringBuilder();
-                                        sb2.append(str);
-                                        sb2.append(i);
-                                        throw new RuntimeException(sb2.toString());
+                                        throw new RuntimeException("no consumer for this updateType: " + i);
                                     }
                             }
                     }
@@ -433,10 +395,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
     public int getOperatingMode() {
         int i = isEisOn() ? 32772 : (!CameraSettings.isVideoBokehOn() || !isFrontCamera()) ? this.mCameraCapabilities.isSupportVideoBeauty() ? CameraCapabilities.SESSION_OPERATION_MODE_VIDEO_BEAUTY : DataRepository.dataItemFeature().ob() ? CameraCapabilities.SESSION_OPERATION_MODE_MCTF : 0 : 32770;
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getOperatingMode: ");
-        sb.append(Integer.toHexString(i));
-        Log.d(str, sb.toString());
+        Log.d(str, "getOperatingMode: " + Integer.toHexString(i));
         return i;
     }
 
@@ -444,11 +403,8 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
     public boolean isCameraSwitchingDuringZoomingAllowed() {
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i = this.mModuleIndex;
-            if (i == 161 && !CameraSettings.isMacroModeEnabled(i) && isBackCamera() && !this.mMediaRecorderRecording && !this.mMediaRecorderRecordingPaused) {
-                return true;
-            }
+            return i == 161 && !CameraSettings.isMacroModeEnabled(i) && isBackCamera() && !this.mMediaRecorderRecording && !this.mMediaRecorderRecordingPaused;
         }
-        return false;
     }
 
     public boolean isNeedHapticFeedback() {
@@ -507,18 +463,15 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
         this.mActivity.getSensorStateManager().reset();
         stopFaceDetection(true);
         resetScreenOn();
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         if (!this.mActivity.isActivityPaused() && !CameraSettings.isStereoModeOn()) {
-            PopupManager.getInstance(this.mActivity).notifyShowPopup(null, 1);
+            PopupManager.getInstance(this.mActivity).notifyShowPopup((View) null, 1);
         }
     }
 
     public void onPreviewLayoutChanged(Rect rect) {
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onPreviewLayoutChanged: ");
-        sb.append(rect);
-        Log.v(str, sb.toString());
+        Log.v(str, "onPreviewLayoutChanged: " + rect);
         this.mActivity.onLayoutChange(rect);
         FocusManager2 focusManager2 = this.mFocusManager;
         if (focusManager2 != null) {
@@ -534,10 +487,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
             return;
         }
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onPreviewSessionSuccess: ");
-        sb.append(cameraCaptureSession);
-        Log.d(str, sb.toString());
+        Log.d(str, "onPreviewSessionSuccess: " + cameraCaptureSession);
         this.mFaceDetectionEnabled = false;
         updatePreferenceInWorkThread(UpdateConstant.FUN_TYPES_ON_PREVIEW_SUCCESS);
     }
@@ -559,42 +509,37 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     public void onShutterButtonClick(int i) {
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onShutterButtonClick  isRecording=");
-        sb.append(this.mMediaRecorderRecording);
-        sb.append(" inStartingFocusRecording=");
-        sb.append(this.mInStartingFocusRecording);
-        Log.v(str, sb.toString());
+        Log.v(str, "onShutterButtonClick  isRecording=" + this.mMediaRecorderRecording + " inStartingFocusRecording=" + this.mInStartingFocusRecording);
         this.mInStartingFocusRecording = false;
         this.mLastBackPressedTime = 0;
         if (isIgnoreTouchEvent()) {
             Log.w(VideoBase.TAG, "onShutterButtonClick: ignore touch event");
         } else if (!isFrontCamera() || !this.mActivity.isScreenSlideOff()) {
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (this.mMediaRecorderRecording) {
                 stopVideoRecording(true, false);
-            } else {
-                recordState.onPrepare();
-                if (!checkCallingState()) {
-                    recordState.onFailed();
-                    return;
-                }
-                this.mActivity.getScreenHint().updateHint();
-                if (Storage.isLowStorageAtLastPoint()) {
-                    recordState.onFailed();
-                    return;
-                }
-                setTriggerMode(i);
-                enableCameraControls(false);
-                playCameraSound(2);
-                this.mRequestStartTime = System.currentTimeMillis();
-                if (this.mFocusManager.canRecord()) {
-                    startVideoRecording();
-                } else {
-                    Log.v(VideoBase.TAG, "wait for autoFocus");
-                    this.mInStartingFocusRecording = true;
-                }
+                return;
             }
+            recordState.onPrepare();
+            if (!checkCallingState()) {
+                recordState.onFailed();
+                return;
+            }
+            this.mActivity.getScreenHint().updateHint();
+            if (Storage.isLowStorageAtLastPoint()) {
+                recordState.onFailed();
+                return;
+            }
+            setTriggerMode(i);
+            enableCameraControls(false);
+            playCameraSound(2);
+            this.mRequestStartTime = System.currentTimeMillis();
+            if (this.mFocusManager.canRecord()) {
+                startVideoRecording();
+                return;
+            }
+            Log.v(VideoBase.TAG, "wait for autoFocus");
+            this.mInStartingFocusRecording = true;
         }
     }
 
@@ -606,7 +551,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
             if (!isFrameAvailable()) {
                 Log.w(VideoBase.TAG, "onSingleTapUp: frame not available");
             } else if (!isFrontCamera() || !this.mActivity.isScreenSlideOff()) {
-                BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+                ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
                 if (backStack != null && !backStack.handleBackStackFromTapDown(i, i2)) {
                     this.mMainProtocol.setFocusViewType(true);
                     this.mTouchFocusStartingTime = System.currentTimeMillis();
@@ -621,10 +566,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     public void onStickerChanged(String str) {
         String str2 = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onStickerChanged: ");
-        sb.append(str);
-        Log.v(str2, sb.toString());
+        Log.v(str2, "onStickerChanged: " + str);
         V6CameraGLSurfaceView v6CameraGLSurfaceView = this.mCameraView;
         if (v6CameraGLSurfaceView != null) {
             GLCanvasImpl gLCanvas = v6CameraGLSurfaceView.getGLCanvas();
@@ -636,7 +578,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     public void onStop() {
         super.onStop();
-        EffectController.getInstance().setCurrentSticker(null);
+        EffectController.getInstance().setCurrentSticker((String) null);
     }
 
     public void onSurfaceTextureUpdated(DrawExtTexAttribute drawExtTexAttribute) {
@@ -652,7 +594,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
     }
 
     public void onZoomingActionEnd(int i) {
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController != null && !dualController.isSlideVisible()) {
             if ((i == 2 || i == 1) && !this.mMediaRecorderRecording && !this.mMediaRecorderRecordingPaused && !CameraSettings.isMacroModeEnabled(this.mModuleIndex)) {
                 dualController.setImmersiveModeEnabled(false);
@@ -661,11 +603,11 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
     }
 
     public void onZoomingActionStart(int i) {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null && topAlert.isExtraMenuShowing()) {
             topAlert.hideExtraMenu();
         }
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController == null) {
             return;
         }
@@ -708,13 +650,13 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     /* access modifiers changed from: protected */
     public void resizeForPreviewAspectRatio() {
-        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
-            MainContentProtocol mainContentProtocol = this.mMainProtocol;
+        if (((this.mCameraCapabilities.getSensorOrientation() - Util.getDisplayRotation(this.mActivity)) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % 180 == 0) {
+            ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
             CameraSize cameraSize = this.mPreviewSize;
             mainContentProtocol.setPreviewAspectRatio(((float) cameraSize.height) / ((float) cameraSize.width));
             return;
         }
-        MainContentProtocol mainContentProtocol2 = this.mMainProtocol;
+        ModeProtocol.MainContentProtocol mainContentProtocol2 = this.mMainProtocol;
         CameraSize cameraSize2 = this.mPreviewSize;
         mainContentProtocol2.setPreviewAspectRatio(((float) cameraSize2.width) / ((float) cameraSize2.height));
     }
@@ -730,10 +672,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
     public void startPreview() {
         String str = VideoBase.TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startPreview: ");
-        sb.append(this.mPreviewing);
-        Log.d(str, sb.toString());
+        Log.d(str, "startPreview: " + this.mPreviewing);
         if (isDeviceAlive()) {
             checkDisplayOrientation();
             CameraSize cameraSize = this.mPreviewSize;
@@ -760,7 +699,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
             onStartRecorderFail();
             return;
         }
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         if (recordState != null) {
             recordState.onStart();
         }
@@ -806,7 +745,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
             if (countDownTimer != null) {
                 countDownTimer.cancel();
             }
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (recordState != null) {
                 recordState.onFinish();
             }
@@ -814,16 +753,12 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
                 CameraStatUtil.trackVideoRecorded(isFrontCamera(), getModuleIndex(), false, false, CameraSettings.isUltraWideConfigOpen(getModuleIndex()), CameraSettings.VIDEO_MODE_FUN, this.mQuality, this.mCamera2Device.getFlashMode(), 30, 0, this.mBeautyValues, uptimeMillis / 1000);
                 CameraStatUtil.trackUltraWideFunTaken();
             }
-            if (!z2) {
-                String str = this.mVideoFocusMode;
-                String str2 = AutoFocus.LEGACY_CONTINUOUS_VIDEO;
-                if (!str2.equals(str)) {
-                    this.mMainProtocol.clearFocusView(2);
-                    setVideoFocusMode(str2, false);
-                    updatePreferenceInWorkThread(14);
-                }
+            if (!z2 && !AutoFocus.LEGACY_CONTINUOUS_VIDEO.equals(this.mVideoFocusMode)) {
+                this.mMainProtocol.clearFocusView(2);
+                setVideoFocusMode(AutoFocus.LEGACY_CONTINUOUS_VIDEO, false);
+                updatePreferenceInWorkThread(14);
             }
-            this.mAudioManager.abandonAudioFocus(null);
+            this.mAudioManager.abandonAudioFocus((AudioManager.OnAudioFocusChangeListener) null);
             restoreMusicSound();
             keepScreenOnAwhile();
             AutoLockManager.getInstance(this.mActivity).hibernateDelayed();
@@ -856,7 +791,7 @@ public class FunModule extends VideoBase implements FilterProtocol, StickerProto
 
                 public void onTick(long j) {
                     String millisecondToTimeString = Util.millisecondToTimeString((j + 950) - FunModule.START_OFFSET_MS, false);
-                    TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                    ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                     if (topAlert != null) {
                         topAlert.updateRecordingTime(millisecondToTimeString);
                     }

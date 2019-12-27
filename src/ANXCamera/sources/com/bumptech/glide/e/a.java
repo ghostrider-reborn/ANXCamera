@@ -2,7 +2,7 @@ package com.bumptech.glide.e;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -33,19 +33,16 @@ public final class a {
             return cVar;
         }
         c q = q(context);
-        c cVar2 = (c) Ul.putIfAbsent(packageName, q);
-        return cVar2 == null ? q : cVar2;
+        c putIfAbsent = Ul.putIfAbsent(packageName, q);
+        return putIfAbsent == null ? q : putIfAbsent;
     }
 
     @Nullable
     private static PackageInfo p(@NonNull Context context) {
         try {
             return context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-        } catch (NameNotFoundException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot resolve info for");
-            sb.append(context.getPackageName());
-            Log.e(TAG, sb.toString(), e2);
+        } catch (PackageManager.NameNotFoundException e2) {
+            Log.e(TAG, "Cannot resolve info for" + context.getPackageName(), e2);
             return null;
         }
     }

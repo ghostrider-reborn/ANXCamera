@@ -12,7 +12,6 @@ import org.jcodec.containers.mp4.Chunk;
 import org.jcodec.containers.mp4.ChunkReader;
 import org.jcodec.containers.mp4.ChunkWriter;
 import org.jcodec.containers.mp4.MP4Util;
-import org.jcodec.containers.mp4.MP4Util.Movie;
 import org.jcodec.containers.mp4.boxes.AliasBox;
 import org.jcodec.containers.mp4.boxes.Box;
 import org.jcodec.containers.mp4.boxes.ChunkOffsetsBox;
@@ -84,7 +83,7 @@ public class Flattern {
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:11:0x0016  */
-    public void flattern(Movie movie, File file) throws IOException {
+    public void flattern(MP4Util.Movie movie, File file) throws IOException {
         FileChannelWrapper fileChannelWrapper;
         Platform.deleteFile(file);
         try {
@@ -110,12 +109,12 @@ public class Flattern {
         }
     }
 
-    public void flatternChannel(Movie movie, SeekableByteChannel seekableByteChannel) throws IOException {
+    public void flatternChannel(MP4Util.Movie movie, SeekableByteChannel seekableByteChannel) throws IOException {
         long j;
         long j2;
         int i;
         int i2;
-        Movie movie2 = movie;
+        MP4Util.Movie movie2 = movie;
         SeekableByteChannel seekableByteChannel2 = seekableByteChannel;
         movie.getFtyp();
         MovieBox moov = movie.getMoov();
@@ -174,7 +173,7 @@ public class Flattern {
                         i8 = i9;
                     }
                     i9++;
-                    Movie movie3 = movie;
+                    MP4Util.Movie movie3 = movie;
                     i5 = i2;
                     i6 = i;
                     position = j2;
@@ -185,18 +184,15 @@ public class Flattern {
                 if (i8 == -1) {
                     break;
                 }
-                Movie movie4 = movie;
                 String str4 = str3;
-                long j3 = j;
                 chunkWriterArr[i8].write(chunkArr[i8]);
                 chunkArr[i8] = chunkReaderArr[i8].next();
                 i5 = i10 + 1;
                 int i12 = i7;
                 i6 = calcProgress(i12, i5, i11);
                 i3 = i12;
-                long j4 = j3;
-                Movie movie5 = movie4;
-                position = j4;
+                MP4Util.Movie movie4 = movie;
+                position = j;
             }
             for (int i13 = 0; i13 < tracks.length; i13++) {
                 chunkWriterArr[i13].apply();
@@ -224,11 +220,11 @@ public class Flattern {
         while (i < tracks.length) {
             DataRefBox dataRefBox = (DataRefBox) NodeBox.findFirstPath(tracks[i], DataRefBox.class, Box.path("mdia.minf.dinf.dref"));
             if (dataRefBox != null) {
-                List boxes = dataRefBox.getBoxes();
+                List<Box> boxes = dataRefBox.getBoxes();
                 SeekableByteChannel[] seekableByteChannelArr2 = new SeekableByteChannel[boxes.size()];
                 SeekableByteChannel[] seekableByteChannelArr3 = new SeekableByteChannel[boxes.size()];
                 for (int i2 = 0; i2 < seekableByteChannelArr2.length; i2++) {
-                    seekableByteChannelArr3[i2] = resolveDataRef((Box) boxes.get(i2));
+                    seekableByteChannelArr3[i2] = resolveDataRef(boxes.get(i2));
                 }
                 seekableByteChannelArr[i] = seekableByteChannelArr3;
                 i++;
@@ -253,10 +249,7 @@ public class Flattern {
             }
             throw new RuntimeException("Could not resolve alias");
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(box.getHeader().getFourcc());
-            sb.append(" dataref type is not supported");
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException(box.getHeader().getFourcc() + " dataref type is not supported");
         }
     }
 }

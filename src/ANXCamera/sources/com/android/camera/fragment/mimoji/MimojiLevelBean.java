@@ -2,12 +2,11 @@ package com.android.camera.fragment.mimoji;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
+import com.arcsoft.avatar.AvatarConfig;
 import java.util.ArrayList;
 
 public class MimojiLevelBean implements Parcelable {
-    public static final Creator<MimojiLevelBean> CREATOR = new Creator<MimojiLevelBean>() {
+    public static final Parcelable.Creator<MimojiLevelBean> CREATOR = new Parcelable.Creator<MimojiLevelBean>() {
         public MimojiLevelBean createFromParcel(Parcel parcel) {
             return new MimojiLevelBean(parcel);
         }
@@ -18,7 +17,7 @@ public class MimojiLevelBean implements Parcelable {
     };
     public volatile int configType;
     public volatile String configTypeName;
-    public ArrayList<ASAvatarConfigInfo> thumnails = new ArrayList<>();
+    public ArrayList<AvatarConfig.ASAvatarConfigInfo> thumnails = new ArrayList<>();
 
     public MimojiLevelBean() {
     }
@@ -32,7 +31,7 @@ public class MimojiLevelBean implements Parcelable {
         return 0;
     }
 
-    public ArrayList<ASAvatarConfigInfo> getColorConfigInfos() {
+    public ArrayList<AvatarConfig.ASAvatarConfigInfo> getColorConfigInfos() {
         AvatarEngineManager instance = AvatarEngineManager.getInstance();
         if (instance == null) {
             return null;

@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.a.d.a;
+import com.bumptech.glide.load.a.d;
 import java.io.IOException;
 
 /* compiled from: AssetPathFetcher */
@@ -20,14 +20,13 @@ public abstract class b<T> implements d<T> {
         this.Pd = str;
     }
 
-    public void a(@NonNull Priority priority, @NonNull a<? super T> aVar) {
+    public void a(@NonNull Priority priority, @NonNull d.a<? super T> aVar) {
         try {
             this.data = b(this.Qd, this.Pd);
             aVar.b(this.data);
         } catch (IOException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Failed to load data from asset manager", e2);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to load data from asset manager", e2);
             }
             aVar.b((Exception) e2);
         }

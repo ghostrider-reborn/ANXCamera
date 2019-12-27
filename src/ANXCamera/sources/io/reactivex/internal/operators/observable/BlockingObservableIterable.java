@@ -102,7 +102,7 @@ public final class BlockingObservableIterable<T> implements Iterable<T> {
             throw new UnsupportedOperationException("remove");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void signalConsumer() {
             this.lock.lock();
             try {

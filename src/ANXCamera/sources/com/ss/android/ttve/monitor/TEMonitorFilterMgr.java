@@ -4,7 +4,6 @@ import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -65,12 +64,12 @@ public class TEMonitorFilterMgr {
     /* JADX WARNING: Removed duplicated region for block: B:12:0x0027 A[LOOP:0: B:12:0x0027->B:25:0x0027, LOOP_START, SYNTHETIC, Splitter:B:12:0x0027] */
     public synchronized String serializeMap(int i) {
         JSONArray jSONArray = new JSONArray();
-        Iterator it = i == 0 ? this.effectMap.entrySet().iterator() : i == 1 ? this.infoStickerMap.entrySet().iterator() : null;
+        Iterator<Map.Entry<Integer, TEMonitorFilter>> it = i == 0 ? this.effectMap.entrySet().iterator() : i == 1 ? this.infoStickerMap.entrySet().iterator() : null;
         if (it == null) {
             return null;
         }
         while (it.hasNext()) {
-            TEMonitorFilter tEMonitorFilter = (TEMonitorFilter) ((Entry) it.next()).getValue();
+            TEMonitorFilter tEMonitorFilter = (TEMonitorFilter) it.next().getValue();
             JSONObject jSONObject = new JSONObject();
             jSONObject.put(ComposerHelper.CONFIG_PATH, tEMonitorFilter.path);
             jSONObject.put("start", tEMonitorFilter.start);

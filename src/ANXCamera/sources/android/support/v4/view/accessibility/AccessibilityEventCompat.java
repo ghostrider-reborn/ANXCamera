@@ -1,6 +1,6 @@
 package android.support.v4.view.accessibility;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityRecord;
 
@@ -50,21 +50,21 @@ public final class AccessibilityEventCompat {
     }
 
     public static int getAction(AccessibilityEvent accessibilityEvent) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return accessibilityEvent.getAction();
         }
         return 0;
     }
 
     public static int getContentChangeTypes(AccessibilityEvent accessibilityEvent) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return accessibilityEvent.getContentChangeTypes();
         }
         return 0;
     }
 
     public static int getMovementGranularity(AccessibilityEvent accessibilityEvent) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return accessibilityEvent.getMovementGranularity();
         }
         return 0;
@@ -81,19 +81,19 @@ public final class AccessibilityEventCompat {
     }
 
     public static void setAction(AccessibilityEvent accessibilityEvent, int i) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             accessibilityEvent.setAction(i);
         }
     }
 
     public static void setContentChangeTypes(AccessibilityEvent accessibilityEvent, int i) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             accessibilityEvent.setContentChangeTypes(i);
         }
     }
 
     public static void setMovementGranularity(AccessibilityEvent accessibilityEvent, int i) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             accessibilityEvent.setMovementGranularity(i);
         }
     }

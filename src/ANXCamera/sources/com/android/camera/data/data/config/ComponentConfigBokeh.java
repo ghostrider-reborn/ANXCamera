@@ -44,23 +44,19 @@ public class ComponentConfigBokeh extends ComponentData {
     }
 
     public String getKey(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(CameraSettings.KEY_CAMERA_BOKEH);
-        sb.append(i);
-        return sb.toString();
+        return CameraSettings.KEY_CAMERA_BOKEH + i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void reInit(int i, int i2) {
         this.mItems = createItems(i, i2);
     }
 
     public void toggle(int i) {
-        String str = "on";
-        if (str.equals(getComponentValue(i))) {
+        if ("on".equals(getComponentValue(i))) {
             setComponentValue(i, "off");
         } else {
-            setComponentValue(i, str);
+            setComponentValue(i, "on");
         }
     }
 }

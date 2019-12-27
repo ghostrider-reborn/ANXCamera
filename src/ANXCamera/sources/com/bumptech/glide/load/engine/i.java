@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import android.util.Log;
 import com.bumptech.glide.load.b.d.e;
 import com.bumptech.glide.load.g;
@@ -17,8 +17,8 @@ public class i<DataType, ResourceType, Transcode> {
     private final List<? extends h<DataType, ResourceType>> gf;
     private final e<ResourceType, Transcode> hf;
 
-    /* renamed from: if reason: not valid java name */
-    private final Pool<List<Throwable>> f0if;
+    /* renamed from: if  reason: not valid java name */
+    private final Pools.Pool<List<Throwable>> f0if;
     private final String jf;
 
     /* compiled from: DecodePath */
@@ -27,30 +27,21 @@ public class i<DataType, ResourceType, Transcode> {
         A<ResourceType> a(@NonNull A<ResourceType> a2);
     }
 
-    public i(Class<DataType> cls, Class<ResourceType> cls2, Class<Transcode> cls3, List<? extends h<DataType, ResourceType>> list, e<ResourceType, Transcode> eVar, Pool<List<Throwable>> pool) {
+    public i(Class<DataType> cls, Class<ResourceType> cls2, Class<Transcode> cls3, List<? extends h<DataType, ResourceType>> list, e<ResourceType, Transcode> eVar, Pools.Pool<List<Throwable>> pool) {
         this.dataClass = cls;
         this.gf = list;
         this.hf = eVar;
         this.f0if = pool;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Failed DecodePath{");
-        sb.append(cls.getSimpleName());
-        String str = "->";
-        sb.append(str);
-        sb.append(cls2.getSimpleName());
-        sb.append(str);
-        sb.append(cls3.getSimpleName());
-        sb.append("}");
-        this.jf = sb.toString();
+        this.jf = "Failed DecodePath{" + cls.getSimpleName() + "->" + cls2.getSimpleName() + "->" + cls3.getSimpleName() + "}";
     }
 
     @NonNull
     private A<ResourceType> a(com.bumptech.glide.load.a.e<DataType> eVar, int i, int i2, @NonNull g gVar) throws GlideException {
-        Object acquire = this.f0if.acquire();
+        List<Throwable> acquire = this.f0if.acquire();
         com.bumptech.glide.util.i.checkNotNull(acquire);
-        List list = (List) acquire;
+        List list = acquire;
         try {
-            A<ResourceType> a2 = a(eVar, i, i2, gVar, list);
+            A<ResourceType> a2 = a(eVar, i, i2, gVar, (List<Throwable>) list);
             return a2;
         } finally {
             this.f0if.release(list);
@@ -68,12 +59,8 @@ public class i<DataType, ResourceType, Transcode> {
                     a2 = hVar.b(eVar.C(), i, i2, gVar);
                 }
             } catch (IOException | OutOfMemoryError | RuntimeException e2) {
-                String str = TAG;
-                if (Log.isLoggable(str, 2)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Failed to decode data for ");
-                    sb.append(hVar);
-                    Log.v(str, sb.toString(), e2);
+                if (Log.isLoggable(TAG, 2)) {
+                    Log.v(TAG, "Failed to decode data for " + hVar, e2);
                 }
                 list.add(e2);
             }
@@ -84,7 +71,7 @@ public class i<DataType, ResourceType, Transcode> {
         if (a2 != null) {
             return a2;
         }
-        throw new GlideException(this.jf, (List<Throwable>) new ArrayList<Throwable>(list));
+        throw new GlideException(this.jf, (List<Throwable>) new ArrayList(list));
     }
 
     public A<Transcode> a(com.bumptech.glide.load.a.e<DataType> eVar, int i, int i2, @NonNull g gVar, a<ResourceType> aVar) throws GlideException {
@@ -92,14 +79,6 @@ public class i<DataType, ResourceType, Transcode> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DecodePath{ dataClass=");
-        sb.append(this.dataClass);
-        sb.append(", decoders=");
-        sb.append(this.gf);
-        sb.append(", transcoder=");
-        sb.append(this.hf);
-        sb.append('}');
-        return sb.toString();
+        return "DecodePath{ dataClass=" + this.dataClass + ", decoders=" + this.gf + ", transcoder=" + this.hf + '}';
     }
 }

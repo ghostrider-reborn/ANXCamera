@@ -5,7 +5,7 @@ import java.util.Map;
 
 public abstract class IntelligentBeautyProcessor extends BeautyProcessor {
     private float mExtraSpan = 0.0f;
-    protected float[][] mLevelParameters = {new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, new float[]{0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f}, new float[]{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}, new float[]{0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f}, new float[]{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}, new float[]{0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f}};
+    protected float[][] mLevelParameters;
 
     public abstract void clearBeautyParameters();
 

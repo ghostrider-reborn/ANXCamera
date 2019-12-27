@@ -6,7 +6,7 @@ import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.internal.util.NotificationLite;
 
 public final class Notification<T> {
-    static final Notification<Object> COMPLETE = new Notification<>(null);
+    static final Notification<Object> COMPLETE = new Notification<>((Object) null);
     final Object value;
 
     private Notification(Object obj) {
@@ -31,10 +31,10 @@ public final class Notification<T> {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof Notification)) {
-            return false;
+        if (obj instanceof Notification) {
+            return ObjectHelper.equals(this.value, ((Notification) obj).value);
         }
-        return ObjectHelper.equals(this.value, ((Notification) obj).value);
+        return false;
     }
 
     @Nullable
@@ -81,18 +81,9 @@ public final class Notification<T> {
         if (obj == null) {
             return "OnCompleteNotification";
         }
-        String str = "]";
         if (NotificationLite.isError(obj)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("OnErrorNotification[");
-            sb.append(NotificationLite.getError(obj));
-            sb.append(str);
-            return sb.toString();
+            return "OnErrorNotification[" + NotificationLite.getError(obj) + "]";
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("OnNextNotification[");
-        sb2.append(this.value);
-        sb2.append(str);
-        return sb2.toString();
+        return "OnNextNotification[" + this.value + "]";
     }
 }

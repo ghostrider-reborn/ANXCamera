@@ -75,6 +75,6 @@ public final class FlowableIgnoreElements<T> extends AbstractFlowableWithUpstrea
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new IgnoreElementsSubscriber<Object>(subscriber));
+        this.source.subscribe(new IgnoreElementsSubscriber(subscriber));
     }
 }

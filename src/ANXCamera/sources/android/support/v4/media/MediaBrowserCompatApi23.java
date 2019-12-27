@@ -1,7 +1,6 @@
 package android.support.v4.media;
 
 import android.media.browse.MediaBrowser;
-import android.media.browse.MediaBrowser.MediaItem;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -15,7 +14,7 @@ class MediaBrowserCompatApi23 {
         void onItemLoaded(Parcel parcel);
     }
 
-    static class ItemCallbackProxy<T extends ItemCallback> extends android.media.browse.MediaBrowser.ItemCallback {
+    static class ItemCallbackProxy<T extends ItemCallback> extends MediaBrowser.ItemCallback {
         protected final T mItemCallback;
 
         public ItemCallbackProxy(T t) {
@@ -26,9 +25,9 @@ class MediaBrowserCompatApi23 {
             this.mItemCallback.onError(str);
         }
 
-        public void onItemLoaded(MediaItem mediaItem) {
+        public void onItemLoaded(MediaBrowser.MediaItem mediaItem) {
             if (mediaItem == null) {
-                this.mItemCallback.onItemLoaded(null);
+                this.mItemCallback.onItemLoaded((Parcel) null);
                 return;
             }
             Parcel obtain = Parcel.obtain();
@@ -45,6 +44,6 @@ class MediaBrowserCompatApi23 {
     }
 
     public static void getItem(Object obj, String str, Object obj2) {
-        ((MediaBrowser) obj).getItem(str, (android.media.browse.MediaBrowser.ItemCallback) obj2);
+        ((MediaBrowser) obj).getItem(str, (MediaBrowser.ItemCallback) obj2);
     }
 }

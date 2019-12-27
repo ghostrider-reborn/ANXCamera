@@ -23,7 +23,7 @@ public abstract class DisposableMaybeObserver<T> implements MaybeObserver<T>, Di
     }
 
     public final void onSubscribe(@NonNull Disposable disposable) {
-        if (EndConsumerHelper.setOnce(this.s, disposable, DisposableMaybeObserver.class)) {
+        if (EndConsumerHelper.setOnce(this.s, disposable, (Class<?>) DisposableMaybeObserver.class)) {
             onStart();
         }
     }

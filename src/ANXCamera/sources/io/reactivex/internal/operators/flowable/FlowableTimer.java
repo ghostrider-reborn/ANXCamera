@@ -41,7 +41,7 @@ public final class FlowableTimer extends Flowable<Long> {
                 return;
             }
             if (this.requested) {
-                this.actual.onNext(Long.valueOf(0));
+                this.actual.onNext(0L);
                 lazySet(EmptyDisposable.INSTANCE);
                 this.actual.onComplete();
                 return;

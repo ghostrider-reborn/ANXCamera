@@ -1,9 +1,8 @@
 package android.support.v4.media.subtitle;
 
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public interface MediaTimeProvider {
     public static final long NO_TIME = -1;
 

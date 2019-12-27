@@ -99,11 +99,7 @@ public class FavoriteTask extends NormalTask {
         }
         hashMap.put(EffectConfiguration.KEY_EFFECT_IDS, list);
         hashMap.put("type", Integer.valueOf(z ? 1 : 0));
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mEffectContext.getLinkSelector().getBestHostUrl());
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_FAVORITE);
-        EffectRequest effectRequest = new EffectRequest("POST", sb.toString());
+        EffectRequest effectRequest = new EffectRequest("POST", this.mEffectContext.getLinkSelector().getBestHostUrl() + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_FAVORITE);
         effectRequest.setBodyParams(hashMap);
         effectRequest.setContentType(HttpRequest.CONTENT_TYPE_JSON);
         return effectRequest;
@@ -114,7 +110,7 @@ public class FavoriteTask extends NormalTask {
         while (i < this.mCurCnt) {
             try {
                 this.mConfiguration.getEffectNetWorker().execute(buildRequest(this.mEffectIds, this.mIsFavorite), this.mJsonConverter, BaseNetResponse.class);
-                sendMessage(40, new FavoriteTaskResult(true, this.mEffectIds, null));
+                sendMessage(40, new FavoriteTaskResult(true, this.mEffectIds, (ExceptionResult) null));
                 return;
             } catch (Exception e2) {
                 e2.printStackTrace();

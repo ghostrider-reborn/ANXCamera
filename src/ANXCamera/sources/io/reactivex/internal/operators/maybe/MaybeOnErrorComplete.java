@@ -14,7 +14,7 @@ public final class MaybeOnErrorComplete<T> extends AbstractMaybeWithUpstream<T, 
     static final class OnErrorCompleteMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f299d;
         final Predicate<? super Throwable> predicate;
 

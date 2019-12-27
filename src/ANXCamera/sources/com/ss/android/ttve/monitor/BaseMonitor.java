@@ -25,9 +25,10 @@ public class BaseMonitor {
                     jSONObject.put(NotificationCompat.CATEGORY_SERVICE, str2);
                 }
             }
-            if (iMonitor != null) {
-                iMonitor.monitorLog(str, jSONObject);
+            if (iMonitor == null) {
+                return true;
             }
+            iMonitor.monitorLog(str, jSONObject);
             return true;
         } catch (JSONException unused) {
             VELogUtil.d(TAG, "No monitor callback, skip");

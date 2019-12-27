@@ -7,6 +7,8 @@ import android.os.RemoteException;
 import com.google.android.aidl.BaseProxy;
 import com.google.android.aidl.BaseStub;
 import com.google.android.aidl.Codecs;
+import com.google.android.apps.gsa.publicsearch.IPublicSearchServiceSession;
+import com.google.android.apps.gsa.publicsearch.IPublicSearchServiceSessionCallback;
 
 public interface IPublicSearchService extends IInterface {
 
@@ -25,7 +27,7 @@ public interface IPublicSearchService extends IInterface {
                 Codecs.writeStrongBinder(obtainAndWriteInterfaceToken, iPublicSearchServiceSessionCallback);
                 obtainAndWriteInterfaceToken.writeByteArray(bArr);
                 Parcel transactAndReadException = transactAndReadException(1, obtainAndWriteInterfaceToken);
-                IPublicSearchServiceSession asInterface = com.google.android.apps.gsa.publicsearch.IPublicSearchServiceSession.Stub.asInterface(transactAndReadException.readStrongBinder());
+                IPublicSearchServiceSession asInterface = IPublicSearchServiceSession.Stub.asInterface(transactAndReadException.readStrongBinder());
                 transactAndReadException.recycle();
                 return asInterface;
             }
@@ -48,7 +50,7 @@ public interface IPublicSearchService extends IInterface {
             if (i != 1) {
                 return false;
             }
-            IPublicSearchServiceSession beginSession = beginSession(parcel.readString(), com.google.android.apps.gsa.publicsearch.IPublicSearchServiceSessionCallback.Stub.asInterface(parcel.readStrongBinder()), parcel.createByteArray());
+            IPublicSearchServiceSession beginSession = beginSession(parcel.readString(), IPublicSearchServiceSessionCallback.Stub.asInterface(parcel.readStrongBinder()), parcel.createByteArray());
             parcel2.writeNoException();
             Codecs.writeStrongBinder(parcel2, beginSession);
             return true;

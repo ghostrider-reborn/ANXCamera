@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.media.SubtitleData;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
 public final class SubtitleData2 {
     public static final String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
@@ -16,7 +15,7 @@ public final class SubtitleData2 {
     private long mStartTimeUs;
     private int mTrackIndex;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public SubtitleData2(int i, long j, long j2, byte[] bArr) {
         this.mTrackIndex = i;
         this.mStartTimeUs = j;
@@ -25,7 +24,7 @@ public final class SubtitleData2 {
     }
 
     @TargetApi(28)
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public SubtitleData2(SubtitleData subtitleData) {
         this.mTrackIndex = subtitleData.getTrackIndex();
         this.mStartTimeUs = subtitleData.getStartTimeUs();

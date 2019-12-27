@@ -3,13 +3,12 @@ package android.support.v4.media.session;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes.Builder;
+import android.media.AudioAttributes;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.MediaSession;
-import android.media.session.MediaSession.Token;
 import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,7 +59,7 @@ class MediaSessionCompatApi21 {
         void onStop();
     }
 
-    static class CallbackProxy<T extends Callback> extends android.media.session.MediaSession.Callback {
+    static class CallbackProxy<T extends Callback> extends MediaSession.Callback {
         protected final T mCallback;
 
         public CallbackProxy(T t) {
@@ -133,15 +132,15 @@ class MediaSessionCompatApi21 {
         }
 
         public static Object createItem(Object obj, long j) {
-            return new android.media.session.MediaSession.QueueItem((MediaDescription) obj, j);
+            return new MediaSession.QueueItem((MediaDescription) obj, j);
         }
 
         public static Object getDescription(Object obj) {
-            return ((android.media.session.MediaSession.QueueItem) obj).getDescription();
+            return ((MediaSession.QueueItem) obj).getDescription();
         }
 
         public static long getQueueId(Object obj) {
-            return ((android.media.session.MediaSession.QueueItem) obj).getQueueId();
+            return ((MediaSession.QueueItem) obj).getQueueId();
         }
     }
 
@@ -161,15 +160,11 @@ class MediaSessionCompatApi21 {
     }
 
     public static boolean hasCallback(Object obj) {
-        boolean z = false;
         try {
             Field declaredField = obj.getClass().getDeclaredField("mCallback");
             if (declaredField != null) {
                 declaredField.setAccessible(true);
-                if (declaredField.get(obj) != null) {
-                    z = true;
-                }
-                return z;
+                return declaredField.get(obj) != null;
             }
         } catch (IllegalAccessException | NoSuchFieldException unused) {
             Log.w(TAG, "Failed to get mCallback object.");
@@ -194,7 +189,7 @@ class MediaSessionCompatApi21 {
     }
 
     public static void setCallback(Object obj, Object obj2, Handler handler) {
-        ((MediaSession) obj).setCallback((android.media.session.MediaSession.Callback) obj2, handler);
+        ((MediaSession) obj).setCallback((MediaSession.Callback) obj2, handler);
     }
 
     public static void setExtras(Object obj, Bundle bundle) {
@@ -218,7 +213,7 @@ class MediaSessionCompatApi21 {
     }
 
     public static void setPlaybackToLocal(Object obj, int i) {
-        Builder builder = new Builder();
+        AudioAttributes.Builder builder = new AudioAttributes.Builder();
         builder.setLegacyStreamType(i);
         ((MediaSession) obj).setPlaybackToLocal(builder.build());
     }
@@ -229,13 +224,13 @@ class MediaSessionCompatApi21 {
 
     public static void setQueue(Object obj, List<Object> list) {
         if (list == null) {
-            ((MediaSession) obj).setQueue(null);
+            ((MediaSession) obj).setQueue((List) null);
             return;
         }
         ArrayList arrayList = new ArrayList();
-        Iterator it = list.iterator();
+        Iterator<Object> it = list.iterator();
         while (it.hasNext()) {
-            arrayList.add((android.media.session.MediaSession.QueueItem) it.next());
+            arrayList.add((MediaSession.QueueItem) it.next());
         }
         ((MediaSession) obj).setQueue(arrayList);
     }
@@ -256,7 +251,7 @@ class MediaSessionCompatApi21 {
     }
 
     public static Object verifyToken(Object obj) {
-        if (obj instanceof Token) {
+        if (obj instanceof MediaSession.Token) {
             return obj;
         }
         throw new IllegalArgumentException("token is not a valid MediaSession.Token object");

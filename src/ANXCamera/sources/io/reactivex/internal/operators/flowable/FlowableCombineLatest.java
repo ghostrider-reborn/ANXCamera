@@ -7,6 +7,7 @@ import io.reactivex.annotations.Nullable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.flowable.FlowableMap;
 import io.reactivex.internal.queue.SpscLinkedArrayQueue;
 import io.reactivex.internal.subscriptions.BasicIntQueueSubscription;
 import io.reactivex.internal.subscriptions.EmptySubscription;
@@ -66,21 +67,22 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             cancelAll();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             for (CombineLatestInnerSubscriber<T> cancel : this.subscribers) {
                 cancel.cancel();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber, SpscLinkedArrayQueue<?> spscLinkedArrayQueue) {
             if (this.cancelled) {
                 cancelAll();
                 spscLinkedArrayQueue.clear();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 if (!this.delayErrors) {
                     Throwable terminate = ExceptionHelper.terminate(this.error);
                     if (terminate != null && terminate != ExceptionHelper.TERMINATED) {
@@ -88,12 +90,16 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
                         spscLinkedArrayQueue.clear();
                         subscriber.onError(terminate);
                         return true;
-                    } else if (z2) {
+                    } else if (!z2) {
+                        return false;
+                    } else {
                         cancelAll();
                         subscriber.onComplete();
                         return true;
                     }
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     cancelAll();
                     Throwable terminate2 = ExceptionHelper.terminate(this.error);
                     if (terminate2 == null || terminate2 == ExceptionHelper.TERMINATED) {
@@ -104,14 +110,13 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
                     return true;
                 }
             }
-            return false;
         }
 
         public void clear() {
             this.queue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 if (this.outputFused) {
@@ -122,7 +127,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainAsync() {
             int i;
             Subscriber<? super R> subscriber = this.actual;
@@ -171,13 +176,13 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             } while (i2 != 0);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainOutput() {
             Subscriber<? super R> subscriber = this.actual;
             SpscLinkedArrayQueue<Object> spscLinkedArrayQueue = this.queue;
             int i = 1;
             while (!this.cancelled) {
-                Throwable th = (Throwable) this.error.get();
+                Throwable th = this.error.get();
                 if (th != null) {
                     spscLinkedArrayQueue.clear();
                     subscriber.onError(th);
@@ -201,7 +206,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             spscLinkedArrayQueue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:12:0x0018, code lost:
             drain();
          */
@@ -224,7 +229,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(int i, Throwable th) {
             if (!ExceptionHelper.addThrowable(this.error, th)) {
                 RxJavaPlugins.onError(th);
@@ -237,7 +242,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerValue(int i, T t) {
             boolean z;
             synchronized (this) {
@@ -298,7 +303,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
             return i2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(Publisher<? extends T>[] publisherArr, int i) {
             CombineLatestInnerSubscriber<T>[] combineLatestInnerSubscriberArr = this.subscribers;
             for (int i2 = 0; i2 < i && !this.done && !this.cancelled; i2++) {
@@ -386,7 +391,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
         if (publisherArr == null) {
             publisherArr = new Publisher[8];
             try {
-                Iterator it = this.iterable.iterator();
+                Iterator<? extends Publisher<? extends T>> it = this.iterable.iterator();
                 ObjectHelper.requireNonNull(it, "The iterator returned is null");
                 Iterator it2 = it;
                 i = 0;
@@ -401,9 +406,8 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
                                 System.arraycopy(publisherArr, 0, publisherArr2, 0, i);
                                 publisherArr = publisherArr2;
                             }
-                            int i2 = i + 1;
                             publisherArr[i] = publisher;
-                            i = i2;
+                            i++;
                         } catch (Throwable th) {
                             Exceptions.throwIfFatal(th);
                             EmptySubscription.error(th, subscriber);
@@ -426,7 +430,7 @@ public final class FlowableCombineLatest<T, R> extends Flowable<R> {
         if (i == 0) {
             EmptySubscription.complete(subscriber);
         } else if (i == 1) {
-            publisherArr[0].subscribe(new MapSubscriber(subscriber, new SingletonArrayFunc()));
+            publisherArr[0].subscribe(new FlowableMap.MapSubscriber(subscriber, new SingletonArrayFunc()));
         } else {
             CombineLatestCoordinator combineLatestCoordinator = new CombineLatestCoordinator(subscriber, this.combiner, i, this.bufferSize, this.delayErrors);
             subscriber.onSubscribe(combineLatestCoordinator);

@@ -1,7 +1,6 @@
 package com.android.camera.ui;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
@@ -9,7 +8,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
@@ -20,7 +18,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import com.android.camera.Camera;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.R;
@@ -52,7 +49,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
     private static final int VIEW_MOVE = 3;
     private static final int VIEW_VISIBLE = 1;
     private static final int VIEW_WIDTH = CameraAppImpl.getAndroidContext().getResources().getDimensionPixelSize(R.dimen.v6_edge_shutter_width);
-    private AnimatorListener mAnimatorListener;
+    private Animator.AnimatorListener mAnimatorListener;
     private Paint mCenterPaint;
     /* access modifiers changed from: private */
     public ValueAnimator mClickAnim;
@@ -89,23 +86,17 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
         }
 
         public void onAnimationCancel(Animator animator) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onAnimationCancel animation=");
-            sb.append(animator);
-            Log.v(V9EdgeShutterView.TAG, sb.toString());
-            V9EdgeShutterView.this.mVisibleState = 1;
+            Log.v(V9EdgeShutterView.TAG, "onAnimationCancel animation=" + animator);
+            int unused = V9EdgeShutterView.this.mVisibleState = 1;
         }
 
         public void onAnimationEnd(Animator animator) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onAnimationEnd animation=");
-            sb.append(animator);
-            Log.v(V9EdgeShutterView.TAG, sb.toString());
+            Log.v(V9EdgeShutterView.TAG, "onAnimationEnd animation=" + animator);
             if (animator == V9EdgeShutterView.this.mFlyOutAnim && V9EdgeShutterView.this.mVisibleState == 2) {
                 V9EdgeShutterView.this.setRelateVisible(4);
-                V9EdgeShutterView.this.mVisibleState = 4;
+                int unused = V9EdgeShutterView.this.mVisibleState = 4;
             } else if (animator == V9EdgeShutterView.this.mMoveAnim && V9EdgeShutterView.this.mVisibleState == 3) {
-                V9EdgeShutterView.this.mVisibleState = 1;
+                int unused2 = V9EdgeShutterView.this.mVisibleState = 1;
             }
             V9EdgeShutterView v9EdgeShutterView = V9EdgeShutterView.this;
             v9EdgeShutterView.setX((float) v9EdgeShutterView.getLeft());
@@ -127,10 +118,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
         }
 
         private ReverseInterpolator(Interpolator interpolator) {
-            if (interpolator == null) {
-                interpolator = new AccelerateDecelerateInterpolator();
-            }
-            this.mInterpolator = interpolator;
+            this.mInterpolator = interpolator == null ? new AccelerateDecelerateInterpolator() : interpolator;
         }
 
         public float getInterpolation(float f2) {
@@ -200,14 +188,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
 
     private void flyto(int i, int i2) {
         Rect reviseLocation = reviseLocation(i, i2, this.mVisibleBounds);
-        StringBuilder sb = new StringBuilder();
-        sb.append("flyto ");
-        sb.append(getVisibility());
-        sb.append(" rec=");
-        sb.append(reviseLocation);
-        sb.append(" viewstate:");
-        sb.append(getViewState());
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "flyto " + getVisibility() + " rec=" + reviseLocation + " viewstate:" + getViewState());
         if (getVisibility() != 0) {
             if (getVisibility() == 8) {
                 setInitLayoutParameters(reviseLocation);
@@ -249,38 +230,18 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
 
     private boolean isDeviceStateReady(int i, int i2, int i3) {
         Camera camera = (Camera) getContext();
-        boolean isStable = camera.isStable();
-        String str = TAG;
-        if (!isStable) {
-            Log.v(str, "Device is not stable, ignore edgetouch");
+        if (!camera.isStable()) {
+            Log.v(TAG, "Device is not stable, ignore edgetouch");
             return false;
         }
         int capturePosture = camera.getCapturePosture();
-        String str2 = " y=";
-        String str3 = " x=";
         if (capturePosture == 0 && i2 > i3) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Device post wrong, y is too big, capturePosture=");
-            sb.append(capturePosture);
-            sb.append(str3);
-            sb.append(i);
-            sb.append(str2);
-            sb.append(i2);
-            sb.append(" maxY=");
-            sb.append(i3);
-            Log.v(str, sb.toString());
+            Log.v(TAG, "Device post wrong, y is too big, capturePosture=" + capturePosture + " x=" + i + " y=" + i2 + " maxY=" + i3);
             return false;
         } else if ((capturePosture != 1 || i == 0) && (capturePosture != 2 || i != 0)) {
             return true;
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Device post wrong, touching bottom edge, capturePosture=");
-            sb2.append(capturePosture);
-            sb2.append(str3);
-            sb2.append(i);
-            sb2.append(str2);
-            sb2.append(i2);
-            Log.v(str, sb2.toString());
+            Log.v(TAG, "Device post wrong, touching bottom edge, capturePosture=" + capturePosture + " x=" + i + " y=" + i2);
             return false;
         }
     }
@@ -291,16 +252,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
     }
 
     private Rect reviseLocation(int i, int i2, Rect rect) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("flyto reviseLocation x");
-        sb.append(i);
-        sb.append(" y=");
-        sb.append(i2);
-        sb.append(" bounds=");
-        sb.append(rect);
-        sb.append(" viewstate:");
-        sb.append(getViewState());
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "flyto reviseLocation x" + i + " y=" + i2 + " bounds=" + rect + " viewstate:" + getViewState());
         int i3 = i2 - ((VIEW_WIDTH * i2) / Util.sWindowHeight);
         int i4 = VIEW_WIDTH;
         Rect rect2 = new Rect(i, i3, i + i4, i4 + i3);
@@ -337,7 +289,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
     }
 
     private void setInitLayoutParameters(Rect rect) {
-        LayoutParams layoutParams = (LayoutParams) getLayoutParams();
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) getLayoutParams();
         layoutParams.leftMargin = rect.left;
         layoutParams.topMargin = rect.top;
         setLayoutParams(layoutParams);
@@ -395,14 +347,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
     }
 
     public boolean onEdgeTap(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onEdgeTouch x=");
-        sb.append(i);
-        sb.append(" y=");
-        sb.append(i2);
-        sb.append(" viewstate:");
-        sb.append(getViewState());
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "onEdgeTouch x=" + i + " y=" + i2 + " viewstate:" + getViewState());
         if (couldTouch(i, i2) || !isDeviceStateReady(i, i2, NORMAL_TAP_MAXY)) {
             return false;
         }
@@ -412,14 +357,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
     }
 
     public boolean onEdgeTouch(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onEdgeTouch x=");
-        sb.append(i);
-        sb.append(" y=");
-        sb.append(i2);
-        sb.append(" viewstate:");
-        sb.append(getViewState());
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "onEdgeTouch x=" + i + " y=" + i2 + " viewstate:" + getViewState());
         if (!couldTouch(i, i2) || !isDeviceStateReady(i, i2, NORMAL_TOUCH_MAXY)) {
             return false;
         }
@@ -429,7 +367,7 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
         }
         MessageDispatcher messageDispatcher = this.mMessageDispatcher;
         if (messageDispatcher != null) {
-            messageDispatcher.dispatchMessage(0, R.id.v9_edge_shutter_view, 2, null, null);
+            messageDispatcher.dispatchMessage(0, R.id.v9_edge_shutter_view, 2, (Object) null, (Object) null);
         }
         this.mClickAnim = createClickAnimation();
         this.mClickAnim.start();
@@ -442,11 +380,11 @@ public class V9EdgeShutterView extends View implements V6FunctionUI {
         this.mCenterPaint = new Paint();
         this.mCenterPaint.setAntiAlias(true);
         this.mCenterPaint.setColor(-1);
-        this.mCenterPaint.setStyle(Style.FILL);
+        this.mCenterPaint.setStyle(Paint.Style.FILL);
         this.mOuterPaint = new Paint();
         this.mOuterPaint.setAntiAlias(true);
         this.mOuterPaint.setColor(-1);
-        this.mOuterPaint.setStyle(Style.STROKE);
+        this.mOuterPaint.setStyle(Paint.Style.STROKE);
         this.mOuterPaint.setStrokeWidth((float) OUTER_CIRCLE_WIDTH);
         this.mAnimatorListener = new CustomAnimatorListener();
     }

@@ -15,10 +15,6 @@ public class i {
         if (Drawable.class.isAssignableFrom(cls)) {
             return new e(imageView);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unhandled class: ");
-        sb.append(cls);
-        sb.append(", try .as*(Class).transcode(ResourceTranscoder)");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Unhandled class: " + cls + ", try .as*(Class).transcode(ResourceTranscoder)");
     }
 }

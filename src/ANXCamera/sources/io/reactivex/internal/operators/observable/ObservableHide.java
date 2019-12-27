@@ -10,7 +10,7 @@ public final class ObservableHide<T> extends AbstractObservableWithUpstream<T, T
     static final class HideDisposable<T> implements Observer<T>, Disposable {
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f317d;
 
         HideDisposable(Observer<? super T> observer) {

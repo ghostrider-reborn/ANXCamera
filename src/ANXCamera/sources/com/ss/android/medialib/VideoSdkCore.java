@@ -5,7 +5,6 @@ import android.content.res.AssetManager;
 import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import com.bef.effectsdk.ResourceFinder;
 import com.ss.android.medialib.common.LogInvoker;
 import com.ss.android.medialib.common.LogUtil;
@@ -18,7 +17,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Keep
 public final class VideoSdkCore {
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public static Context APPLICATION_CONTEXT = null;
     public static final int PRODUCT_AWEME = 0;
     public static final int PRODUCT_HOTSOON = 1;
@@ -74,10 +73,7 @@ public final class VideoSdkCore {
                                 PerformanceConfig.restoreFromCache();
                             } catch (Exception e2) {
                                 String access$000 = VideoSdkCore.TAG;
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("VideoSdkCore init failed: ");
-                                sb.append(e2.toString());
-                                VELogUtil.e(access$000, sb.toString());
+                                VELogUtil.e(access$000, "VideoSdkCore init failed: " + e2.toString());
                             }
                         }
                     }.start();

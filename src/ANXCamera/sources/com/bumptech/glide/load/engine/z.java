@@ -1,15 +1,14 @@
 package com.bumptech.glide.load.engine;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import com.bumptech.glide.util.a.d;
-import com.bumptech.glide.util.a.d.c;
 import com.bumptech.glide.util.a.g;
 import com.bumptech.glide.util.i;
 
 /* compiled from: LockedResource */
-final class z<Z> implements A<Z>, c {
-    private static final Pool<z<?>> Rf = d.b(20, new y());
+final class z<Z> implements A<Z>, d.c {
+    private static final Pools.Pool<z<?>> Rf = d.b(20, new y());
     private A<Z> Qf;
     private final g Re = g.newInstance();
     private boolean isLocked;
@@ -20,11 +19,11 @@ final class z<Z> implements A<Z>, c {
 
     @NonNull
     static <Z> z<Z> f(A<Z> a2) {
-        z<Z> zVar = (z) Rf.acquire();
-        i.checkNotNull(zVar);
-        z<Z> zVar2 = zVar;
-        zVar2.i(a2);
-        return zVar2;
+        z<Z> acquire = Rf.acquire();
+        i.checkNotNull(acquire);
+        z<Z> zVar = acquire;
+        zVar.i(a2);
+        return zVar;
     }
 
     private void i(A<Z> a2) {
@@ -61,7 +60,7 @@ final class z<Z> implements A<Z>, c {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void unlock() {
         this.Re.Mh();
         if (this.isLocked) {

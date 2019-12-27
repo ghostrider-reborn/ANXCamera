@@ -45,11 +45,8 @@ public class ComponentConfigRatio extends ComponentData {
         if (str == null || i == 165) {
             str = super.getComponentValue(i);
         }
-        if (165 == i) {
-            String str2 = RATIO_1X1;
-            if (str == str2) {
-                return str2;
-            }
+        if (165 == i && str == RATIO_1X1) {
+            return RATIO_1X1;
         }
         for (ComponentDataItem componentDataItem : getItems()) {
             if (TextUtils.equals(str, componentDataItem.mValue)) {
@@ -96,7 +93,7 @@ public class ComponentConfigRatio extends ComponentData {
         if (this.mItems == null) {
             synchronized (this.mItemsLock) {
                 if (this.mItems == null) {
-                    reInit(DataRepository.dataItemGlobal().getCurrentMode(), DataRepository.dataItemGlobal().getCurrentCameraId(), null);
+                    reInit(DataRepository.dataItemGlobal().getCurrentMode(), DataRepository.dataItemGlobal().getCurrentCameraId(), (CameraCapabilities) null);
                 }
             }
         }
@@ -128,8 +125,8 @@ public class ComponentConfigRatio extends ComponentData {
         if (list != null) {
             int size = list.size();
             for (int i2 = 0; i2 < size; i2++) {
-                if (TextUtils.equals(((ComponentDataItem) this.mItems.get(i2)).mValue, persistValue)) {
-                    return ((ComponentDataItem) this.mItems.get((i2 + 1) % size)).mValue;
+                if (TextUtils.equals(this.mItems.get(i2).mValue, persistValue)) {
+                    return this.mItems.get((i2 + 1) % size).mValue;
                 }
             }
         }
@@ -146,19 +143,19 @@ public class ComponentConfigRatio extends ComponentData {
         int i3 = -1;
         int i4 = 0;
         for (int i5 = 0; i5 < list.size(); i5++) {
-            cameraSize.parseSize((CameraSize) list.get(i5));
+            cameraSize.parseSize(list.get(i5));
             if (i4 < cameraSize.area()) {
                 i4 = cameraSize.area();
                 i3 = i5;
             }
         }
-        cameraSize.parseSize((CameraSize) list.get(i3));
+        cameraSize.parseSize(list.get(i3));
         if (((double) Math.abs(cameraSize.getRatio() - 1.3333333f)) < 0.02d) {
             this.mDefaultValue = RATIO_4X3;
         } else {
             this.mDefaultValue = RATIO_16X9;
         }
-        reInit(i, i2, null);
+        reInit(i, i2, (CameraCapabilities) null);
     }
 
     public boolean isSquareModule() {
@@ -190,133 +187,127 @@ public class ComponentConfigRatio extends ComponentData {
         }
         ArrayList arrayList = new ArrayList();
         this.mForceValue = null;
-        String str = RATIO_FULL_18_7_5X9;
-        String str2 = RATIO_FULL_19X9;
-        String str3 = RATIO_FULL_18X9;
-        String str4 = RATIO_16X9;
-        String str5 = RATIO_FULL_195X9;
-        String str6 = RATIO_4X3;
         switch (i3) {
             case 163:
             case 173:
                 break;
             case 165:
             case 175:
-                this.mForceValue = str6;
+                this.mForceValue = RATIO_4X3;
                 break;
             case 166:
-                this.mForceValue = str4;
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, str4));
+                this.mForceValue = RATIO_16X9;
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, RATIO_16X9));
                 break;
             case 167:
                 if (CameraSettings.isUltraPixelOn()) {
-                    this.mForceValue = str6;
+                    this.mForceValue = RATIO_4X3;
                 }
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, str6));
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, str4));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, RATIO_4X3));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, RATIO_16X9));
                 if (!this.sSupport18_7_5x9) {
                     if (!this.sSupport18x9) {
                         if (!this.sSupport195x9) {
                             if (this.sSupport19x9) {
-                                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str2));
+                                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_19X9));
                                 break;
                             }
                         } else {
-                            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+                            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
                             break;
                         }
                     } else {
-                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str3));
+                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18X9));
                         break;
                     }
                 } else if (DataRepository.dataItemGlobal().getDisplayMode() != 2) {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str));
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18_7_5X9));
                     break;
                 } else {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
                     break;
                 }
                 break;
             case 171:
                 if (i2 == 0 && DataRepository.dataItemFeature().jb()) {
-                    this.mForceValue = str6;
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, str6));
+                    this.mForceValue = RATIO_4X3;
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, RATIO_4X3));
                     break;
                 } else {
                     if (DataRepository.dataItemGlobal().getDisplayMode() == 1) {
-                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, str6));
+                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, RATIO_4X3));
                     }
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, str4));
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, RATIO_16X9));
                     if (!this.sSupport18_7_5x9) {
                         if (!this.sSupport18x9) {
                             if (!this.sSupport195x9) {
                                 if (this.sSupport19x9) {
-                                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str2));
+                                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_19X9));
                                     break;
                                 }
                             } else {
-                                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+                                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
                                 break;
                             }
                         } else {
-                            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str3));
+                            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18X9));
                             break;
                         }
                     } else if (DataRepository.dataItemGlobal().getDisplayMode() != 2) {
-                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str));
+                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18_7_5X9));
                         break;
                     } else {
-                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
                         break;
                     }
                 }
                 break;
             case 176:
-                this.mForceValue = str6;
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, str6));
+                this.mForceValue = RATIO_4X3;
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, RATIO_4X3));
                 break;
             case 177:
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, str6));
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, str4));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, RATIO_4X3));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, RATIO_16X9));
                 if (!this.sSupport18x9) {
                     if (!this.sSupport195x9) {
                         if (this.sSupport19x9) {
-                            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str2));
+                            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_19X9));
                             break;
                         }
                     } else {
-                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+                        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
                         break;
                     }
                 } else {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str3));
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18X9));
                     break;
                 }
                 break;
         }
         if (i2 == 0) {
             if (CameraSettings.isUltraPixelOn()) {
-                this.mForceValue = str6;
+                this.mForceValue = RATIO_4X3;
             }
         } else if (CameraSettings.isUltraPixelOn()) {
-            this.mForceValue = str6;
+            this.mForceValue = RATIO_4X3;
         }
         if (DataRepository.dataItemGlobal().getDisplayMode() == 1) {
-            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, str6));
+            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_4_3, (int) R.drawable.ic_config_4_3, (int) R.string.pref_camera_picturesize_entry_3_4, RATIO_4X3));
         }
-        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, str4));
+        arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_16_9, (int) R.drawable.ic_config_16_9, (int) R.string.pref_camera_picturesize_entry_9_16, RATIO_16X9));
         if (this.sSupport18_7_5x9) {
             if (DataRepository.dataItemGlobal().getDisplayMode() == 2) {
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
             } else {
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18_7_5X9));
             }
         } else if (this.sSupport18x9) {
-            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str3));
+            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_18X9));
         } else if (this.sSupport195x9) {
-            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str5));
+            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_195X9));
         } else if (this.sSupport19x9) {
-            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, str2));
+            arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_fullscreen, (int) R.drawable.ic_config_fullscreen, (int) R.string.pref_camera_picturesize_entry_fullscreen, RATIO_FULL_19X9));
         }
         if ((i3 == 165 || i3 == 163) && DataRepository.dataItemGlobal().getDisplayMode() == 1) {
             arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1_1, (int) R.drawable.ic_config_1_1, (int) R.string.pref_camera_picturesize_entry_1_1, RATIO_1X1));
@@ -325,15 +316,14 @@ public class ComponentConfigRatio extends ComponentData {
     }
 
     public void setComponentValue(int i, String str) {
-        String str2 = RATIO_1X1;
-        if (i == 165 && str != str2) {
+        if (i == 165 && str != RATIO_1X1) {
             i = 163;
         }
-        if (str == str2) {
+        if (str == RATIO_1X1) {
             super.setComponentValue(165, str);
             return;
         }
-        super.setComponentValue(165, null);
+        super.setComponentValue(165, (String) null);
         super.setComponentValue(i, str);
     }
 

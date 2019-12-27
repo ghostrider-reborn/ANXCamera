@@ -15,20 +15,17 @@ public class Rational {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (obj == null) {
             return false;
         }
         if (this == obj) {
             return true;
         }
-        if (obj instanceof Rational) {
-            Rational rational = (Rational) obj;
-            if (this.mNumerator == rational.mNumerator && this.mDenominator == rational.mDenominator) {
-                z = true;
-            }
+        if (!(obj instanceof Rational)) {
+            return false;
         }
-        return z;
+        Rational rational = (Rational) obj;
+        return this.mNumerator == rational.mNumerator && this.mDenominator == rational.mDenominator;
     }
 
     public long getDenominator() {
@@ -44,10 +41,6 @@ public class Rational {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mNumerator);
-        sb.append("/");
-        sb.append(this.mDenominator);
-        return sb.toString();
+        return this.mNumerator + "/" + this.mDenominator;
     }
 }

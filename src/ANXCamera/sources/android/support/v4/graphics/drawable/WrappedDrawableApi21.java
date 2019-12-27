@@ -3,17 +3,18 @@ package android.support.v4.graphics.drawable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Outline;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.graphics.drawable.WrappedDrawableApi14;
 import android.util.Log;
 import java.lang.reflect.Method;
 
@@ -22,8 +23,8 @@ class WrappedDrawableApi21 extends WrappedDrawableApi14 {
     private static final String TAG = "WrappedDrawableApi21";
     private static Method sIsProjectedDrawableMethod;
 
-    private static class DrawableWrapperStateLollipop extends DrawableWrapperState {
-        DrawableWrapperStateLollipop(@Nullable DrawableWrapperState drawableWrapperState, @Nullable Resources resources) {
+    private static class DrawableWrapperStateLollipop extends WrappedDrawableApi14.DrawableWrapperState {
+        DrawableWrapperStateLollipop(@Nullable WrappedDrawableApi14.DrawableWrapperState drawableWrapperState, @Nullable Resources resources) {
             super(drawableWrapperState, resources);
         }
 
@@ -38,7 +39,7 @@ class WrappedDrawableApi21 extends WrappedDrawableApi14 {
         findAndCacheIsProjectedDrawableMethod();
     }
 
-    WrappedDrawableApi21(DrawableWrapperState drawableWrapperState, Resources resources) {
+    WrappedDrawableApi21(WrappedDrawableApi14.DrawableWrapperState drawableWrapperState, Resources resources) {
         super(drawableWrapperState, resources);
         findAndCacheIsProjectedDrawableMethod();
     }
@@ -64,7 +65,7 @@ class WrappedDrawableApi21 extends WrappedDrawableApi14 {
 
     /* access modifiers changed from: protected */
     public boolean isCompatTintEnabled() {
-        if (VERSION.SDK_INT != 21) {
+        if (Build.VERSION.SDK_INT != 21) {
             return false;
         }
         Drawable drawable = this.mDrawable;
@@ -86,10 +87,10 @@ class WrappedDrawableApi21 extends WrappedDrawableApi14 {
         return false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
-    public DrawableWrapperState mutateConstantState() {
-        return new DrawableWrapperStateLollipop(this.mState, null);
+    public WrappedDrawableApi14.DrawableWrapperState mutateConstantState() {
+        return new DrawableWrapperStateLollipop(this.mState, (Resources) null);
     }
 
     public void setHotspot(float f2, float f3) {
@@ -124,7 +125,7 @@ class WrappedDrawableApi21 extends WrappedDrawableApi14 {
         }
     }
 
-    public void setTintMode(Mode mode) {
+    public void setTintMode(PorterDuff.Mode mode) {
         if (isCompatTintEnabled()) {
             super.setTintMode(mode);
         } else {

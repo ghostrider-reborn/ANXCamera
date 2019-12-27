@@ -30,7 +30,7 @@ public final class CompletableDelay extends Completable {
 
         final class OnError implements Runnable {
 
-            /* renamed from: e reason: collision with root package name */
+            /* renamed from: e  reason: collision with root package name */
             private final Throwable f270e;
 
             OnError(Throwable th) {

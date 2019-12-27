@@ -6,8 +6,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.provider.Settings.SettingNotFoundException;
-import android.provider.Settings.System;
+import android.provider.Settings;
 import com.android.camera.log.Log;
 import com.mi.config.b;
 import java.util.WeakHashMap;
@@ -36,17 +35,12 @@ public class AutoLockManager {
             this.mHibernationTimeOut = MILLIS_IN_MINUTE * ((long) b.Th());
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mHibernationTimeOut = ");
-        sb.append(this.mHibernationTimeOut);
-        sb.append(", mScreenOffTimeOut = ");
-        sb.append(this.mScreenOffTimeOut);
-        Log.v(str, sb.toString());
+        Log.v(str, "mHibernationTimeOut = " + this.mHibernationTimeOut + ", mScreenOffTimeOut = " + this.mScreenOffTimeOut);
         updateScreenOffTimeout(context);
     }
 
     public static AutoLockManager getInstance(Context context) {
-        AutoLockManager autoLockManager = (AutoLockManager) sMap.get(context);
+        AutoLockManager autoLockManager = sMap.get(context);
         if (autoLockManager != null) {
             return autoLockManager;
         }
@@ -87,9 +81,9 @@ public class AutoLockManager {
     }
 
     public static void removeInstance(Context context) {
-        AutoLockManager autoLockManager = (AutoLockManager) sMap.remove(context);
-        if (autoLockManager != null) {
-            Handler handler = autoLockManager.mHandler;
+        AutoLockManager remove = sMap.remove(context);
+        if (remove != null) {
+            Handler handler = remove.mHandler;
             if (handler != null) {
                 handler.getLooper().quit();
             }
@@ -98,8 +92,8 @@ public class AutoLockManager {
 
     private void updateScreenOffTimeout(Context context) {
         try {
-            this.mScreenOffTimeOut = (long) System.getInt(context.getContentResolver(), "screen_off_timeout");
-        } catch (SettingNotFoundException e2) {
+            this.mScreenOffTimeOut = (long) Settings.System.getInt(context.getContentResolver(), "screen_off_timeout");
+        } catch (Settings.SettingNotFoundException e2) {
             Log.e(TAG, e2.getMessage());
         }
     }
@@ -114,13 +108,10 @@ public class AutoLockManager {
                 if (!camera.isRecording()) {
                     this.mHandler.sendEmptyMessageDelayed(1, this.mHibernationTimeOut);
                     Log.v(TAG, "send MSG_HIBERNATE");
-                } else {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("isRecording = ");
-                    sb.append(camera.isRecording());
-                    Log.w(str, sb.toString());
+                    return;
                 }
+                String str = TAG;
+                Log.w(str, "isRecording = " + camera.isRecording());
             }
         }
     }
@@ -132,10 +123,7 @@ public class AutoLockManager {
             handler.removeMessages(0);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("lockScreenDelayed: ");
-        sb.append(this.mScreenOffTimeOut);
-        Log.d(str, sb.toString());
+        Log.d(str, "lockScreenDelayed: " + this.mScreenOffTimeOut);
         this.mHandler.sendEmptyMessageDelayed(0, this.mScreenOffTimeOut);
     }
 
@@ -156,7 +144,7 @@ public class AutoLockManager {
     public void removeMessage() {
         Handler handler = this.mHandler;
         if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+            handler.removeCallbacksAndMessages((Object) null);
             Log.v(TAG, "removeMessage");
         }
     }

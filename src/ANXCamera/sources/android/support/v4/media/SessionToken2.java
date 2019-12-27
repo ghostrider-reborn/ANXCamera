@@ -11,10 +11,8 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.MediaControllerCompat.Callback;
-import android.support.v4.media.session.MediaSessionCompat.Token;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import java.lang.annotation.Retention;
@@ -39,9 +37,9 @@ public final class SessionToken2 {
     private static final long WAIT_TIME_MS_FOR_SESSION_READY = 300;
     private final SupportLibraryImpl mImpl;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public interface OnSessionToken2CreatedListener {
-        void onSessionToken2Created(Token token, SessionToken2 sessionToken2);
+        void onSessionToken2Created(MediaSessionCompat.Token token, SessionToken2 sessionToken2);
     }
 
     interface SupportLibraryImpl {
@@ -65,7 +63,7 @@ public final class SessionToken2 {
         Bundle toBundle();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TokenType {
     }
@@ -74,13 +72,13 @@ public final class SessionToken2 {
         this.mImpl = new SessionToken2ImplBase(context, componentName);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     SessionToken2(SupportLibraryImpl supportLibraryImpl) {
         this.mImpl = supportLibraryImpl;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
-    public static void createSessionToken2(@NonNull final Context context, @NonNull final Token token, @NonNull Executor executor, @NonNull final OnSessionToken2CreatedListener onSessionToken2CreatedListener) {
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
+    public static void createSessionToken2(@NonNull final Context context, @NonNull final MediaSessionCompat.Token token, @NonNull Executor executor, @NonNull final OnSessionToken2CreatedListener onSessionToken2CreatedListener) {
         if (context == null) {
             throw new IllegalArgumentException("context shouldn't be null");
         } else if (token == null) {
@@ -92,7 +90,7 @@ public final class SessionToken2 {
                 public void run() {
                     try {
                         final MediaControllerCompat mediaControllerCompat = new MediaControllerCompat(context, token);
-                        mediaControllerCompat.registerCallback(new Callback() {
+                        mediaControllerCompat.registerCallback(new MediaControllerCompat.Callback() {
                             public void onSessionReady() {
                                 synchronized (onSessionToken2CreatedListener) {
                                     onSessionToken2CreatedListener.onSessionToken2Created(token, mediaControllerCompat.getSessionToken2());
@@ -130,30 +128,31 @@ public final class SessionToken2 {
         return bundle.getInt(KEY_TYPE, -1) == 100 ? new SessionToken2(SessionToken2ImplLegacy.fromBundle(bundle)) : new SessionToken2(SessionToken2ImplBase.fromBundle(bundle));
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static String getSessionId(ResolveInfo resolveInfo) {
-        if (resolveInfo != null) {
-            ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-            if (serviceInfo != null) {
-                String str = "";
-                return serviceInfo.metaData == null ? str : resolveInfo.serviceInfo.metaData.getString(MediaSessionService2.SERVICE_META_DATA, str);
-            }
+        if (resolveInfo == null) {
+            return null;
         }
-        return null;
+        ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+        if (serviceInfo == null) {
+            return null;
+        }
+        return serviceInfo.metaData == null ? "" : resolveInfo.serviceInfo.metaData.getString(MediaSessionService2.SERVICE_META_DATA, "");
     }
 
     private static String getSessionIdFromService(PackageManager packageManager, String str, ComponentName componentName) {
         Intent intent = new Intent(str);
         intent.setPackage(componentName.getPackageName());
-        List queryIntentServices = packageManager.queryIntentServices(intent, 128);
-        if (queryIntentServices != null) {
-            for (int i = 0; i < queryIntentServices.size(); i++) {
-                ResolveInfo resolveInfo = (ResolveInfo) queryIntentServices.get(i);
-                if (resolveInfo != null) {
-                    ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-                    if (serviceInfo != null && TextUtils.equals(serviceInfo.name, componentName.getClassName())) {
-                        return getSessionId(resolveInfo);
-                    }
+        List<ResolveInfo> queryIntentServices = packageManager.queryIntentServices(intent, 128);
+        if (queryIntentServices == null) {
+            return null;
+        }
+        for (int i = 0; i < queryIntentServices.size(); i++) {
+            ResolveInfo resolveInfo = queryIntentServices.get(i);
+            if (resolveInfo != null) {
+                ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+                if (serviceInfo != null && TextUtils.equals(serviceInfo.name, componentName.getClassName())) {
+                    return getSessionId(resolveInfo);
                 }
             }
         }
@@ -167,12 +166,12 @@ public final class SessionToken2 {
         return this.mImpl.equals(((SessionToken2) obj).mImpl);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public Object getBinder() {
         return this.mImpl.getBinder();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public ComponentName getComponentName() {
         return this.mImpl.getComponentName();
     }
@@ -203,7 +202,7 @@ public final class SessionToken2 {
         return this.mImpl.hashCode();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public boolean isLegacySession() {
         return this.mImpl instanceof SessionToken2ImplLegacy;
     }

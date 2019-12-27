@@ -1,9 +1,8 @@
 package com.android.camera.fragment.fullscreen;
 
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,12 +10,12 @@ import com.android.camera.R;
 import com.android.camera.fragment.CommonRecyclerViewHolder;
 import java.util.List;
 
-public class ShareAdapter extends Adapter<CommonRecyclerViewHolder> {
+public class ShareAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> {
     private int mItemWidth;
-    private OnClickListener mOnClickListener;
+    private View.OnClickListener mOnClickListener;
     private List<ShareInfo> mShareInfoList;
 
-    public ShareAdapter(List<ShareInfo> list, OnClickListener onClickListener, int i) {
+    public ShareAdapter(List<ShareInfo> list, View.OnClickListener onClickListener, int i) {
         this.mShareInfoList = list;
         this.mOnClickListener = onClickListener;
         this.mItemWidth = i;
@@ -27,13 +26,11 @@ public class ShareAdapter extends Adapter<CommonRecyclerViewHolder> {
     }
 
     public void onBindViewHolder(CommonRecyclerViewHolder commonRecyclerViewHolder, int i) {
-        ShareInfo shareInfo = (ShareInfo) this.mShareInfoList.get(i);
+        ShareInfo shareInfo = this.mShareInfoList.get(i);
         commonRecyclerViewHolder.itemView.setTag(shareInfo);
         commonRecyclerViewHolder.itemView.setOnClickListener(this.mOnClickListener);
-        ImageView imageView = (ImageView) commonRecyclerViewHolder.getView(R.id.live_share_icon);
-        TextView textView = (TextView) commonRecyclerViewHolder.getView(R.id.live_share_name);
-        imageView.setImageResource(shareInfo.drawableRes);
-        textView.setText(shareInfo.textRes);
+        ((ImageView) commonRecyclerViewHolder.getView(R.id.live_share_icon)).setImageResource(shareInfo.drawableRes);
+        ((TextView) commonRecyclerViewHolder.getView(R.id.live_share_name)).setText(shareInfo.textRes);
     }
 
     public CommonRecyclerViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {

@@ -5,12 +5,11 @@ import com.android.camera.network.net.HttpManager;
 import com.android.camera.network.threadpool.ThreadManager;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import java.util.concurrent.CountDownLatch;
 
-public abstract class VolleyRequest<T, E> extends BaseRequest<E> implements Listener<T>, ErrorListener {
+public abstract class VolleyRequest<T, E> extends BaseRequest<E> implements Response.Listener<T>, Response.ErrorListener {
     private Request<T> mRequest;
     private CountDownLatch mSyncExecuteLock = null;
 
@@ -24,7 +23,7 @@ public abstract class VolleyRequest<T, E> extends BaseRequest<E> implements List
 
     public final void cancel() {
         releaseSyncExecuteLock();
-        setOnResponseListener(null);
+        setOnResponseListener((ResponseListener) null);
         Request<T> request = this.mRequest;
         if (request != null) {
             request.cancel();
@@ -32,7 +31,7 @@ public abstract class VolleyRequest<T, E> extends BaseRequest<E> implements List
     }
 
     /* access modifiers changed from: protected */
-    public abstract Request<T> createVolleyRequest(Listener<T> listener, ErrorListener errorListener);
+    public abstract Request<T> createVolleyRequest(Response.Listener<T> listener, Response.ErrorListener errorListener);
 
     public void execute() {
         this.mRequest = createVolleyRequest(this, this);
@@ -75,8 +74,6 @@ public abstract class VolleyRequest<T, E> extends BaseRequest<E> implements List
     public abstract void handleResponse(T t);
 
     /* JADX WARNING: type inference failed for: r1v1, types: [java.lang.Throwable] */
-    /* JADX WARNING: type inference failed for: r3v1, types: [java.lang.Throwable, java.lang.Object] */
-    /* JADX WARNING: type inference failed for: r3v2 */
     /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Unknown variable types count: 1 */
     public final void onErrorResponse(VolleyError volleyError) {

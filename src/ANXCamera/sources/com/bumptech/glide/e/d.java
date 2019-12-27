@@ -15,10 +15,10 @@ public final class d implements c {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof d)) {
-            return false;
+        if (obj instanceof d) {
+            return this.object.equals(((d) obj).object);
         }
-        return this.object.equals(((d) obj).object);
+        return false;
     }
 
     public int hashCode() {
@@ -26,11 +26,7 @@ public final class d implements c {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ObjectKey{object=");
-        sb.append(this.object);
-        sb.append('}');
-        return sb.toString();
+        return "ObjectKey{object=" + this.object + '}';
     }
 
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {

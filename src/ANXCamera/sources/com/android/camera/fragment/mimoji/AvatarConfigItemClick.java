@@ -1,7 +1,7 @@
 package com.android.camera.fragment.mimoji;
 
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
+import com.arcsoft.avatar.AvatarConfig;
 
 public interface AvatarConfigItemClick {
-    void onConfigItemClick(ASAvatarConfigInfo aSAvatarConfigInfo, boolean z, int i);
+    void onConfigItemClick(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo, boolean z, int i);
 }

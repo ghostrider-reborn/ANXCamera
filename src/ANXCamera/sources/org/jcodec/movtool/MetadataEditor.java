@@ -7,7 +7,6 @@ import java.util.Map;
 import org.jcodec.common.Format;
 import org.jcodec.common.JCodecUtil;
 import org.jcodec.containers.mp4.MP4Util;
-import org.jcodec.containers.mp4.MP4Util.Movie;
 import org.jcodec.containers.mp4.boxes.Header;
 import org.jcodec.containers.mp4.boxes.MetaBox;
 import org.jcodec.containers.mp4.boxes.MetaValue;
@@ -32,15 +31,12 @@ public class MetadataEditor {
     public static MetadataEditor createFrom(File file) throws IOException {
         Format detectFormat = JCodecUtil.detectFormat(file);
         if (detectFormat == Format.MOV) {
-            Movie parseFullMovie = MP4Util.parseFullMovie(file);
+            MP4Util.Movie parseFullMovie = MP4Util.parseFullMovie(file);
             MetaBox metaBox = (MetaBox) NodeBox.findFirst(parseFullMovie.getMoov(), MetaBox.class, MetaBox.fourcc());
             MetaBox metaBox2 = (MetaBox) NodeBox.findFirstPath(parseFullMovie.getMoov(), MetaBox.class, new String[]{"udta", MetaBox.fourcc()});
             return new MetadataEditor(file, metaBox == null ? new HashMap() : metaBox.getKeyedMeta(), metaBox2 == null ? new HashMap() : metaBox2.getItunesMeta());
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unsupported format: ");
-        sb.append(detectFormat);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Unsupported format: " + detectFormat);
     }
 
     public Map<Integer, MetaValue> getItunesMeta() {
@@ -55,8 +51,7 @@ public class MetadataEditor {
         AnonymousClass1 r0 = new MP4Edit() {
             public void apply(MovieBox movieBox) {
                 MetaBox metaBox = (MetaBox) NodeBox.findFirst(movieBox, MetaBox.class, MetaBox.fourcc());
-                String str = "udta";
-                MetaBox metaBox2 = (MetaBox) NodeBox.findFirstPath(movieBox, MetaBox.class, new String[]{str, MetaBox.fourcc()});
+                MetaBox metaBox2 = (MetaBox) NodeBox.findFirstPath(movieBox, MetaBox.class, new String[]{"udta", MetaBox.fourcc()});
                 if (this.keyedMeta != null && this.keyedMeta.size() > 0) {
                     if (metaBox == null) {
                         metaBox = MetaBox.createMetaBox();
@@ -67,9 +62,9 @@ public class MetadataEditor {
                 if (this.itunesMeta != null && this.itunesMeta.size() > 0) {
                     if (metaBox2 == null) {
                         metaBox2 = UdtaMetaBox.createUdtaMetaBox();
-                        NodeBox nodeBox = (NodeBox) NodeBox.findFirst(movieBox, NodeBox.class, str);
+                        NodeBox nodeBox = (NodeBox) NodeBox.findFirst(movieBox, NodeBox.class, "udta");
                         if (nodeBox == null) {
-                            nodeBox = new NodeBox(Header.createHeader(str, 0));
+                            nodeBox = new NodeBox(Header.createHeader("udta", 0));
                             movieBox.add(nodeBox);
                         }
                         nodeBox.add(metaBox2);

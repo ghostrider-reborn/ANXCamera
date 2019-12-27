@@ -1,7 +1,7 @@
 package com.android.gallery3d.exif;
 
 import com.android.camera.network.net.base.HTTP;
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -138,43 +138,39 @@ public class ExifTag {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
-        if (obj == null) {
+        if (obj == null || !(obj instanceof ExifTag)) {
             return false;
         }
-        if (obj instanceof ExifTag) {
-            ExifTag exifTag = (ExifTag) obj;
-            if (exifTag.mTagId == this.mTagId && exifTag.mComponentCountActual == this.mComponentCountActual && exifTag.mDataType == this.mDataType) {
-                Object obj2 = this.mValue;
-                if (obj2 != null) {
-                    Object obj3 = exifTag.mValue;
-                    if (obj3 == null) {
-                        return false;
-                    }
-                    if (obj2 instanceof long[]) {
-                        if (!(obj3 instanceof long[])) {
-                            return false;
-                        }
-                        return Arrays.equals((long[]) obj2, (long[]) obj3);
-                    } else if (obj2 instanceof Rational[]) {
-                        if (!(obj3 instanceof Rational[])) {
-                            return false;
-                        }
-                        return Arrays.equals((Rational[]) obj2, (Rational[]) obj3);
-                    } else if (!(obj2 instanceof byte[])) {
-                        return obj2.equals(obj3);
-                    } else {
-                        if (!(obj3 instanceof byte[])) {
-                            return false;
-                        }
-                        return Arrays.equals((byte[]) obj2, (byte[]) obj3);
-                    }
-                } else if (exifTag.mValue == null) {
-                    z = true;
-                }
-            }
+        ExifTag exifTag = (ExifTag) obj;
+        if (exifTag.mTagId != this.mTagId || exifTag.mComponentCountActual != this.mComponentCountActual || exifTag.mDataType != this.mDataType) {
+            return false;
         }
-        return z;
+        Object obj2 = this.mValue;
+        if (obj2 == null) {
+            return exifTag.mValue == null;
+        }
+        Object obj3 = exifTag.mValue;
+        if (obj3 == null) {
+            return false;
+        }
+        if (obj2 instanceof long[]) {
+            if (!(obj3 instanceof long[])) {
+                return false;
+            }
+            return Arrays.equals((long[]) obj2, (long[]) obj3);
+        } else if (obj2 instanceof Rational[]) {
+            if (!(obj3 instanceof Rational[])) {
+                return false;
+            }
+            return Arrays.equals((Rational[]) obj2, (Rational[]) obj3);
+        } else if (!(obj2 instanceof byte[])) {
+            return obj2.equals(obj3);
+        } else {
+            if (!(obj3 instanceof byte[])) {
+                return false;
+            }
+            return Arrays.equals((byte[]) obj2, (byte[]) obj3);
+        }
     }
 
     public long forceGetValueAsLong(long j) {
@@ -192,9 +188,8 @@ public class ExifTag {
 
     public String forceGetValueAsString() {
         Object obj = this.mValue;
-        String str = "";
         if (obj == null) {
-            return str;
+            return "";
         }
         if (obj instanceof byte[]) {
             return this.mDataType == 2 ? new String((byte[]) obj, US_ASCII) : Arrays.toString((byte[]) obj);
@@ -209,7 +204,7 @@ public class ExifTag {
             return Arrays.toString((Object[]) obj);
         }
         Object obj2 = ((Object[]) obj)[0];
-        return obj2 == null ? str : obj2.toString();
+        return obj2 == null ? "" : obj2.toString();
     }
 
     /* access modifiers changed from: protected */
@@ -234,10 +229,7 @@ public class ExifTag {
             System.arraycopy(obj, 0, bArr, i, i3);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cannot get BYTE value from ");
-        sb.append(convertTypeToString(this.mDataType));
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Cannot get BYTE value from " + convertTypeToString(this.mDataType));
     }
 
     public int getComponentCount() {
@@ -267,10 +259,7 @@ public class ExifTag {
         if (s == 10 || s == 5) {
             return ((Rational[]) this.mValue)[i];
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cannot get RATIONAL value from ");
-        sb.append(convertTypeToString(this.mDataType));
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Cannot get RATIONAL value from " + convertTypeToString(this.mDataType));
     }
 
     /* access modifiers changed from: protected */
@@ -278,10 +267,7 @@ public class ExifTag {
         if (this.mDataType == 2) {
             return new String((byte[]) this.mValue, US_ASCII);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cannot get ASCII value from ");
-        sb.append(convertTypeToString(this.mDataType));
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Cannot get ASCII value from " + convertTypeToString(this.mDataType));
     }
 
     /* access modifiers changed from: protected */
@@ -363,7 +349,6 @@ public class ExifTag {
 
     public String getValueAsString() {
         Object obj = this.mValue;
-        String str = null;
         if (obj == null) {
             return null;
         }
@@ -371,9 +356,9 @@ public class ExifTag {
             return (String) obj;
         }
         if (obj instanceof byte[]) {
-            str = new String((byte[]) obj, US_ASCII);
+            return new String((byte[]) obj, US_ASCII);
         }
-        return str;
+        return null;
     }
 
     public String getValueAsString(String str) {
@@ -390,10 +375,7 @@ public class ExifTag {
         if (obj instanceof byte[]) {
             return (long) ((byte[]) obj)[i];
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cannot get integer value from ");
-        sb.append(convertTypeToString(this.mDataType));
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Cannot get integer value from " + convertTypeToString(this.mDataType));
     }
 
     /* access modifiers changed from: protected */
@@ -449,7 +431,7 @@ public class ExifTag {
             return false;
         }
         if (obj instanceof Short) {
-            return setValue((int) ((Short) obj).shortValue() & ColorSpace.UNCALIBRATED);
+            return setValue((int) ((Short) obj).shortValue() & ExifInterface.ColorSpace.UNCALIBRATED);
         }
         if (obj instanceof String) {
             return setValue((String) obj);
@@ -482,7 +464,7 @@ public class ExifTag {
             Short[] shArr = (Short[]) obj;
             int[] iArr = new int[shArr.length];
             for (int i = 0; i < shArr.length; i++) {
-                iArr[i] = shArr[i] == null ? 0 : shArr[i].shortValue() & ColorSpace.UNCALIBRATED;
+                iArr[i] = shArr[i] == null ? 0 : shArr[i].shortValue() & ExifInterface.ColorSpace.UNCALIBRATED;
             }
             return setValue(iArr);
         } else if (obj instanceof Integer[]) {
@@ -603,19 +585,6 @@ public class ExifTag {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format(Locale.ENGLISH, "tag id: %04X\n", new Object[]{Short.valueOf(this.mTagId)}));
-        sb.append("ifd id: ");
-        sb.append(this.mIfd);
-        sb.append("\ntype: ");
-        sb.append(convertTypeToString(this.mDataType));
-        sb.append("\ncount: ");
-        sb.append(this.mComponentCountActual);
-        sb.append("\noffset: ");
-        sb.append(this.mOffset);
-        sb.append("\nvalue: ");
-        sb.append(forceGetValueAsString());
-        sb.append("\n");
-        return sb.toString();
+        return String.format(Locale.ENGLISH, "tag id: %04X\n", new Object[]{Short.valueOf(this.mTagId)}) + "ifd id: " + this.mIfd + "\ntype: " + convertTypeToString(this.mDataType) + "\ncount: " + this.mComponentCountActual + "\noffset: " + this.mOffset + "\nvalue: " + forceGetValueAsString() + "\n";
     }
 }

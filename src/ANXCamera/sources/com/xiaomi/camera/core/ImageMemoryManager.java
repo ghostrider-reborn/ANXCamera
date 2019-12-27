@@ -61,13 +61,7 @@ public class ImageMemoryManager {
             int imageUsedMemory = getImageUsedMemory(image);
             this.mImagesMap.put(image, new ImageInfo(i, imageUsedMemory));
             mUsedMemory += imageUsedMemory;
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("holdAnImage: ");
-            sb.append(image);
-            sb.append(", needCloseImageNum=");
-            sb.append(getMaxHoldImageNumber());
-            Log.d(str, sb.toString());
+            Log.d(TAG, "holdAnImage: " + image + ", needCloseImageNum=" + getMaxHoldImageNumber());
         }
     }
 
@@ -85,27 +79,16 @@ public class ImageMemoryManager {
     public void releaseAnImage(Image image) {
         synchronized (this.mObjLock) {
             if (this.mImagesMap.containsKey(image)) {
-                ImageInfo imageInfo = (ImageInfo) this.mImagesMap.get(image);
-                int i = this.mHoldImageNumArray.get(imageInfo.owner);
-                if (i > 0) {
-                    this.mHoldImageNumArray.put(imageInfo.owner, i - 1);
+                ImageInfo imageInfo = this.mImagesMap.get(image);
+                if (this.mHoldImageNumArray.get(imageInfo.owner) > 0) {
+                    this.mHoldImageNumArray.put(imageInfo.owner, r2 - 1);
                 }
                 mUsedMemory -= imageInfo.size;
                 this.mImagesMap.remove(image);
                 this.mObjLock.notifyAll();
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("releaseAnImage: ");
-                sb.append(image);
-                sb.append(", needCloseImageNum=");
-                sb.append(getMaxHoldImageNumber());
-                Log.d(str, sb.toString());
+                Log.d(TAG, "releaseAnImage: " + image + ", needCloseImageNum=" + getMaxHoldImageNumber());
             } else {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("releaseAnImage: not hold image ");
-                sb2.append(image);
-                Log.d(str2, sb2.toString());
+                Log.d(TAG, "releaseAnImage: not hold image " + image);
             }
         }
     }

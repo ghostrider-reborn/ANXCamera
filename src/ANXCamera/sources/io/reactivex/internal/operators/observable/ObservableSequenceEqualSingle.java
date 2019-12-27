@@ -43,7 +43,7 @@ public final class ObservableSequenceEqualSingle<T> extends Single<Boolean> impl
             equalObserverArr[1] = new EqualObserver<>(this, 1, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancel(SpscLinkedArrayQueue<T> spscLinkedArrayQueue, SpscLinkedArrayQueue<T> spscLinkedArrayQueue2) {
             this.cancelled = true;
             spscLinkedArrayQueue.clear();
@@ -62,7 +62,7 @@ public final class ObservableSequenceEqualSingle<T> extends Single<Boolean> impl
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 EqualObserver<T>[] equalObserverArr = this.observers;
@@ -99,14 +99,14 @@ public final class ObservableSequenceEqualSingle<T> extends Single<Boolean> impl
                     }
                     boolean z4 = this.v2 == null;
                     if (z && z2 && z3 && z4) {
-                        this.actual.onSuccess(Boolean.valueOf(true));
+                        this.actual.onSuccess(true);
                         return;
                     } else if (!z || !z2 || z3 == z4) {
                         if (!z3 && !z4) {
                             try {
                                 if (!this.comparer.test(this.v1, this.v2)) {
                                     cancel(spscLinkedArrayQueue, spscLinkedArrayQueue2);
-                                    this.actual.onSuccess(Boolean.valueOf(false));
+                                    this.actual.onSuccess(false);
                                     return;
                                 }
                                 this.v1 = null;
@@ -126,7 +126,7 @@ public final class ObservableSequenceEqualSingle<T> extends Single<Boolean> impl
                         }
                     } else {
                         cancel(spscLinkedArrayQueue, spscLinkedArrayQueue2);
-                        this.actual.onSuccess(Boolean.valueOf(false));
+                        this.actual.onSuccess(false);
                         return;
                     }
                 }
@@ -139,12 +139,12 @@ public final class ObservableSequenceEqualSingle<T> extends Single<Boolean> impl
             return this.cancelled;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean setDisposable(Disposable disposable, int i) {
             return this.resources.setResource(i, disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe() {
             EqualObserver<T>[] equalObserverArr = this.observers;
             this.first.subscribe(equalObserverArr[0]);
@@ -194,7 +194,7 @@ public final class ObservableSequenceEqualSingle<T> extends Single<Boolean> impl
     }
 
     public Observable<Boolean> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableSequenceEqual<T>(this.first, this.second, this.comparer, this.bufferSize));
+        return RxJavaPlugins.onAssembly(new ObservableSequenceEqual(this.first, this.second, this.comparer, this.bufferSize));
     }
 
     public void subscribeActual(SingleObserver<? super Boolean> singleObserver) {

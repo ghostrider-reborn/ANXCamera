@@ -131,47 +131,32 @@ public class ViewDragHelper {
     private boolean checkNewEdgeDrag(float f2, float f3, int i, int i2) {
         float abs = Math.abs(f2);
         float abs2 = Math.abs(f3);
-        boolean z = false;
-        if (!((this.mInitialEdgesTouched[i] & i2) != i2 || (this.mTrackingEdges & i2) == 0 || (this.mEdgeDragsLocked[i] & i2) == i2 || (this.mEdgeDragsInProgress[i] & i2) == i2)) {
-            int i3 = this.mTouchSlop;
-            if (abs > ((float) i3) || abs2 > ((float) i3)) {
-                if (abs < abs2 * 0.5f && this.mCallback.onEdgeLock(i2)) {
-                    int[] iArr = this.mEdgeDragsLocked;
-                    iArr[i] = iArr[i] | i2;
-                    return false;
-                } else if ((this.mEdgeDragsInProgress[i] & i2) == 0 && abs > ((float) this.mTouchSlop)) {
-                    z = true;
-                }
-            }
+        if ((this.mInitialEdgesTouched[i] & i2) != i2 || (this.mTrackingEdges & i2) == 0 || (this.mEdgeDragsLocked[i] & i2) == i2 || (this.mEdgeDragsInProgress[i] & i2) == i2) {
+            return false;
         }
-        return z;
+        int i3 = this.mTouchSlop;
+        if (abs <= ((float) i3) && abs2 <= ((float) i3)) {
+            return false;
+        }
+        if (abs >= abs2 * 0.5f || !this.mCallback.onEdgeLock(i2)) {
+            return (this.mEdgeDragsInProgress[i] & i2) == 0 && abs > ((float) this.mTouchSlop);
+        }
+        int[] iArr = this.mEdgeDragsLocked;
+        iArr[i] = iArr[i] | i2;
+        return false;
     }
 
     private boolean checkTouchSlop(View view, float f2, float f3) {
-        boolean z = false;
         if (view == null) {
             return false;
         }
-        boolean z2 = this.mCallback.getViewHorizontalDragRange(view) > 0;
-        boolean z3 = this.mCallback.getViewVerticalDragRange(view) > 0;
-        if (z2 && z3) {
-            float f4 = (f2 * f2) + (f3 * f3);
-            int i = this.mTouchSlop;
-            if (f4 > ((float) (i * i))) {
-                z = true;
-            }
-            return z;
-        } else if (z2) {
-            if (Math.abs(f2) > ((float) this.mTouchSlop)) {
-                z = true;
-            }
-            return z;
-        } else {
-            if (z3 && Math.abs(f3) > ((float) this.mTouchSlop)) {
-                z = true;
-            }
-            return z;
+        boolean z = this.mCallback.getViewHorizontalDragRange(view) > 0;
+        boolean z2 = this.mCallback.getViewVerticalDragRange(view) > 0;
+        if (!z || !z2) {
+            return z ? Math.abs(f2) > ((float) this.mTouchSlop) : z2 && Math.abs(f3) > ((float) this.mTouchSlop);
         }
+        int i = this.mTouchSlop;
+        return (f2 * f2) + (f3 * f3) > ((float) (i * i));
     }
 
     private float clampMag(float f2, float f3, float f4) {
@@ -179,13 +164,7 @@ public class ViewDragHelper {
         if (abs < f3) {
             return 0.0f;
         }
-        if (abs <= f4) {
-            return f2;
-        }
-        if (f2 <= 0.0f) {
-            f4 = -f4;
-        }
-        return f4;
+        return abs > f4 ? f2 > 0.0f ? f4 : -f4 : f2;
     }
 
     private int clampMag(int i, int i2, int i3) {
@@ -193,13 +172,7 @@ public class ViewDragHelper {
         if (abs < i2) {
             return 0;
         }
-        if (abs <= i3) {
-            return i;
-        }
-        if (i <= 0) {
-            i3 = -i3;
-        }
-        return i3;
+        return abs > i3 ? i > 0 ? i3 : -i3 : i;
     }
 
     private void clearMotionHistory() {
@@ -380,13 +353,7 @@ public class ViewDragHelper {
         if (isPointerDown(i)) {
             return true;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Ignoring pointerId=");
-        sb.append(i);
-        sb.append(" because ACTION_DOWN was not received ");
-        sb.append("for this pointer before ACTION_MOVE. It likely happened because ");
-        sb.append(" ViewDragHelper did not receive all the events in the event stream.");
-        Log.e(TAG, sb.toString());
+        Log.e(TAG, "Ignoring pointerId=" + i + " because ACTION_DOWN was not received " + "for this pointer before ACTION_MOVE. It likely happened because " + " ViewDragHelper did not receive all the events in the event stream.");
         return false;
     }
 
@@ -457,7 +424,6 @@ public class ViewDragHelper {
     /* access modifiers changed from: protected */
     public boolean canScroll(@NonNull View view, boolean z, int i, int i2, int i3, int i4) {
         View view2 = view;
-        boolean z2 = true;
         if (view2 instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) view2;
             int scrollX = view.getScrollX();
@@ -475,10 +441,7 @@ public class ViewDragHelper {
                 }
             }
         }
-        if (!z || (!view.canScrollHorizontally(-i) && !view.canScrollVertically(-i2))) {
-            z2 = false;
-        }
-        return z2;
+        return z && (view.canScrollHorizontally(-i) || view.canScrollVertically(-i2));
     }
 
     public void cancel() {
@@ -499,11 +462,7 @@ public class ViewDragHelper {
             setDragState(1);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("captureChildView: parameter must be a descendant of the ViewDragHelper's tracked parent view (");
-        sb.append(this.mParentView);
-        sb.append(")");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("captureChildView: parameter must be a descendant of the ViewDragHelper's tracked parent view (" + this.mParentView + ")");
     }
 
     public boolean checkTouchSlop(int i) {
@@ -517,32 +476,18 @@ public class ViewDragHelper {
     }
 
     public boolean checkTouchSlop(int i, int i2) {
-        boolean z = false;
         if (!isPointerDown(i2)) {
             return false;
         }
-        boolean z2 = (i & 1) == 1;
-        boolean z3 = (i & 2) == 2;
+        boolean z = (i & 1) == 1;
+        boolean z2 = (i & 2) == 2;
         float f2 = this.mLastMotionX[i2] - this.mInitialMotionX[i2];
         float f3 = this.mLastMotionY[i2] - this.mInitialMotionY[i2];
-        if (z2 && z3) {
-            float f4 = (f2 * f2) + (f3 * f3);
-            int i3 = this.mTouchSlop;
-            if (f4 > ((float) (i3 * i3))) {
-                z = true;
-            }
-            return z;
-        } else if (z2) {
-            if (Math.abs(f2) > ((float) this.mTouchSlop)) {
-                z = true;
-            }
-            return z;
-        } else {
-            if (z3 && Math.abs(f3) > ((float) this.mTouchSlop)) {
-                z = true;
-            }
-            return z;
+        if (!z || !z2) {
+            return z ? Math.abs(f2) > ((float) this.mTouchSlop) : z2 && Math.abs(f3) > ((float) this.mTouchSlop);
         }
+        int i3 = this.mTouchSlop;
+        return (f2 * f2) + (f3 * f3) > ((float) (i3 * i3));
     }
 
     public boolean continueSettling(boolean z) {
@@ -646,14 +591,7 @@ public class ViewDragHelper {
     }
 
     public boolean isViewUnder(@Nullable View view, int i, int i2) {
-        boolean z = false;
-        if (view == null) {
-            return false;
-        }
-        if (i >= view.getLeft() && i < view.getRight() && i2 >= view.getTop() && i2 < view.getBottom()) {
-            z = true;
-        }
-        return z;
+        return view != null && i >= view.getLeft() && i < view.getRight() && i2 >= view.getTop() && i2 < view.getBottom();
     }
 
     public void processTouchEvent(@NonNull MotionEvent motionEvent) {
@@ -767,7 +705,7 @@ public class ViewDragHelper {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setDragState(int i) {
         this.mParentView.removeCallbacks(this.mSetIdleRunnable);
         if (this.mDragState != i) {
@@ -915,7 +853,7 @@ public class ViewDragHelper {
         return forceSettleCapturedViewAt;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean tryCaptureViewForDrag(View view, int i) {
         if (view == this.mCapturedView && this.mActivePointerId == i) {
             return true;

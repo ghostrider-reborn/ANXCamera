@@ -2,10 +2,9 @@ package com.android.camera.fragment.beauty;
 
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 
 /* compiled from: lambda */
-public final /* synthetic */ class a implements OnItemClickListener {
+public final /* synthetic */ class a implements AdapterView.OnItemClickListener {
     private final /* synthetic */ RemodelingParamsFragment ub;
 
     public /* synthetic */ a(RemodelingParamsFragment remodelingParamsFragment) {

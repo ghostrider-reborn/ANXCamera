@@ -11,14 +11,7 @@ public class PriorityStorageBroadcastReceiver extends BroadcastReceiver {
     public static boolean isPriorityStorage() {
         Context androidContext = CameraAppImpl.getAndroidContext();
         int componentEnabledSetting = androidContext.getPackageManager().getComponentEnabledSetting(new ComponentName(androidContext, PriorityStorageBroadcastReceiver.class));
-        if (componentEnabledSetting == 0) {
-            return androidContext.getResources().getBoolean(R.bool.priority_storage);
-        }
-        boolean z = true;
-        if (componentEnabledSetting != 1) {
-            z = false;
-        }
-        return z;
+        return componentEnabledSetting == 0 ? androidContext.getResources().getBoolean(R.bool.priority_storage) : componentEnabledSetting == 1;
     }
 
     public static void setPriorityStorage(boolean z) {

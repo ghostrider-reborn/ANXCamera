@@ -2,11 +2,9 @@ package com.android.camera2;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
@@ -17,7 +15,7 @@ import com.android.camera.CameraSettings;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 import com.ss.android.ttve.common.TEDefine;
 import com.xiaomi.camera.base.PerformanceTracker;
 import com.xiaomi.camera.core.ParallelCallback;
@@ -47,40 +45,29 @@ public class MiCamera2ShotStill extends MiCamera2Shot<ParallelTaskData> {
         long currentTimeMillis = System.currentTimeMillis();
         this.mCurrentParallelTaskData.setPreviewThumbnailHash(this.mPreviewThumbnailHash);
         parallelCallback.onParallelProcessFinish(parallelTaskData, captureResult, cameraCharacteristics);
-        long currentTimeMillis2 = System.currentTimeMillis() - currentTimeMillis;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mJpegCallbackFinishTime = ");
-        sb.append(currentTimeMillis2);
-        sb.append("ms");
-        Log.d(str, sb.toString());
+        Log.d(str, "mJpegCallbackFinishTime = " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
     }
 
     /* access modifiers changed from: protected */
-    public CaptureCallback generateCaptureCallback() {
-        return new CaptureCallback() {
+    public CameraCaptureSession.CaptureCallback generateCaptureCallback() {
+        return new CameraCaptureSession.CaptureCallback() {
             public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
                 String access$000 = MiCamera2ShotStill.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted: ");
-                sb.append(totalCaptureResult.getFrameNumber());
-                Log.d(access$000, sb.toString());
+                Log.d(access$000, "onCaptureCompleted: " + totalCaptureResult.getFrameNumber());
                 if (MiCamera2ShotStill.this.mMiCamera.getSuperNight()) {
                     MiCamera2ShotStill.this.mMiCamera.setAWBLock(false);
                 }
                 MiCamera2ShotStill miCamera2ShotStill = MiCamera2ShotStill.this;
                 miCamera2ShotStill.mMiCamera.onCapturePictureFinished(true, miCamera2ShotStill);
                 MiCamera2ShotStill.this.mMiCamera.setCaptureEnable(true);
-                MiCamera2ShotStill.this.mCaptureResult = totalCaptureResult;
+                TotalCaptureResult unused = MiCamera2ShotStill.this.mCaptureResult = totalCaptureResult;
             }
 
             public void onCaptureFailed(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull CaptureFailure captureFailure) {
                 super.onCaptureFailed(cameraCaptureSession, captureRequest, captureFailure);
                 String access$000 = MiCamera2ShotStill.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureFailed: reason=");
-                sb.append(captureFailure.getReason());
-                Log.e(access$000, sb.toString());
+                Log.e(access$000, "onCaptureFailed: reason=" + captureFailure.getReason());
                 if (MiCamera2ShotStill.this.mMiCamera.getSuperNight()) {
                     MiCamera2ShotStill.this.mMiCamera.setAWBLock(false);
                 }
@@ -92,7 +79,7 @@ public class MiCamera2ShotStill extends MiCamera2Shot<ParallelTaskData> {
             public void onCaptureStarted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, long j, long j2) {
                 super.onCaptureStarted(cameraCaptureSession, captureRequest, j, j2);
                 if ((!CameraSettings.isSupportedZslShutter() || CameraSettings.isUltraPixelOn()) && !CameraSettings.getPlayToneOnCaptureStart()) {
-                    PictureCallback pictureCallback = MiCamera2ShotStill.this.getPictureCallback();
+                    Camera2Proxy.PictureCallback pictureCallback = MiCamera2ShotStill.this.getPictureCallback();
                     if (pictureCallback != null) {
                         pictureCallback.onCaptureShutter(false);
                     } else {
@@ -103,26 +90,18 @@ public class MiCamera2ShotStill extends MiCamera2Shot<ParallelTaskData> {
                     MiCamera2ShotStill.this.mCurrentParallelTaskData.setTimestamp(j);
                 }
                 String access$000 = MiCamera2ShotStill.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureStarted: mCurrentParallelTaskData: ");
-                sb.append(MiCamera2ShotStill.this.mCurrentParallelTaskData.getTimestamp());
-                Log.d(access$000, sb.toString());
+                Log.d(access$000, "onCaptureStarted: mCurrentParallelTaskData: " + MiCamera2ShotStill.this.mCurrentParallelTaskData.getTimestamp());
             }
         };
     }
 
     /* access modifiers changed from: protected */
-    public Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
-        Builder createCaptureRequest = this.mMiCamera.getCameraDevice().createCaptureRequest(2);
+    public CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
+        CaptureRequest.Builder createCaptureRequest = this.mMiCamera.getCameraDevice().createCaptureRequest(2);
         ImageReader photoImageReader = this.mMiCamera.getPhotoImageReader();
         createCaptureRequest.addTarget(photoImageReader.getSurface());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("size=");
-        sb.append(photoImageReader.getWidth());
-        sb.append("x");
-        sb.append(photoImageReader.getHeight());
-        Log.d(str, sb.toString());
+        Log.d(str, "size=" + photoImageReader.getWidth() + "x" + photoImageReader.getHeight());
         if (!isInQcfaMode() || Camera2DataContainer.getInstance().getBokehFrontCameraId() == this.mMiCamera.getId()) {
             createCaptureRequest.addTarget(this.mMiCamera.getPreviewSurface());
         }
@@ -152,12 +131,12 @@ public class MiCamera2ShotStill extends MiCamera2Shot<ParallelTaskData> {
 
     /* access modifiers changed from: protected */
     public void notifyResultData(ParallelTaskData parallelTaskData) {
-        notifyResultData(parallelTaskData, null, null);
+        notifyResultData(parallelTaskData, (CaptureResult) null, (CameraCharacteristics) null);
     }
 
     /* access modifiers changed from: protected */
     public void onImageReceived(Image image, int i) {
-        PictureCallback pictureCallback = getPictureCallback();
+        Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
         if (pictureCallback != null) {
             ParallelTaskData parallelTaskData = this.mCurrentParallelTaskData;
             if (parallelTaskData != null) {
@@ -166,46 +145,36 @@ public class MiCamera2ShotStill extends MiCamera2Shot<ParallelTaskData> {
                     this.mCurrentParallelTaskData.setTimestamp(image.getTimestamp());
                 }
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onImageReceived mCurrentParallelTaskData timestamp:");
-                sb.append(this.mCurrentParallelTaskData.getTimestamp());
-                sb.append(" image timestamp:");
-                sb.append(image.getTimestamp());
-                Log.d(str, sb.toString());
+                Log.d(str, "onImageReceived mCurrentParallelTaskData timestamp:" + this.mCurrentParallelTaskData.getTimestamp() + " image timestamp:" + image.getTimestamp());
                 byte[] firstPlane = Util.getFirstPlane(image);
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("onImageReceived: dataLen=");
-                sb2.append(firstPlane == null ? TEDefine.FACE_BEAUTY_NULL : Integer.valueOf(firstPlane.length));
-                sb2.append(" resultType = ");
-                sb2.append(i);
-                sb2.append(" timeStamp=");
-                sb2.append(image.getTimestamp());
-                sb2.append(" holder=");
-                sb2.append(hashCode());
-                Log.d(str2, sb2.toString());
+                StringBuilder sb = new StringBuilder();
+                sb.append("onImageReceived: dataLen=");
+                sb.append(firstPlane == null ? TEDefine.FACE_BEAUTY_NULL : Integer.valueOf(firstPlane.length));
+                sb.append(" resultType = ");
+                sb.append(i);
+                sb.append(" timeStamp=");
+                sb.append(image.getTimestamp());
+                sb.append(" holder=");
+                sb.append(hashCode());
+                Log.d(str2, sb.toString());
                 image.close();
                 this.mCurrentParallelTaskData.fillJpegData(firstPlane, i);
-                boolean z = this.mNeedCaptureResult ? this.mCurrentParallelTaskData.isJpegDataReady() && this.mCaptureResult != null : this.mCurrentParallelTaskData.isJpegDataReady();
-                if (z) {
-                    if (this.mIsIntent) {
-                        notifyResultData(this.mCurrentParallelTaskData);
-                        pictureCallback.onPictureTakenFinished(true);
-                    } else {
-                        pictureCallback.onPictureTakenFinished(true);
-                        notifyResultData(this.mCurrentParallelTaskData, this.mCaptureResult, this.mMiCamera.getCapabilities().getCameraCharacteristics());
-                    }
+                if (!(this.mNeedCaptureResult ? this.mCurrentParallelTaskData.isJpegDataReady() && this.mCaptureResult != null : this.mCurrentParallelTaskData.isJpegDataReady())) {
+                    return;
                 }
+                if (this.mIsIntent) {
+                    notifyResultData(this.mCurrentParallelTaskData);
+                    pictureCallback.onPictureTakenFinished(true);
+                    return;
+                }
+                pictureCallback.onPictureTakenFinished(true);
+                notifyResultData(this.mCurrentParallelTaskData, this.mCaptureResult, this.mMiCamera.getCapabilities().getCameraCharacteristics());
                 return;
             }
         }
         String str3 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("onImageReceived: something wrong happened when image received: callback = ");
-        sb3.append(pictureCallback);
-        sb3.append(" mCurrentParallelTaskData = ");
-        sb3.append(this.mCurrentParallelTaskData);
-        Log.w(str3, sb3.toString());
+        Log.w(str3, "onImageReceived: something wrong happened when image received: callback = " + pictureCallback + " mCurrentParallelTaskData = " + this.mCurrentParallelTaskData);
         image.close();
     }
 
@@ -236,8 +205,8 @@ public class MiCamera2ShotStill extends MiCamera2Shot<ParallelTaskData> {
                 return;
             }
             this.mCurrentParallelTaskData.setShot2Gallery(this.mMiCamera.getCameraConfigs().isShot2Gallery());
-            CaptureCallback generateCaptureCallback = generateCaptureCallback();
-            Builder generateRequestBuilder = generateRequestBuilder();
+            CameraCaptureSession.CaptureCallback generateCaptureCallback = generateCaptureCallback();
+            CaptureRequest.Builder generateRequestBuilder = generateRequestBuilder();
             PerformanceTracker.trackPictureCapture(0);
             this.mMiCamera.getCaptureSession().capture(generateRequestBuilder.build(), generateCaptureCallback, this.mCameraHandler);
         } catch (CameraAccessException e2) {

@@ -90,7 +90,7 @@ public class PreviewListPreference extends ListPreference {
     }
 
     public PreviewListPreference(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public PreviewListPreference(Context context, AttributeSet attributeSet) {

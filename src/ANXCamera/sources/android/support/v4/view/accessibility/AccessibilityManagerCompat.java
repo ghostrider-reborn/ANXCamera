@@ -1,7 +1,7 @@
 package android.support.v4.view.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.view.accessibility.AccessibilityManager;
@@ -19,7 +19,7 @@ public final class AccessibilityManagerCompat {
     public static abstract class AccessibilityStateChangeListenerCompat implements AccessibilityStateChangeListener {
     }
 
-    private static class AccessibilityStateChangeListenerWrapper implements android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener {
+    private static class AccessibilityStateChangeListenerWrapper implements AccessibilityManager.AccessibilityStateChangeListener {
         AccessibilityStateChangeListener mListener;
 
         AccessibilityStateChangeListenerWrapper(@NonNull AccessibilityStateChangeListener accessibilityStateChangeListener) {
@@ -50,7 +50,7 @@ public final class AccessibilityManagerCompat {
     }
 
     @RequiresApi(19)
-    private static class TouchExplorationStateChangeListenerWrapper implements android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener {
+    private static class TouchExplorationStateChangeListenerWrapper implements AccessibilityManager.TouchExplorationStateChangeListener {
         final TouchExplorationStateChangeListener mListener;
 
         TouchExplorationStateChangeListenerWrapper(@NonNull TouchExplorationStateChangeListener touchExplorationStateChangeListener) {
@@ -88,7 +88,7 @@ public final class AccessibilityManagerCompat {
     }
 
     public static boolean addTouchExplorationStateChangeListener(AccessibilityManager accessibilityManager, TouchExplorationStateChangeListener touchExplorationStateChangeListener) {
-        if (VERSION.SDK_INT < 19 || touchExplorationStateChangeListener == null) {
+        if (Build.VERSION.SDK_INT < 19 || touchExplorationStateChangeListener == null) {
             return false;
         }
         return accessibilityManager.addTouchExplorationStateChangeListener(new TouchExplorationStateChangeListenerWrapper(touchExplorationStateChangeListener));
@@ -118,7 +118,7 @@ public final class AccessibilityManagerCompat {
     }
 
     public static boolean removeTouchExplorationStateChangeListener(AccessibilityManager accessibilityManager, TouchExplorationStateChangeListener touchExplorationStateChangeListener) {
-        if (VERSION.SDK_INT < 19 || touchExplorationStateChangeListener == null) {
+        if (Build.VERSION.SDK_INT < 19 || touchExplorationStateChangeListener == null) {
             return false;
         }
         return accessibilityManager.removeTouchExplorationStateChangeListener(new TouchExplorationStateChangeListenerWrapper(touchExplorationStateChangeListener));

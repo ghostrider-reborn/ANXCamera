@@ -66,6 +66,8 @@ public class AppendOnlyLinkedArrayList<T> {
         }
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v0, resolved type: java.lang.Object[]} */
+    /* JADX WARNING: Multi-variable type inference failed */
     public void add(T t) {
         int i = this.capacity;
         int i2 = this.offset;

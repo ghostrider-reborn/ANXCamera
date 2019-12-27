@@ -18,7 +18,7 @@ class RoundedBitmapDrawable21 extends RoundedBitmapDrawable {
         outline.setRoundRect(this.mDstRect, getCornerRadius());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void gravityCompatApply(int i, int i2, int i3, Rect rect, Rect rect2) {
         Gravity.apply(i, i2, i3, rect, rect2, 0);
     }

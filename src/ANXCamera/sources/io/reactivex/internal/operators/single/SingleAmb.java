@@ -54,14 +54,13 @@ public final class SingleAmb<T> extends Single<T> {
     public void subscribeActual(SingleObserver<? super T> singleObserver) {
         int i;
         SingleSource<? extends T>[] singleSourceArr = this.sources;
-        String str = "One of the sources is null";
         if (singleSourceArr == null) {
             singleSourceArr = new SingleSource[8];
             try {
                 i = 0;
                 for (SingleSource<? extends T> singleSource : this.sourcesIterable) {
                     if (singleSource == null) {
-                        EmptyDisposable.error((Throwable) new NullPointerException(str), singleObserver);
+                        EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), (SingleObserver<?>) singleObserver);
                         return;
                     }
                     if (i == singleSourceArr.length) {
@@ -75,7 +74,7 @@ public final class SingleAmb<T> extends Single<T> {
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, singleObserver);
+                EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
                 return;
             }
         } else {
@@ -90,16 +89,18 @@ public final class SingleAmb<T> extends Single<T> {
             if (!ambSingleObserver.get()) {
                 if (singleSource2 == null) {
                     compositeDisposable.dispose();
-                    NullPointerException nullPointerException = new NullPointerException(str);
+                    NullPointerException nullPointerException = new NullPointerException("One of the sources is null");
                     if (ambSingleObserver.compareAndSet(false, true)) {
                         singleObserver.onError(nullPointerException);
+                        return;
                     } else {
                         RxJavaPlugins.onError(nullPointerException);
+                        return;
                     }
-                    return;
+                } else {
+                    singleSource2.subscribe(ambSingleObserver);
+                    i3++;
                 }
-                singleSource2.subscribe(ambSingleObserver);
-                i3++;
             } else {
                 return;
             }

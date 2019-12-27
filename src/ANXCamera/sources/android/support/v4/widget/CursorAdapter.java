@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.os.Handler;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
+import android.support.v4.widget.CursorFilter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -14,27 +14,27 @@ import android.widget.Filter;
 import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
 
-public abstract class CursorAdapter extends BaseAdapter implements Filterable, CursorFilterClient {
+public abstract class CursorAdapter extends BaseAdapter implements Filterable, CursorFilter.CursorFilterClient {
     @Deprecated
     public static final int FLAG_AUTO_REQUERY = 1;
     public static final int FLAG_REGISTER_CONTENT_OBSERVER = 2;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected boolean mAutoRequery;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected ChangeObserver mChangeObserver;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected Context mContext;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected Cursor mCursor;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected CursorFilter mCursorFilter;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected DataSetObserver mDataSetObserver;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected boolean mDataValid;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected FilterQueryProvider mFilterQueryProvider;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     protected int mRowIDColumn;
 
     private class ChangeObserver extends ContentObserver {
@@ -95,11 +95,12 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
     }
 
     public int getCount() {
-        if (this.mDataValid) {
-            Cursor cursor = this.mCursor;
-            if (cursor != null) {
-                return cursor.getCount();
-            }
+        if (!this.mDataValid) {
+            return 0;
+        }
+        Cursor cursor = this.mCursor;
+        if (cursor != null) {
+            return cursor.getCount();
         }
         return 0;
     }
@@ -132,14 +133,15 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
     }
 
     public Object getItem(int i) {
-        if (this.mDataValid) {
-            Cursor cursor = this.mCursor;
-            if (cursor != null) {
-                cursor.moveToPosition(i);
-                return this.mCursor;
-            }
+        if (!this.mDataValid) {
+            return null;
         }
-        return null;
+        Cursor cursor = this.mCursor;
+        if (cursor == null) {
+            return null;
+        }
+        cursor.moveToPosition(i);
+        return this.mCursor;
     }
 
     public long getItemId(int i) {
@@ -162,10 +164,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
             bindView(view, this.mContext, this.mCursor);
             return view;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("couldn't move cursor to position ");
-            sb.append(i);
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("couldn't move cursor to position " + i);
         }
     }
 
@@ -173,7 +172,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void init(Context context, Cursor cursor, int i) {
         boolean z = false;
         if ((i & 1) == 1) {

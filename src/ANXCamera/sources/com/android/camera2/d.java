@@ -1,10 +1,9 @@
 package com.android.camera2;
 
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 
 /* compiled from: lambda */
-public final /* synthetic */ class d implements OnImageAvailableListener {
+public final /* synthetic */ class d implements ImageReader.OnImageAvailableListener {
     private final /* synthetic */ MiCamera2 ub;
 
     public /* synthetic */ d(MiCamera2 miCamera2) {

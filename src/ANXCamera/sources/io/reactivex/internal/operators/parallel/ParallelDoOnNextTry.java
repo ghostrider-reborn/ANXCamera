@@ -17,7 +17,7 @@ public final class ParallelDoOnNextTry<T> extends ParallelFlowable<T> {
     final Consumer<? super T> onNext;
     final ParallelFlowable<T> source;
 
-    /* renamed from: io.reactivex.internal.operators.parallel.ParallelDoOnNextTry$1 reason: invalid class name */
+    /* renamed from: io.reactivex.internal.operators.parallel.ParallelDoOnNextTry$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$io$reactivex$parallel$ParallelFailureHandling = new int[ParallelFailureHandling.values().length];
 

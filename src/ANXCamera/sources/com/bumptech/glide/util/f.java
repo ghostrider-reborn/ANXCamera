@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /* compiled from: LruCache */
 public class f<T, Y> {
@@ -65,11 +64,11 @@ public class f<T, Y> {
     /* access modifiers changed from: protected */
     public synchronized void h(long j) {
         while (this.ig > j) {
-            Iterator it = this.cache.entrySet().iterator();
-            Entry entry = (Entry) it.next();
-            Object value = entry.getValue();
+            Iterator<Map.Entry<T, Y>> it = this.cache.entrySet().iterator();
+            Map.Entry next = it.next();
+            Object value = next.getValue();
             this.ig -= (long) r(value);
-            Object key = entry.getKey();
+            Object key = next.getKey();
             it.remove();
             b(key, value);
         }

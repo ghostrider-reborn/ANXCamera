@@ -9,10 +9,10 @@ import java.util.List;
 /* compiled from: ArrayUtil */
 public class e {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f178a = "e";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static final double f179b = 1.0E-9d;
 
     private e() {
@@ -27,7 +27,6 @@ public class e {
     }
 
     public static <T> boolean a(T t, T t2) {
-        boolean z = true;
         if (t == null && t2 == null) {
             return true;
         }
@@ -35,39 +34,25 @@ public class e {
             return false;
         }
         if (t instanceof Byte) {
-            if (((Byte) t).byteValue() != ((Byte) t2).byteValue()) {
-                z = false;
-            }
-            return z;
-        } else if (t instanceof Short) {
-            if (((Short) t).shortValue() != ((Short) t2).shortValue()) {
-                z = false;
-            }
-            return z;
-        } else if (t instanceof Integer) {
-            if (((Integer) t).intValue() != ((Integer) t2).intValue()) {
-                z = false;
-            }
-            return z;
-        } else if (t instanceof Long) {
-            if (((Long) t).longValue() != ((Long) t2).longValue()) {
-                z = false;
-            }
-            return z;
-        } else if (t instanceof Float) {
+            return ((Byte) t).byteValue() == ((Byte) t2).byteValue();
+        }
+        if (t instanceof Short) {
+            return ((Short) t).shortValue() == ((Short) t2).shortValue();
+        }
+        if (t instanceof Integer) {
+            return ((Integer) t).intValue() == ((Integer) t2).intValue();
+        }
+        if (t instanceof Long) {
+            return ((Long) t).longValue() == ((Long) t2).longValue();
+        }
+        if (t instanceof Float) {
             double abs = (double) Math.abs(((Float) t).floatValue() - ((Float) t2).floatValue());
-            if (abs <= -1.0E-9d || abs >= f179b) {
-                z = false;
-            }
-            return z;
+            return abs > -1.0E-9d && abs < f179b;
         } else if (!(t instanceof Double)) {
             return t instanceof String ? ((String) t).equals((String) t2) : t instanceof g ? ((g) t).h((g) t2) : t.equals(t2);
         } else {
             double abs2 = Math.abs(((Double) t).doubleValue() - ((Double) t2).doubleValue());
-            if (abs2 <= -1.0E-9d || abs2 >= f179b) {
-                z = false;
-            }
-            return z;
+            return abs2 > -1.0E-9d && abs2 < f179b;
         }
     }
 
@@ -97,10 +82,7 @@ public class e {
         }
         int length = tArr.length;
         if (length == 1) {
-            if (tArr[0] == t) {
-                tArr = (Object[]) Array.newInstance(cls, 0);
-            }
-            return tArr;
+            return tArr[0] == t ? (Object[]) Array.newInstance(cls, 0) : tArr;
         }
         int[] c2 = c(tArr, t);
         if (c2 == null || c2.length <= 0) {
@@ -133,23 +115,16 @@ public class e {
     }
 
     public static <T> int b(T[] tArr, T t) {
-        int i = -1;
         if (tArr == null) {
             return -1;
         }
         int length = tArr.length;
-        int i2 = 0;
-        while (true) {
-            if (i2 >= length) {
-                break;
-            } else if (a(t, tArr[i2])) {
-                i = i2;
-                break;
-            } else {
-                i2++;
+        for (int i = 0; i < length; i++) {
+            if (a(t, tArr[i])) {
+                return i;
             }
         }
-        return i;
+        return -1;
     }
 
     public static <T> void b(T[] tArr) {

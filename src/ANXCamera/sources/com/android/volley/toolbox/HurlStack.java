@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -43,11 +42,11 @@ public class HurlStack extends BaseHttpStack {
     }
 
     public HurlStack() {
-        this(null);
+        this((UrlRewriter) null);
     }
 
     public HurlStack(UrlRewriter urlRewriter) {
-        this(urlRewriter, null);
+        this(urlRewriter, (SSLSocketFactory) null);
     }
 
     public HurlStack(UrlRewriter urlRewriter, SSLSocketFactory sSLSocketFactory) {
@@ -57,9 +56,8 @@ public class HurlStack extends BaseHttpStack {
 
     private static void addBody(HttpURLConnection httpURLConnection, Request<?> request, byte[] bArr) throws IOException {
         httpURLConnection.setDoOutput(true);
-        String str = "Content-Type";
-        if (!httpURLConnection.getRequestProperties().containsKey(str)) {
-            httpURLConnection.setRequestProperty(str, request.getBodyContentType());
+        if (!httpURLConnection.getRequestProperties().containsKey("Content-Type")) {
+            httpURLConnection.setRequestProperty("Content-Type", request.getBodyContentType());
         }
         DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
         dataOutputStream.write(bArr);
@@ -76,10 +74,10 @@ public class HurlStack extends BaseHttpStack {
     @VisibleForTesting
     static List<Header> convertHeaders(Map<String, List<String>> map) {
         ArrayList arrayList = new ArrayList(map.size());
-        for (Entry entry : map.entrySet()) {
-            if (entry.getKey() != null) {
-                for (String header : (List) entry.getValue()) {
-                    arrayList.add(new Header((String) entry.getKey(), header));
+        for (Map.Entry next : map.entrySet()) {
+            if (next.getKey() != null) {
+                for (String header : (List) next.getValue()) {
+                    arrayList.add(new Header((String) next.getKey(), header));
                 }
             }
         }
@@ -116,12 +114,11 @@ public class HurlStack extends BaseHttpStack {
     }
 
     static void setConnectionParametersForRequest(HttpURLConnection httpURLConnection, Request<?> request) throws IOException, AuthFailureError {
-        String str = "POST";
         switch (request.getMethod()) {
             case -1:
                 byte[] postBody = request.getPostBody();
                 if (postBody != null) {
-                    httpURLConnection.setRequestMethod(str);
+                    httpURLConnection.setRequestMethod("POST");
                     addBody(httpURLConnection, request, postBody);
                     return;
                 }
@@ -130,7 +127,7 @@ public class HurlStack extends BaseHttpStack {
                 httpURLConnection.setRequestMethod("GET");
                 return;
             case 1:
-                httpURLConnection.setRequestMethod(str);
+                httpURLConnection.setRequestMethod("POST");
                 addBodyIfExists(httpURLConnection, request);
                 return;
             case 2:
@@ -175,10 +172,7 @@ public class HurlStack extends BaseHttpStack {
         if (urlRewriter != null) {
             str = urlRewriter.rewriteUrl(url);
             if (str == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("URL blocked by rewriter: ");
-                sb.append(url);
-                throw new IOException(sb.toString());
+                throw new IOException("URL blocked by rewriter: " + url);
             }
         } else {
             str = url;

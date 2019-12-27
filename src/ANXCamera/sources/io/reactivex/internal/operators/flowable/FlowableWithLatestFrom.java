@@ -73,7 +73,7 @@ public final class FlowableWithLatestFrom<T, U, R> extends AbstractFlowableWithU
 
         public void onNext(T t) {
             if (!tryOnNext(t)) {
-                ((Subscription) this.s.get()).request(1);
+                this.s.get().request(1);
             }
         }
 
@@ -124,6 +124,6 @@ public final class FlowableWithLatestFrom<T, U, R> extends AbstractFlowableWithU
         WithLatestFromSubscriber withLatestFromSubscriber = new WithLatestFromSubscriber(serializedSubscriber, this.combiner);
         serializedSubscriber.onSubscribe(withLatestFromSubscriber);
         this.other.subscribe(new FlowableWithLatestSubscriber(withLatestFromSubscriber));
-        this.source.subscribe((FlowableSubscriber<? super T>) withLatestFromSubscriber);
+        this.source.subscribe(withLatestFromSubscriber);
     }
 }

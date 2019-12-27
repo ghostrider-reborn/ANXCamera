@@ -1,11 +1,9 @@
 package com.android.camera.effect.renders;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.Paint.FontMetricsInt;
-import android.graphics.Paint.Style;
-import android.os.Build.VERSION;
+import android.graphics.Paint;
+import android.os.Build;
 import android.text.TextPaint;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -28,12 +26,12 @@ public class CustomTextWaterMark {
     private final TextPaint mCNPaint;
     private final TextPaint mENPaint;
     private Bitmap mInputBitmap;
-    private final FontMetricsInt mMetrics;
+    private final Paint.FontMetricsInt mMetrics;
     private float mStartX;
     private float mStartY;
     private String mText;
 
-    public CustomTextWaterMark(Bitmap bitmap, float f2, float f3, String str, TextPaint textPaint, TextPaint textPaint2, FontMetricsInt fontMetricsInt) {
+    public CustomTextWaterMark(Bitmap bitmap, float f2, float f3, String str, TextPaint textPaint, TextPaint textPaint2, Paint.FontMetricsInt fontMetricsInt) {
         this.mInputBitmap = bitmap;
         this.mStartX = f2;
         this.mStartY = f3;
@@ -56,7 +54,7 @@ public class CustomTextWaterMark {
         }
         textPaint.setShadowLayer(0.1f, 0.0f, 2.0f, 771751936);
         textPaint.setStrokeWidth(0.5f);
-        textPaint.setStyle(Style.FILL_AND_STROKE);
+        textPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         setLongshotMode(textPaint, 0.05f);
         return textPaint;
     }
@@ -70,13 +68,13 @@ public class CustomTextWaterMark {
     }
 
     private static void setLongshotMode(TextPaint textPaint, float f2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             CompatibilityUtils.setTextPaintLetterSpacing(textPaint, f2);
         }
     }
 
     public Bitmap drawToBitmap() {
-        Bitmap copy = this.mInputBitmap.copy(Config.ARGB_8888, true);
+        Bitmap copy = this.mInputBitmap.copy(Bitmap.Config.ARGB_8888, true);
         this.mInputBitmap.recycle();
         copy.setPremultiplied(true);
         onDraw(new Canvas(copy), copy);
@@ -105,9 +103,6 @@ public class CustomTextWaterMark {
             i = (int) (f3 + f2);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Custom watermark cost time = ");
-        sb.append(System.nanoTime() - nanoTime);
-        Log.v(str, sb.toString());
+        Log.v(str, "Custom watermark cost time = " + (System.nanoTime() - nanoTime));
     }
 }

@@ -2,8 +2,10 @@ package com.arcsoft.avatar.recoder;
 
 import android.media.AudioRecord;
 import android.media.MediaCodec;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
-import android.os.Build.VERSION;
+import android.os.Build;
+import android.view.Surface;
 import com.arcsoft.avatar.util.NotifyMessage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,10 +44,7 @@ public class AudioEncoder extends BaseEncoder {
         this.A = 1;
         this.B = "audio/mp4a-latm";
         this.C = 2000000;
-        if (VERSION.SDK_INT > 28) {
-            i = 22050;
-        }
-        this.D = i;
+        this.D = Build.VERSION.SDK_INT > 28 ? 22050 : i;
         this.E = 16;
         this.F = 2;
         this.G = 1;
@@ -63,7 +62,7 @@ public class AudioEncoder extends BaseEncoder {
         } catch (Exception e2) {
             RecordingListener recordingListener = this.o;
             if (recordingListener != null) {
-                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_CREATE, Integer.valueOf(0));
+                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_CREATE, 0);
             }
             e2.printStackTrace();
         }
@@ -77,18 +76,17 @@ public class AudioEncoder extends BaseEncoder {
     }
 
     private boolean c() {
-        String str = "audio/mp4a-latm";
-        MediaFormat createAudioFormat = MediaFormat.createAudioFormat(str, this.D, this.E);
+        MediaFormat createAudioFormat = MediaFormat.createAudioFormat("audio/mp4a-latm", this.D, this.E);
         createAudioFormat.setInteger("aac-profile", 2);
         createAudioFormat.setInteger("channel-count", d());
         createAudioFormat.setInteger("bitrate", this.H);
         try {
-            this.i = MediaCodec.createEncoderByType(str);
+            this.i = MediaCodec.createEncoderByType("audio/mp4a-latm");
         } catch (IOException e2) {
             this.i = null;
             RecordingListener recordingListener = this.o;
             if (recordingListener != null) {
-                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_CREATE, Integer.valueOf(0));
+                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_CREATE, 0);
             }
             e2.printStackTrace();
         }
@@ -97,12 +95,12 @@ public class AudioEncoder extends BaseEncoder {
             return false;
         }
         try {
-            mediaCodec.configure(createAudioFormat, null, null, 1);
+            mediaCodec.configure(createAudioFormat, (Surface) null, (MediaCrypto) null, 1);
         } catch (Exception e3) {
             e3.printStackTrace();
             RecordingListener recordingListener2 = this.o;
             if (recordingListener2 != null) {
-                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_CONFIGURE, Integer.valueOf(0));
+                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_CONFIGURE, 0);
             }
         }
         return true;
@@ -153,7 +151,7 @@ public class AudioEncoder extends BaseEncoder {
                             e2.printStackTrace();
                             RecordingListener recordingListener = AudioEncoder.this.o;
                             if (recordingListener != null) {
-                                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_START_RECORDING, Integer.valueOf(0));
+                                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_START_RECORDING, 0);
                             }
                         }
                         try {
@@ -161,7 +159,7 @@ public class AudioEncoder extends BaseEncoder {
                         } catch (Exception unused) {
                             RecordingListener recordingListener2 = AudioEncoder.this.o;
                             if (recordingListener2 != null) {
-                                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_START, Integer.valueOf(0));
+                                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_START, 0);
                             }
                         }
                         long nanoTime = System.nanoTime();
@@ -178,7 +176,7 @@ public class AudioEncoder extends BaseEncoder {
                                             } catch (Exception e3) {
                                                 e3.printStackTrace();
                                                 if (AudioEncoder.this.o != null) {
-                                                    AudioEncoder.this.o.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_STOP, Integer.valueOf(0));
+                                                    AudioEncoder.this.o.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_STOP, 0);
                                                 }
                                             }
                                             try {
@@ -188,7 +186,7 @@ public class AudioEncoder extends BaseEncoder {
                                                 } catch (Exception e4) {
                                                     e4.printStackTrace();
                                                     if (AudioEncoder.this.o != null) {
-                                                        AudioEncoder.this.o.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_START_RECORDING, Integer.valueOf(0));
+                                                        AudioEncoder.this.o.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_START_RECORDING, 0);
                                                     }
                                                 }
                                                 AudioEncoder.this.g += System.nanoTime() - nanoTime2;
@@ -211,10 +209,10 @@ public class AudioEncoder extends BaseEncoder {
                                     e6.printStackTrace();
                                     RecordingListener recordingListener3 = AudioEncoder.this.o;
                                     if (recordingListener3 != null) {
-                                        recordingListener3.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_STOP, Integer.valueOf(0));
+                                        recordingListener3.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_AUDIO_RECORD_STOP, 0);
                                     }
                                 }
-                                AudioEncoder.this.encode(null, 0);
+                                AudioEncoder.this.encode((ByteBuffer) null, 0);
                                 AudioEncoder.this.drain();
                                 return;
                             }

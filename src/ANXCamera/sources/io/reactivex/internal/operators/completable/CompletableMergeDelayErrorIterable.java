@@ -6,6 +6,7 @@ import io.reactivex.CompletableSource;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.completable.CompletableMergeDelayErrorArray;
 import io.reactivex.internal.util.AtomicThrowable;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,7 +22,7 @@ public final class CompletableMergeDelayErrorIterable extends Completable {
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         completableObserver.onSubscribe(compositeDisposable);
         try {
-            Iterator it = this.sources.iterator();
+            Iterator<? extends CompletableSource> it = this.sources.iterator();
             ObjectHelper.requireNonNull(it, "The source iterator returned is null");
             Iterator it2 = it;
             AtomicInteger atomicInteger = new AtomicInteger(1);
@@ -33,11 +34,14 @@ public final class CompletableMergeDelayErrorIterable extends Completable {
                             Throwable terminate = atomicThrowable.terminate();
                             if (terminate == null) {
                                 completableObserver.onComplete();
+                                return;
                             } else {
                                 completableObserver.onError(terminate);
+                                return;
                             }
+                        } else {
+                            return;
                         }
-                        return;
                     } else if (!compositeDisposable.isDisposed()) {
                         try {
                             Object next = it2.next();
@@ -45,7 +49,7 @@ public final class CompletableMergeDelayErrorIterable extends Completable {
                             CompletableSource completableSource = (CompletableSource) next;
                             if (!compositeDisposable.isDisposed()) {
                                 atomicInteger.getAndIncrement();
-                                completableSource.subscribe(new MergeInnerCompletableObserver(completableObserver, compositeDisposable, atomicThrowable, atomicInteger));
+                                completableSource.subscribe(new CompletableMergeDelayErrorArray.MergeInnerCompletableObserver(completableObserver, compositeDisposable, atomicThrowable, atomicInteger));
                             } else {
                                 return;
                             }

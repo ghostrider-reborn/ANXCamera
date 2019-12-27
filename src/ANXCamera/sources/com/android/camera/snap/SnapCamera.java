@@ -6,35 +6,26 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraDevice.StateCallback;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
-import android.hardware.camera2.CaptureRequest.Key;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.location.Location;
 import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.media.MediaRecorder;
-import android.media.MediaRecorder.OnErrorListener;
-import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.provider.MediaStore.Video.Media;
+import android.provider.MediaStore;
 import android.provider.MiuiSettings;
-import android.provider.MiuiSettings.ScreenEffect;
-import android.provider.Settings.Secure;
-import android.provider.Settings.System;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.view.OrientationEventListener;
 import android.view.Surface;
@@ -46,10 +37,8 @@ import com.android.camera.FileCompat;
 import com.android.camera.LocationManager;
 import com.android.camera.MiuiCameraSound;
 import com.android.camera.PictureSizeManager;
-import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.log.Log;
 import com.android.camera.module.VideoModule;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
@@ -58,15 +47,14 @@ import com.android.camera.storage.Storage;
 import com.android.camera2.CameraCapabilities;
 import com.mi.config.b;
 import com.xiaomi.camera.core.PictureInfo;
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 @TargetApi(26)
-public class SnapCamera implements OnErrorListener, OnInfoListener {
+public class SnapCamera implements MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener {
     private static final int MSG_FOCUS_TIMEOUT = 1;
     private static final String SUFFIX = "_SNAP";
     /* access modifiers changed from: private */
@@ -81,7 +69,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     public Handler mCameraHandler;
     private int mCameraId;
     private MiuiCameraSound mCameraSound;
-    private StateCallback mCameraStateCallback = new StateCallback() {
+    private CameraDevice.StateCallback mCameraStateCallback = new CameraDevice.StateCallback() {
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
             Log.w(SnapCamera.TAG, "onDisconnected");
             SnapCamera.this.release();
@@ -89,37 +77,27 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
 
         public void onError(@NonNull CameraDevice cameraDevice, int i) {
             String access$100 = SnapCamera.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onError: ");
-            sb.append(i);
-            Log.e(access$100, sb.toString());
+            Log.e(access$100, "onError: " + i);
             SnapCamera.this.release();
         }
 
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             synchronized (SnapCamera.this) {
-                SnapCamera.this.mCameraDevice = cameraDevice;
+                CameraDevice unused = SnapCamera.this.mCameraDevice = cameraDevice;
             }
             if (SnapCamera.this.mStatusListener != null) {
                 SnapCamera.this.mStatusListener.onCameraOpened();
             }
         }
     };
-    private final CaptureCallback mCaptureCallback = new CaptureCallback() {
+    private final CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() {
         private void process(CaptureResult captureResult) {
-            if (!(SnapCamera.this.mCameraDevice == null || SnapCamera.this.mFocused || captureResult.get(CaptureResult.CONTROL_AF_STATE) == null)) {
+            if (SnapCamera.this.mCameraDevice != null && !SnapCamera.this.mFocused && captureResult.get(CaptureResult.CONTROL_AF_STATE) != null) {
                 Integer num = (Integer) captureResult.get(CaptureResult.CONTROL_AF_STATE);
                 String access$100 = SnapCamera.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("process: afState=");
-                sb.append(num);
-                sb.append(" aeState=");
-                sb.append(captureResult.get(CaptureResult.CONTROL_AE_STATE));
-                sb.append(" mFocused=");
-                sb.append(SnapCamera.this.mFocused);
-                Log.d(access$100, sb.toString());
+                Log.d(access$100, "process: afState=" + num + " aeState=" + captureResult.get(CaptureResult.CONTROL_AE_STATE) + " mFocused=" + SnapCamera.this.mFocused);
                 if (2 == num.intValue()) {
-                    SnapCamera.this.mFocused = true;
+                    boolean unused = SnapCamera.this.mFocused = true;
                     SnapCamera.this.mCameraHandler.removeMessages(1);
                 }
             }
@@ -149,33 +127,31 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     /* access modifiers changed from: private */
     public int mOrientation = 0;
     private OrientationEventListener mOrientationListener;
-    private final OnImageAvailableListener mPhotoAvailableListener = new OnImageAvailableListener() {
-        /* JADX WARNING: Code restructure failed: missing block: B:16:0x001f, code lost:
+    private final ImageReader.OnImageAvailableListener mPhotoAvailableListener = new ImageReader.OnImageAvailableListener() {
+        /* JADX WARNING: Code restructure failed: missing block: B:15:0x001f, code lost:
             r0 = move-exception;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:17:0x0020, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:16:0x0020, code lost:
             if (r2 != null) goto L_0x0022;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:19:?, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:18:?, code lost:
             r2.close();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:23:0x002a, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:22:0x002a, code lost:
             throw r0;
          */
         public void onImageAvailable(ImageReader imageReader) {
             try {
                 Image acquireNextImage = imageReader.acquireNextImage();
-                if (acquireNextImage == null) {
+                if (acquireNextImage != null) {
+                    byte[] firstPlane = Util.getFirstPlane(acquireNextImage);
+                    if (firstPlane != null) {
+                        SnapCamera.this.onPictureTaken(firstPlane);
+                    }
                     if (acquireNextImage != null) {
                         acquireNextImage.close();
                     }
-                    return;
-                }
-                byte[] firstPlane = Util.getFirstPlane(acquireNextImage);
-                if (firstPlane != null) {
-                    SnapCamera.this.onPictureTaken(firstPlane);
-                }
-                if (acquireNextImage != null) {
+                } else if (acquireNextImage != null) {
                     acquireNextImage.close();
                 }
             } catch (Exception e2) {
@@ -186,7 +162,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         }
     };
     private ImageReader mPhotoImageReader;
-    private Builder mPreviewRequestBuilder;
+    private CaptureRequest.Builder mPreviewRequestBuilder;
     private Surface mPreviewSurface;
     private CamcorderProfile mProfile;
     /* access modifiers changed from: private */
@@ -203,7 +179,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                     cameraCaptureSession.close();
                     return;
                 }
-                SnapCamera.this.mCaptureSession = cameraCaptureSession;
+                CameraCaptureSession unused = SnapCamera.this.mCaptureSession = cameraCaptureSession;
                 SnapCamera.this.startPreview();
                 SnapCamera.this.capture();
             }
@@ -213,7 +189,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     public SnapStatusListener mStatusListener;
     private SurfaceTexture mSurfaceTexture;
     /* access modifiers changed from: private */
-    public Builder mVideoRequestBuilder;
+    public CaptureRequest.Builder mVideoRequestBuilder;
     private int mWidth;
 
     public interface SnapStatusListener {
@@ -236,36 +212,28 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
             initCamera();
         } catch (Exception e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("init failed ");
-            sb.append(e2.getMessage());
-            Log.e(str, sb.toString());
+            Log.e(str, "init failed " + e2.getMessage());
         }
     }
 
-    private void applySettingsForPreview(Builder builder) {
-        Key key = CaptureRequest.CONTROL_MODE;
-        Integer valueOf = Integer.valueOf(1);
-        builder.set(key, valueOf);
-        builder.set(CaptureRequest.CONTROL_AF_MODE, Integer.valueOf(4));
-        builder.set(CaptureRequest.CONTROL_AE_MODE, valueOf);
-        builder.set(CaptureRequest.FLASH_MODE, Integer.valueOf(0));
-        builder.set(CaptureRequest.CONTROL_AWB_MODE, valueOf);
+    private void applySettingsForPreview(CaptureRequest.Builder builder) {
+        builder.set(CaptureRequest.CONTROL_MODE, 1);
+        builder.set(CaptureRequest.CONTROL_AF_MODE, 4);
+        builder.set(CaptureRequest.CONTROL_AE_MODE, 1);
+        builder.set(CaptureRequest.FLASH_MODE, 0);
+        builder.set(CaptureRequest.CONTROL_AWB_MODE, 1);
     }
 
     /* access modifiers changed from: private */
     public synchronized void capture() {
         if (this.mFocused) {
             try {
-                Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(2);
+                CaptureRequest.Builder createCaptureRequest = this.mCameraDevice.createCaptureRequest(2);
                 createCaptureRequest.addTarget(this.mPhotoImageReader.getSurface());
                 int jpegRotation = Util.getJpegRotation(this.mCameraId, this.mOrientation);
                 createCaptureRequest.set(CaptureRequest.JPEG_ORIENTATION, Integer.valueOf(jpegRotation));
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("orientation=");
-                sb.append(jpegRotation);
-                Log.d(str, sb.toString());
+                Log.d(str, "orientation=" + jpegRotation);
                 Location currentLocation = LocationManager.instance().getCurrentLocation();
                 if (currentLocation != null) {
                     createCaptureRequest.set(CaptureRequest.JPEG_GPS_LOCATION, currentLocation);
@@ -274,10 +242,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                 this.mCaptureSession.capture(createCaptureRequest.build(), this.mCaptureCallback, this.mCameraHandler);
             } catch (CameraAccessException e2) {
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("takeSnap: ");
-                sb2.append(e2.getMessage());
-                Log.e(str2, sb2.toString(), e2);
+                Log.e(str2, "takeSnap: " + e2.getMessage(), e2);
             }
         } else if (this.mStatusListener != null) {
             this.mStatusListener.onSkipCapture();
@@ -292,7 +257,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
 
     private void initCamera() {
         this.mCameraId = 0;
-        if (System.getInt(this.mContext.getContentResolver(), "persist.camera.snap.auto_switch", 0) == 1) {
+        if (Settings.System.getInt(this.mContext.getContentResolver(), "persist.camera.snap.auto_switch", 0) == 1) {
             this.mCameraId = CameraSettings.readPreferredCameraId();
         }
         CameraManager cameraManager = (CameraManager) this.mContext.getSystemService("camera");
@@ -304,31 +269,25 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                 int preferVideoQuality = CameraSettings.getPreferVideoQuality(this.mCameraId, 162);
                 if (CamcorderProfile.hasProfile(this.mCameraId, preferVideoQuality)) {
                     this.mProfile = CamcorderProfile.get(this.mCameraId, preferVideoQuality);
-                } else {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("invalid camcorder profile ");
-                    sb.append(preferVideoQuality);
-                    Log.w(str, sb.toString());
-                    this.mProfile = CamcorderProfile.get(this.mCameraId, 5);
+                    return;
                 }
-            } else {
-                PictureSizeManager.initialize(this.mCameraCapabilities.getSupportedOutputSize(256), 0, 163, this.mCameraId);
-                CameraSize bestPictureSize = PictureSizeManager.getBestPictureSize(Util.getRatio(CameraSettings.getPictureSizeRatioString()));
-                CameraSize optimalPreviewSize = Util.getOptimalPreviewSize(false, this.mCameraId, this.mCameraCapabilities.getSupportedOutputSize(SurfaceTexture.class), (double) CameraSettings.getPreviewAspectRatio(bestPictureSize.width, bestPictureSize.height));
-                this.mSurfaceTexture = new SurfaceTexture(false);
-                this.mSurfaceTexture.setDefaultBufferSize(optimalPreviewSize.width, optimalPreviewSize.height);
-                this.mPreviewSurface = new Surface(this.mSurfaceTexture);
-                preparePhotoImageReader(bestPictureSize);
-                this.mWidth = bestPictureSize.width;
-                this.mHeight = bestPictureSize.height;
+                String str = TAG;
+                Log.w(str, "invalid camcorder profile " + preferVideoQuality);
+                this.mProfile = CamcorderProfile.get(this.mCameraId, 5);
+                return;
             }
+            PictureSizeManager.initialize(this.mCameraCapabilities.getSupportedOutputSize(256), 0, 163, this.mCameraId);
+            CameraSize bestPictureSize = PictureSizeManager.getBestPictureSize(Util.getRatio(CameraSettings.getPictureSizeRatioString()));
+            CameraSize optimalPreviewSize = Util.getOptimalPreviewSize(false, this.mCameraId, this.mCameraCapabilities.getSupportedOutputSize(SurfaceTexture.class), (double) CameraSettings.getPreviewAspectRatio(bestPictureSize.width, bestPictureSize.height));
+            this.mSurfaceTexture = new SurfaceTexture(false);
+            this.mSurfaceTexture.setDefaultBufferSize(optimalPreviewSize.width, optimalPreviewSize.height);
+            this.mPreviewSurface = new Surface(this.mSurfaceTexture);
+            preparePhotoImageReader(bestPictureSize);
+            this.mWidth = bestPictureSize.width;
+            this.mHeight = bestPictureSize.height;
         } catch (CameraAccessException | SecurityException e2) {
             String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("initCamera: ");
-            sb2.append(e2.getMessage());
-            Log.e(str2, sb2.toString(), e2);
+            Log.e(str2, "initCamera: " + e2.getMessage(), e2);
         }
     }
 
@@ -339,7 +298,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         this.mCameraHandler = new Handler(this.mHandlerThread.getLooper()) {
             public void handleMessage(Message message) {
                 if (1 == message.what) {
-                    SnapCamera.this.mFocused = true;
+                    boolean unused = SnapCamera.this.mFocused = true;
                 }
             }
         };
@@ -349,7 +308,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         this.mOrientationListener = new OrientationEventListener(this.mContext, b.Uh() ? 2 : 3) {
             public void onOrientationChanged(int i) {
                 SnapCamera snapCamera = SnapCamera.this;
-                snapCamera.mOrientation = Util.roundOrientation(i, snapCamera.mOrientation);
+                int unused = snapCamera.mOrientation = Util.roundOrientation(i, snapCamera.mOrientation);
             }
         };
         if (this.mOrientationListener.canDetectOrientation()) {
@@ -362,7 +321,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     }
 
     private void initSnapType() {
-        String string = Secure.getString(this.mContext.getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN);
+        String string = Settings.Secure.getString(this.mContext.getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN);
         if (string.equals(MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE)) {
             this.mIsCamcorder = false;
         } else if (string.equals(MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE)) {
@@ -378,58 +337,30 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     }
 
     public static boolean isSnapEnabled(Context context) {
-        DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
-        String str = CameraSettings.KEY_CAMERA_SNAP;
-        String string = dataItemGlobal.getString(str, null);
-        String str2 = MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN;
+        String string = DataRepository.dataItemGlobal().getString(CameraSettings.KEY_CAMERA_SNAP, (String) null);
         if (string != null) {
-            Secure.putString(context.getContentResolver(), str2, CameraSettings.getMiuiSettingsKeyForStreetSnap(string));
-            DataRepository.dataItemGlobal().editor().remove(str).apply();
+            Settings.Secure.putString(context.getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN, CameraSettings.getMiuiSettingsKeyForStreetSnap(string));
+            DataRepository.dataItemGlobal().editor().remove(CameraSettings.KEY_CAMERA_SNAP).apply();
         }
-        String string2 = Secure.getString(context.getContentResolver(), str2);
+        String string2 = Settings.Secure.getString(context.getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN);
         return MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string2) || MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string2);
     }
 
     /* access modifiers changed from: private */
     public void onPictureTaken(byte[] bArr) {
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Util.createJpegName(System.currentTimeMillis()));
-            sb.append(SUFFIX);
-            Uri addImageForSnapCamera = Storage.addImageForSnapCamera(this.mContext, sb.toString(), System.currentTimeMillis(), LocationManager.instance().getCurrentLocation(), Exif.getOrientation(bArr), bArr, this.mWidth, this.mHeight, false, false, false, null, getPictureInfo());
+            Uri addImageForSnapCamera = Storage.addImageForSnapCamera(this.mContext, Util.createJpegName(System.currentTimeMillis()) + SUFFIX, System.currentTimeMillis(), LocationManager.instance().getCurrentLocation(), Exif.getOrientation(bArr), bArr, this.mWidth, this.mHeight, false, false, false, (String) null, getPictureInfo());
             if (this.mStatusListener != null) {
                 playSound();
                 this.mStatusListener.onDone(addImageForSnapCamera);
             }
         } catch (Exception e2) {
             String str = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("save picture failed ");
-            sb2.append(e2.getMessage());
-            Log.e(str, sb2.toString());
+            Log.e(str, "save picture failed " + e2.getMessage());
         }
     }
 
     /* JADX WARNING: type inference failed for: r1v2, types: [com.android.camera.MiuiCameraSound, boolean] */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r1v2, types: [com.android.camera.MiuiCameraSound, boolean]
-  assigns: [boolean]
-  uses: [?[int, boolean, OBJECT, ARRAY, byte, short, char], com.android.camera.MiuiCameraSound]
-  mth insns count: 8
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 1 */
     private void playSound() {
         if (this.mCameraSound != null) {
             ? isCameraSoundOpen = CameraSettings.isCameraSoundOpen();
@@ -451,17 +382,15 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     private void setRecorderOrientationHint() {
         int sensorOrientation = this.mCameraCapabilities.getSensorOrientation();
         if (this.mOrientation != -1) {
-            sensorOrientation = this.mCameraCapabilities.getFacing() == 0 ? ((sensorOrientation - this.mOrientation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : (sensorOrientation + this.mOrientation) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+            sensorOrientation = this.mCameraCapabilities.getFacing() == 0 ? ((sensorOrientation - this.mOrientation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : (sensorOrientation + this.mOrientation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setOrientationHint: ");
-        sb.append(sensorOrientation);
-        Log.d(str, sb.toString());
+        Log.d(str, "setOrientationHint: " + sensorOrientation);
         this.mMediaRecorder.setOrientationHint(sensorOrientation);
     }
 
     private void setupMediaRecorder() {
+        String format;
         this.mMediaRecorder = new MediaRecorder();
         this.mMediaRecorder.setAudioSource(5);
         this.mMediaRecorder.setVideoSource(2);
@@ -473,40 +402,21 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         if (currentLocation != null) {
             this.mMediaRecorder.setLocation((float) currentLocation.getLatitude(), (float) currentLocation.getLongitude());
         }
-        String format = new SimpleDateFormat(this.mContext.getString(R.string.video_file_name_format), Locale.ENGLISH).format(Long.valueOf(System.currentTimeMillis()));
-        StringBuilder sb = new StringBuilder();
-        sb.append(format);
-        sb.append(SUFFIX);
-        sb.append(Util.convertOutputFormatToFileExt(this.mProfile.fileFormat));
-        String sb2 = sb.toString();
         String convertOutputFormatToMimeType = Util.convertOutputFormatToMimeType(this.mProfile.fileFormat);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(Storage.DIRECTORY);
-        sb3.append('/');
-        sb3.append(sb2);
-        String sb4 = sb3.toString();
+        String str = Storage.DIRECTORY + '/' + r2;
         this.mContentValues = new ContentValues(7);
         this.mContentValues.put("title", format);
-        this.mContentValues.put("_display_name", sb2);
+        this.mContentValues.put("_display_name", format + SUFFIX + Util.convertOutputFormatToFileExt(this.mProfile.fileFormat));
         this.mContentValues.put("mime_type", convertOutputFormatToMimeType);
-        this.mContentValues.put("_data", sb4);
-        ContentValues contentValues = this.mContentValues;
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(Integer.toString(this.mProfile.videoFrameWidth));
-        sb5.append("x");
-        sb5.append(Integer.toString(this.mProfile.videoFrameHeight));
-        contentValues.put("resolution", sb5.toString());
+        this.mContentValues.put("_data", str);
+        this.mContentValues.put("resolution", Integer.toString(this.mProfile.videoFrameWidth) + "x" + Integer.toString(this.mProfile.videoFrameHeight));
         if (currentLocation != null) {
             this.mContentValues.put("latitude", Double.valueOf(currentLocation.getLatitude()));
             this.mContentValues.put("longitude", Double.valueOf(currentLocation.getLongitude()));
         }
         long availableSpace = Storage.getAvailableSpace() - Storage.LOW_STORAGE_THRESHOLD;
         if (VideoModule.VIDEO_MAX_SINGLE_FILE_SIZE < availableSpace && DataRepository.dataItemFeature().ub()) {
-            String str = TAG;
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append("need reduce , now maxFileSize = ");
-            sb6.append(availableSpace);
-            Log.d(str, sb6.toString());
+            Log.d(TAG, "need reduce , now maxFileSize = " + availableSpace);
             availableSpace = 3670016000L;
         }
         long j = VideoModule.VIDEO_MIN_SINGLE_FILE_SIZE;
@@ -522,26 +432,18 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
         this.mMediaRecorder.setOnInfoListener(this);
         ParcelFileDescriptor parcelFileDescriptor = null;
         try {
-            String str2 = TAG;
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append("save to ");
-            sb7.append(sb4);
-            Log.d(str2, sb7.toString());
+            Log.d(TAG, "save to " + str);
             if (!Storage.isUseDocumentMode()) {
-                this.mMediaRecorder.setOutputFile(sb4);
+                this.mMediaRecorder.setOutputFile(str);
             } else {
-                parcelFileDescriptor = FileCompat.getParcelFileDescriptor(sb4, true);
+                parcelFileDescriptor = FileCompat.getParcelFileDescriptor(str, true);
                 this.mMediaRecorder.setOutputFile(parcelFileDescriptor.getFileDescriptor());
             }
             this.mMediaRecorder.prepare();
         } catch (IOException e2) {
-            String str3 = TAG;
-            StringBuilder sb8 = new StringBuilder();
-            sb8.append("prepare failed for ");
-            sb8.append(sb4);
-            Log.e(str3, sb8.toString(), e2);
+            Log.e(TAG, "prepare failed for " + str, e2);
         } catch (Throwable th) {
-            Util.closeSilently(null);
+            Util.closeSilently((Closeable) null);
             throw th;
         }
         Util.closeSilently(parcelFileDescriptor);
@@ -588,6 +490,10 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
     }
 
     /* access modifiers changed from: private */
+    /* JADX WARNING: Code restructure failed: missing block: B:58:0x0105, code lost:
+        r1 = th;
+     */
+    /* JADX WARNING: Exception block dominator not found, dom blocks: [] */
     /* JADX WARNING: Removed duplicated region for block: B:57:0x00ff A[Catch:{ Exception -> 0x0012 }] */
     public synchronized void stopCamcorder() {
         ParcelFileDescriptor parcelFileDescriptor;
@@ -629,22 +535,14 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                             } catch (Exception e3) {
                                 e = e3;
                                 parcelFileDescriptor = parcelFileDescriptor2;
-                                try {
-                                    e.printStackTrace();
-                                    String str2 = TAG;
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append("Failed to write MediaStore ");
-                                    sb.append(e);
-                                    Log.e(str2, sb.toString());
-                                    Util.closeSilently(parcelFileDescriptor);
-                                    if (this.mStatusListener != null) {
-                                    }
-                                    this.mRecording = false;
-                                } catch (Throwable th) {
-                                    th = th;
+                                e.printStackTrace();
+                                Log.e(TAG, "Failed to write MediaStore " + e);
+                                Util.closeSilently(parcelFileDescriptor);
+                                if (this.mStatusListener != null) {
                                 }
-                            } catch (Throwable th2) {
-                                th = th2;
+                                this.mRecording = false;
+                            } catch (Throwable th) {
+                                th = th;
                                 parcelFileDescriptor = parcelFileDescriptor2;
                                 Util.closeSilently(parcelFileDescriptor);
                                 throw th;
@@ -655,13 +553,9 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                                 this.mContentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
                                 this.mContentValues.put("_size", Long.valueOf(length));
                                 this.mContentValues.put("duration", Long.valueOf(j));
-                                Uri insert = this.mContext.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, this.mContentValues);
+                                Uri insert = this.mContext.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, this.mContentValues);
                                 if (insert == null) {
-                                    String str3 = TAG;
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append("insert MediaProvider failed, attempt to find uri by path, ");
-                                    sb2.append(str);
-                                    Log.d(str3, sb2.toString());
+                                    Log.d(TAG, "insert MediaProvider failed, attempt to find uri by path, " + str);
                                     uri = MediaProviderUtil.getContentUriFromPath(this.mContext, str);
                                 } else {
                                     uri = insert;
@@ -669,11 +563,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                             } catch (Exception e4) {
                                 e = e4;
                                 e.printStackTrace();
-                                String str22 = TAG;
-                                StringBuilder sb3 = new StringBuilder();
-                                sb3.append("Failed to write MediaStore ");
-                                sb3.append(e);
-                                Log.e(str22, sb3.toString());
+                                Log.e(TAG, "Failed to write MediaStore " + e);
                                 Util.closeSilently(parcelFileDescriptor);
                                 if (this.mStatusListener != null) {
                                 }
@@ -687,17 +577,13 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                     e = e5;
                     parcelFileDescriptor = null;
                     e.printStackTrace();
-                    String str222 = TAG;
-                    StringBuilder sb32 = new StringBuilder();
-                    sb32.append("Failed to write MediaStore ");
-                    sb32.append(e);
-                    Log.e(str222, sb32.toString());
+                    Log.e(TAG, "Failed to write MediaStore " + e);
                     Util.closeSilently(parcelFileDescriptor);
                     if (this.mStatusListener != null) {
                     }
                     this.mRecording = false;
-                } catch (Throwable th3) {
-                    th = th3;
+                } catch (Throwable th2) {
+                    th = th2;
                     parcelFileDescriptor = null;
                     Util.closeSilently(parcelFileDescriptor);
                     throw th;
@@ -756,7 +642,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
             Log.e(TAG, e4.getMessage(), e4);
         }
         if (this.mCameraHandler != null) {
-            this.mCameraHandler.removeCallbacksAndMessages(null);
+            this.mCameraHandler.removeCallbacksAndMessages((Object) null);
         }
         if (this.mHandlerThread != null) {
             this.mHandlerThread.quitSafely();
@@ -792,39 +678,30 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
 
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     try {
-                        cameraCaptureSession.setRepeatingRequest(SnapCamera.this.mVideoRequestBuilder.build(), new CaptureCallback() {
+                        cameraCaptureSession.setRepeatingRequest(SnapCamera.this.mVideoRequestBuilder.build(), new CameraCaptureSession.CaptureCallback() {
                             public void onCaptureStarted(CameraCaptureSession cameraCaptureSession, CaptureRequest captureRequest, long j, long j2) {
                                 if (!SnapCamera.this.mRecording) {
                                     try {
                                         SnapCamera.this.mMediaRecorder.start();
                                     } catch (Exception e2) {
                                         String access$100 = SnapCamera.TAG;
-                                        StringBuilder sb = new StringBuilder();
-                                        sb.append("failed to start media recorder: ");
-                                        sb.append(e2.getMessage());
-                                        Log.e(access$100, sb.toString(), e2);
+                                        Log.e(access$100, "failed to start media recorder: " + e2.getMessage(), e2);
                                         e2.printStackTrace();
                                         SnapCamera.this.stopCamcorder();
                                     }
-                                    SnapCamera.this.mRecording = true;
+                                    boolean unused = SnapCamera.this.mRecording = true;
                                 }
                             }
                         }, SnapCamera.this.mBackgroundHandler);
                     } catch (CameraAccessException e2) {
                         String access$100 = SnapCamera.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("videoSessionCb::onConfigured: ");
-                        sb.append(e2.getMessage());
-                        Log.e(access$100, sb.toString(), e2);
+                        Log.e(access$100, "videoSessionCb::onConfigured: " + e2.getMessage(), e2);
                     }
                 }
             }, this.mCameraHandler);
         } catch (CameraAccessException e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("failed to startCamcorder: ");
-            sb.append(e2.getMessage());
-            Log.e(str, sb.toString(), e2);
+            Log.e(str, "failed to startCamcorder: " + e2.getMessage(), e2);
         }
         return;
     }
@@ -837,10 +714,7 @@ public class SnapCamera implements OnErrorListener, OnInfoListener {
                 this.mCameraDevice.createCaptureSession(Arrays.asList(new Surface[]{this.mPreviewSurface, this.mPhotoImageReader.getSurface()}), this.mSessionCallback, this.mCameraHandler);
             } catch (CameraAccessException e2) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("takeSnap: ");
-                sb.append(e2.getMessage());
-                Log.e(str, sb.toString(), e2);
+                Log.e(str, "takeSnap: " + e2.getMessage(), e2);
             }
         } else {
             capture();

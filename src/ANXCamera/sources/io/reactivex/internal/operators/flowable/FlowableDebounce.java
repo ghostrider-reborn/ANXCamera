@@ -45,7 +45,7 @@ public final class FlowableDebounce<T, U> extends AbstractFlowableWithUpstream<T
                 this.value = t;
             }
 
-            /* access modifiers changed from: 0000 */
+            /* access modifiers changed from: package-private */
             public void emit() {
                 if (this.once.compareAndSet(false, true)) {
                     this.parent.emit(this.index, this.value);
@@ -87,7 +87,7 @@ public final class FlowableDebounce<T, U> extends AbstractFlowableWithUpstream<T
             DisposableHelper.dispose(this.debouncer);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit(long j, T t) {
             if (j != this.index) {
                 return;
@@ -104,7 +104,7 @@ public final class FlowableDebounce<T, U> extends AbstractFlowableWithUpstream<T
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
-                Disposable disposable = (Disposable) this.debouncer.get();
+                Disposable disposable = this.debouncer.get();
                 if (!DisposableHelper.isDisposed(disposable)) {
                     ((DebounceInnerSubscriber) disposable).emit();
                     DisposableHelper.dispose(this.debouncer);
@@ -122,7 +122,7 @@ public final class FlowableDebounce<T, U> extends AbstractFlowableWithUpstream<T
             if (!this.done) {
                 long j = this.index + 1;
                 this.index = j;
-                Disposable disposable = (Disposable) this.debouncer.get();
+                Disposable disposable = this.debouncer.get();
                 if (disposable != null) {
                     disposable.dispose();
                 }
@@ -164,6 +164,6 @@ public final class FlowableDebounce<T, U> extends AbstractFlowableWithUpstream<T
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new DebounceSubscriber<Object>(new SerializedSubscriber(subscriber), this.debounceSelector));
+        this.source.subscribe(new DebounceSubscriber(new SerializedSubscriber(subscriber), this.debounceSelector));
     }
 }

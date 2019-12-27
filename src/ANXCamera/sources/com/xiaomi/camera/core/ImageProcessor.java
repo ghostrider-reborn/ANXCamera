@@ -13,9 +13,8 @@ import android.support.annotation.NonNull;
 import android.util.Size;
 import com.android.camera.log.Log;
 import com.mi.config.b;
-import com.xiaomi.camera.core.CaptureData.CaptureDataBean;
+import com.xiaomi.camera.core.CaptureData;
 import com.xiaomi.camera.imagecodec.ImagePool;
-import com.xiaomi.camera.imagecodec.ImagePool.ImageFormat;
 import com.xiaomi.engine.BufferFormat;
 import com.xiaomi.engine.TaskSession;
 import com.xiaomi.protocol.ICustomCaptureResult;
@@ -82,14 +81,8 @@ public abstract class ImageProcessor {
         objArr[2] = Integer.valueOf(bufferFormat.getBufferHeight());
         objArr[3] = Integer.valueOf(hashCode());
         String format = String.format(locale, "_%s_%dx%d_%d", objArr);
-        StringBuilder sb = new StringBuilder();
-        sb.append("WorkerThread");
-        sb.append(format);
-        this.mWorkThread = new HandlerThread(sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("ReaderThread");
-        sb2.append(format);
-        this.mImageReaderThread = new HandlerThread(sb2.toString());
+        this.mWorkThread = new HandlerThread("WorkerThread" + format);
+        this.mImageReaderThread = new HandlerThread("ReaderThread" + format);
         this.mFilterProcessor = new FilterProcessor(this.mBlockVariable);
         this.mFilterProcessor.init(new Size(bufferFormat.getBufferWidth(), bufferFormat.getBufferHeight()));
     }
@@ -113,7 +106,7 @@ public abstract class ImageProcessor {
         throw new RuntimeException("Thread already die!");
     }
 
-    public void dispatchTask(@NonNull List<CaptureDataBean> list) {
+    public void dispatchTask(@NonNull List<CaptureData.CaptureDataBean> list) {
         if (isAlive()) {
             Message obtainMessage = this.mWorkHandler.obtainMessage();
             obtainMessage.what = 1;
@@ -142,27 +135,16 @@ public abstract class ImageProcessor {
                     }
                 }
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("doFilter: ");
-                sb.append(timestamp);
-                sb.append("/");
-                sb.append(i);
-                Log.d(str, sb.toString());
+                Log.d(str, "doFilter: " + timestamp + "/" + i);
                 this.mFilterProcessor.doFilterSync(parallelTaskData, image, i);
             } else if (parallelTaskData == null) {
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("doFilter: no task data found for image ");
-                sb2.append(timestamp);
-                Log.w(str2, sb2.toString());
+                Log.w(str2, "doFilter: no task data found for image " + timestamp);
             }
             this.mImageProcessorStatusCallback.onImageProcessed(image, i, filterTaskData.isPoolImage);
         } else if (filterTaskData.isPoolImage) {
             String str3 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("doFilter: release pool image ");
-            sb3.append(timestamp);
-            Log.w(str3, sb3.toString());
+            Log.w(str3, "doFilter: release pool image " + timestamp);
             image.close();
             ImagePool.getInstance().releaseImage(image);
         }
@@ -173,10 +155,7 @@ public abstract class ImageProcessor {
                 this.mNeedProcessDepthImageSize.getAndDecrement();
             }
             String str4 = TAG;
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("invalid target: ");
-            sb4.append(i);
-            Log.e(str4, sb4.toString());
+            Log.e(str4, "invalid target: " + i);
         } else {
             this.mNeedProcessRawImageSize.getAndDecrement();
         }
@@ -197,15 +176,15 @@ public abstract class ImageProcessor {
         return this.mNeedProcessNormalImageSize.get();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract boolean isIdle();
 
-    /* access modifiers changed from: 0000 */
-    public abstract void processImage(List<CaptureDataBean> list);
+    /* access modifiers changed from: package-private */
+    public abstract void processImage(List<CaptureData.CaptureDataBean> list);
 
     /* access modifiers changed from: protected */
     public Image queueImageToPool(ImagePool imagePool, Image image) {
-        ImageFormat imageQueueKey = imagePool.toImageQueueKey(image);
+        ImagePool.ImageFormat imageQueueKey = imagePool.toImageQueueKey(image);
         if (imagePool.isImageQueueFull(imageQueueKey, 2)) {
             Log.w(TAG, "queueImageToPool: wait E");
             imagePool.waitIfImageQueueFull(imageQueueKey, 2, 0);
@@ -254,10 +233,7 @@ public abstract class ImageProcessor {
                     ImageProcessor.this.processImage((List) message.obj);
                 } else if (i != 2) {
                     String access$000 = ImageProcessor.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("handleMessage: unknown message: ");
-                    sb.append(message.what);
-                    Log.d(access$000, sb.toString());
+                    Log.d(access$000, "handleMessage: unknown message: " + message.what);
                 } else {
                     ImageProcessor.this.doFilter((FilterTaskData) message.obj);
                 }
@@ -272,12 +248,12 @@ public abstract class ImageProcessor {
         this.mWorkThread.quitSafely();
         Log.d(TAG, String.format(Locale.ENGLISH, "stopWork: %s stopped", new Object[]{this.mWorkThread.getName()}));
         if (this.mWorkHandler != null) {
-            this.mWorkHandler.removeCallbacksAndMessages(null);
+            this.mWorkHandler.removeCallbacksAndMessages((Object) null);
             this.mWorkHandler = null;
         }
         this.mImageReaderThread.quitSafely();
         if (this.mImageReaderThread != null) {
-            this.mImageReaderHandler.removeCallbacksAndMessages(null);
+            this.mImageReaderHandler.removeCallbacksAndMessages((Object) null);
             this.mImageReaderHandler = null;
         }
         if (this.mFilterProcessor != null) {

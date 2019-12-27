@@ -13,7 +13,7 @@ public final class BasicTrustRootIndex implements TrustRootIndex {
     public BasicTrustRootIndex(X509Certificate... x509CertificateArr) {
         for (X509Certificate x509Certificate : x509CertificateArr) {
             X500Principal subjectX500Principal = x509Certificate.getSubjectX500Principal();
-            Set set = (Set) this.subjectToCaCerts.get(subjectX500Principal);
+            Set set = this.subjectToCaCerts.get(subjectX500Principal);
             if (set == null) {
                 set = new LinkedHashSet(1);
                 this.subjectToCaCerts.put(subjectX500Principal, set);
@@ -23,18 +23,14 @@ public final class BasicTrustRootIndex implements TrustRootIndex {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof BasicTrustRootIndex) || !((BasicTrustRootIndex) obj).subjectToCaCerts.equals(this.subjectToCaCerts)) {
-            z = false;
-        }
-        return z;
+        return (obj instanceof BasicTrustRootIndex) && ((BasicTrustRootIndex) obj).subjectToCaCerts.equals(this.subjectToCaCerts);
     }
 
     public X509Certificate findByIssuerAndSignature(X509Certificate x509Certificate) {
-        Set<X509Certificate> set = (Set) this.subjectToCaCerts.get(x509Certificate.getIssuerX500Principal());
+        Set<X509Certificate> set = this.subjectToCaCerts.get(x509Certificate.getIssuerX500Principal());
         if (set == null) {
             return null;
         }

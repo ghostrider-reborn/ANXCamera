@@ -1,7 +1,6 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -11,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,7 +22,7 @@ public final class IoScheduler extends Scheduler {
     private static final long KEEP_ALIVE_TIME = 60;
     private static final TimeUnit KEEP_ALIVE_UNIT = TimeUnit.SECONDS;
     private static final String KEY_IO_PRIORITY = "rx2.io-priority";
-    static final CachedWorkerPool NONE = new CachedWorkerPool(0, null, WORKER_THREAD_FACTORY);
+    static final CachedWorkerPool NONE = new CachedWorkerPool(0, (TimeUnit) null, WORKER_THREAD_FACTORY);
     static final ThreadWorker SHUTDOWN_THREAD_WORKER = new ThreadWorker(new RxThreadFactory("RxCachedThreadSchedulerShutdown"));
     static final RxThreadFactory WORKER_THREAD_FACTORY;
     private static final String WORKER_THREAD_NAME_PREFIX = "RxCachedThreadScheduler";
@@ -38,7 +38,7 @@ public final class IoScheduler extends Scheduler {
         private final ThreadFactory threadFactory;
 
         CachedWorkerPool(long j, TimeUnit timeUnit, ThreadFactory threadFactory2) {
-            Future<?> future;
+            ScheduledFuture<?> scheduledFuture;
             this.keepAliveTime = timeUnit != null ? timeUnit.toNanos(j) : 0;
             this.expiringWorkerQueue = new ConcurrentLinkedQueue<>();
             this.allWorkers = new CompositeDisposable();
@@ -47,53 +47,53 @@ public final class IoScheduler extends Scheduler {
             if (timeUnit != null) {
                 scheduledExecutorService = Executors.newScheduledThreadPool(1, IoScheduler.EVICTOR_THREAD_FACTORY);
                 long j2 = this.keepAliveTime;
-                future = scheduledExecutorService.scheduleWithFixedDelay(this, j2, j2, TimeUnit.NANOSECONDS);
+                scheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(this, j2, j2, TimeUnit.NANOSECONDS);
             } else {
-                future = null;
+                scheduledFuture = null;
             }
             this.evictorService = scheduledExecutorService;
-            this.evictorTask = future;
+            this.evictorTask = scheduledFuture;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void evictExpiredWorkers() {
             if (!this.expiringWorkerQueue.isEmpty()) {
                 long now = now();
-                Iterator it = this.expiringWorkerQueue.iterator();
+                Iterator<ThreadWorker> it = this.expiringWorkerQueue.iterator();
                 while (it.hasNext()) {
-                    ThreadWorker threadWorker = (ThreadWorker) it.next();
-                    if (threadWorker.getExpirationTime() > now) {
+                    ThreadWorker next = it.next();
+                    if (next.getExpirationTime() > now) {
                         return;
                     }
-                    if (this.expiringWorkerQueue.remove(threadWorker)) {
-                        this.allWorkers.remove(threadWorker);
+                    if (this.expiringWorkerQueue.remove(next)) {
+                        this.allWorkers.remove(next);
                     }
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public ThreadWorker get() {
             if (this.allWorkers.isDisposed()) {
                 return IoScheduler.SHUTDOWN_THREAD_WORKER;
             }
             while (!this.expiringWorkerQueue.isEmpty()) {
-                ThreadWorker threadWorker = (ThreadWorker) this.expiringWorkerQueue.poll();
-                if (threadWorker != null) {
-                    return threadWorker;
+                ThreadWorker poll = this.expiringWorkerQueue.poll();
+                if (poll != null) {
+                    return poll;
                 }
             }
-            ThreadWorker threadWorker2 = new ThreadWorker(this.threadFactory);
-            this.allWorkers.add(threadWorker2);
-            return threadWorker2;
+            ThreadWorker threadWorker = new ThreadWorker(this.threadFactory);
+            this.allWorkers.add(threadWorker);
+            return threadWorker;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public long now() {
             return System.nanoTime();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void release(ThreadWorker threadWorker) {
             threadWorker.setExpirationTime(now() + this.keepAliveTime);
             this.expiringWorkerQueue.offer(threadWorker);
@@ -103,7 +103,7 @@ public final class IoScheduler extends Scheduler {
             evictExpiredWorkers();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void shutdown() {
             this.allWorkers.dispose();
             Future<?> future = this.evictorTask;
@@ -117,7 +117,7 @@ public final class IoScheduler extends Scheduler {
         }
     }
 
-    static final class EventLoopWorker extends Worker {
+    static final class EventLoopWorker extends Scheduler.Worker {
         final AtomicBoolean once = new AtomicBoolean();
         private final CachedWorkerPool pool;
         private final CompositeDisposable tasks;
@@ -184,15 +184,15 @@ public final class IoScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
-        return new EventLoopWorker((CachedWorkerPool) this.pool.get());
+    public Scheduler.Worker createWorker() {
+        return new EventLoopWorker(this.pool.get());
     }
 
     public void shutdown() {
         CachedWorkerPool cachedWorkerPool;
         CachedWorkerPool cachedWorkerPool2;
         do {
-            cachedWorkerPool = (CachedWorkerPool) this.pool.get();
+            cachedWorkerPool = this.pool.get();
             cachedWorkerPool2 = NONE;
             if (cachedWorkerPool == cachedWorkerPool2) {
                 return;
@@ -202,7 +202,7 @@ public final class IoScheduler extends Scheduler {
     }
 
     public int size() {
-        return ((CachedWorkerPool) this.pool.get()).allWorkers.size();
+        return this.pool.get().allWorkers.size();
     }
 
     public void start() {

@@ -24,10 +24,10 @@ public final class ObservableRetryWhen<T> extends AbstractObservableWithUpstream
         volatile boolean active;
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         final AtomicReference<Disposable> f324d = new AtomicReference<>();
         final AtomicThrowable error = new AtomicThrowable();
-        final InnerRepeatObserver inner = new InnerRepeatObserver<>();
+        final RepeatWhenObserver<T>.InnerRepeatObserver inner = new InnerRepeatObserver();
         final Subject<Throwable> signaller;
         final ObservableSource<T> source;
         final AtomicInteger wip = new AtomicInteger();
@@ -66,30 +66,30 @@ public final class ObservableRetryWhen<T> extends AbstractObservableWithUpstream
             DisposableHelper.dispose(this.inner);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete() {
             DisposableHelper.dispose(this.f324d);
-            HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+            HalfSerializer.onComplete((Observer<?>) this.actual, (AtomicInteger) this, this.error);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(Throwable th) {
             DisposableHelper.dispose(this.f324d);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Observer<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerNext() {
             subscribeNext();
         }
 
         public boolean isDisposed() {
-            return DisposableHelper.isDisposed((Disposable) this.f324d.get());
+            return DisposableHelper.isDisposed(this.f324d.get());
         }
 
         public void onComplete() {
             DisposableHelper.dispose(this.inner);
-            HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+            HalfSerializer.onComplete((Observer<?>) this.actual, (AtomicInteger) this, this.error);
         }
 
         public void onError(Throwable th) {
@@ -105,7 +105,7 @@ public final class ObservableRetryWhen<T> extends AbstractObservableWithUpstream
             DisposableHelper.replace(this.f324d, disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             if (this.wip.getAndIncrement() == 0) {
                 while (!isDisposed()) {
@@ -114,6 +114,7 @@ public final class ObservableRetryWhen<T> extends AbstractObservableWithUpstream
                         this.source.subscribe(this);
                     }
                     if (this.wip.decrementAndGet() == 0) {
+                        return;
                     }
                 }
             }
@@ -138,7 +139,7 @@ public final class ObservableRetryWhen<T> extends AbstractObservableWithUpstream
             repeatWhenObserver.subscribeNext();
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

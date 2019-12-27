@@ -5,7 +5,6 @@ import android.os.Message;
 import com.ss.android.ugc.effectmanager.ListenerManger;
 import com.ss.android.ugc.effectmanager.common.TaskManager;
 import com.ss.android.ugc.effectmanager.common.WeakHandler;
-import com.ss.android.ugc.effectmanager.common.WeakHandler.IHandler;
 import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.common.utils.LogUtils;
 import com.ss.android.ugc.effectmanager.common.utils.ValueConvertUtil;
@@ -20,7 +19,7 @@ import com.ss.android.ugc.effectmanager.effect.task.task.ReadUpdateTagTask;
 import com.ss.android.ugc.effectmanager.effect.task.task.WriteUpdateTagTask;
 import java.util.HashMap;
 
-public class UpdateTagRepository implements IHandler {
+public class UpdateTagRepository implements WeakHandler.IHandler {
     private final String TAG = "UpdateTagRepository";
     private EffectContext mEffectContext;
     private Handler mHandler;
@@ -36,11 +35,9 @@ public class UpdateTagRepository implements IHandler {
         HashMap<String, String> hashMap = this.mTagsCachedMap;
         if (hashMap == null) {
             iIsTagNeedUpdatedListener.onTagNeedUpdate();
-            return;
-        }
-        if (!hashMap.containsKey(str)) {
+        } else if (!hashMap.containsKey(str)) {
             iIsTagNeedUpdatedListener.onTagNeedUpdate();
-        } else if (ValueConvertUtil.ConvertStringToLong(str2, -1) > ValueConvertUtil.ConvertStringToLong((String) this.mTagsCachedMap.get(str), -1)) {
+        } else if (ValueConvertUtil.ConvertStringToLong(str2, -1) > ValueConvertUtil.ConvertStringToLong(this.mTagsCachedMap.get(str), -1)) {
             iIsTagNeedUpdatedListener.onTagNeedUpdate();
         } else {
             iIsTagNeedUpdatedListener.onTagNeedNotUpdate();
@@ -49,25 +46,23 @@ public class UpdateTagRepository implements IHandler {
 
     /* access modifiers changed from: private */
     public void requestWriteTask(String str, String str2, String str3, final IUpdateTagListener iUpdateTagListener) {
-        if (this.mEffectContext == null) {
-            if (iUpdateTagListener != null) {
+        if (this.mEffectContext != null) {
+            if (this.mTagsCachedMap == null) {
                 iUpdateTagListener.onFinally();
             }
-            return;
-        }
-        if (this.mTagsCachedMap == null) {
+            this.mTagsCachedMap.put(str2, str3);
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setWriteUpdateTagListener(str, new IWriteUpdateTagListener() {
+                public void onFinally() {
+                    IUpdateTagListener iUpdateTagListener = iUpdateTagListener;
+                    if (iUpdateTagListener != null) {
+                        iUpdateTagListener.onFinally();
+                    }
+                }
+            });
+            this.mEffectContext.getEffectConfiguration().getTaskManager().commit(new WriteUpdateTagTask(this.mHandler, this.mEffectContext, str, this.mTagsCachedMap));
+        } else if (iUpdateTagListener != null) {
             iUpdateTagListener.onFinally();
         }
-        this.mTagsCachedMap.put(str2, str3);
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setWriteUpdateTagListener(str, new IWriteUpdateTagListener() {
-            public void onFinally() {
-                IUpdateTagListener iUpdateTagListener = iUpdateTagListener;
-                if (iUpdateTagListener != null) {
-                    iUpdateTagListener.onFinally();
-                }
-            }
-        });
-        this.mEffectContext.getEffectConfiguration().getTaskManager().commit(new WriteUpdateTagTask(this.mHandler, this.mEffectContext, str, this.mTagsCachedMap));
     }
 
     public void handleMsg(Message message) {
@@ -117,27 +112,25 @@ public class UpdateTagRepository implements IHandler {
     public void isTagUpdated(String str, final String str2, final String str3, final IIsTagNeedUpdatedListener iIsTagNeedUpdatedListener) {
         if (this.mTagsCachedMap == null) {
             EffectContext effectContext = this.mEffectContext;
-            if (effectContext == null) {
-                if (iIsTagNeedUpdatedListener != null) {
-                    iIsTagNeedUpdatedListener.onTagNeedNotUpdate();
-                }
-                return;
+            if (effectContext != null) {
+                effectContext.getEffectConfiguration().getListenerManger().setReadUpdateTagListener(str, new IReadUpdateTagListener() {
+                    public void onFailed(ExceptionResult exceptionResult) {
+                        iIsTagNeedUpdatedListener.onTagNeedUpdate();
+                    }
+
+                    public void onFinally() {
+                    }
+
+                    public void onSuccess() {
+                        UpdateTagRepository.this.checkedTagInHashMap(str2, str3, iIsTagNeedUpdatedListener);
+                    }
+                });
+                TaskManager taskManager = this.mEffectContext.getEffectConfiguration().getTaskManager();
+                ReadUpdateTagTask readUpdateTagTask = new ReadUpdateTagTask(this.mHandler, this.mEffectContext, str, str2, str3);
+                taskManager.commit(readUpdateTagTask);
+            } else if (iIsTagNeedUpdatedListener != null) {
+                iIsTagNeedUpdatedListener.onTagNeedNotUpdate();
             }
-            effectContext.getEffectConfiguration().getListenerManger().setReadUpdateTagListener(str, new IReadUpdateTagListener() {
-                public void onFailed(ExceptionResult exceptionResult) {
-                    iIsTagNeedUpdatedListener.onTagNeedUpdate();
-                }
-
-                public void onFinally() {
-                }
-
-                public void onSuccess() {
-                    UpdateTagRepository.this.checkedTagInHashMap(str2, str3, iIsTagNeedUpdatedListener);
-                }
-            });
-            TaskManager taskManager = this.mEffectContext.getEffectConfiguration().getTaskManager();
-            ReadUpdateTagTask readUpdateTagTask = new ReadUpdateTagTask(this.mHandler, this.mEffectContext, str, str2, str3);
-            taskManager.commit(readUpdateTagTask);
         } else {
             checkedTagInHashMap(str2, str3, iIsTagNeedUpdatedListener);
         }
@@ -146,32 +139,30 @@ public class UpdateTagRepository implements IHandler {
     public void updateTag(String str, String str2, String str3, IUpdateTagListener iUpdateTagListener) {
         if (this.mTagsCachedMap == null) {
             EffectContext effectContext = this.mEffectContext;
-            if (effectContext == null) {
-                if (iUpdateTagListener != null) {
-                    iUpdateTagListener.onFinally();
-                }
-                return;
+            if (effectContext != null) {
+                ListenerManger listenerManger = effectContext.getEffectConfiguration().getListenerManger();
+                final String str4 = str;
+                final String str5 = str2;
+                final String str6 = str3;
+                final IUpdateTagListener iUpdateTagListener2 = iUpdateTagListener;
+                AnonymousClass2 r1 = new IReadUpdateTagListener() {
+                    public void onFailed(ExceptionResult exceptionResult) {
+                    }
+
+                    public void onFinally() {
+                        UpdateTagRepository.this.requestWriteTask(str4, str5, str6, iUpdateTagListener2);
+                    }
+
+                    public void onSuccess() {
+                    }
+                };
+                listenerManger.setReadUpdateTagListener(str, r1);
+                TaskManager taskManager = this.mEffectContext.getEffectConfiguration().getTaskManager();
+                ReadUpdateTagTask readUpdateTagTask = new ReadUpdateTagTask(this.mHandler, this.mEffectContext, str4, str5, str6);
+                taskManager.commit(readUpdateTagTask);
+            } else if (iUpdateTagListener != null) {
+                iUpdateTagListener.onFinally();
             }
-            ListenerManger listenerManger = effectContext.getEffectConfiguration().getListenerManger();
-            final String str4 = str;
-            final String str5 = str2;
-            final String str6 = str3;
-            final IUpdateTagListener iUpdateTagListener2 = iUpdateTagListener;
-            AnonymousClass2 r1 = new IReadUpdateTagListener() {
-                public void onFailed(ExceptionResult exceptionResult) {
-                }
-
-                public void onFinally() {
-                    UpdateTagRepository.this.requestWriteTask(str4, str5, str6, iUpdateTagListener2);
-                }
-
-                public void onSuccess() {
-                }
-            };
-            listenerManger.setReadUpdateTagListener(str, r1);
-            TaskManager taskManager = this.mEffectContext.getEffectConfiguration().getTaskManager();
-            ReadUpdateTagTask readUpdateTagTask = new ReadUpdateTagTask(this.mHandler, this.mEffectContext, str4, str5, str6);
-            taskManager.commit(readUpdateTagTask);
         } else {
             requestWriteTask(str, str2, str3, iUpdateTagListener);
         }

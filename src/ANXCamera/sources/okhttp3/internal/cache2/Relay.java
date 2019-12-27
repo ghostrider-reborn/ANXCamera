@@ -37,18 +37,19 @@ final class Relay {
 
         public void close() throws IOException {
             if (this.fileOperator != null) {
-                Closeable closeable = null;
+                RandomAccessFile randomAccessFile = null;
                 this.fileOperator = null;
                 synchronized (Relay.this) {
-                    Relay.this.sourceCount--;
+                    Relay relay = Relay.this;
+                    relay.sourceCount--;
                     if (Relay.this.sourceCount == 0) {
-                        RandomAccessFile randomAccessFile = Relay.this.file;
+                        RandomAccessFile randomAccessFile2 = Relay.this.file;
                         Relay.this.file = null;
-                        closeable = randomAccessFile;
+                        randomAccessFile = randomAccessFile2;
                     }
                 }
-                if (closeable != null) {
-                    Util.closeQuietly(closeable);
+                if (randomAccessFile != null) {
+                    Util.closeQuietly((Closeable) randomAccessFile);
                 }
             }
         }
@@ -169,7 +170,7 @@ final class Relay {
             long readLong2 = buffer2.readLong();
             Buffer buffer3 = new Buffer();
             fileOperator.read(readLong + 32, buffer3, readLong2);
-            Relay relay = new Relay(randomAccessFile, null, readLong, buffer3.readByteString(), 0);
+            Relay relay = new Relay(randomAccessFile, (Source) null, readLong, buffer3.readByteString(), 0);
             return relay;
         }
         throw new IOException("unreadable cache file");
@@ -193,7 +194,7 @@ final class Relay {
         new FileOperator(this.file.getChannel()).write(32 + j, buffer2, (long) this.metadata.size());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void commit(long j) throws IOException {
         writeMetadata(j);
         this.file.getChannel().force(false);
@@ -206,7 +207,7 @@ final class Relay {
         this.upstream = null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isClosed() {
         return this.file == null;
     }

@@ -60,14 +60,14 @@ public final class FlowableZip<T, R> extends Flowable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             for (ZipSubscriber<T, R> cancel : this.subscribers) {
                 cancel.cancel();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (getAndIncrement() == 0) {
@@ -92,7 +92,7 @@ public final class FlowableZip<T, R> extends Flowable<R> {
                                         try {
                                             boolean z2 = zipSubscriber.done;
                                             SimpleQueue<T> simpleQueue = zipSubscriber.queue;
-                                            Object poll = simpleQueue != null ? simpleQueue.poll() : null;
+                                            T poll = simpleQueue != null ? simpleQueue.poll() : null;
                                             boolean z3 = poll == null;
                                             if (!z2 || !z3) {
                                                 if (!z3) {
@@ -103,10 +103,11 @@ public final class FlowableZip<T, R> extends Flowable<R> {
                                                 cancelAll();
                                                 if (((Throwable) this.errors.get()) != null) {
                                                     subscriber.onError(this.errors.terminate());
+                                                    return;
                                                 } else {
                                                     subscriber.onComplete();
+                                                    return;
                                                 }
-                                                return;
                                             }
                                         } catch (Throwable th) {
                                             Exceptions.throwIfFatal(th);
@@ -127,7 +128,7 @@ public final class FlowableZip<T, R> extends Flowable<R> {
                                     ObjectHelper.requireNonNull(apply, "The zipper returned a null value");
                                     subscriber.onNext(apply);
                                     j2++;
-                                    Arrays.fill(objArr, null);
+                                    Arrays.fill(objArr, (Object) null);
                                 } catch (Throwable th2) {
                                     Exceptions.throwIfFatal(th2);
                                     cancelAll();
@@ -153,16 +154,17 @@ public final class FlowableZip<T, R> extends Flowable<R> {
                                         try {
                                             boolean z4 = zipSubscriber2.done;
                                             SimpleQueue<T> simpleQueue2 = zipSubscriber2.queue;
-                                            Object poll2 = simpleQueue2 != null ? simpleQueue2.poll() : null;
+                                            T poll2 = simpleQueue2 != null ? simpleQueue2.poll() : null;
                                             boolean z5 = poll2 == null;
                                             if (z4 && z5) {
                                                 cancelAll();
                                                 if (((Throwable) this.errors.get()) != null) {
                                                     subscriber.onError(this.errors.terminate());
+                                                    return;
                                                 } else {
                                                     subscriber.onComplete();
+                                                    return;
                                                 }
-                                                return;
                                             } else if (!z5) {
                                                 objArr[i4] = poll2;
                                             }
@@ -199,7 +201,7 @@ public final class FlowableZip<T, R> extends Flowable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void error(ZipSubscriber<T, R> zipSubscriber, Throwable th) {
             if (this.errors.addThrowable(th)) {
                 zipSubscriber.done = true;
@@ -216,7 +218,7 @@ public final class FlowableZip<T, R> extends Flowable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(Publisher<? extends T>[] publisherArr, int i) {
             ZipSubscriber<T, R>[] zipSubscriberArr = this.subscribers;
             int i2 = 0;
@@ -323,9 +325,8 @@ public final class FlowableZip<T, R> extends Flowable<R> {
                     System.arraycopy(publisherArr, 0, publisherArr2, 0, i);
                     publisherArr = publisherArr2;
                 }
-                int i2 = i + 1;
                 publisherArr[i] = publisher;
-                i = i2;
+                i++;
             }
         } else {
             i = publisherArr.length;

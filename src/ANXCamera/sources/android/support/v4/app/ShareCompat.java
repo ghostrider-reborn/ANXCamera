@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build.VERSION;
-import android.os.Parcelable;
+import android.os.Build;
 import android.support.annotation.StringRes;
 import android.support.v4.content.IntentCompat;
 import android.text.Html;
@@ -108,8 +106,7 @@ public final class ShareCompat {
         }
 
         public IntentBuilder addStream(Uri uri) {
-            String str = "android.intent.extra.STREAM";
-            Uri uri2 = (Uri) this.mIntent.getParcelableExtra(str);
+            Uri uri2 = (Uri) this.mIntent.getParcelableExtra("android.intent.extra.STREAM");
             if (this.mStreams == null && uri2 == null) {
                 return setStream(uri);
             }
@@ -117,7 +114,7 @@ public final class ShareCompat {
                 this.mStreams = new ArrayList<>();
             }
             if (uri2 != null) {
-                this.mIntent.removeExtra(str);
+                this.mIntent.removeExtra("android.intent.extra.STREAM");
                 this.mStreams.add(uri2);
             }
             this.mStreams.add(uri);
@@ -128,7 +125,7 @@ public final class ShareCompat {
             return Intent.createChooser(getIntent(), this.mChooserTitle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Activity getActivity() {
             return this.mActivity;
         }
@@ -154,26 +151,24 @@ public final class ShareCompat {
             if (arrayList4 == null || arrayList4.size() <= 1) {
                 z = false;
             }
-            String str = "android.intent.action.SEND_MULTIPLE";
-            boolean equals = this.mIntent.getAction().equals(str);
-            String str2 = "android.intent.extra.STREAM";
+            boolean equals = this.mIntent.getAction().equals("android.intent.action.SEND_MULTIPLE");
             if (!z && equals) {
                 this.mIntent.setAction("android.intent.action.SEND");
                 ArrayList<Uri> arrayList5 = this.mStreams;
                 if (arrayList5 == null || arrayList5.isEmpty()) {
-                    this.mIntent.removeExtra(str2);
+                    this.mIntent.removeExtra("android.intent.extra.STREAM");
                 } else {
-                    this.mIntent.putExtra(str2, (Parcelable) this.mStreams.get(0));
+                    this.mIntent.putExtra("android.intent.extra.STREAM", this.mStreams.get(0));
                 }
                 this.mStreams = null;
             }
             if (z && !equals) {
-                this.mIntent.setAction(str);
+                this.mIntent.setAction("android.intent.action.SEND_MULTIPLE");
                 ArrayList<Uri> arrayList6 = this.mStreams;
                 if (arrayList6 == null || arrayList6.isEmpty()) {
-                    this.mIntent.removeExtra(str2);
+                    this.mIntent.removeExtra("android.intent.extra.STREAM");
                 } else {
-                    this.mIntent.putParcelableArrayListExtra(str2, this.mStreams);
+                    this.mIntent.putParcelableArrayListExtra("android.intent.extra.STREAM", this.mStreams);
                 }
             }
             return this.mIntent;
@@ -215,9 +210,8 @@ public final class ShareCompat {
         }
 
         public IntentBuilder setStream(Uri uri) {
-            String str = "android.intent.action.SEND";
-            if (!this.mIntent.getAction().equals(str)) {
-                this.mIntent.setAction(str);
+            if (!this.mIntent.getAction().equals("android.intent.action.SEND")) {
+                this.mIntent.setAction("android.intent.action.SEND");
             }
             this.mStreams = null;
             this.mIntent.putExtra("android.intent.extra.STREAM", uri);
@@ -273,11 +267,7 @@ public final class ShareCompat {
                 } else if (charAt == '&') {
                     sb.append("&amp;");
                 } else if (charAt > '~' || charAt < ' ') {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("&#");
-                    sb2.append(charAt);
-                    sb2.append(";");
-                    sb.append(sb2.toString());
+                    sb.append("&#" + charAt + ";");
                 } else if (charAt == ' ') {
                     while (true) {
                         int i3 = i + 1;
@@ -306,7 +296,7 @@ public final class ShareCompat {
             }
             try {
                 return this.mActivity.getPackageManager().getActivityIcon(this.mCallingActivity);
-            } catch (NameNotFoundException e2) {
+            } catch (PackageManager.NameNotFoundException e2) {
                 Log.e(TAG, "Could not retrieve icon for calling activity", e2);
                 return null;
             }
@@ -318,7 +308,7 @@ public final class ShareCompat {
             }
             try {
                 return this.mActivity.getPackageManager().getApplicationIcon(this.mCallingPackage);
-            } catch (NameNotFoundException e2) {
+            } catch (PackageManager.NameNotFoundException e2) {
                 Log.e(TAG, "Could not retrieve icon for calling application", e2);
                 return null;
             }
@@ -331,7 +321,7 @@ public final class ShareCompat {
             PackageManager packageManager = this.mActivity.getPackageManager();
             try {
                 return packageManager.getApplicationLabel(packageManager.getApplicationInfo(this.mCallingPackage, 0));
-            } catch (NameNotFoundException e2) {
+            } catch (PackageManager.NameNotFoundException e2) {
                 Log.e(TAG, "Could not retrieve label for calling application", e2);
                 return null;
             }
@@ -365,7 +355,7 @@ public final class ShareCompat {
             if (text == null) {
                 return stringExtra;
             }
-            if (VERSION.SDK_INT >= 16) {
+            if (Build.VERSION.SDK_INT >= 16) {
                 return Html.escapeHtml(text);
             }
             StringBuilder sb = new StringBuilder();
@@ -378,32 +368,25 @@ public final class ShareCompat {
         }
 
         public Uri getStream(int i) {
-            String str = "android.intent.extra.STREAM";
             if (this.mStreams == null && isMultipleShare()) {
-                this.mStreams = this.mIntent.getParcelableArrayListExtra(str);
+                this.mStreams = this.mIntent.getParcelableArrayListExtra("android.intent.extra.STREAM");
             }
             ArrayList<Uri> arrayList = this.mStreams;
             if (arrayList != null) {
-                return (Uri) arrayList.get(i);
+                return arrayList.get(i);
             }
             if (i == 0) {
-                return (Uri) this.mIntent.getParcelableExtra(str);
+                return (Uri) this.mIntent.getParcelableExtra("android.intent.extra.STREAM");
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Stream items available: ");
-            sb.append(getStreamCount());
-            sb.append(" index requested: ");
-            sb.append(i);
-            throw new IndexOutOfBoundsException(sb.toString());
+            throw new IndexOutOfBoundsException("Stream items available: " + getStreamCount() + " index requested: " + i);
         }
 
         public int getStreamCount() {
-            String str = "android.intent.extra.STREAM";
             if (this.mStreams == null && isMultipleShare()) {
-                this.mStreams = this.mIntent.getParcelableArrayListExtra(str);
+                this.mStreams = this.mIntent.getParcelableArrayListExtra("android.intent.extra.STREAM");
             }
             ArrayList<Uri> arrayList = this.mStreams;
-            return arrayList != null ? arrayList.size() : this.mIntent.hasExtra(str) ? 1 : 0;
+            return arrayList != null ? arrayList.size() : this.mIntent.hasExtra("android.intent.extra.STREAM") ? 1 : 0;
         }
 
         public String getSubject() {
@@ -441,23 +424,16 @@ public final class ShareCompat {
             configureMenuItem(findItem, intentBuilder);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Could not find menu item with id ");
-        sb.append(i);
-        sb.append(" in the supplied menu");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Could not find menu item with id " + i + " in the supplied menu");
     }
 
     public static void configureMenuItem(MenuItem menuItem, IntentBuilder intentBuilder) {
         ActionProvider actionProvider = menuItem.getActionProvider();
         ShareActionProvider shareActionProvider = !(actionProvider instanceof ShareActionProvider) ? new ShareActionProvider(intentBuilder.getActivity()) : (ShareActionProvider) actionProvider;
-        StringBuilder sb = new StringBuilder();
-        sb.append(HISTORY_FILENAME_PREFIX);
-        sb.append(intentBuilder.getActivity().getClass().getName());
-        shareActionProvider.setShareHistoryFileName(sb.toString());
+        shareActionProvider.setShareHistoryFileName(HISTORY_FILENAME_PREFIX + intentBuilder.getActivity().getClass().getName());
         shareActionProvider.setShareIntent(intentBuilder.getIntent());
         menuItem.setActionProvider(shareActionProvider);
-        if (VERSION.SDK_INT < 16 && !menuItem.hasSubMenu()) {
+        if (Build.VERSION.SDK_INT < 16 && !menuItem.hasSubMenu()) {
             menuItem.setIntent(intentBuilder.createChooserIntent());
         }
     }

@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.reactivex.internal.disposables.SequentialDisposable;
@@ -30,9 +29,9 @@ public final class FlowableThrottleFirstTimed<T> extends AbstractFlowableWithUps
         final long timeout;
         final SequentialDisposable timer = new SequentialDisposable();
         final TimeUnit unit;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        DebounceTimedSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Worker worker2) {
+        DebounceTimedSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Scheduler.Worker worker2) {
             this.actual = subscriber;
             this.timeout = j;
             this.unit = timeUnit;
@@ -73,11 +72,11 @@ public final class FlowableThrottleFirstTimed<T> extends AbstractFlowableWithUps
                         disposable.dispose();
                     }
                     this.timer.replace(this.worker.schedule(this, this.timeout, this.unit));
-                } else {
-                    this.done = true;
-                    cancel();
-                    this.actual.onError(new MissingBackpressureException("Could not deliver value due to lack of requests"));
+                    return;
                 }
+                this.done = true;
+                cancel();
+                this.actual.onError(new MissingBackpressureException("Could not deliver value due to lack of requests"));
             }
         }
 

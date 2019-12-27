@@ -1,13 +1,11 @@
 package com.android.camera.fragment.bottom;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -18,9 +16,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.PathInterpolator;
@@ -56,28 +52,13 @@ import com.android.camera.module.impl.component.MimojiStatusManager;
 import com.android.camera.module.loader.StartControl;
 import com.android.camera.permission.PermissionManager;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
-import com.android.camera.protocol.ModeProtocol.BottomMenuProtocol;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.CameraActionTrack;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.HandleBeautyRecording;
-import com.android.camera.protocol.ModeProtocol.HandlerSwitcher;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.MimojiAvatarEngine;
-import com.android.camera.protocol.ModeProtocol.ModeChangeController;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.RecordState;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.statistic.ScenarioTrackUtil;
 import com.android.camera.ui.CameraSnapView;
-import com.android.camera.ui.CameraSnapView.SnapListener;
 import com.android.camera.ui.EdgeHorizonScrollView;
 import com.android.camera.ui.ModeSelectView;
-import com.android.camera.ui.ModeSelectView.onModeClickedListener;
 import com.mi.config.b;
 import io.reactivex.Completable;
 import java.util.List;
@@ -86,7 +67,7 @@ import miui.view.animation.CubicEaseInInterpolator;
 import miui.view.animation.CubicEaseOutInterpolator;
 import miui.view.animation.SineEaseOutInterpolator;
 
-public class FragmentBottomAction extends BaseFragment implements OnClickListener, ModeChangeController, ActionProcessing, HandleBeautyRecording, HandlerSwitcher, HandleBackTrace, onModeClickedListener, SnapListener, BottomMenuProtocol {
+public class FragmentBottomAction extends BaseFragment implements View.OnClickListener, ModeProtocol.ModeChangeController, ModeProtocol.ActionProcessing, ModeProtocol.HandleBeautyRecording, ModeProtocol.HandlerSwitcher, ModeProtocol.HandleBackTrace, ModeSelectView.onModeClickedListener, CameraSnapView.SnapListener, ModeProtocol.BottomMenuProtocol {
     public static final int FRAGMENT_INFO = 241;
     private static final int MSG_SHOW_PROGRESS = 1;
     private static final String TAG = "FragmentBottomAction";
@@ -197,7 +178,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
         boolean z = false;
         int i = currentCameraId == 0 ? 1 : 0;
         if (this.mCurrentMode == 163 && CameraSettings.isUltraPixelOn()) {
-            ((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).switchOffElementsSilent(209);
+            ((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).switchOffElementsSilent(209);
         }
         HybridZoomingSystem.clearZoomRatioHistory();
         dataItemGlobal.setCameraId(i);
@@ -214,7 +195,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
         }
         ScenarioTrackUtil.trackSwitchCameraStart(z2, z, this.mCurrentMode);
         Util.displayMode(i);
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         topAlert.removeExtraMenu(4);
         int i3 = this.mCurrentMode;
         int i4 = 169;
@@ -242,11 +223,11 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
             }
             ((Camera) getContext()).onModeSelected(StartControl.create(this.mCurrentMode).setResetType(5).setViewConfigType(2).setNeedBlurAnimation(true));
         } else {
-            MimojiAvatarEngine mimojiAvatarEngine = (MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
+            ModeProtocol.MimojiAvatarEngine mimojiAvatarEngine = (ModeProtocol.MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
             if (mimojiAvatarEngine == null || !mimojiAvatarEngine.isOnCreateMimoji()) {
                 i2 = 2;
             } else {
-                ((MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).mimojiStart();
+                ((ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).mimojiStart();
                 topAlert.disableMenuItem(true, 197, 193);
             }
             ((Camera) getContext()).onModeSelected(StartControl.create(this.mCurrentMode).setResetType(5).setViewConfigType(i2).setNeedBlurAnimation(true));
@@ -261,13 +242,13 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
         if (!this.mIsIntentAction) {
             ActivityBase activityBase = (ActivityBase) getContext();
             if ((activityBase.startFromSecureKeyguard() || activityBase.isGalleryLocked()) && !activityBase.isJumpBack()) {
-                activityBase.getThumbnailUpdater().setThumbnail(null, true, false);
+                activityBase.getThumbnailUpdater().setThumbnail((Thumbnail) null, true, false);
             } else if (PermissionManager.checkStoragePermissions()) {
                 activityBase.getThumbnailUpdater().getLastThumbnail();
             }
         } else {
-            this.mThumbnailImage.setBackground(null);
-            ((MarginLayoutParams) this.mThumbnailImage.getLayoutParams()).setMargins(0, 0, 0, 0);
+            this.mThumbnailImage.setBackground((Drawable) null);
+            ((ViewGroup.MarginLayoutParams) this.mThumbnailImage.getLayoutParams()).setMargins(0, 0, 0, 0);
             this.mThumbnailImage.setImageResource(R.drawable.v6_ic_image_capture_cancel_normal);
         }
     }
@@ -292,7 +273,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
                 ofFloat.setDuration(300);
                 ofFloat.setStartDelay(160);
                 ofFloat.setInterpolator(new PathInterpolator(0.25f, 0.1f, 0.25f, 1.0f));
-                ofFloat.addUpdateListener(new AnimatorUpdateListener() {
+                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         Float f2 = (Float) valueAnimator.getAnimatedValue();
                         FragmentBottomAction.this.mPostProcess.setAlpha(f2.floatValue());
@@ -305,12 +286,12 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
                 ValueAnimator ofFloat2 = ValueAnimator.ofFloat(new float[]{1.0f, 0.0f});
                 ofFloat2.setDuration(300);
                 ofFloat2.setInterpolator(new CubicEaseInInterpolator());
-                ofFloat2.addUpdateListener(new AnimatorUpdateListener() {
+                ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         FragmentBottomAction.this.mPostProcess.setAlpha(((Float) valueAnimator.getAnimatedValue()).floatValue());
                     }
                 });
-                ofFloat2.addListener(new AnimatorListener() {
+                ofFloat2.addListener(new Animator.AnimatorListener() {
                     public void onAnimationCancel(Animator animator) {
                         FragmentBottomAction.this.mPostProcess.setVisibility(8);
                     }
@@ -352,12 +333,12 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
 
     private void showReverseConfirmDialog() {
         CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_REVERSE);
-        Builder builder = new Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage(R.string.live_reverse_message);
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.live_reverse_confirm, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int i) {
-                FragmentBottomAction.this.mReverseDialog = null;
+                AlertDialog unused = FragmentBottomAction.this.mReverseDialog = null;
                 FragmentBottomAction.this.mShutterButton.removeLastSegment();
                 CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_REVERSE_CONFIRM);
                 ((LiveModule) ((ActivityBase) FragmentBottomAction.this.getContext()).getCurrentModule()).doReverse();
@@ -365,7 +346,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
         });
         builder.setNegativeButton(R.string.snap_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int i) {
-                FragmentBottomAction.this.mReverseDialog = null;
+                AlertDialog unused = FragmentBottomAction.this.mReverseDialog = null;
             }
         });
         this.mReverseDialog = builder.show();
@@ -384,17 +365,17 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
                 ViewCompat.setScaleX(this.mShutterButton, 1.0f);
                 ViewCompat.setScaleY(this.mShutterButton, 1.0f);
                 ViewCompat.animate(this.mShutterButton).setDuration(300).scaleX(0.9f).scaleY(0.9f).setInterpolator(this.mCubicEaseOut).start();
-            } else {
-                ViewCompat.setAlpha(this.mBottomMenuLayout, 0.0f);
-                ViewCompat.animate(this.mBottomMenuLayout).setStartDelay(50).setDuration(250).alpha(1.0f).setInterpolator(this.mSineEaseOut).start();
-                ViewCompat.setTranslationY(this.mBottomMenuLayout, (float) this.mFilterListHeight);
-                ViewCompat.animate(this.mBottomMenuLayout).setDuration(300).translationY(0.0f).setInterpolator(this.mCubicEaseOut).start();
-                ViewCompat.setTranslationY(this.mV9bottomParentLayout, (float) this.mBottomRollDownHeight);
-                ViewCompat.animate(this.mV9bottomParentLayout).setDuration(300).translationY(0.0f).setInterpolator(this.mCubicEaseOut).start();
-                ViewCompat.setScaleX(this.mShutterButton, 0.9f);
-                ViewCompat.setScaleY(this.mShutterButton, 0.9f);
-                ViewCompat.animate(this.mShutterButton).setDuration(300).scaleX(1.0f).scaleY(1.0f).setInterpolator(this.mCubicEaseOut).start();
+                return;
             }
+            ViewCompat.setAlpha(this.mBottomMenuLayout, 0.0f);
+            ViewCompat.animate(this.mBottomMenuLayout).setStartDelay(50).setDuration(250).alpha(1.0f).setInterpolator(this.mSineEaseOut).start();
+            ViewCompat.setTranslationY(this.mBottomMenuLayout, (float) this.mFilterListHeight);
+            ViewCompat.animate(this.mBottomMenuLayout).setDuration(300).translationY(0.0f).setInterpolator(this.mCubicEaseOut).start();
+            ViewCompat.setTranslationY(this.mV9bottomParentLayout, (float) this.mBottomRollDownHeight);
+            ViewCompat.animate(this.mV9bottomParentLayout).setDuration(300).translationY(0.0f).setInterpolator(this.mCubicEaseOut).start();
+            ViewCompat.setScaleX(this.mShutterButton, 0.9f);
+            ViewCompat.setScaleY(this.mShutterButton, 0.9f);
+            ViewCompat.animate(this.mShutterButton).setDuration(300).scaleX(1.0f).scaleY(1.0f).setInterpolator(this.mCubicEaseOut).start();
         }
     }
 
@@ -526,17 +507,11 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
         this.mBottomAnimator.setInterpolator(new DecelerateInterpolator() {
             public float getInterpolation(float f2) {
                 float interpolation = super.getInterpolation(f2);
-                View view = FragmentBottomAction.this.mModeSelectLayout.getView();
-                float f3 = z ? 1.0f - interpolation : FragmentBottomAction.this.mModeSelectLayout.getView().getAlpha() == 0.0f ? interpolation : 1.0f;
-                ViewCompat.setAlpha(view, f3);
+                ViewCompat.setAlpha(FragmentBottomAction.this.mModeSelectLayout.getView(), z ? 1.0f - interpolation : FragmentBottomAction.this.mModeSelectLayout.getView().getAlpha() == 0.0f ? interpolation : 1.0f);
                 if (FragmentBottomAction.this.mCameraPickEnable) {
-                    ImageView access$700 = FragmentBottomAction.this.mCameraPicker;
-                    float f4 = z ? 1.0f - interpolation : FragmentBottomAction.this.mCameraPicker.getAlpha() == 0.0f ? interpolation : 1.0f;
-                    ViewCompat.setAlpha(access$700, f4);
+                    ViewCompat.setAlpha(FragmentBottomAction.this.mCameraPicker, z ? 1.0f - interpolation : FragmentBottomAction.this.mCameraPicker.getAlpha() == 0.0f ? interpolation : 1.0f);
                 }
-                ViewGroup access$800 = FragmentBottomAction.this.mThumbnailImageLayout;
-                float f5 = z ? 1.0f - interpolation : FragmentBottomAction.this.mThumbnailImageLayout.getAlpha() == 0.0f ? interpolation : 1.0f;
-                ViewCompat.setAlpha(access$800, f5);
+                ViewCompat.setAlpha(FragmentBottomAction.this.mThumbnailImageLayout, z ? 1.0f - interpolation : FragmentBottomAction.this.mThumbnailImageLayout.getAlpha() == 0.0f ? interpolation : 1.0f);
                 if (FragmentBottomAction.this.mVideoPauseSupported) {
                     ViewCompat.setAlpha(FragmentBottomAction.this.mRecordingPause, z ? interpolation : 1.0f - interpolation);
                 }
@@ -552,7 +527,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
                 return interpolation;
             }
         });
-        this.mBottomAnimator.addListener(new AnimatorListener() {
+        this.mBottomAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -606,7 +581,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
     }
 
     public boolean canSnap() {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         return cameraAction != null && !cameraAction.isBlockSnap();
     }
 
@@ -623,8 +598,7 @@ public class FragmentBottomAction extends BaseFragment implements OnClickListene
     /* JADX WARNING: Removed duplicated region for block: B:13:0x0038  */
     /* JADX WARNING: Removed duplicated region for block: B:18:0x0047 A[ADDED_TO_REGION] */
     /* JADX WARNING: Removed duplicated region for block: B:22:0x0051  */
-    /* JADX WARNING: Removed duplicated region for block: B:26:0x0045 A[EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  
-EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
+    /* JADX WARNING: Removed duplicated region for block: B:26:0x0045 A[EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     public void changeModeByGravity(int i, int i2) {
         int size;
         int i3;
@@ -676,9 +650,8 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     /* JADX WARNING: Code restructure failed: missing block: B:13:0x0026, code lost:
         if (r0 != 169) goto L_0x004a;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:18:0x0048, code lost:
-        if (r7 != 169) goto L_0x004a;
-     */
+    /* JADX WARNING: Removed duplicated region for block: B:31:0x0079 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:32:0x007a  */
     public void changeModeByNewMode(int i, int i2) {
         if (i == 166 && CameraSettings.isFrontCamera() && DataRepository.dataItemFeature().mc()) {
             i = 176;
@@ -688,7 +661,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
             if (i3 != 162) {
                 if (i3 == 163) {
                     if (CameraSettings.isUltraPixelOn()) {
-                        ((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).switchOffElementsSilent(209);
+                        ((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).switchOffElementsSilent(209);
                     }
                 }
                 if (i == 174 && !CameraSettings.isLiveModuleClicked()) {
@@ -698,19 +671,26 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
                 if (i == 163 || i == 165) {
                     i = DataRepository.dataItemConfig().getComponentConfigRatio().getMappingModeByRatio(163);
                 }
-                if (!isThumbLoading()) {
-                    CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+                if (isThumbLoading()) {
+                    ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
                     if (cameraAction == null || !cameraAction.isDoingAction()) {
                         this.mCurrentMode = i;
                         dataItemGlobal.setCurrentMode(i);
                         ViberatorContext.getInstance(getActivity().getApplicationContext()).performModeSwitch();
                         ((Camera) getContext()).onModeSelected(StartControl.create(i).setStartDelay(i2).setResetType(4).setViewConfigType(2).setNeedBlurAnimation(true));
+                        return;
                     }
                     return;
                 }
                 return;
             }
-            if (i != 162) {
+            if (i == 162 || i == 169) {
+                return;
+            }
+            CameraSettings.setLiveModuleClicked(true);
+            DataItemGlobal dataItemGlobal2 = (DataItemGlobal) DataRepository.provider().dataGlobal();
+            i = DataRepository.dataItemConfig().getComponentConfigRatio().getMappingModeByRatio(163);
+            if (isThumbLoading()) {
             }
         }
     }
@@ -748,7 +728,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void hideExtra() {
         if (this.mIsShowLighting) {
-            ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+            ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
             if (configChanges != null) {
                 configChanges.showOrHideLighting(false);
             }
@@ -758,10 +738,10 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     /* access modifiers changed from: protected */
     public void initView(View view) {
         this.mBottomActionView = (FrameLayout) view.findViewById(R.id.bottom_action);
-        ((MarginLayoutParams) this.mBottomActionView.getLayoutParams()).height = Util.getBottomHeight(getResources());
+        ((ViewGroup.MarginLayoutParams) this.mBottomActionView.getLayoutParams()).height = Util.getBottomHeight(getResources());
         this.mBottomRollDownHeight = getResources().getDimensionPixelSize(R.dimen.bottom_roll_down_height);
         this.mV9bottomParentLayout = (RelativeLayout) view.findViewById(R.id.v9_bottom_parent);
-        ((MarginLayoutParams) this.mV9bottomParentLayout.getLayoutParams()).bottomMargin = getResources().getDimensionPixelSize(R.dimen.bottom_margin_bottom) + Util.sNavigationBarHeight;
+        ((ViewGroup.MarginLayoutParams) this.mV9bottomParentLayout.getLayoutParams()).bottomMargin = getResources().getDimensionPixelSize(R.dimen.bottom_margin_bottom) + Util.sNavigationBarHeight;
         this.mComponentModuleList = DataRepository.dataItemGlobal().getComponentModuleList();
         this.mModeSelectLayout = new BottomActionMenu(getContext(), (FrameLayout) view.findViewById(R.id.mode_select_layout));
         this.mEdgeHorizonScrollView = this.mModeSelectLayout.getCameraOperateMenuView();
@@ -795,7 +775,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
         this.mMimojiBack = (ImageView) view.findViewById(R.id.mimoji_create_back);
         this.mMimojiBack.setOnClickListener(this);
         adjustViewBackground(this.mModeSelectLayout.getView(), this.mCurrentMode);
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
         this.mIsIntentAction = DataRepository.dataItemGlobal().isIntentAction();
         this.mCubicEaseOut = new CubicEaseOutInterpolator();
         this.mSineEaseOut = new SineEaseOutInterpolator();
@@ -836,7 +816,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
             }
         }
         if (DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiCreate()) {
-            ((MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).mimojiStart();
+            ((ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).mimojiStart();
         }
     }
 
@@ -872,7 +852,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
         }
         hideExtra();
         if (Util.isAccessible()) {
-            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateContentDescription();
+            ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateContentDescription();
         }
         return true;
     }
@@ -890,52 +870,48 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     }
 
     public void onClick(View view) {
-        boolean isEnableClick = isEnableClick();
-        String str = TAG;
-        if (!isEnableClick) {
-            Log.d(str, "onClick: disabled");
+        if (!isEnableClick()) {
+            Log.d(TAG, "onClick: disabled");
             return;
         }
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null) {
-            Log.d(str, "onClick: null action");
+            Log.d(TAG, "onClick: null action");
             return;
         }
         Module currentModule = ((ActivityBase) getContext()).getCurrentModule();
         if (!currentModule.isIgnoreTouchEvent() || (currentModule.isShot2Gallery() && view.getId() == R.id.v9_thumbnail_layout)) {
             switch (view.getId()) {
-                case R.id.bottom_recording_camera_picker /*2131296296*/:
+                case R.id.bottom_recording_camera_picker:
                     if (this.mVideoRecordingPaused) {
                         CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_SWITCH);
                         changeCamera(view);
-                        break;
-                    } else {
                         return;
                     }
-                case R.id.mimoji_create_back /*2131296444*/:
+                    return;
+                case R.id.mimoji_create_back:
                     DataRepository.dataItemLive().getMimojiStatusManager().setMode(MimojiStatusManager.MIMOJI_PREVIEW);
                     this.mMimojiBack.setVisibility(8);
                     this.mShutterButton.intoPattern(177, false);
-                    ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onMimojiCreateBack();
+                    ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onMimojiCreateBack();
                     CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_CREATE_BACK);
-                    break;
-                case R.id.v9_camera_picker /*2131296599*/:
+                    return;
+                case R.id.v9_camera_picker:
                     if (!cameraAction.isDoingAction() && !cameraAction.isRecording() && !isThumbLoading()) {
                         hideExtra();
                         if (DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiCreate()) {
                             CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_CREATE_SWITCH);
                         }
                         changeCamera(view);
-                        break;
-                    } else {
                         return;
                     }
-                case R.id.v9_recording_pause /*2131296602*/:
+                    return;
+                case R.id.v9_recording_pause:
                     if (this.mVideoPauseSupported && this.mVideoRecordingStarted) {
                         int i = this.mCurrentMode;
                         if (i == 162 || i == 169) {
                             ((VideoModule) ((ActivityBase) getContext()).getCurrentModule()).onPauseButtonClick();
-                            break;
+                            return;
                         } else if (i == 174) {
                             long currentTimeMillis = System.currentTimeMillis() - this.mLastPauseTime;
                             if (currentTimeMillis <= 0 || currentTimeMillis >= 500) {
@@ -946,60 +922,58 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
                                 }
                                 this.mLastPauseTime = System.currentTimeMillis();
                                 ((LiveModule) ((ActivityBase) getContext()).getCurrentModule()).onPauseButtonClick();
-                                break;
-                            } else {
                                 return;
                             }
+                            return;
                         } else {
                             return;
                         }
                     } else {
                         return;
                     }
-                    break;
-                case R.id.v9_recording_reverse /*2131296604*/:
+                case R.id.v9_recording_reverse:
                     if (this.mVideoReverseEnable && this.mVideoRecordingStarted && this.mShutterButton.hasSegments()) {
                         showReverseConfirmDialog();
-                        break;
-                    } else {
                         return;
-                    }
-                    break;
-                case R.id.v9_recording_snap /*2131296605*/:
-                    if (this.mVideoCaptureEnable && this.mVideoRecordingStarted) {
-                        ActivityBase activityBase = (ActivityBase) getContext();
-                        if (activityBase != null && (activityBase.getCurrentModule() instanceof VideoModule)) {
-                            ((VideoModule) activityBase.getCurrentModule()).takeVideoSnapShoot();
-                            break;
-                        } else {
-                            Log.w(str, "onClick: recording snap is not allowed!!!");
-                        }
                     }
                     return;
-                case R.id.v9_thumbnail_layout /*2131296608*/:
-                    if (!isThumbLoading()) {
-                        if (DataRepository.dataItemGlobal().isIntentAction()) {
-                            cameraAction.onReviewCancelClicked();
-                            break;
+                case R.id.v9_recording_snap:
+                    if (this.mVideoCaptureEnable && this.mVideoRecordingStarted) {
+                        ActivityBase activityBase = (ActivityBase) getContext();
+                        if (activityBase == null || !(activityBase.getCurrentModule() instanceof VideoModule)) {
+                            Log.w(TAG, "onClick: recording snap is not allowed!!!");
+                            return;
                         } else {
-                            cameraAction.onThumbnailClicked(null);
-                            break;
+                            ((VideoModule) activityBase.getCurrentModule()).takeVideoSnapShoot();
+                            return;
                         }
                     } else {
-                        Log.w(str, "onClick: ignore thumbnail click event as loading thumbnail");
                         return;
                     }
+                case R.id.v9_thumbnail_layout:
+                    if (isThumbLoading()) {
+                        Log.w(TAG, "onClick: ignore thumbnail click event as loading thumbnail");
+                        return;
+                    } else if (!DataRepository.dataItemGlobal().isIntentAction()) {
+                        cameraAction.onThumbnailClicked((View) null);
+                        return;
+                    } else {
+                        cameraAction.onReviewCancelClicked();
+                        return;
+                    }
+                default:
+                    return;
             }
-            return;
+        } else {
+            Log.w(TAG, "onClick: ignore click event, because module isn't ready");
         }
-        Log.w(str, "onClick: ignore click event, because module isn't ready");
     }
 
     public boolean onHandleSwitcher(int i) {
         if (!this.mIsShowLighting) {
             return false;
         }
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction != null && !cameraAction.isDoingAction() && this.mIsShowLighting) {
             this.mFragmentLighting.switchLighting(i);
         }
@@ -1007,8 +981,10 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     }
 
     public void onModeClicked(int i) {
-        if (!isShowFilterView() && !isShowLightingView() && (this.mCurrentMode != 177 || DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiPreview())) {
-            changeModeByNewMode(i, 0);
+        if (!isShowFilterView() && !isShowLightingView()) {
+            if (this.mCurrentMode != 177 || DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiPreview()) {
+                changeModeByNewMode(i, 0);
+            }
         }
     }
 
@@ -1018,24 +994,22 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     }
 
     public void onSnapClick() {
-        boolean isEnableClick = isEnableClick();
-        String str = TAG;
-        if (!isEnableClick) {
-            Log.w(str, "onSnapClick: disabled");
+        if (!isEnableClick()) {
+            Log.w(TAG, "onSnapClick: disabled");
         } else if (getContext() == null) {
-            Log.w(str, "onSnapClick: no context");
+            Log.w(TAG, "onSnapClick: no context");
         } else {
             Camera camera = (Camera) getContext();
             Module currentModule = camera.getCurrentModule();
             if (currentModule != null && currentModule.isIgnoreTouchEvent()) {
-                Log.w(str, "onSnapClick: ignore onSnapClick event, because module isn't ready");
+                Log.w(TAG, "onSnapClick: ignore onSnapClick event, because module isn't ready");
             } else if (!CameraSettings.isFrontCamera() || !camera.isScreenSlideOff()) {
-                CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+                ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
                 if (cameraAction == null) {
-                    Log.w(str, "onSnapClick: no camera action");
+                    Log.w(TAG, "onSnapClick: no camera action");
                     return;
                 }
-                Log.d(str, "onSnapClick");
+                Log.d(TAG, "onSnapClick");
                 int i = this.mCurrentMode;
                 if (i == 161 || i == 162 || i == 166 || i == 169 || i == 172 || i == 174 || i == 179 || i == 176) {
                     if (!this.mVideoRecordingStarted) {
@@ -1044,12 +1018,12 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
                     cameraAction.onShutterButtonClick(10);
                 } else if (i != 177) {
                     if (cameraAction.isBlockSnap()) {
-                        Log.w(str, "onSnapClick: block snap");
+                        Log.w(TAG, "onSnapClick: block snap");
                         return;
                     }
                     cameraAction.onShutterButtonClick(10);
                 } else if (cameraAction.isDoingAction()) {
-                    Log.w(str, "onSnapClick: doing action");
+                    Log.w(TAG, "onSnapClick: doing action");
                     return;
                 } else {
                     cameraAction.onShutterButtonClick(10);
@@ -1065,14 +1039,14 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
                     this.mEdgeHorizonScrollView.sendAccessibilityEvent(32768);
                 }
             } else {
-                Log.w(str, "onSnapClick: ignore onSnapClick event, because screen slide is off");
+                Log.w(TAG, "onSnapClick: ignore onSnapClick event, because screen slide is off");
             }
         }
     }
 
     public void onSnapLongPress() {
         if (isEnableClick()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction != null && !cameraAction.isDoingAction()) {
                 if (getContext() != null) {
                     Camera camera = (Camera) getContext();
@@ -1090,7 +1064,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void onSnapLongPressCancelIn() {
         if (isEnableClick()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction != null) {
                 Log.d(TAG, "onSnapLongPressCancelIn");
                 cameraAction.onShutterButtonLongClickCancel(true);
@@ -1108,7 +1082,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void onSnapLongPressCancelOut() {
         if (isEnableClick()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction != null) {
                 Log.d(TAG, "onSnapLongPressCancelOut");
                 cameraAction.onShutterButtonLongClickCancel(false);
@@ -1121,7 +1095,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void onSnapPrepare() {
         if (isEnableClick()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction != null) {
                 Log.d(TAG, "onSnapPrepare");
                 cameraAction.onShutterButtonFocus(true, 2);
@@ -1154,13 +1128,9 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void onTrackSnapMissTaken(long j) {
         if (isEnableClick()) {
-            CameraActionTrack cameraActionTrack = (CameraActionTrack) ModeCoordinatorImpl.getInstance().getAttachProtocol(186);
+            ModeProtocol.CameraActionTrack cameraActionTrack = (ModeProtocol.CameraActionTrack) ModeCoordinatorImpl.getInstance().getAttachProtocol(186);
             if (cameraActionTrack != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onTrackSnapMissTaken ");
-                sb.append(j);
-                sb.append("ms");
-                Log.d(TAG, sb.toString());
+                Log.d(TAG, "onTrackSnapMissTaken " + j + "ms");
                 cameraActionTrack.onTrackShutterButtonMissTaken(j);
             }
         }
@@ -1168,13 +1138,9 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void onTrackSnapTaken(long j) {
         if (isEnableClick()) {
-            CameraActionTrack cameraActionTrack = (CameraActionTrack) ModeCoordinatorImpl.getInstance().getAttachProtocol(186);
+            ModeProtocol.CameraActionTrack cameraActionTrack = (ModeProtocol.CameraActionTrack) ModeCoordinatorImpl.getInstance().getAttachProtocol(186);
             if (cameraActionTrack != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onTrackSnapTaken ");
-                sb.append(j);
-                sb.append("ms");
-                Log.d(TAG, sb.toString());
+                Log.d(TAG, "onTrackSnapTaken " + j + "ms");
                 cameraActionTrack.onTrackShutterButtonTaken(j);
             }
         }
@@ -1344,6 +1310,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
         }
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public void provideAnimateElement(int i, List<Completable> list, int i2) {
         int i3 = this.mCurrentMode;
         int i4 = 1;
@@ -1381,14 +1348,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
         }
         this.mModeSelectLayout.clearBottomMenu();
         this.mShutterButton.setParameters(i, list != null, isFPS960());
-        StringBuilder sb = new StringBuilder();
-        sb.append("provideAnimateElement: newMode = ");
-        sb.append(i);
-        sb.append(", mCurrentMode = ");
-        sb.append(this.mCurrentMode);
-        sb.append(", animateInElements = ");
-        sb.append(list);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "provideAnimateElement: newMode = " + i + ", mCurrentMode = " + this.mCurrentMode + ", animateInElements = " + list);
         if (!this.mIsShowLighting && this.mModeSelectView.getVisibility() != 0) {
             this.mModeSelectView.setVisibility(0);
         }
@@ -1455,8 +1415,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     /* access modifiers changed from: protected */
     public Animation provideExitAnimation(int i) {
         if (i == 65523) {
-            int dimensionPixelSize = getResources().getDimensionPixelSize(R.dimen.vv_start_layout_height) + getResources().getDimensionPixelSize(R.dimen.vv_list_height);
-            ViewCompat.setTranslationY(getView(), (float) (dimensionPixelSize - getView().getHeight()));
+            ViewCompat.setTranslationY(getView(), (float) ((getResources().getDimensionPixelSize(R.dimen.vv_start_layout_height) + getResources().getDimensionPixelSize(R.dimen.vv_list_height)) - getView().getHeight()));
         }
         return FragmentAnimationFactory.wrapperAnimation(162);
     }
@@ -1473,7 +1432,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(179, this);
         modeCoordinator.attachProtocol(162, this);
@@ -1493,13 +1452,13 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
 
     public void showOrHideBottomViewWithAnim(boolean z) {
         float f2 = 1.0f;
-        ViewCompat.animate(this.mModeSelectLayout.getView()).setInterpolator(new CubicEaseInInterpolator()).setDuration(300).alpha(z ? 1.0f : 0.0f).setListener(null).start();
-        ViewCompat.animate(this.mThumbnailImage).setInterpolator(new CubicEaseInInterpolator()).setDuration(300).alpha(z ? 1.0f : 0.0f).setListener(null).start();
+        ViewCompat.animate(this.mModeSelectLayout.getView()).setInterpolator(new CubicEaseInInterpolator()).setDuration(300).alpha(z ? 1.0f : 0.0f).setListener((ViewPropertyAnimatorListener) null).start();
+        ViewCompat.animate(this.mThumbnailImage).setInterpolator(new CubicEaseInInterpolator()).setDuration(300).alpha(z ? 1.0f : 0.0f).setListener((ViewPropertyAnimatorListener) null).start();
         ViewPropertyAnimatorCompat duration = ViewCompat.animate(this.mCameraPicker).setInterpolator(new CubicEaseInInterpolator()).setDuration(300);
         if (!z) {
             f2 = 0.0f;
         }
-        duration.alpha(f2).setListener(null).start();
+        duration.alpha(f2).setListener((ViewPropertyAnimatorListener) null).start();
     }
 
     public boolean showOrHideFilterView() {
@@ -1538,9 +1497,9 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         modeCoordinator.detachProtocol(179, this);
         modeCoordinator.detachProtocol(162, this);
         modeCoordinator.detachProtocol(183, this);
@@ -1551,7 +1510,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
     public void updateLoading(boolean z) {
         if (z) {
             this.mInLoading = false;
-            this.mHandler.removeCallbacksAndMessages(null);
+            this.mHandler.removeCallbacksAndMessages((Object) null);
             this.mThumbnailProgress.setVisibility(8);
         } else if (!this.mIsIntentAction) {
             this.mInLoading = true;
@@ -1577,7 +1536,7 @@ EDGE_INSN: B:26:0x0045->B:17:0x0045 ?: BREAK  , SYNTHETIC] */
                     thumbnailUpdater.setThumbnail(thumbnail, false, false);
                     Log.d(TAG, "inconsistent thumbnail");
                 }
-                this.mHandler.removeCallbacksAndMessages(null);
+                this.mHandler.removeCallbacksAndMessages((Object) null);
                 this.mInLoading = false;
                 if (this.mThumbnailProgress.getVisibility() != 8) {
                     this.mThumbnailProgress.setVisibility(8);

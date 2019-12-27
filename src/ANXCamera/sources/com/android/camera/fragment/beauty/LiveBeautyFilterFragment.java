@@ -2,14 +2,14 @@ package com.android.camera.fragment.beauty;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,14 +18,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.OnScrollListener;
-import android.support.v7.widget.RecyclerView.State;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,13 +30,11 @@ import com.android.camera.effect.EffectController;
 import com.android.camera.fragment.DefaultItemAnimator;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.List;
 import miui.view.animation.CubicEaseOutInterpolator;
 
-public class LiveBeautyFilterFragment extends Fragment implements OnClickListener {
+public class LiveBeautyFilterFragment extends Fragment implements View.OnClickListener {
     public static final int LIVE_FILTER_NONE_ID = 0;
     private static final String TAG = "LiveBeautyFilterFragment";
     /* access modifiers changed from: private */
@@ -62,7 +54,7 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
     private int mTotalWidth;
     private View mView;
 
-    protected class EffectItemPadding extends ItemDecoration {
+    protected class EffectItemPadding extends RecyclerView.ItemDecoration {
         protected int mEffectListLeft;
         protected int mHorizontalPadding;
         protected int mVerticalPadding;
@@ -73,14 +65,14 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
             this.mEffectListLeft = LiveBeautyFilterFragment.this.getContext().getResources().getDimensionPixelSize(R.dimen.effect_list_padding_left);
         }
 
-        public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+        public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
             int i = recyclerView.getChildPosition(view) == 0 ? this.mEffectListLeft : 0;
             int i2 = this.mVerticalPadding;
             rect.set(i, i2, this.mHorizontalPadding, i2);
         }
     }
 
-    protected class FilterItemAdapter extends Adapter {
+    protected class FilterItemAdapter extends RecyclerView.Adapter {
         protected LayoutInflater mLayoutInflater;
 
         public FilterItemAdapter(Context context) {
@@ -91,14 +83,13 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
             return LiveBeautyFilterFragment.this.mFilters.size();
         }
 
-        public void onBindViewHolder(ViewHolder viewHolder, int i) {
-            LiveFilterItem liveFilterItem = (LiveFilterItem) LiveBeautyFilterFragment.this.mFilters.get(i);
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
             FilterItemHolder filterItemHolder = (FilterItemHolder) viewHolder;
             filterItemHolder.itemView.setTag(Integer.valueOf(i));
-            filterItemHolder.bindEffectIndex(i, liveFilterItem);
+            filterItemHolder.bindEffectIndex(i, (LiveFilterItem) LiveBeautyFilterFragment.this.mFilters.get(i));
         }
 
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View inflate = this.mLayoutInflater.inflate(R.layout.live_filter_item, viewGroup, false);
             FilterStillItemHolder filterStillItemHolder = new FilterStillItemHolder(inflate);
             inflate.setOnClickListener(LiveBeautyFilterFragment.this);
@@ -106,7 +97,7 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
         }
     }
 
-    protected abstract class FilterItemHolder extends ViewHolder {
+    protected abstract class FilterItemHolder extends RecyclerView.ViewHolder {
         protected int mEffectIndex;
         protected TextView mTextView;
 
@@ -202,7 +193,7 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
 
     private int findIndex(int i) {
         for (int i2 = 0; i2 < this.mFilters.size(); i2++) {
-            if (((LiveFilterItem) this.mFilters.get(i2)).id == i) {
+            if (this.mFilters.get(i2).id == i) {
                 return i2;
             }
         }
@@ -224,10 +215,10 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
         this.mRecyclerView.setLayoutManager(this.mLayoutManager);
         this.mRecyclerView.addItemDecoration(new EffectItemPadding());
         this.mRecyclerView.setAdapter(this.mFilterItemAdapter);
-        this.mRecyclerView.addOnScrollListener(new OnScrollListener() {
+        this.mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             public void onScrollStateChanged(RecyclerView recyclerView, int i) {
                 super.onScrollStateChanged(recyclerView, i);
-                LiveBeautyFilterFragment.this.isAnimation = false;
+                boolean unused = LiveBeautyFilterFragment.this.isAnimation = false;
             }
         });
         DefaultItemAnimator defaultItemAnimator = new DefaultItemAnimator();
@@ -250,13 +241,8 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
 
     private void onItemSelected(int i, boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onItemSelected: index = ");
-        sb.append(i);
-        sb.append(", fromClick = ");
-        sb.append(z);
-        Log.d(str, sb.toString());
-        if (((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)) == null) {
+        Log.d(str, "onItemSelected: index = " + i + ", fromClick = " + z);
+        if (((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)) == null) {
             Log.e(TAG, "onItemSelected: configChanges = null");
             return;
         }
@@ -264,10 +250,7 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
             selectItem(i);
         } catch (NumberFormatException e2) {
             String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("invalid filter id: ");
-            sb2.append(e2.getMessage());
-            Log.e(str2, sb2.toString());
+            Log.e(str2, "invalid filter id: " + e2.getMessage());
         }
     }
 
@@ -292,42 +275,39 @@ public class LiveBeautyFilterFragment extends Fragment implements OnClickListene
         float dimension = getResources().getDimension(R.dimen.live_filter_item_mask_size);
         float dimension2 = getResources().getDimension(R.dimen.live_filter_item_corners_size);
         int i2 = (int) dimension;
-        Bitmap createBitmap = Bitmap.createBitmap(i2, i2, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(i2, i2, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(createBitmap);
         Paint paint = new Paint();
         paint.setColor(ViewCompat.MEASURED_STATE_MASK);
         canvas.drawRoundRect(new RectF(4.0f, 4.0f, dimension, dimension), dimension2, dimension2, paint);
         Bitmap decodeResource = BitmapFactory.decodeResource(getResources(), i);
-        Bitmap createBitmap2 = Bitmap.createBitmap(createBitmap.getWidth(), createBitmap.getHeight(), Config.ARGB_8888);
+        Bitmap createBitmap2 = Bitmap.createBitmap(createBitmap.getWidth(), createBitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas2 = new Canvas(createBitmap2);
         Paint paint2 = new Paint();
         canvas2.drawBitmap(createBitmap, 0.0f, 0.0f, paint2);
-        paint2.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+        paint2.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas2.drawBitmap(decodeResource, 0.0f, 0.0f, paint2);
-        paint2.setXfermode(null);
+        paint2.setXfermode((Xfermode) null);
         imageView.setImageBitmap(createBitmap2);
     }
 
     public void onClick(View view) {
         if (this.mRecyclerView.isEnabled()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction == null || !cameraAction.isDoingAction()) {
                 int intValue = ((Integer) view.getTag()).intValue();
                 if (this.mCurrentIndex != intValue) {
                     this.isAnimation = false;
-                    LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+                    ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
                     if (liveConfigChanges != null) {
                         String str = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("filter_path:");
-                        sb.append(((LiveFilterItem) this.mFilters.get(intValue)).directoryName);
-                        Log.e(str, sb.toString());
+                        Log.e(str, "filter_path:" + this.mFilters.get(intValue).directoryName);
                         if (intValue != 0) {
-                            liveConfigChanges.setFilter(true, ((LiveFilterItem) this.mFilters.get(intValue)).directoryName);
+                            liveConfigChanges.setFilter(true, this.mFilters.get(intValue).directoryName);
                         } else {
-                            liveConfigChanges.setFilter(false, null);
+                            liveConfigChanges.setFilter(false, (String) null);
                         }
-                        DataRepository.dataItemLive().setLiveFilter(((LiveFilterItem) this.mFilters.get(intValue)).id);
+                        DataRepository.dataItemLive().setLiveFilter(this.mFilters.get(intValue).id);
                     }
                     onItemSelected(intValue, true);
                 }

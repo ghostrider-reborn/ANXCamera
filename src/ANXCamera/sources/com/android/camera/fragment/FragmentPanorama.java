@@ -6,20 +6,17 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.opengl.GLSurfaceView.Renderer;
+import android.graphics.drawable.Drawable;
+import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.android.camera.ActivityBase;
 import com.android.camera.CameraScreenNail;
-import com.android.camera.CameraScreenNail.RequestRenderListener;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.Util;
@@ -27,11 +24,9 @@ import com.android.camera.animation.type.AlphaInOnSubscribe;
 import com.android.camera.animation.type.AlphaOutOnSubscribe;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.log.Log;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.PanoramaProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.GLTextureView;
-import com.android.camera.ui.GLTextureView.EGLShareContextGetter;
 import com.android.camera.ui.PanoMovingIndicatorView;
 import com.android.camera.ui.drawable.PanoramaArrowAnimateDrawable;
 import com.android.gallery3d.ui.GLCanvasImpl;
@@ -42,7 +37,7 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 import miui.view.animation.CubicEaseInOutInterpolator;
 
-public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, RequestRenderListener, OnClickListener {
+public class FragmentPanorama extends BaseFragment implements ModeProtocol.PanoramaProtocol, CameraScreenNail.RequestRenderListener, View.OnClickListener {
     public static final int FRAGMENT_INFO = 4080;
     public static final String TAG = "FragmentPanorama";
     private int mArrowMargin;
@@ -76,7 +71,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
     /* access modifiers changed from: private */
     public boolean mWaitingFirstFrame = false;
 
-    private class StillPreviewRender implements Renderer {
+    private class StillPreviewRender implements GLSurfaceView.Renderer {
         private DrawExtTexAttribute mExtTexture;
         float[] mTransform;
 
@@ -102,7 +97,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
                     gLCanvas.recycledResources();
                 }
                 if (FragmentPanorama.this.mWaitingFirstFrame) {
-                    FragmentPanorama.this.mWaitingFirstFrame = false;
+                    boolean unused = FragmentPanorama.this.mWaitingFirstFrame = false;
                     FragmentPanorama.this.mHandler.post(new Runnable() {
                         public void run() {
                             FragmentPanorama.this.mStillPreview.animate().alpha(1.0f);
@@ -122,7 +117,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
     }
 
     private void setViewMargin(View view, int i) {
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) view.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
         marginLayoutParams.topMargin = i;
         view.setLayoutParams(marginLayoutParams);
     }
@@ -142,7 +137,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
 
     public void initPreviewLayout(int i, int i2, int i3, int i4) {
         this.mMoveDirection = CameraSettings.getPanoramaMoveDirection(getContext());
-        LayoutParams layoutParams = this.mStillPreview.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = this.mStillPreview.getLayoutParams();
         layoutParams.width = i;
         layoutParams.height = i2;
         int i5 = layoutParams.width;
@@ -174,7 +169,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
         if (this.mStillPreview.getRenderer() == null) {
             StillPreviewRender stillPreviewRender = new StillPreviewRender();
             this.mStillPreview.setEGLContextClientVersion(2);
-            this.mStillPreview.setEGLShareContextGetter(new EGLShareContextGetter() {
+            this.mStillPreview.setEGLShareContextGetter(new GLTextureView.EGLShareContextGetter() {
                 public EGLContext getShareContext() {
                     return ((ActivityBase) FragmentPanorama.this.getContext()).getGLView().getEGLContext();
                 }
@@ -208,10 +203,9 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
         ObjectAnimator ofFloat2 = ObjectAnimator.ofFloat(panoramaArrowAnimateDrawable, "transformationRatio", new float[]{panoramaArrowAnimateDrawable.getTransformationRatio(), transformationRatio});
         ofFloat2.setDuration(500);
         GLTextureView gLTextureView = this.mStillPreview;
-        String str = "alpha";
-        ObjectAnimator ofFloat3 = ObjectAnimator.ofFloat(gLTextureView, str, new float[]{gLTextureView.getAlpha(), 0.0f});
+        ObjectAnimator ofFloat3 = ObjectAnimator.ofFloat(gLTextureView, "alpha", new float[]{gLTextureView.getAlpha(), 0.0f});
         ofFloat3.setDuration(250);
-        ObjectAnimator ofFloat4 = ObjectAnimator.ofFloat(this.mStillPreview, str, new float[]{0.0f, 1.0f});
+        ObjectAnimator ofFloat4 = ObjectAnimator.ofFloat(this.mStillPreview, "alpha", new float[]{0.0f, 1.0f});
         ofFloat4.setDuration(250);
         ofFloat4.addListener(new AnimatorListenerAdapter() {
             public void onAnimationStart(Animator animator) {
@@ -267,7 +261,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
     public void onPause() {
         super.onPause();
         this.mStillPreview.onPause();
-        this.mPanoramaPreview.setImageDrawable(null);
+        this.mPanoramaPreview.setImageDrawable((Drawable) null);
     }
 
     public void onPreviewMoving() {
@@ -303,7 +297,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(176, this);
     }
@@ -334,7 +328,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
 
     public void setDisplayPreviewBitmap(Bitmap bitmap) {
         if (bitmap == null) {
-            this.mPanoramaPreview.setImageDrawable(null);
+            this.mPanoramaPreview.setImageDrawable((Drawable) null);
         } else {
             this.mPanoramaPreview.setImageBitmap(bitmap);
         }
@@ -376,7 +370,7 @@ public class FragmentPanorama extends BaseFragment implements PanoramaProtocol, 
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(176, this);
     }

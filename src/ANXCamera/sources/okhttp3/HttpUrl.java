@@ -40,9 +40,9 @@ public final class HttpUrl {
     private final String url;
     private final String username;
 
-    /* renamed from: okhttp3.HttpUrl$1 reason: invalid class name */
+    /* renamed from: okhttp3.HttpUrl$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult = new int[ParseResult.values().length];
+        static final /* synthetic */ int[] $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult = new int[Builder.ParseResult.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(12:0|1|2|3|4|5|6|7|8|9|10|12) */
         /* JADX WARNING: Code restructure failed: missing block: B:13:?, code lost:
@@ -54,22 +54,22 @@ public final class HttpUrl {
         /* JADX WARNING: Missing exception handler attribute for start block: B:7:0x002a */
         /* JADX WARNING: Missing exception handler attribute for start block: B:9:0x0035 */
         static {
-            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[ParseResult.SUCCESS.ordinal()] = 1;
-            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[ParseResult.INVALID_HOST.ordinal()] = 2;
-            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[ParseResult.UNSUPPORTED_SCHEME.ordinal()] = 3;
-            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[ParseResult.MISSING_SCHEME.ordinal()] = 4;
-            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[ParseResult.INVALID_PORT.ordinal()] = 5;
+            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[Builder.ParseResult.SUCCESS.ordinal()] = 1;
+            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[Builder.ParseResult.INVALID_HOST.ordinal()] = 2;
+            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[Builder.ParseResult.UNSUPPORTED_SCHEME.ordinal()] = 3;
+            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[Builder.ParseResult.MISSING_SCHEME.ordinal()] = 4;
+            $SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[Builder.ParseResult.INVALID_PORT.ordinal()] = 5;
         }
     }
 
     public static final class Builder {
         @Nullable
         String encodedFragment;
-        String encodedPassword;
+        String encodedPassword = "";
         final List<String> encodedPathSegments = new ArrayList();
         @Nullable
         List<String> encodedQueryNamesAndValues;
-        String encodedUsername;
+        String encodedUsername = "";
         @Nullable
         String host;
         int port = -1;
@@ -85,10 +85,7 @@ public final class HttpUrl {
         }
 
         public Builder() {
-            String str = "";
-            this.encodedUsername = str;
-            this.encodedPassword = str;
-            this.encodedPathSegments.add(str);
+            this.encodedPathSegments.add("");
         }
 
         private Builder addPathSegments(String str, boolean z) {
@@ -115,7 +112,7 @@ public final class HttpUrl {
 
         private static int parsePort(String str, int i, int i2) {
             try {
-                int parseInt = Integer.parseInt(HttpUrl.canonicalize(str, i, i2, "", false, false, false, true, null));
+                int parseInt = Integer.parseInt(HttpUrl.canonicalize(str, i, i2, "", false, false, false, true, (Charset) null));
                 if (parseInt <= 0 || parseInt > 65535) {
                     return -1;
                 }
@@ -126,13 +123,12 @@ public final class HttpUrl {
 
         private void pop() {
             List<String> list = this.encodedPathSegments;
-            String str = "";
-            if (!((String) list.remove(list.size() - 1)).isEmpty() || this.encodedPathSegments.isEmpty()) {
-                this.encodedPathSegments.add(str);
+            if (!list.remove(list.size() - 1).isEmpty() || this.encodedPathSegments.isEmpty()) {
+                this.encodedPathSegments.add("");
                 return;
             }
             List<String> list2 = this.encodedPathSegments;
-            list2.set(list2.size() - 1, str);
+            list2.set(list2.size() - 1, "");
         }
 
         private static int portColonOffset(String str, int i, int i2) {
@@ -155,14 +151,14 @@ public final class HttpUrl {
         }
 
         private void push(String str, int i, int i2, boolean z, boolean z2) {
-            String canonicalize = HttpUrl.canonicalize(str, i, i2, HttpUrl.PATH_SEGMENT_ENCODE_SET, z2, false, false, true, null);
+            String canonicalize = HttpUrl.canonicalize(str, i, i2, HttpUrl.PATH_SEGMENT_ENCODE_SET, z2, false, false, true, (Charset) null);
             if (!isDot(canonicalize)) {
                 if (isDotDot(canonicalize)) {
                     pop();
                     return;
                 }
                 List<String> list = this.encodedPathSegments;
-                if (((String) list.get(list.size() - 1)).isEmpty()) {
+                if (list.get(list.size() - 1).isEmpty()) {
                     List<String> list2 = this.encodedPathSegments;
                     list2.set(list2.size() - 1, canonicalize);
                 } else {
@@ -187,32 +183,10 @@ public final class HttpUrl {
             }
         }
 
-        /*  JADX ERROR: JadxRuntimeException in pass: RegionMakerVisitor
-            jadx.core.utils.exceptions.JadxRuntimeException: Regions count limit reached
-            	at jadx.core.dex.visitors.regions.RegionMaker.makeRegion(RegionMaker.java:89)
-            	at jadx.core.dex.visitors.regions.RegionMaker.makeEndlessLoop(RegionMaker.java:368)
-            	at jadx.core.dex.visitors.regions.RegionMaker.processLoop(RegionMaker.java:172)
-            	at jadx.core.dex.visitors.regions.RegionMaker.traverse(RegionMaker.java:106)
-            	at jadx.core.dex.visitors.regions.RegionMaker.makeRegion(RegionMaker.java:86)
-            	at jadx.core.dex.visitors.regions.RegionMaker.processIf(RegionMaker.java:695)
-            	at jadx.core.dex.visitors.regions.RegionMaker.traverse(RegionMaker.java:123)
-            	at jadx.core.dex.visitors.regions.RegionMaker.makeRegion(RegionMaker.java:86)
-            	at jadx.core.dex.visitors.regions.RegionMakerVisitor.visit(RegionMakerVisitor.java:49)
-            	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-            	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-            	at java.util.ArrayList.forEach(Unknown Source)
-            	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-            	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$0(DepthTraversal.java:13)
-            	at java.util.ArrayList.forEach(Unknown Source)
-            	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:13)
-            	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-            	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-            	at java.util.ArrayList.forEach(Unknown Source)
-            	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-            	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-            	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-            	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-            	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
+        /*  JADX ERROR: JadxOverflowException in pass: RegionMakerVisitor
+            jadx.core.utils.exceptions.JadxOverflowException: Regions count limit reached
+            	at jadx.core.utils.ErrorsCounter.addError(ErrorsCounter.java:47)
+            	at jadx.core.utils.ErrorsCounter.methodError(ErrorsCounter.java:81)
             */
         /* JADX WARNING: Removed duplicated region for block: B:10:0x002c  */
         /* JADX WARNING: Removed duplicated region for block: B:18:0x0044 A[SYNTHETIC] */
@@ -246,7 +220,7 @@ public final class HttpUrl {
                 r6 = r12
                 if (r6 >= r13) goto L_0x0044
                 java.lang.String r12 = "/\\"
-                int r12 = okhttp3.internal.Util.delimiterOffset(r11, r6, r13, r12)
+                int r12 = okhttp3.internal.Util.delimiterOffset((java.lang.String) r11, (int) r6, (int) r13, (java.lang.String) r12)
                 if (r12 >= r13) goto L_0x0036
                 r0 = r3
                 goto L_0x0037
@@ -321,19 +295,12 @@ public final class HttpUrl {
         }
 
         public Builder addEncodedQueryParameter(String str, @Nullable String str2) {
-            String str3;
             if (str != null) {
                 if (this.encodedQueryNamesAndValues == null) {
                     this.encodedQueryNamesAndValues = new ArrayList();
                 }
                 this.encodedQueryNamesAndValues.add(HttpUrl.canonicalize(str, HttpUrl.QUERY_COMPONENT_ENCODE_SET, true, false, true, true));
-                List<String> list = this.encodedQueryNamesAndValues;
-                if (str2 != null) {
-                    str3 = HttpUrl.canonicalize(str2, HttpUrl.QUERY_COMPONENT_ENCODE_SET, true, false, true, true);
-                } else {
-                    str3 = null;
-                }
-                list.add(str3);
+                this.encodedQueryNamesAndValues.add(str2 != null ? HttpUrl.canonicalize(str2, HttpUrl.QUERY_COMPONENT_ENCODE_SET, true, false, true, true) : null);
                 return this;
             }
             throw new NullPointerException("encodedName == null");
@@ -356,19 +323,12 @@ public final class HttpUrl {
         }
 
         public Builder addQueryParameter(String str, @Nullable String str2) {
-            String str3;
             if (str != null) {
                 if (this.encodedQueryNamesAndValues == null) {
                     this.encodedQueryNamesAndValues = new ArrayList();
                 }
                 this.encodedQueryNamesAndValues.add(HttpUrl.canonicalize(str, HttpUrl.QUERY_COMPONENT_ENCODE_SET, false, false, true, true));
-                List<String> list = this.encodedQueryNamesAndValues;
-                if (str2 != null) {
-                    str3 = HttpUrl.canonicalize(str2, HttpUrl.QUERY_COMPONENT_ENCODE_SET, false, false, true, true);
-                } else {
-                    str3 = null;
-                }
-                list.add(str3);
+                this.encodedQueryNamesAndValues.add(str2 != null ? HttpUrl.canonicalize(str2, HttpUrl.QUERY_COMPONENT_ENCODE_SET, false, false, true, true) : null);
                 return this;
             }
             throw new NullPointerException("name == null");
@@ -384,20 +344,14 @@ public final class HttpUrl {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int effectivePort() {
             int i = this.port;
             return i != -1 ? i : HttpUrl.defaultPort(this.scheme);
         }
 
         public Builder encodedFragment(@Nullable String str) {
-            String str2;
-            if (str != null) {
-                str2 = HttpUrl.canonicalize(str, "", true, false, false, false);
-            } else {
-                str2 = null;
-            }
-            this.encodedFragment = str2;
+            this.encodedFragment = str != null ? HttpUrl.canonicalize(str, "", true, false, false, false) : null;
             return this;
         }
 
@@ -416,21 +370,12 @@ public final class HttpUrl {
                 resolvePath(str, 0, str.length());
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected encodedPath: ");
-                sb.append(str);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("unexpected encodedPath: " + str);
             }
         }
 
         public Builder encodedQuery(@Nullable String str) {
-            List<String> list;
-            if (str != null) {
-                list = HttpUrl.queryStringToNamesAndValues(HttpUrl.canonicalize(str, HttpUrl.QUERY_ENCODE_SET, true, false, true, true));
-            } else {
-                list = null;
-            }
-            this.encodedQueryNamesAndValues = list;
+            this.encodedQueryNamesAndValues = str != null ? HttpUrl.queryStringToNamesAndValues(HttpUrl.canonicalize(str, HttpUrl.QUERY_ENCODE_SET, true, false, true, true)) : null;
             return this;
         }
 
@@ -443,13 +388,7 @@ public final class HttpUrl {
         }
 
         public Builder fragment(@Nullable String str) {
-            String str2;
-            if (str != null) {
-                str2 = HttpUrl.canonicalize(str, "", false, false, false, false);
-            } else {
-                str2 = null;
-            }
-            this.encodedFragment = str2;
+            this.encodedFragment = str != null ? HttpUrl.canonicalize(str, "", false, false, false, false) : null;
             return this;
         }
 
@@ -460,15 +399,12 @@ public final class HttpUrl {
                     this.host = canonicalizeHost;
                     return this;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected host: ");
-                sb.append(str);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("unexpected host: " + str);
             }
             throw new NullPointerException("host == null");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public ParseResult parse(@Nullable HttpUrl httpUrl, String str) {
             int i;
             int delimiterOffset;
@@ -481,10 +417,9 @@ public final class HttpUrl {
                 if (str.regionMatches(true, skipLeadingAsciiWhitespace, "https:", 0, 6)) {
                     this.scheme = "https";
                     skipLeadingAsciiWhitespace += 6;
+                } else if (!str.regionMatches(true, skipLeadingAsciiWhitespace, "http:", 0, 5)) {
+                    return ParseResult.UNSUPPORTED_SCHEME;
                 } else {
-                    if (!str.regionMatches(true, skipLeadingAsciiWhitespace, "http:", 0, 5)) {
-                        return ParseResult.UNSUPPORTED_SCHEME;
-                    }
                     this.scheme = "http";
                     skipLeadingAsciiWhitespace += 5;
                 }
@@ -509,34 +444,24 @@ public final class HttpUrl {
                         int i4 = portColonOffset + 1;
                     } else {
                         if (charAt == '@') {
-                            String str3 = "%40";
                             if (!z) {
                                 int delimiterOffset2 = Util.delimiterOffset(str2, i3, delimiterOffset, ':');
                                 int i5 = delimiterOffset2;
-                                String str4 = str3;
+                                String str3 = "%40";
                                 i2 = delimiterOffset;
-                                String canonicalize = HttpUrl.canonicalize(str, i3, delimiterOffset2, " \"':;<=>@[]^`{}|/\\?#", true, false, false, true, null);
+                                String canonicalize = HttpUrl.canonicalize(str, i3, delimiterOffset2, " \"':;<=>@[]^`{}|/\\?#", true, false, false, true, (Charset) null);
                                 if (z2) {
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append(this.encodedUsername);
-                                    sb.append(str4);
-                                    sb.append(canonicalize);
-                                    canonicalize = sb.toString();
+                                    canonicalize = this.encodedUsername + str3 + canonicalize;
                                 }
                                 this.encodedUsername = canonicalize;
                                 if (i5 != i2) {
-                                    this.encodedPassword = HttpUrl.canonicalize(str, i5 + 1, i2, " \"':;<=>@[]^`{}|/\\?#", true, false, false, true, null);
+                                    this.encodedPassword = HttpUrl.canonicalize(str, i5 + 1, i2, " \"':;<=>@[]^`{}|/\\?#", true, false, false, true, (Charset) null);
                                     z = true;
                                 }
                                 z2 = true;
                             } else {
-                                String str5 = str3;
                                 i2 = delimiterOffset;
-                                StringBuilder sb2 = new StringBuilder();
-                                sb2.append(this.encodedPassword);
-                                sb2.append(str5);
-                                sb2.append(HttpUrl.canonicalize(str, i3, i2, " \"':;<=>@[]^`{}|/\\?#", true, false, false, true, null));
-                                this.encodedPassword = sb2.toString();
+                                this.encodedPassword += "%40" + HttpUrl.canonicalize(str, i3, i2, " \"':;<=>@[]^`{}|/\\?#", true, false, false, true, (Charset) null);
                             }
                             i3 = i2 + 1;
                         }
@@ -576,11 +501,11 @@ public final class HttpUrl {
             resolvePath(str2, i, delimiterOffset3);
             if (delimiterOffset3 < skipTrailingAsciiWhitespace && str2.charAt(delimiterOffset3) == '?') {
                 int delimiterOffset4 = Util.delimiterOffset(str2, delimiterOffset3, skipTrailingAsciiWhitespace, '#');
-                this.encodedQueryNamesAndValues = HttpUrl.queryStringToNamesAndValues(HttpUrl.canonicalize(str, delimiterOffset3 + 1, delimiterOffset4, HttpUrl.QUERY_ENCODE_SET, true, false, true, true, null));
+                this.encodedQueryNamesAndValues = HttpUrl.queryStringToNamesAndValues(HttpUrl.canonicalize(str, delimiterOffset3 + 1, delimiterOffset4, HttpUrl.QUERY_ENCODE_SET, true, false, true, true, (Charset) null));
                 delimiterOffset3 = delimiterOffset4;
             }
             if (delimiterOffset3 < skipTrailingAsciiWhitespace && str2.charAt(delimiterOffset3) == '#') {
-                this.encodedFragment = HttpUrl.canonicalize(str, 1 + delimiterOffset3, skipTrailingAsciiWhitespace, "", true, false, false, false, null);
+                this.encodedFragment = HttpUrl.canonicalize(str, 1 + delimiterOffset3, skipTrailingAsciiWhitespace, "", true, false, false, false, (Charset) null);
             }
             return ParseResult.SUCCESS;
         }
@@ -595,37 +520,28 @@ public final class HttpUrl {
 
         public Builder port(int i) {
             if (i <= 0 || i > 65535) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected port: ");
-                sb.append(i);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("unexpected port: " + i);
             }
             this.port = i;
             return this;
         }
 
         public Builder query(@Nullable String str) {
-            List<String> list;
-            if (str != null) {
-                list = HttpUrl.queryStringToNamesAndValues(HttpUrl.canonicalize(str, HttpUrl.QUERY_ENCODE_SET, false, false, true, true));
-            } else {
-                list = null;
-            }
-            this.encodedQueryNamesAndValues = list;
+            this.encodedQueryNamesAndValues = str != null ? HttpUrl.queryStringToNamesAndValues(HttpUrl.canonicalize(str, HttpUrl.QUERY_ENCODE_SET, false, false, true, true)) : null;
             return this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Builder reencodeForUri() {
             int size = this.encodedPathSegments.size();
             for (int i = 0; i < size; i++) {
-                this.encodedPathSegments.set(i, HttpUrl.canonicalize((String) this.encodedPathSegments.get(i), "[]", true, true, false, true));
+                this.encodedPathSegments.set(i, HttpUrl.canonicalize(this.encodedPathSegments.get(i), "[]", true, true, false, true));
             }
             List<String> list = this.encodedQueryNamesAndValues;
             if (list != null) {
                 int size2 = list.size();
                 for (int i2 = 0; i2 < size2; i2++) {
-                    String str = (String) this.encodedQueryNamesAndValues.get(i2);
+                    String str = this.encodedQueryNamesAndValues.get(i2);
                     if (str != null) {
                         this.encodedQueryNamesAndValues.set(i2, HttpUrl.canonicalize(str, HttpUrl.QUERY_COMPONENT_ENCODE_SET_URI, true, true, true, true));
                     }
@@ -670,19 +586,12 @@ public final class HttpUrl {
 
         public Builder scheme(String str) {
             if (str != null) {
-                String str2 = "http";
-                if (str.equalsIgnoreCase(str2)) {
-                    this.scheme = str2;
+                if (str.equalsIgnoreCase("http")) {
+                    this.scheme = "http";
+                } else if (str.equalsIgnoreCase("https")) {
+                    this.scheme = "https";
                 } else {
-                    String str3 = "https";
-                    if (str.equalsIgnoreCase(str3)) {
-                        this.scheme = str3;
-                    } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("unexpected scheme: ");
-                        sb.append(str);
-                        throw new IllegalArgumentException(sb.toString());
-                    }
+                    throw new IllegalArgumentException("unexpected scheme: " + str);
                 }
                 return this;
             }
@@ -691,15 +600,12 @@ public final class HttpUrl {
 
         public Builder setEncodedPathSegment(int i, String str) {
             if (str != null) {
-                String canonicalize = HttpUrl.canonicalize(str, 0, str.length(), HttpUrl.PATH_SEGMENT_ENCODE_SET, true, false, false, true, null);
+                String canonicalize = HttpUrl.canonicalize(str, 0, str.length(), HttpUrl.PATH_SEGMENT_ENCODE_SET, true, false, false, true, (Charset) null);
                 this.encodedPathSegments.set(i, canonicalize);
                 if (!isDot(canonicalize) && !isDotDot(canonicalize)) {
                     return this;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected path segment: ");
-                sb.append(str);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("unexpected path segment: " + str);
             }
             throw new NullPointerException("encodedPathSegment == null");
         }
@@ -712,12 +618,9 @@ public final class HttpUrl {
 
         public Builder setPathSegment(int i, String str) {
             if (str != null) {
-                String canonicalize = HttpUrl.canonicalize(str, 0, str.length(), HttpUrl.PATH_SEGMENT_ENCODE_SET, false, false, false, true, null);
+                String canonicalize = HttpUrl.canonicalize(str, 0, str.length(), HttpUrl.PATH_SEGMENT_ENCODE_SET, false, false, false, true, (Charset) null);
                 if (isDot(canonicalize) || isDotDot(canonicalize)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("unexpected path segment: ");
-                    sb.append(str);
-                    throw new IllegalArgumentException(sb.toString());
+                    throw new IllegalArgumentException("unexpected path segment: " + str);
                 }
                 this.encodedPathSegments.set(i, canonicalize);
                 return this;
@@ -787,10 +690,7 @@ public final class HttpUrl {
         String str = null;
         this.queryNamesAndValues = list != null ? percentDecode(list, true) : null;
         String str2 = builder.encodedFragment;
-        if (str2 != null) {
-            str = percentDecode(str2, false);
-        }
-        this.fragment = str;
+        this.fragment = str2 != null ? percentDecode(str2, false) : str;
         this.url = builder.toString();
     }
 
@@ -819,7 +719,7 @@ public final class HttpUrl {
     }
 
     static String canonicalize(String str, String str2, boolean z, boolean z2, boolean z3, boolean z4) {
-        return canonicalize(str, 0, str.length(), str2, z, z2, z3, z4, null);
+        return canonicalize(str, 0, str.length(), str2, z, z2, z3, z4, (Charset) null);
     }
 
     static String canonicalize(String str, String str2, boolean z, boolean z2, boolean z3, boolean z4, Charset charset) {
@@ -875,30 +775,22 @@ public final class HttpUrl {
 
     static HttpUrl getChecked(String str) throws MalformedURLException, UnknownHostException {
         Builder builder = new Builder();
-        ParseResult parse = builder.parse(null, str);
+        Builder.ParseResult parse = builder.parse((HttpUrl) null, str);
         int i = AnonymousClass1.$SwitchMap$okhttp3$HttpUrl$Builder$ParseResult[parse.ordinal()];
         if (i == 1) {
             return builder.build();
         }
         if (i != 2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid URL: ");
-            sb.append(parse);
-            sb.append(" for ");
-            sb.append(str);
-            throw new MalformedURLException(sb.toString());
+            throw new MalformedURLException("Invalid URL: " + parse + " for " + str);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Invalid host: ");
-        sb2.append(str);
-        throw new UnknownHostException(sb2.toString());
+        throw new UnknownHostException("Invalid host: " + str);
     }
 
     static void namesAndValuesToQueryString(StringBuilder sb, List<String> list) {
         int size = list.size();
         for (int i = 0; i < size; i += 2) {
-            String str = (String) list.get(i);
-            String str2 = (String) list.get(i + 1);
+            String str = list.get(i);
+            String str2 = list.get(i + 1);
             if (i > 0) {
                 sb.append('&');
             }
@@ -913,7 +805,7 @@ public final class HttpUrl {
     @Nullable
     public static HttpUrl parse(String str) {
         Builder builder = new Builder();
-        if (builder.parse(null, str) == ParseResult.SUCCESS) {
+        if (builder.parse((HttpUrl) null, str) == Builder.ParseResult.SUCCESS) {
             return builder.build();
         }
         return null;
@@ -923,7 +815,7 @@ public final class HttpUrl {
         int size = list.size();
         for (int i = 0; i < size; i++) {
             sb.append('/');
-            sb.append((String) list.get(i));
+            sb.append(list.get(i));
         }
     }
 
@@ -948,7 +840,7 @@ public final class HttpUrl {
         int size = list.size();
         ArrayList arrayList = new ArrayList(size);
         for (int i = 0; i < size; i++) {
-            String str = (String) list.get(i);
+            String str = list.get(i);
             arrayList.add(str != null ? percentDecode(str, z) : null);
         }
         return Collections.unmodifiableList(arrayList);
@@ -996,7 +888,7 @@ public final class HttpUrl {
             int indexOf2 = str.indexOf(61, i);
             if (indexOf2 == -1 || indexOf2 > indexOf) {
                 arrayList.add(str.substring(i, indexOf));
-                arrayList.add(null);
+                arrayList.add((Object) null);
             } else {
                 arrayList.add(str.substring(i, indexOf2));
                 arrayList.add(str.substring(indexOf2 + 1, indexOf));
@@ -1018,7 +910,8 @@ public final class HttpUrl {
         if (this.password.isEmpty()) {
             return "";
         }
-        return this.url.substring(this.url.indexOf(58, this.scheme.length() + 3) + 1, this.url.indexOf(64));
+        int indexOf = this.url.indexOf(64);
+        return this.url.substring(this.url.indexOf(58, this.scheme.length() + 3) + 1, indexOf);
     }
 
     public String encodedPath() {
@@ -1098,7 +991,7 @@ public final class HttpUrl {
     @Nullable
     public Builder newBuilder(String str) {
         Builder builder = new Builder();
-        if (builder.parse(this, str) == ParseResult.SUCCESS) {
+        if (builder.parse(this, str) == Builder.ParseResult.SUCCESS) {
             return builder;
         }
         return null;
@@ -1139,7 +1032,7 @@ public final class HttpUrl {
         int size = list.size();
         for (int i = 0; i < size; i += 2) {
             if (str.equals(this.queryNamesAndValues.get(i))) {
-                return (String) this.queryNamesAndValues.get(i + 1);
+                return this.queryNamesAndValues.get(i + 1);
             }
         }
         return null;
@@ -1148,7 +1041,7 @@ public final class HttpUrl {
     public String queryParameterName(int i) {
         List<String> list = this.queryNamesAndValues;
         if (list != null) {
-            return (String) list.get(i * 2);
+            return list.get(i * 2);
         }
         throw new IndexOutOfBoundsException();
     }
@@ -1168,7 +1061,7 @@ public final class HttpUrl {
     public String queryParameterValue(int i) {
         List<String> list = this.queryNamesAndValues;
         if (list != null) {
-            return (String) list.get((i * 2) + 1);
+            return list.get((i * 2) + 1);
         }
         throw new IndexOutOfBoundsException();
     }
@@ -1196,8 +1089,7 @@ public final class HttpUrl {
     }
 
     public String redact() {
-        String str = "";
-        return newBuilder("/...").username(str).password(str).build().toString();
+        return newBuilder("/...").username("").password("").build().toString();
     }
 
     @Nullable

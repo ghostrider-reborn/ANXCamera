@@ -26,9 +26,8 @@ public class XMPNormalizer {
     }
 
     private static void compareAliasedSubtrees(XMPNode xMPNode, XMPNode xMPNode2, boolean z) throws XMPException {
-        String str = "Mismatch between alias and base nodes";
         if (!xMPNode.getValue().equals(xMPNode2.getValue()) || xMPNode.getChildrenLength() != xMPNode2.getChildrenLength()) {
-            throw new XMPException(str, 203);
+            throw new XMPException("Mismatch between alias and base nodes", 203);
         } else if (z || (xMPNode.getName().equals(xMPNode2.getName()) && xMPNode.getOptions().equals(xMPNode2.getOptions()) && xMPNode.getQualifierLength() == xMPNode2.getQualifierLength())) {
             Iterator iterateChildren = xMPNode.iterateChildren();
             Iterator iterateChildren2 = xMPNode2.iterateChildren();
@@ -41,7 +40,7 @@ public class XMPNormalizer {
                 compareAliasedSubtrees((XMPNode) iterateQualifier.next(), (XMPNode) iterateQualifier2.next(), false);
             }
         } else {
-            throw new XMPException(str, 203);
+            throw new XMPException("Mismatch between alias and base nodes", 203);
         }
     }
 
@@ -59,19 +58,20 @@ public class XMPNormalizer {
         if (findChildNode != null) {
             try {
                 XMPDateTime convertToDate = XMPUtils.convertToDate(findChildNode.getValue());
-                if (convertToDate.getYear() == 0 && convertToDate.getMonth() == 0) {
-                    if (convertToDate.getDay() == 0) {
-                        XMPNode findChildNode2 = XMPNodeUtils.findChildNode(xMPNode, "exif:DateTimeOriginal", false);
-                        if (findChildNode2 == null) {
-                            findChildNode2 = XMPNodeUtils.findChildNode(xMPNode, "exif:DateTimeDigitized", false);
-                        }
-                        XMPDateTime convertToDate2 = XMPUtils.convertToDate(findChildNode2.getValue());
-                        Calendar calendar = convertToDate.getCalendar();
-                        calendar.set(1, convertToDate2.getYear());
-                        calendar.set(2, convertToDate2.getMonth());
-                        calendar.set(5, convertToDate2.getDay());
-                        findChildNode.setValue(XMPUtils.convertFromDate(new XMPDateTimeImpl(calendar)));
+                if (convertToDate.getYear() != 0 || convertToDate.getMonth() != 0) {
+                    return;
+                }
+                if (convertToDate.getDay() == 0) {
+                    XMPNode findChildNode2 = XMPNodeUtils.findChildNode(xMPNode, "exif:DateTimeOriginal", false);
+                    if (findChildNode2 == null) {
+                        findChildNode2 = XMPNodeUtils.findChildNode(xMPNode, "exif:DateTimeDigitized", false);
                     }
+                    XMPDateTime convertToDate2 = XMPUtils.convertToDate(findChildNode2.getValue());
+                    Calendar calendar = convertToDate.getCalendar();
+                    calendar.set(1, convertToDate2.getYear());
+                    calendar.set(2, convertToDate2.getMonth());
+                    calendar.set(5, convertToDate2.getDay());
+                    findChildNode.setValue(XMPUtils.convertFromDate(new XMPDateTimeImpl(calendar)));
                 }
             } catch (XMPException unused) {
             }
@@ -104,46 +104,32 @@ public class XMPNormalizer {
     }
 
     private static void migrateAudioCopyright(XMPMeta xMPMeta, XMPNode xMPNode) {
-        String str = XMPConst.X_DEFAULT;
         try {
             XMPNode findSchemaNode = XMPNodeUtils.findSchemaNode(((XMPMetaImpl) xMPMeta).getRoot(), XMPConst.NS_DC, true);
             String value = xMPNode.getValue();
-            String str2 = "\n\n";
             XMPNode findChildNode = XMPNodeUtils.findChildNode(findSchemaNode, "dc:rights", false);
             if (findChildNode != null) {
                 if (findChildNode.hasChildren()) {
-                    int lookupLanguageItem = XMPNodeUtils.lookupLanguageItem(findChildNode, str);
+                    int lookupLanguageItem = XMPNodeUtils.lookupLanguageItem(findChildNode, XMPConst.X_DEFAULT);
                     if (lookupLanguageItem < 0) {
-                        XMPMeta xMPMeta2 = xMPMeta;
-                        xMPMeta2.setLocalizedText(XMPConst.NS_DC, "rights", "", XMPConst.X_DEFAULT, findChildNode.getChild(1).getValue(), null);
-                        lookupLanguageItem = XMPNodeUtils.lookupLanguageItem(findChildNode, str);
+                        xMPMeta.setLocalizedText(XMPConst.NS_DC, "rights", "", XMPConst.X_DEFAULT, findChildNode.getChild(1).getValue(), (PropertyOptions) null);
+                        lookupLanguageItem = XMPNodeUtils.lookupLanguageItem(findChildNode, XMPConst.X_DEFAULT);
                     }
                     XMPNode child = findChildNode.getChild(lookupLanguageItem);
                     String value2 = child.getValue();
-                    int indexOf = value2.indexOf(str2);
+                    int indexOf = value2.indexOf("\n\n");
                     if (indexOf >= 0) {
                         int i = indexOf + 2;
                         if (!value2.substring(i).equals(value)) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(value2.substring(0, i));
-                            sb.append(value);
-                            child.setValue(sb.toString());
+                            child.setValue(value2.substring(0, i) + value);
                         }
                     } else if (!value.equals(value2)) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(value2);
-                        sb2.append(str2);
-                        sb2.append(value);
-                        child.setValue(sb2.toString());
+                        child.setValue(value2 + "\n\n" + value);
                     }
                     xMPNode.getParent().removeChild(xMPNode);
                 }
             }
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str2);
-            sb3.append(value);
-            XMPMeta xMPMeta3 = xMPMeta;
-            xMPMeta3.setLocalizedText(XMPConst.NS_DC, "rights", "", XMPConst.X_DEFAULT, sb3.toString(), null);
+            xMPMeta.setLocalizedText(XMPConst.NS_DC, "rights", "", XMPConst.X_DEFAULT, "\n\n" + value, (PropertyOptions) null);
             xMPNode.getParent().removeChild(xMPNode);
         } catch (XMPException unused) {
         }
@@ -163,25 +149,16 @@ public class XMPNormalizer {
                             XMPAliasInfo findAlias = XMPMetaFactory.getSchemaRegistry().findAlias(xMPNode3.getName());
                             if (findAlias != null) {
                                 XMPNode xMPNode4 = null;
-                                XMPNode findSchemaNode = XMPNodeUtils.findSchemaNode(xMPNode, findAlias.getNamespace(), null, true);
+                                XMPNode findSchemaNode = XMPNodeUtils.findSchemaNode(xMPNode, findAlias.getNamespace(), (String) null, true);
                                 findSchemaNode.setImplicit(false);
-                                StringBuilder sb = new StringBuilder();
-                                sb.append(findAlias.getPrefix());
-                                sb.append(findAlias.getPropName());
-                                XMPNode findChildNode = XMPNodeUtils.findChildNode(findSchemaNode, sb.toString(), false);
+                                XMPNode findChildNode = XMPNodeUtils.findChildNode(findSchemaNode, findAlias.getPrefix() + findAlias.getPropName(), false);
                                 if (findChildNode == null) {
                                     if (findAlias.getAliasForm().isSimple()) {
-                                        StringBuilder sb2 = new StringBuilder();
-                                        sb2.append(findAlias.getPrefix());
-                                        sb2.append(findAlias.getPropName());
-                                        xMPNode3.setName(sb2.toString());
+                                        xMPNode3.setName(findAlias.getPrefix() + findAlias.getPropName());
                                         findSchemaNode.addChild(xMPNode3);
                                         iterateChildren.remove();
                                     } else {
-                                        StringBuilder sb3 = new StringBuilder();
-                                        sb3.append(findAlias.getPrefix());
-                                        sb3.append(findAlias.getPropName());
-                                        XMPNode xMPNode5 = new XMPNode(sb3.toString(), findAlias.getAliasForm().toPropertyOptions());
+                                        XMPNode xMPNode5 = new XMPNode(findAlias.getPrefix() + findAlias.getPropName(), findAlias.getAliasForm().toPropertyOptions());
                                         findSchemaNode.addChild(xMPNode5);
                                         transplantArrayItemAlias(iterateChildren, xMPNode3, xMPNode5);
                                     }
@@ -228,7 +205,7 @@ public class XMPNormalizer {
                     xMPNode2.addChild(child);
                     xMPNode.replaceChild(i, xMPNode2);
                     if (propertyOptions.isArrayAltText() && !child.getOptions().getHasLanguage()) {
-                        child.addQualifier(new XMPNode(XMPConst.XML_LANG, XMPConst.X_DEFAULT, null));
+                        child.addQualifier(new XMPNode(XMPConst.XML_LANG, XMPConst.X_DEFAULT, (PropertyOptions) null));
                     }
                 } else {
                     child.getOptions().setOption(7680, false);
@@ -263,7 +240,7 @@ public class XMPNormalizer {
                     if (value == null || value.length() == 0) {
                         iterateChildren.remove();
                     } else {
-                        xMPNode2.addQualifier(new XMPNode(XMPConst.XML_LANG, "x-repair", null));
+                        xMPNode2.addQualifier(new XMPNode(XMPConst.XML_LANG, "x-repair", (PropertyOptions) null));
                     }
                 }
             }
@@ -271,35 +248,27 @@ public class XMPNormalizer {
     }
 
     private static void touchUpDataModel(XMPMetaImpl xMPMetaImpl) throws XMPException {
-        XMPNode root = xMPMetaImpl.getRoot();
-        String str = XMPConst.NS_DC;
-        XMPNodeUtils.findSchemaNode(root, str, true);
+        XMPNodeUtils.findSchemaNode(xMPMetaImpl.getRoot(), XMPConst.NS_DC, true);
         Iterator iterateChildren = xMPMetaImpl.getRoot().iterateChildren();
         while (iterateChildren.hasNext()) {
             XMPNode xMPNode = (XMPNode) iterateChildren.next();
-            if (str.equals(xMPNode.getName())) {
+            if (XMPConst.NS_DC.equals(xMPNode.getName())) {
                 normalizeDCArrays(xMPNode);
-            } else {
-                if (XMPConst.NS_EXIF.equals(xMPNode.getName())) {
-                    fixGPSTimeStamp(xMPNode);
-                    XMPNode findChildNode = XMPNodeUtils.findChildNode(xMPNode, "exif:UserComment", false);
-                    if (findChildNode != null) {
-                        repairAltText(findChildNode);
-                    }
-                } else {
-                    if (XMPConst.NS_DM.equals(xMPNode.getName())) {
-                        XMPNode findChildNode2 = XMPNodeUtils.findChildNode(xMPNode, "xmpDM:copyright", false);
-                        if (findChildNode2 != null) {
-                            migrateAudioCopyright(xMPMetaImpl, findChildNode2);
-                        }
-                    } else {
-                        if (XMPConst.NS_XMP_RIGHTS.equals(xMPNode.getName())) {
-                            XMPNode findChildNode3 = XMPNodeUtils.findChildNode(xMPNode, "xmpRights:UsageTerms", false);
-                            if (findChildNode3 != null) {
-                                repairAltText(findChildNode3);
-                            }
-                        }
-                    }
+            } else if (XMPConst.NS_EXIF.equals(xMPNode.getName())) {
+                fixGPSTimeStamp(xMPNode);
+                XMPNode findChildNode = XMPNodeUtils.findChildNode(xMPNode, "exif:UserComment", false);
+                if (findChildNode != null) {
+                    repairAltText(findChildNode);
+                }
+            } else if (XMPConst.NS_DM.equals(xMPNode.getName())) {
+                XMPNode findChildNode2 = XMPNodeUtils.findChildNode(xMPNode, "xmpDM:copyright", false);
+                if (findChildNode2 != null) {
+                    migrateAudioCopyright(xMPMetaImpl, findChildNode2);
+                }
+            } else if (XMPConst.NS_XMP_RIGHTS.equals(xMPNode.getName())) {
+                XMPNode findChildNode3 = XMPNodeUtils.findChildNode(xMPNode, "xmpRights:UsageTerms", false);
+                if (findChildNode3 != null) {
+                    repairAltText(findChildNode3);
                 }
             }
         }
@@ -308,7 +277,7 @@ public class XMPNormalizer {
     private static void transplantArrayItemAlias(Iterator it, XMPNode xMPNode, XMPNode xMPNode2) throws XMPException {
         if (xMPNode2.getOptions().isArrayAltText()) {
             if (!xMPNode.getOptions().getHasLanguage()) {
-                xMPNode.addQualifier(new XMPNode(XMPConst.XML_LANG, XMPConst.X_DEFAULT, null));
+                xMPNode.addQualifier(new XMPNode(XMPConst.XML_LANG, XMPConst.X_DEFAULT, (PropertyOptions) null));
             } else {
                 throw new XMPException("Alias to x-default already has a language qualifier", 203);
             }
@@ -321,21 +290,17 @@ public class XMPNormalizer {
     private static void tweakOldXMP(XMPNode xMPNode) throws XMPException {
         if (xMPNode.getName() != null && xMPNode.getName().length() >= 36) {
             String lowerCase = xMPNode.getName().toLowerCase();
-            String str = "uuid:";
-            if (lowerCase.startsWith(str)) {
+            if (lowerCase.startsWith("uuid:")) {
                 lowerCase = lowerCase.substring(5);
             }
             if (Utils.checkUUIDFormat(lowerCase)) {
-                XMPNode findNode = XMPNodeUtils.findNode(xMPNode, XMPPathParser.expandXPath(XMPConst.NS_XMP_MM, "InstanceID"), true, null);
+                XMPNode findNode = XMPNodeUtils.findNode(xMPNode, XMPPathParser.expandXPath(XMPConst.NS_XMP_MM, "InstanceID"), true, (PropertyOptions) null);
                 if (findNode != null) {
-                    findNode.setOptions(null);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(lowerCase);
-                    findNode.setValue(sb.toString());
+                    findNode.setOptions((PropertyOptions) null);
+                    findNode.setValue("uuid:" + lowerCase);
                     findNode.removeChildren();
                     findNode.removeQualifiers();
-                    xMPNode.setName(null);
+                    xMPNode.setName((String) null);
                     return;
                 }
                 throw new XMPException("Failure creating xmpMM:InstanceID", 9);

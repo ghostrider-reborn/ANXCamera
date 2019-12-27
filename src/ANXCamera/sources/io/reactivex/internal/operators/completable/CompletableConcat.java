@@ -71,24 +71,26 @@ public final class CompletableConcat extends Completable {
             DisposableHelper.dispose(this.inner);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 while (!isDisposed()) {
                     if (!this.active) {
                         boolean z = this.done;
                         try {
-                            CompletableSource completableSource = (CompletableSource) this.queue.poll();
-                            boolean z2 = completableSource == null;
-                            if (z && z2) {
-                                if (this.once.compareAndSet(false, true)) {
-                                    this.actual.onComplete();
+                            CompletableSource poll = this.queue.poll();
+                            boolean z2 = poll == null;
+                            if (!z || !z2) {
+                                if (!z2) {
+                                    this.active = true;
+                                    poll.subscribe(this.inner);
+                                    request();
                                 }
+                            } else if (this.once.compareAndSet(false, true)) {
+                                this.actual.onComplete();
                                 return;
-                            } else if (!z2) {
-                                this.active = true;
-                                completableSource.subscribe(this.inner);
-                                request();
+                            } else {
+                                return;
                             }
                         } catch (Throwable th) {
                             Exceptions.throwIfFatal(th);
@@ -103,13 +105,13 @@ public final class CompletableConcat extends Completable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete() {
             this.active = false;
             drain();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(Throwable th) {
             if (this.once.compareAndSet(false, true)) {
                 this.s.cancel();
@@ -179,7 +181,7 @@ public final class CompletableConcat extends Completable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void request() {
             if (this.sourceFused != 1) {
                 int i = this.consumed + 1;

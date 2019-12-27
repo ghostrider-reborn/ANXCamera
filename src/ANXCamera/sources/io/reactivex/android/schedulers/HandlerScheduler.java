@@ -3,7 +3,6 @@ package io.reactivex.android.schedulers;
 import android.os.Handler;
 import android.os.Message;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -12,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 final class HandlerScheduler extends Scheduler {
     private final Handler handler;
 
-    private static final class HandlerWorker extends Worker {
+    private static final class HandlerWorker extends Scheduler.Worker {
         private volatile boolean disposed;
         private final Handler handler;
 
@@ -85,7 +84,7 @@ final class HandlerScheduler extends Scheduler {
         this.handler = handler2;
     }
 
-    public Worker createWorker() {
+    public Scheduler.Worker createWorker() {
         return new HandlerWorker(this.handler);
     }
 

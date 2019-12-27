@@ -2,7 +2,7 @@ package com.android.camera.ui.drawable.snap;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint.Style;
+import android.graphics.Paint;
 import com.android.camera.Util;
 import com.android.camera.ui.drawable.CameraPaintBase;
 
@@ -35,7 +35,7 @@ public class CameraSnapPaintSecond extends CameraPaintBase {
     /* access modifiers changed from: protected */
     public void initPaint(Context context) {
         this.mPaint.setAntiAlias(true);
-        this.mPaint.setStyle(Style.STROKE);
+        this.mPaint.setStyle(Paint.Style.STROKE);
         this.mPaint.setStrokeWidth(3.0f);
     }
 

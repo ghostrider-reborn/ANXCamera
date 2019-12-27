@@ -15,7 +15,7 @@ public final class CancellableDisposable extends AtomicReference<Cancellable> im
 
     public void dispose() {
         if (get() != null) {
-            Cancellable cancellable = (Cancellable) getAndSet(null);
+            Cancellable cancellable = (Cancellable) getAndSet((Object) null);
             if (cancellable != null) {
                 try {
                     cancellable.cancel();

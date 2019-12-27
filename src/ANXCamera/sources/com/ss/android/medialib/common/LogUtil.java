@@ -19,46 +19,31 @@ public class LogUtil {
 
     public static void d(Class<?> cls, String str) {
         if ((LOGD & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            Log.d(sb.toString(), str);
+            Log.d(APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void d(String str, String str2) {
         if ((LOGD & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            Log.d(sb.toString(), str2);
+            Log.d(APPNAME + str, str2);
         }
     }
 
     public static void e(Class<?> cls, String str) {
         if ((LOGE & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            Log.e(sb.toString(), str);
+            Log.e(APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void e(Class<?> cls, String str, Throwable th) {
         if ((LOGE & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            Log.e(sb.toString(), str, th);
+            Log.e(APPNAME + cls.getSimpleName(), str, th);
         }
     }
 
     public static void e(String str, String str2) {
         if ((LOGE & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            Log.e(sb.toString(), str2);
+            Log.e(APPNAME + str, str2);
         }
     }
 
@@ -96,19 +81,13 @@ public class LogUtil {
 
     public static void i(String str, String str2) {
         if ((LOGI & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            Log.i(sb.toString(), str2);
+            Log.i(APPNAME + str, str2);
         }
     }
 
     public static void setUp(String str, byte b2) {
         if (str != null && str.length() > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append("-");
-            APPNAME = sb.toString();
+            APPNAME = str + "-";
         }
         DEBUG_LEVEL = b2;
     }
@@ -119,55 +98,37 @@ public class LogUtil {
 
     public static void v(Class<?> cls, String str) {
         if ((LOGV & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            Log.v(sb.toString(), str);
+            Log.v(APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void v(String str, String str2) {
         if ((LOGV & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            Log.v(sb.toString(), str2);
+            Log.v(APPNAME + str, str2);
         }
     }
 
     public static void w(Class<?> cls, String str) {
         if ((LOGW & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            Log.w(sb.toString(), str);
+            Log.w(APPNAME + cls.getSimpleName(), str);
         }
     }
 
     public static void w(Class<?> cls, String str, Throwable th) {
         if ((LOGW & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(cls.getSimpleName());
-            Log.w(sb.toString(), str, th);
+            Log.w(APPNAME + cls.getSimpleName(), str, th);
         }
     }
 
     public static void w(String str, String str2) {
         if ((LOGW & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            Log.w(sb.toString(), str2);
+            Log.w(APPNAME + str, str2);
         }
     }
 
     public static void w(String str, String str2, Throwable th) {
         if ((LOGW & DEBUG_LEVEL) != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(APPNAME);
-            sb.append(str);
-            Log.w(sb.toString(), str2, th);
+            Log.w(APPNAME + str, str2, th);
         }
     }
 }

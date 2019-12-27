@@ -56,24 +56,7 @@ public class NewStyleTextWaterMark extends WaterMark {
 
     private void print() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("WaterMark pictureWidth=");
-        sb.append(this.mPictureWidth);
-        sb.append(" pictureHeight =");
-        sb.append(this.mPictureHeight);
-        sb.append(" waterText=");
-        sb.append(this.mWaterText);
-        sb.append(" centerX=");
-        sb.append(this.mCenterX);
-        sb.append(" centerY=");
-        sb.append(this.mCenterY);
-        sb.append(" waterWidth=");
-        sb.append(this.mWaterWidth);
-        sb.append(" waterHeight=");
-        sb.append(this.mWaterHeight);
-        sb.append(" padding=");
-        sb.append(this.mPadding);
-        Log.v(str, sb.toString());
+        Log.v(str, "WaterMark pictureWidth=" + this.mPictureWidth + " pictureHeight =" + this.mPictureHeight + " waterText=" + this.mWaterText + " centerX=" + this.mCenterX + " centerY=" + this.mCenterY + " waterWidth=" + this.mWaterWidth + " waterHeight=" + this.mWaterHeight + " padding=" + this.mPadding);
     }
 
     public int getCenterX() {

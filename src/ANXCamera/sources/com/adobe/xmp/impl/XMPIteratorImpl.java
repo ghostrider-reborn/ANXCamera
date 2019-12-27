@@ -49,9 +49,8 @@ public class XMPIteratorImpl implements XMPIterator {
                 this.subIterator = Collections.EMPTY_LIST.iterator();
             }
             if (!this.subIterator.hasNext() && it.hasNext()) {
-                XMPNode xMPNode = (XMPNode) it.next();
                 this.index++;
-                this.subIterator = new NodeIterator(xMPNode, this.path, this.index);
+                this.subIterator = new NodeIterator((XMPNode) it.next(), this.path, this.index);
             }
             if (!this.subIterator.hasNext()) {
                 return false;
@@ -68,11 +67,7 @@ public class XMPIteratorImpl implements XMPIterator {
                 return null;
             }
             if (xMPNode.getParent().getOptions().isArray()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("[");
-                sb.append(String.valueOf(i));
-                sb.append("]");
-                str3 = sb.toString();
+                str3 = "[" + String.valueOf(i) + "]";
                 str2 = "";
             } else {
                 str3 = xMPNode.getName();
@@ -82,21 +77,14 @@ public class XMPIteratorImpl implements XMPIterator {
                 return str3;
             }
             if (XMPIteratorImpl.this.getOptions().isJustLeafname()) {
-                if (str3.startsWith("?")) {
-                    str3 = str3.substring(1);
-                }
-                return str3;
+                return !str3.startsWith("?") ? str3 : str3.substring(1);
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(str2);
-            sb2.append(str3);
-            return sb2.toString();
+            return str + str2 + str3;
         }
 
         /* access modifiers changed from: protected */
         public XMPPropertyInfo createPropertyInfo(XMPNode xMPNode, String str, String str2) {
-            final Object value = xMPNode.getOptions().isSchemaNode() ? null : xMPNode.getValue();
+            final String value = xMPNode.getOptions().isSchemaNode() ? null : xMPNode.getValue();
             final String str3 = str;
             final String str4 = str2;
             final XMPNode xMPNode2 = xMPNode;
@@ -147,12 +135,12 @@ public class XMPIteratorImpl implements XMPIterator {
                     this.childrenIterator = this.visitedNode.iterateChildren();
                 }
                 boolean iterateChildren = iterateChildren(this.childrenIterator);
-                if (!iterateChildren && this.visitedNode.hasQualifier() && !XMPIteratorImpl.this.getOptions().isOmitQualifiers()) {
-                    this.state = 2;
-                    this.childrenIterator = null;
-                    iterateChildren = hasNext();
+                if (iterateChildren || !this.visitedNode.hasQualifier() || XMPIteratorImpl.this.getOptions().isOmitQualifiers()) {
+                    return iterateChildren;
                 }
-                return iterateChildren;
+                this.state = 2;
+                this.childrenIterator = null;
+                return hasNext();
             }
             if (this.childrenIterator == null) {
                 this.childrenIterator = this.visitedNode.iterateQualifier();
@@ -234,10 +222,7 @@ public class XMPIteratorImpl implements XMPIterator {
     public XMPIteratorImpl(XMPMetaImpl xMPMetaImpl, String str, String str2, IteratorOptions iteratorOptions) throws XMPException {
         XMPNode xMPNode;
         String str3 = null;
-        if (iteratorOptions == null) {
-            iteratorOptions = new IteratorOptions();
-        }
-        this.options = iteratorOptions;
+        this.options = iteratorOptions == null ? new IteratorOptions() : iteratorOptions;
         boolean z = str != null && str.length() > 0;
         boolean z2 = str2 != null && str2.length() > 0;
         if (!z && !z2) {
@@ -248,7 +233,7 @@ public class XMPIteratorImpl implements XMPIterator {
             for (int i = 0; i < expandXPath.size() - 1; i++) {
                 xMPPath.add(expandXPath.getSegment(i));
             }
-            xMPNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), expandXPath, false, null);
+            xMPNode = XMPNodeUtils.findNode(xMPMetaImpl.getRoot(), expandXPath, false, (PropertyOptions) null);
             this.baseNS = str;
             str3 = xMPPath.toString();
         } else if (!z || z2) {

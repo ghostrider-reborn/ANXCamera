@@ -3,11 +3,9 @@ package android.support.v4.content.res;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
-import android.content.res.Resources.Theme;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.ColorInt;
@@ -17,8 +15,7 @@ import android.support.annotation.FontRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.content.res.FontResourcesParserCompat.FamilyResourceEntry;
+import android.support.v4.content.res.FontResourcesParserCompat;
 import android.support.v4.graphics.TypefaceCompat;
 import android.support.v4.util.Preconditions;
 import android.util.Log;
@@ -30,7 +27,7 @@ public final class ResourcesCompat {
     private static final String TAG = "ResourcesCompat";
 
     public static abstract class FontCallback {
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public final void callbackFailAsync(final int i, @Nullable Handler handler) {
             if (handler == null) {
                 handler = new Handler(Looper.getMainLooper());
@@ -42,7 +39,7 @@ public final class ResourcesCompat {
             });
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public final void callbackSuccessAsync(final Typeface typeface, @Nullable Handler handler) {
             if (handler == null) {
                 handler = new Handler(Looper.getMainLooper());
@@ -63,43 +60,43 @@ public final class ResourcesCompat {
     }
 
     @ColorInt
-    public static int getColor(@NonNull Resources resources, @ColorRes int i, @Nullable Theme theme) throws NotFoundException {
-        return VERSION.SDK_INT >= 23 ? resources.getColor(i, theme) : resources.getColor(i);
+    public static int getColor(@NonNull Resources resources, @ColorRes int i, @Nullable Resources.Theme theme) throws Resources.NotFoundException {
+        return Build.VERSION.SDK_INT >= 23 ? resources.getColor(i, theme) : resources.getColor(i);
     }
 
     @Nullable
-    public static ColorStateList getColorStateList(@NonNull Resources resources, @ColorRes int i, @Nullable Theme theme) throws NotFoundException {
-        return VERSION.SDK_INT >= 23 ? resources.getColorStateList(i, theme) : resources.getColorStateList(i);
+    public static ColorStateList getColorStateList(@NonNull Resources resources, @ColorRes int i, @Nullable Resources.Theme theme) throws Resources.NotFoundException {
+        return Build.VERSION.SDK_INT >= 23 ? resources.getColorStateList(i, theme) : resources.getColorStateList(i);
     }
 
     @Nullable
-    public static Drawable getDrawable(@NonNull Resources resources, @DrawableRes int i, @Nullable Theme theme) throws NotFoundException {
-        return VERSION.SDK_INT >= 21 ? resources.getDrawable(i, theme) : resources.getDrawable(i);
+    public static Drawable getDrawable(@NonNull Resources resources, @DrawableRes int i, @Nullable Resources.Theme theme) throws Resources.NotFoundException {
+        return Build.VERSION.SDK_INT >= 21 ? resources.getDrawable(i, theme) : resources.getDrawable(i);
     }
 
     @Nullable
-    public static Drawable getDrawableForDensity(@NonNull Resources resources, @DrawableRes int i, int i2, @Nullable Theme theme) throws NotFoundException {
-        int i3 = VERSION.SDK_INT;
+    public static Drawable getDrawableForDensity(@NonNull Resources resources, @DrawableRes int i, int i2, @Nullable Resources.Theme theme) throws Resources.NotFoundException {
+        int i3 = Build.VERSION.SDK_INT;
         return i3 >= 21 ? resources.getDrawableForDensity(i, i2, theme) : i3 >= 15 ? resources.getDrawableForDensity(i, i2) : resources.getDrawable(i);
     }
 
     @Nullable
-    public static Typeface getFont(@NonNull Context context, @FontRes int i) throws NotFoundException {
+    public static Typeface getFont(@NonNull Context context, @FontRes int i) throws Resources.NotFoundException {
         if (context.isRestricted()) {
             return null;
         }
-        return loadFont(context, i, new TypedValue(), 0, null, null, false);
+        return loadFont(context, i, new TypedValue(), 0, (FontCallback) null, (Handler) null, false);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
-    public static Typeface getFont(@NonNull Context context, @FontRes int i, TypedValue typedValue, int i2, @Nullable FontCallback fontCallback) throws NotFoundException {
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
+    public static Typeface getFont(@NonNull Context context, @FontRes int i, TypedValue typedValue, int i2, @Nullable FontCallback fontCallback) throws Resources.NotFoundException {
         if (context.isRestricted()) {
             return null;
         }
-        return loadFont(context, i, typedValue, i2, fontCallback, null, true);
+        return loadFont(context, i, typedValue, i2, fontCallback, (Handler) null, true);
     }
 
-    public static void getFont(@NonNull Context context, @FontRes int i, @NonNull FontCallback fontCallback, @Nullable Handler handler) throws NotFoundException {
+    public static void getFont(@NonNull Context context, @FontRes int i, @NonNull FontCallback fontCallback, @Nullable Handler handler) throws Resources.NotFoundException {
         Preconditions.checkNotNull(fontCallback);
         if (context.isRestricted()) {
             fontCallback.callbackFailAsync(-4, handler);
@@ -115,11 +112,7 @@ public final class ResourcesCompat {
         if (loadFont != null || fontCallback != null) {
             return loadFont;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Font resource ID #0x");
-        sb.append(Integer.toHexString(i));
-        sb.append(" could not be retrieved.");
-        throw new NotFoundException(sb.toString());
+        throw new Resources.NotFoundException("Font resource ID #0x" + Integer.toHexString(i) + " could not be retrieved.");
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:34:0x00a3  */
@@ -130,7 +123,6 @@ public final class ResourcesCompat {
         int i4 = i2;
         FontCallback fontCallback2 = fontCallback;
         Handler handler2 = handler;
-        String str = TAG;
         CharSequence charSequence = typedValue2.string;
         if (charSequence != null) {
             String charSequence2 = charSequence.toString();
@@ -149,11 +141,11 @@ public final class ResourcesCompat {
             }
             try {
                 if (charSequence2.toLowerCase().endsWith(".xml")) {
-                    FamilyResourceEntry parse = FontResourcesParserCompat.parse(resources2.getXml(i3), resources2);
+                    FontResourcesParserCompat.FamilyResourceEntry parse = FontResourcesParserCompat.parse(resources2.getXml(i3), resources2);
                     if (parse != null) {
                         return TypefaceCompat.createFromResourcesFamilyXml(context, parse, resources, i, i2, fontCallback, handler, z);
                     }
-                    Log.e(str, "Failed to find font-family tag");
+                    Log.e(TAG, "Failed to find font-family tag");
                     if (fontCallback2 != null) {
                         fontCallback2.callbackFailAsync(-3, handler2);
                     }
@@ -170,32 +162,19 @@ public final class ResourcesCompat {
                 }
                 return createFromResourcesFontFile;
             } catch (XmlPullParserException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to parse xml resource ");
-                sb.append(charSequence2);
-                Log.e(str, sb.toString(), e2);
+                Log.e(TAG, "Failed to parse xml resource " + charSequence2, e2);
                 if (fontCallback2 != null) {
                     fontCallback2.callbackFailAsync(-3, handler2);
                 }
                 return null;
             } catch (IOException e3) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Failed to read xml resource ");
-                sb2.append(charSequence2);
-                Log.e(str, sb2.toString(), e3);
+                Log.e(TAG, "Failed to read xml resource " + charSequence2, e3);
                 if (fontCallback2 != null) {
                 }
                 return null;
             }
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Resource \"");
-            sb3.append(resources2.getResourceName(i3));
-            sb3.append("\" (");
-            sb3.append(Integer.toHexString(i));
-            sb3.append(") is not a Font: ");
-            sb3.append(typedValue2);
-            throw new NotFoundException(sb3.toString());
+            throw new Resources.NotFoundException("Resource \"" + resources2.getResourceName(i3) + "\" (" + Integer.toHexString(i) + ") is not a Font: " + typedValue2);
         }
     }
 }

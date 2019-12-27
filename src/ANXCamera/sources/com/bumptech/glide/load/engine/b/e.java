@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.engine.b;
 
-import com.bumptech.glide.load.engine.b.b.C0008b;
+import com.bumptech.glide.load.engine.b.b;
 
 /* compiled from: GlideExecutor */
-class e implements C0008b {
+class e implements b.C0008b {
     e() {
     }
 

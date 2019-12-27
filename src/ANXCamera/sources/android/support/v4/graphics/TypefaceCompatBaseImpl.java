@@ -7,15 +7,13 @@ import android.os.CancellationSignal;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.content.res.FontResourcesParserCompat.FontFamilyFilesResourceEntry;
-import android.support.v4.content.res.FontResourcesParserCompat.FontFileResourceEntry;
-import android.support.v4.provider.FontsContractCompat.FontInfo;
+import android.support.v4.content.res.FontResourcesParserCompat;
+import android.support.v4.provider.FontsContractCompat;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 class TypefaceCompatBaseImpl {
     private static final String CACHE_FILE_PREFIX = "cached_font_";
     private static final String TAG = "TypefaceCompatBaseImpl";
@@ -29,13 +27,13 @@ class TypefaceCompatBaseImpl {
     TypefaceCompatBaseImpl() {
     }
 
-    private FontFileResourceEntry findBestEntry(FontFamilyFilesResourceEntry fontFamilyFilesResourceEntry, int i) {
-        return (FontFileResourceEntry) findBestFont(fontFamilyFilesResourceEntry.getEntries(), i, new StyleExtractor<FontFileResourceEntry>() {
-            public int getWeight(FontFileResourceEntry fontFileResourceEntry) {
+    private FontResourcesParserCompat.FontFileResourceEntry findBestEntry(FontResourcesParserCompat.FontFamilyFilesResourceEntry fontFamilyFilesResourceEntry, int i) {
+        return (FontResourcesParserCompat.FontFileResourceEntry) findBestFont(fontFamilyFilesResourceEntry.getEntries(), i, new StyleExtractor<FontResourcesParserCompat.FontFileResourceEntry>() {
+            public int getWeight(FontResourcesParserCompat.FontFileResourceEntry fontFileResourceEntry) {
                 return fontFileResourceEntry.getWeight();
             }
 
-            public boolean isItalic(FontFileResourceEntry fontFileResourceEntry) {
+            public boolean isItalic(FontResourcesParserCompat.FontFileResourceEntry fontFileResourceEntry) {
                 return fontFileResourceEntry.isItalic();
             }
         });
@@ -57,15 +55,15 @@ class TypefaceCompatBaseImpl {
     }
 
     @Nullable
-    public Typeface createFromFontFamilyFilesResourceEntry(Context context, FontFamilyFilesResourceEntry fontFamilyFilesResourceEntry, Resources resources, int i) {
-        FontFileResourceEntry findBestEntry = findBestEntry(fontFamilyFilesResourceEntry, i);
+    public Typeface createFromFontFamilyFilesResourceEntry(Context context, FontResourcesParserCompat.FontFamilyFilesResourceEntry fontFamilyFilesResourceEntry, Resources resources, int i) {
+        FontResourcesParserCompat.FontFileResourceEntry findBestEntry = findBestEntry(fontFamilyFilesResourceEntry, i);
         if (findBestEntry == null) {
             return null;
         }
         return TypefaceCompat.createFromResourcesFontFile(context, resources, findBestEntry.getResourceId(), findBestEntry.getFileName(), i);
     }
 
-    public Typeface createFromFontInfo(Context context, @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fontInfoArr, int i) {
+    public Typeface createFromFontInfo(Context context, @Nullable CancellationSignal cancellationSignal, @NonNull FontsContractCompat.FontInfo[] fontInfoArr, int i) {
         InputStream inputStream;
         InputStream inputStream2 = null;
         if (fontInfoArr.length < 1) {
@@ -138,13 +136,13 @@ class TypefaceCompatBaseImpl {
     }
 
     /* access modifiers changed from: protected */
-    public FontInfo findBestInfo(FontInfo[] fontInfoArr, int i) {
-        return (FontInfo) findBestFont(fontInfoArr, i, new StyleExtractor<FontInfo>() {
-            public int getWeight(FontInfo fontInfo) {
+    public FontsContractCompat.FontInfo findBestInfo(FontsContractCompat.FontInfo[] fontInfoArr, int i) {
+        return (FontsContractCompat.FontInfo) findBestFont(fontInfoArr, i, new StyleExtractor<FontsContractCompat.FontInfo>() {
+            public int getWeight(FontsContractCompat.FontInfo fontInfo) {
                 return fontInfo.getWeight();
             }
 
-            public boolean isItalic(FontInfo fontInfo) {
+            public boolean isItalic(FontsContractCompat.FontInfo fontInfo) {
                 return fontInfo.isItalic();
             }
         });

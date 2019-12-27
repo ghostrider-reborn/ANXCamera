@@ -1,51 +1,43 @@
 package com.android.camera.fragment.live;
 
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import com.android.camera.HybridZoomingSystem;
 import com.android.camera.R;
 import com.android.camera.animation.FragmentAnimationFactory;
 import com.android.camera.data.DataRepository;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.BottomMenuProtocol;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Completable;
 import java.util.List;
 import miui.view.animation.QuinticEaseInInterpolator;
 import miui.view.animation.QuinticEaseOutInterpolator;
 
-public abstract class FragmentLiveBase extends BaseFragment implements HandleBackTrace {
+public abstract class FragmentLiveBase extends BaseFragment implements ModeProtocol.HandleBackTrace {
     protected boolean mIsNeedShowWhenExit = true;
     protected boolean mRemoveFragment;
 
-    private class ExitAnimationListener implements AnimationListener {
+    private class ExitAnimationListener implements Animation.AnimationListener {
         private ExitAnimationListener() {
         }
 
         public void onAnimationEnd(Animation animation) {
-            BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+            ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
             if (baseDelegate != null && baseDelegate.getActiveFragment(R.id.bottom_beauty) == 4090) {
                 baseDelegate.delegateEvent(10);
             }
             if (FragmentLiveBase.this.mRemoveFragment) {
-                CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+                ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
                 if (cameraAction != null && !cameraAction.isDoingAction() && FragmentLiveBase.this.mIsNeedShowWhenExit) {
-                    ((BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).reInitTipImage();
+                    ((ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).reInitTipImage();
                 }
                 FragmentLiveBase.this.mRemoveFragment = false;
             }
             if (HybridZoomingSystem.IS_3_OR_MORE_SAT && FragmentLiveBase.this.mCurrentMode == 174 && DataRepository.dataItemGlobal().getCurrentCameraId() == 0) {
-                DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+                ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
                 if (dualController != null) {
                     dualController.showZoomButton();
-                    TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                    ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                     if (topAlert != null) {
                         topAlert.clearAlertStatus();
                     }
@@ -61,13 +53,13 @@ public abstract class FragmentLiveBase extends BaseFragment implements HandleBac
     }
 
     public boolean onBackEvent(int i) {
-        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
         if (baseDelegate == null || baseDelegate.getActiveFragment(R.id.bottom_beauty) != getFragmentInto()) {
             return false;
         }
         this.mRemoveFragment = true;
         baseDelegate.delegateEvent(10);
-        ((BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).onSwitchCameraActionMenu(0);
+        ((ModeProtocol.BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).onSwitchCameraActionMenu(0);
         return true;
     }
 
@@ -102,13 +94,13 @@ public abstract class FragmentLiveBase extends BaseFragment implements HandleBac
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         registerBackStack(modeCoordinator, this);
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         unRegisterBackStack(modeCoordinator, this);
     }

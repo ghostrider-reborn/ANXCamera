@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.a.d;
+import com.bumptech.glide.load.model.t;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,7 +39,7 @@ public final class g<Model, Data> implements t<Model, Data> {
             return this.reader.M();
         }
 
-        public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super Data> aVar) {
+        public void a(@NonNull Priority priority, @NonNull d.a<? super Data> aVar) {
             try {
                 this.data = this.reader.decode(this.Kh);
                 aVar.b(this.data);
@@ -80,8 +81,8 @@ public final class g<Model, Data> implements t<Model, Data> {
         this.Lh = aVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<Data> a(@NonNull Model model, int i, int i2, @NonNull com.bumptech.glide.load.g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(model), new b(model.toString(), this.Lh));
+    public t.a<Data> a(@NonNull Model model, int i, int i2, @NonNull com.bumptech.glide.load.g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(model), new b(model.toString(), this.Lh));
     }
 
     public boolean c(@NonNull Model model) {

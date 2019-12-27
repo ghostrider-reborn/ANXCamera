@@ -1,21 +1,18 @@
 package org.webrtc.videocodec;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
-import android.media.MediaCodec.CryptoException;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceView;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -24,7 +21,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 class MediaCodecVideoEncoder {
-    public static final Boolean DEBUG = Boolean.valueOf(true);
+    public static final Boolean DEBUG = true;
     public static final int ENCODE = 0;
     public static final int EXIT = 2;
     public static final int PUSHBUFFER = 1;
@@ -33,7 +30,7 @@ class MediaCodecVideoEncoder {
     private static int encodeStarted = 0;
     private LinkedList<Integer> availableInputBufferIndices;
     private LinkedList<Integer> availableOutputBufferIndices;
-    private LinkedList<BufferInfo> availableOutputBufferInfos;
+    private LinkedList<MediaCodec.BufferInfo> availableOutputBufferInfos;
     private int bitRate;
     /* access modifiers changed from: private */
     public MediaCodec codec = null;
@@ -59,7 +56,7 @@ class MediaCodecVideoEncoder {
     /* access modifiers changed from: private */
     public Map<String, String> timeMap;
 
-    /* renamed from: org.webrtc.videocodec.MediaCodecVideoEncoder$4 reason: invalid class name */
+    /* renamed from: org.webrtc.videocodec.MediaCodecVideoEncoder$4  reason: invalid class name */
     static /* synthetic */ class AnonymousClass4 {
         static final /* synthetic */ int[] $SwitchMap$org$webrtc$videocodec$MediaCodecVideoEncoder$CodecName = new int[CodecName.values().length];
 
@@ -168,10 +165,10 @@ class MediaCodecVideoEncoder {
     private void check(boolean z, String str) {
         if (!z) {
             Log.e("WEBRTC-CHECK", str);
-            AlertDialog create = new Builder(this.context).create();
+            AlertDialog create = new AlertDialog.Builder(this.context).create();
             create.setTitle("WebRTC Error");
             create.setMessage(str);
-            create.setButton(-1, "OK", new OnClickListener() {
+            create.setButton(-1, "OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                 }
             });
@@ -180,12 +177,12 @@ class MediaCodecVideoEncoder {
     }
 
     private Frame dequeueFrame() {
-        Frame frame;
+        Frame removeFirst;
         synchronized (this.frameQueue) {
             this.frameCount--;
-            frame = (Frame) this.frameQueue.removeFirst();
+            removeFirst = this.frameQueue.removeFirst();
         }
-        return frame;
+        return removeFirst;
     }
 
     private boolean drainOutputBuffer() {
@@ -200,20 +197,12 @@ class MediaCodecVideoEncoder {
             }
             return false;
         }
-        int intValue = ((Integer) this.availableOutputBufferIndices.peekFirst()).intValue();
-        BufferInfo bufferInfo = (BufferInfo) this.availableOutputBufferInfos.peekFirst();
+        int intValue = this.availableOutputBufferIndices.peekFirst().intValue();
+        MediaCodec.BufferInfo peekFirst = this.availableOutputBufferInfos.peekFirst();
         if (logInfoEnable()) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("drainOutputBuffer--enter-- got one frame:");
-            sb.append(intValue);
-            sb.append("info.presentationTimeUs:");
-            sb.append(bufferInfo.presentationTimeUs);
-            sb.append("info.size:");
-            sb.append(bufferInfo.size);
-            Log.d(str2, sb.toString());
+            Log.d(TAG, "drainOutputBuffer--enter-- got one frame:" + intValue + "info.presentationTimeUs:" + peekFirst.presentationTimeUs + "info.size:" + peekFirst.size);
         }
-        int i3 = bufferInfo.flags;
+        int i3 = peekFirst.flags;
         if ((i3 & 4) != 0) {
             check(false, "Saw output end of stream.");
             Log.d(TAG, "Saw output end of stream");
@@ -222,23 +211,17 @@ class MediaCodecVideoEncoder {
         if ((i3 & 2) != 0) {
             Log.d(TAG, "Got config bytes");
         }
-        if ((bufferInfo.flags & 1) != 0) {
+        if ((peekFirst.flags & 1) != 0) {
             Log.d(TAG, "Got Sync Frame");
             i = 1;
         } else {
             i = 0;
         }
-        String str3 = (String) this.timeMap.get(String.valueOf(bufferInfo.presentationTimeUs));
-        if (str3 == null) {
-            String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("drainOutputBuffer timestap error from decoder -index:");
-            sb2.append(intValue);
-            sb2.append("info.presentationTimeUs:");
-            sb2.append(bufferInfo.presentationTimeUs);
-            Log.e(str4, sb2.toString());
+        String str2 = this.timeMap.get(String.valueOf(peekFirst.presentationTimeUs));
+        if (str2 == null) {
+            Log.e(TAG, "drainOutputBuffer timestap error from decoder -index:" + intValue + "info.presentationTimeUs:" + peekFirst.presentationTimeUs);
             if (this.native_context != 0) {
-                Frame frame = new Frame(this.codecOutputBuffers[intValue], bufferInfo.size, bufferInfo.presentationTimeUs, -1, this.codecwidth, this.codecheight, i);
+                Frame frame = new Frame(this.codecOutputBuffers[intValue], peekFirst.size, peekFirst.presentationTimeUs, -1, this.codecwidth, this.codecheight, i);
                 SendFrame(frame, this.native_context);
             }
             synchronized (this.codec) {
@@ -251,38 +234,22 @@ class MediaCodecVideoEncoder {
                 return false;
             }
         }
-        long parseLong = Long.parseLong(str3);
+        long parseLong = Long.parseLong(str2);
         if (logInfoEnable()) {
-            String str5 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("drainOutputBuffer before SendFrame:");
-            sb3.append(intValue);
-            sb3.append("info.presentationTimeUs:");
-            sb3.append(bufferInfo.presentationTimeUs);
-            sb3.append("frametype:");
-            sb3.append(i);
-            Log.d(str5, sb3.toString());
+            Log.d(TAG, "drainOutputBuffer before SendFrame:" + intValue + "info.presentationTimeUs:" + peekFirst.presentationTimeUs + "frametype:" + i);
         }
         if (this.native_context != 0) {
             Frame frame2 = r1;
-            str = str3;
+            str = str2;
             i2 = i;
-            Frame frame3 = new Frame(this.codecOutputBuffers[intValue], bufferInfo.size, bufferInfo.presentationTimeUs, parseLong, this.codecwidth, this.codecheight, i);
+            Frame frame3 = new Frame(this.codecOutputBuffers[intValue], peekFirst.size, peekFirst.presentationTimeUs, parseLong, this.codecwidth, this.codecheight, i);
             SendFrame(frame2, this.native_context);
         } else {
-            str = str3;
+            str = str2;
             i2 = i;
         }
         if (logInfoEnable()) {
-            String str6 = TAG;
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("drainOutputBuffer after SendFrame:");
-            sb4.append(intValue);
-            sb4.append("info.presentationTimeUs:");
-            sb4.append(bufferInfo.presentationTimeUs);
-            sb4.append("frametype:");
-            sb4.append(i2);
-            Log.d(str6, sb4.toString());
+            Log.d(TAG, "drainOutputBuffer after SendFrame:" + intValue + "info.presentationTimeUs:" + peekFirst.presentationTimeUs + "frametype:" + i2);
         }
         this.timeMap.remove(str);
         synchronized (this.codec) {
@@ -306,14 +273,11 @@ class MediaCodecVideoEncoder {
     public void encodePendingBuffers() {
         synchronized (this.codec) {
             if (validCodec(this.codec)) {
-                BufferInfo bufferInfo = new BufferInfo();
+                MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
                 int dequeueOutputBuffer = this.codec.dequeueOutputBuffer(bufferInfo, (long) 0);
                 if (logInfoEnable()) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("dequeueOutputBuffer :index:");
-                    sb.append(dequeueOutputBuffer);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "dequeueOutputBuffer :index:" + dequeueOutputBuffer);
                 }
                 if (dequeueOutputBuffer >= 0) {
                     this.availableOutputBufferIndices.add(Integer.valueOf(dequeueOutputBuffer));
@@ -321,17 +285,11 @@ class MediaCodecVideoEncoder {
                 } else if (dequeueOutputBuffer == -3) {
                     this.codecOutputBuffers = this.codec.getOutputBuffers();
                     String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Output Buffer changed ");
-                    sb2.append(this.codecOutputBuffers);
-                    Log.d(str2, sb2.toString());
+                    Log.d(str2, "Output Buffer changed " + this.codecOutputBuffers);
                 } else if (dequeueOutputBuffer == -2) {
                     MediaFormat outputFormat = this.codec.getOutputFormat();
                     String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("Media Format Changed ");
-                    sb3.append(outputFormat);
-                    Log.d(str3, sb3.toString());
+                    Log.d(str3, "Media Format Changed " + outputFormat);
                 } else if (dequeueOutputBuffer == -1) {
                 }
             }
@@ -356,7 +314,7 @@ class MediaCodecVideoEncoder {
         } else {
             Frame dequeueFrame = dequeueFrame();
             ByteBuffer byteBuffer = dequeueFrame.buffer;
-            int intValue = ((Integer) this.availableInputBufferIndices.pollFirst()).intValue();
+            int intValue = this.availableInputBufferIndices.pollFirst().intValue();
             ByteBuffer byteBuffer2 = this.codecInputBuffers[intValue];
             check(byteBuffer2.capacity() >= byteBuffer.capacity(), "Buffer is too small to copy a frame.");
             byteBuffer.rewind();
@@ -365,12 +323,7 @@ class MediaCodecVideoEncoder {
             try {
                 if (logInfoEnable()) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("feedInputBuffer -index:");
-                    sb.append(intValue);
-                    sb.append("frame.timestampUs:");
-                    sb.append(dequeueFrame.timestampUs);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "feedInputBuffer -index:" + intValue + "frame.timestampUs:" + dequeueFrame.timestampUs);
                 }
                 synchronized (this.codec) {
                     if (!validCodec(this.codec)) {
@@ -378,14 +331,8 @@ class MediaCodecVideoEncoder {
                     }
                     this.codec.queueInputBuffer(intValue, 0, byteBuffer.capacity(), dequeueFrame.timestampUs, 0);
                 }
-            } catch (CryptoException e4) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("CryptoException w/ errorCode ");
-                sb2.append(e4.getErrorCode());
-                sb2.append(", '");
-                sb2.append(e4.getMessage());
-                sb2.append("'");
-                check(false, sb2.toString());
+            } catch (MediaCodec.CryptoException e4) {
+                check(false, "CryptoException w/ errorCode " + e4.getErrorCode() + ", '" + e4.getMessage() + "'");
             }
         }
         return true;
@@ -420,7 +367,7 @@ class MediaCodecVideoEncoder {
                 Log.d(TAG, "isPlatformSupported MiTV2 model");
             }
             return true;
-        } else if (VERSION.SDK_INT < 19) {
+        } else if (Build.VERSION.SDK_INT < 19) {
             return false;
         } else {
             if (DEBUG.booleanValue()) {
@@ -452,17 +399,7 @@ class MediaCodecVideoEncoder {
                 ByteBuffer allocate = ByteBuffer.allocate(((i2 * i3) * 3) / 2);
                 allocate.put(bArr2);
                 if (logInfoEnable()) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("len:");
-                    sb.append(bArr2.length);
-                    sb.append(" pushBuffer timestampUs:");
-                    sb.append(j);
-                    sb.append("ntp_timestapUs:");
-                    sb.append(j2);
-                    sb.append("frameCount:");
-                    sb.append(this.frameCount);
-                    Log.d(str, sb.toString());
+                    Log.d(TAG, "len:" + bArr2.length + " pushBuffer timestampUs:" + j + "ntp_timestapUs:" + j2 + "frameCount:" + this.frameCount);
                 } else {
                     long j3 = j;
                     long j4 = j2;
@@ -487,11 +424,7 @@ class MediaCodecVideoEncoder {
                 }
             }
             if (this.frameCount > 10) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("pushBuffer sleep, frameCount:");
-                sb2.append(this.frameCount);
-                Log.d(str2, sb2.toString());
+                Log.d(TAG, "pushBuffer sleep, frameCount:" + this.frameCount);
                 Thread.sleep(10);
             }
         } catch (Exception e2) {
@@ -516,12 +449,7 @@ class MediaCodecVideoEncoder {
         this.format = new MediaFormat();
         this.format.setInteger("width", i);
         this.format.setInteger("height", i2);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Init---framerate:");
-        sb.append(i3);
-        sb.append(" bitrate:");
-        sb.append(i4);
-        Log.v("setCodecState", sb.toString());
+        Log.v("setCodecState", "Init---framerate:" + i3 + " bitrate:" + i4);
         try {
             int i5 = AnonymousClass4.$SwitchMap$org$webrtc$videocodec$MediaCodecVideoEncoder$CodecName[codecName.ordinal()];
             if (i5 == 1) {
@@ -539,7 +467,7 @@ class MediaCodecVideoEncoder {
                 this.format.setInteger("i-frame-interval", 450);
             }
             synchronized (this.codec) {
-                this.codec.configure(this.format, null, null, 1);
+                this.codec.configure(this.format, (Surface) null, (MediaCrypto) null, 1);
                 this.codec.start();
                 this.codecInputBuffers = this.codec.getInputBuffers();
                 this.codecOutputBuffers = this.codec.getOutputBuffers();
@@ -606,7 +534,7 @@ class MediaCodecVideoEncoder {
             public void run() {
                 Looper.prepare();
                 MediaCodecVideoEncoder mediaCodecVideoEncoder = MediaCodecVideoEncoder.this;
-                mediaCodecVideoEncoder.encodehandler = new EncodeHandler();
+                EncodeHandler unused = mediaCodecVideoEncoder.encodehandler = new EncodeHandler();
                 if (MediaCodecVideoEncoder.DEBUG.booleanValue()) {
                     Log.d(MediaCodecVideoEncoder.TAG, "startEncodeLooperThread Encoder-HW");
                 }
@@ -631,7 +559,7 @@ class MediaCodecVideoEncoder {
             public void run() {
                 Looper.prepare();
                 MediaCodecVideoEncoder mediaCodecVideoEncoder = MediaCodecVideoEncoder.this;
-                mediaCodecVideoEncoder.pushhandler = new EncodeHandler();
+                EncodeHandler unused = mediaCodecVideoEncoder.pushhandler = new EncodeHandler();
                 if (MediaCodecVideoEncoder.DEBUG.booleanValue()) {
                     Log.d(MediaCodecVideoEncoder.TAG, "startPushLooperThread Encoder-HW");
                 }
@@ -656,9 +584,10 @@ class MediaCodecVideoEncoder {
         if (mediaCodec != null) {
             return true;
         }
-        if (DEBUG.booleanValue()) {
-            Log.d(TAG, "validCodec codec is null.");
+        if (!DEBUG.booleanValue()) {
+            return false;
         }
+        Log.d(TAG, "validCodec codec is null.");
         return false;
     }
 

@@ -4,7 +4,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.internal.fuseable.SimplePlainQueue;
@@ -40,7 +39,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
         final long timespan;
         final TimeUnit unit;
         UnicastSubject<T> window;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         static final class ConsumerIndexHolder implements Runnable {
             final long index;
@@ -84,16 +83,16 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeTimer() {
             DisposableHelper.dispose(this.timer);
-            Worker worker2 = this.worker;
+            Scheduler.Worker worker2 = this.worker;
             if (worker2 != null) {
                 worker2.dispose();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             MpscLinkedQueue mpscLinkedQueue = (MpscLinkedQueue) this.queue;
             Observer<? super V> observer = this.actual;
@@ -111,10 +110,11 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                     Throwable th = this.error;
                     if (th != null) {
                         unicastSubject.onError(th);
+                        return;
                     } else {
                         unicastSubject.onComplete();
+                        return;
                     }
-                    return;
                 } else if (z2) {
                     i = leave(-i);
                     if (i == 0) {
@@ -141,9 +141,9 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                         this.window = unicastSubject;
                         this.actual.onNext(unicastSubject);
                         if (this.restartTimerOnMaxSize) {
-                            Disposable disposable = (Disposable) this.timer.get();
+                            Disposable disposable = this.timer.get();
                             disposable.dispose();
-                            Worker worker2 = this.worker;
+                            Scheduler.Worker worker2 = this.worker;
                             ConsumerIndexHolder consumerIndexHolder2 = new ConsumerIndexHolder(this.producerIndex, this);
                             long j2 = this.timespan;
                             Disposable schedulePeriodically = worker2.schedulePeriodically(consumerIndexHolder2, j2, j2, this.unit);
@@ -198,8 +198,8 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                         this.window = create;
                         this.actual.onNext(create);
                         if (this.restartTimerOnMaxSize) {
-                            ((Disposable) this.timer.get()).dispose();
-                            Worker worker2 = this.worker;
+                            this.timer.get().dispose();
+                            Scheduler.Worker worker2 = this.worker;
                             ConsumerIndexHolder consumerIndexHolder = new ConsumerIndexHolder(this.producerIndex, this);
                             long j2 = this.timespan;
                             DisposableHelper.replace(this.timer, worker2.schedulePeriodically(consumerIndexHolder, j2, j2, this.unit));
@@ -234,7 +234,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                     observer.onNext(create);
                     ConsumerIndexHolder consumerIndexHolder = new ConsumerIndexHolder(this.producerIndex, this);
                     if (this.restartTimerOnMaxSize) {
-                        Worker worker2 = this.worker;
+                        Scheduler.Worker worker2 = this.worker;
                         long j = this.timespan;
                         disposable2 = worker2.schedulePeriodically(consumerIndexHolder, j, j, this.unit);
                     } else {
@@ -271,12 +271,12 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeTimer() {
             DisposableHelper.dispose(this.timer);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             MpscLinkedQueue mpscLinkedQueue = (MpscLinkedQueue) this.queue;
             Observer<? super V> observer = this.actual;
@@ -395,7 +395,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
         final long timespan;
         final TimeUnit unit;
         final List<UnicastSubject<T>> windows = new LinkedList();
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         final class CompletionTask implements Runnable {
             private final UnicastSubject<T> w;
@@ -419,7 +419,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
             }
         }
 
-        WindowSkipObserver(Observer<? super Observable<T>> observer, long j, long j2, TimeUnit timeUnit, Worker worker2, int i) {
+        WindowSkipObserver(Observer<? super Observable<T>> observer, long j, long j2, TimeUnit timeUnit, Scheduler.Worker worker2, int i) {
             super(observer, new MpscLinkedQueue());
             this.timespan = j;
             this.timeskip = j2;
@@ -428,7 +428,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
             this.bufferSize = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void complete(UnicastSubject<T> unicastSubject) {
             this.queue.offer(new SubjectWork(unicastSubject, false));
             if (enter()) {
@@ -440,12 +440,12 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeWorker() {
             this.worker.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             MpscLinkedQueue mpscLinkedQueue = (MpscLinkedQueue) this.queue;
             Observer<? super V> observer = this.actual;
@@ -460,11 +460,11 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                     mpscLinkedQueue.clear();
                     Throwable th = this.error;
                     if (th != null) {
-                        for (UnicastSubject onError : list) {
+                        for (UnicastSubject<T> onError : list) {
                             onError.onError(th);
                         }
                     } else {
-                        for (UnicastSubject onComplete : list) {
+                        for (UnicastSubject<T> onComplete : list) {
                             onComplete.onComplete();
                         }
                     }
@@ -491,7 +491,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                         this.worker.schedule(new CompletionTask(create), this.timespan, this.unit);
                     }
                 } else {
-                    for (UnicastSubject onNext : list) {
+                    for (UnicastSubject<T> onNext : list) {
                         onNext.onNext(poll);
                     }
                 }
@@ -527,7 +527,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
 
         public void onNext(T t) {
             if (fastEnter()) {
-                for (UnicastSubject onNext : this.windows) {
+                for (UnicastSubject<T> onNext : this.windows) {
                     onNext.onNext(t);
                 }
                 if (leave(-1) == 0) {
@@ -551,7 +551,7 @@ public final class ObservableWindowTimed<T> extends AbstractObservableWithUpstre
                     this.windows.add(create);
                     this.actual.onNext(create);
                     this.worker.schedule(new CompletionTask(create), this.timespan, this.unit);
-                    Worker worker2 = this.worker;
+                    Scheduler.Worker worker2 = this.worker;
                     long j = this.timeskip;
                     worker2.schedulePeriodically(this, j, j, this.unit);
                 }

@@ -5,10 +5,8 @@ import android.support.annotation.NonNull;
 import com.android.camera.log.Log;
 import com.xiaomi.camera.base.PerformanceTracker;
 import com.xiaomi.camera.core.CaptureData;
-import com.xiaomi.camera.core.CaptureData.CaptureDataBean;
 import com.xiaomi.camera.core.CaptureDataListener;
 import com.xiaomi.camera.imagecodec.ImagePool;
-import com.xiaomi.camera.imagecodec.ImagePool.ImageFormat;
 import com.xiaomi.engine.FrameData;
 import com.xiaomi.engine.MiaNodeJNI;
 import com.xiaomi.protocol.ICustomCaptureResult;
@@ -18,49 +16,39 @@ import java.util.List;
 public class ClearShotProcessor implements AlgoProcessor {
     private static final String TAG = "ClearShotProcessor";
 
-    private void onImageAvailable(CaptureData captureData, CaptureDataBean captureDataBean, ProcessResultListener processResultListener) {
+    private void onImageAvailable(CaptureData captureData, CaptureData.CaptureDataBean captureDataBean, ProcessResultListener processResultListener) {
         captureData.setMultiFrameProcessResult(captureDataBean);
         processResultListener.onProcessFinished(captureData, true);
     }
 
     public void doProcess(@NonNull CaptureData captureData, ProcessResultListener processResultListener) {
         Log.d(TAG, "doProcess: start process capture data");
-        List<CaptureDataBean> captureDataBeanList = captureData.getCaptureDataBeanList();
+        List<CaptureData.CaptureDataBean> captureDataBeanList = captureData.getCaptureDataBeanList();
         if (captureDataBeanList == null || captureDataBeanList.isEmpty()) {
             throw new IllegalArgumentException("taskBeanList is not allow to be empty!");
         }
-        CaptureDataBean captureDataBean = new CaptureDataBean(captureData.getStreamNum());
+        CaptureData.CaptureDataBean captureDataBean = new CaptureData.CaptureDataBean(captureData.getStreamNum());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("doProcess: dataNum = ");
-        sb.append(captureDataBeanList.size());
-        Log.d(str, sb.toString());
-        String str2 = "[CLEARSHOT]";
-        PerformanceTracker.trackAlgorithmProcess(str2, 0);
+        Log.d(str, "doProcess: dataNum = " + captureDataBeanList.size());
+        PerformanceTracker.trackAlgorithmProcess("[CLEARSHOT]", 0);
         ArrayList arrayList = new ArrayList();
-        for (CaptureDataBean captureDataBean2 : captureDataBeanList) {
-            FrameData frameData = new FrameData(0, captureDataBean2.getResult().getSequenceId(), captureDataBean2.getResult().getFrameNumber(), captureDataBean2.getResult().getResults(), captureDataBean2.getMainImage());
+        for (CaptureData.CaptureDataBean next : captureDataBeanList) {
+            FrameData frameData = new FrameData(0, next.getResult().getSequenceId(), next.getResult().getFrameNumber(), next.getResult().getResults(), next.getMainImage());
             arrayList.add(frameData);
         }
-        Image mainImage = ((CaptureDataBean) captureDataBeanList.get(0)).getMainImage();
-        Image anEmptyImage = ImagePool.getInstance().getAnEmptyImage(new ImageFormat(mainImage.getWidth(), mainImage.getHeight(), mainImage.getFormat()));
+        Image mainImage = captureDataBeanList.get(0).getMainImage();
+        Image anEmptyImage = ImagePool.getInstance().getAnEmptyImage(new ImagePool.ImageFormat(mainImage.getWidth(), mainImage.getHeight(), mainImage.getFormat()));
         int process = MiaNodeJNI.getInstance().process(arrayList, anEmptyImage, 2, captureData.getStreamNum() == 2);
         if (process > arrayList.size() || process < 0) {
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("doProcess: returned a error baseIndex: ");
-            sb2.append(process);
-            Log.w(str3, sb2.toString());
+            String str2 = TAG;
+            Log.w(str2, "doProcess: returned a error baseIndex: " + process);
             process = 0;
         }
-        PerformanceTracker.trackAlgorithmProcess(str2, 1);
-        String str4 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("doProcess: clearShot done. baseIndex: ");
-        sb3.append(process);
-        Log.d(str4, sb3.toString());
-        CaptureDataBean captureDataBean3 = (CaptureDataBean) captureDataBeanList.get(process);
-        ICustomCaptureResult result = captureDataBean3.getResult();
+        PerformanceTracker.trackAlgorithmProcess("[CLEARSHOT]", 1);
+        String str3 = TAG;
+        Log.d(str3, "doProcess: clearShot done. baseIndex: " + process);
+        CaptureData.CaptureDataBean captureDataBean2 = captureDataBeanList.get(process);
+        ICustomCaptureResult result = captureDataBean2.getResult();
         long timeStamp = result.getTimeStamp();
         anEmptyImage.setTimestamp(timeStamp);
         ImagePool.getInstance().queueImage(anEmptyImage);
@@ -68,12 +56,12 @@ public class ClearShotProcessor implements AlgoProcessor {
         captureDataBean.setImage(image, 0);
         ImagePool.getInstance().holdImage(image);
         CaptureDataListener captureDataListener = captureData.getCaptureDataListener();
-        for (CaptureDataBean captureDataBean4 : captureDataBeanList) {
-            if (captureDataBean4 != captureDataBean3) {
-                Image mainImage2 = captureDataBean4.getMainImage();
+        for (CaptureData.CaptureDataBean next2 : captureDataBeanList) {
+            if (next2 != captureDataBean2) {
+                Image mainImage2 = next2.getMainImage();
                 mainImage2.close();
                 captureDataListener.onOriginalImageClosed(mainImage2);
-                Image subImage = captureDataBean4.getSubImage();
+                Image subImage = next2.getSubImage();
                 if (subImage != null) {
                     subImage.close();
                     captureDataListener.onOriginalImageClosed(subImage);
@@ -81,8 +69,8 @@ public class ClearShotProcessor implements AlgoProcessor {
             }
         }
         captureDataBeanList.clear();
-        Image mainImage3 = captureDataBean3.getMainImage();
-        Image subImage2 = captureDataBean3.getSubImage();
+        Image mainImage3 = captureDataBean2.getMainImage();
+        Image subImage2 = captureDataBean2.getSubImage();
         mainImage3.close();
         captureDataListener.onOriginalImageClosed(mainImage3);
         captureDataBean.setCaptureResult(result, true);

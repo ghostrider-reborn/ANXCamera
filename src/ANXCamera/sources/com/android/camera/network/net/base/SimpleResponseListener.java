@@ -5,9 +5,9 @@ public abstract class SimpleResponseListener<T> implements ResponseListener {
 
     public final void onResponse(Object... objArr) {
         if (objArr == null || objArr.length <= 0) {
-            onResponse((T) null);
+            onResponse((Object) null);
         } else {
-            onResponse((T) objArr[0]);
+            onResponse(objArr[0]);
         }
     }
 

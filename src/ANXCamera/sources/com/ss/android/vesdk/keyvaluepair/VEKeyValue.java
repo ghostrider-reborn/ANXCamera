@@ -16,14 +16,13 @@ public class VEKeyValue {
         if (!this.mIsFirst) {
             this.mKVSB.append(",");
         }
-        String str3 = "\"";
-        this.mKVSB.append(str3);
+        this.mKVSB.append("\"");
         this.mKVSB.append(str);
-        this.mKVSB.append(str3);
+        this.mKVSB.append("\"");
         this.mKVSB.append(":");
-        this.mKVSB.append(str3);
+        this.mKVSB.append("\"");
         this.mKVSB.append(str2);
-        this.mKVSB.append(str3);
+        this.mKVSB.append("\"");
         if (this.mIsFirst) {
             this.mIsFirst = false;
         }
@@ -31,29 +30,15 @@ public class VEKeyValue {
 
     public VEKeyValue add(String str, float f2) {
         Map<String, String> map = this.mKVPair;
-        StringBuilder sb = new StringBuilder();
-        sb.append(f2);
-        String str2 = "";
-        sb.append(str2);
-        map.put(str, sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(f2);
-        sb2.append(str2);
-        addSB(str, sb2.toString());
+        map.put(str, f2 + "");
+        addSB(str, f2 + "");
         return this;
     }
 
     public VEKeyValue add(String str, int i) {
         Map<String, String> map = this.mKVPair;
-        StringBuilder sb = new StringBuilder();
-        sb.append(i);
-        String str2 = "";
-        sb.append(str2);
-        map.put(str, sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(i);
-        sb2.append(str2);
-        addSB(str, sb2.toString());
+        map.put(str, i + "");
+        addSB(str, i + "");
         return this;
     }
 
@@ -67,8 +52,8 @@ public class VEKeyValue {
     public JSONObject parseJsonObj() {
         try {
             JSONObject jSONObject = new JSONObject();
-            for (String str : this.mKVPair.keySet()) {
-                jSONObject.put(str, (String) this.mKVPair.get(str));
+            for (String next : this.mKVPair.keySet()) {
+                jSONObject.put(next, this.mKVPair.get(next));
             }
             return jSONObject;
         } catch (JSONException unused) {
@@ -78,10 +63,6 @@ public class VEKeyValue {
 
     @NonNull
     public String parseJsonStr() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append(this.mKVSB);
-        sb.append("}");
-        return sb.toString();
+        return "{" + this.mKVSB + "}";
     }
 }

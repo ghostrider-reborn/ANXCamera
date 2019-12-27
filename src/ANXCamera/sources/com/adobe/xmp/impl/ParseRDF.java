@@ -8,7 +8,6 @@ import com.adobe.xmp.XMPSchemaRegistry;
 import com.adobe.xmp.options.PropertyOptions;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -44,28 +43,24 @@ public class ParseRDF implements XMPError, XMPConst {
                 namespaceURI = XMPConst.NS_DC;
             }
             String namespacePrefix = schemaRegistry.getNamespacePrefix(namespaceURI);
-            String str2 = DEFAULT_PREFIX;
             if (namespacePrefix == null) {
-                namespacePrefix = schemaRegistry.registerNamespace(namespaceURI, node.getPrefix() != null ? node.getPrefix() : str2);
+                namespacePrefix = schemaRegistry.registerNamespace(namespaceURI, node.getPrefix() != null ? node.getPrefix() : DEFAULT_PREFIX);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(namespacePrefix);
-            sb.append(node.getLocalName());
-            String sb2 = sb.toString();
+            String str2 = namespacePrefix + node.getLocalName();
             PropertyOptions propertyOptions = new PropertyOptions();
             boolean z2 = false;
             if (z) {
-                xMPNode = XMPNodeUtils.findSchemaNode(xMPMetaImpl.getRoot(), namespaceURI, str2, true);
+                xMPNode = XMPNodeUtils.findSchemaNode(xMPMetaImpl.getRoot(), namespaceURI, DEFAULT_PREFIX, true);
                 xMPNode.setImplicit(false);
-                if (schemaRegistry.findAlias(sb2) != null) {
+                if (schemaRegistry.findAlias(str2) != null) {
                     xMPMetaImpl.getRoot().setHasAliases(true);
                     xMPNode.setHasAliases(true);
                     z2 = true;
                 }
             }
-            boolean equals = "rdf:li".equals(sb2);
-            boolean equals2 = "rdf:value".equals(sb2);
-            XMPNode xMPNode2 = new XMPNode(sb2, str, propertyOptions);
+            boolean equals = "rdf:li".equals(str2);
+            boolean equals2 = "rdf:value".equals(str2);
+            XMPNode xMPNode2 = new XMPNode(str2, str, propertyOptions);
             xMPNode2.setAlias(z2);
             if (!equals2) {
                 xMPNode.addChild(xMPNode2);
@@ -94,7 +89,7 @@ public class ParseRDF implements XMPError, XMPConst {
         if (XMPConst.XML_LANG.equals(str)) {
             str2 = Utils.normalizeLangValue(str2);
         }
-        XMPNode xMPNode2 = new XMPNode(str, str2, null);
+        XMPNode xMPNode2 = new XMPNode(str, str2, (PropertyOptions) null);
         xMPNode.addQualifier(xMPNode2);
         return xMPNode2;
     }
@@ -130,51 +125,46 @@ public class ParseRDF implements XMPError, XMPConst {
     private static int getRDFTermKind(Node node) {
         String localName = node.getLocalName();
         String namespaceURI = node.getNamespaceURI();
-        String str = "ID";
-        String str2 = "about";
-        String str3 = XMPConst.NS_RDF;
-        if (namespaceURI == null && ((str2.equals(localName) || str.equals(localName)) && (node instanceof Attr) && str3.equals(((Attr) node).getOwnerElement().getNamespaceURI()))) {
-            namespaceURI = str3;
+        if (namespaceURI == null && (("about".equals(localName) || "ID".equals(localName)) && (node instanceof Attr) && XMPConst.NS_RDF.equals(((Attr) node).getOwnerElement().getNamespaceURI()))) {
+            namespaceURI = XMPConst.NS_RDF;
         }
-        if (str3.equals(namespaceURI)) {
-            if ("li".equals(localName)) {
-                return 9;
-            }
-            if ("parseType".equals(localName)) {
-                return 4;
-            }
-            if ("Description".equals(localName)) {
-                return 8;
-            }
-            if (str2.equals(localName)) {
-                return 3;
-            }
-            if ("resource".equals(localName)) {
-                return 5;
-            }
-            if ("RDF".equals(localName)) {
-                return 1;
-            }
-            if (str.equals(localName)) {
-                return 2;
-            }
-            if ("nodeID".equals(localName)) {
-                return 6;
-            }
-            if ("datatype".equals(localName)) {
-                return 7;
-            }
-            if ("aboutEach".equals(localName)) {
-                return 10;
-            }
-            if ("aboutEachPrefix".equals(localName)) {
-                return 11;
-            }
-            if ("bagID".equals(localName)) {
-                return 12;
-            }
+        if (!XMPConst.NS_RDF.equals(namespaceURI)) {
+            return 0;
         }
-        return 0;
+        if ("li".equals(localName)) {
+            return 9;
+        }
+        if ("parseType".equals(localName)) {
+            return 4;
+        }
+        if ("Description".equals(localName)) {
+            return 8;
+        }
+        if ("about".equals(localName)) {
+            return 3;
+        }
+        if ("resource".equals(localName)) {
+            return 5;
+        }
+        if ("RDF".equals(localName)) {
+            return 1;
+        }
+        if ("ID".equals(localName)) {
+            return 2;
+        }
+        if ("nodeID".equals(localName)) {
+            return 6;
+        }
+        if ("datatype".equals(localName)) {
+            return 7;
+        }
+        if ("aboutEach".equals(localName)) {
+            return 10;
+        }
+        if ("aboutEachPrefix".equals(localName)) {
+            return 11;
+        }
+        return "bagID".equals(localName) ? 12 : 0;
     }
 
     private static boolean isCoreSyntaxTerm(int i) {
@@ -218,140 +208,116 @@ public class ParseRDF implements XMPError, XMPConst {
         XMPMetaImpl xMPMetaImpl2 = xMPMetaImpl;
         if (!node.hasChildNodes()) {
             Node node2 = null;
-            int i2 = 0;
             boolean z3 = false;
             boolean z4 = false;
             boolean z5 = false;
             boolean z6 = false;
-            while (true) {
-                int length = node.getAttributes().getLength();
-                String str = "Unrecognized attribute of empty property element";
-                String str2 = XMPConst.XML_LANG;
-                String str3 = "xmlns";
-                if (i2 < length) {
-                    Node item = node.getAttributes().item(i2);
-                    if (!str3.equals(item.getPrefix()) && (item.getPrefix() != null || !str3.equals(item.getNodeName()))) {
-                        int rDFTermKind = getRDFTermKind(item);
-                        String str4 = "Empty property element can't have both rdf:value and rdf:resource";
-                        if (rDFTermKind == 0) {
-                            if ("value".equals(item.getLocalName())) {
-                                if (XMPConst.NS_RDF.equals(item.getNamespaceURI())) {
-                                    if (!z4) {
-                                        node2 = item;
-                                        z3 = true;
-                                    } else {
-                                        throw new XMPException(str4, 203);
-                                    }
-                                }
-                            }
-                            if (!str2.equals(item.getNodeName())) {
-                                z5 = true;
-                            }
-                        } else if (rDFTermKind != 2) {
-                            String str5 = "Empty property element can't have both rdf:resource and rdf:nodeID";
-                            if (rDFTermKind != 5) {
-                                if (rDFTermKind != 6) {
-                                    throw new XMPException(str, 202);
-                                } else if (!z4) {
-                                    z6 = true;
-                                } else {
-                                    throw new XMPException(str5, 202);
-                                }
-                            } else if (z6) {
-                                throw new XMPException(str5, 202);
-                            } else if (!z3) {
-                                if (!z3) {
-                                    node2 = item;
-                                }
-                                z4 = true;
-                            } else {
-                                throw new XMPException(str4, 203);
-                            }
-                        } else {
+            for (int i2 = 0; i2 < node.getAttributes().getLength(); i2++) {
+                Node item = node.getAttributes().item(i2);
+                if (!"xmlns".equals(item.getPrefix()) && (item.getPrefix() != null || !"xmlns".equals(item.getNodeName()))) {
+                    int rDFTermKind = getRDFTermKind(item);
+                    if (rDFTermKind != 0) {
+                        if (rDFTermKind == 2) {
                             continue;
-                        }
-                    }
-                    i2++;
-                } else {
-                    String str6 = "";
-                    XMPNode addChildNode = addChildNode(xMPMetaImpl2, xMPNode, node, str6, z);
-                    if (z3 || z4) {
-                        if (node2 != null) {
-                            str6 = node2.getNodeValue();
-                        }
-                        addChildNode.setValue(str6);
-                        if (!z3) {
-                            addChildNode.getOptions().setURI(true);
-                        }
-                    } else if (z5) {
-                        z2 = true;
-                        addChildNode.getOptions().setStruct(true);
-                        for (i = 0; i < node.getAttributes().getLength(); i++) {
-                            Node item2 = node.getAttributes().item(i);
-                            if (item2 != node2 && !str3.equals(item2.getPrefix()) && (item2.getPrefix() != null || !str3.equals(item2.getNodeName()))) {
-                                int rDFTermKind2 = getRDFTermKind(item2);
-                                if (rDFTermKind2 != 0) {
-                                    if (rDFTermKind2 != 2) {
-                                        if (rDFTermKind2 == 5) {
-                                            addQualifierNode(addChildNode, "rdf:resource", item2.getNodeValue());
-                                        } else if (rDFTermKind2 != 6) {
-                                            throw new XMPException(str, 202);
-                                        }
-                                    }
-                                } else if (!z2) {
-                                    addQualifierNode(addChildNode, item2.getNodeName(), item2.getNodeValue());
-                                } else if (str2.equals(item2.getNodeName())) {
-                                    addQualifierNode(addChildNode, str2, item2.getNodeValue());
-                                } else {
-                                    addChildNode(xMPMetaImpl2, addChildNode, item2, item2.getNodeValue(), false);
-                                }
+                        } else if (rDFTermKind != 5) {
+                            if (rDFTermKind != 6) {
+                                throw new XMPException("Unrecognized attribute of empty property element", 202);
+                            } else if (!z4) {
+                                z6 = true;
+                            } else {
+                                throw new XMPException("Empty property element can't have both rdf:resource and rdf:nodeID", 202);
                             }
+                        } else if (z6) {
+                            throw new XMPException("Empty property element can't have both rdf:resource and rdf:nodeID", 202);
+                        } else if (!z3) {
+                            if (!z3) {
+                                node2 = item;
+                            }
+                            z4 = true;
+                        } else {
+                            throw new XMPException("Empty property element can't have both rdf:value and rdf:resource", 203);
                         }
-                        return;
+                    } else if (!"value".equals(item.getLocalName()) || !XMPConst.NS_RDF.equals(item.getNamespaceURI())) {
+                        if (!XMPConst.XML_LANG.equals(item.getNodeName())) {
+                            z5 = true;
+                        }
+                    } else if (!z4) {
+                        node2 = item;
+                        z3 = true;
+                    } else {
+                        throw new XMPException("Empty property element can't have both rdf:value and rdf:resource", 203);
                     }
-                    z2 = false;
-                    while (i < node.getAttributes().getLength()) {
-                    }
-                    return;
                 }
             }
-        } else {
-            throw new XMPException("Nested content not allowed with rdf:resource or property attributes", 202);
+            String str = "";
+            XMPNode addChildNode = addChildNode(xMPMetaImpl2, xMPNode, node, str, z);
+            if (z3 || z4) {
+                if (node2 != null) {
+                    str = node2.getNodeValue();
+                }
+                addChildNode.setValue(str);
+                if (!z3) {
+                    addChildNode.getOptions().setURI(true);
+                }
+            } else if (z5) {
+                z2 = true;
+                addChildNode.getOptions().setStruct(true);
+                for (i = 0; i < node.getAttributes().getLength(); i++) {
+                    Node item2 = node.getAttributes().item(i);
+                    if (item2 != node2 && !"xmlns".equals(item2.getPrefix()) && (item2.getPrefix() != null || !"xmlns".equals(item2.getNodeName()))) {
+                        int rDFTermKind2 = getRDFTermKind(item2);
+                        if (rDFTermKind2 != 0) {
+                            if (rDFTermKind2 != 2) {
+                                if (rDFTermKind2 == 5) {
+                                    addQualifierNode(addChildNode, "rdf:resource", item2.getNodeValue());
+                                } else if (rDFTermKind2 != 6) {
+                                    throw new XMPException("Unrecognized attribute of empty property element", 202);
+                                }
+                            }
+                        } else if (!z2) {
+                            addQualifierNode(addChildNode, item2.getNodeName(), item2.getNodeValue());
+                        } else if (XMPConst.XML_LANG.equals(item2.getNodeName())) {
+                            addQualifierNode(addChildNode, XMPConst.XML_LANG, item2.getNodeValue());
+                        } else {
+                            addChildNode(xMPMetaImpl2, addChildNode, item2, item2.getNodeValue(), false);
+                        }
+                    }
+                }
+                return;
+            }
+            z2 = false;
+            while (i < node.getAttributes().getLength()) {
+            }
+            return;
         }
+        throw new XMPException("Nested content not allowed with rdf:resource or property attributes", 202);
     }
 
     private static void rdf_LiteralPropertyElement(XMPMetaImpl xMPMetaImpl, XMPNode xMPNode, Node node, boolean z) throws XMPException {
-        XMPNode addChildNode = addChildNode(xMPMetaImpl, xMPNode, node, null, z);
+        XMPNode addChildNode = addChildNode(xMPMetaImpl, xMPNode, node, (String) null, z);
         int i = 0;
         for (int i2 = 0; i2 < node.getAttributes().getLength(); i2++) {
             Node item = node.getAttributes().item(i2);
-            String str = "xmlns";
-            if (!str.equals(item.getPrefix()) && (item.getPrefix() != null || !str.equals(item.getNodeName()))) {
+            if (!"xmlns".equals(item.getPrefix()) && (item.getPrefix() != null || !"xmlns".equals(item.getNodeName()))) {
                 String namespaceURI = item.getNamespaceURI();
                 String localName = item.getLocalName();
-                String nodeName = item.getNodeName();
-                String str2 = XMPConst.XML_LANG;
-                if (str2.equals(nodeName)) {
-                    addQualifierNode(addChildNode, str2, item.getNodeValue());
+                if (XMPConst.XML_LANG.equals(item.getNodeName())) {
+                    addQualifierNode(addChildNode, XMPConst.XML_LANG, item.getNodeValue());
                 } else if (!XMPConst.NS_RDF.equals(namespaceURI) || (!"ID".equals(localName) && !"datatype".equals(localName))) {
                     throw new XMPException("Invalid attribute for literal property element", 202);
                 }
             }
         }
-        String str3 = "";
+        String str = "";
         while (i < node.getChildNodes().getLength()) {
-            Node item2 = node.getChildNodes().item(i);
-            if (item2.getNodeType() == 3) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str3);
-                sb.append(item2.getNodeValue());
-                str3 = sb.toString();
+            if (node.getChildNodes().item(i).getNodeType() == 3) {
+                str = str + r0.getNodeValue();
                 i++;
             } else {
                 throw new XMPException("Invalid child of literal property element", 202);
             }
         }
-        addChildNode.setValue(str3);
+        addChildNode.setValue(str);
     }
 
     private static void rdf_NodeElement(XMPMetaImpl xMPMetaImpl, XMPNode xMPNode, Node node, boolean z) throws XMPException {
@@ -370,8 +336,7 @@ public class ParseRDF implements XMPError, XMPConst {
         int i = 0;
         for (int i2 = 0; i2 < node.getAttributes().getLength(); i2++) {
             Node item = node.getAttributes().item(i2);
-            String str = "xmlns";
-            if (!str.equals(item.getPrefix()) && (item.getPrefix() != null || !str.equals(item.getNodeName()))) {
+            if (!"xmlns".equals(item.getPrefix()) && (item.getPrefix() != null || !"xmlns".equals(item.getNodeName()))) {
                 int rDFTermKind = getRDFTermKind(item);
                 if (rDFTermKind == 0) {
                     addChildNode(xMPMetaImpl, xMPNode, item, item.getNodeValue(), z);
@@ -419,14 +384,11 @@ public class ParseRDF implements XMPError, XMPConst {
         addChildNode.getOptions().setStruct(true);
         for (int i = 0; i < node.getAttributes().getLength(); i++) {
             Node item = node.getAttributes().item(i);
-            String str = "xmlns";
-            if (!str.equals(item.getPrefix()) && (item.getPrefix() != null || !str.equals(item.getNodeName()))) {
+            if (!"xmlns".equals(item.getPrefix()) && (item.getPrefix() != null || !"xmlns".equals(item.getNodeName()))) {
                 String localName = item.getLocalName();
                 String namespaceURI = item.getNamespaceURI();
-                String nodeName = item.getNodeName();
-                String str2 = XMPConst.XML_LANG;
-                if (str2.equals(nodeName)) {
-                    addQualifierNode(addChildNode, str2, item.getNodeValue());
+                if (XMPConst.XML_LANG.equals(item.getNodeName())) {
+                    addQualifierNode(addChildNode, XMPConst.XML_LANG, item.getNodeValue());
                 } else if (!XMPConst.NS_RDF.equals(namespaceURI) || (!"ID".equals(localName) && !"parseType".equals(localName))) {
                     throw new XMPException("Invalid attribute for ParseTypeResource property element", 202);
                 }
@@ -441,64 +403,64 @@ public class ParseRDF implements XMPError, XMPConst {
     private static void rdf_PropertyElement(XMPMetaImpl xMPMetaImpl, XMPNode xMPNode, Node node, boolean z) throws XMPException {
         if (isPropertyElementName(getRDFTermKind(node))) {
             NamedNodeMap attributes = node.getAttributes();
-            List<String> list = null;
+            ArrayList<String> arrayList = null;
             for (int i = 0; i < attributes.getLength(); i++) {
                 Node item = attributes.item(i);
-                String str = "xmlns";
-                if (str.equals(item.getPrefix()) || (item.getPrefix() == null && str.equals(item.getNodeName()))) {
-                    if (list == null) {
-                        list = new ArrayList<>();
+                if ("xmlns".equals(item.getPrefix()) || (item.getPrefix() == null && "xmlns".equals(item.getNodeName()))) {
+                    if (arrayList == null) {
+                        arrayList = new ArrayList<>();
                     }
-                    list.add(item.getNodeName());
+                    arrayList.add(item.getNodeName());
                 }
             }
-            if (list != null) {
-                for (String removeNamedItem : list) {
+            if (arrayList != null) {
+                for (String removeNamedItem : arrayList) {
                     attributes.removeNamedItem(removeNamedItem);
                 }
             }
             if (attributes.getLength() > 3) {
                 rdf_EmptyPropertyElement(xMPMetaImpl, xMPNode, node, z);
-            } else {
-                for (int i2 = 0; i2 < attributes.getLength(); i2++) {
-                    Node item2 = attributes.item(i2);
-                    String localName = item2.getLocalName();
-                    String namespaceURI = item2.getNamespaceURI();
-                    String nodeValue = item2.getNodeValue();
-                    boolean equals = XMPConst.XML_LANG.equals(item2.getNodeName());
-                    String str2 = XMPConst.NS_RDF;
-                    if (!equals || ("ID".equals(localName) && str2.equals(namespaceURI))) {
-                        if ("datatype".equals(localName) && str2.equals(namespaceURI)) {
-                            rdf_LiteralPropertyElement(xMPMetaImpl, xMPNode, node, z);
-                        } else if (!"parseType".equals(localName) || !str2.equals(namespaceURI)) {
-                            rdf_EmptyPropertyElement(xMPMetaImpl, xMPNode, node, z);
-                        } else if ("Literal".equals(nodeValue)) {
-                            rdf_ParseTypeLiteralPropertyElement();
-                            throw null;
-                        } else if ("Resource".equals(nodeValue)) {
-                            rdf_ParseTypeResourcePropertyElement(xMPMetaImpl, xMPNode, node, z);
-                        } else if ("Collection".equals(nodeValue)) {
-                            rdf_ParseTypeCollectionPropertyElement();
-                            throw null;
-                        } else {
-                            rdf_ParseTypeOtherPropertyElement();
-                            throw null;
-                        }
+                return;
+            }
+            int i2 = 0;
+            while (i2 < attributes.getLength()) {
+                Node item2 = attributes.item(i2);
+                String localName = item2.getLocalName();
+                String namespaceURI = item2.getNamespaceURI();
+                String nodeValue = item2.getNodeValue();
+                if (XMPConst.XML_LANG.equals(item2.getNodeName()) && (!"ID".equals(localName) || !XMPConst.NS_RDF.equals(namespaceURI))) {
+                    i2++;
+                } else if ("datatype".equals(localName) && XMPConst.NS_RDF.equals(namespaceURI)) {
+                    rdf_LiteralPropertyElement(xMPMetaImpl, xMPNode, node, z);
+                    return;
+                } else if (!"parseType".equals(localName) || !XMPConst.NS_RDF.equals(namespaceURI)) {
+                    rdf_EmptyPropertyElement(xMPMetaImpl, xMPNode, node, z);
+                    return;
+                } else if ("Literal".equals(nodeValue)) {
+                    rdf_ParseTypeLiteralPropertyElement();
+                    throw null;
+                } else if ("Resource".equals(nodeValue)) {
+                    rdf_ParseTypeResourcePropertyElement(xMPMetaImpl, xMPNode, node, z);
+                    return;
+                } else if ("Collection".equals(nodeValue)) {
+                    rdf_ParseTypeCollectionPropertyElement();
+                    throw null;
+                } else {
+                    rdf_ParseTypeOtherPropertyElement();
+                    throw null;
+                }
+            }
+            if (node.hasChildNodes()) {
+                for (int i3 = 0; i3 < node.getChildNodes().getLength(); i3++) {
+                    if (node.getChildNodes().item(i3).getNodeType() != 3) {
+                        rdf_ResourcePropertyElement(xMPMetaImpl, xMPNode, node, z);
                         return;
                     }
                 }
-                if (node.hasChildNodes()) {
-                    for (int i3 = 0; i3 < node.getChildNodes().getLength(); i3++) {
-                        if (node.getChildNodes().item(i3).getNodeType() != 3) {
-                            rdf_ResourcePropertyElement(xMPMetaImpl, xMPNode, node, z);
-                            return;
-                        }
-                    }
-                    rdf_LiteralPropertyElement(xMPMetaImpl, xMPNode, node, z);
-                } else {
-                    rdf_EmptyPropertyElement(xMPMetaImpl, xMPNode, node, z);
-                }
+                rdf_LiteralPropertyElement(xMPMetaImpl, xMPNode, node, z);
+                return;
             }
+            rdf_EmptyPropertyElement(xMPMetaImpl, xMPNode, node, z);
             return;
         }
         throw new XMPException("Invalid property element name", 202);
@@ -526,79 +488,60 @@ public class ParseRDF implements XMPError, XMPConst {
     }
 
     private static void rdf_ResourcePropertyElement(XMPMetaImpl xMPMetaImpl, XMPNode xMPNode, Node node, boolean z) throws XMPException {
-        if (z) {
-            if ("iX:changes".equals(node.getNodeName())) {
-                return;
-            }
-        }
-        XMPNode addChildNode = addChildNode(xMPMetaImpl, xMPNode, node, "", z);
-        int i = 0;
-        while (true) {
-            int length = node.getAttributes().getLength();
-            String str = XMPConst.NS_RDF;
-            if (i < length) {
+        if (!z || !"iX:changes".equals(node.getNodeName())) {
+            XMPNode addChildNode = addChildNode(xMPMetaImpl, xMPNode, node, "", z);
+            for (int i = 0; i < node.getAttributes().getLength(); i++) {
                 Node item = node.getAttributes().item(i);
-                String str2 = "xmlns";
-                if (!str2.equals(item.getPrefix()) && (item.getPrefix() != null || !str2.equals(item.getNodeName()))) {
+                if (!"xmlns".equals(item.getPrefix()) && (item.getPrefix() != null || !"xmlns".equals(item.getNodeName()))) {
                     String localName = item.getLocalName();
                     String namespaceURI = item.getNamespaceURI();
-                    String nodeName = item.getNodeName();
-                    String str3 = XMPConst.XML_LANG;
-                    if (str3.equals(nodeName)) {
-                        addQualifierNode(addChildNode, str3, item.getNodeValue());
-                    } else if (!"ID".equals(localName) || !str.equals(namespaceURI)) {
+                    if (XMPConst.XML_LANG.equals(item.getNodeName())) {
+                        addQualifierNode(addChildNode, XMPConst.XML_LANG, item.getNodeValue());
+                    } else if (!"ID".equals(localName) || !XMPConst.NS_RDF.equals(namespaceURI)) {
+                        throw new XMPException("Invalid attribute for resource property element", 202);
                     }
                 }
-                i++;
-            } else {
-                boolean z2 = false;
-                for (int i2 = 0; i2 < node.getChildNodes().getLength(); i2++) {
-                    Node item2 = node.getChildNodes().item(i2);
-                    if (!isWhitespaceNode(item2)) {
-                        if (item2.getNodeType() == 1 && !z2) {
-                            boolean equals = str.equals(item2.getNamespaceURI());
-                            String localName2 = item2.getLocalName();
-                            if (equals && "Bag".equals(localName2)) {
-                                addChildNode.getOptions().setArray(true);
-                            } else if (equals && "Seq".equals(localName2)) {
-                                addChildNode.getOptions().setArray(true).setArrayOrdered(true);
-                            } else if (!equals || !"Alt".equals(localName2)) {
-                                addChildNode.getOptions().setStruct(true);
-                                if (!equals && !"Description".equals(localName2)) {
-                                    String namespaceURI2 = item2.getNamespaceURI();
-                                    if (namespaceURI2 != null) {
-                                        StringBuilder sb = new StringBuilder();
-                                        sb.append(namespaceURI2);
-                                        sb.append(':');
-                                        sb.append(localName2);
-                                        addQualifierNode(addChildNode, XMPConst.RDF_TYPE, sb.toString());
-                                    } else {
-                                        throw new XMPException("All XML elements must be in a namespace", 203);
-                                    }
+            }
+            boolean z2 = false;
+            for (int i2 = 0; i2 < node.getChildNodes().getLength(); i2++) {
+                Node item2 = node.getChildNodes().item(i2);
+                if (!isWhitespaceNode(item2)) {
+                    if (item2.getNodeType() == 1 && !z2) {
+                        boolean equals = XMPConst.NS_RDF.equals(item2.getNamespaceURI());
+                        String localName2 = item2.getLocalName();
+                        if (equals && "Bag".equals(localName2)) {
+                            addChildNode.getOptions().setArray(true);
+                        } else if (equals && "Seq".equals(localName2)) {
+                            addChildNode.getOptions().setArray(true).setArrayOrdered(true);
+                        } else if (!equals || !"Alt".equals(localName2)) {
+                            addChildNode.getOptions().setStruct(true);
+                            if (!equals && !"Description".equals(localName2)) {
+                                if (item2.getNamespaceURI() != null) {
+                                    addQualifierNode(addChildNode, XMPConst.RDF_TYPE, r1 + ':' + localName2);
+                                } else {
+                                    throw new XMPException("All XML elements must be in a namespace", 203);
                                 }
-                            } else {
-                                addChildNode.getOptions().setArray(true).setArrayOrdered(true).setArrayAlternate(true);
                             }
-                            rdf_NodeElement(xMPMetaImpl, addChildNode, item2, false);
-                            if (addChildNode.getHasValueChild()) {
-                                fixupQualifiedNode(addChildNode);
-                            } else if (addChildNode.getOptions().isArrayAlternate()) {
-                                XMPNodeUtils.detectAltText(addChildNode);
-                            }
-                            z2 = true;
-                        } else if (z2) {
-                            throw new XMPException("Invalid child of resource property element", 202);
                         } else {
-                            throw new XMPException("Children of resource property element must be XML elements", 202);
+                            addChildNode.getOptions().setArray(true).setArrayOrdered(true).setArrayAlternate(true);
                         }
+                        rdf_NodeElement(xMPMetaImpl, addChildNode, item2, false);
+                        if (addChildNode.getHasValueChild()) {
+                            fixupQualifiedNode(addChildNode);
+                        } else if (addChildNode.getOptions().isArrayAlternate()) {
+                            XMPNodeUtils.detectAltText(addChildNode);
+                        }
+                        z2 = true;
+                    } else if (z2) {
+                        throw new XMPException("Invalid child of resource property element", 202);
+                    } else {
+                        throw new XMPException("Children of resource property element must be XML elements", 202);
                     }
                 }
-                if (!z2) {
-                    throw new XMPException("Missing child of resource property element", 202);
-                }
-                return;
+            }
+            if (!z2) {
+                throw new XMPException("Missing child of resource property element", 202);
             }
         }
-        throw new XMPException("Invalid attribute for resource property element", 202);
     }
 }

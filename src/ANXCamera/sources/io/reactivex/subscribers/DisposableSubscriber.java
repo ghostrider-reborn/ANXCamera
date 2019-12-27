@@ -25,7 +25,7 @@ public abstract class DisposableSubscriber<T> implements FlowableSubscriber<T>, 
 
     /* access modifiers changed from: protected */
     public void onStart() {
-        ((Subscription) this.s.get()).request(Long.MAX_VALUE);
+        this.s.get().request(Long.MAX_VALUE);
     }
 
     public final void onSubscribe(Subscription subscription) {
@@ -36,6 +36,6 @@ public abstract class DisposableSubscriber<T> implements FlowableSubscriber<T>, 
 
     /* access modifiers changed from: protected */
     public final void request(long j) {
-        ((Subscription) this.s.get()).request(j);
+        this.s.get().request(j);
     }
 }

@@ -17,10 +17,10 @@ abstract class c<T extends l> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public abstract T create();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public T get() {
         T t = (l) this.cg.poll();
         return t == null ? create() : t;

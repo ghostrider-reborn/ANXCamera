@@ -44,19 +44,19 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
         Node tail;
 
         BoundedReplayBuffer() {
-            Node node = new Node(null, 0);
+            Node node = new Node((Object) null, 0);
             this.tail = node;
             set(node);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void addLast(Node node) {
             this.tail.set(node);
             this.tail = node;
             this.size++;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void collect(Collection<? super T> collection) {
             Node head = getHead();
             while (true) {
@@ -83,7 +83,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             truncateFinal();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object enterTransform(Object obj) {
             return obj;
         }
@@ -96,24 +96,24 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             truncateFinal();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Node getHead() {
             return (Node) get();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasCompleted() {
             Object obj = this.tail.value;
             return obj != null && NotificationLite.isComplete(leaveTransform(obj));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasError() {
             Object obj = this.tail.value;
             return obj != null && NotificationLite.isError(leaveTransform(obj));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object leaveTransform(Object obj) {
             return obj;
         }
@@ -127,7 +127,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             truncate();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void removeFirst() {
             Node node = (Node) ((Node) get()).get();
             if (node != null) {
@@ -138,7 +138,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             throw new IllegalStateException("Empty list!");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void removeSome(int i) {
             Node node = (Node) get();
             while (i > 0) {
@@ -149,7 +149,6 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             setFirst(node);
         }
 
-        /* JADX INFO: used method not loaded: io.reactivex.internal.util.NotificationLite.accept(java.lang.Object, org.reactivestreams.Subscriber):null, types can be incorrect */
         /* JADX WARNING: Code restructure failed: missing block: B:10:0x0011, code lost:
             if (r14.isDisposed() == false) goto L_0x0014;
          */
@@ -195,7 +194,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             r5 = leaveTransform(r10.value);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:27:0x0056, code lost:
-            if (io.reactivex.internal.util.NotificationLite.accept(r5, (org.reactivestreams.Subscriber) r14.child) == false) goto L_0x005b;
+            if (io.reactivex.internal.util.NotificationLite.accept(r5, r14.child) == false) goto L_0x005b;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:28:0x0058, code lost:
             r14.index = null;
@@ -224,44 +223,50 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             r14.index = null;
             r14.dispose();
          */
+        /* JADX WARNING: Code restructure failed: missing block: B:36:0x0075, code lost:
+            if (io.reactivex.internal.util.NotificationLite.isError(r5) != false) goto L_?;
+         */
         /* JADX WARNING: Code restructure failed: missing block: B:39:0x007d, code lost:
             r14.child.onError(r13);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:40:0x0082, code lost:
-            return;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:42:0x0085, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:41:0x0085, code lost:
             if (r8 == 0) goto L_0x008e;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:43:0x0087, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:42:0x0087, code lost:
             r14.index = r5;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:44:0x0089, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:43:0x0089, code lost:
             if (r0 != false) goto L_0x008e;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:45:0x008b, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:44:0x008b, code lost:
             r14.produced(r8);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:46:0x008e, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:45:0x008e, code lost:
             monitor-enter(r14);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:49:0x0091, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:48:0x0091, code lost:
             if (r14.missed != false) goto L_0x0097;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:50:0x0093, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:49:0x0093, code lost:
             r14.emitting = false;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:51:0x0095, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:50:0x0095, code lost:
             monitor-exit(r14);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:52:0x0096, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:51:0x0096, code lost:
             return;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:53:0x0097, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:52:0x0097, code lost:
             r14.missed = false;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:54:0x0099, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:53:0x0099, code lost:
             monitor-exit(r14);
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:71:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:73:?, code lost:
+            return;
          */
         public final void replay(InnerSubscription<T> innerSubscription) {
             synchronized (innerSubscription) {
@@ -273,16 +278,16 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void setFirst(Node node) {
             set(node);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncate() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncateFinal() {
         }
     }
@@ -341,7 +346,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public <U> U index() {
             return this.index;
         }
@@ -460,17 +465,17 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             this.bufferFactory = callable;
         }
 
-        /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+        /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
         public void subscribe(Subscriber<? super T> subscriber) {
             ReplaySubscriber replaySubscriber;
             while (true) {
-                replaySubscriber = (ReplaySubscriber) this.curr.get();
+                replaySubscriber = this.curr.get();
                 if (replaySubscriber != null) {
                     break;
                 }
                 try {
                     ReplaySubscriber replaySubscriber2 = new ReplaySubscriber((ReplayBuffer) this.bufferFactory.call());
-                    if (this.curr.compareAndSet(null, replaySubscriber2)) {
+                    if (this.curr.compareAndSet((Object) null, replaySubscriber2)) {
                         replaySubscriber = replaySubscriber2;
                         break;
                     }
@@ -507,7 +512,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             this.buffer = replayBuffer;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean add(InnerSubscription<T> innerSubscription) {
             InnerSubscription[] innerSubscriptionArr;
             InnerSubscription[] innerSubscriptionArr2;
@@ -536,7 +541,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             return this.subscribers.get() == TERMINATED;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void manageRequests() {
             if (this.management.getAndIncrement() == 0) {
                 int i = 1;
@@ -616,7 +621,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void remove(InnerSubscription<T> innerSubscription) {
             InnerSubscription[] innerSubscriptionArr;
             InnerSubscription[] innerSubscriptionArr2;
@@ -688,12 +693,12 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             this.unit = timeUnit;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object enterTransform(Object obj) {
             return new Timed(obj, this.scheduler.now(this.unit), this.unit);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Node getHead() {
             Node node;
             long now = this.scheduler.now(this.unit) - this.maxAge;
@@ -716,12 +721,12 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             return node;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Object leaveTransform(Object obj) {
             return ((Timed) obj).value();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncate() {
             Node node;
             long now = this.scheduler.now(this.unit) - this.maxAge;
@@ -735,8 +740,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
                 if (node2 == null) {
                     break;
                 }
-                int i2 = this.size;
-                if (i2 <= this.limit) {
+                if (this.size <= this.limit) {
                     if (((Timed) node2.value).time() > now) {
                         break;
                     }
@@ -745,7 +749,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
                     node3 = (Node) node2.get();
                 } else {
                     i++;
-                    this.size = i2 - 1;
+                    this.size = r5 - 1;
                     node3 = (Node) node2.get();
                 }
             }
@@ -754,7 +758,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Removed duplicated region for block: B:14:? A[RETURN, SYNTHETIC] */
         /* JADX WARNING: Removed duplicated region for block: B:9:0x003e  */
         public void truncateFinal() {
@@ -790,7 +794,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             this.limit = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void truncate() {
             if (this.size > this.limit) {
                 removeFirst();
@@ -822,7 +826,6 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             this.size++;
         }
 
-        /* JADX INFO: used method not loaded: io.reactivex.internal.util.NotificationLite.accept(java.lang.Object, org.reactivestreams.Subscriber):null, types can be incorrect */
         /* JADX WARNING: Code restructure failed: missing block: B:11:0x0013, code lost:
             if (r15.isDisposed() == false) goto L_0x0016;
          */
@@ -857,7 +860,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             r12 = get(r2);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:24:0x003d, code lost:
-            if (io.reactivex.internal.util.NotificationLite.accept(r12, (org.reactivestreams.Subscriber) r0) == false) goto L_0x0040;
+            if (io.reactivex.internal.util.NotificationLite.accept(r12, r0) == false) goto L_0x0040;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:25:0x003f, code lost:
             return;
@@ -880,44 +883,50 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
             io.reactivex.exceptions.Exceptions.throwIfFatal(r14);
             r15.dispose();
          */
+        /* JADX WARNING: Code restructure failed: missing block: B:32:0x0059, code lost:
+            if (io.reactivex.internal.util.NotificationLite.isError(r12) != false) goto L_?;
+         */
         /* JADX WARNING: Code restructure failed: missing block: B:35:0x0061, code lost:
             r0.onError(r14);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:36:0x0064, code lost:
-            return;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:38:0x0067, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:37:0x0067, code lost:
             if (r10 == 0) goto L_0x007b;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:39:0x0069, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:38:0x0069, code lost:
             r15.index = java.lang.Integer.valueOf(r2);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:40:0x0076, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:39:0x0076, code lost:
             if (r4 == Long.MAX_VALUE) goto L_0x007b;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:41:0x0078, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:40:0x0078, code lost:
             r15.produced(r10);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:42:0x007b, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:41:0x007b, code lost:
             monitor-enter(r15);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:45:0x007e, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:44:0x007e, code lost:
             if (r15.missed != false) goto L_0x0084;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:46:0x0080, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:45:0x0080, code lost:
             r15.emitting = false;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:47:0x0082, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:46:0x0082, code lost:
             monitor-exit(r15);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:48:0x0083, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:47:0x0083, code lost:
             return;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:49:0x0084, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:48:0x0084, code lost:
             r15.missed = false;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:50:0x0086, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:49:0x0086, code lost:
             monitor-exit(r15);
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:67:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:69:?, code lost:
+            return;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:9:0x000d, code lost:
             r0 = r15.child;
@@ -941,7 +950,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
     }
 
     public static <T> ConnectableFlowable<T> create(Flowable<T> flowable, int i) {
-        return i == Integer.MAX_VALUE ? createFrom(flowable) : create(flowable, (Callable<? extends ReplayBuffer<T>>) new ReplayBufferTask<Object>(i));
+        return i == Integer.MAX_VALUE ? createFrom(flowable) : create(flowable, new ReplayBufferTask(i));
     }
 
     public static <T> ConnectableFlowable<T> create(Flowable<T> flowable, long j, TimeUnit timeUnit, Scheduler scheduler) {
@@ -950,12 +959,12 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
 
     public static <T> ConnectableFlowable<T> create(Flowable<T> flowable, long j, TimeUnit timeUnit, Scheduler scheduler, int i) {
         ScheduledReplayBufferTask scheduledReplayBufferTask = new ScheduledReplayBufferTask(i, j, timeUnit, scheduler);
-        return create(flowable, (Callable<? extends ReplayBuffer<T>>) scheduledReplayBufferTask);
+        return create(flowable, scheduledReplayBufferTask);
     }
 
     static <T> ConnectableFlowable<T> create(Flowable<T> flowable, Callable<? extends ReplayBuffer<T>> callable) {
         AtomicReference atomicReference = new AtomicReference();
-        return RxJavaPlugins.onAssembly((ConnectableFlowable<T>) new FlowableReplay<T>(new ReplayPublisher(atomicReference, callable), flowable, atomicReference, callable));
+        return RxJavaPlugins.onAssembly(new FlowableReplay(new ReplayPublisher(atomicReference, callable), flowable, atomicReference, callable));
     }
 
     public static <T> ConnectableFlowable<T> createFrom(Flowable<? extends T> flowable) {
@@ -967,14 +976,14 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
     }
 
     public static <T> ConnectableFlowable<T> observeOn(ConnectableFlowable<T> connectableFlowable, Scheduler scheduler) {
-        return RxJavaPlugins.onAssembly((ConnectableFlowable<T>) new ConnectableFlowableReplay<T>(connectableFlowable, connectableFlowable.observeOn(scheduler)));
+        return RxJavaPlugins.onAssembly(new ConnectableFlowableReplay(connectableFlowable, connectableFlowable.observeOn(scheduler)));
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
     public void connect(Consumer<? super Disposable> consumer) {
         ReplaySubscriber replaySubscriber;
         while (true) {
-            replaySubscriber = (ReplaySubscriber) this.current.get();
+            replaySubscriber = this.current.get();
             if (replaySubscriber != null && !replaySubscriber.isDisposed()) {
                 break;
             }
@@ -993,7 +1002,7 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
         try {
             consumer.accept(replaySubscriber);
             if (z) {
-                this.source.subscribe((FlowableSubscriber<? super T>) replaySubscriber);
+                this.source.subscribe(replaySubscriber);
             }
         } catch (Throwable th2) {
             if (z) {
@@ -1005,11 +1014,11 @@ public final class FlowableReplay<T> extends ConnectableFlowable<T> implements H
     }
 
     public void dispose() {
-        this.current.lazySet(null);
+        this.current.lazySet((Object) null);
     }
 
     public boolean isDisposed() {
-        Disposable disposable = (Disposable) this.current.get();
+        Disposable disposable = this.current.get();
         return disposable == null || disposable.isDisposed();
     }
 

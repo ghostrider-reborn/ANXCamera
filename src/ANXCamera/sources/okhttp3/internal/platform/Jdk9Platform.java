@@ -30,7 +30,7 @@ final class Jdk9Platform extends Platform {
     public void configureTlsExtensions(SSLSocket sSLSocket, String str, List<Protocol> list) {
         try {
             SSLParameters sSLParameters = sSLSocket.getSSLParameters();
-            List alpnProtocolNames = Platform.alpnProtocolNames(list);
+            List<String> alpnProtocolNames = Platform.alpnProtocolNames(list);
             this.setProtocolMethod.invoke(sSLParameters, new Object[]{alpnProtocolNames.toArray(new String[alpnProtocolNames.size()])});
             sSLSocket.setSSLParameters(sSLParameters);
         } catch (IllegalAccessException | InvocationTargetException e2) {

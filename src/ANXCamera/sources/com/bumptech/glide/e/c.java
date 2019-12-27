@@ -13,10 +13,7 @@ public class c implements com.bumptech.glide.load.c {
     private final int orientation;
 
     public c(@Nullable String str, long j, int i) {
-        if (str == null) {
-            str = "";
-        }
-        this.mimeType = str;
+        this.mimeType = str == null ? "" : str;
         this.Wl = j;
         this.orientation = i;
     }
@@ -33,9 +30,8 @@ public class c implements com.bumptech.glide.load.c {
     }
 
     public int hashCode() {
-        int hashCode = this.mimeType.hashCode() * 31;
         long j = this.Wl;
-        return ((hashCode + ((int) (j ^ (j >>> 32)))) * 31) + this.orientation;
+        return (((this.mimeType.hashCode() * 31) + ((int) (j ^ (j >>> 32)))) * 31) + this.orientation;
     }
 
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {

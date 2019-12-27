@@ -6,7 +6,6 @@ import android.support.annotation.ArrayRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.compat.R;
 import android.support.v4.provider.FontRequest;
 import android.util.Base64;
@@ -20,7 +19,7 @@ import java.util.List;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class FontResourcesParserCompat {
     private static final int DEFAULT_TIMEOUT_MILLIS = 500;
     public static final int FETCH_STRATEGY_ASYNC = 1;
@@ -160,9 +159,8 @@ public class FontResourcesParserCompat {
 
     @Nullable
     private static FamilyResourceEntry readFamilies(XmlPullParser xmlPullParser, Resources resources) throws XmlPullParserException, IOException {
-        String str = "font-family";
-        xmlPullParser.require(2, null, str);
-        if (xmlPullParser.getName().equals(str)) {
+        xmlPullParser.require(2, (String) null, "font-family");
+        if (xmlPullParser.getName().equals("font-family")) {
             return readFamily(xmlPullParser, resources);
         }
         skip(xmlPullParser);

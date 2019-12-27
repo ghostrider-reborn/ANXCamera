@@ -31,32 +31,34 @@ public final class FlowableOnBackpressureLatest<T> extends AbstractFlowableWithU
                 this.cancelled = true;
                 this.s.cancel();
                 if (getAndIncrement() == 0) {
-                    this.current.lazySet(null);
+                    this.current.lazySet((Object) null);
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber, AtomicReference<T> atomicReference) {
             if (this.cancelled) {
-                atomicReference.lazySet(null);
+                atomicReference.lazySet((Object) null);
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 Throwable th = this.error;
                 if (th != null) {
-                    atomicReference.lazySet(null);
+                    atomicReference.lazySet((Object) null);
                     subscriber.onError(th);
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     subscriber.onComplete();
                     return true;
                 }
             }
-            return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             boolean z;
             if (getAndIncrement() == 0) {
@@ -72,7 +74,7 @@ public final class FlowableOnBackpressureLatest<T> extends AbstractFlowableWithU
                             break;
                         }
                         boolean z2 = this.done;
-                        Object andSet = atomicReference.getAndSet(null);
+                        T andSet = atomicReference.getAndSet((Object) null);
                         boolean z3 = andSet == null;
                         if (!checkTerminated(z2, z3, subscriber, atomicReference)) {
                             if (z3) {
@@ -139,6 +141,6 @@ public final class FlowableOnBackpressureLatest<T> extends AbstractFlowableWithU
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new BackpressureLatestSubscriber<Object>(subscriber));
+        this.source.subscribe(new BackpressureLatestSubscriber(subscriber));
     }
 }

@@ -21,7 +21,7 @@ public final class FlowableSkipUntil<T, U> extends AbstractFlowableWithUpstream<
         final Subscriber<? super T> actual;
         final AtomicThrowable error = new AtomicThrowable();
         volatile boolean gate;
-        final OtherSubscriber other = new OtherSubscriber<>();
+        final SkipUntilMainSubscriber<T>.OtherSubscriber other = new OtherSubscriber();
         final AtomicLong requested = new AtomicLong();
         final AtomicReference<Subscription> s = new AtomicReference<>();
 
@@ -38,7 +38,7 @@ public final class FlowableSkipUntil<T, U> extends AbstractFlowableWithUpstream<
             public void onError(Throwable th) {
                 SubscriptionHelper.cancel(SkipUntilMainSubscriber.this.s);
                 SkipUntilMainSubscriber skipUntilMainSubscriber = SkipUntilMainSubscriber.this;
-                HalfSerializer.onError(skipUntilMainSubscriber.actual, th, (AtomicInteger) skipUntilMainSubscriber, skipUntilMainSubscriber.error);
+                HalfSerializer.onError((Subscriber<?>) skipUntilMainSubscriber.actual, th, (AtomicInteger) skipUntilMainSubscriber, skipUntilMainSubscriber.error);
             }
 
             public void onNext(Object obj) {
@@ -64,17 +64,17 @@ public final class FlowableSkipUntil<T, U> extends AbstractFlowableWithUpstream<
 
         public void onComplete() {
             SubscriptionHelper.cancel(this.other);
-            HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+            HalfSerializer.onComplete((Subscriber<?>) this.actual, (AtomicInteger) this, this.error);
         }
 
         public void onError(Throwable th) {
             SubscriptionHelper.cancel(this.other);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Subscriber<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
         public void onNext(T t) {
             if (!tryOnNext(t)) {
-                ((Subscription) this.s.get()).request(1);
+                this.s.get().request(1);
             }
         }
 
@@ -105,6 +105,6 @@ public final class FlowableSkipUntil<T, U> extends AbstractFlowableWithUpstream<
         SkipUntilMainSubscriber skipUntilMainSubscriber = new SkipUntilMainSubscriber(subscriber);
         subscriber.onSubscribe(skipUntilMainSubscriber);
         this.other.subscribe(skipUntilMainSubscriber.other);
-        this.source.subscribe((FlowableSubscriber<? super T>) skipUntilMainSubscriber);
+        this.source.subscribe(skipUntilMainSubscriber);
     }
 }

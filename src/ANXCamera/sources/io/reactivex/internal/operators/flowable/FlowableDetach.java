@@ -60,6 +60,6 @@ public final class FlowableDetach<T> extends AbstractFlowableWithUpstream<T, T> 
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new DetachSubscriber<Object>(subscriber));
+        this.source.subscribe(new DetachSubscriber(subscriber));
     }
 }

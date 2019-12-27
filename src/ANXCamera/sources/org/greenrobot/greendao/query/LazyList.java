@@ -91,7 +91,7 @@ public class LazyList<E> implements List<E>, Closeable {
         if (z) {
             this.entities = new ArrayList(this.size);
             for (int i = 0; i < this.size; i++) {
-                this.entities.add(null);
+                this.entities.add((Object) null);
             }
         } else {
             this.entities = null;
@@ -223,15 +223,9 @@ public class LazyList<E> implements List<E>, Closeable {
             if (loadCurrent != null) {
                 return loadCurrent;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Loading of entity failed (null) at position ");
-            sb.append(i);
-            throw new DaoException(sb.toString());
+            throw new DaoException("Loading of entity failed (null) at position " + i);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Could not move to cursor location ");
-        sb2.append(i);
-        throw new DaoException(sb2.toString());
+        throw new DaoException("Could not move to cursor location " + i);
     }
 
     public void loadRemaining() {

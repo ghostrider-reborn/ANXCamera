@@ -2,10 +2,10 @@ package com.android.camera.storage;
 
 import com.android.camera.Util;
 import com.android.camera.log.Log;
-import com.android.camera.storage.Storage.StorageListener;
+import com.android.camera.storage.Storage;
 import com.mi.config.b;
 
-public class MemoryManager implements StorageListener {
+public class MemoryManager implements Storage.StorageListener {
     private static final int DELAY_SECTION = 100;
     private static final float MAX_MEMORY_LIMIT_RATIO = 0.95f;
     public static final float MTK_SPEED_DOWN_RATIO = 0.66f;
@@ -40,16 +40,7 @@ public class MemoryManager implements StorageListener {
         long j = this.mRuntime.totalMemory();
         long freeMemory = this.mRuntime.freeMemory();
         long j2 = j - freeMemory;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getLeftMemory: maxMemory=");
-        sb.append(this.mMaxMemory);
-        sb.append(", total=");
-        sb.append(j);
-        sb.append(", free=");
-        sb.append(freeMemory);
-        sb.append(", totalUsed=");
-        sb.append(j2);
-        log(sb.toString());
+        log("getLeftMemory: maxMemory=" + this.mMaxMemory + ", total=" + j + ", free=" + freeMemory + ", totalUsed=" + j2);
         return (int) j2;
     }
 
@@ -64,17 +55,11 @@ public class MemoryManager implements StorageListener {
             }
         }
         this.mSavedQueueMemoryLimit = (int) (((float) this.mSaveTaskMemoryLimit) * SAVE_QUEUE_MEMORY_RATIO);
-        StringBuilder sb = new StringBuilder();
-        sb.append("initLimit: mSavedQueueMemoryLimit = ");
-        sb.append(this.mSavedQueueMemoryLimit);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "initLimit: mSavedQueueMemoryLimit = " + this.mSavedQueueMemoryLimit);
     }
 
     private boolean isReachedMemoryLimit() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("isReachedMemoryLimit: usedMemory=");
-        sb.append(this.mSaverMemoryUse);
-        log(sb.toString());
+        log("isReachedMemoryLimit: usedMemory=" + this.mSaverMemoryUse);
         return this.mSaverMemoryUse >= this.mSaveTaskMemoryLimit;
     }
 
@@ -105,10 +90,7 @@ public class MemoryManager implements StorageListener {
         } else {
             i = 0;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("getBurstDelay: delayMultiple=");
-        sb.append(i);
-        log(sb.toString());
+        log("getBurstDelay: delayMultiple=" + i);
         return i * 100;
     }
 
@@ -118,10 +100,7 @@ public class MemoryManager implements StorageListener {
         this.mSaverMemoryUse = 0;
         initLimit();
         Storage.setStorageListener(this);
-        StringBuilder sb = new StringBuilder();
-        sb.append("initMemory: maxMemory=");
-        sb.append(this.mMaxMemory);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "initMemory: maxMemory=" + this.mMaxMemory);
     }
 
     public boolean isNeedSlowDown() {
@@ -129,14 +108,7 @@ public class MemoryManager implements StorageListener {
         if (!b.isMTKPlatform() ? this.mSaverMemoryUse < this.mSaveTaskMemoryLimit / 2 : this.mSaverMemoryUse < (this.mSaveTaskMemoryLimit * 3) / 4) {
             z = false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("isNeedSlowDown: return ");
-        sb.append(z);
-        sb.append(" mSaverMemoryUse=");
-        sb.append(this.mSaverMemoryUse);
-        sb.append(" mSaveTaskMemoryLimit=");
-        sb.append(this.mSaveTaskMemoryLimit);
-        log(sb.toString());
+        log("isNeedSlowDown: return " + z + " mSaverMemoryUse=" + this.mSaverMemoryUse + " mSaveTaskMemoryLimit=" + this.mSaveTaskMemoryLimit);
         return z;
     }
 
@@ -144,24 +116,14 @@ public class MemoryManager implements StorageListener {
         if (!isReachedMemoryLimit() && this.mMaxTotalMemory > getTotalUsedMemory() && Storage.getLeftSpace() > ((long) this.mSaverMemoryUse)) {
             return false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("isNeedStopCapture: needStop=");
-        sb.append(true);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "isNeedStopCapture: needStop=" + true);
         return true;
     }
 
     public synchronized boolean isSaveQueueFull() {
         boolean z;
         z = this.mSaverMemoryUse >= this.mSavedQueueMemoryLimit;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isSaveQueueFull = ");
-        sb.append(z);
-        sb.append(", usedMemory=");
-        sb.append(this.mSaverMemoryUse);
-        sb.append(", limit = ");
-        sb.append(this.mSavedQueueMemoryLimit);
-        log(sb.toString());
+        log("isSaveQueueFull = " + z + ", usedMemory=" + this.mSaverMemoryUse + ", limit = " + this.mSavedQueueMemoryLimit);
         return z;
     }
 

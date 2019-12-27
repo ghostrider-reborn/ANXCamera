@@ -24,6 +24,6 @@ public final class SingleError<T> extends Single<T> {
             th = th;
             Exceptions.throwIfFatal(th);
         }
-        EmptyDisposable.error(th, singleObserver);
+        EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
     }
 }

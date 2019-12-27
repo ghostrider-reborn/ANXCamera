@@ -5,13 +5,13 @@ import java.util.HashMap;
 /* compiled from: TimeConsumingUtil */
 public class d {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     public static boolean f167a = false;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static HashMap<String, Long> f168b = new HashMap<>();
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private static final String f169c = "PERFORMANCE";
 
     public static void a(String str) {
@@ -27,13 +27,8 @@ public class d {
         if (f167a) {
             HashMap<String, Long> hashMap = f168b;
             if (hashMap != null && hashMap.containsKey(str2)) {
-                long longValue = ((Long) f168b.get(str2)).longValue();
-                StringBuilder sb = new StringBuilder();
-                sb.append("");
-                sb.append(str2);
-                sb.append(" : ");
-                sb.append(System.currentTimeMillis() - longValue);
-                LOG.d(str, sb.toString());
+                long longValue = f168b.get(str2).longValue();
+                LOG.d(str, "" + str2 + " : " + (System.currentTimeMillis() - longValue));
             }
         }
     }
@@ -42,13 +37,8 @@ public class d {
         if (f167a) {
             HashMap<String, Long> hashMap = f168b;
             if (hashMap != null && hashMap.containsKey(str)) {
-                long longValue = ((Long) f168b.get(str)).longValue();
-                StringBuilder sb = new StringBuilder();
-                sb.append("");
-                sb.append(str);
-                sb.append(" : ");
-                sb.append(System.currentTimeMillis() - longValue);
-                LOG.d(f169c, sb.toString());
+                long longValue = f168b.get(str).longValue();
+                LOG.d(f169c, "" + str + " : " + (System.currentTimeMillis() - longValue));
             }
         }
     }

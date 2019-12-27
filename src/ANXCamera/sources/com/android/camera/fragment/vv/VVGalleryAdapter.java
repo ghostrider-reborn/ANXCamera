@@ -2,10 +2,9 @@ package com.android.camera.fragment.vv;
 
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,14 +15,14 @@ import com.bumptech.glide.load.engine.o;
 import com.bumptech.glide.request.f;
 import java.util.Locale;
 
-public class VVGalleryAdapter extends Adapter<CommonRecyclerViewHolder> implements OnClickListener {
+public class VVGalleryAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> implements View.OnClickListener {
     private f mGlideOptions = new f();
-    private OnClickListener mParentClickListener;
+    private View.OnClickListener mParentClickListener;
     private ResourceSelectedListener mResourceSelectedListener;
     private int mSelectedIndex;
     private VVList mVVList;
 
-    public VVGalleryAdapter(VVList vVList, OnClickListener onClickListener, ResourceSelectedListener resourceSelectedListener) {
+    public VVGalleryAdapter(VVList vVList, View.OnClickListener onClickListener, ResourceSelectedListener resourceSelectedListener) {
         this.mVVList = vVList;
         this.mParentClickListener = onClickListener;
         this.mResourceSelectedListener = resourceSelectedListener;

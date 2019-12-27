@@ -6,7 +6,7 @@ import com.android.camera.constant.BeautyConstant;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.data.data.global.DataItemGlobal;
-import com.android.camera.data.data.runing.ComponentRunningShine.ShineType;
+import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.data.data.runing.TypeElementsBeauty;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
@@ -16,13 +16,13 @@ import java.util.Map;
 
 public class AbBeautySettingBusiness implements IBeautySettingBusiness {
     private static final String TAG = "AbBeautySettingBusiness";
-    @ShineType
+    @ComponentRunningShine.ShineType
     private String mBeautyType;
     private String mCurrentBeautyItemType;
     private Map<String, Integer> mExtraTable = new HashMap();
     private List<TypeItem> mSupportedTypeItems;
 
-    public AbBeautySettingBusiness(@ShineType String str, TypeElementsBeauty typeElementsBeauty) {
+    public AbBeautySettingBusiness(@ComponentRunningShine.ShineType String str, TypeElementsBeauty typeElementsBeauty) {
         this.mBeautyType = str;
         initBeauty(this.mBeautyType, typeElementsBeauty);
     }
@@ -35,14 +35,14 @@ public class AbBeautySettingBusiness implements IBeautySettingBusiness {
         DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
         int currentCameraId = dataItemGlobal.getCurrentCameraId();
         this.mSupportedTypeItems = typeElementsBeauty.initAndGetSupportItems(currentCameraId, Camera2DataContainer.getInstance().getCapabilitiesByBogusCameraId(currentCameraId, dataItemGlobal.getCurrentMode()), str);
-        this.mCurrentBeautyItemType = ((TypeItem) getSupportedTypeArray(getBeautyType()).get(0)).mKeyOrType;
+        this.mCurrentBeautyItemType = getSupportedTypeArray(getBeautyType()).get(0).mKeyOrType;
     }
 
     public void clearBeauty() {
         for (TypeItem typeItem : getSupportedTypeArray(getBeautyType())) {
             String str = typeItem.mKeyOrType;
             CameraSettings.setFaceBeautyRatio(str, 0);
-            this.mExtraTable.put(str, Integer.valueOf(0));
+            this.mExtraTable.put(str, 0);
         }
         BeautyHelper.onBeautyChanged();
     }
@@ -52,7 +52,7 @@ public class AbBeautySettingBusiness implements IBeautySettingBusiness {
     }
 
     public int getProgressByCurrentItem() {
-        return this.mExtraTable.get(this.mCurrentBeautyItemType) == null ? getProgressDefValue(this.mCurrentBeautyItemType) : ((Integer) this.mExtraTable.get(this.mCurrentBeautyItemType)).intValue();
+        return this.mExtraTable.get(this.mCurrentBeautyItemType) == null ? getProgressDefValue(this.mCurrentBeautyItemType) : this.mExtraTable.get(this.mCurrentBeautyItemType).intValue();
     }
 
     /* access modifiers changed from: protected */
@@ -83,18 +83,13 @@ public class AbBeautySettingBusiness implements IBeautySettingBusiness {
     }
 
     public void setProgressForCurrentItem(int i) {
-        int intValue = this.mExtraTable.get(this.mCurrentBeautyItemType) == null ? 0 : ((Integer) this.mExtraTable.get(this.mCurrentBeautyItemType)).intValue();
+        int intValue = this.mExtraTable.get(this.mCurrentBeautyItemType) == null ? 0 : this.mExtraTable.get(this.mCurrentBeautyItemType).intValue();
         this.mExtraTable.put(this.mCurrentBeautyItemType, Integer.valueOf(i));
         String str = this.mCurrentBeautyItemType;
         if (intValue != i || i == getProgressDefValue(str)) {
             CameraSettings.setFaceBeautyRatio(str, i);
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onBeautyParameterChanged: ");
-            sb.append(str);
-            sb.append("=");
-            sb.append(i);
-            Log.v(str2, sb.toString());
+            Log.v(str2, "onBeautyParameterChanged: " + str + "=" + i);
             BeautyHelper.onBeautyChanged();
         }
     }

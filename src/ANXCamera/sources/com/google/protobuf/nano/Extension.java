@@ -525,7 +525,7 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
     }
 
     private Extension(int i, Class<T> cls, int i2, boolean z) {
-        this(i, cls, null, i2, z);
+        this(i, cls, (GeneratedMessageLite<?, ?>) null, i2, z);
     }
 
     private Extension(int i, Class<T> cls, GeneratedMessageLite<?, ?> generatedMessageLite, int i2, boolean z) {
@@ -572,7 +572,7 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
     private T getRepeatedValueFrom(List<UnknownFieldData> list) {
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            UnknownFieldData unknownFieldData = (UnknownFieldData) list.get(i);
+            UnknownFieldData unknownFieldData = list.get(i);
             if (unknownFieldData.bytes.length != 0) {
                 readDataInto(unknownFieldData, arrayList);
             }
@@ -593,7 +593,7 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
         if (list.isEmpty()) {
             return null;
         }
-        return this.clazz.cast(readData(CodedInputByteBufferNano.newInstance(((UnknownFieldData) list.get(list.size() - 1)).bytes)));
+        return this.clazz.cast(readData(CodedInputByteBufferNano.newInstance(list.get(list.size() - 1).bytes)));
     }
 
     /* access modifiers changed from: protected */
@@ -620,12 +620,12 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
         return i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int computeSerializedSize(Object obj) {
         return this.repeated ? computeRepeatedSerializedSize(obj) : computeSingularSerializedSize(obj);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int computeSerializedSizeAsMessageSet(Object obj) {
         return this.repeated ? computeRepeatedSerializedSizeAsMessageSet(obj) : computeSingularSerializedSizeAsMessageSet(obj);
     }
@@ -652,7 +652,6 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -660,13 +659,10 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
             return false;
         }
         Extension extension = (Extension) obj;
-        if (!(this.type == extension.type && this.clazz == extension.clazz && this.tag == extension.tag && this.repeated == extension.repeated)) {
-            z = false;
-        }
-        return z;
+        return this.type == extension.type && this.clazz == extension.clazz && this.tag == extension.tag && this.repeated == extension.repeated;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final T getValueFrom(List<UnknownFieldData> list) {
         if (list == null) {
             return null;
@@ -680,8 +676,7 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
 
     /* access modifiers changed from: protected */
     public Object readData(CodedInputByteBufferNano codedInputByteBufferNano) {
-        String str = "Error creating instance of class ";
-        Class<T> componentType = this.repeated ? this.clazz.getComponentType() : this.clazz;
+        Class componentType = this.repeated ? this.clazz.getComponentType() : this.clazz;
         try {
             int i = this.type;
             if (i == 10) {
@@ -704,13 +699,13 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
         } catch (InstantiationException e2) {
             String valueOf = String.valueOf(componentType);
             StringBuilder sb2 = new StringBuilder(String.valueOf(valueOf).length() + 33);
-            sb2.append(str);
+            sb2.append("Error creating instance of class ");
             sb2.append(valueOf);
             throw new IllegalArgumentException(sb2.toString(), e2);
         } catch (IllegalAccessException e3) {
             String valueOf2 = String.valueOf(componentType);
             StringBuilder sb3 = new StringBuilder(String.valueOf(valueOf2).length() + 33);
-            sb3.append(str);
+            sb3.append("Error creating instance of class ");
             sb3.append(valueOf2);
             throw new IllegalArgumentException(sb3.toString(), e3);
         } catch (IOException e4) {
@@ -723,7 +718,7 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
         list.add(readData(CodedInputByteBufferNano.newInstance(unknownFieldData.bytes)));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeAsMessageSetTo(Object obj, CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
         if (this.repeated) {
             writeRepeatedDataAsMessageSet(obj, codedOutputByteBufferNano);
@@ -788,7 +783,7 @@ public class Extension<M extends ExtendableMessageNano<M>, T> {
         codedOutputByteBufferNano.writeMessageSetExtension(WireFormatNano.getTagFieldNumber(this.tag), (MessageNano) obj);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeTo(Object obj, CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
         if (this.repeated) {
             writeRepeatedData(obj, codedOutputByteBufferNano);

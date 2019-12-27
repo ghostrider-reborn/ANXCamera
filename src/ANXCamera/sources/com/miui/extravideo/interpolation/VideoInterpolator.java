@@ -10,12 +10,12 @@ public class VideoInterpolator {
     private static final String TAG = "VideoInterpolator";
 
     public static void doDecodeAndEncodeAsync(String str, String str2, boolean z, boolean z2, EncodeListener encodeListener) {
-        doDecodeAndEncodeAsyncWithWatermark(str, str2, z, null, null, z2, encodeListener);
+        doDecodeAndEncodeAsyncWithWatermark(str, str2, z, (Bitmap) null, (float[]) null, z2, encodeListener);
     }
 
     public static void doDecodeAndEncodeAsyncWithWatermark(String str, String str2, boolean z, Bitmap bitmap, float[] fArr, boolean z2, EncodeListener encodeListener) {
         Log.d(TAG, String.format("start doDecodeAndEncode async mode sdk version : %s", new Object[]{BuildConfig.VERSION_NAME}));
-        VideoInterpolatorAsyncImp videoInterpolatorAsyncImp = new VideoInterpolatorAsyncImp(str, str2, z, null, fArr, z2);
+        VideoInterpolatorAsyncImp videoInterpolatorAsyncImp = new VideoInterpolatorAsyncImp(str, str2, z, (Bitmap) null, fArr, z2);
         videoInterpolatorAsyncImp.setEncodeListener(encodeListener);
         videoInterpolatorAsyncImp.doDecodeAndEncode();
     }
@@ -25,7 +25,7 @@ public class VideoInterpolator {
     }
 
     public static boolean doDecodeAndEncodeSync(String str, String str2, boolean z, boolean z2) {
-        return doDecodeAndEncodeSyncWithWatermark(str, str2, z, null, null, z2);
+        return doDecodeAndEncodeSyncWithWatermark(str, str2, z, (Bitmap) null, (float[]) null, z2);
     }
 
     public static boolean doDecodeAndEncodeSyncWithWatermark(String str, String str2, boolean z, Bitmap bitmap, float[] fArr, boolean z2) {

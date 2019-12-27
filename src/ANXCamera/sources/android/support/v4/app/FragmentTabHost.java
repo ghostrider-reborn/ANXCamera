@@ -5,33 +5,27 @@ import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.BaseSavedState;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
-import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TabHost.TabContentFactory;
-import android.widget.TabHost.TabSpec;
 import android.widget.TabWidget;
 import java.util.ArrayList;
 
-public class FragmentTabHost extends TabHost implements OnTabChangeListener {
+public class FragmentTabHost extends TabHost implements TabHost.OnTabChangeListener {
     private boolean mAttached;
     private int mContainerId;
     private Context mContext;
     private FragmentManager mFragmentManager;
     private TabInfo mLastTab;
-    private OnTabChangeListener mOnTabChangeListener;
+    private TabHost.OnTabChangeListener mOnTabChangeListener;
     private FrameLayout mRealTabContent;
     private final ArrayList<TabInfo> mTabs = new ArrayList<>();
 
-    static class DummyTabFactory implements TabContentFactory {
+    static class DummyTabFactory implements TabHost.TabContentFactory {
         private final Context mContext;
 
         public DummyTabFactory(Context context) {
@@ -46,8 +40,8 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
         }
     }
 
-    static class SavedState extends BaseSavedState {
-        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+    static class SavedState extends View.BaseSavedState {
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel parcel) {
                 return new SavedState(parcel);
             }
@@ -68,13 +62,7 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("FragmentTabHost.SavedState{");
-            sb.append(Integer.toHexString(System.identityHashCode(this)));
-            sb.append(" curTab=");
-            sb.append(this.curTab);
-            sb.append("}");
-            return sb.toString();
+            return "FragmentTabHost.SavedState{" + Integer.toHexString(System.identityHashCode(this)) + " curTab=" + this.curTab + "}";
         }
 
         public void writeToParcel(Parcel parcel, int i) {
@@ -100,8 +88,8 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
     }
 
     public FragmentTabHost(Context context) {
-        super(context, null);
-        initFragmentTabHost(context, null);
+        super(context, (AttributeSet) null);
+        initFragmentTabHost(context, (AttributeSet) null);
     }
 
     public FragmentTabHost(Context context, AttributeSet attributeSet) {
@@ -141,10 +129,7 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
         if (this.mRealTabContent == null) {
             this.mRealTabContent = (FrameLayout) findViewById(this.mContainerId);
             if (this.mRealTabContent == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("No tab content FrameLayout found for id ");
-                sb.append(this.mContainerId);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("No tab content FrameLayout found for id " + this.mContainerId);
             }
         }
     }
@@ -153,7 +138,7 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
         if (findViewById(16908307) == null) {
             LinearLayout linearLayout = new LinearLayout(context);
             linearLayout.setOrientation(1);
-            addView(linearLayout, new LayoutParams(-1, -1));
+            addView(linearLayout, new FrameLayout.LayoutParams(-1, -1));
             TabWidget tabWidget = new TabWidget(context);
             tabWidget.setId(16908307);
             tabWidget.setOrientation(0);
@@ -172,7 +157,7 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
     private TabInfo getTabInfoForTag(String str) {
         int size = this.mTabs.size();
         for (int i = 0; i < size; i++) {
-            TabInfo tabInfo = (TabInfo) this.mTabs.get(i);
+            TabInfo tabInfo = this.mTabs.get(i);
             if (tabInfo.tag.equals(str)) {
                 return tabInfo;
             }
@@ -187,7 +172,7 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
         super.setOnTabChangedListener(this);
     }
 
-    public void addTab(@NonNull TabSpec tabSpec, @NonNull Class<?> cls, @Nullable Bundle bundle) {
+    public void addTab(@NonNull TabHost.TabSpec tabSpec, @NonNull Class<?> cls, @Nullable Bundle bundle) {
         tabSpec.setContent(new DummyTabFactory(this.mContext));
         String tag = tabSpec.getTag();
         TabInfo tabInfo = new TabInfo(tag, cls, bundle);
@@ -211,7 +196,7 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
         int size = this.mTabs.size();
         FragmentTransaction fragmentTransaction = null;
         for (int i = 0; i < size; i++) {
-            TabInfo tabInfo = (TabInfo) this.mTabs.get(i);
+            TabInfo tabInfo = this.mTabs.get(i);
             tabInfo.fragment = this.mFragmentManager.findFragmentByTag(tabInfo.tag);
             Fragment fragment = tabInfo.fragment;
             if (fragment != null && !fragment.isDetached()) {
@@ -259,18 +244,18 @@ public class FragmentTabHost extends TabHost implements OnTabChangeListener {
 
     public void onTabChanged(String str) {
         if (this.mAttached) {
-            FragmentTransaction doTabChanged = doTabChanged(str, null);
+            FragmentTransaction doTabChanged = doTabChanged(str, (FragmentTransaction) null);
             if (doTabChanged != null) {
                 doTabChanged.commit();
             }
         }
-        OnTabChangeListener onTabChangeListener = this.mOnTabChangeListener;
+        TabHost.OnTabChangeListener onTabChangeListener = this.mOnTabChangeListener;
         if (onTabChangeListener != null) {
             onTabChangeListener.onTabChanged(str);
         }
     }
 
-    public void setOnTabChangedListener(OnTabChangeListener onTabChangeListener) {
+    public void setOnTabChangedListener(TabHost.OnTabChangeListener onTabChangeListener) {
         this.mOnTabChangeListener = onTabChangeListener;
     }
 

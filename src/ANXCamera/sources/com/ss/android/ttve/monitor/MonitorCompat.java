@@ -2,11 +2,10 @@ package com.ss.android.ttve.monitor;
 
 import android.content.Context;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import org.json.JSONObject;
 
-@RestrictTo({Scope.LIBRARY})
+@RestrictTo({RestrictTo.Scope.LIBRARY})
 public class MonitorCompat {
     private static final String TAG = "MonitorCompat";
 

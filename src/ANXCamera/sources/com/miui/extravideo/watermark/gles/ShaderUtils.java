@@ -9,23 +9,13 @@ public class ShaderUtils {
     public static void checkGlError(String str) {
         int glGetError = GLES20.glGetError();
         if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            String str2 = ": glError ";
-            sb.append(str2);
-            sb.append(glGetError);
-            Log.e(TAG, sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(str2);
-            sb2.append(glGetError);
-            throw new RuntimeException(sb2.toString());
+            Log.e(TAG, str + ": glError " + glGetError);
+            throw new RuntimeException(str + ": glError " + glGetError);
         }
     }
 
     public static int createProgram(String str, String str2) {
         int loadShader = loadShader(35633, str);
-        int i = 0;
         if (loadShader == 0) {
             return 0;
         }
@@ -36,23 +26,20 @@ public class ShaderUtils {
         int glCreateProgram = GLES20.glCreateProgram();
         if (glCreateProgram != 0) {
             GLES20.glAttachShader(glCreateProgram, loadShader);
-            String str3 = "glAttachShader";
-            checkGlError(str3);
+            checkGlError("glAttachShader");
             GLES20.glAttachShader(glCreateProgram, loadShader2);
-            checkGlError(str3);
+            checkGlError("glAttachShader");
             GLES20.glLinkProgram(glCreateProgram);
             int[] iArr = new int[1];
             GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
             if (iArr[0] != 1) {
-                String str4 = TAG;
-                Log.e(str4, "Could not link program: ");
-                Log.e(str4, GLES20.glGetProgramInfoLog(glCreateProgram));
+                Log.e(TAG, "Could not link program: ");
+                Log.e(TAG, GLES20.glGetProgramInfoLog(glCreateProgram));
                 GLES20.glDeleteProgram(glCreateProgram);
-                return i;
+                return 0;
             }
         }
-        i = glCreateProgram;
-        return i;
+        return glCreateProgram;
     }
 
     public static int loadShader(int i, String str) {
@@ -67,14 +54,8 @@ public class ShaderUtils {
         if (iArr[0] != 0) {
             return glCreateShader;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Could not compile shader ");
-        sb.append(i);
-        sb.append(":");
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        Log.e(str2, sb2);
-        Log.e(str2, GLES20.glGetShaderInfoLog(glCreateShader));
+        Log.e(TAG, "Could not compile shader " + i + ":");
+        Log.e(TAG, GLES20.glGetShaderInfoLog(glCreateShader));
         GLES20.glDeleteShader(glCreateShader);
         return 0;
     }

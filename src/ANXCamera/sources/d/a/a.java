@@ -9,7 +9,7 @@ import android.os.RemoteException;
 /* compiled from: IPopupCameraManager */
 public interface a extends IInterface {
 
-    /* renamed from: d.a.a$a reason: collision with other inner class name */
+    /* renamed from: d.a.a$a  reason: collision with other inner class name */
     /* compiled from: IPopupCameraManager */
     public static class C0015a implements a {
         public boolean a(int i, int i2, String str) throws RemoteException {
@@ -45,7 +45,7 @@ public interface a extends IInterface {
         static final int La = 4;
         static final int Ma = 5;
 
-        /* renamed from: d.a.a$b$a reason: collision with other inner class name */
+        /* renamed from: d.a.a$b$a  reason: collision with other inner class name */
         /* compiled from: IPopupCameraManager */
         private static class C0016a implements a {
             public static a sDefaultImpl;
@@ -200,9 +200,8 @@ public interface a extends IInterface {
 
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
             int i3 = 0;
-            String str = DESCRIPTOR;
             if (i == 1) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 boolean a2 = a(parcel.readInt(), parcel.readInt(), parcel.readString());
                 parcel2.writeNoException();
                 if (a2) {
@@ -211,7 +210,7 @@ public interface a extends IInterface {
                 parcel2.writeInt(i3);
                 return true;
             } else if (i == 2) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 boolean popupMotor = popupMotor();
                 parcel2.writeNoException();
                 if (popupMotor) {
@@ -220,7 +219,7 @@ public interface a extends IInterface {
                 parcel2.writeInt(i3);
                 return true;
             } else if (i == 3) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 boolean takebackMotor = takebackMotor();
                 parcel2.writeNoException();
                 if (takebackMotor) {
@@ -229,20 +228,20 @@ public interface a extends IInterface {
                 parcel2.writeInt(i3);
                 return true;
             } else if (i == 4) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 int motorStatus = getMotorStatus();
                 parcel2.writeNoException();
                 parcel2.writeInt(motorStatus);
                 return true;
             } else if (i == 5) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 j();
                 parcel2.writeNoException();
                 return true;
             } else if (i != 1598968902) {
                 return super.onTransact(i, parcel, parcel2, i2);
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

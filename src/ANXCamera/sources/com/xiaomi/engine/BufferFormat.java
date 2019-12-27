@@ -2,11 +2,10 @@ package com.xiaomi.engine;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.util.Objects;
 
 public final class BufferFormat implements Parcelable {
-    public static final Creator<BufferFormat> CREATOR = new Creator<BufferFormat>() {
+    public static final Parcelable.Creator<BufferFormat> CREATOR = new Parcelable.Creator<BufferFormat>() {
         public BufferFormat createFromParcel(Parcel parcel) {
             return new BufferFormat(parcel);
         }
@@ -21,7 +20,7 @@ public final class BufferFormat implements Parcelable {
     private GraphDescriptorBean mGraphDescriptor;
 
     public BufferFormat(int i, int i2, int i3) {
-        this(i, i2, i3, null);
+        this(i, i2, i3, (GraphDescriptorBean) null);
     }
 
     public BufferFormat(int i, int i2, int i3, GraphDescriptorBean graphDescriptorBean) {
@@ -91,17 +90,7 @@ public final class BufferFormat implements Parcelable {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("BufferFormat{ bufferWidth=");
-        sb.append(getBufferWidth());
-        sb.append(", bufferHeight=");
-        sb.append(getBufferHeight());
-        sb.append(", bufferFormat=");
-        sb.append(getBufferFormat());
-        sb.append(", graphDescriptor=");
-        sb.append(getGraphDescriptor());
-        sb.append('}');
-        return sb.toString();
+        return "BufferFormat{ bufferWidth=" + getBufferWidth() + ", bufferHeight=" + getBufferHeight() + ", bufferFormat=" + getBufferFormat() + ", graphDescriptor=" + getGraphDescriptor() + '}';
     }
 
     public void writeToParcel(Parcel parcel, int i) {

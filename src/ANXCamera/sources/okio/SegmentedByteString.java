@@ -11,7 +11,7 @@ final class SegmentedByteString extends ByteString {
     final transient byte[][] segments;
 
     SegmentedByteString(Buffer buffer, int i) {
-        super(null);
+        super((byte[]) null);
         Util.checkOffsetAndCount(buffer.size, 0, (long) i);
         int i2 = 0;
         Segment segment = buffer.head;
@@ -72,21 +72,17 @@ final class SegmentedByteString extends ByteString {
         return toByteString().base64Url();
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:8:0x001d, code lost:
-        if (rangeEquals(0, r5, 0, size()) != false) goto L_0x0021;
-     */
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
         if (obj instanceof ByteString) {
             ByteString byteString = (ByteString) obj;
-            if (byteString.size() == size()) {
+            if (byteString.size() == size() && rangeEquals(0, byteString, 0, size())) {
+                return true;
             }
         }
-        z = false;
-        return z;
+        return false;
     }
 
     public byte getByte(int i) {
@@ -140,7 +136,7 @@ final class SegmentedByteString extends ByteString {
         return toByteString().indexOf(bArr, i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public byte[] internalArray() {
         return toByteArray();
     }
@@ -228,16 +224,15 @@ final class SegmentedByteString extends ByteString {
     }
 
     public byte[] toByteArray() {
-        int[] iArr = this.directory;
-        byte[][] bArr = this.segments;
-        byte[] bArr2 = new byte[iArr[bArr.length - 1]];
+        byte[][] bArr;
+        byte[] bArr2 = new byte[this.directory[this.segments.length - 1]];
         int length = bArr.length;
         int i = 0;
         int i2 = 0;
         while (i < length) {
-            int[] iArr2 = this.directory;
-            int i3 = iArr2[length + i];
-            int i4 = iArr2[i];
+            int[] iArr = this.directory;
+            int i3 = iArr[length + i];
+            int i4 = iArr[i];
             System.arraycopy(this.segments[i], i3, bArr2, i2, i4 - i2);
             i++;
             i2 = i4;
@@ -271,7 +266,7 @@ final class SegmentedByteString extends ByteString {
         throw new IllegalArgumentException("out == null");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void write(Buffer buffer) {
         int length = this.segments.length;
         int i = 0;

@@ -63,9 +63,9 @@ public final class SingleFromPublisher<T> extends Single<T> {
                     this.done = true;
                     this.value = null;
                     this.actual.onError(new IndexOutOfBoundsException("Too many elements in the Publisher"));
-                } else {
-                    this.value = t;
+                    return;
                 }
+                this.value = t;
             }
         }
 

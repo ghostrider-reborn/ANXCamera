@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.MissingBackpressureException;
@@ -124,7 +123,7 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void close(OperatorWindowBoundaryCloseSubscriber<T, V> operatorWindowBoundaryCloseSubscriber) {
             this.resources.delete(operatorWindowBoundaryCloseSubscriber);
             this.queue.offer(new WindowOperation(operatorWindowBoundaryCloseSubscriber.w, null));
@@ -133,13 +132,13 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void dispose() {
             this.resources.dispose();
             DisposableHelper.dispose(this.boundary);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             SimplePlainQueue<U> simplePlainQueue = this.queue;
             Subscriber<? super V> subscriber = this.actual;
@@ -147,17 +146,17 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
             int i = 1;
             while (true) {
                 boolean z = this.done;
-                Object poll = simplePlainQueue.poll();
+                U poll = simplePlainQueue.poll();
                 boolean z2 = poll == null;
                 if (z && z2) {
                     dispose();
                     Throwable th = this.error;
                     if (th != null) {
-                        for (UnicastProcessor onError : list) {
+                        for (UnicastProcessor<T> onError : list) {
                             onError.onError(th);
                         }
                     } else {
-                        for (UnicastProcessor onComplete : list) {
+                        for (UnicastProcessor<T> onComplete : list) {
                             onComplete.onComplete();
                         }
                     }
@@ -209,15 +208,15 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
                         }
                     }
                 } else {
-                    for (UnicastProcessor unicastProcessor2 : list) {
+                    for (UnicastProcessor<T> onNext : list) {
                         NotificationLite.getValue(poll);
-                        unicastProcessor2.onNext(poll);
+                        onNext.onNext(poll);
                     }
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void error(Throwable th) {
             this.s.cancel();
             this.resources.dispose();
@@ -257,7 +256,7 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
         public void onNext(T t) {
             if (!this.done) {
                 if (fastEnter()) {
-                    for (UnicastProcessor onNext : this.ws) {
+                    for (UnicastProcessor<T> onNext : this.ws) {
                         onNext.onNext(t);
                     }
                     if (leave(-1) == 0) {
@@ -281,7 +280,7 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
                 this.actual.onSubscribe(this);
                 if (!this.cancelled) {
                     OperatorWindowBoundaryOpenSubscriber operatorWindowBoundaryOpenSubscriber = new OperatorWindowBoundaryOpenSubscriber(this);
-                    if (this.boundary.compareAndSet(null, operatorWindowBoundaryOpenSubscriber)) {
+                    if (this.boundary.compareAndSet((Object) null, operatorWindowBoundaryOpenSubscriber)) {
                         this.windows.getAndIncrement();
                         subscription.request(Long.MAX_VALUE);
                         this.open.subscribe(operatorWindowBoundaryOpenSubscriber);
@@ -290,9 +289,9 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void open(B b2) {
-            this.queue.offer(new WindowOperation(null, b2));
+            this.queue.offer(new WindowOperation((UnicastProcessor) null, b2));
             if (enter()) {
                 drainLoop();
             }
@@ -322,6 +321,6 @@ public final class FlowableWindowBoundarySelector<T, B, V> extends AbstractFlowa
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super Flowable<T>> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new WindowBoundaryMainSubscriber<Object>(new SerializedSubscriber(subscriber), this.open, this.close, this.bufferSize));
+        this.source.subscribe(new WindowBoundaryMainSubscriber(new SerializedSubscriber(subscriber), this.open, this.close, this.bufferSize));
     }
 }

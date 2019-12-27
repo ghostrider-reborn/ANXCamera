@@ -27,7 +27,7 @@ public class UrlBox extends FullBox {
         String str = this.url;
         if (str != null) {
             NIOUtils.write(byteBuffer, ByteBuffer.wrap(Platform.getBytesForCharset(str, "UTF-8")));
-            byteBuffer.put(0);
+            byteBuffer.put((byte) 0);
         }
     }
 

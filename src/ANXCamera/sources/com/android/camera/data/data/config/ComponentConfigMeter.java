@@ -17,6 +17,7 @@ public class ComponentConfigMeter extends ComponentData {
 
     public ComponentConfigMeter(DataItemConfig dataItemConfig) {
         super(dataItemConfig);
+        this.mItems = new ArrayList();
         this.mItems.add(new ComponentDataItem(getCenterWeighted(), getCenterWeighted(), (int) R.string.pref_camera_autoexposure_entry_centerweighted, "1"));
     }
 

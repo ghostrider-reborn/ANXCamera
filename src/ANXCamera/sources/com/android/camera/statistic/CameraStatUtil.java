@@ -3,7 +3,7 @@ package com.android.camera.statistic;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.util.SparseArray;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
@@ -46,13 +46,11 @@ public class CameraStatUtil {
         sCameraModeIdToName.put(165, CameraStat.PARAM_SQUARE);
         sCameraModeIdToName.put(167, "手动");
         sCameraModeIdToName.put(171, "人像");
-        String str = "全景";
-        sCameraModeIdToName.put(166, str);
-        sCameraModeIdToName.put(176, str);
+        sCameraModeIdToName.put(166, "全景");
+        sCameraModeIdToName.put(176, "全景");
         sCameraModeIdToName.put(172, "慢动作");
-        String str2 = "录像";
-        sCameraModeIdToName.put(162, str2);
-        sCameraModeIdToName.put(169, str2);
+        sCameraModeIdToName.put(162, "录像");
+        sCameraModeIdToName.put(169, "录像");
         sCameraModeIdToName.put(173, "夜景");
         sCameraModeIdToName.put(175, "超清");
         sTriggerModeIdToName.put(10, "拍照键");
@@ -75,9 +73,8 @@ public class CameraStatUtil {
         sExposureTimeLessThan1sToName.put(0, "auto");
         sExposureTimeLessThan1sToName.put(1000, "1/1000s");
         sExposureTimeLessThan1sToName.put(2000, "1/500s");
-        String str3 = "1/250s";
-        sExposureTimeLessThan1sToName.put(System.STATUS_BAR_UPDATE_NETWORK_SPEED_INTERVAL_DEFAULT, str3);
-        sExposureTimeLessThan1sToName.put(5000, str3);
+        sExposureTimeLessThan1sToName.put(MiuiSettings.System.STATUS_BAR_UPDATE_NETWORK_SPEED_INTERVAL_DEFAULT, "1/250s");
+        sExposureTimeLessThan1sToName.put(5000, "1/250s");
         sExposureTimeLessThan1sToName.put(BaseModule.LENS_DIRTY_DETECT_HINT_DURATION, "1/125s");
         sExposureTimeLessThan1sToName.put(16667, "1/60s");
         sExposureTimeLessThan1sToName.put(33333, "1/30s");
@@ -150,33 +147,31 @@ public class CameraStatUtil {
     private static void addUltraPixelParameter(boolean z, Map<String, String> map) {
         boolean isUltraPixelOn = CameraSettings.isUltraPixelOn();
         String str = "on";
-        String str2 = "off";
         if (!z) {
             int Ja = DataRepository.dataItemFeature().Ja();
             if (Ja == 48000000) {
                 if (!isUltraPixelOn) {
-                    str = str2;
+                    str = "off";
                 }
                 map.put(CameraStat.PARAM_ULTRA_PIXEL_48MP, str);
             } else if (Ja == 64144128) {
                 if (!isUltraPixelOn) {
-                    str = str2;
+                    str = "off";
                 }
                 map.put(CameraStat.PARAM_ULTRA_PIXEL_64MP, str);
             }
         } else if (DataRepository.dataItemFeature().Da() == 32275200) {
             if (!isUltraPixelOn) {
-                str = str2;
+                str = "off";
             }
             map.put(CameraStat.PARAM_ULTRA_PIXEL_32MP, str);
         }
     }
 
     private static String antiBandingToName(String str) {
-        String str2 = OTHERS;
         if (str == null) {
             Log.e(TAG, "null antiBanding");
-            return str2;
+            return OTHERS;
         }
         char c2 = 65535;
         switch (str.hashCode()) {
@@ -217,12 +212,8 @@ public class CameraStatUtil {
         if (c2 == 3) {
             return "auto";
         }
-        String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unexpected antiBanding ");
-        sb.append(str);
-        Log.e(str3, sb.toString());
-        return str2;
+        Log.e(TAG, "unexpected antiBanding " + str);
+        return OTHERS;
     }
 
     private static String autoExposureToName(String str) {
@@ -239,18 +230,14 @@ public class CameraStatUtil {
             }
         }
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unexpected auto exposure ");
-        sb.append(str);
-        Log.e(str2, sb.toString());
+        Log.e(str2, "unexpected auto exposure " + str);
         return OTHERS;
     }
 
     private static String autoWhiteBalanceToName(String str) {
-        String str2 = OTHERS;
         if (str == null) {
             Log.e(TAG, "null awb");
-            return str2;
+            return OTHERS;
         }
         char c2 = 65535;
         int hashCode = str.hashCode();
@@ -286,30 +273,26 @@ public class CameraStatUtil {
         } else if (str.equals("manual")) {
             c2 = 0;
         }
-        if (c2 != 0) {
-            if (c2 == 1) {
-                str = "auto";
-            } else if (c2 == 2) {
-                return "incandescent";
-            } else {
-                if (c2 == 3) {
-                    return "fluorescent";
-                }
-                if (c2 == 4) {
-                    return "daylight";
-                }
-                if (c2 == 5) {
-                    return "cloudy-daylight";
-                }
-                String str3 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected awb ");
-                sb.append(str);
-                Log.e(str3, sb.toString());
-                return str2;
-            }
+        if (c2 == 0) {
+            return str;
         }
-        return str;
+        if (c2 == 1) {
+            return "auto";
+        }
+        if (c2 == 2) {
+            return "incandescent";
+        }
+        if (c2 == 3) {
+            return "fluorescent";
+        }
+        if (c2 == 4) {
+            return "daylight";
+        }
+        if (c2 == 5) {
+            return "cloudy-daylight";
+        }
+        Log.e(TAG, "unexpected awb " + str);
+        return OTHERS;
     }
 
     private static String burstShotNumToName(int i) {
@@ -357,30 +340,20 @@ public class CameraStatUtil {
             try {
                 int parseLong = (int) (Long.parseLong(str) / 1000);
                 if (parseLong < 1000000) {
-                    String str2 = (String) sExposureTimeLessThan1sToName.get(parseLong);
+                    String str2 = sExposureTimeLessThan1sToName.get(parseLong);
                     if (str2 != null) {
                         return str2;
                     }
                 } else {
-                    int i = parseLong / 1000000;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(i);
-                    sb.append("s");
-                    return sb.toString();
+                    return (parseLong / 1000000) + "s";
                 }
             } catch (NumberFormatException unused) {
                 String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("invalid exposure time ");
-                sb2.append(str);
-                Log.e(str3, sb2.toString());
+                Log.e(str3, "invalid exposure time " + str);
             }
         }
         String str4 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("unexpected exposure time ");
-        sb3.append(str);
-        Log.e(str4, sb3.toString());
+        Log.e(str4, "unexpected exposure time " + str);
         return "auto";
     }
 
@@ -389,30 +362,25 @@ public class CameraStatUtil {
     }
 
     private static String filterIdToName(int i) {
-        String str = "none";
         if (FilterInfo.FILTER_ID_NONE == i) {
-            return str;
+            return "none";
         }
         int category = FilterInfo.getCategory(i);
         if (category == 1 || category == 2 || category == 3) {
-            String str2 = (String) sFilterTypeToName.get(FilterInfo.getIndex(i));
-            if (str2 != null) {
-                return str2;
+            String str = sFilterTypeToName.get(FilterInfo.getIndex(i));
+            if (str != null) {
+                return str;
             }
         }
-        String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unexpected filter id: ");
-        sb.append(Integer.toHexString(i));
-        Log.e(str3, sb.toString());
-        return str;
+        String str2 = TAG;
+        Log.e(str2, "unexpected filter id: " + Integer.toHexString(i));
+        return "none";
     }
 
     private static String flashModeToName(String str) {
-        String str2 = OTHERS;
         if (str == null) {
             Log.e(TAG, "null flash mode");
-            return str2;
+            return OTHERS;
         }
         char c2 = 65535;
         int hashCode = str.hashCode();
@@ -468,12 +436,8 @@ public class CameraStatUtil {
         if (c2 == 5) {
             return "off";
         }
-        String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unexpected flash mode ");
-        sb.append(str);
-        Log.e(str3, sb.toString());
-        return str2;
+        Log.e(TAG, "unexpected flash mode " + str);
+        return OTHERS;
     }
 
     private static String focusPositionToName(int i) {
@@ -497,31 +461,23 @@ public class CameraStatUtil {
     }
 
     private static int indexOfString(String[] strArr, String str) {
-        if (!(strArr == null || str == null)) {
-            for (int i = 0; i < strArr.length; i++) {
-                if (str.equals(strArr[i])) {
-                    return i;
-                }
+        if (strArr == null || str == null) {
+            return -1;
+        }
+        for (int i = 0; i < strArr.length; i++) {
+            if (str.equals(strArr[i])) {
+                return i;
             }
         }
         return -1;
     }
 
     private static String isoToName(String str) {
-        if (str != null) {
-            String str2 = "auto";
-            if (str2.equalsIgnoreCase(str)) {
-                return str2;
-            }
-            if (str.toUpperCase(Locale.ENGLISH).indexOf("ISO") > -1) {
-                str = str.substring(3);
-            }
-        }
-        return str;
+        return str != null ? "auto".equalsIgnoreCase(str) ? "auto" : str.toUpperCase(Locale.ENGLISH).indexOf("ISO") > -1 ? str.substring(3) : str : str;
     }
 
     public static String modeIdToName(int i) {
-        String str = (String) sCameraModeIdToName.get(i);
+        String str = sCameraModeIdToName.get(i);
         return str == null ? "未知" : str;
     }
 
@@ -532,12 +488,9 @@ public class CameraStatUtil {
             if (indexOfString <= -1) {
                 return OTHERS;
             }
-            return (String) sPictureQualityIndexToName.get(indexOfString + ((sPictureQualityIndexToName.size() - stringArray.length) / 2));
+            return sPictureQualityIndexToName.get(indexOfString + ((sPictureQualityIndexToName.size() - stringArray.length) / 2));
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("picture quality array size is smaller than values size ");
-        sb.append(str.length());
-        throw new RuntimeException(sb.toString());
+        throw new RuntimeException("picture quality array size is smaller than values size " + str.length());
     }
 
     private static long round(long j, int i) {
@@ -561,9 +514,8 @@ public class CameraStatUtil {
     }
 
     private static String slowMotionQualityIdToName(String str) {
-        String str2 = OTHERS;
         if (str == null) {
-            return str2;
+            return OTHERS;
         }
         char c2 = 65535;
         int hashCode = str.hashCode();
@@ -574,7 +526,7 @@ public class CameraStatUtil {
         } else if (str.equals("5")) {
             c2 = 0;
         }
-        return c2 != 0 ? c2 != 1 ? str2 : "1080p" : "720p";
+        return c2 != 0 ? c2 != 1 ? OTHERS : "1080p" : "720p";
     }
 
     public static void tarckBokenChanged(int i, String str) {
@@ -834,7 +786,7 @@ public class CameraStatUtil {
     }
 
     private static String triggerModeToName(int i) {
-        return (String) sTriggerModeIdToName.get(i);
+        return sTriggerModeIdToName.get(i);
     }
 
     private static String videoQualityToName(String str) {
@@ -857,10 +809,7 @@ public class CameraStatUtil {
             return "1080p,60fps";
         }
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("unexpected video quality: ");
-        sb.append(str);
-        Log.e(str2, sb.toString());
+        Log.e(str2, "unexpected video quality: " + str);
         return OTHERS;
     }
 }

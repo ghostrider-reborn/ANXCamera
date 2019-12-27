@@ -3,7 +3,6 @@ package com.bumptech.glide;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import com.bumptech.glide.request.target.n;
 import com.bumptech.glide.request.target.o;
 import com.bumptech.glide.util.l;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.Queue;
 
 /* compiled from: ListPreloader */
-public class f<T> implements OnScrollListener {
+public class f<T> implements AbsListView.OnScrollListener {
     private final int Tb;
     private final d Ub;
     private final a<T> Vb;
@@ -69,11 +68,11 @@ public class f<T> implements OnScrollListener {
         }
 
         public c f(int i, int i2) {
-            c cVar = (c) this.queue.poll();
-            this.queue.offer(cVar);
-            cVar.wl = i;
-            cVar.vl = i2;
-            return cVar;
+            c poll = this.queue.poll();
+            this.queue.offer(poll);
+            poll.wl = i;
+            poll.vl = i2;
+            return poll;
         }
     }
 
@@ -110,7 +109,7 @@ public class f<T> implements OnScrollListener {
         if (t != null) {
             int[] a2 = this.Wb.a(t, i, i2);
             if (a2 != null) {
-                j f2 = this.Vb.f(t);
+                j<?> f2 = this.Vb.f(t);
                 if (f2 != null) {
                     f2.c(this.Ub.f(a2[0], a2[1]));
                 }

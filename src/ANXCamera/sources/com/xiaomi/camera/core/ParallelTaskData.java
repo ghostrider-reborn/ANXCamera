@@ -1,8 +1,8 @@
 package com.xiaomi.camera.core;
 
 import com.android.camera.log.Log;
-import com.xiaomi.camera.base.Constants.ShotType;
-import com.xiaomi.camera.core.ParallelTaskDataParameter.Builder;
+import com.xiaomi.camera.base.Constants;
+import com.xiaomi.camera.core.ParallelTaskDataParameter;
 import com.xiaomi.protocol.ICustomCaptureResult;
 
 public class ParallelTaskData {
@@ -70,35 +70,19 @@ public class ParallelTaskData {
         String savePath = getSavePath();
         String str2 = GROUPSHOT_ORIGINAL_SUFFIX;
         if (i > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append("_");
-            sb.append(i);
-            str2 = sb.toString();
+            str2 = str2 + "_" + i;
         }
-        int lastIndexOf = savePath.lastIndexOf(".");
-        if (lastIndexOf > 0) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(savePath.substring(0, lastIndexOf));
-            sb2.append(str2);
-            sb2.append(savePath.substring(lastIndexOf));
-            str = sb2.toString();
+        if (savePath.lastIndexOf(".") > 0) {
+            str = savePath.substring(0, r7) + str2 + savePath.substring(r7);
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(savePath);
-            sb3.append(str2);
-            str = sb3.toString();
+            str = savePath + str2;
         }
-        String str3 = TAG;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("[1] cloneTaskData: path=");
-        sb4.append(str);
-        Log.d(str3, sb4.toString());
+        Log.d(TAG, "[1] cloneTaskData: path=" + str);
         parallelTaskData.setSavePath(str);
         parallelTaskData.setNeedThumbnail(false);
-        Builder builder = new Builder(getDataParameter());
+        ParallelTaskDataParameter.Builder builder = new ParallelTaskDataParameter.Builder(getDataParameter());
         builder.setHasDualWaterMark(false);
-        builder.setTimeWaterMarkString(null);
+        builder.setTimeWaterMarkString((String) null);
         builder.setSaveGroupshotPrimitive(false);
         parallelTaskData.fillParameter(builder.build());
         return parallelTaskData;
@@ -134,12 +118,7 @@ public class ParallelTaskData {
             throw new RuntimeException("algo fillJpegData: jpeg already set");
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("fillJpegData: jpegData=");
-        sb.append(bArr);
-        sb.append("; imageType=");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "fillJpegData: jpegData=" + bArr + "; imageType=" + i);
     }
 
     public void fillParameter(ParallelTaskDataParameter parallelTaskDataParameter) {
@@ -152,12 +131,7 @@ public class ParallelTaskData {
             this.mVideoRawData = bArr;
             this.mCoverFrameTimestamp = j;
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("fillVideoData: video = ");
-            sb.append(bArr);
-            sb.append(", timestamp = ");
-            sb.append(j);
-            Log.d(str, sb.toString());
+            Log.d(str, "fillVideoData: video = " + bArr + ", timestamp = " + j);
         } else {
             throw new IllegalStateException("algo fillVideoData: microvideo already set");
         }
@@ -243,6 +217,7 @@ public class ParallelTaskData {
         return this.isAdaptiveSnapshotSize;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Code restructure failed: missing block: B:8:0x000f, code lost:
         if (r4.mRawImageData != null) goto L_0x0011;
      */
@@ -253,15 +228,15 @@ public class ParallelTaskData {
         boolean z;
         z = false;
         switch (this.mParallelType) {
-            case ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
+            case Constants.ShotType.INTENT_PARALLEL_DUAL_SHOT:
             case -3:
             case 2:
             case 6:
             case 7:
                 if (!(this.mJpegImageData == null || this.mPortraitRawData == null || this.mPortraitDepthData == null)) {
                 }
-            case ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
-            case ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
+            case Constants.ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT:
+            case Constants.ShotType.INTENT_PARALLEL_SINGLE_SHOT:
             case -2:
             case -1:
             case 0:
@@ -278,25 +253,7 @@ public class ParallelTaskData {
                 }
                 break;
         }
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isJpegDataReady: object = ");
-        sb.append(this);
-        sb.append("; mParallelType = ");
-        sb.append(this.mParallelType);
-        sb.append("; mJpegImageData = ");
-        sb.append(this.mJpegImageData);
-        sb.append("; mRawImageData = ");
-        sb.append(this.mRawImageData);
-        sb.append("; mPortraitRawData = ");
-        sb.append(this.mPortraitRawData);
-        sb.append("; mPortraitDepthData = ");
-        sb.append(this.mPortraitDepthData);
-        sb.append("; mVideoRawData = ");
-        sb.append(this.mVideoRawData);
-        sb.append("; result = ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "isJpegDataReady: object = " + this + "; mParallelType = " + this.mParallelType + "; mJpegImageData = " + this.mJpegImageData + "; mRawImageData = " + this.mRawImageData + "; mPortraitRawData = " + this.mPortraitRawData + "; mPortraitDepthData = " + this.mPortraitDepthData + "; mVideoRawData = " + this.mVideoRawData + "; result = " + z);
         return z;
     }
 

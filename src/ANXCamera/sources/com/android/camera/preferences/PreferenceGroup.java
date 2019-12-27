@@ -17,16 +17,16 @@ public class PreferenceGroup extends CameraPreference {
     }
 
     public ListPreference findPreference(String str) {
-        Iterator it = this.list.iterator();
+        Iterator<CameraPreference> it = this.list.iterator();
         while (it.hasNext()) {
-            CameraPreference cameraPreference = (CameraPreference) it.next();
-            if (cameraPreference instanceof ListPreference) {
-                ListPreference listPreference = (ListPreference) cameraPreference;
+            CameraPreference next = it.next();
+            if (next instanceof ListPreference) {
+                ListPreference listPreference = (ListPreference) next;
                 if (listPreference.getKey().equals(str)) {
                     return listPreference;
                 }
-            } else if (cameraPreference instanceof PreferenceGroup) {
-                ListPreference findPreference = ((PreferenceGroup) cameraPreference).findPreference(str);
+            } else if (next instanceof PreferenceGroup) {
+                ListPreference findPreference = ((PreferenceGroup) next).findPreference(str);
                 if (findPreference != null) {
                     return findPreference;
                 }
@@ -38,7 +38,7 @@ public class PreferenceGroup extends CameraPreference {
     }
 
     public CameraPreference get(int i) {
-        return (CameraPreference) this.list.get(i);
+        return this.list.get(i);
     }
 
     public void removePreference(int i) {

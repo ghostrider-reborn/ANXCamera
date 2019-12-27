@@ -1,6 +1,6 @@
 package android.support.v4.view.accessibility;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -30,14 +30,14 @@ public class AccessibilityNodeProviderCompat {
         }
 
         public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String str, int i) {
-            List findAccessibilityNodeInfosByText = this.mCompat.findAccessibilityNodeInfosByText(str, i);
+            List<AccessibilityNodeInfoCompat> findAccessibilityNodeInfosByText = this.mCompat.findAccessibilityNodeInfosByText(str, i);
             if (findAccessibilityNodeInfosByText == null) {
                 return null;
             }
             ArrayList arrayList = new ArrayList();
             int size = findAccessibilityNodeInfosByText.size();
             for (int i2 = 0; i2 < size; i2++) {
-                arrayList.add(((AccessibilityNodeInfoCompat) findAccessibilityNodeInfosByText.get(i2)).unwrap());
+                arrayList.add(findAccessibilityNodeInfosByText.get(i2).unwrap());
             }
             return arrayList;
         }
@@ -63,7 +63,7 @@ public class AccessibilityNodeProviderCompat {
     }
 
     public AccessibilityNodeProviderCompat() {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 19) {
             this.mProvider = new AccessibilityNodeProviderApi19(this);
         } else if (i >= 16) {

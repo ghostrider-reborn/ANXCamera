@@ -1,15 +1,16 @@
 package com.xiaomi.camera.liveshot.encoder;
 
 import android.media.MediaCodec;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.opengl.EGLContext;
 import android.os.Handler;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.view.Surface;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.log.Log;
 import com.xiaomi.camera.liveshot.LivePhotoResult;
-import com.xiaomi.camera.liveshot.encoder.CircularMediaEncoder.Snapshot;
+import com.xiaomi.camera.liveshot.encoder.CircularMediaEncoder;
 import com.xiaomi.camera.liveshot.gles.RenderThread;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
     private static final boolean DEBUG_FPS = true;
     private static final String TAG = "CircularVideoEncoder";
     protected long mFirstPresentationTimeUs;
-    private int mFpsOutputInterval = System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT;
+    private int mFpsOutputInterval = MiuiSettings.System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT;
     private long mFrameStartTimestampNs = 0;
     private int mFramesRendered = 0;
     private Surface mInputSurface;
@@ -38,12 +39,7 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
         long millis = TimeUnit.MICROSECONDS.toMillis(this.mBufferingDurationUs);
         float f3 = f2 * 1000.0f * 2.0f;
         if (((float) millis) < f3) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Requested time span is too short: ");
-            sb.append(millis);
-            sb.append(" vs. ");
-            sb.append(f3);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Requested time span is too short: " + millis + " vs. " + f3);
         } else if (eGLContext != null) {
             this.mSharedEGLContext = eGLContext;
             int integer = this.mDesiredMediaFormat.getInteger("width");
@@ -54,10 +50,7 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
                 this.mMediaCodec = MediaCodec.createEncoderByType(this.mDesiredMediaFormat.getString("mime"));
                 this.mIsInitialized = true;
             } catch (IOException e2) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Failed to configure MediaCodec: ");
-                sb2.append(e2);
-                throw new IllegalStateException(sb2.toString());
+                throw new IllegalStateException("Failed to configure MediaCodec: " + e2);
             }
         } else {
             throw new IllegalArgumentException("The shared EGLContext must not be null");
@@ -79,7 +72,7 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
             Log.d(TAG, "start(): encoder is already running");
         } else {
             this.mCyclicBuffer.clear();
-            this.mMediaCodec.configure(this.mDesiredMediaFormat, null, null, 1);
+            this.mMediaCodec.configure(this.mDesiredMediaFormat, (Surface) null, (MediaCrypto) null, 1);
             this.mInputSurface = this.mMediaCodec.createInputSurface();
             RenderThread renderThread = new RenderThread(TAG, this.mPreviewWidth, this.mPreviewHeight, this.mSharedEGLContext, this.mInputSurface, true);
             this.mRenderThread = renderThread;
@@ -110,26 +103,19 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
                 }
                 super.doStop();
                 Log.d(TAG, "clear pending snapshot requests: E");
-                ArrayList<Snapshot> arrayList = new ArrayList<>();
+                ArrayList<CircularMediaEncoder.Snapshot> arrayList = new ArrayList<>();
                 synchronized (this.mSnapshots) {
                     arrayList.addAll(this.mSnapshots);
                     this.mSnapshots.clear();
                 }
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("cleared ");
-                sb.append(arrayList.size());
-                sb.append(" snapshot requests.");
-                Log.d(str, sb.toString());
-                for (Snapshot putEos : arrayList) {
+                Log.d(str, "cleared " + arrayList.size() + " snapshot requests.");
+                for (CircularMediaEncoder.Snapshot putEos : arrayList) {
                     try {
                         putEos.putEos();
                     } catch (InterruptedException e2) {
                         String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Failed to putEos: ");
-                        sb2.append(e2);
-                        Log.d(str2, sb2.toString());
+                        Log.d(str2, "Failed to putEos: " + e2);
                     }
                 }
                 Log.d(TAG, "clear pending snapshot requests: X");
@@ -178,11 +164,7 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
                     this.mFramesRendered++;
                     if (j > ((long) this.mFpsOutputInterval)) {
                         double d2 = ((double) (this.mFramesRendered * 1000)) / ((double) j);
-                        String str = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("onSurfaceTextureUpdated(): ");
-                        sb.append(d2);
-                        Log.d(str, sb.toString());
+                        Log.d(TAG, "onSurfaceTextureUpdated(): " + d2);
                         this.mFrameStartTimestampNs = millis;
                         this.mFramesRendered = 0;
                     }
@@ -203,10 +185,7 @@ public class CircularVideoEncoder extends CircularMediaEncoder {
 
     public void setFpsReduction(float f2) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setFpsReduction: ");
-        sb.append(f2);
-        Log.d(str, sb.toString());
+        Log.d(str, "setFpsReduction: " + f2);
         if (f2 <= 0.0f) {
             this.mMinFrameRenderPeriodNs = Long.MAX_VALUE;
         } else {

@@ -3,8 +3,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -15,10 +14,10 @@ import java.util.Set;
 
 /* compiled from: LruBitmapPool */
 public class j implements d {
-    private static final Config DEFAULT_CONFIG = Config.ARGB_8888;
+    private static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.ARGB_8888;
     private static final String TAG = "LruBitmapPool";
     private long ig;
-    private final Set<Config> lg;
+    private final Set<Bitmap.Config> lg;
     private long maxSize;
     private final long mg;
     private final a ng;
@@ -59,15 +58,7 @@ public class j implements d {
                 this.kg.add(bitmap);
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Can't add already added bitmap: ");
-            sb.append(bitmap);
-            sb.append(" [");
-            sb.append(bitmap.getWidth());
-            sb.append("x");
-            sb.append(bitmap.getHeight());
-            sb.append("]");
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Can't add already added bitmap: " + bitmap + " [" + bitmap.getWidth() + "x" + bitmap.getHeight() + "]");
         }
 
         public void f(Bitmap bitmap) {
@@ -83,7 +74,7 @@ public class j implements d {
         this(j, tk(), sk());
     }
 
-    j(long j, k kVar, Set<Config> set) {
+    j(long j, k kVar, Set<Bitmap.Config> set) {
         this.mg = j;
         this.maxSize = j;
         this.strategy = kVar;
@@ -91,23 +82,19 @@ public class j implements d {
         this.ng = new b();
     }
 
-    public j(long j, Set<Config> set) {
+    public j(long j, Set<Bitmap.Config> set) {
         this(j, tk(), set);
     }
 
     @TargetApi(26)
-    private static void b(Config config) {
-        if (VERSION.SDK_INT >= 26 && config == Config.HARDWARE) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot create a mutable Bitmap with config: ");
-            sb.append(config);
-            sb.append(". Consider setting Downsampler#ALLOW_HARDWARE_CONFIG to false in your RequestOptions and/or in GlideBuilder.setDefaultRequestOptions");
-            throw new IllegalArgumentException(sb.toString());
+    private static void b(Bitmap.Config config) {
+        if (Build.VERSION.SDK_INT >= 26 && config == Bitmap.Config.HARDWARE) {
+            throw new IllegalArgumentException("Cannot create a mutable Bitmap with config: " + config + ". Consider setting Downsampler#ALLOW_HARDWARE_CONFIG to false in your RequestOptions and/or in GlideBuilder.setDefaultRequestOptions");
         }
     }
 
     @NonNull
-    private static Bitmap createBitmap(int i, int i2, @Nullable Config config) {
+    private static Bitmap createBitmap(int i, int i2, @Nullable Bitmap.Config config) {
         if (config == null) {
             config = DEFAULT_CONFIG;
         }
@@ -121,17 +108,13 @@ public class j implements d {
     }
 
     @Nullable
-    private synchronized Bitmap h(int i, int i2, @Nullable Config config) {
+    private synchronized Bitmap h(int i, int i2, @Nullable Bitmap.Config config) {
         Bitmap d2;
         b(config);
         d2 = this.strategy.d(i, i2, config != null ? config : DEFAULT_CONFIG);
         if (d2 == null) {
             if (Log.isLoggable(TAG, 3)) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Missing bitmap=");
-                sb.append(this.strategy.b(i, i2, config));
-                Log.d(str, sb.toString());
+                Log.d(TAG, "Missing bitmap=" + this.strategy.b(i, i2, config));
             }
             this.pg++;
         } else {
@@ -141,11 +124,7 @@ public class j implements d {
             m(d2);
         }
         if (Log.isLoggable(TAG, 2)) {
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Get bitmap=");
-            sb2.append(this.strategy.b(i, i2, config));
-            Log.v(str2, sb2.toString());
+            Log.v(TAG, "Get bitmap=" + this.strategy.b(i, i2, config));
         }
         dump();
         return d2;
@@ -166,11 +145,7 @@ public class j implements d {
             this.ig -= (long) this.strategy.c(removeLast);
             this.rg++;
             if (Log.isLoggable(TAG, 3)) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Evicting bitmap=");
-                sb.append(this.strategy.e(removeLast));
-                Log.d(str, sb.toString());
+                Log.d(TAG, "Evicting bitmap=" + this.strategy.e(removeLast));
             }
             dump();
             removeLast.recycle();
@@ -179,7 +154,7 @@ public class j implements d {
 
     @TargetApi(19)
     private static void l(Bitmap bitmap) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             bitmap.setPremultiplied(true);
         }
     }
@@ -194,44 +169,28 @@ public class j implements d {
     }
 
     private void rk() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Hits=");
-        sb.append(this.og);
-        sb.append(", misses=");
-        sb.append(this.pg);
-        sb.append(", puts=");
-        sb.append(this.qg);
-        sb.append(", evictions=");
-        sb.append(this.rg);
-        sb.append(", currentSize=");
-        sb.append(this.ig);
-        sb.append(", maxSize=");
-        sb.append(this.maxSize);
-        sb.append("\nStrategy=");
-        sb.append(this.strategy);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "Hits=" + this.og + ", misses=" + this.pg + ", puts=" + this.qg + ", evictions=" + this.rg + ", currentSize=" + this.ig + ", maxSize=" + this.maxSize + "\nStrategy=" + this.strategy);
     }
 
     @TargetApi(26)
-    private static Set<Config> sk() {
-        HashSet hashSet = new HashSet(Arrays.asList(Config.values()));
-        if (VERSION.SDK_INT >= 19) {
-            hashSet.add(null);
+    private static Set<Bitmap.Config> sk() {
+        HashSet hashSet = new HashSet(Arrays.asList(Bitmap.Config.values()));
+        if (Build.VERSION.SDK_INT >= 19) {
+            hashSet.add((Object) null);
         }
-        if (VERSION.SDK_INT >= 26) {
-            hashSet.remove(Config.HARDWARE);
+        if (Build.VERSION.SDK_INT >= 26) {
+            hashSet.remove(Bitmap.Config.HARDWARE);
         }
         return Collections.unmodifiableSet(hashSet);
     }
 
     private static k tk() {
-        return VERSION.SDK_INT >= 19 ? new SizeConfigStrategy() : new AttributeStrategy();
+        return Build.VERSION.SDK_INT >= 19 ? new SizeConfigStrategy() : new AttributeStrategy();
     }
 
     public void G() {
-        String str = TAG;
-        if (Log.isLoggable(str, 3)) {
-            Log.d(str, "clearMemory");
+        if (Log.isLoggable(TAG, 3)) {
+            Log.d(TAG, "clearMemory");
         }
         h(0);
     }
@@ -253,11 +212,7 @@ public class j implements d {
                             this.qg++;
                             this.ig += (long) c2;
                             if (Log.isLoggable(TAG, 2)) {
-                                String str = TAG;
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("Put bitmap in pool=");
-                                sb.append(this.strategy.e(bitmap));
-                                Log.v(str, sb.toString());
+                                Log.v(TAG, "Put bitmap in pool=" + this.strategy.e(bitmap));
                             }
                             dump();
                             pk();
@@ -265,21 +220,14 @@ public class j implements d {
                         }
                     }
                     if (Log.isLoggable(TAG, 2)) {
-                        String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Reject bitmap from pool, bitmap: ");
-                        sb2.append(this.strategy.e(bitmap));
-                        sb2.append(", is mutable: ");
-                        sb2.append(bitmap.isMutable());
-                        sb2.append(", is allowed config: ");
-                        sb2.append(this.lg.contains(bitmap.getConfig()));
-                        Log.v(str2, sb2.toString());
+                        Log.v(TAG, "Reject bitmap from pool, bitmap: " + this.strategy.e(bitmap) + ", is mutable: " + bitmap.isMutable() + ", is allowed config: " + this.lg.contains(bitmap.getConfig()));
                     }
                     bitmap.recycle();
                     return;
                 }
                 throw new IllegalStateException("Cannot pool recycled bitmap");
-            } finally {
+            } catch (Throwable th) {
+                throw th;
             }
         } else {
             throw new NullPointerException("Bitmap must not be null");
@@ -287,13 +235,13 @@ public class j implements d {
     }
 
     @NonNull
-    public Bitmap c(int i, int i2, Config config) {
+    public Bitmap c(int i, int i2, Bitmap.Config config) {
         Bitmap h = h(i, i2, config);
         return h == null ? createBitmap(i, i2, config) : h;
     }
 
     @NonNull
-    public Bitmap d(int i, int i2, Config config) {
+    public Bitmap d(int i, int i2, Bitmap.Config config) {
         Bitmap h = h(i, i2, config);
         if (h == null) {
             return createBitmap(i, i2, config);
@@ -308,12 +256,8 @@ public class j implements d {
 
     @SuppressLint({"InlinedApi"})
     public void trimMemory(int i) {
-        String str = TAG;
-        if (Log.isLoggable(str, 3)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("trimMemory, level=");
-            sb.append(i);
-            Log.d(str, sb.toString());
+        if (Log.isLoggable(TAG, 3)) {
+            Log.d(TAG, "trimMemory, level=" + i);
         }
         if (i >= 40) {
             G();

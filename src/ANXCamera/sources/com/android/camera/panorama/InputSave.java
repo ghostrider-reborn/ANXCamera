@@ -13,9 +13,9 @@ import java.util.concurrent.Executors;
 
 public class InputSave {
     public static final String TAG = "InputSave";
-    private String FOLDER_PATH;
+    private String FOLDER_PATH = (Environment.getExternalStorageDirectory() + "/Panorama/");
     private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private String mFileNamePrefix;
+    private String mFileNamePrefix = new SimpleDateFormat("yyyymmddhhmmss").format(new Date());
     private int mIndex;
 
     private class InputSaveRunnable implements Runnable {
@@ -25,31 +25,20 @@ public class InputSave {
         public InputSaveRunnable(CaptureImage captureImage, String str) {
             this.imageFormat = str;
             Image image = captureImage.mImage;
-            String str2 = InputSave.TAG;
             if (image == null) {
-                Log.w(str2, "save failed, image is null");
+                Log.w(InputSave.TAG, "save failed, image is null");
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(image.getWidth());
-            sb.append("X");
-            sb.append(image.getHeight());
-            sb.append(", imageFormat = ");
-            sb.append(this.imageFormat);
-            Log.d(str2, sb.toString());
+            Log.d(InputSave.TAG, image.getWidth() + "X" + image.getHeight() + ", imageFormat = " + this.imageFormat);
             if (PanoramaGP3ImageFormat.YUV420_PLANAR.equals(this.imageFormat)) {
                 this.mImageBytes = new ConvertFromYuv420Planar().image2bytes(image);
+            } else if (PanoramaGP3ImageFormat.YUV420_SEMIPLANAR.equals(this.imageFormat)) {
+                this.mImageBytes = new ConvertFromYuv420SemiPlanar().image2bytes(image);
+            } else if (PanoramaGP3ImageFormat.YVU420_SEMIPLANAR.equals(this.imageFormat)) {
+                this.mImageBytes = new ConvertFromYvu420SemiPlanar().image2bytes(image);
             } else {
-                if (PanoramaGP3ImageFormat.YUV420_SEMIPLANAR.equals(this.imageFormat)) {
-                    this.mImageBytes = new ConvertFromYuv420SemiPlanar().image2bytes(image);
-                } else {
-                    if (PanoramaGP3ImageFormat.YVU420_SEMIPLANAR.equals(this.imageFormat)) {
-                        this.mImageBytes = new ConvertFromYvu420SemiPlanar().image2bytes(image);
-                    } else {
-                        this.mImageBytes = null;
-                        Log.e(str2, "Image format error.");
-                    }
-                }
+                this.mImageBytes = null;
+                Log.e(InputSave.TAG, "Image format error.");
             }
         }
 
@@ -59,14 +48,6 @@ public class InputSave {
                 InputSave.this.saveImage(bArr, this.imageFormat);
             }
         }
-    }
-
-    public InputSave() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory());
-        sb.append("/Panorama/");
-        this.FOLDER_PATH = sb.toString();
-        this.mFileNamePrefix = new SimpleDateFormat("yyyymmddhhmmss").format(new Date());
     }
 
     /* access modifiers changed from: private */
@@ -81,28 +62,18 @@ public class InputSave {
      */
     public void saveImage(byte[] bArr, String str) {
         this.mIndex++;
-        String format = String.format(Locale.US, "%06d.yuv", new Object[]{Integer.valueOf(this.mIndex)});
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.FOLDER_PATH);
-        sb.append(this.mFileNamePrefix);
-        String generalFileName = generalFileName(sb.toString(), format);
-        String str2 = "saveImage() error.";
-        String str3 = "InputSaveState";
+        String generalFileName = generalFileName(this.FOLDER_PATH + this.mFileNamePrefix, String.format(Locale.US, "%06d.yuv", new Object[]{Integer.valueOf(this.mIndex)}));
         if (generalFileName == null) {
-            Log.e(str3, str2);
+            Log.e("InputSaveState", "saveImage() error.");
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(new File(generalFileName));
             fileOutputStream.write(bArr);
             fileOutputStream.flush();
-            String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("write file success,  ");
-            sb2.append(generalFileName);
-            Log.d(str4, sb2.toString());
+            Log.d(TAG, "write file success,  " + generalFileName);
             fileOutputStream.close();
         } catch (Exception e2) {
-            Log.e(str3, str2, e2);
+            Log.e("InputSaveState", "saveImage() error.", e2);
         } catch (Throwable th) {
             r4.addSuppressed(th);
         }
@@ -119,22 +90,10 @@ public class InputSave {
             i++;
             String[] split = str2.split("\\.");
             String num = Integer.toString(i);
-            StringBuilder sb = new StringBuilder();
-            sb.append(split[0]);
-            sb.append("-");
-            sb.append(num);
-            sb.append(".");
-            sb.append(split[1]);
-            String sb2 = sb.toString();
-            File file3 = new File(str, sb2);
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("NewFilename:");
-            sb3.append(sb2);
-            String sb4 = sb3.toString();
-            String str3 = TAG;
-            Log.d(str3, sb4);
+            File file3 = new File(str, split[0] + "-" + num + "." + split[1]);
+            Log.d(TAG, "NewFilename:" + r7);
             if (i >= 1000) {
-                Log.e(str3, "NewFilename 1000 count over!!");
+                Log.e(TAG, "NewFilename 1000 count over!!");
                 return null;
             }
             file2 = file3;

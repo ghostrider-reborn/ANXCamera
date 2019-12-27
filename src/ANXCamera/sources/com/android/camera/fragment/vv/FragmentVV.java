@@ -2,8 +2,7 @@ package com.android.camera.fragment.vv;
 
 import android.support.v4.app.Fragment;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import com.android.camera.R;
 import com.android.camera.animation.FragmentAnimationFactory;
@@ -13,12 +12,9 @@ import com.android.camera.fragment.BaseFragmentDelegate;
 import com.android.camera.fragment.FragmentUtils;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.LiveVVChooser;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 
-public class FragmentVV extends BaseFragment implements OnClickListener, LiveVVChooser, HandleBackTrace, ResourceSelectedListener {
+public class FragmentVV extends BaseFragment implements View.OnClickListener, ModeProtocol.LiveVVChooser, ModeProtocol.HandleBackTrace, ResourceSelectedListener {
     private VVItem mSelectedItem;
     private View mShotView;
 
@@ -59,7 +55,7 @@ public class FragmentVV extends BaseFragment implements OnClickListener, LiveVVC
 
     /* access modifiers changed from: protected */
     public void initView(View view) {
-        ((MarginLayoutParams) view.getLayoutParams()).height = -2;
+        ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).height = -2;
         adjustViewBackground(view, this.mCurrentMode);
         this.mShotView = view.findViewById(R.id.vv_start);
         this.mShotView.setVisibility(4);
@@ -86,11 +82,7 @@ public class FragmentVV extends BaseFragment implements OnClickListener, LiveVVC
     }
 
     public void onResourceSelected(VVItem vVItem) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(vVItem.index);
-        sb.append(" | ");
-        sb.append(vVItem.name);
-        Log.d("vvSelected:", sb.toString());
+        Log.d("vvSelected:", vVItem.index + " | " + vVItem.name);
         this.mSelectedItem = vVItem;
     }
 
@@ -105,7 +97,7 @@ public class FragmentVV extends BaseFragment implements OnClickListener, LiveVVC
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(229, this);
         registerBackStack(modeCoordinator, this);
@@ -118,12 +110,12 @@ public class FragmentVV extends BaseFragment implements OnClickListener, LiveVVC
 
     public void startShot() {
         if (this.mSelectedItem != null) {
-            ((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).configLiveVV(this.mSelectedItem, true, false);
+            ((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).configLiveVV(this.mSelectedItem, true, false);
         }
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(229, this);
         unRegisterBackStack(modeCoordinator, this);

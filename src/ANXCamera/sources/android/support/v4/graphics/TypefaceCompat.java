@@ -3,23 +3,19 @@ package android.support.v4.graphics;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.content.res.FontResourcesParserCompat.FamilyResourceEntry;
-import android.support.v4.content.res.FontResourcesParserCompat.FontFamilyFilesResourceEntry;
-import android.support.v4.content.res.FontResourcesParserCompat.ProviderResourceEntry;
-import android.support.v4.content.res.ResourcesCompat.FontCallback;
+import android.support.v4.content.res.FontResourcesParserCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.os.BuildCompat;
 import android.support.v4.provider.FontsContractCompat;
-import android.support.v4.provider.FontsContractCompat.FontInfo;
 import android.support.v4.util.LruCache;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class TypefaceCompat {
     private static final String TAG = "TypefaceCompat";
     private static final LruCache<String, Typeface> sTypefaceCache = new LruCache<>(16);
@@ -29,12 +25,12 @@ public class TypefaceCompat {
         if (BuildCompat.isAtLeastP()) {
             sTypefaceCompatImpl = new TypefaceCompatApi28Impl();
         } else {
-            int i = VERSION.SDK_INT;
+            int i = Build.VERSION.SDK_INT;
             if (i >= 26) {
                 sTypefaceCompatImpl = new TypefaceCompatApi26Impl();
             } else if (i >= 24 && TypefaceCompatApi24Impl.isUsable()) {
                 sTypefaceCompatImpl = new TypefaceCompatApi24Impl();
-            } else if (VERSION.SDK_INT >= 21) {
+            } else if (Build.VERSION.SDK_INT >= 21) {
                 sTypefaceCompatImpl = new TypefaceCompatApi21Impl();
             } else {
                 sTypefaceCompatImpl = new TypefaceCompatBaseImpl();
@@ -46,22 +42,22 @@ public class TypefaceCompat {
     }
 
     @Nullable
-    public static Typeface createFromFontInfo(@NonNull Context context, @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fontInfoArr, int i) {
+    public static Typeface createFromFontInfo(@NonNull Context context, @Nullable CancellationSignal cancellationSignal, @NonNull FontsContractCompat.FontInfo[] fontInfoArr, int i) {
         return sTypefaceCompatImpl.createFromFontInfo(context, cancellationSignal, fontInfoArr, i);
     }
 
     @Nullable
-    public static Typeface createFromResourcesFamilyXml(@NonNull Context context, @NonNull FamilyResourceEntry familyResourceEntry, @NonNull Resources resources, int i, int i2, @Nullable FontCallback fontCallback, @Nullable Handler handler, boolean z) {
+    public static Typeface createFromResourcesFamilyXml(@NonNull Context context, @NonNull FontResourcesParserCompat.FamilyResourceEntry familyResourceEntry, @NonNull Resources resources, int i, int i2, @Nullable ResourcesCompat.FontCallback fontCallback, @Nullable Handler handler, boolean z) {
         Typeface typeface;
-        if (familyResourceEntry instanceof ProviderResourceEntry) {
-            ProviderResourceEntry providerResourceEntry = (ProviderResourceEntry) familyResourceEntry;
+        if (familyResourceEntry instanceof FontResourcesParserCompat.ProviderResourceEntry) {
+            FontResourcesParserCompat.ProviderResourceEntry providerResourceEntry = (FontResourcesParserCompat.ProviderResourceEntry) familyResourceEntry;
             boolean z2 = false;
             if (!z ? fontCallback == null : providerResourceEntry.getFetchStrategy() == 0) {
                 z2 = true;
             }
             typeface = FontsContractCompat.getFontSync(context, providerResourceEntry.getRequest(), fontCallback, handler, z2, z ? providerResourceEntry.getTimeout() : -1, i2);
         } else {
-            typeface = sTypefaceCompatImpl.createFromFontFamilyFilesResourceEntry(context, (FontFamilyFilesResourceEntry) familyResourceEntry, resources, i2);
+            typeface = sTypefaceCompatImpl.createFromFontFamilyFilesResourceEntry(context, (FontResourcesParserCompat.FontFamilyFilesResourceEntry) familyResourceEntry, resources, i2);
             if (fontCallback != null) {
                 if (typeface != null) {
                     fontCallback.callbackSuccessAsync(typeface, handler);
@@ -86,18 +82,11 @@ public class TypefaceCompat {
     }
 
     private static String createResourceUid(Resources resources, int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(resources.getResourcePackageName(i));
-        String str = "-";
-        sb.append(str);
-        sb.append(i);
-        sb.append(str);
-        sb.append(i2);
-        return sb.toString();
+        return resources.getResourcePackageName(i) + "-" + i + "-" + i2;
     }
 
     @Nullable
     public static Typeface findFromCache(@NonNull Resources resources, int i, int i2) {
-        return (Typeface) sTypefaceCache.get(createResourceUid(resources, i, i2));
+        return sTypefaceCache.get(createResourceUid(resources, i, i2));
     }
 }

@@ -2,17 +2,13 @@ package android.support.v7.widget;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.LayoutParams;
-import android.support.v7.widget.RecyclerView.SmoothScroller;
-import android.support.v7.widget.RecyclerView.SmoothScroller.Action;
-import android.support.v7.widget.RecyclerView.State;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
-public class LinearSmoothScroller extends SmoothScroller {
+public class LinearSmoothScroller extends RecyclerView.SmoothScroller {
     private static final boolean DEBUG = false;
     private static final float MILLISECONDS_PER_INCH = 25.0f;
     public static final int SNAP_TO_ANY = 0;
@@ -62,20 +58,20 @@ public class LinearSmoothScroller extends SmoothScroller {
     }
 
     public int calculateDxToMakeVisible(View view, int i) {
-        LayoutManager layoutManager = getLayoutManager();
+        RecyclerView.LayoutManager layoutManager = getLayoutManager();
         if (layoutManager == null || !layoutManager.canScrollHorizontally()) {
             return 0;
         }
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) view.getLayoutParams();
         return calculateDtToFit(layoutManager.getDecoratedLeft(view) - layoutParams.leftMargin, layoutManager.getDecoratedRight(view) + layoutParams.rightMargin, layoutManager.getPaddingLeft(), layoutManager.getWidth() - layoutManager.getPaddingRight(), i);
     }
 
     public int calculateDyToMakeVisible(View view, int i) {
-        LayoutManager layoutManager = getLayoutManager();
+        RecyclerView.LayoutManager layoutManager = getLayoutManager();
         if (layoutManager == null || !layoutManager.canScrollVertically()) {
             return 0;
         }
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) view.getLayoutParams();
         return calculateDtToFit(layoutManager.getDecoratedTop(view) - layoutParams.topMargin, layoutManager.getDecoratedBottom(view) + layoutParams.bottomMargin, layoutManager.getPaddingTop(), layoutManager.getHeight() - layoutManager.getPaddingBottom(), i);
     }
 
@@ -119,7 +115,7 @@ public class LinearSmoothScroller extends SmoothScroller {
     }
 
     /* access modifiers changed from: protected */
-    public void onSeekTargetStep(int i, int i2, State state, Action action) {
+    public void onSeekTargetStep(int i, int i2, RecyclerView.State state, RecyclerView.SmoothScroller.Action action) {
         if (getChildCount() == 0) {
             stop();
             return;
@@ -143,7 +139,7 @@ public class LinearSmoothScroller extends SmoothScroller {
     }
 
     /* access modifiers changed from: protected */
-    public void onTargetFound(View view, State state, Action action) {
+    public void onTargetFound(View view, RecyclerView.State state, RecyclerView.SmoothScroller.Action action) {
         int calculateDxToMakeVisible = calculateDxToMakeVisible(view, getHorizontalSnapPreference());
         int calculateDyToMakeVisible = calculateDyToMakeVisible(view, getVerticalSnapPreference());
         int calculateTimeForDeceleration = calculateTimeForDeceleration((int) Math.sqrt((double) ((calculateDxToMakeVisible * calculateDxToMakeVisible) + (calculateDyToMakeVisible * calculateDyToMakeVisible))));
@@ -153,7 +149,7 @@ public class LinearSmoothScroller extends SmoothScroller {
     }
 
     /* access modifiers changed from: protected */
-    public void updateActionForInterimTarget(Action action) {
+    public void updateActionForInterimTarget(RecyclerView.SmoothScroller.Action action) {
         PointF computeScrollVectorForPosition = computeScrollVectorForPosition(getTargetPosition());
         if (computeScrollVectorForPosition == null || (computeScrollVectorForPosition.x == 0.0f && computeScrollVectorForPosition.y == 0.0f)) {
             action.jumpTo(getTargetPosition());

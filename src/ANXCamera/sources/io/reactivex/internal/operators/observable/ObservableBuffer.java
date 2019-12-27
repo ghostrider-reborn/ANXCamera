@@ -32,7 +32,7 @@ public final class ObservableBuffer<T, U extends Collection<? super T>> extends 
             this.bufferSupplier = callable;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean createBuffer() {
             try {
                 U call = this.bufferSupplier.call();
@@ -44,11 +44,11 @@ public final class ObservableBuffer<T, U extends Collection<? super T>> extends 
                 this.buffer = null;
                 Disposable disposable = this.s;
                 if (disposable == null) {
-                    EmptyDisposable.error(th, this.actual);
-                } else {
-                    disposable.dispose();
-                    this.actual.onError(th);
+                    EmptyDisposable.error(th, (Observer<?>) this.actual);
+                    return false;
                 }
+                disposable.dispose();
+                this.actual.onError(th);
                 return false;
             }
         }
@@ -139,7 +139,7 @@ public final class ObservableBuffer<T, U extends Collection<? super T>> extends 
             this.index = 1 + j;
             if (j % ((long) this.skip) == 0) {
                 try {
-                    Object call = this.bufferSupplier.call();
+                    U call = this.bufferSupplier.call();
                     ObjectHelper.requireNonNull(call, "The bufferSupplier returned a null collection. Null values are generally not allowed in 2.x operators and sources.");
                     this.buffers.offer((Collection) call);
                 } catch (Throwable th) {
@@ -149,7 +149,7 @@ public final class ObservableBuffer<T, U extends Collection<? super T>> extends 
                     return;
                 }
             }
-            Iterator it = this.buffers.iterator();
+            Iterator<U> it = this.buffers.iterator();
             while (it.hasNext()) {
                 Collection collection = (Collection) it.next();
                 collection.add(t);

@@ -2,26 +2,21 @@ package com.android.camera.fragment.beauty;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
 import java.util.List;
 
-public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
+public class EyeLightSingleCheckAdapter extends RecyclerView.Adapter<SingleCheckViewHolder> {
     /* access modifiers changed from: private */
     public int mBackgroundColorNormal;
     /* access modifiers changed from: private */
@@ -37,7 +32,7 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
     /* access modifiers changed from: private */
     public int mSelectedItem = 0;
     private List<EyeLightItem> mSingleCheckList;
-    private OnItemClickListener onItemClickListener;
+    private AdapterView.OnItemClickListener onItemClickListener;
 
     public static class EyeLightItem {
         private int mImageResource;
@@ -63,7 +58,7 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         }
     }
 
-    class SingleCheckViewHolder extends ViewHolder implements OnClickListener {
+    class SingleCheckViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         /* access modifiers changed from: private */
         public View itemView;
         private EyeLightSingleCheckAdapter mAdapter;
@@ -74,7 +69,7 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             this.mAdapter = eyeLightSingleCheckAdapter;
             this.itemView = view;
             this.mBase = (ImageView) view.findViewById(R.id.eye_light_item_icon);
-            MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mBase.getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.mBase.getLayoutParams();
             marginLayoutParams.setMarginStart(EyeLightSingleCheckAdapter.this.mItemHorizontalMargin);
             marginLayoutParams.setMarginEnd(EyeLightSingleCheckAdapter.this.mItemHorizontalMargin);
             view.setOnClickListener(this);
@@ -83,7 +78,7 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         private void colorAnimate(final ImageView imageView, int i, int i2) {
             ValueAnimator ofObject = ValueAnimator.ofObject(new ArgbEvaluator(), new Object[]{Integer.valueOf(i), Integer.valueOf(i2)});
             ofObject.setDuration(200);
-            ofObject.addUpdateListener(new AnimatorUpdateListener() {
+            ofObject.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     imageView.setBackgroundTintList(ColorStateList.valueOf(((Integer) valueAnimator.getAnimatedValue()).intValue()));
                 }
@@ -95,8 +90,8 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             int adapterPosition = getAdapterPosition();
             if (adapterPosition != EyeLightSingleCheckAdapter.this.mSelectedItem) {
                 EyeLightSingleCheckAdapter eyeLightSingleCheckAdapter = EyeLightSingleCheckAdapter.this;
-                eyeLightSingleCheckAdapter.mPreSelectedItem = eyeLightSingleCheckAdapter.mSelectedItem;
-                EyeLightSingleCheckAdapter.this.mSelectedItem = adapterPosition;
+                int unused = eyeLightSingleCheckAdapter.mPreSelectedItem = eyeLightSingleCheckAdapter.mSelectedItem;
+                int unused2 = EyeLightSingleCheckAdapter.this.mSelectedItem = adapterPosition;
                 SingleCheckViewHolder singleCheckViewHolder = (SingleCheckViewHolder) EyeLightSingleCheckAdapter.this.mRecyclerView.findViewHolderForAdapterPosition(EyeLightSingleCheckAdapter.this.mPreSelectedItem);
                 SingleCheckViewHolder singleCheckViewHolder2 = (SingleCheckViewHolder) EyeLightSingleCheckAdapter.this.mRecyclerView.findViewHolderForAdapterPosition(EyeLightSingleCheckAdapter.this.mSelectedItem);
                 EyeLightSingleCheckAdapter.this.mContext.getResources();
@@ -118,15 +113,9 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             if (Util.isAccessible()) {
                 View view = this.itemView;
                 if (i == EyeLightSingleCheckAdapter.this.mSelectedItem) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(resources.getString(eyeLightItem.getTextResource()));
-                    sb.append(resources.getString(R.string.accessibility_open));
-                    str = sb.toString();
+                    str = resources.getString(eyeLightItem.getTextResource()) + resources.getString(R.string.accessibility_open);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(resources.getString(eyeLightItem.getTextResource()));
-                    sb2.append(resources.getString(R.string.accessibility_closed));
-                    str = sb2.toString();
+                    str = resources.getString(eyeLightItem.getTextResource()) + resources.getString(R.string.accessibility_closed);
                 }
                 view.setContentDescription(str);
             }
@@ -159,7 +148,7 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
 
     public void onBindViewHolder(SingleCheckViewHolder singleCheckViewHolder, int i) {
         try {
-            singleCheckViewHolder.setDataToView((EyeLightItem) this.mSingleCheckList.get(i), i);
+            singleCheckViewHolder.setDataToView(this.mSingleCheckList.get(i), i);
         } catch (Exception e2) {
             e2.printStackTrace();
         }
@@ -170,13 +159,13 @@ public class EyeLightSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
     }
 
     public void onItemHolderClick(SingleCheckViewHolder singleCheckViewHolder) {
-        OnItemClickListener onItemClickListener2 = this.onItemClickListener;
+        AdapterView.OnItemClickListener onItemClickListener2 = this.onItemClickListener;
         if (onItemClickListener2 != null) {
-            onItemClickListener2.onItemClick(null, singleCheckViewHolder.itemView, singleCheckViewHolder.getAdapterPosition(), singleCheckViewHolder.getItemId());
+            onItemClickListener2.onItemClick((AdapterView) null, singleCheckViewHolder.itemView, singleCheckViewHolder.getAdapterPosition(), singleCheckViewHolder.getItemId());
         }
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener2) {
+    public void setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener2) {
         this.onItemClickListener = onItemClickListener2;
     }
 

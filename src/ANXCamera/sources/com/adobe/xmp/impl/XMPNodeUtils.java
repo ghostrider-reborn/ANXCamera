@@ -25,8 +25,8 @@ public class XMPNodeUtils implements XMPConst {
     }
 
     static void appendLangItem(XMPNode xMPNode, String str, String str2) throws XMPException {
-        XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, str2, null);
-        XMPNode xMPNode3 = new XMPNode(XMPConst.XML_LANG, str, null);
+        XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, str2, (PropertyOptions) null);
+        XMPNode xMPNode3 = new XMPNode(XMPConst.XML_LANG, str, (PropertyOptions) null);
         xMPNode2.addQualifier(xMPNode3);
         if (!XMPConst.X_DEFAULT.equals(xMPNode3.getValue())) {
             xMPNode.addChild(xMPNode2);
@@ -47,25 +47,23 @@ public class XMPNodeUtils implements XMPConst {
             int i = 0;
             while (iterateChildren.hasNext()) {
                 XMPNode xMPNode4 = (XMPNode) iterateChildren.next();
-                if (!xMPNode4.getOptions().isCompositeProperty()) {
-                    if (xMPNode4.hasQualifier()) {
-                        if (XMPConst.XML_LANG.equals(xMPNode4.getQualifier(1).getName())) {
-                            String value = xMPNode4.getQualifier(1).getValue();
-                            if (str2.equals(value)) {
-                                return new Object[]{new Integer(1), xMPNode4};
-                            } else if (str != null && value.startsWith(str)) {
-                                if (xMPNode2 == null) {
-                                    xMPNode2 = xMPNode4;
-                                }
-                                i++;
-                            } else if (XMPConst.X_DEFAULT.equals(value)) {
-                                xMPNode3 = xMPNode4;
-                            }
-                        }
-                    }
+                if (xMPNode4.getOptions().isCompositeProperty()) {
+                    throw new XMPException("Alt-text array item is not simple", 102);
+                } else if (!xMPNode4.hasQualifier() || !XMPConst.XML_LANG.equals(xMPNode4.getQualifier(1).getName())) {
                     throw new XMPException("Alt-text array item has no language qualifier", 102);
+                } else {
+                    String value = xMPNode4.getQualifier(1).getValue();
+                    if (str2.equals(value)) {
+                        return new Object[]{new Integer(1), xMPNode4};
+                    } else if (str != null && value.startsWith(str)) {
+                        if (xMPNode2 == null) {
+                            xMPNode2 = xMPNode4;
+                        }
+                        i++;
+                    } else if (XMPConst.X_DEFAULT.equals(value)) {
+                        xMPNode3 = xMPNode4;
+                    }
                 }
-                throw new XMPException("Alt-text array item is not simple", 102);
             }
             if (i == 1) {
                 return new Object[]{new Integer(2), xMPNode2};
@@ -137,7 +135,7 @@ public class XMPNodeUtils implements XMPConst {
             int parseInt = Integer.parseInt(str.substring(1, str.length() - 1));
             if (parseInt >= 1) {
                 if (z && parseInt == xMPNode.getChildrenLength() + 1) {
-                    XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, null);
+                    XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, (PropertyOptions) null);
                     xMPNode2.setImplicit(true);
                     xMPNode.addChild(xMPNode2);
                 }
@@ -207,7 +205,7 @@ public class XMPNodeUtils implements XMPConst {
         if (findQualifierByName != null || !z) {
             return findQualifierByName;
         }
-        XMPNode xMPNode2 = new XMPNode(str, null);
+        XMPNode xMPNode2 = new XMPNode(str, (PropertyOptions) null);
         xMPNode2.setImplicit(true);
         xMPNode.addQualifier(xMPNode2);
         return xMPNode2;
@@ -232,7 +230,7 @@ public class XMPNodeUtils implements XMPConst {
     }
 
     static XMPNode findSchemaNode(XMPNode xMPNode, String str, boolean z) throws XMPException {
-        return findSchemaNode(xMPNode, str, null, z);
+        return findSchemaNode(xMPNode, str, (String) null, z);
     }
 
     private static XMPNode followXPathStep(XMPNode xMPNode, XMPPathSegment xMPPathSegment, boolean z) throws XMPException {
@@ -296,10 +294,8 @@ public class XMPNodeUtils implements XMPConst {
         if (xMPNode.getOptions().isArray()) {
             for (int i = 1; i <= xMPNode.getChildrenLength(); i++) {
                 XMPNode child = xMPNode.getChild(i);
-                if (child.hasQualifier()) {
-                    if (XMPConst.XML_LANG.equals(child.getQualifier(1).getName()) && str.equals(child.getQualifier(1).getValue())) {
-                        return i;
-                    }
+                if (child.hasQualifier() && XMPConst.XML_LANG.equals(child.getQualifier(1).getName()) && str.equals(child.getQualifier(1).getValue())) {
+                    return i;
                 }
             }
             return -1;
@@ -308,14 +304,13 @@ public class XMPNodeUtils implements XMPConst {
     }
 
     private static int lookupQualSelector(XMPNode xMPNode, String str, String str2, int i) throws XMPException {
-        String str3 = XMPConst.XML_LANG;
-        if (str3.equals(str)) {
+        if (XMPConst.XML_LANG.equals(str)) {
             int lookupLanguageItem = lookupLanguageItem(xMPNode, Utils.normalizeLangValue(str2));
             if (lookupLanguageItem >= 0 || (i & 4096) <= 0) {
                 return lookupLanguageItem;
             }
-            XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, null);
-            xMPNode2.addQualifier(new XMPNode(str3, XMPConst.X_DEFAULT, null));
+            XMPNode xMPNode2 = new XMPNode(XMPConst.ARRAY_ITEM_NAME, (PropertyOptions) null);
+            xMPNode2.addQualifier(new XMPNode(XMPConst.XML_LANG, XMPConst.X_DEFAULT, (PropertyOptions) null));
             xMPNode.addChild(1, xMPNode2);
             return 1;
         }
@@ -334,45 +329,41 @@ public class XMPNodeUtils implements XMPConst {
     static void normalizeLangArray(XMPNode xMPNode) {
         if (xMPNode.getOptions().isArrayAltText()) {
             int i = 2;
-            while (true) {
-                if (i > xMPNode.getChildrenLength()) {
-                    break;
-                }
+            while (i <= xMPNode.getChildrenLength()) {
                 XMPNode child = xMPNode.getChild(i);
-                if (child.hasQualifier()) {
-                    if (XMPConst.X_DEFAULT.equals(child.getQualifier(1).getValue())) {
-                        try {
-                            xMPNode.removeChild(i);
-                            xMPNode.addChild(1, child);
-                        } catch (XMPException unused) {
-                        }
-                        if (i == 2) {
-                            xMPNode.getChild(2).setValue(child.getValue());
-                        }
+                if (!child.hasQualifier() || !XMPConst.X_DEFAULT.equals(child.getQualifier(1).getValue())) {
+                    i++;
+                } else {
+                    try {
+                        xMPNode.removeChild(i);
+                        xMPNode.addChild(1, child);
+                    } catch (XMPException unused) {
                     }
+                    if (i == 2) {
+                        xMPNode.getChild(2).setValue(child.getValue());
+                        return;
+                    }
+                    return;
                 }
-                i++;
             }
         }
     }
 
     static String serializeNodeValue(Object obj) {
-        String str = obj == null ? null : obj instanceof Boolean ? XMPUtils.convertFromBoolean(((Boolean) obj).booleanValue()) : obj instanceof Integer ? XMPUtils.convertFromInteger(((Integer) obj).intValue()) : obj instanceof Long ? XMPUtils.convertFromLong(((Long) obj).longValue()) : obj instanceof Double ? XMPUtils.convertFromDouble(((Double) obj).doubleValue()) : obj instanceof XMPDateTime ? XMPUtils.convertFromDate((XMPDateTime) obj) : obj instanceof GregorianCalendar ? XMPUtils.convertFromDate(XMPDateTimeFactory.createFromCalendar((GregorianCalendar) obj)) : obj instanceof byte[] ? XMPUtils.encodeBase64((byte[]) obj) : obj.toString();
-        if (str != null) {
-            return Utils.removeControlChars(str);
+        String convertFromBoolean = obj == null ? null : obj instanceof Boolean ? XMPUtils.convertFromBoolean(((Boolean) obj).booleanValue()) : obj instanceof Integer ? XMPUtils.convertFromInteger(((Integer) obj).intValue()) : obj instanceof Long ? XMPUtils.convertFromLong(((Long) obj).longValue()) : obj instanceof Double ? XMPUtils.convertFromDouble(((Double) obj).doubleValue()) : obj instanceof XMPDateTime ? XMPUtils.convertFromDate((XMPDateTime) obj) : obj instanceof GregorianCalendar ? XMPUtils.convertFromDate(XMPDateTimeFactory.createFromCalendar((GregorianCalendar) obj)) : obj instanceof byte[] ? XMPUtils.encodeBase64((byte[]) obj) : obj.toString();
+        if (convertFromBoolean != null) {
+            return Utils.removeControlChars(convertFromBoolean);
         }
         return null;
     }
 
     static void setNodeValue(XMPNode xMPNode, Object obj) {
         String serializeNodeValue = serializeNodeValue(obj);
-        if (xMPNode.getOptions().isQualifier()) {
-            if (XMPConst.XML_LANG.equals(xMPNode.getName())) {
-                xMPNode.setValue(Utils.normalizeLangValue(serializeNodeValue));
-                return;
-            }
+        if (!xMPNode.getOptions().isQualifier() || !XMPConst.XML_LANG.equals(xMPNode.getName())) {
+            xMPNode.setValue(serializeNodeValue);
+        } else {
+            xMPNode.setValue(Utils.normalizeLangValue(serializeNodeValue));
         }
-        xMPNode.setValue(serializeNodeValue);
     }
 
     static PropertyOptions verifySetOptions(PropertyOptions propertyOptions, Object obj) throws XMPException {

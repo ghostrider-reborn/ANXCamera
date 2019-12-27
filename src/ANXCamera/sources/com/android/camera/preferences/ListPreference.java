@@ -1,7 +1,7 @@
 package com.android.camera.preferences;
 
 import android.content.Context;
-import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -58,10 +58,7 @@ public class ListPreference extends CameraPreference {
 
     public void filterValue() {
         if (findIndexOfValue(getValue()) < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("filterValue index < 0, value=");
-            sb.append(getValue());
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "filterValue index < 0, value=" + getValue());
             print();
             setValueIndex(0);
         }
@@ -105,10 +102,7 @@ public class ListPreference extends CameraPreference {
     public String getEntry() {
         int findIndexOfValue = findIndexOfValue(getValue());
         if (findIndexOfValue < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("getEntry index=");
-            sb.append(findIndexOfValue);
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "getEntry index=" + findIndexOfValue);
             print();
             setValue(findSupportedDefaultValue());
             findIndexOfValue = findIndexOfValue(getValue());
@@ -141,50 +135,21 @@ public class ListPreference extends CameraPreference {
 
     /* access modifiers changed from: protected */
     public void persistStringValue(String str) {
-        Editor edit = getSharedPreferences().edit();
+        SharedPreferences.Editor edit = getSharedPreferences().edit();
         edit.putString(this.mKey, str);
         edit.apply();
     }
 
     public void print() {
-        String str;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Preference key=");
-        sb.append(getKey());
-        sb.append(". value=");
-        sb.append(getValue());
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        Log.v(str2, sb2);
-        int i = 0;
-        while (true) {
-            str = "]=";
-            if (i >= this.mEntryValues.length) {
-                break;
-            }
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("entryValues[");
-            sb3.append(i);
-            sb3.append(str);
-            sb3.append(this.mEntryValues[i]);
-            Log.v(str2, sb3.toString());
-            i++;
+        Log.v(TAG, "Preference key=" + getKey() + ". value=" + getValue());
+        for (int i = 0; i < this.mEntryValues.length; i++) {
+            Log.v(TAG, "entryValues[" + i + "]=" + this.mEntryValues[i]);
         }
         for (int i2 = 0; i2 < this.mEntries.length; i2++) {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("mEntries[");
-            sb4.append(i2);
-            sb4.append(str);
-            sb4.append(this.mEntries[i2]);
-            Log.v(str2, sb4.toString());
+            Log.v(TAG, "mEntries[" + i2 + "]=" + this.mEntries[i2]);
         }
         for (int i3 = 0; i3 < this.mDefaultValues.length; i3++) {
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("mDefaultValues[");
-            sb5.append(i3);
-            sb5.append(str);
-            sb5.append(this.mDefaultValues[i3]);
-            Log.v(str2, sb5.toString());
+            Log.v(TAG, "mDefaultValues[" + i3 + "]=" + this.mDefaultValues[i3]);
         }
     }
 

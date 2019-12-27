@@ -1,19 +1,18 @@
 package android.support.v4.os;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.GuardedBy;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.Size;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 final class LocaleListHelper {
     private static final Locale EN_LATN = LocaleHelper.forLanguageTag("en-Latn");
     private static final Locale LOCALE_AR_XB = new Locale("ar", "XB");
@@ -36,7 +35,7 @@ final class LocaleListHelper {
     @NonNull
     private final String mStringRepresentation;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     LocaleListHelper(@NonNull Locale locale, LocaleListHelper localeListHelper) {
         if (locale != null) {
             int length = localeListHelper == null ? 0 : localeListHelper.mList.length;
@@ -86,7 +85,7 @@ final class LocaleListHelper {
         throw new NullPointerException("topLocale is null");
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     LocaleListHelper(@NonNull Locale... localeArr) {
         if (localeArr.length == 0) {
             this.mList = sEmptyList;
@@ -99,13 +98,8 @@ final class LocaleListHelper {
         int i = 0;
         while (i < localeArr.length) {
             Locale locale = localeArr[i];
-            String str = "list[";
             if (locale == null) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(i);
-                sb2.append("] is null");
-                throw new NullPointerException(sb2.toString());
+                throw new NullPointerException("list[" + i + "] is null");
             } else if (!hashSet.contains(locale)) {
                 Locale locale2 = (Locale) locale.clone();
                 localeArr2[i] = locale2;
@@ -116,11 +110,7 @@ final class LocaleListHelper {
                 hashSet.add(locale2);
                 i++;
             } else {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str);
-                sb3.append(i);
-                sb3.append("] is a repetition");
-                throw new IllegalArgumentException(sb3.toString());
+                throw new IllegalArgumentException("list[" + i + "] is a repetition");
             }
         }
         this.mList = localeArr2;
@@ -135,7 +125,7 @@ final class LocaleListHelper {
         return this.mList[computeFirstMatchIndex];
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:12:0x001b, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:11:0x001b, code lost:
         if (r6 < Integer.MAX_VALUE) goto L_0x001f;
      */
     private int computeFirstMatchIndex(Collection<String> collection, boolean z) {
@@ -183,7 +173,7 @@ final class LocaleListHelper {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     static LocaleListHelper forLanguageTags(@Nullable String str) {
         if (str == null || str.isEmpty()) {
@@ -209,7 +199,7 @@ final class LocaleListHelper {
     }
 
     @Size(min = 1)
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     static LocaleListHelper getDefault() {
         Locale locale = Locale.getDefault();
@@ -229,21 +219,20 @@ final class LocaleListHelper {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     static LocaleListHelper getEmptyLocaleList() {
         return sEmptyLocaleList;
     }
 
     private static String getLikelyScript(Locale locale) {
-        String str = "";
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             String script = locale.getScript();
             if (!script.isEmpty()) {
                 return script;
             }
         }
-        return str;
+        return "";
     }
 
     private static boolean isPseudoLocale(String str) {
@@ -254,7 +243,7 @@ final class LocaleListHelper {
         return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     static boolean isPseudoLocalesOnly(@Nullable String[] strArr) {
         if (strArr == null) {
             return true;
@@ -272,7 +261,6 @@ final class LocaleListHelper {
 
     @IntRange(from = 0, to = 1)
     private static int matchScore(Locale locale, Locale locale2) {
-        int i = 1;
         if (locale.equals(locale2)) {
             return 1;
         }
@@ -284,18 +272,15 @@ final class LocaleListHelper {
             return likelyScript.equals(getLikelyScript(locale2)) ? 1 : 0;
         }
         String country = locale.getCountry();
-        if (!country.isEmpty() && !country.equals(locale2.getCountry())) {
-            i = 0;
-        }
-        return i;
+        return (country.isEmpty() || country.equals(locale2.getCountry())) ? 1 : 0;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     static void setDefault(@Size(min = 1) @NonNull LocaleListHelper localeListHelper) {
         setDefault(localeListHelper, 0);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     static void setDefault(@Size(min = 1) @NonNull LocaleListHelper localeListHelper, int i) {
         if (localeListHelper == null) {
             throw new NullPointerException("locales is null");
@@ -340,8 +325,8 @@ final class LocaleListHelper {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    /* access modifiers changed from: package-private */
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public Locale get(int i) {
         if (i >= 0) {
             Locale[] localeArr = this.mList;
@@ -352,34 +337,34 @@ final class LocaleListHelper {
         return null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public Locale getFirstMatch(String[] strArr) {
         return computeFirstMatch(Arrays.asList(strArr), false);
     }
 
-    /* access modifiers changed from: 0000 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    /* access modifiers changed from: package-private */
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public int getFirstMatchIndex(String[] strArr) {
         return computeFirstMatchIndex(Arrays.asList(strArr), false);
     }
 
-    /* access modifiers changed from: 0000 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    /* access modifiers changed from: package-private */
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public int getFirstMatchIndexWithEnglishSupported(Collection<String> collection) {
         return computeFirstMatchIndex(collection, true);
     }
 
-    /* access modifiers changed from: 0000 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    /* access modifiers changed from: package-private */
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public int getFirstMatchIndexWithEnglishSupported(String[] strArr) {
         return getFirstMatchIndexWithEnglishSupported((Collection<String>) Arrays.asList(strArr));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public Locale getFirstMatchWithEnglishSupported(String[] strArr) {
         return computeFirstMatch(Arrays.asList(strArr), true);
     }
@@ -397,9 +382,9 @@ final class LocaleListHelper {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @IntRange(from = -1)
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public int indexOf(Locale locale) {
         int i = 0;
         while (true) {
@@ -414,21 +399,21 @@ final class LocaleListHelper {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    /* access modifiers changed from: package-private */
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public boolean isEmpty() {
         return this.mList.length == 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @IntRange(from = 0)
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public int size() {
         return this.mList.length;
     }
 
-    /* access modifiers changed from: 0000 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    /* access modifiers changed from: package-private */
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     public String toLanguageTags() {
         return this.mStringRepresentation;

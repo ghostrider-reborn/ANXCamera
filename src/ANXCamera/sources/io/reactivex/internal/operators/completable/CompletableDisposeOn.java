@@ -14,7 +14,7 @@ public final class CompletableDisposeOn extends Completable {
 
     static final class CompletableObserverImplementation implements CompletableObserver, Disposable, Runnable {
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f272d;
         volatile boolean disposed;
         final CompletableObserver s;

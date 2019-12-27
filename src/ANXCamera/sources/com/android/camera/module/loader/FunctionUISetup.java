@@ -10,8 +10,7 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.module.BaseModule;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -28,7 +27,7 @@ public class FunctionUISetup extends Func1Base<BaseModule, BaseModule> {
         if (!nullHolder.isPresent()) {
             return nullHolder;
         }
-        BaseModule baseModule = (BaseModule) nullHolder.get();
+        BaseModule baseModule = nullHolder.get();
         if (baseModule.isDeparted()) {
             return NullHolder.ofNullable(baseModule, 225);
         }
@@ -55,7 +54,7 @@ public class FunctionUISetup extends Func1Base<BaseModule, BaseModule> {
         Rect previewRect = Util.getPreviewRect(CameraAppImpl.getAndroidContext());
         baseModule.onPreviewLayoutChanged(previewRect);
         baseModule.onPreviewSizeChanged(previewRect.width(), previewRect.height());
-        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
         int lastCameraId = DataRepository.dataItemGlobal().getLastCameraId();
         int currentCameraId = DataRepository.dataItemGlobal().getCurrentCameraId();
         int uiStyle = DataRepository.dataItemRunning().getUiStyle();
@@ -71,7 +70,7 @@ public class FunctionUISetup extends Func1Base<BaseModule, BaseModule> {
         LocationManager.instance().recordLocation(CameraSettings.isRecordLocation());
         CameraSize previewSize = baseModule.getPreviewSize();
         if (previewSize != null) {
-            ((MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).setPreviewAspectRatio(CameraSettings.getPreviewAspectRatio(previewSize.width, previewSize.height));
+            ((ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).setPreviewAspectRatio(CameraSettings.getPreviewAspectRatio(previewSize.width, previewSize.height));
         }
         return nullHolder;
     }

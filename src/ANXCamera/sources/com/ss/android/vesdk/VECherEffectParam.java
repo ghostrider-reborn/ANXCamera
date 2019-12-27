@@ -2,12 +2,11 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.Keep;
 
 @Keep
 public class VECherEffectParam implements Parcelable {
-    public static final Creator<VECherEffectParam> CREATOR = new Creator<VECherEffectParam>() {
+    public static final Parcelable.Creator<VECherEffectParam> CREATOR = new Parcelable.Creator<VECherEffectParam>() {
         public VECherEffectParam createFromParcel(Parcel parcel) {
             int readInt = parcel.readInt();
             int readInt2 = parcel.readInt();

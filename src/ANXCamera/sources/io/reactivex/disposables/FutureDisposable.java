@@ -13,7 +13,7 @@ final class FutureDisposable extends AtomicReference<Future<?>> implements Dispo
     }
 
     public void dispose() {
-        Future future = (Future) getAndSet(null);
+        Future future = (Future) getAndSet((Object) null);
         if (future != null) {
             future.cancel(this.allowInterrupt);
         }

@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import com.ss.android.ugc.effectmanager.common.TaskManager;
 import com.ss.android.ugc.effectmanager.common.WeakHandler;
-import com.ss.android.ugc.effectmanager.common.WeakHandler.IHandler;
 import com.ss.android.ugc.effectmanager.common.task.BaseTask;
 import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.context.EffectContext;
@@ -25,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EffectRepository implements IHandler {
+public class EffectRepository implements WeakHandler.IHandler {
     private EffectConfiguration mConfiguration;
     private EffectContext mEffectContext;
     private Handler mHandler;
@@ -46,15 +45,15 @@ public class EffectRepository implements IHandler {
 
     public void cancelDownloadEffect(Effect effect) {
         if (this.mTaskMap.containsKey(effect)) {
-            ((BaseTask) this.mTaskMap.get(effect)).cancel();
+            this.mTaskMap.get(effect).cancel();
             Handler handler = this.mHandler;
             if (handler != null) {
-                handler.removeCallbacksAndMessages(null);
+                handler.removeCallbacksAndMessages((Object) null);
             }
             this.mTaskMap.remove(effect);
             EffectListener effectListener = this.mListener;
             if (effectListener != null) {
-                effectListener.updateEffectStatus("", effect, 22, null);
+                effectListener.updateEffectStatus("", effect, 22, (ExceptionResult) null);
             }
         }
     }
@@ -65,14 +64,14 @@ public class EffectRepository implements IHandler {
 
     public void fetchEffect(Effect effect, String str) {
         DownloadEffectTask downloadEffectTask = new DownloadEffectTask(effect, this.mEffectContext, str, this.mHandler);
-        this.mListener.updateEffectStatus("", effect, 21, null);
+        this.mListener.updateEffectStatus("", effect, 21, (ExceptionResult) null);
         this.mTaskMap.put(effect, downloadEffectTask);
         this.mConfiguration.getTaskManager().commit(downloadEffectTask);
     }
 
     public void fetchEffectList(List<Effect> list, String str) {
         for (Effect updateEffectStatus : list) {
-            this.mListener.updateEffectStatus("", updateEffectStatus, 21, null);
+            this.mListener.updateEffectStatus("", updateEffectStatus, 21, (ExceptionResult) null);
         }
         this.mConfiguration.getTaskManager().commit(new DownloadEffectListTask(this.mEffectContext, list, str, this.mHandler));
     }
@@ -100,7 +99,7 @@ public class EffectRepository implements IHandler {
                     Effect effect = effectTaskResult.getEffect();
                     ExceptionResult exception = effectTaskResult.getException();
                     if (exception == null) {
-                        this.mListener.updateEffectStatus(effectTaskResult.getTaskID(), effect, 20, null);
+                        this.mListener.updateEffectStatus(effectTaskResult.getTaskID(), effect, 20, (ExceptionResult) null);
                     } else {
                         this.mListener.updateEffectStatus(effectTaskResult.getTaskID(), effect, 26, exception);
                     }
@@ -113,7 +112,7 @@ public class EffectRepository implements IHandler {
                     EffectListTaskResult effectListTaskResult = (EffectListTaskResult) obj2;
                     ExceptionResult exception2 = effectListTaskResult.getException();
                     if (exception2 == null) {
-                        this.mListener.updateEffectListStatus(effectListTaskResult.getTaskID(), effectListTaskResult.getEffectList(), null);
+                        this.mListener.updateEffectListStatus(effectListTaskResult.getTaskID(), effectListTaskResult.getEffectList(), (ExceptionResult) null);
                     } else {
                         this.mListener.updateEffectListStatus(effectListTaskResult.getTaskID(), effectListTaskResult.getEffectList(), exception2);
                     }

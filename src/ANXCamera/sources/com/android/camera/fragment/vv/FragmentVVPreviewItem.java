@@ -7,9 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.camera.R;
@@ -20,8 +18,8 @@ import com.bumptech.glide.load.engine.o;
 import com.bumptech.glide.request.f;
 import java.util.Locale;
 
-public class FragmentVVPreviewItem extends BaseViewPagerFragment implements OnClickListener {
-    private OnClickListener mClickListener;
+public class FragmentVVPreviewItem extends BaseViewPagerFragment implements View.OnClickListener {
+    private View.OnClickListener mClickListener;
     private boolean mFirstPreviewItem;
     private f mGlideOptions;
     private int mImageHeight;
@@ -33,8 +31,7 @@ public class FragmentVVPreviewItem extends BaseViewPagerFragment implements OnCl
     private VVItem mVVItem;
 
     private String getDurationString(long j) {
-        float f2 = ((float) j) / 1000.0f;
-        return String.format(Locale.ENGLISH, "%.1f", new Object[]{Float.valueOf(Math.abs(f2))});
+        return String.format(Locale.ENGLISH, "%.1f", new Object[]{Float.valueOf(Math.abs(((float) j) / 1000.0f))});
     }
 
     private void initView(View view) {
@@ -46,10 +43,10 @@ public class FragmentVVPreviewItem extends BaseViewPagerFragment implements OnCl
         imageView2.setTag(Integer.valueOf(this.mIndex));
         imageView2.setOnClickListener(this);
         if (this.mImageWidth > 0 && this.mImageHeight > 0) {
-            MarginLayoutParams marginLayoutParams = (MarginLayoutParams) imageView.getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) imageView.getLayoutParams();
             marginLayoutParams.width = this.mImageWidth;
             marginLayoutParams.height = this.mImageHeight;
-            MarginLayoutParams marginLayoutParams2 = (MarginLayoutParams) this.mTextureVideoView.getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams2 = (ViewGroup.MarginLayoutParams) this.mTextureVideoView.getLayoutParams();
             marginLayoutParams2.width = this.mImageWidth;
             marginLayoutParams2.height = this.mImageHeight;
         }
@@ -122,7 +119,7 @@ public class FragmentVVPreviewItem extends BaseViewPagerFragment implements OnCl
         }
     }
 
-    public void setData(int i, VVItem vVItem, int i2, int i3, OnClickListener onClickListener, int i4) {
+    public void setData(int i, VVItem vVItem, int i2, int i3, View.OnClickListener onClickListener, int i4) {
         this.mIndex = i;
         this.mVVItem = vVItem;
         this.mImageWidth = i2;

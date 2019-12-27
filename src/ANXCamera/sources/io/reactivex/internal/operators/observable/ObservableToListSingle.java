@@ -72,17 +72,17 @@ public final class ObservableToListSingle<T, U extends Collection<? super T>> ex
     }
 
     public Observable<U> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableToList<T>(this.source, this.collectionSupplier));
+        return RxJavaPlugins.onAssembly(new ObservableToList(this.source, this.collectionSupplier));
     }
 
     public void subscribeActual(SingleObserver<? super U> singleObserver) {
         try {
-            Object call = this.collectionSupplier.call();
+            U call = this.collectionSupplier.call();
             ObjectHelper.requireNonNull(call, "The collectionSupplier returned a null collection. Null values are generally not allowed in 2.x operators and sources.");
             this.source.subscribe(new ToListObserver(singleObserver, (Collection) call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

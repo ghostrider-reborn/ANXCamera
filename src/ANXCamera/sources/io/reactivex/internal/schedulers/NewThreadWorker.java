@@ -1,6 +1,6 @@
 package io.reactivex.internal.schedulers;
 
-import io.reactivex.Scheduler.Worker;
+import io.reactivex.Scheduler;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.disposables.Disposable;
@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-public class NewThreadWorker extends Worker implements Disposable {
+public class NewThreadWorker extends Scheduler.Worker implements Disposable {
     volatile boolean disposed;
     private final ScheduledExecutorService executor;
 
@@ -34,12 +34,12 @@ public class NewThreadWorker extends Worker implements Disposable {
 
     @NonNull
     public Disposable schedule(@NonNull Runnable runnable) {
-        return schedule(runnable, 0, null);
+        return schedule(runnable, 0, (TimeUnit) null);
     }
 
     @NonNull
     public Disposable schedule(@NonNull Runnable runnable, long j, @NonNull TimeUnit timeUnit) {
-        return this.disposed ? EmptyDisposable.INSTANCE : scheduleActual(runnable, j, timeUnit, null);
+        return this.disposed ? EmptyDisposable.INSTANCE : scheduleActual(runnable, j, timeUnit, (DisposableContainer) null);
     }
 
     @NonNull

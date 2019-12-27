@@ -65,10 +65,7 @@ public class WrapperRender extends ShaderRender {
     public boolean draw(DrawAttribute drawAttribute) {
         if (!isAttriSupported(drawAttribute.getTarget())) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("unsupported target ");
-            sb.append(drawAttribute.getTarget());
-            Log.w(str, sb.toString());
+            Log.w(str, "unsupported target " + drawAttribute.getTarget());
             return false;
         } else if (this.mFilter == null) {
             Log.e(TAG, "null filter!");
@@ -78,11 +75,14 @@ public class WrapperRender extends ShaderRender {
             if (target == 5) {
                 DrawBasicTexAttribute drawBasicTexAttribute = (DrawBasicTexAttribute) drawAttribute;
                 drawTexture(drawBasicTexAttribute.mBasicTexture, (float) drawBasicTexAttribute.mX, (float) drawBasicTexAttribute.mY, (float) drawBasicTexAttribute.mWidth, (float) drawBasicTexAttribute.mHeight);
-            } else if (target == 6) {
+                return true;
+            } else if (target != 6) {
+                return true;
+            } else {
                 DrawIntTexAttribute drawIntTexAttribute = (DrawIntTexAttribute) drawAttribute;
                 drawTexture(drawIntTexAttribute.mTexId, (float) drawIntTexAttribute.mX, (float) drawIntTexAttribute.mY, (float) drawIntTexAttribute.mWidth, (float) drawIntTexAttribute.mHeight);
+                return true;
             }
-            return true;
         }
     }
 
@@ -130,8 +130,8 @@ public class WrapperRender extends ShaderRender {
 
     /* access modifiers changed from: protected */
     public void initSupportAttriList() {
-        this.mAttriSupportedList.add(Integer.valueOf(5));
-        this.mAttriSupportedList.add(Integer.valueOf(6));
+        this.mAttriSupportedList.add(5);
+        this.mAttriSupportedList.add(6);
     }
 
     /* access modifiers changed from: protected */

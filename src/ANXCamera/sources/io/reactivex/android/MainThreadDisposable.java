@@ -10,10 +10,7 @@ public abstract class MainThreadDisposable implements Disposable {
 
     public static void verifyMainThread() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Expected to be called on the main thread but was ");
-            sb.append(Thread.currentThread().getName());
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Expected to be called on the main thread but was " + Thread.currentThread().getName());
         }
     }
 

@@ -88,7 +88,7 @@ public final class ObservableElementAtSingle<T> extends Single<T> implements Fus
 
     public Observable<T> fuseToObservable() {
         ObservableElementAt observableElementAt = new ObservableElementAt(this.source, this.index, this.defaultValue, true);
-        return RxJavaPlugins.onAssembly((Observable<T>) observableElementAt);
+        return RxJavaPlugins.onAssembly(observableElementAt);
     }
 
     public void subscribeActual(SingleObserver<? super T> singleObserver) {

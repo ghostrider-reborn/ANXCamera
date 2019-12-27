@@ -25,12 +25,8 @@ public final class b extends FilterInputStream {
             try {
                 return Integer.parseInt(str);
             } catch (NumberFormatException e2) {
-                String str2 = TAG;
-                if (Log.isLoggable(str2, 3)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("failed to parse content length header: ");
-                    sb.append(str);
-                    Log.d(str2, sb.toString(), e2);
+                if (Log.isLoggable(TAG, 3)) {
+                    Log.d(TAG, "failed to parse content length header: " + str, e2);
                 }
             }
         }
@@ -41,12 +37,7 @@ public final class b extends FilterInputStream {
         if (i >= 0) {
             this.eq += i;
         } else if (this.contentLength - ((long) this.eq) > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to read all expected data, expected: ");
-            sb.append(this.contentLength);
-            sb.append(", but read: ");
-            sb.append(this.eq);
-            throw new IOException(sb.toString());
+            throw new IOException("Failed to read all expected data, expected: " + this.contentLength + ", but read: " + this.eq);
         }
         return i;
     }

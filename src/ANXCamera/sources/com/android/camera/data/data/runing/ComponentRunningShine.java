@@ -62,8 +62,7 @@ public class ComponentRunningShine extends ComponentData {
     }
 
     private ComponentDataItem generateBeautyLevelItem(boolean z) {
-        String str = "1";
-        return b.Pi() ? new ComponentDataItem((int) R.drawable.ic_beauty_off, (int) R.drawable.ic_beauty_on, (int) R.string.beauty_fragment_tab_name_3d_beauty, str) : new ComponentDataItem((int) R.drawable.ic_beauty_off, (int) R.drawable.ic_beauty_on, (int) R.string.beauty_fragment_tab_name_beauty, str);
+        return b.Pi() ? new ComponentDataItem((int) R.drawable.ic_beauty_off, (int) R.drawable.ic_beauty_on, (int) R.string.beauty_fragment_tab_name_3d_beauty, "1") : new ComponentDataItem((int) R.drawable.ic_beauty_off, (int) R.drawable.ic_beauty_on, (int) R.string.beauty_fragment_tab_name_beauty, "1");
     }
 
     private ComponentDataItem generateFigureItem() {
@@ -89,6 +88,7 @@ public class ComponentRunningShine extends ComponentData {
         return new ComponentDataItem((int) R.drawable.ic_beauty_off, (int) R.drawable.ic_beauty_on, (int) R.string.beauty_fragment_tab_name_3d_beauty, "2");
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Removed duplicated region for block: B:45:0x00a2 A[ADDED_TO_REGION] */
     /* JADX WARNING: Removed duplicated region for block: B:49:0x00b4  */
     /* JADX WARNING: Removed duplicated region for block: B:54:0x00d2  */
@@ -106,9 +106,9 @@ public class ComponentRunningShine extends ComponentData {
         } else {
             Boolean bool = null;
             Boolean bool2 = null;
-            for (ComponentDataItem componentDataItem : this.mItems) {
-                if (componentDataItem != null) {
-                    String str = componentDataItem.mValue;
+            for (ComponentDataItem next : this.mItems) {
+                if (next != null) {
+                    String str = next.mValue;
                     int hashCode = str.hashCode();
                     if (hashCode == 1567) {
                         if (str.equals("10")) {
@@ -165,13 +165,13 @@ public class ComponentRunningShine extends ComponentData {
                                     } else {
                                         int parseInt = Integer.parseInt(DataRepository.dataItemRunning().getComponentConfigFilter().getComponentValue(i));
                                         if (parseInt != FilterInfo.FILTER_ID_NONE && parseInt > 0) {
-                                            bool2 = Boolean.valueOf(true);
+                                            bool2 = true;
                                             break;
                                         }
                                     }
                                 case 8:
                                     if (bool2 == null && DataRepository.dataItemLive().getLiveFilter() != 0) {
-                                        bool2 = Boolean.valueOf(true);
+                                        bool2 = true;
                                         break;
                                     }
                             }
@@ -250,13 +250,7 @@ public class ComponentRunningShine extends ComponentData {
     public int getBottomEntryRes(int i) {
         this.mCurrentStatus = determineStatus(i);
         int i2 = this.mShineEntry;
-        if (i2 == 4) {
-            return this.mCurrentStatus ? R.drawable.ic_beauty_tips_on : R.drawable.ic_beauty_tips_normal;
-        } else if (i2 != 5) {
-            return R.drawable.ic_shine_off;
-        } else {
-            return this.mCurrentStatus ? R.drawable.ic_beauty_on : R.drawable.ic_beauty_off;
-        }
+        return i2 != 4 ? i2 != 5 ? R.drawable.ic_shine_off : this.mCurrentStatus ? R.drawable.ic_beauty_on : R.drawable.ic_beauty_off : this.mCurrentStatus ? R.drawable.ic_beauty_tips_on : R.drawable.ic_beauty_tips_normal;
     }
 
     public boolean getCurrentStatus() {
@@ -289,19 +283,7 @@ public class ComponentRunningShine extends ComponentData {
     public int getTopConfigEntryRes(int i) {
         this.mCurrentStatus = determineStatus(i);
         int i2 = this.mShineEntry;
-        int i3 = R.drawable.ic_shine_off;
-        if (i2 == 1) {
-            if (this.mCurrentStatus) {
-                i3 = R.drawable.ic_shine_on;
-            }
-            return i3;
-        } else if (i2 == 2) {
-            return this.mCurrentStatus ? R.drawable.ic_beauty_on : R.drawable.ic_beauty_off;
-        } else if (i2 != 3) {
-            return R.drawable.ic_shine_off;
-        } else {
-            return this.mCurrentStatus ? R.drawable.ic_new_effect_button_selected : R.drawable.ic_new_effect_button_normal;
-        }
+        return i2 != 1 ? i2 != 2 ? i2 != 3 ? R.drawable.ic_shine_off : this.mCurrentStatus ? R.drawable.ic_new_effect_button_selected : R.drawable.ic_new_effect_button_normal : this.mCurrentStatus ? R.drawable.ic_beauty_on : R.drawable.ic_beauty_off : this.mCurrentStatus ? R.drawable.ic_shine_on : R.drawable.ic_shine_off;
     }
 
     public int getTopConfigItem() {
@@ -355,7 +337,6 @@ public class ComponentRunningShine extends ComponentData {
         this.mSupportBeautyModel = false;
         this.mSupportBeautyMakeUp = false;
         this.mSupportBeautyBody = false;
-        String str = "7";
         switch (i) {
             case 161:
                 if (!cameraCapabilities.isSupportVideoBeauty()) {
@@ -365,7 +346,7 @@ public class ComponentRunningShine extends ComponentData {
                 } else {
                     this.mShineEntry = 4;
                     if (i2 == 0) {
-                        this.mDefaultType = str;
+                        this.mDefaultType = "7";
                         if (!isSmoothDependBeautyVersion()) {
                             this.mSupportBeautyLevel = true;
                             this.mItems.add(generateBeautyLevelItem(i2 == 1));
@@ -438,7 +419,7 @@ public class ComponentRunningShine extends ComponentData {
                     }
                     if (i2 == 0) {
                         this.mShineEntry = 1;
-                        this.mDefaultType = str;
+                        this.mDefaultType = "7";
                         if (DataRepository.dataItemFeature().isSupportBeautyBody()) {
                             this.mSupportBeautyBody = true;
                             this.mItems.add(generateFigureItem());
@@ -491,10 +472,9 @@ public class ComponentRunningShine extends ComponentData {
                 break;
             case 174:
                 this.mShineEntry = 4;
-                String str2 = "10";
-                this.mDefaultType = str2;
+                this.mDefaultType = "10";
                 this.mItems.add(new ComponentDataItem((int) R.drawable.ic_beauty_off, (int) R.drawable.ic_beauty_on, (int) R.string.beauty_fragment_tab_name_3d_beauty, SHINE_LIVE_BEAUTY));
-                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_effect_button_normal, (int) R.drawable.ic_new_effect_button_selected, (int) R.string.pref_camera_coloreffect_title, str2));
+                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_new_effect_button_normal, (int) R.drawable.ic_new_effect_button_selected, (int) R.string.pref_camera_coloreffect_title, "10"));
                 break;
             case 176:
                 this.mShineEntry = 4;
@@ -520,7 +500,7 @@ public class ComponentRunningShine extends ComponentData {
                 break;
         }
         if (this.mDefaultType == null && !this.mItems.isEmpty()) {
-            this.mDefaultType = ((ComponentDataItem) this.mItems.get(0)).mValue;
+            this.mDefaultType = this.mItems.get(0).mValue;
         }
         this.mCurrentType = this.mDefaultType;
     }

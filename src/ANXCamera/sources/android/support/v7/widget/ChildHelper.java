@@ -1,8 +1,8 @@
 package android.support.v7.widget;
 
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +28,7 @@ class ChildHelper {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear(int i) {
             if (i >= 64) {
                 Bucket bucket = this.mNext;
@@ -41,7 +41,7 @@ class ChildHelper {
             this.mData &= ~(1 << i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int countOnesBefore(int i) {
             Bucket bucket = this.mNext;
             if (bucket == null) {
@@ -56,7 +56,7 @@ class ChildHelper {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean get(int i) {
             if (i >= 64) {
                 ensureNext();
@@ -65,7 +65,7 @@ class ChildHelper {
             return ((1 << i) & this.mData) != 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void insert(int i, boolean z) {
             if (i >= 64) {
                 ensureNext();
@@ -87,7 +87,7 @@ class ChildHelper {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean remove(int i) {
             if (i >= 64) {
                 ensureNext();
@@ -109,7 +109,7 @@ class ChildHelper {
             return z;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void reset() {
             this.mData = 0;
             Bucket bucket = this.mNext;
@@ -118,7 +118,7 @@ class ChildHelper {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void set(int i) {
             if (i >= 64) {
                 ensureNext();
@@ -132,18 +132,14 @@ class ChildHelper {
             if (this.mNext == null) {
                 return Long.toBinaryString(this.mData);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.mNext.toString());
-            sb.append("xx");
-            sb.append(Long.toBinaryString(this.mData));
-            return sb.toString();
+            return this.mNext.toString() + "xx" + Long.toBinaryString(this.mData);
         }
     }
 
     interface Callback {
         void addView(View view, int i);
 
-        void attachViewToParent(View view, int i, LayoutParams layoutParams);
+        void attachViewToParent(View view, int i, ViewGroup.LayoutParams layoutParams);
 
         void detachViewFromParent(int i);
 
@@ -151,7 +147,7 @@ class ChildHelper {
 
         int getChildCount();
 
-        ViewHolder getChildViewHolder(View view);
+        RecyclerView.ViewHolder getChildViewHolder(View view);
 
         int indexOfChild(View view);
 
@@ -200,7 +196,7 @@ class ChildHelper {
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addView(View view, int i, boolean z) {
         int childCount = i < 0 ? this.mCallback.getChildCount() : getOffset(i);
         this.mBucket.insert(childCount, z);
@@ -210,13 +206,13 @@ class ChildHelper {
         this.mCallback.addView(view, childCount);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addView(View view, boolean z) {
         addView(view, -1, z);
     }
 
-    /* access modifiers changed from: 0000 */
-    public void attachViewToParent(View view, int i, LayoutParams layoutParams, boolean z) {
+    /* access modifiers changed from: package-private */
+    public void attachViewToParent(View view, int i, ViewGroup.LayoutParams layoutParams, boolean z) {
         int childCount = i < 0 ? this.mCallback.getChildCount() : getOffset(i);
         this.mBucket.insert(childCount, z);
         if (z) {
@@ -225,19 +221,19 @@ class ChildHelper {
         this.mCallback.attachViewToParent(view, childCount, layoutParams);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void detachViewFromParent(int i) {
         int offset = getOffset(i);
         this.mBucket.remove(offset);
         this.mCallback.detachViewFromParent(offset);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public View findHiddenNonRemovedView(int i) {
         int size = this.mHiddenViews.size();
         for (int i2 = 0; i2 < size; i2++) {
-            View view = (View) this.mHiddenViews.get(i2);
-            ViewHolder childViewHolder = this.mCallback.getChildViewHolder(view);
+            View view = this.mHiddenViews.get(i2);
+            RecyclerView.ViewHolder childViewHolder = this.mCallback.getChildViewHolder(view);
             if (childViewHolder.getLayoutPosition() == i && !childViewHolder.isInvalid() && !childViewHolder.isRemoved()) {
                 return view;
             }
@@ -245,27 +241,27 @@ class ChildHelper {
         return null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public View getChildAt(int i) {
         return this.mCallback.getChildAt(getOffset(i));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getChildCount() {
         return this.mCallback.getChildCount() - this.mHiddenViews.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public View getUnfilteredChildAt(int i) {
         return this.mCallback.getChildAt(i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getUnfilteredChildCount() {
         return this.mCallback.getChildCount();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void hide(View view) {
         int indexOfChild = this.mCallback.indexOfChild(view);
         if (indexOfChild >= 0) {
@@ -273,13 +269,10 @@ class ChildHelper {
             hideViewInternal(view);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("view is not a child, cannot hide ");
-        sb.append(view);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("view is not a child, cannot hide " + view);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int indexOfChild(View view) {
         int indexOfChild = this.mCallback.indexOfChild(view);
         if (indexOfChild != -1 && !this.mBucket.get(indexOfChild)) {
@@ -288,22 +281,22 @@ class ChildHelper {
         return -1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isHidden(View view) {
         return this.mHiddenViews.contains(view);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void removeAllViewsUnfiltered() {
         this.mBucket.reset();
         for (int size = this.mHiddenViews.size() - 1; size >= 0; size--) {
-            this.mCallback.onLeftHiddenState((View) this.mHiddenViews.get(size));
+            this.mCallback.onLeftHiddenState(this.mHiddenViews.get(size));
             this.mHiddenViews.remove(size);
         }
         this.mCallback.removeAllViews();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void removeView(View view) {
         int indexOfChild = this.mCallback.indexOfChild(view);
         if (indexOfChild >= 0) {
@@ -314,7 +307,7 @@ class ChildHelper {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void removeViewAt(int i) {
         int offset = getOffset(i);
         View childAt = this.mCallback.getChildAt(offset);
@@ -326,7 +319,7 @@ class ChildHelper {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean removeViewIfHidden(View view) {
         int indexOfChild = this.mCallback.indexOfChild(view);
         if (indexOfChild == -1) {
@@ -343,29 +336,19 @@ class ChildHelper {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mBucket.toString());
-        sb.append(", hidden list:");
-        sb.append(this.mHiddenViews.size());
-        return sb.toString();
+        return this.mBucket.toString() + ", hidden list:" + this.mHiddenViews.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void unhide(View view) {
         int indexOfChild = this.mCallback.indexOfChild(view);
         if (indexOfChild < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("view is not a child, cannot hide ");
-            sb.append(view);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("view is not a child, cannot hide " + view);
         } else if (this.mBucket.get(indexOfChild)) {
             this.mBucket.clear(indexOfChild);
             unhideViewInternal(view);
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("trying to unhide a view that was not hidden");
-            sb2.append(view);
-            throw new RuntimeException(sb2.toString());
+            throw new RuntimeException("trying to unhide a view that was not hidden" + view);
         }
     }
 }

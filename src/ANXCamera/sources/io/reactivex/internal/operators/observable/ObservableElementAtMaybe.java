@@ -78,7 +78,7 @@ public final class ObservableElementAtMaybe<T> extends Maybe<T> implements FuseT
 
     public Observable<T> fuseToObservable() {
         ObservableElementAt observableElementAt = new ObservableElementAt(this.source, this.index, null, false);
-        return RxJavaPlugins.onAssembly((Observable<T>) observableElementAt);
+        return RxJavaPlugins.onAssembly(observableElementAt);
     }
 
     public void subscribeActual(MaybeObserver<? super T> maybeObserver) {

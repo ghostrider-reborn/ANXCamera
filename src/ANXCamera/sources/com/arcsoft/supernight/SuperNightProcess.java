@@ -2,11 +2,9 @@ package com.arcsoft.supernight;
 
 import android.graphics.Rect;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.CaptureResult.Key;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.Face;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.os.Environment;
 import android.text.TextUtils;
 import java.io.BufferedReader;
@@ -70,7 +68,7 @@ public class SuperNightProcess implements ProgressCallback {
     public static final int ASVL_PAF_RAW16_GRAY_16B = 3633;
     public static final int ASVL_PAF_RAW16_GRBG_16B = 3362;
     public static final int ASVL_PAF_RAW16_RGGB_16B = 3361;
-    private static final String DEBUG_FILE;
+    private static final String DEBUG_FILE = (Environment.getExternalStorageDirectory().toString() + "/DCIM/arc_super_night/dump_file.txt");
     private static final String DUMP_KEY = "dumpSNImage";
     private static final String HINT_FOR_RAW_REPROCESS_KEY = "com.mediatek.control.capture.hintForRawReprocess";
     private static final String LOG_KEY = "debugSNLog";
@@ -85,16 +83,16 @@ public class SuperNightProcess implements ProgressCallback {
     private static final String SUPPERNIGHT_TOTALGAIN_KEY = "com.mediatek.suppernightfeature.ftotalgain";
     private static final String SUPPERNIGHT_WBGAIN_KEY = "com.mediatek.suppernightfeature.fwbgain";
     private static final String TAG = "SuperNightProcess";
-    private Key<int[]> ADRC_GAIN_RESULT_KEY = null;
-    private Key<int[]> BLACK_LEVEL_RESULT_KEY = null;
-    private Key<int[]> BRIGHT_LEVEL_RESULT_KEY = null;
-    private Key<int[]> EXP_INDEX_RESULT_KEY = null;
-    private Key<int[]> ISP_GAIN_RESULT_KEY = null;
-    private Key<int[]> LUX_INDEX_RESULT_KEY = null;
-    private Key<int[]> SENSOR_GAIN_RESULT_KEY = null;
-    private Key<long[]> SHUTTER_RESULT_KEY = null;
-    private Key<int[]> TOTAL_GAIN_RESULT_KEY = null;
-    private Key<float[]> WB_GAIN_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> ADRC_GAIN_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> BLACK_LEVEL_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> BRIGHT_LEVEL_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> EXP_INDEX_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> ISP_GAIN_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> LUX_INDEX_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> SENSOR_GAIN_RESULT_KEY = null;
+    private CaptureResult.Key<long[]> SHUTTER_RESULT_KEY = null;
+    private CaptureResult.Key<int[]> TOTAL_GAIN_RESULT_KEY = null;
+    private CaptureResult.Key<float[]> WB_GAIN_RESULT_KEY = null;
     private Rect mArrayRect = null;
     private CountDownLatch mCountDownLatch;
     private boolean mDumpFile = false;
@@ -164,35 +162,17 @@ public class SuperNightProcess implements ProgressCallback {
         }
     }
 
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().toString());
-        sb.append("/DCIM/arc_super_night/dump_file.txt");
-        DEBUG_FILE = sb.toString();
-    }
-
     public SuperNightProcess(Rect rect) {
         readDebugFileValue();
         this.mSuperNightJni.setDumpImageFile(this.mDumpFile);
         this.mArrayRect = rect;
+        LOG.d(TAG, "dumpFile = " + this.mDumpFile + " debugLog = " + LOG.DEBUG);
         StringBuilder sb = new StringBuilder();
-        sb.append("dumpFile = ");
-        sb.append(this.mDumpFile);
-        sb.append(" debugLog = ");
-        sb.append(LOG.DEBUG);
-        String sb2 = sb.toString();
-        String str = TAG;
-        LOG.d(str, sb2);
-        StringBuilder sb3 = new StringBuilder();
-        String str2 = "mArrayRect = ";
-        sb3.append(str2);
-        sb3.append(this.mArrayRect);
-        LOG.d(str, sb3.toString());
+        sb.append("mArrayRect = ");
+        sb.append(this.mArrayRect);
+        LOG.d(TAG, sb.toString());
         if (this.mArrayRect != null) {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(str2);
-            sb4.append(this.mArrayRect.toString());
-            LOG.d(str, sb4.toString());
+            LOG.d(TAG, "mArrayRect = " + this.mArrayRect.toString());
         }
         LOG.d("Version", "--8/10--");
     }
@@ -203,14 +183,7 @@ public class SuperNightProcess implements ProgressCallback {
             if (rect2 != null && i > 0 && i2 > 0) {
                 float width = ((float) rect2.width()) / ((float) i);
                 float height = ((float) this.mArrayRect.height()) / ((float) i2);
-                StringBuilder sb = new StringBuilder();
-                sb.append("fMultipleW = ");
-                sb.append(width);
-                sb.append(", fMultipleH = ");
-                sb.append(height);
-                String sb2 = sb.toString();
-                String str = TAG;
-                LOG.d(str, sb2);
+                LOG.d(TAG, "fMultipleW = " + width + ", fMultipleH = " + height);
                 rect.left = (int) (((float) rect.left) * width);
                 rect.top = (int) (((float) rect.top) * height);
                 Rect rect3 = this.mArrayRect;
@@ -232,54 +205,37 @@ public class SuperNightProcess implements ProgressCallback {
                 if (i6 % 2 != 0) {
                     rect.bottom = i6 - 1;
                 }
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("conversionCropRect -> cropRect = ");
-                sb3.append(rect.toString());
-                LOG.d(str, sb3.toString());
+                LOG.d(TAG, "conversionCropRect -> cropRect = " + rect.toString());
             }
         }
     }
 
     private FaceInfo getFaceInfo(TotalCaptureResult totalCaptureResult, int i, int i2) {
-        FaceInfo faceInfo;
         if (totalCaptureResult == null || this.mArrayRect == null || i <= 0 || i2 <= 0) {
             return null;
         }
         Face[] faceArr = (Face[]) totalCaptureResult.get(CaptureResult.STATISTICS_FACES);
-        String str = TAG;
         if (faceArr != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("face length = ");
-            sb.append(faceArr.length);
-            LOG.d(str, sb.toString());
+            LOG.d(TAG, "face length = " + faceArr.length);
         }
         if (faceArr == null || faceArr.length <= 0) {
-            faceInfo = null;
-        } else {
-            float width = ((float) this.mArrayRect.width()) / ((float) i);
-            float height = ((float) this.mArrayRect.height()) / ((float) i2);
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("fMultipleW = ");
-            sb2.append(width);
-            sb2.append(", fMultipleH = ");
-            sb2.append(height);
-            LOG.d(str, sb2.toString());
-            faceInfo = new FaceInfo();
-            faceInfo.faceRects = new Rect[faceArr.length];
-            faceInfo.faceNum = faceArr.length;
-            faceInfo.faceOrientation = this.mFaceOrientation;
-            for (int i3 = 0; i3 < faceArr.length; i3++) {
-                faceInfo.faceRects[i3] = new Rect(faceArr[i3].getBounds());
-                Rect[] rectArr = faceInfo.faceRects;
-                rectArr[i3].left = (int) (((float) rectArr[i3].left) / width);
-                rectArr[i3].top = (int) (((float) rectArr[i3].top) / height);
-                rectArr[i3].right = (int) (((float) rectArr[i3].right) / width);
-                rectArr[i3].bottom = (int) (((float) rectArr[i3].bottom) / height);
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("conversionFaceRect -> faceRect = ");
-                sb3.append(faceInfo.faceRects[i3].toString());
-                LOG.d(str, sb3.toString());
-            }
+            return null;
+        }
+        float width = ((float) this.mArrayRect.width()) / ((float) i);
+        float height = ((float) this.mArrayRect.height()) / ((float) i2);
+        LOG.d(TAG, "fMultipleW = " + width + ", fMultipleH = " + height);
+        FaceInfo faceInfo = new FaceInfo();
+        faceInfo.faceRects = new Rect[faceArr.length];
+        faceInfo.faceNum = faceArr.length;
+        faceInfo.faceOrientation = this.mFaceOrientation;
+        for (int i3 = 0; i3 < faceArr.length; i3++) {
+            faceInfo.faceRects[i3] = new Rect(faceArr[i3].getBounds());
+            Rect[] rectArr = faceInfo.faceRects;
+            rectArr[i3].left = (int) (((float) rectArr[i3].left) / width);
+            rectArr[i3].top = (int) (((float) rectArr[i3].top) / height);
+            rectArr[i3].right = (int) (((float) rectArr[i3].right) / width);
+            rectArr[i3].bottom = (int) (((float) rectArr[i3].bottom) / height);
+            LOG.d(TAG, "conversionFaceRect -> faceRect = " + faceInfo.faceRects[i3].toString());
         }
         return faceInfo;
     }
@@ -289,7 +245,7 @@ public class SuperNightProcess implements ProgressCallback {
         int format = image.getFormat();
         rawImage.mWidth = image.getWidth();
         rawImage.mHeight = image.getHeight();
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         ByteBuffer buffer = planes[0].getBuffer();
         buffer.rewind();
         rawImage.mPitch1 = 0;
@@ -313,10 +269,7 @@ public class SuperNightProcess implements ProgressCallback {
     }
 
     private void getVendorTagValue(TotalCaptureResult totalCaptureResult, RawInfo rawInfo) {
-        Key<int[]> key = this.BRIGHT_LEVEL_RESULT_KEY;
-        String str = TAG;
-        String str2 = "vendorTag";
-        String str3 = "] = ";
+        CaptureResult.Key<int[]> key = this.BRIGHT_LEVEL_RESULT_KEY;
         if (key != null) {
             int[] iArr = (int[]) totalCaptureResult.get(key);
             if (iArr != null && iArr.length > 0) {
@@ -328,26 +281,16 @@ public class SuperNightProcess implements ProgressCallback {
                             break;
                         }
                         iArr2[i] = iArr[0] / 1024;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("brightLevel[");
-                        sb.append(i);
-                        sb.append(str3);
-                        sb.append(rawInfo.brightLevel[i]);
-                        LOG.d(str, sb.toString());
+                        LOG.d(TAG, "brightLevel[" + i + "] = " + rawInfo.brightLevel[i]);
                         i++;
                     }
                 }
                 for (int i2 = 0; i2 < iArr.length; i2++) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("bright[");
-                    sb2.append(i2);
-                    sb2.append(str3);
-                    sb2.append(iArr[i2]);
-                    LOG.d(str2, sb2.toString());
+                    LOG.d("vendorTag", "bright[" + i2 + "] = " + iArr[i2]);
                 }
             }
         }
-        Key<int[]> key2 = this.BLACK_LEVEL_RESULT_KEY;
+        CaptureResult.Key<int[]> key2 = this.BLACK_LEVEL_RESULT_KEY;
         if (key2 != null) {
             int[] iArr3 = (int[]) totalCaptureResult.get(key2);
             if (iArr3 != null && iArr3.length > 0) {
@@ -359,32 +302,19 @@ public class SuperNightProcess implements ProgressCallback {
                             break;
                         }
                         iArr4[i3] = iArr3[0] / 1024;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("blackLevel[");
-                        sb3.append(i3);
-                        sb3.append(str3);
-                        sb3.append(rawInfo.blackLevel[i3]);
-                        LOG.d(str, sb3.toString());
+                        LOG.d(TAG, "blackLevel[" + i3 + "] = " + rawInfo.blackLevel[i3]);
                         i3++;
                     }
                 }
                 for (int i4 = 0; i4 < iArr3.length; i4++) {
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("black[");
-                    sb4.append(i4);
-                    sb4.append(str3);
-                    sb4.append(iArr3[i4]);
-                    LOG.d(str2, sb4.toString());
+                    LOG.d("vendorTag", "black[" + i4 + "] = " + iArr3[i4]);
                 }
             }
         }
-        Key<float[]> key3 = this.WB_GAIN_RESULT_KEY;
+        CaptureResult.Key<float[]> key3 = this.WB_GAIN_RESULT_KEY;
         if (key3 != null) {
             float[] fArr = (float[]) totalCaptureResult.get(key3);
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("awbGain = ");
-            sb5.append(fArr);
-            LOG.d(str2, sb5.toString());
+            LOG.d("vendorTag", "awbGain = " + fArr);
             if (fArr != null && fArr.length > 0) {
                 if (this.mEnableWbGain) {
                     float[] fArr2 = rawInfo.fWbGain;
@@ -394,212 +324,150 @@ public class SuperNightProcess implements ProgressCallback {
                     fArr2[3] = fArr[3];
                 }
                 for (int i5 = 0; i5 < fArr.length; i5++) {
-                    StringBuilder sb6 = new StringBuilder();
-                    sb6.append("wbGain[");
-                    sb6.append(i5);
-                    sb6.append(str3);
-                    sb6.append(fArr[i5]);
-                    LOG.d(str2, sb6.toString());
+                    LOG.d("vendorTag", "wbGain[" + i5 + "] = " + fArr[i5]);
                 }
             }
         }
-        Key<long[]> key4 = this.SHUTTER_RESULT_KEY;
+        CaptureResult.Key<long[]> key4 = this.SHUTTER_RESULT_KEY;
         if (key4 != null) {
             long[] jArr = (long[]) totalCaptureResult.get(key4);
             if (jArr != null && jArr.length > 0) {
                 rawInfo.fShutter = (float) jArr[0];
-                StringBuilder sb7 = new StringBuilder();
-                sb7.append("fShutter = ");
-                sb7.append(rawInfo.fShutter);
-                LOG.d(str, sb7.toString());
+                LOG.d(TAG, "fShutter = " + rawInfo.fShutter);
                 for (int i6 = 0; i6 < jArr.length; i6++) {
-                    StringBuilder sb8 = new StringBuilder();
-                    sb8.append("shutter[");
-                    sb8.append(i6);
-                    sb8.append(str3);
-                    sb8.append(jArr[i6]);
-                    LOG.d(str2, sb8.toString());
+                    LOG.d("vendorTag", "shutter[" + i6 + "] = " + jArr[i6]);
                 }
             }
         }
-        Key<int[]> key5 = this.SENSOR_GAIN_RESULT_KEY;
+        CaptureResult.Key<int[]> key5 = this.SENSOR_GAIN_RESULT_KEY;
         if (key5 != null) {
             int[] iArr5 = (int[]) totalCaptureResult.get(key5);
             if (iArr5 != null && iArr5.length > 0) {
                 rawInfo.fSensorGain = ((float) iArr5[0]) / 1024.0f;
-                StringBuilder sb9 = new StringBuilder();
-                sb9.append("fSensorGain = ");
-                sb9.append(rawInfo.fSensorGain);
-                LOG.d(str, sb9.toString());
+                LOG.d(TAG, "fSensorGain = " + rawInfo.fSensorGain);
                 for (int i7 = 0; i7 < iArr5.length; i7++) {
-                    StringBuilder sb10 = new StringBuilder();
-                    sb10.append("sensorGain[");
-                    sb10.append(i7);
-                    sb10.append(str3);
-                    sb10.append(iArr5[i7]);
-                    LOG.d(str2, sb10.toString());
+                    LOG.d("vendorTag", "sensorGain[" + i7 + "] = " + iArr5[i7]);
                 }
             }
         }
-        Key<int[]> key6 = this.ISP_GAIN_RESULT_KEY;
+        CaptureResult.Key<int[]> key6 = this.ISP_GAIN_RESULT_KEY;
         if (key6 != null) {
             int[] iArr6 = (int[]) totalCaptureResult.get(key6);
             if (iArr6 != null && iArr6.length > 0) {
                 rawInfo.fISPGain = ((float) iArr6[0]) / 1024.0f;
-                StringBuilder sb11 = new StringBuilder();
-                sb11.append("fISPGain = ");
-                sb11.append(rawInfo.fISPGain);
-                LOG.d(str, sb11.toString());
+                LOG.d(TAG, "fISPGain = " + rawInfo.fISPGain);
                 for (int i8 = 0; i8 < iArr6.length; i8++) {
-                    StringBuilder sb12 = new StringBuilder();
-                    sb12.append("ispGain[");
-                    sb12.append(i8);
-                    sb12.append(str3);
-                    sb12.append(iArr6[i8]);
-                    LOG.d(str2, sb12.toString());
+                    LOG.d("vendorTag", "ispGain[" + i8 + "] = " + iArr6[i8]);
                 }
             }
         }
-        Key<int[]> key7 = this.LUX_INDEX_RESULT_KEY;
+        CaptureResult.Key<int[]> key7 = this.LUX_INDEX_RESULT_KEY;
         if (key7 != null) {
             int[] iArr7 = (int[]) totalCaptureResult.get(key7);
             if (iArr7 != null && iArr7.length > 0) {
                 rawInfo.luxIndex = iArr7[0] / 10000;
-                StringBuilder sb13 = new StringBuilder();
-                sb13.append("luxIndex = ");
-                sb13.append(rawInfo.luxIndex);
-                LOG.d(str, sb13.toString());
+                LOG.d(TAG, "luxIndex = " + rawInfo.luxIndex);
                 for (int i9 = 0; i9 < iArr7.length; i9++) {
-                    StringBuilder sb14 = new StringBuilder();
-                    sb14.append("luxIndex[");
-                    sb14.append(i9);
-                    sb14.append(str3);
-                    sb14.append(iArr7[i9]);
-                    LOG.d(str2, sb14.toString());
+                    LOG.d("vendorTag", "luxIndex[" + i9 + "] = " + iArr7[i9]);
                 }
             }
         }
-        Key<int[]> key8 = this.EXP_INDEX_RESULT_KEY;
+        CaptureResult.Key<int[]> key8 = this.EXP_INDEX_RESULT_KEY;
         if (key8 != null) {
             int[] iArr8 = (int[]) totalCaptureResult.get(key8);
             if (iArr8 != null && iArr8.length > 0) {
                 rawInfo.expIndex = iArr8[0];
-                StringBuilder sb15 = new StringBuilder();
-                sb15.append("expIndex = ");
-                sb15.append(rawInfo.expIndex);
-                LOG.d(str, sb15.toString());
+                LOG.d(TAG, "expIndex = " + rawInfo.expIndex);
                 for (int i10 = 0; i10 < iArr8.length; i10++) {
-                    StringBuilder sb16 = new StringBuilder();
-                    sb16.append("expIndex[");
-                    sb16.append(i10);
-                    sb16.append(str3);
-                    sb16.append(iArr8[i10]);
-                    LOG.d(str2, sb16.toString());
+                    LOG.d("vendorTag", "expIndex[" + i10 + "] = " + iArr8[i10]);
                 }
             }
         }
-        Key<int[]> key9 = this.ADRC_GAIN_RESULT_KEY;
+        CaptureResult.Key<int[]> key9 = this.ADRC_GAIN_RESULT_KEY;
         if (key9 != null) {
             int[] iArr9 = (int[]) totalCaptureResult.get(key9);
             if (iArr9 != null && iArr9.length > 0) {
                 if (this.mEnableAdrcGain) {
                     rawInfo.fAdrcGain = ((float) iArr9[0]) / 1000.0f;
-                    StringBuilder sb17 = new StringBuilder();
-                    sb17.append("fAdrcGain = ");
-                    sb17.append(rawInfo.fAdrcGain);
-                    LOG.d(str, sb17.toString());
+                    LOG.d(TAG, "fAdrcGain = " + rawInfo.fAdrcGain);
                 }
                 for (int i11 = 0; i11 < iArr9.length; i11++) {
-                    StringBuilder sb18 = new StringBuilder();
-                    sb18.append("adrcGain[");
-                    sb18.append(i11);
-                    sb18.append(str3);
-                    sb18.append(iArr9[i11]);
-                    LOG.d(str2, sb18.toString());
+                    LOG.d("vendorTag", "adrcGain[" + i11 + "] = " + iArr9[i11]);
                 }
             }
         }
-        Key<int[]> key10 = this.TOTAL_GAIN_RESULT_KEY;
+        CaptureResult.Key<int[]> key10 = this.TOTAL_GAIN_RESULT_KEY;
         if (key10 != null) {
             int[] iArr10 = (int[]) totalCaptureResult.get(key10);
             if (iArr10 != null && iArr10.length > 0) {
                 rawInfo.fTotalGain = ((float) iArr10[0]) / 100.0f;
-                StringBuilder sb19 = new StringBuilder();
-                sb19.append("fTotalGain = ");
-                sb19.append(rawInfo.fTotalGain);
-                LOG.d(str, sb19.toString());
+                LOG.d(TAG, "fTotalGain = " + rawInfo.fTotalGain);
                 for (int i12 = 0; i12 < iArr10.length; i12++) {
-                    StringBuilder sb20 = new StringBuilder();
-                    sb20.append("totalGain[");
-                    sb20.append(i12);
-                    sb20.append(str3);
-                    sb20.append(iArr10[i12]);
-                    LOG.d(str2, sb20.toString());
+                    LOG.d("vendorTag", "totalGain[" + i12 + "] = " + iArr10[i12]);
                 }
             }
         }
     }
 
     private void setupSomcVendorTag(TotalCaptureResult totalCaptureResult) {
-        String str = TAG;
-        LOG.d(str, "setupSomcVendorTag");
+        LOG.d(TAG, "setupSomcVendorTag");
         if (this.BRIGHT_LEVEL_RESULT_KEY == null || this.BLACK_LEVEL_RESULT_KEY == null || this.WB_GAIN_RESULT_KEY == null || this.SHUTTER_RESULT_KEY == null || this.SENSOR_GAIN_RESULT_KEY == null || this.ISP_GAIN_RESULT_KEY == null || this.LUX_INDEX_RESULT_KEY == null || this.ADRC_GAIN_RESULT_KEY == null || this.TOTAL_GAIN_RESULT_KEY == null || this.EXP_INDEX_RESULT_KEY == null) {
-            for (Key<int[]> key : totalCaptureResult.getKeys()) {
+            for (CaptureResult.Key<int[]> key : totalCaptureResult.getKeys()) {
                 if (SUPPERNIGHT_BRIGHTLEVEL_KEY.equals(key.getName())) {
-                    LOG.d(str, "BRIGHT_LEVEL_RESULT_KEY");
+                    LOG.d(TAG, "BRIGHT_LEVEL_RESULT_KEY");
                     this.BRIGHT_LEVEL_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_BLACKLEVEL_KEY.equals(key.getName())) {
-                    LOG.d(str, "BLACK_LEVEL_RESULT_KEY");
+                    LOG.d(TAG, "BLACK_LEVEL_RESULT_KEY");
                     this.BLACK_LEVEL_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_WBGAIN_KEY.equals(key.getName())) {
-                    LOG.d(str, "WB_GAIN_RESULT_KEY");
+                    LOG.d(TAG, "WB_GAIN_RESULT_KEY");
                     this.WB_GAIN_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_SHUTTER_KEY.equals(key.getName())) {
-                    LOG.d(str, "SHUTTER_RESULT_KEY");
+                    LOG.d(TAG, "SHUTTER_RESULT_KEY");
                     this.SHUTTER_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_SENSORGAIN_KEY.equals(key.getName())) {
-                    LOG.d(str, "SENSOR_GAIN_RESULT_KEY");
+                    LOG.d(TAG, "SENSOR_GAIN_RESULT_KEY");
                     this.SENSOR_GAIN_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_ISPGAIN_KEY.equals(key.getName())) {
-                    LOG.d(str, "ISP_GAIN_RESULT_KEY");
+                    LOG.d(TAG, "ISP_GAIN_RESULT_KEY");
                     this.ISP_GAIN_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_LUXINDEX_KEY.equals(key.getName())) {
-                    LOG.d(str, "LUX_INDEX_RESULT_KEY");
+                    LOG.d(TAG, "LUX_INDEX_RESULT_KEY");
                     this.LUX_INDEX_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_EXPINDEX_KEY.equals(key.getName())) {
-                    LOG.d(str, "EXP_INDEX_RESULT_KEY");
+                    LOG.d(TAG, "EXP_INDEX_RESULT_KEY");
                     this.EXP_INDEX_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_ADRCGAIN_KEY.equals(key.getName())) {
-                    LOG.d(str, "ADRC_GAIN_RESULT_KEY");
+                    LOG.d(TAG, "ADRC_GAIN_RESULT_KEY");
                     this.ADRC_GAIN_RESULT_KEY = key;
                 }
                 if (SUPPERNIGHT_TOTALGAIN_KEY.equals(key.getName())) {
-                    LOG.d(str, "TOTAL_GAIN_RESULT_KEY");
+                    LOG.d(TAG, "TOTAL_GAIN_RESULT_KEY");
                     this.TOTAL_GAIN_RESULT_KEY = key;
                 }
             }
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:65:0x017c, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:61:0x017c, code lost:
         if (r7.mCountDownLatch != null) goto L_0x017e;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:66:0x017e, code lost:
-        com.arcsoft.supernight.LOG.d(r9, r8);
+    /* JADX WARNING: Code restructure failed: missing block: B:62:0x017e, code lost:
+        com.arcsoft.supernight.LOG.d(TAG, "mCountDownLatch.countDown() 0");
         r7.mCountDownLatch.countDown();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:74:0x01a7, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:70:0x01a7, code lost:
         if (r7.mCountDownLatch != null) goto L_0x017e;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:75:0x01aa, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:71:0x01aa, code lost:
         return r10;
      */
     public int addAllInputInfo(ArrayList<Image> arrayList, ArrayList<TotalCaptureResult> arrayList2, int i, Image image, Rect rect) {
@@ -607,22 +475,18 @@ public class SuperNightProcess implements ProgressCallback {
         ArrayList<TotalCaptureResult> arrayList4 = arrayList2;
         int i2 = i;
         Image image2 = image;
-        String str = "mCountDownLatch.countDown() 0";
-        String str2 = TAG;
-        LOG.d(str2, "-- addAllInputInfoEx --");
+        LOG.d(TAG, "-- addAllInputInfoEx --");
         int i3 = -1;
         if (arrayList3 == null || arrayList.size() <= 0 || arrayList4 == null || arrayList2.size() <= 0 || arrayList.size() != arrayList2.size() || this.mSuperNightJni == null || image2 == null || rect == null) {
-            LOG.d(str2, "addAllInputInfo - > error invalid param");
-            if (this.mCountDownLatch != null) {
-                LOG.d(str2, "mCountDownLatch.countDown() 1");
-                this.mCountDownLatch.countDown();
+            LOG.d(TAG, "addAllInputInfo - > error invalid param");
+            if (this.mCountDownLatch == null) {
+                return -1;
             }
+            LOG.d(TAG, "mCountDownLatch.countDown() 1");
+            this.mCountDownLatch.countDown();
             return -1;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(" imageList size =  ");
-        sb.append(arrayList.size());
-        LOG.d(str2, sb.toString());
+        LOG.d(TAG, " imageList size =  " + arrayList.size());
         int size = arrayList.size();
         int i4 = 0;
         int i5 = 0;
@@ -632,37 +496,30 @@ public class SuperNightProcess implements ProgressCallback {
             try {
                 if (this.mIsCancel) {
                     try {
-                        LOG.d(str2, "is cancel 0");
+                        LOG.d(TAG, "is cancel 0");
                         if (this.mCountDownLatch != null) {
-                            LOG.d(str2, str);
+                            LOG.d(TAG, "mCountDownLatch.countDown() 0");
                             this.mCountDownLatch.countDown();
                         }
                         return i3;
                     } catch (IllegalStateException e2) {
                         e = e2;
-                        String str3 = "Error";
                         try {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("e-> ");
-                            sb2.append(e.toString());
-                            LOG.d(str3, sb2.toString());
+                            LOG.d("Error", "e-> " + e.toString());
                         } catch (Throwable th) {
                             if (this.mCountDownLatch != null) {
-                                LOG.d(str2, str);
+                                LOG.d(TAG, "mCountDownLatch.countDown() 0");
                                 this.mCountDownLatch.countDown();
                             }
                             throw th;
                         }
                     }
                 } else {
-                    Image image3 = (Image) arrayList3.get(i5);
-                    TotalCaptureResult totalCaptureResult = (TotalCaptureResult) arrayList4.get(i5);
+                    Image image3 = arrayList3.get(i5);
+                    TotalCaptureResult totalCaptureResult = arrayList4.get(i5);
                     if (image3 != null) {
                         if (totalCaptureResult != null) {
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append(" ------ ");
-                            sb3.append(i5);
-                            LOG.d("vendorTag", sb3.toString());
+                            LOG.d("vendorTag", " ------ " + i5);
                             setupSomcVendorTag(totalCaptureResult);
                             InputInfo inputInfo = new InputInfo();
                             inputInfo.curIndex = i5;
@@ -687,42 +544,40 @@ public class SuperNightProcess implements ProgressCallback {
                             i3 = -1;
                         }
                     }
-                    LOG.d(str2, "TotalCaptureResult - > error invalid param");
-                    if (this.mCountDownLatch != null) {
-                        LOG.d(str2, str);
-                        this.mCountDownLatch.countDown();
+                    LOG.d(TAG, "TotalCaptureResult - > error invalid param");
+                    if (this.mCountDownLatch == null) {
+                        return -1;
                     }
+                    LOG.d(TAG, "mCountDownLatch.countDown() 0");
+                    this.mCountDownLatch.countDown();
                     return -1;
                 }
             } catch (IllegalStateException e3) {
                 e = e3;
                 i3 = -1;
-                String str32 = "Error";
-                StringBuilder sb22 = new StringBuilder();
-                sb22.append("e-> ");
-                sb22.append(e.toString());
-                LOG.d(str32, sb22.toString());
+                LOG.d("Error", "e-> " + e.toString());
             }
         }
         FaceInfo faceInfo = null;
-        Iterator it = arrayList2.iterator();
+        Iterator<TotalCaptureResult> it = arrayList2.iterator();
         while (true) {
             if (!it.hasNext()) {
                 break;
             }
-            TotalCaptureResult totalCaptureResult2 = (TotalCaptureResult) it.next();
-            Integer num2 = (Integer) totalCaptureResult2.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION);
+            TotalCaptureResult next = it.next();
+            Integer num2 = (Integer) next.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION);
             if (num2 != null && num2.intValue() == 0) {
-                faceInfo = getFaceInfo(totalCaptureResult2, i6, i7);
+                faceInfo = getFaceInfo(next, i6, i7);
                 break;
             }
         }
         if (this.mIsCancel) {
-            LOG.d(str2, "is cancel 1");
-            if (this.mCountDownLatch != null) {
-                LOG.d(str2, str);
-                this.mCountDownLatch.countDown();
+            LOG.d(TAG, "is cancel 1");
+            if (this.mCountDownLatch == null) {
+                return -1;
             }
+            LOG.d(TAG, "mCountDownLatch.countDown() 0");
+            this.mCountDownLatch.countDown();
             return -1;
         }
         InputInfo inputInfo2 = new InputInfo();
@@ -731,45 +586,38 @@ public class SuperNightProcess implements ProgressCallback {
         inputInfo2.cameraState = 2;
         inputInfo2.inputImages[0] = getRawImage(image2, i2);
         i3 = this.mSuperNightJni.process(faceInfo, inputInfo2, 3, rect, this);
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("cropRect0 = ");
-        sb4.append(rect.toString());
-        LOG.d(str2, sb4.toString());
+        LOG.d(TAG, "cropRect0 = " + rect.toString());
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:62:0x016f, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:58:0x016f, code lost:
         if (r7.mCountDownLatch != null) goto L_0x0171;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:63:0x0171, code lost:
-        com.arcsoft.supernight.LOG.d(r10, r8);
+    /* JADX WARNING: Code restructure failed: missing block: B:59:0x0171, code lost:
+        com.arcsoft.supernight.LOG.d(TAG, "mCountDownLatch.countDown() 2");
         r7.mCountDownLatch.countDown();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:72:0x019c, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:68:0x019c, code lost:
         if (r7.mCountDownLatch != null) goto L_0x0171;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:73:0x019f, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:69:0x019f, code lost:
         return r9;
      */
     public int addAllInputInfoEx(ArrayList<Image> arrayList, ArrayList<TotalCaptureResult> arrayList2, int i, Rect rect) {
         int i2;
         ArrayList<Image> arrayList3 = arrayList;
         ArrayList<TotalCaptureResult> arrayList4 = arrayList2;
-        String str = "mCountDownLatch.countDown() 2";
         int i3 = -1;
-        String str2 = TAG;
         if (arrayList3 == null || arrayList.size() <= 0 || arrayList4 == null || arrayList2.size() <= 0 || arrayList.size() != arrayList2.size() || this.mSuperNightJni == null || rect == null) {
-            LOG.d(str2, "addAllInputInfo - > error invalid param");
-            if (this.mCountDownLatch != null) {
-                LOG.d(str2, "mCountDownLatch.countDown() 3");
-                this.mCountDownLatch.countDown();
+            LOG.d(TAG, "addAllInputInfo - > error invalid param");
+            if (this.mCountDownLatch == null) {
+                return -1;
             }
+            LOG.d(TAG, "mCountDownLatch.countDown() 3");
+            this.mCountDownLatch.countDown();
             return -1;
         }
         InputInfo inputInfo = new InputInfo();
-        StringBuilder sb = new StringBuilder();
-        sb.append(" imageList size =  ");
-        sb.append(arrayList.size());
-        LOG.d(str2, sb.toString());
+        LOG.d(TAG, " imageList size =  " + arrayList.size());
         int size = arrayList.size();
         InputInfo inputInfo2 = inputInfo;
         int i4 = 0;
@@ -779,23 +627,17 @@ public class SuperNightProcess implements ProgressCallback {
             try {
                 if (this.mIsCancel) {
                     if (this.mCountDownLatch != null) {
-                        LOG.d(str2, str);
+                        LOG.d(TAG, "mCountDownLatch.countDown() 2");
                         this.mCountDownLatch.countDown();
                     }
                     return i3;
                 }
-                Image image = (Image) arrayList3.get(i4);
-                TotalCaptureResult totalCaptureResult = (TotalCaptureResult) arrayList4.get(i4);
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Image format - > ");
-                sb2.append(image.getFormat());
-                LOG.d(str2, sb2.toString());
+                Image image = arrayList3.get(i4);
+                TotalCaptureResult totalCaptureResult = arrayList4.get(i4);
+                LOG.d(TAG, "Image format - > " + image.getFormat());
                 if (image != null) {
                     if (totalCaptureResult != null) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append(" ------ ");
-                        sb3.append(i4);
-                        LOG.d("vendorTag", sb3.toString());
+                        LOG.d("vendorTag", " ------ " + i4);
                         setupSomcVendorTag(totalCaptureResult);
                         InputInfo inputInfo3 = new InputInfo();
                         inputInfo3.curIndex = i4;
@@ -822,24 +664,21 @@ public class SuperNightProcess implements ProgressCallback {
                         i3 = -1;
                     }
                 }
-                LOG.d(str2, "TotalCaptureResult - > error invalid param");
-                if (this.mCountDownLatch != null) {
-                    LOG.d(str2, str);
-                    this.mCountDownLatch.countDown();
+                LOG.d(TAG, "TotalCaptureResult - > error invalid param");
+                if (this.mCountDownLatch == null) {
+                    return -1;
                 }
+                LOG.d(TAG, "mCountDownLatch.countDown() 2");
+                this.mCountDownLatch.countDown();
                 return -1;
             } catch (IllegalStateException e2) {
                 e = e2;
                 i2 = -1;
-                String str3 = "Error";
                 try {
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("e-> ");
-                    sb4.append(e.toString());
-                    LOG.d(str3, sb4.toString());
+                    LOG.d("Error", "e-> " + e.toString());
                 } catch (Throwable th) {
                     if (this.mCountDownLatch != null) {
-                        LOG.d(str2, str);
+                        LOG.d(TAG, "mCountDownLatch.countDown() 2");
                         this.mCountDownLatch.countDown();
                     }
                     throw th;
@@ -847,53 +686,47 @@ public class SuperNightProcess implements ProgressCallback {
             }
         }
         FaceInfo faceInfo = null;
-        Iterator it = arrayList2.iterator();
+        Iterator<TotalCaptureResult> it = arrayList2.iterator();
         while (true) {
             if (!it.hasNext()) {
                 break;
             }
-            TotalCaptureResult totalCaptureResult2 = (TotalCaptureResult) it.next();
-            Integer num2 = (Integer) totalCaptureResult2.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION);
+            TotalCaptureResult next = it.next();
+            Integer num2 = (Integer) next.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION);
             if (num2 != null && num2.intValue() == 0) {
-                faceInfo = getFaceInfo(totalCaptureResult2, i5, i6);
+                faceInfo = getFaceInfo(next, i5, i6);
                 break;
             }
         }
         FaceInfo faceInfo2 = faceInfo;
-        if (this.mIsCancel) {
-            if (this.mCountDownLatch != null) {
-                LOG.d(str2, str);
-                this.mCountDownLatch.countDown();
+        if (!this.mIsCancel) {
+            i2 = this.mSuperNightJni.process(faceInfo2, inputInfo2, 3, rect, this);
+            try {
+                LOG.d(TAG, "cropRect = " + rect.toString());
+            } catch (IllegalStateException e3) {
+                e = e3;
+                LOG.d("Error", "e-> " + e.toString());
             }
+        } else if (this.mCountDownLatch == null) {
             return -1;
-        }
-        i2 = this.mSuperNightJni.process(faceInfo2, inputInfo2, 3, rect, this);
-        try {
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("cropRect = ");
-            sb5.append(rect.toString());
-            LOG.d(str2, sb5.toString());
-        } catch (IllegalStateException e3) {
-            e = e3;
-            String str32 = "Error";
-            StringBuilder sb42 = new StringBuilder();
-            sb42.append("e-> ");
-            sb42.append(e.toString());
-            LOG.d(str32, sb42.toString());
+        } else {
+            LOG.d(TAG, "mCountDownLatch.countDown() 2");
+            this.mCountDownLatch.countDown();
+            return -1;
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:73:0x01ce, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:69:0x01ce, code lost:
         if (r1.mCountDownLatch != null) goto L_0x01d0;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:74:0x01d0, code lost:
-        com.arcsoft.supernight.LOG.d(r7, r6);
+    /* JADX WARNING: Code restructure failed: missing block: B:70:0x01d0, code lost:
+        com.arcsoft.supernight.LOG.d(TAG, "mCountDownLatch.countDown() 0");
         r1.mCountDownLatch.countDown();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:82:0x01f9, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:78:0x01f9, code lost:
         if (r1.mCountDownLatch != null) goto L_0x01d0;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:83:0x01fc, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:79:0x01fc, code lost:
         return r8;
      */
     public int addAllInputInfo_Fd(ArrayList<Image> arrayList, ArrayList<TotalCaptureResult> arrayList2, ArrayList<Integer> arrayList3, int i, Image image, int i2, Rect rect) {
@@ -902,22 +735,18 @@ public class SuperNightProcess implements ProgressCallback {
         ArrayList<Integer> arrayList6 = arrayList3;
         int i3 = i;
         Image image2 = image;
-        String str = "mCountDownLatch.countDown() 0";
-        String str2 = TAG;
-        LOG.d(str2, "-- addAllInputInfo by fd --");
+        LOG.d(TAG, "-- addAllInputInfo by fd --");
         int i4 = -1;
         if (arrayList4 == null || arrayList.size() <= 0 || arrayList5 == null || arrayList2.size() <= 0 || arrayList6 == null || arrayList3.size() <= 0 || arrayList.size() != arrayList2.size() || arrayList.size() != arrayList3.size() || this.mSuperNightJni == null || image2 == null || rect == null) {
-            LOG.d(str2, "addAllInputInfo - > error invalid param");
-            if (this.mCountDownLatch != null) {
-                LOG.d(str2, "mCountDownLatch.countDown() 1");
-                this.mCountDownLatch.countDown();
+            LOG.d(TAG, "addAllInputInfo - > error invalid param");
+            if (this.mCountDownLatch == null) {
+                return -1;
             }
+            LOG.d(TAG, "mCountDownLatch.countDown() 1");
+            this.mCountDownLatch.countDown();
             return -1;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(" imageList size =  ");
-        sb.append(arrayList.size());
-        LOG.d(str2, sb.toString());
+        LOG.d(TAG, " imageList size =  " + arrayList.size());
         int size = arrayList.size();
         int i5 = 0;
         int i6 = 0;
@@ -926,51 +755,39 @@ public class SuperNightProcess implements ProgressCallback {
             try {
                 if (this.mIsCancel) {
                     try {
-                        LOG.d(str2, "is cancel 0");
+                        LOG.d(TAG, "is cancel 0");
                         if (this.mCountDownLatch != null) {
-                            LOG.d(str2, str);
+                            LOG.d(TAG, "mCountDownLatch.countDown() 0");
                             this.mCountDownLatch.countDown();
                         }
                         return i4;
                     } catch (IllegalStateException e2) {
                         e = e2;
-                        String str3 = "Error";
                         try {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("e-> ");
-                            sb2.append(e.toString());
-                            LOG.d(str3, sb2.toString());
+                            LOG.d("Error", "e-> " + e.toString());
                         } catch (Throwable th) {
                             if (this.mCountDownLatch != null) {
-                                LOG.d(str2, str);
+                                LOG.d(TAG, "mCountDownLatch.countDown() 0");
                                 this.mCountDownLatch.countDown();
                             }
                             throw th;
                         }
                     }
                 } else {
-                    Image image3 = (Image) arrayList4.get(i5);
-                    TotalCaptureResult totalCaptureResult = (TotalCaptureResult) arrayList5.get(i5);
+                    Image image3 = arrayList4.get(i5);
+                    TotalCaptureResult totalCaptureResult = arrayList5.get(i5);
                     if (image3 != null) {
                         if (totalCaptureResult != null) {
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append(" ------ ");
-                            sb3.append(i5);
-                            LOG.d("vendorTag", sb3.toString());
+                            LOG.d("vendorTag", " ------ " + i5);
                             setupSomcVendorTag(totalCaptureResult);
                             InputInfo inputInfo = new InputInfo();
                             inputInfo.curIndex = i5;
                             inputInfo.imgNum = size;
                             inputInfo.cameraState = 2;
-                            Integer num = (Integer) arrayList6.get(i5);
+                            Integer num = arrayList6.get(i5);
                             if (num != null) {
                                 inputInfo.inputFd[0] = num.intValue();
-                                StringBuilder sb4 = new StringBuilder();
-                                sb4.append("input fd[");
-                                sb4.append(i5);
-                                sb4.append("] = ");
-                                sb4.append(inputInfo.inputFd[0]);
-                                LOG.d(str2, sb4.toString());
+                                LOG.d(TAG, "input fd[" + i5 + "] = " + inputInfo.inputFd[0]);
                             }
                             int width = image3.getWidth();
                             int height = image3.getHeight();
@@ -991,42 +808,40 @@ public class SuperNightProcess implements ProgressCallback {
                             i4 = -1;
                         }
                     }
-                    LOG.d(str2, "TotalCaptureResult - > error invalid param");
-                    if (this.mCountDownLatch != null) {
-                        LOG.d(str2, str);
-                        this.mCountDownLatch.countDown();
+                    LOG.d(TAG, "TotalCaptureResult - > error invalid param");
+                    if (this.mCountDownLatch == null) {
+                        return -1;
                     }
+                    LOG.d(TAG, "mCountDownLatch.countDown() 0");
+                    this.mCountDownLatch.countDown();
                     return -1;
                 }
             } catch (IllegalStateException e3) {
                 e = e3;
                 i4 = -1;
-                String str32 = "Error";
-                StringBuilder sb22 = new StringBuilder();
-                sb22.append("e-> ");
-                sb22.append(e.toString());
-                LOG.d(str32, sb22.toString());
+                LOG.d("Error", "e-> " + e.toString());
             }
         }
         FaceInfo faceInfo = null;
-        Iterator it = arrayList2.iterator();
+        Iterator<TotalCaptureResult> it = arrayList2.iterator();
         while (true) {
             if (!it.hasNext()) {
                 break;
             }
-            TotalCaptureResult totalCaptureResult2 = (TotalCaptureResult) it.next();
-            Integer num3 = (Integer) totalCaptureResult2.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION);
+            TotalCaptureResult next = it.next();
+            Integer num3 = (Integer) next.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION);
             if (num3 != null && num3.intValue() == 0) {
-                faceInfo = getFaceInfo(totalCaptureResult2, i6, i7);
+                faceInfo = getFaceInfo(next, i6, i7);
                 break;
             }
         }
         if (this.mIsCancel) {
-            LOG.d(str2, "is cancel 1");
-            if (this.mCountDownLatch != null) {
-                LOG.d(str2, str);
-                this.mCountDownLatch.countDown();
+            LOG.d(TAG, "is cancel 1");
+            if (this.mCountDownLatch == null) {
+                return -1;
             }
+            LOG.d(TAG, "mCountDownLatch.countDown() 0");
+            this.mCountDownLatch.countDown();
             return -1;
         }
         InputInfo inputInfo2 = new InputInfo();
@@ -1036,17 +851,14 @@ public class SuperNightProcess implements ProgressCallback {
         inputInfo2.inputImages[0] = getRawImage(image2, i3);
         inputInfo2.inputFd[0] = i2;
         i4 = this.mSuperNightJni.process(faceInfo, inputInfo2, 3, rect, this);
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append("cropRect0 = ");
-        sb5.append(rect.toString());
-        LOG.d(str2, sb5.toString());
+        LOG.d(TAG, "cropRect0 = " + rect.toString());
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:18:0x0064, code lost:
         if (r7.mCountDownLatch != null) goto L_0x0066;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:19:0x0066, code lost:
-        com.arcsoft.supernight.LOG.d(r2, r0);
+        com.arcsoft.supernight.LOG.d(TAG, "mCountDownLatch.countDown() 5");
         r7.mCountDownLatch.countDown();
      */
     /* JADX WARNING: Code restructure failed: missing block: B:25:0x0077, code lost:
@@ -1056,11 +868,9 @@ public class SuperNightProcess implements ProgressCallback {
         return r1;
      */
     public int addOneInputInfo(Image image, TotalCaptureResult totalCaptureResult, int i, int i2, int i3) {
-        String str = "mCountDownLatch.countDown() 5";
         int i4 = -1;
-        String str2 = TAG;
         if (image == null || totalCaptureResult == null || this.mSuperNightJni == null || i < 0) {
-            LOG.d(str2, "addOneInputInfo - > error invalid param");
+            LOG.d(TAG, "addOneInputInfo - > error invalid param");
             return -1;
         }
         try {
@@ -1086,7 +896,7 @@ public class SuperNightProcess implements ProgressCallback {
             e2.printStackTrace();
         } catch (Throwable th) {
             if (this.mCountDownLatch != null) {
-                LOG.d(str2, str);
+                LOG.d(TAG, "mCountDownLatch.countDown() 5");
                 this.mCountDownLatch.countDown();
             }
             throw th;
@@ -1120,20 +930,12 @@ public class SuperNightProcess implements ProgressCallback {
         int preProcess = this.mSuperNightJni.preProcess();
         this.mIsCancel = false;
         this.mInit = true;
-        StringBuilder sb = new StringBuilder();
-        sb.append("preprocess = ");
-        sb.append(preProcess);
-        LOG.d(TAG, sb.toString());
+        LOG.d(TAG, "preprocess = " + preProcess);
         return preProcess;
     }
 
     public void onProgress(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("progress = ");
-        sb.append(i);
-        sb.append(" status = ");
-        sb.append(i2);
-        LOG.d(TAG, sb.toString());
+        LOG.d(TAG, "progress = " + i + " status = " + i2);
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:13:0x0063, code lost:
@@ -1146,12 +948,10 @@ public class SuperNightProcess implements ProgressCallback {
         if (r10.mCountDownLatch != null) goto L_0x0052;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:7:0x0052, code lost:
-        com.arcsoft.supernight.LOG.d(r8, r7);
+        com.arcsoft.supernight.LOG.d(TAG, "mCountDownLatch.countDown() 4");
         r10.mCountDownLatch.countDown();
      */
     public int process(Image image, int i, Rect rect, int i2) {
-        String str = "mCountDownLatch.countDown() 4";
-        String str2 = TAG;
         int i3 = -1;
         if (image == null || rect == null) {
             return -1;
@@ -1164,15 +964,12 @@ public class SuperNightProcess implements ProgressCallback {
             inputInfo.cameraState = 2;
             inputInfo.inputImages[0] = getRawImage(image, i);
             i3 = this.mSuperNightJni.process(faceInfo, inputInfo, 3, rect, this);
-            StringBuilder sb = new StringBuilder();
-            sb.append("cropRect = ");
-            sb.append(rect.toString());
-            LOG.d(str2, sb.toString());
+            LOG.d(TAG, "cropRect = " + rect.toString());
         } catch (IllegalStateException e2) {
             e2.printStackTrace();
         } catch (Throwable th) {
             if (this.mCountDownLatch != null) {
-                LOG.d(str2, str);
+                LOG.d(TAG, "mCountDownLatch.countDown() 4");
                 this.mCountDownLatch.countDown();
             }
             throw th;
@@ -1180,10 +977,10 @@ public class SuperNightProcess implements ProgressCallback {
     }
 
     public void readDebugFileValue() {
+        String substring;
+        String substring2;
         File file = new File(DEBUG_FILE);
-        boolean exists = file.exists();
-        String str = TAG;
-        if (exists || file.isFile()) {
+        if (file.exists() || file.isFile()) {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -1194,10 +991,7 @@ public class SuperNightProcess implements ProgressCallback {
                     if (readLine == null) {
                         break;
                     }
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("dump file line = ");
-                    sb.append(readLine);
-                    LOG.d(str, sb.toString());
+                    LOG.d(TAG, "dump file line = " + readLine);
                     if (!TextUtils.isEmpty(readLine)) {
                         if (i >= 2) {
                             break;
@@ -1205,23 +999,15 @@ public class SuperNightProcess implements ProgressCallback {
                         boolean z = true;
                         if (readLine.contains(DUMP_KEY)) {
                             String trim = readLine.trim();
-                            String substring = trim.substring(trim.length() - 1);
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("dump file value =");
-                            sb2.append(substring);
-                            LOG.d(str, sb2.toString());
-                            if (Integer.parseInt(substring) != 1) {
+                            LOG.d(TAG, "dump file value =" + substring2);
+                            if (Integer.parseInt(substring2) != 1) {
                                 z = false;
                             }
                             this.mDumpFile = z;
                         } else if (readLine.contains(LOG_KEY)) {
                             String trim2 = readLine.trim();
-                            String substring2 = trim2.substring(trim2.length() - 1);
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("debug log value =");
-                            sb3.append(substring2);
-                            LOG.d(str, sb3.toString());
-                            if (Integer.parseInt(substring2) != 1) {
+                            LOG.d(TAG, "debug log value =" + substring);
+                            if (Integer.parseInt(substring) != 1) {
                                 z = false;
                             }
                             LOG.DEBUG = z;
@@ -1240,9 +1026,9 @@ public class SuperNightProcess implements ProgressCallback {
             } catch (NumberFormatException e4) {
                 e4.printStackTrace();
             }
-            return;
+        } else {
+            LOG.d(TAG, "dump file return false 0");
         }
-        LOG.d(str, "dump file return false 0");
     }
 
     public void setEnableAdrcGain(boolean z) {
@@ -1267,21 +1053,13 @@ public class SuperNightProcess implements ProgressCallback {
             return -1;
         }
         int postProcess = superNightJni.postProcess();
-        StringBuilder sb = new StringBuilder();
-        sb.append("postProcess = ");
-        sb.append(postProcess);
-        String sb2 = sb.toString();
-        String str = TAG;
-        LOG.d(str, sb2);
+        LOG.d(TAG, "postProcess = " + postProcess);
         int unInit = this.mSuperNightJni.unInit();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("unInit = ");
-        sb3.append(unInit);
-        LOG.d(str, sb3.toString());
+        LOG.d(TAG, "unInit = " + unInit);
         this.mMetdata = null;
         CountDownLatch countDownLatch = this.mCountDownLatch;
         if (countDownLatch != null && countDownLatch.getCount() > 0) {
-            LOG.d(str, "mCountDownLatch.countDown() 6");
+            LOG.d(TAG, "mCountDownLatch.countDown() 6");
             this.mCountDownLatch.countDown();
         }
         this.mInit = false;

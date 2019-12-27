@@ -2,7 +2,7 @@ package com.android.camera.lib.compatibility.related.v23;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
@@ -18,10 +18,8 @@ public class V23Utils {
 
     public static String getSdcardPath(Context context) {
         VolumeInfo volumeInfo;
-        int i = VERSION.SDK_INT;
-        String str = TAG;
-        String str2 = null;
-        if (i >= 23) {
+        String str = null;
+        if (Build.VERSION.SDK_INT >= 23) {
             List volumes = ((StorageManager) context.getSystemService("storage")).getVolumes();
             if (volumes != null) {
                 Iterator it = volumes.iterator();
@@ -32,10 +30,7 @@ public class V23Utils {
                     volumeInfo = (VolumeInfo) it.next();
                     if (volumeInfo.getType() == 0 && volumeInfo.isMountedWritable()) {
                         DiskInfo disk = volumeInfo.getDisk();
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("getSdcardPath: diskInfo = ");
-                        sb.append(disk);
-                        Log.d(str, sb.toString());
+                        Log.d(TAG, "getSdcardPath: diskInfo = " + disk);
                         if (disk != null && disk.isSd()) {
                             break;
                         }
@@ -44,30 +39,25 @@ public class V23Utils {
             }
         }
         volumeInfo = null;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("getSdcardPath: sdcardVolume = ");
-        sb2.append(volumeInfo);
-        Log.d(str, sb2.toString());
+        Log.d(TAG, "getSdcardPath: sdcardVolume = " + volumeInfo);
         if (volumeInfo != null) {
             File path = volumeInfo.getPath();
             if (path != null) {
-                str2 = path.getPath();
+                str = path.getPath();
             }
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("getSdcardPath sd=");
-            sb3.append(str2);
-            Log.v(str, sb3.toString());
+            Log.v(TAG, "getSdcardPath sd=" + str);
         }
-        return str2;
+        return str;
     }
 
     public static final boolean isInVideoCall(Context context) {
         Log.d(TAG, "isInVideoCall: start");
-        if (VERSION.SDK_INT >= 21) {
-            TelecomManager telecomManager = (TelecomManager) context.getSystemService("telecom");
-            if (telecomManager != null) {
-                return telecomManager.isInCall();
-            }
+        if (Build.VERSION.SDK_INT < 21) {
+            return false;
+        }
+        TelecomManager telecomManager = (TelecomManager) context.getSystemService("telecom");
+        if (telecomManager != null) {
+            return telecomManager.isInCall();
         }
         return false;
     }

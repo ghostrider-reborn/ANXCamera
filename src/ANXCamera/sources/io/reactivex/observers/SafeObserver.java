@@ -42,7 +42,7 @@ public final class SafeObserver<T> implements Observer<T>, Disposable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onCompleteNoSubscription() {
         NullPointerException nullPointerException = new NullPointerException("Subscription not set!");
         try {
@@ -116,7 +116,7 @@ public final class SafeObserver<T> implements Observer<T>, Disposable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onNextNoSubscription() {
         this.done = true;
         NullPointerException nullPointerException = new NullPointerException("Subscription not set!");

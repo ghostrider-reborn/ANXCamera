@@ -1,7 +1,6 @@
 package com.android.camera.watermark;
 
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.drawable.Drawable;
 import com.android.camera.R;
 import java.util.List;
@@ -55,7 +54,7 @@ public class AgeGenderWaterMarkDrawable extends BaseWaterMarkDrawable {
         this.mFaceRectPaint = new Paint();
         this.mFaceRectPaint.setAntiAlias(true);
         this.mFaceRectPaint.setStrokeWidth((float) this.mContext.getResources().getDimensionPixelSize(R.dimen.face_rect_width));
-        this.mFaceRectPaint.setStyle(Style.STROKE);
+        this.mFaceRectPaint.setStyle(Paint.Style.STROKE);
         this.mFaceRectPaint.setColor(GENDER_MALE_RECT_COLOR);
         this.mMaleHonPadding = this.mContext.getResources().getDimensionPixelSize(R.dimen.face_info_male_hon_padding);
         this.mFemaleHonPadding = this.mContext.getResources().getDimensionPixelSize(R.dimen.face_info_female_hon_padding);

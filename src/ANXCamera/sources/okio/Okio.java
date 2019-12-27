@@ -89,11 +89,7 @@ public final class Okio {
                 }
 
                 public String toString() {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("sink(");
-                    sb.append(outputStream);
-                    sb.append(")");
-                    return sb.toString();
+                    return "sink(" + outputStream + ")";
                 }
 
                 public void write(Buffer buffer, long j) throws IOException {
@@ -158,10 +154,7 @@ public final class Okio {
                 public long read(Buffer buffer, long j) throws IOException {
                     int i = (j > 0 ? 1 : (j == 0 ? 0 : -1));
                     if (i < 0) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("byteCount < 0: ");
-                        sb.append(j);
-                        throw new IllegalArgumentException(sb.toString());
+                        throw new IllegalArgumentException("byteCount < 0: " + j);
                     } else if (i == 0) {
                         return 0;
                     } else {
@@ -190,11 +183,7 @@ public final class Okio {
                 }
 
                 public String toString() {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("source(");
-                    sb.append(inputStream);
-                    sb.append(")");
-                    return sb.toString();
+                    return "source(" + inputStream + ")";
                 }
             };
         } else {
@@ -231,24 +220,17 @@ public final class Okio {
 
             /* access modifiers changed from: protected */
             public void timedOut() {
-                String str = "Failed to close timed out socket ";
                 try {
                     socket.close();
                 } catch (Exception e2) {
                     Logger logger = Okio.logger;
                     Level level = Level.WARNING;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(socket);
-                    logger.log(level, sb.toString(), e2);
+                    logger.log(level, "Failed to close timed out socket " + socket, e2);
                 } catch (AssertionError e3) {
                     if (Okio.isAndroidGetsocknameError(e3)) {
                         Logger logger2 = Okio.logger;
                         Level level2 = Level.WARNING;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(str);
-                        sb2.append(socket);
-                        logger2.log(level2, sb2.toString(), e3);
+                        logger2.log(level2, "Failed to close timed out socket " + socket, e3);
                         return;
                     }
                     throw e3;

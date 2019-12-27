@@ -61,6 +61,6 @@ public final class FlowableSkip<T> extends AbstractFlowableWithUpstream<T, T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new SkipSubscriber<Object>(subscriber, this.n));
+        this.source.subscribe(new SkipSubscriber(subscriber, this.n));
     }
 }

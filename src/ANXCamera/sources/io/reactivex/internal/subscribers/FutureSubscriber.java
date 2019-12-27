@@ -30,13 +30,14 @@ public final class FutureSubscriber<T> extends CountDownLatch implements Flowabl
         Subscription subscription;
         SubscriptionHelper subscriptionHelper;
         do {
-            subscription = (Subscription) this.s.get();
-            if (subscription != this) {
-                subscriptionHelper = SubscriptionHelper.CANCELLED;
-                if (subscription == subscriptionHelper) {
-                }
+            subscription = this.s.get();
+            if (subscription == this) {
+                return false;
             }
-            return false;
+            subscriptionHelper = SubscriptionHelper.CANCELLED;
+            if (subscription == subscriptionHelper) {
+                return false;
+            }
         } while (!this.s.compareAndSet(subscription, subscriptionHelper));
         if (subscription != null) {
             subscription.cancel();
@@ -78,7 +79,7 @@ public final class FutureSubscriber<T> extends CountDownLatch implements Flowabl
     }
 
     public boolean isCancelled() {
-        return SubscriptionHelper.isCancelled((Subscription) this.s.get());
+        return SubscriptionHelper.isCancelled(this.s.get());
     }
 
     public boolean isDone() {
@@ -86,27 +87,24 @@ public final class FutureSubscriber<T> extends CountDownLatch implements Flowabl
     }
 
     public void onComplete() {
+        Subscription subscription;
         if (this.value == null) {
             onError(new NoSuchElementException("The source is empty"));
             return;
         }
-        while (true) {
-            Subscription subscription = (Subscription) this.s.get();
-            if (subscription != this && subscription != SubscriptionHelper.CANCELLED) {
-                if (this.s.compareAndSet(subscription, this)) {
-                    countDown();
-                    break;
-                }
-            } else {
-                break;
+        do {
+            subscription = this.s.get();
+            if (subscription == this || subscription == SubscriptionHelper.CANCELLED) {
+                return;
             }
-        }
+        } while (!this.s.compareAndSet(subscription, this));
+        countDown();
     }
 
     public void onError(Throwable th) {
         Subscription subscription;
         do {
-            subscription = (Subscription) this.s.get();
+            subscription = this.s.get();
             if (subscription == this || subscription == SubscriptionHelper.CANCELLED) {
                 RxJavaPlugins.onError(th);
                 return;
@@ -118,7 +116,7 @@ public final class FutureSubscriber<T> extends CountDownLatch implements Flowabl
 
     public void onNext(T t) {
         if (this.value != null) {
-            ((Subscription) this.s.get()).cancel();
+            this.s.get().cancel();
             onError(new IndexOutOfBoundsException("More than one element received"));
             return;
         }

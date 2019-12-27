@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.functions.ObjectHelper;
@@ -39,7 +38,7 @@ public final class FlowableMap<T, U> extends AbstractFlowableWithUpstream<T, U> 
 
         @Nullable
         public U poll() throws Exception {
-            Object poll = this.qs.poll();
+            T poll = this.qs.poll();
             if (poll == null) {
                 return null;
             }
@@ -93,7 +92,7 @@ public final class FlowableMap<T, U> extends AbstractFlowableWithUpstream<T, U> 
 
         @Nullable
         public U poll() throws Exception {
-            Object poll = this.qs.poll();
+            T poll = this.qs.poll();
             if (poll == null) {
                 return null;
             }
@@ -115,9 +114,9 @@ public final class FlowableMap<T, U> extends AbstractFlowableWithUpstream<T, U> 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super U> subscriber) {
         if (subscriber instanceof ConditionalSubscriber) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new MapConditionalSubscriber<Object>((ConditionalSubscriber) subscriber, this.mapper));
+            this.source.subscribe(new MapConditionalSubscriber((ConditionalSubscriber) subscriber, this.mapper));
         } else {
-            this.source.subscribe((FlowableSubscriber<? super T>) new MapSubscriber<Object>(subscriber, this.mapper));
+            this.source.subscribe(new MapSubscriber(subscriber, this.mapper));
         }
     }
 }

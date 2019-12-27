@@ -57,11 +57,11 @@ public final class FlowableIgnoreElementsCompletable<T> extends Completable impl
     }
 
     public Flowable<T> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableIgnoreElements<T>(this.source));
+        return RxJavaPlugins.onAssembly(new FlowableIgnoreElements(this.source));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(CompletableObserver completableObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new IgnoreElementsSubscriber<Object>(completableObserver));
+        this.source.subscribe(new IgnoreElementsSubscriber(completableObserver));
     }
 }

@@ -35,7 +35,7 @@ public class TimecodeSampleEntry extends SampleEntry {
         byteBuffer.putInt(this.timescale);
         byteBuffer.putInt(this.frameDuration);
         byteBuffer.put(this.numFrames);
-        byteBuffer.put(-49);
+        byteBuffer.put((byte) -49);
     }
 
     public int getFlags() {

@@ -18,7 +18,7 @@ public abstract class g implements j<Bitmap> {
     public final A<Bitmap> transform(@NonNull Context context, @NonNull A<Bitmap> a2, int i, int i2) {
         if (l.o(i, i2)) {
             d Cf = c.get(context).Cf();
-            Bitmap bitmap = (Bitmap) a2.get();
+            Bitmap bitmap = a2.get();
             if (i == Integer.MIN_VALUE) {
                 i = bitmap.getWidth();
             }
@@ -28,12 +28,6 @@ public abstract class g implements j<Bitmap> {
             Bitmap transform = transform(Cf, bitmap, i, i2);
             return bitmap.equals(transform) ? a2 : f.a(transform, Cf);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cannot apply transformation on width: ");
-        sb.append(i);
-        sb.append(" or height: ");
-        sb.append(i2);
-        sb.append(" less than or equal to zero and not Target.SIZE_ORIGINAL");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Cannot apply transformation on width: " + i + " or height: " + i2 + " less than or equal to zero and not Target.SIZE_ORIGINAL");
     }
 }

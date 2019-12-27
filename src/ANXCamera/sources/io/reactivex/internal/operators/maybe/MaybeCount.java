@@ -14,7 +14,7 @@ public final class MaybeCount<T> extends Single<Long> implements HasUpstreamMayb
     static final class CountMaybeObserver implements MaybeObserver<Object>, Disposable {
         final SingleObserver<? super Long> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f279d;
 
         CountMaybeObserver(SingleObserver<? super Long> singleObserver) {
@@ -32,7 +32,7 @@ public final class MaybeCount<T> extends Single<Long> implements HasUpstreamMayb
 
         public void onComplete() {
             this.f279d = DisposableHelper.DISPOSED;
-            this.actual.onSuccess(Long.valueOf(0));
+            this.actual.onSuccess(0L);
         }
 
         public void onError(Throwable th) {
@@ -49,7 +49,7 @@ public final class MaybeCount<T> extends Single<Long> implements HasUpstreamMayb
 
         public void onSuccess(Object obj) {
             this.f279d = DisposableHelper.DISPOSED;
-            this.actual.onSuccess(Long.valueOf(1));
+            this.actual.onSuccess(1L);
         }
     }
 

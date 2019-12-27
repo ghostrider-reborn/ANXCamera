@@ -5,8 +5,8 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build.VERSION;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -85,7 +85,7 @@ public final class TaskStackBuilder implements Iterable<Intent> {
                 parentActivityIntent = NavUtils.getParentActivityIntent(this.mSourceContext, parentActivityIntent.getComponent());
             }
             return this;
-        } catch (NameNotFoundException e2) {
+        } catch (PackageManager.NameNotFoundException e2) {
             Log.e(TAG, "Bad ComponentName while traversing activity parent metadata");
             throw new IllegalArgumentException(e2);
         }
@@ -98,7 +98,7 @@ public final class TaskStackBuilder implements Iterable<Intent> {
 
     @Nullable
     public Intent editIntentAt(int i) {
-        return (Intent) this.mIntents.get(i);
+        return this.mIntents.get(i);
     }
 
     @Deprecated
@@ -116,16 +116,16 @@ public final class TaskStackBuilder implements Iterable<Intent> {
         if (intentArr.length == 0) {
             return intentArr;
         }
-        intentArr[0] = new Intent((Intent) this.mIntents.get(0)).addFlags(268484608);
+        intentArr[0] = new Intent(this.mIntents.get(0)).addFlags(268484608);
         for (int i = 1; i < intentArr.length; i++) {
-            intentArr[i] = new Intent((Intent) this.mIntents.get(i));
+            intentArr[i] = new Intent(this.mIntents.get(i));
         }
         return intentArr;
     }
 
     @Nullable
     public PendingIntent getPendingIntent(int i, int i2) {
-        return getPendingIntent(i, i2, null);
+        return getPendingIntent(i, i2, (Bundle) null);
     }
 
     @Nullable
@@ -134,7 +134,7 @@ public final class TaskStackBuilder implements Iterable<Intent> {
             ArrayList<Intent> arrayList = this.mIntents;
             Intent[] intentArr = (Intent[]) arrayList.toArray(new Intent[arrayList.size()]);
             intentArr[0] = new Intent(intentArr[0]).addFlags(268484608);
-            return VERSION.SDK_INT >= 16 ? PendingIntent.getActivities(this.mSourceContext, i, intentArr, i2, bundle) : PendingIntent.getActivities(this.mSourceContext, i, intentArr, i2);
+            return Build.VERSION.SDK_INT >= 16 ? PendingIntent.getActivities(this.mSourceContext, i, intentArr, i2, bundle) : PendingIntent.getActivities(this.mSourceContext, i, intentArr, i2);
         }
         throw new IllegalStateException("No intents added to TaskStackBuilder; cannot getPendingIntent");
     }
@@ -145,7 +145,7 @@ public final class TaskStackBuilder implements Iterable<Intent> {
     }
 
     public void startActivities() {
-        startActivities(null);
+        startActivities((Bundle) null);
     }
 
     public void startActivities(@Nullable Bundle bundle) {

@@ -26,7 +26,6 @@ public class ComponentConfigSlowMotionQuality extends ComponentData {
     }
 
     public static ArrayList<String> getSupportedHfrSettings(CameraCapabilities cameraCapabilities) {
-        Size[] supportedHighSpeedVideoSize;
         ArrayList<String> arrayList = new ArrayList<>();
         for (Size size : cameraCapabilities.getSupportedHighSpeedVideoSize()) {
             if (size.getWidth() == 1920 || size.getWidth() == 1280) {
@@ -48,10 +47,7 @@ public class ComponentConfigSlowMotionQuality extends ComponentData {
                 return true;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("checkValueValid: invalid value: ");
-        sb.append(str);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "checkValueValid: invalid value: " + str);
         return false;
     }
 
@@ -67,12 +63,7 @@ public class ComponentConfigSlowMotionQuality extends ComponentData {
             return string;
         }
         String simpleName = ComponentConfigSlowMotionQuality.class.getSimpleName();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Items do not have this ");
-        sb.append(string);
-        sb.append(",so return defaultValue = ");
-        sb.append(defaultValue);
-        Log.e(simpleName, sb.toString());
+        Log.e(simpleName, "Items do not have this " + string + ",so return defaultValue = " + defaultValue);
         return defaultValue;
     }
 
@@ -96,8 +87,8 @@ public class ComponentConfigSlowMotionQuality extends ComponentData {
         String persistValue = getPersistValue(i);
         int size = this.mItems.size();
         for (int i2 = 0; i2 < size; i2++) {
-            if (TextUtils.equals(((ComponentDataItem) this.mItems.get(i2)).mValue, persistValue)) {
-                return ((ComponentDataItem) this.mItems.get((i2 + 1) % size)).mValue;
+            if (TextUtils.equals(this.mItems.get(i2).mValue, persistValue)) {
+                return this.mItems.get((i2 + 1) % size).mValue;
             }
         }
         return getDefaultValue(i);
@@ -111,7 +102,7 @@ public class ComponentConfigSlowMotionQuality extends ComponentData {
             list.clear();
         }
         if (i == 172) {
-            ArrayList supportedHfrSettings = getSupportedHfrSettings(cameraCapabilities);
+            ArrayList<String> supportedHfrSettings = getSupportedHfrSettings(cameraCapabilities);
             boolean contains = supportedHfrSettings.contains("1920x1080:240");
             boolean contains2 = supportedHfrSettings.contains(SIZE_FPS_1080_120);
             mCurrentFps = componentConfigSlowMotion.getComponentValue(i);
@@ -129,32 +120,30 @@ public class ComponentConfigSlowMotionQuality extends ComponentData {
             } else if (str.equals(ComponentConfigSlowMotion.DATA_CONFIG_NEW_SLOW_MOTION_120)) {
                 c2 = 2;
             }
-            String str2 = "6";
-            String str3 = "5";
             if (c2 != 0) {
                 if (c2 != 1) {
                     if (c2 == 2) {
                         if (contains2) {
-                            this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_1080p_120fps, (int) R.drawable.ic_config_slow_1080p_120fps, (int) R.string.pref_new_slow_motion_video_quality_entry_1080p, str2));
-                            this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_120fps, (int) R.drawable.ic_config_slow_720p_120fps, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, str3));
+                            this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_1080p_120fps, (int) R.drawable.ic_config_slow_1080p_120fps, (int) R.string.pref_new_slow_motion_video_quality_entry_1080p, "6"));
+                            this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_120fps, (int) R.drawable.ic_config_slow_720p_120fps, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, "5"));
                         } else {
-                            this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_120fps_disable, (int) R.drawable.ic_config_slow_720p_120fps_disable, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, str3));
+                            this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_120fps_disable, (int) R.drawable.ic_config_slow_720p_120fps_disable, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, "5"));
                             if (DataRepository.dataItemFeature().sc()) {
-                                setComponentValue(i, str3);
+                                setComponentValue(i, "5");
                             }
                         }
                     }
                 } else if (contains) {
-                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_1080p_240fps, (int) R.drawable.ic_config_slow_1080p_240fps, (int) R.string.pref_new_slow_motion_video_quality_entry_1080p, str2));
-                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_240fps, (int) R.drawable.ic_config_slow_720p_240fps, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, str3));
+                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_1080p_240fps, (int) R.drawable.ic_config_slow_1080p_240fps, (int) R.string.pref_new_slow_motion_video_quality_entry_1080p, "6"));
+                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_240fps, (int) R.drawable.ic_config_slow_720p_240fps, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, "5"));
                 } else {
-                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_240fps_disable, (int) R.drawable.ic_config_slow_720p_240fps_disable, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, str3));
+                    this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_240fps_disable, (int) R.drawable.ic_config_slow_720p_240fps_disable, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, "5"));
                 }
             } else if (contains) {
-                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_1080p_960fps, (int) R.drawable.ic_config_slow_1080p_960fps, (int) R.string.pref_new_slow_motion_video_quality_entry_1080p, str2));
-                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_960fps, (int) R.drawable.ic_config_slow_720p_960fps, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, str3));
+                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_1080p_960fps, (int) R.drawable.ic_config_slow_1080p_960fps, (int) R.string.pref_new_slow_motion_video_quality_entry_1080p, "6"));
+                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_960fps, (int) R.drawable.ic_config_slow_720p_960fps, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, "5"));
             } else {
-                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_960fps_disable, (int) R.drawable.ic_config_slow_720p_960fps_disable, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, str3));
+                this.mItems.add(new ComponentDataItem((int) R.drawable.ic_config_slow_720p_960fps_disable, (int) R.drawable.ic_config_slow_720p_960fps_disable, (int) R.string.pref_new_slow_motion_video_quality_entry_720p, "5"));
             }
         }
         return this.mItems;

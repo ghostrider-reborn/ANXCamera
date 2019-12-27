@@ -17,7 +17,7 @@ public class ContentLoadingProgressBar extends ProgressBar {
     long mStartTime;
 
     public ContentLoadingProgressBar(@NonNull Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public ContentLoadingProgressBar(@NonNull Context context, @Nullable AttributeSet attributeSet) {

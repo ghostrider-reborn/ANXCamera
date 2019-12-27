@@ -10,12 +10,9 @@ public class Block {
 
     public int[] getOffset(int i, int i2) {
         int i3 = this.mOffset;
-        int i4 = i3 % i;
-        int i5 = this.mAdjWidth;
-        int i6 = i4 / i5;
-        int i7 = i3 / i;
-        int i8 = this.mAdjHeight;
-        return new int[]{i6 * i5, (i7 / i8) * i8};
+        int i4 = this.mAdjWidth;
+        int i5 = this.mAdjHeight;
+        return new int[]{((i3 % i) / i4) * i4, ((i3 / i) / i5) * i5};
     }
 
     public int[] getYUVOffset(int i, int i2, int i3, int i4) {

@@ -29,14 +29,7 @@ public class PreviewImageProp extends CaptureImage {
                 int limit = buffer.limit();
                 int limit2 = buffer2.limit();
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("convertYUV420888ToNV21: ");
-                sb.append(image.getWidth());
-                sb.append("x");
-                sb.append(image.getHeight());
-                sb.append(" ");
-                sb.append(image.getPlanes()[2].getRowStride());
-                Log.v(str, sb.toString());
+                Log.v(str, "convertYUV420888ToNV21: " + image.getWidth() + "x" + image.getHeight() + " " + image.getPlanes()[2].getRowStride());
                 this.mData = new byte[(limit + limit2)];
                 buffer.get(this.mData, 0, limit);
                 buffer2.get(this.mData, limit, limit2);
@@ -70,11 +63,10 @@ public class PreviewImageProp extends CaptureImage {
             i4++;
         }
         while (true) {
-            int i7 = i2 / 2;
-            if (i3 >= i7) {
+            if (i3 >= i2 / 2) {
                 return bArr;
             }
-            if (i3 == i7 - 1) {
+            if (i3 == r3 - 1) {
                 System.arraycopy(data, i5, bArr, i6, i - 1);
             } else {
                 System.arraycopy(data, i5, bArr, i6, i);

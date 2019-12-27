@@ -14,7 +14,7 @@ public final class MaybeMap<T, R> extends AbstractMaybeWithUpstream<T, R> {
     static final class MapMaybeObserver<T, R> implements MaybeObserver<T>, Disposable {
         final MaybeObserver<? super R> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f298d;
         final Function<? super T, ? extends R> mapper;
 

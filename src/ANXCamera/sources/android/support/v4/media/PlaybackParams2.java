@@ -1,10 +1,9 @@
 package android.support.v4.media;
 
 import android.media.PlaybackParams;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -17,7 +16,7 @@ public final class PlaybackParams2 {
     private PlaybackParams mPlaybackParams;
     private Float mSpeed;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioFallbackMode {
     }
@@ -29,23 +28,23 @@ public final class PlaybackParams2 {
         private Float mSpeed;
 
         public Builder() {
-            if (VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 23) {
                 this.mPlaybackParams = new PlaybackParams();
             }
         }
 
         @RequiresApi(23)
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public Builder(PlaybackParams playbackParams) {
             this.mPlaybackParams = playbackParams;
         }
 
         public PlaybackParams2 build() {
-            return VERSION.SDK_INT >= 23 ? new PlaybackParams2(this.mPlaybackParams) : new PlaybackParams2(this.mAudioFallbackMode, this.mPitch, this.mSpeed);
+            return Build.VERSION.SDK_INT >= 23 ? new PlaybackParams2(this.mPlaybackParams) : new PlaybackParams2(this.mAudioFallbackMode, this.mPitch, this.mSpeed);
         }
 
         public Builder setAudioFallbackMode(int i) {
-            if (VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 23) {
                 this.mPlaybackParams.setAudioFallbackMode(i);
             } else {
                 this.mAudioFallbackMode = Integer.valueOf(i);
@@ -55,7 +54,7 @@ public final class PlaybackParams2 {
 
         public Builder setPitch(float f2) {
             if (f2 >= 0.0f) {
-                if (VERSION.SDK_INT >= 23) {
+                if (Build.VERSION.SDK_INT >= 23) {
                     this.mPlaybackParams.setPitch(f2);
                 } else {
                     this.mPitch = Float.valueOf(f2);
@@ -66,7 +65,7 @@ public final class PlaybackParams2 {
         }
 
         public Builder setSpeed(float f2) {
-            if (VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 23) {
                 this.mPlaybackParams.setSpeed(f2);
             } else {
                 this.mSpeed = Float.valueOf(f2);
@@ -87,7 +86,7 @@ public final class PlaybackParams2 {
     }
 
     public Integer getAudioFallbackMode() {
-        if (VERSION.SDK_INT < 23) {
+        if (Build.VERSION.SDK_INT < 23) {
             return this.mAudioFallbackMode;
         }
         try {
@@ -98,7 +97,7 @@ public final class PlaybackParams2 {
     }
 
     public Float getPitch() {
-        if (VERSION.SDK_INT < 23) {
+        if (Build.VERSION.SDK_INT < 23) {
             return this.mPitch;
         }
         try {
@@ -109,16 +108,16 @@ public final class PlaybackParams2 {
     }
 
     @RequiresApi(23)
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public PlaybackParams getPlaybackParams() {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             return this.mPlaybackParams;
         }
         return null;
     }
 
     public Float getSpeed() {
-        if (VERSION.SDK_INT < 23) {
+        if (Build.VERSION.SDK_INT < 23) {
             return this.mPitch;
         }
         try {

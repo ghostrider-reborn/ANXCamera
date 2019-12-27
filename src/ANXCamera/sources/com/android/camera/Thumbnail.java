@@ -4,10 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -15,10 +12,9 @@ import android.graphics.PaintFlagsDrawFilter;
 import android.media.MediaMetadataRetriever;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Build.VERSION;
-import android.provider.MediaStore.Images.Thumbnails;
-import android.provider.MediaStore.Video;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.os.Build;
+import android.provider.MediaStore;
+import android.provider.MiuiSettings;
 import android.text.TextUtils;
 import com.android.camera.data.DataRepository;
 import com.android.camera.log.Log;
@@ -74,8 +70,6 @@ public class Thumbnail {
     private static Bitmap adjustImage(Bitmap bitmap, int i, boolean z) {
         int i2;
         int i3;
-        String str = "Failed to rotate thumbnail";
-        String str2 = TAG;
         if (i == 0 && !z && bitmap.getWidth() == bitmap.getHeight()) {
             return bitmap;
         }
@@ -97,7 +91,7 @@ public class Thumbnail {
         matrix.postTranslate(((float) (min - i3)) / 2.0f, ((float) (min - i2)) / 2.0f);
         Bitmap bitmap2 = null;
         try {
-            bitmap2 = Bitmap.createBitmap(min, min, Config.ARGB_8888);
+            bitmap2 = Bitmap.createBitmap(min, min, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap2);
             canvas.setDrawFilter(new PaintFlagsDrawFilter(0, 3));
             Paint paint = new Paint();
@@ -105,21 +99,22 @@ public class Thumbnail {
             paint.setFilterBitmap(true);
             canvas.drawBitmap(bitmap, matrix, paint);
             bitmap.recycle();
+            return bitmap2;
         } catch (Exception e2) {
-            Log.w(str2, str, e2);
+            Log.w(TAG, "Failed to rotate thumbnail", e2);
+            return bitmap2;
         } catch (OutOfMemoryError e3) {
-            Log.w(str2, str, e3);
+            Log.w(TAG, "Failed to rotate thumbnail", e3);
+            return bitmap2;
         }
-        return bitmap2;
     }
 
     public static Bitmap createBitmap(byte[] bArr, int i, boolean z, int i2) {
-        String str = TAG;
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = i2;
         options.inPurgeable = true;
         Bitmap decodeByteArray = BitmapFactory.decodeByteArray(bArr, 0, bArr.length, options);
-        int i3 = i % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        int i3 = i % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         if (decodeByteArray != null && (i3 != 0 || z)) {
             Matrix matrix = new Matrix();
             Matrix matrix2 = new Matrix();
@@ -131,15 +126,15 @@ public class Thumbnail {
                 matrix.postConcat(matrix2);
             }
             try {
-                Log.d(str, "createBitmap:createBitmap start ");
+                Log.d(TAG, "createBitmap:createBitmap start ");
                 Bitmap createBitmap = Bitmap.createBitmap(decodeByteArray, 0, 0, decodeByteArray.getWidth(), decodeByteArray.getHeight(), matrix, true);
-                Log.d(str, "createBitmap: createBitmap end");
+                Log.d(TAG, "createBitmap: createBitmap end");
                 if (createBitmap != decodeByteArray) {
                     decodeByteArray.recycle();
                 }
                 return createBitmap;
             } catch (Exception e2) {
-                Log.w(str, "Failed to rotate thumbnail", e2);
+                Log.w(TAG, "Failed to rotate thumbnail", e2);
             }
         }
         return decodeByteArray;
@@ -165,7 +160,7 @@ public class Thumbnail {
                 Log.e(TAG, "parser jpeg error, ignore", e2);
             }
             if (bitmap == null) {
-                Options options = new Options();
+                BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = i2;
                 options.inPurgeable = true;
                 bitmap = BitmapFactory.decodeByteArray(bArr, 0, bArr.length, options);
@@ -187,36 +182,35 @@ public class Thumbnail {
         boolean z2;
         Bitmap bitmap;
         if (!(uri == null || uri.getPath() == null)) {
-            boolean contains = uri.getPath().contains(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI.getPath());
-            String str2 = "_data";
-            String str3 = "_id";
-            Cursor query = contentResolver.query(uri, contains ? new String[]{str3, str2, "orientation"} : new String[]{str3, str2}, null, null, null);
+            boolean contains = uri.getPath().contains(MediaStore.Images.Media.EXTERNAL_CONTENT_URI.getPath());
+            Cursor query = contentResolver.query(uri, contains ? new String[]{"_id", "_data", "orientation"} : new String[]{"_id", "_data"}, (String) null, (String[]) null, (String) null);
             int i2 = 0;
             if (query != null) {
                 try {
                     if (query.moveToFirst()) {
                         long j2 = query.getLong(0);
+                        String string = query.getString(1);
                         i = contains ? query.getInt(2) : 0;
                         long j3 = j2;
                         z2 = true;
-                        str = query.getString(1);
+                        str = string;
                         j = j3;
                         if (query != null) {
                             query.close();
                         }
                         if (z2) {
                             if (contains) {
-                                bitmap = Thumbnails.getThumbnail(contentResolver, j, 1, null);
+                                bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, j, 1, (BitmapFactory.Options) null);
                                 if (bitmap == null) {
                                     bitmap = ThumbnailUtils.createImageThumbnail(str, 1);
                                 }
                             } else {
-                                bitmap = Video.Thumbnails.getThumbnail(contentResolver, j, 1, null);
+                                bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, j, 1, (BitmapFactory.Options) null);
                                 if (bitmap == null) {
                                     bitmap = ThumbnailUtils.createVideoThumbnail(str, 1);
                                 }
                             }
-                            if (VERSION.SDK_INT <= 28) {
+                            if (Build.VERSION.SDK_INT <= 28) {
                                 i2 = i;
                             }
                             return createThumbnail(uri, bitmap, i2, z);
@@ -242,11 +236,11 @@ public class Thumbnail {
     }
 
     public static Bitmap createVideoThumbnailBitmap(FileDescriptor fileDescriptor, int i) {
-        return createVideoThumbnailBitmap(null, fileDescriptor, i);
+        return createVideoThumbnailBitmap((String) null, fileDescriptor, i);
     }
 
     public static Bitmap createVideoThumbnailBitmap(String str, int i) {
-        return createVideoThumbnailBitmap(str, null, i);
+        return createVideoThumbnailBitmap(str, (FileDescriptor) null, i);
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:25:0x0049  */
@@ -254,22 +248,21 @@ public class Thumbnail {
     private static Bitmap createVideoThumbnailBitmap(String str, FileDescriptor fileDescriptor, int i) {
         Bitmap bitmap;
         MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        String str2 = TAG;
         if (str != null) {
             try {
                 mediaMetadataRetriever.setDataSource(str);
             } catch (IllegalArgumentException e2) {
-                Log.e(str2, e2.getMessage(), e2);
+                Log.e(TAG, e2.getMessage(), e2);
                 mediaMetadataRetriever.release();
                 bitmap = null;
                 if (bitmap == null) {
                 }
             } catch (RuntimeException e3) {
-                Log.e(str2, e3.getMessage(), e3);
+                Log.e(TAG, e3.getMessage(), e3);
                 try {
                     mediaMetadataRetriever.release();
                 } catch (RuntimeException e4) {
-                    Log.e(str2, e4.getMessage(), e4);
+                    Log.e(TAG, e4.getMessage(), e4);
                 }
                 bitmap = null;
                 if (bitmap == null) {
@@ -278,7 +271,7 @@ public class Thumbnail {
                 try {
                     mediaMetadataRetriever.release();
                 } catch (RuntimeException e5) {
-                    Log.e(str2, e5.getMessage(), e5);
+                    Log.e(TAG, e5.getMessage(), e5);
                 }
                 throw th;
             }
@@ -289,63 +282,32 @@ public class Thumbnail {
         try {
             mediaMetadataRetriever.release();
         } catch (RuntimeException e6) {
-            Log.e(str2, e6.getMessage(), e6);
+            Log.e(TAG, e6.getMessage(), e6);
         }
         if (bitmap == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("fail to get thumbnail for ");
-            sb.append(str);
-            Log.e(str2, sb.toString());
+            Log.e(TAG, "fail to get thumbnail for " + str);
             return null;
         }
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        if (width > i) {
-            float f2 = (float) width;
-            float f3 = ((float) i) / f2;
-            bitmap = Bitmap.createScaledBitmap(bitmap, Math.round(f2 * f3), Math.round(f3 * ((float) height)), true);
+        if (width <= i) {
+            return bitmap;
         }
-        return bitmap;
+        float f2 = (float) width;
+        float f3 = ((float) i) / f2;
+        return Bitmap.createScaledBitmap(bitmap, Math.round(f2 * f3), Math.round(f3 * ((float) height)), true);
     }
 
     private static String getImageBucketIds() {
-        String str = ")";
-        String str2 = "bucket_id IN (";
-        String str3 = ",";
         if (Storage.secondaryStorageMounted()) {
             if (DataRepository.dataItemFeature().va()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(Storage.PRIMARY_BUCKET_ID);
-                sb.append(str3);
-                sb.append(Storage.SECONDARY_BUCKET_ID);
-                sb.append(str3);
-                sb.append(Storage.PRIMARY_RAW_BUCKET_ID);
-                sb.append(str3);
-                sb.append(Storage.SECONDARY_RAW_BUCKET_ID);
-                sb.append(str);
-                return sb.toString();
+                return "bucket_id IN (" + Storage.PRIMARY_BUCKET_ID + "," + Storage.SECONDARY_BUCKET_ID + "," + Storage.PRIMARY_RAW_BUCKET_ID + "," + Storage.SECONDARY_RAW_BUCKET_ID + ")";
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str2);
-            sb2.append(Storage.PRIMARY_BUCKET_ID);
-            sb2.append(str3);
-            sb2.append(Storage.SECONDARY_BUCKET_ID);
-            sb2.append(str);
-            return sb2.toString();
+            return "bucket_id IN (" + Storage.PRIMARY_BUCKET_ID + "," + Storage.SECONDARY_BUCKET_ID + ")";
         } else if (DataRepository.dataItemFeature().va()) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str2);
-            sb3.append(Storage.BUCKET_ID);
-            sb3.append(str3);
-            sb3.append(Storage.PRIMARY_RAW_BUCKET_ID);
-            sb3.append(str);
-            return sb3.toString();
+            return "bucket_id IN (" + Storage.BUCKET_ID + "," + Storage.PRIMARY_RAW_BUCKET_ID + ")";
         } else {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("bucket_id=");
-            sb4.append(Storage.BUCKET_ID);
-            return sb4.toString();
+            return "bucket_id=" + Storage.BUCKET_ID;
         }
     }
 
@@ -371,42 +333,28 @@ public class Thumbnail {
         Cursor cursor;
         Cursor cursor2;
         boolean z;
-        String str = TAG;
-        Uri uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         Uri build = uri.buildUpon().appendQueryParameter("limit", "1").build();
         String[] strArr = {"_id", "orientation", "datetaken", "_data"};
-        String str2 = "";
+        String str = "";
         if (!DataRepository.dataItemFeature().va()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append("mime_type='image/jpeg' AND ");
-            str2 = sb.toString();
+            str = str + "mime_type='image/jpeg' AND ";
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str2);
-        sb2.append(getImageBucketIds());
-        sb2.append(" AND ");
-        sb2.append("_size");
-        sb2.append(" > 0");
-        String sb3 = sb2.toString();
-        String str3 = "datetaken DESC,_id DESC";
+        String str2 = str + getImageBucketIds() + " AND " + "_size" + " > 0";
         try {
-            cursor = contentResolver.query(build, strArr, sb3, null, str3);
+            cursor = contentResolver.query(build, strArr, str2, (String[]) null, "datetaken DESC,_id DESC");
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
                         String string = cursor.getString(3);
                         if (TextUtils.isEmpty(string) || !new File(string).exists()) {
-                            Log.d(str, "getLastImageThumbnail first file is deleted");
+                            Log.d(TAG, "getLastImageThumbnail first file is deleted");
                             z = true;
                             if (!z) {
-                                cursor2 = contentResolver.query(uri, strArr, sb3, null, str3);
+                                cursor2 = contentResolver.query(uri, strArr, str2, (String[]) null, "datetaken DESC,_id DESC");
                                 if (cursor2 != null) {
                                     try {
-                                        StringBuilder sb4 = new StringBuilder();
-                                        sb4.append("getLastImageThumbnail count=");
-                                        sb4.append(cursor2.getCount());
-                                        Log.d(str, sb4.toString());
+                                        Log.d(TAG, "getLastImageThumbnail count=" + cursor2.getCount());
                                         while (cursor2.moveToNext()) {
                                             String string2 = cursor2.getString(3);
                                             if (!TextUtils.isEmpty(string2) && new File(string2).exists()) {
@@ -424,7 +372,7 @@ public class Thumbnail {
                                     } catch (Exception e2) {
                                         e = e2;
                                         try {
-                                            Log.w(str, "getLastImageThumbnail error", e);
+                                            Log.w(TAG, "getLastImageThumbnail error", e);
                                             if (cursor != null) {
                                             }
                                         } catch (Throwable th) {
@@ -455,7 +403,7 @@ public class Thumbnail {
                 } catch (Exception e3) {
                     e = e3;
                     cursor2 = null;
-                    Log.w(str, "getLastImageThumbnail error", e);
+                    Log.w(TAG, "getLastImageThumbnail error", e);
                     if (cursor != null) {
                     }
                 } catch (Throwable th2) {
@@ -477,7 +425,7 @@ public class Thumbnail {
             e = e4;
             cursor2 = null;
             cursor = null;
-            Log.w(str, "getLastImageThumbnail error", e);
+            Log.w(TAG, "getLastImageThumbnail error", e);
             if (cursor != null) {
                 cursor.close();
             }
@@ -502,29 +450,28 @@ public class Thumbnail {
         if (lastImageThumbnail == null && lastVideoThumbnail == null) {
             return 0;
         }
-        String str = TAG;
         if (lastImageThumbnail == null || (lastVideoThumbnail != null && lastImageThumbnail.dateTaken < lastVideoThumbnail.dateTaken)) {
             if (uri != null && uri.equals(lastVideoThumbnail.uri)) {
                 return -1;
             }
-            bitmap = Video.Thumbnails.getThumbnail(contentResolver, lastVideoThumbnail.id, 1, null);
+            bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, lastVideoThumbnail.id, 1, (BitmapFactory.Options) null);
             if (bitmap == null) {
                 try {
                     bitmap = ThumbnailUtils.createVideoThumbnail(lastVideoThumbnail.path, 1);
                 } catch (Exception e2) {
-                    Log.e(str, "exception in createVideoThumbnail", e2);
+                    Log.e(TAG, "exception in createVideoThumbnail", e2);
                 }
             }
             lastImageThumbnail = lastVideoThumbnail;
         } else if (uri != null && uri.equals(lastImageThumbnail.uri)) {
             return -1;
         } else {
-            bitmap = Thumbnails.getThumbnail(contentResolver, lastImageThumbnail.id, 1, null);
+            bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, lastImageThumbnail.id, 1, (BitmapFactory.Options) null);
             if (bitmap == null) {
                 try {
                     bitmap = ThumbnailUtils.createImageThumbnail(lastImageThumbnail.path, 1);
                 } catch (Exception e3) {
-                    Log.e(str, "exception in createImageThumbnail", e3);
+                    Log.e(TAG, "exception in createImageThumbnail", e3);
                 }
             }
         }
@@ -534,7 +481,7 @@ public class Thumbnail {
         if (bitmap == null) {
             return 3;
         }
-        thumbnailArr[0] = createThumbnail(lastImageThumbnail.uri, bitmap, VERSION.SDK_INT > 28 ? 0 : lastImageThumbnail.orientation, false);
+        thumbnailArr[0] = createThumbnail(lastImageThumbnail.uri, bitmap, Build.VERSION.SDK_INT > 28 ? 0 : lastImageThumbnail.orientation, false);
         return 1;
     }
 
@@ -565,12 +512,8 @@ public class Thumbnail {
                     } catch (IOException e2) {
                         e = e2;
                         dataInputStream = null;
-                        String str = TAG;
                         try {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Fail to load bitmap. ");
-                            sb.append(e);
-                            Log.i(str, sb.toString());
+                            Log.i(TAG, "Fail to load bitmap. " + e);
                             Util.closeSilently(fileInputStream);
                             Util.closeSilently(bufferedInputStream);
                             Util.closeSilently(dataInputStream);
@@ -606,11 +549,7 @@ public class Thumbnail {
                         Util.closeSilently(dataInputStream);
                     } catch (IOException e3) {
                         e = e3;
-                        String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Fail to load bitmap. ");
-                        sb2.append(e);
-                        Log.i(str2, sb2.toString());
+                        Log.i(TAG, "Fail to load bitmap. " + e);
                         Util.closeSilently(fileInputStream);
                         Util.closeSilently(bufferedInputStream);
                         Util.closeSilently(dataInputStream);
@@ -620,11 +559,7 @@ public class Thumbnail {
                     e = e4;
                     bufferedInputStream = null;
                     dataInputStream = null;
-                    String str22 = TAG;
-                    StringBuilder sb22 = new StringBuilder();
-                    sb22.append("Fail to load bitmap. ");
-                    sb22.append(e);
-                    Log.i(str22, sb22.toString());
+                    Log.i(TAG, "Fail to load bitmap. " + e);
                     Util.closeSilently(fileInputStream);
                     Util.closeSilently(bufferedInputStream);
                     Util.closeSilently(dataInputStream);
@@ -643,11 +578,7 @@ public class Thumbnail {
                 bufferedInputStream = null;
                 fileInputStream = null;
                 dataInputStream = null;
-                String str222 = TAG;
-                StringBuilder sb222 = new StringBuilder();
-                sb222.append("Fail to load bitmap. ");
-                sb222.append(e);
-                Log.i(str222, sb222.toString());
+                Log.i(TAG, "Fail to load bitmap. " + e);
                 Util.closeSilently(fileInputStream);
                 Util.closeSilently(bufferedInputStream);
                 Util.closeSilently(dataInputStream);
@@ -669,7 +600,7 @@ public class Thumbnail {
         if (!(arrayList == null || arrayList.size() == 0)) {
             int size = arrayList.size() - 1;
             while (size >= 0) {
-                Uri uri2 = (Uri) arrayList.get(size);
+                Uri uri2 = arrayList.get(size);
                 if (!Util.isUriValid(uri2, contentResolver)) {
                     size--;
                 } else if (uri != null && uri.equals(uri2)) {
@@ -689,10 +620,13 @@ public class Thumbnail {
         if (lastImageThumbnail != null && (lastVideoThumbnail == null || lastImageThumbnail.dateTaken >= lastVideoThumbnail.dateTaken)) {
             return lastImageThumbnail.uri;
         }
-        if (lastVideoThumbnail == null || (lastImageThumbnail != null && lastVideoThumbnail.dateTaken < lastImageThumbnail.dateTaken)) {
+        if (lastVideoThumbnail == null) {
             return null;
         }
-        return lastVideoThumbnail.uri;
+        if (lastImageThumbnail == null || lastVideoThumbnail.dateTaken >= lastImageThumbnail.dateTaken) {
+            return lastVideoThumbnail.uri;
+        }
+        return null;
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:23:0x0099 A[Catch:{ all -> 0x0092 }] */
@@ -705,33 +639,22 @@ public class Thumbnail {
         Cursor cursor;
         Cursor cursor2;
         boolean z;
-        Uri uri = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        Uri build = uri.buildUpon().appendQueryParameter("limit", "1").build();
+        Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] strArr = {"_id", "_data", "datetaken"};
-        StringBuilder sb = new StringBuilder();
-        sb.append(getVideoBucketIds());
-        sb.append(" AND ");
-        sb.append("_size");
-        sb.append(" > 0");
-        String sb2 = sb.toString();
-        String str = "datetaken DESC,_id DESC";
+        String str = getVideoBucketIds() + " AND " + "_size" + " > 0";
         try {
-            cursor = contentResolver.query(build, strArr, sb2, null, str);
-            String str2 = TAG;
+            cursor = contentResolver.query(uri.buildUpon().appendQueryParameter("limit", "1").build(), strArr, str, (String[]) null, "datetaken DESC,_id DESC");
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
                         long j = cursor.getLong(0);
                         if (cursor.getString(1) == null || !new File(cursor.getString(1)).exists()) {
-                            Log.d(str2, "getLastVideoThumbnail first file is deleted");
+                            Log.d(TAG, "getLastVideoThumbnail first file is deleted");
                             z = true;
                             if (!z) {
-                                cursor2 = contentResolver.query(uri, strArr, sb2, null, str);
+                                cursor2 = contentResolver.query(uri, strArr, str, (String[]) null, "datetaken DESC,_id DESC");
                                 try {
-                                    StringBuilder sb3 = new StringBuilder();
-                                    sb3.append("getLastVideoThumbnail count=");
-                                    sb3.append(cursor2.getCount());
-                                    Log.d(str2, sb3.toString());
+                                    Log.d(TAG, "getLastVideoThumbnail count=" + cursor2.getCount());
                                     if (cursor2 != null) {
                                         while (cursor2.moveToNext()) {
                                             if (cursor2.getString(1) != null && new File(cursor2.getString(1)).exists()) {
@@ -806,18 +729,9 @@ public class Thumbnail {
 
     private static String getVideoBucketIds() {
         if (Storage.secondaryStorageMounted()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("bucket_id IN (");
-            sb.append(Storage.PRIMARY_BUCKET_ID);
-            sb.append(",");
-            sb.append(Storage.SECONDARY_BUCKET_ID);
-            sb.append(")");
-            return sb.toString();
+            return "bucket_id IN (" + Storage.PRIMARY_BUCKET_ID + "," + Storage.SECONDARY_BUCKET_ID + ")";
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("bucket_id=");
-        sb2.append(Storage.BUCKET_ID);
-        return sb2.toString();
+        return "bucket_id=" + Storage.BUCKET_ID;
     }
 
     public boolean fromFile() {
@@ -855,12 +769,8 @@ public class Thumbnail {
                     bufferedOutputStream = null;
                     dataOutputStream = null;
                     fileOutputStream = fileOutputStream2;
-                    String str = TAG;
                     try {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Fail to store bitmap. path=");
-                        sb.append(file2.getPath());
-                        Log.e(str, sb.toString(), e);
+                        Log.e(TAG, "Fail to store bitmap. path=" + file2.getPath(), e);
                         Util.closeSilently(fileOutputStream);
                         Util.closeSilently(bufferedOutputStream);
                         Util.closeSilently(dataOutputStream);
@@ -887,11 +797,7 @@ public class Thumbnail {
                     e = e3;
                     dataOutputStream = null;
                     fileOutputStream = fileOutputStream2;
-                    String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Fail to store bitmap. path=");
-                    sb2.append(file2.getPath());
-                    Log.e(str2, sb2.toString(), e);
+                    Log.e(TAG, "Fail to store bitmap. path=" + file2.getPath(), e);
                     Util.closeSilently(fileOutputStream);
                     Util.closeSilently(bufferedOutputStream);
                     Util.closeSilently(dataOutputStream);
@@ -906,18 +812,14 @@ public class Thumbnail {
                 }
                 try {
                     dataOutputStream.writeUTF(this.mUri.toString());
-                    this.mBitmap.compress(CompressFormat.JPEG, 90, dataOutputStream);
+                    this.mBitmap.compress(Bitmap.CompressFormat.JPEG, 90, dataOutputStream);
                     dataOutputStream.close();
                     Util.closeSilently(fileOutputStream2);
                     Util.closeSilently(bufferedOutputStream);
                 } catch (IOException e4) {
                     e = e4;
                     fileOutputStream = fileOutputStream2;
-                    String str22 = TAG;
-                    StringBuilder sb22 = new StringBuilder();
-                    sb22.append("Fail to store bitmap. path=");
-                    sb22.append(file2.getPath());
-                    Log.e(str22, sb22.toString(), e);
+                    Log.e(TAG, "Fail to store bitmap. path=" + file2.getPath(), e);
                     Util.closeSilently(fileOutputStream);
                     Util.closeSilently(bufferedOutputStream);
                     Util.closeSilently(dataOutputStream);
@@ -933,11 +835,7 @@ public class Thumbnail {
                 e = e5;
                 bufferedOutputStream = null;
                 dataOutputStream = null;
-                String str222 = TAG;
-                StringBuilder sb222 = new StringBuilder();
-                sb222.append("Fail to store bitmap. path=");
-                sb222.append(file2.getPath());
-                Log.e(str222, sb222.toString(), e);
+                Log.e(TAG, "Fail to store bitmap. path=" + file2.getPath(), e);
                 Util.closeSilently(fileOutputStream);
                 Util.closeSilently(bufferedOutputStream);
                 Util.closeSilently(dataOutputStream);

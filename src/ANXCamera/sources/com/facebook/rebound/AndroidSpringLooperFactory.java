@@ -1,11 +1,10 @@
 package com.facebook.rebound;
 
 import android.annotation.TargetApi;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.Choreographer;
-import android.view.Choreographer.FrameCallback;
 
 abstract class AndroidSpringLooperFactory {
 
@@ -14,13 +13,13 @@ abstract class AndroidSpringLooperFactory {
         /* access modifiers changed from: private */
         public final Choreographer mChoreographer;
         /* access modifiers changed from: private */
-        public final FrameCallback mFrameCallback = new FrameCallback() {
+        public final Choreographer.FrameCallback mFrameCallback = new Choreographer.FrameCallback() {
             public void doFrame(long j) {
                 if (ChoreographerAndroidSpringLooper.this.mStarted && ChoreographerAndroidSpringLooper.this.mSpringSystem != null) {
                     long uptimeMillis = SystemClock.uptimeMillis();
                     ChoreographerAndroidSpringLooper choreographerAndroidSpringLooper = ChoreographerAndroidSpringLooper.this;
                     choreographerAndroidSpringLooper.mSpringSystem.loop((double) (uptimeMillis - choreographerAndroidSpringLooper.mLastTime));
-                    ChoreographerAndroidSpringLooper.this.mLastTime = uptimeMillis;
+                    long unused = ChoreographerAndroidSpringLooper.this.mLastTime = uptimeMillis;
                     ChoreographerAndroidSpringLooper.this.mChoreographer.postFrameCallback(ChoreographerAndroidSpringLooper.this.mFrameCallback);
                 }
             }
@@ -65,7 +64,7 @@ abstract class AndroidSpringLooperFactory {
                     long uptimeMillis = SystemClock.uptimeMillis();
                     LegacyAndroidSpringLooper legacyAndroidSpringLooper = LegacyAndroidSpringLooper.this;
                     legacyAndroidSpringLooper.mSpringSystem.loop((double) (uptimeMillis - legacyAndroidSpringLooper.mLastTime));
-                    LegacyAndroidSpringLooper.this.mLastTime = uptimeMillis;
+                    long unused = LegacyAndroidSpringLooper.this.mLastTime = uptimeMillis;
                     LegacyAndroidSpringLooper.this.mHandler.post(LegacyAndroidSpringLooper.this.mLooperRunnable);
                 }
             }
@@ -100,6 +99,6 @@ abstract class AndroidSpringLooperFactory {
     }
 
     public static SpringLooper createSpringLooper() {
-        return VERSION.SDK_INT >= 16 ? ChoreographerAndroidSpringLooper.create() : LegacyAndroidSpringLooper.create();
+        return Build.VERSION.SDK_INT >= 16 ? ChoreographerAndroidSpringLooper.create() : LegacyAndroidSpringLooper.create();
     }
 }

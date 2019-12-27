@@ -5,7 +5,6 @@ import android.graphics.SurfaceTexture;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -20,39 +19,29 @@ import com.android.camera.Util;
 import com.android.camera.constant.DurationConstant;
 import com.android.camera.data.DataRepository;
 import com.android.camera.effect.EffectController;
-import com.android.camera.fragment.beauty.LiveBeautyFilterFragment.LiveFilterItem;
+import com.android.camera.fragment.beauty.LiveBeautyFilterFragment;
 import com.android.camera.log.Log;
 import com.android.camera.module.LiveModule;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
-import com.android.camera.protocol.ModeProtocol.FilterProtocol;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
-import com.android.camera.protocol.ModeProtocol.OnFaceBeautyChangedProtocol;
-import com.android.camera.protocol.ModeProtocol.StickerProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.gallery3d.ui.ExtTexture;
+import com.android.gallery3d.ui.GLCanvas;
 import com.ss.android.vesdk.TERecorder;
-import com.ss.android.vesdk.TERecorder.IRenderCallback;
-import com.ss.android.vesdk.TERecorder.OnConcatFinishedListener;
-import com.ss.android.vesdk.TERecorder.OnSlamDetectListener;
-import com.ss.android.vesdk.TERecorder.Texture;
 import com.ss.android.vesdk.VEAudioEncodeSettings;
 import com.ss.android.vesdk.VECameraSettings;
-import com.ss.android.vesdk.VECameraSettings.CAMERA_FACING_ID;
-import com.ss.android.vesdk.VEEditor.MVConsts;
-import com.ss.android.vesdk.VEListener.VERecorderNativeInitListener;
+import com.ss.android.vesdk.VEEditor;
+import com.ss.android.vesdk.VEListener;
 import com.ss.android.vesdk.VEPreviewSettings;
-import com.ss.android.vesdk.VEPreviewSettings.Builder;
 import com.ss.android.vesdk.VESDK;
 import com.ss.android.vesdk.VESize;
 import com.ss.android.vesdk.VEVideoEncodeSettings;
-import com.ss.android.vesdk.VEVideoEncodeSettings.ENCODE_PROFILE;
 import com.ss.android.vesdk.runtime.VERuntime;
 import com.ss.android.vesdk.runtime.oauth.TEOAuthResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LiveConfigChangeTTImpl implements LiveConfigChanges {
+public class LiveConfigChangeTTImpl implements ModeProtocol.LiveConfigChanges {
     private static final long MIN_RECORD_TIME = 500;
     private static final long START_OFFSET_MS = 450;
     /* access modifiers changed from: private */
@@ -64,14 +53,14 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
     private VEAudioEncodeSettings mAudioEncodeSettings;
     private TEOAuthResult mAuthResult;
     private String mBGMPath;
-    private OnFaceBeautyChangedProtocol mBeautyImpl;
+    private ModeProtocol.OnFaceBeautyChangedProtocol mBeautyImpl;
     private String mConcatVideoPath;
     private String mConcatWavPath;
     /* access modifiers changed from: private */
     public Context mContext;
     private CountDownTimer mCountDownTimer;
     private float mCurrentSpeed;
-    private FilterProtocol mFilterImpl;
+    private ModeProtocol.FilterProtocol mFilterImpl;
     private Handler mHandler;
     private boolean mInitialized;
     /* access modifiers changed from: private */
@@ -91,7 +80,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
     /* access modifiers changed from: private */
     public boolean mReleased;
     private long mStartTime;
-    private StickerProtocol mStickerImpl;
+    private ModeProtocol.StickerProtocol mStickerImpl;
     /* access modifiers changed from: private */
     public String mStickerPath;
     /* access modifiers changed from: private */
@@ -99,7 +88,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
     private long mTotalRecordingTime = 0;
     private VEVideoEncodeSettings mVideoEncodeSettings;
 
-    /* renamed from: com.android.camera.module.impl.component.LiveConfigChangeTTImpl$7 reason: invalid class name */
+    /* renamed from: com.android.camera.module.impl.component.LiveConfigChangeTTImpl$7  reason: invalid class name */
     static /* synthetic */ class AnonymousClass7 {
         static final /* synthetic */ int[] $SwitchMap$com$ss$android$vesdk$runtime$oauth$TEOAuthResult = new int[TEOAuthResult.values().length];
 
@@ -159,10 +148,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
         if (!currentLiveMusic[0].isEmpty()) {
             onBGMChanged(currentLiveMusic[0]);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(FileUtils.STICKER_RESOURCE_DIR);
-        sb.append(CameraSettings.getCurrentLiveSticker());
-        this.mStickerPath = sb.toString();
+        this.mStickerPath = FileUtils.STICKER_RESOURCE_DIR + CameraSettings.getCurrentLiveSticker();
         setRecordSpeed(Integer.valueOf(CameraSettings.getCurrentLiveSpeed()).intValue());
     }
 
@@ -182,7 +168,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
 
     /* access modifiers changed from: private */
     public void updateRecordingTime(long j) {
-        ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+        ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
         if (actionProcessing != null) {
             actionProcessing.updateRecordingTime(Util.millisecondToTimeString((long) ((((float) j) * 1.0f) / this.mCurrentSpeed), false));
         }
@@ -197,7 +183,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
         if (tERecorder != null) {
             this.mBGMPath = null;
             tERecorder.setRecordBGM("", 0, 1);
-            CameraSettings.setCurrentLiveMusic(null, null);
+            CameraSettings.setCurrentLiveMusic((String) null, (String) null);
         }
     }
 
@@ -253,14 +239,11 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
     }
 
     public void initPreview(int i, int i2, boolean z, int i3) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(i3);
-        sb.append("");
-        Log.e("live initPreview:", sb.toString());
+        Log.e("live initPreview:", i3 + "");
         this.mIsFrontCamera = z;
-        this.mPreviewSettings = new Builder().setRenderSize(new VESize(i, i2)).build();
+        this.mPreviewSettings = new VEPreviewSettings.Builder().setRenderSize(new VESize(i, i2)).build();
         this.mInputSurfaceTexture.setDefaultBufferSize(i2, i);
-        VECameraSettings vECameraSettings = new VECameraSettings(z ? CAMERA_FACING_ID.FACING_FRONT : CAMERA_FACING_ID.FACING_BACK, i3, new VESize(i, i2));
+        VECameraSettings vECameraSettings = new VECameraSettings(z ? VECameraSettings.CAMERA_FACING_ID.FACING_FRONT : VECameraSettings.CAMERA_FACING_ID.FACING_BACK, i3, new VESize(i, i2));
         this.mRecordSegmentTimeInfo = DataRepository.dataItemLive().getRecordSegmentTimeInfo();
         if (this.mInitialized) {
             this.mRecorder.setCameraSettings(vECameraSettings);
@@ -272,8 +255,8 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
                 this.mTotalRecordingTime = 0;
             }
         } else {
-            this.mVideoEncodeSettings = new VEVideoEncodeSettings.Builder(1).setHwEnc(true).setEncodeProfile(ENCODE_PROFILE.ENCODE_PROFILE_MAIN).setVideoRes(i, i2).build();
-            this.mRecorder.init(this.mVideoEncodeSettings, null, this.mPreviewSettings, vECameraSettings);
+            this.mVideoEncodeSettings = new VEVideoEncodeSettings.Builder(1).setHwEnc(true).setEncodeProfile(VEVideoEncodeSettings.ENCODE_PROFILE.ENCODE_PROFILE_MAIN).setVideoRes(i, i2).build();
+            this.mRecorder.init(this.mVideoEncodeSettings, (VEAudioEncodeSettings) null, this.mPreviewSettings, vECameraSettings);
             List<TimeSpeedModel> list2 = this.mRecordSegmentTimeInfo;
             if (list2 != null) {
                 this.mRecorder.tryRestore(list2.size());
@@ -292,25 +275,15 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
     public void initResource() {
         List<String> list;
         String str;
-        String str2 = "live/";
         VESDK.setExternalMonitorListener(MyOwnMonitor.Instance);
         VESDK.init(this.mContext, FileUtils.ROOT_DIR);
-        String string = this.mContext.getString(R.string.live_activation_id);
-        this.mAuthResult = VERuntime.activate(this.mContext, this.mContext.getString(R.string.live_activation_license), string, DataRepository.dataItemLive().getActivation());
+        this.mAuthResult = VERuntime.activate(this.mContext, this.mContext.getString(R.string.live_activation_license), this.mContext.getString(R.string.live_activation_id), DataRepository.dataItemLive().getActivation());
         TEOAuthResult tEOAuthResult = this.mAuthResult;
         if (tEOAuthResult == TEOAuthResult.OK || tEOAuthResult == TEOAuthResult.TBD) {
             DataRepository.dataItemLive().setActivation(VERuntime.getActivationCode());
-            String str3 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("activation success: ");
-            sb.append(this.mAuthResult.name());
-            Log.d(str3, sb.toString());
+            Log.d(TAG, "activation success: " + this.mAuthResult.name());
         } else {
-            String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("activation failed: ");
-            sb2.append(this.mAuthResult.name());
-            Log.d(str4, sb2.toString());
+            Log.d(TAG, "activation failed: " + this.mAuthResult.name());
         }
         if (!FileUtils.hasDir(FileUtils.ROOT_DIR)) {
             FileUtils.delDir(FileUtils.ROOT_DIR);
@@ -335,29 +308,13 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
                 str = "music_cn.zip";
                 list = FileUtils.RESOURCE_LIST_CN;
             }
-            Context context = this.mContext;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str2);
-            sb3.append(str);
-            Util.verifyAssetZip(context, sb3.toString(), FileUtils.MUSIC_LOCAL, 32768);
+            Util.verifyAssetZip(this.mContext, "live/" + str, FileUtils.MUSIC_LOCAL, 32768);
             FileUtils.makeDir(FileUtils.MUSIC_ONLINE);
-            for (String str5 : list) {
-                Context context2 = this.mContext;
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str2);
-                sb4.append(str5);
-                sb4.append(".zip");
-                String sb5 = sb4.toString();
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append(FileUtils.STICKER_RESOURCE_DIR);
-                sb6.append(str5);
-                Util.verifyAssetZip(context2, sb5, sb6.toString(), 32768);
+            for (String next : list) {
+                Util.verifyAssetZip(this.mContext, "live/" + next + ".zip", FileUtils.STICKER_RESOURCE_DIR + next, 32768);
             }
             Util.verifyAssetZip(this.mContext, "live/Beauty_12.zip", FileUtils.BEAUTY_12_DIR, 32768);
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append(FileUtils.RESOURCE_DIR);
-            sb7.append("filter");
-            Util.verifyAssetZip(this.mContext, "live/filter.zip", sb7.toString(), 32768);
+            Util.verifyAssetZip(this.mContext, "live/filter.zip", FileUtils.RESOURCE_DIR + "filter", 32768);
             Util.verifyAssetZip(this.mContext, "live/FaceReshape_V2.zip", FileUtils.RESHAPE_DIR_NAME, 32768);
         } catch (Exception e3) {
             Log.e(TAG, "verify asset zip failed...", e3);
@@ -391,7 +348,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
         }
     }
 
-    public boolean onRecordConcat(OnConcatFinishedListener onConcatFinishedListener) {
+    public boolean onRecordConcat(TERecorder.OnConcatFinishedListener onConcatFinishedListener) {
         if (!hasSegments()) {
             Log.e(TAG, "record segments is empty, stop concat");
             return false;
@@ -415,10 +372,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
         if (tERecorder != null && !this.mMediaRecorderRecordingPaused) {
             int stopRecord = tERecorder.stopRecord();
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("stopRecordResult onPause: ");
-            sb.append(stopRecord);
-            Log.d(str, sb.toString());
+            Log.d(str, "stopRecordResult onPause: " + stopRecord);
             long endFrameTime = this.mRecorder.getEndFrameTime() / 1000;
             if (endFrameTime > MIN_RECORD_TIME || endFrameTime < 0) {
                 this.mRecordSegmentTimeInfo.add(new TimeSpeedModel(endFrameTime, (double) this.mCurrentSpeed));
@@ -426,11 +380,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
             } else {
                 deleteLastSegment();
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("recording time = ");
-                sb2.append(endFrameTime);
-                sb2.append(", it's too short");
-                Log.d(str2, sb2.toString());
+                Log.d(str2, "recording time = " + endFrameTime + ", it's too short");
             }
             DataRepository.dataItemLive().setRecordSegmentTimeInfo(this.mRecordSegmentTimeInfo);
             this.mMediaRecorderRecordingPaused = true;
@@ -440,7 +390,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
 
     public void onRecordResume() {
         if (this.mRecorder != null && this.mMediaRecorderRecordingPaused) {
-            ((AudioManager) this.mActivity.getSystemService(MVConsts.TYPE_AUDIO)).requestAudioFocus(new OnAudioFocusChangeListener() {
+            ((AudioManager) this.mActivity.getSystemService(VEEditor.MVConsts.TYPE_AUDIO)).requestAudioFocus(new AudioManager.OnAudioFocusChangeListener() {
                 public void onAudioFocusChange(int i) {
                 }
             }, 3, 1);
@@ -448,10 +398,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
             this.mMediaRecorderRecording = true;
             int startRecord = this.mRecorder.startRecord(this.mCurrentSpeed, this.mTotalRecordingTime);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("startRecordResult onResume: ");
-            sb.append(startRecord);
-            Log.d(str, sb.toString());
+            Log.d(str, "startRecordResult onResume: " + startRecord);
             updateRecordingTime();
         }
     }
@@ -471,7 +418,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
 
     public void onRecordStart() {
         if (this.mRecorder != null) {
-            ((AudioManager) this.mActivity.getSystemService(MVConsts.TYPE_AUDIO)).requestAudioFocus(new OnAudioFocusChangeListener() {
+            ((AudioManager) this.mActivity.getSystemService(VEEditor.MVConsts.TYPE_AUDIO)).requestAudioFocus(new AudioManager.OnAudioFocusChangeListener() {
                 public void onAudioFocusChange(int i) {
                 }
             }, 3, 1);
@@ -482,10 +429,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
             }
             int startRecord = this.mRecorder.startRecord(this.mCurrentSpeed, this.mTotalRecordingTime);
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("startRecordResult onStart: ");
-            sb.append(startRecord);
-            Log.d(str2, sb.toString());
+            Log.d(str2, "startRecordResult onStart: " + startRecord);
             this.mMediaRecorderRecordingPaused = false;
             this.mMediaRecorderRecording = true;
             updateRecordingTime();
@@ -495,7 +439,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
     public void onRecordStop() {
         if (this.mRecorder != null) {
             onRecordPause();
-            DataRepository.dataItemLive().setRecordSegmentTimeInfo(null);
+            DataRepository.dataItemLive().setRecordSegmentTimeInfo((List<TimeSpeedModel>) null);
             this.mTotalRecordingTime = 0;
             this.mRecordSegmentTimeInfo.clear();
             this.mMediaRecorderRecordingPaused = false;
@@ -543,23 +487,17 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
             if (this.mRecorder != null) {
                 int stopRecord = this.mRecorder.stopRecord();
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("stopRecordResult onRelease: ");
-                sb.append(stopRecord);
-                Log.d(str, sb.toString());
+                Log.d(str, "stopRecordResult onRelease: " + stopRecord);
                 int stopPreview = this.mRecorder.stopPreview();
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("stopPreviewResult onRelease: ");
-                sb2.append(stopPreview);
-                Log.d(str2, sb2.toString());
-                this.mRecorder.setNativeInitListener(null);
-                this.mRecorder.setRenderCallback(null);
+                Log.d(str2, "stopPreviewResult onRelease: " + stopPreview);
+                this.mRecorder.setNativeInitListener((VEListener.VERecorderNativeInitListener) null);
+                this.mRecorder.setRenderCallback((TERecorder.IRenderCallback) null);
                 this.mRecorder.destroy();
                 this.mInputSurfaceReady = false;
                 this.mInputSurfaceTexture.release();
                 this.mRecorder = null;
-                this.mHandler.removeCallbacksAndMessages(null);
+                this.mHandler.removeCallbacksAndMessages((Object) null);
                 this.mHandler = null;
             }
         }
@@ -602,11 +540,7 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
                 this.mRecorder.setFilter("", 1.0f);
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(FileUtils.FILTER_DIR);
-            sb.append(str);
-            sb.append(File.separator);
-            this.mRecorder.setFilter(sb.toString(), 1.0f);
+            this.mRecorder.setFilter(FileUtils.FILTER_DIR + str + File.separator, 1.0f);
         }
     }
 
@@ -620,17 +554,17 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
             return;
         }
         Log.d(TAG, "startPreview");
-        AnonymousClass1 r0 = new IRenderCallback() {
-            public Texture onCreateTexture() {
+        AnonymousClass1 r0 = new TERecorder.IRenderCallback() {
+            public TERecorder.Texture onCreateTexture() {
                 if (LiveConfigChangeTTImpl.this.mReleased) {
                     return null;
                 }
                 Log.d(LiveConfigChangeTTImpl.TAG, "TTRenderCallback, onCreateTexture");
-                LiveConfigChangeTTImpl.this.mInputSurfaceReady = true;
+                boolean unused = LiveConfigChangeTTImpl.this.mInputSurfaceReady = true;
                 ExtTexture extTexture = new ExtTexture();
-                extTexture.onBind(null);
+                extTexture.onBind((GLCanvas) null);
                 LiveConfigChangeTTImpl.this.mInputSurfaceTexture.attachToGLContext(extTexture.getId());
-                return new Texture(extTexture.getId(), LiveConfigChangeTTImpl.this.mInputSurfaceTexture);
+                return new TERecorder.Texture(extTexture.getId(), LiveConfigChangeTTImpl.this.mInputSurfaceTexture);
             }
 
             public boolean onDestroy() {
@@ -639,37 +573,31 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
                     LiveConfigChangeTTImpl.this.mInputSurfaceTexture.detachFromGLContext();
                 } catch (Exception e2) {
                     String access$100 = LiveConfigChangeTTImpl.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("detachFromGLContext exception ");
-                    sb.append(e2.getMessage());
-                    Log.e(access$100, sb.toString());
+                    Log.e(access$100, "detachFromGLContext exception " + e2.getMessage());
                 }
-                LiveConfigChangeTTImpl.this.mInputSurfaceReady = false;
+                boolean unused = LiveConfigChangeTTImpl.this.mInputSurfaceReady = false;
                 return false;
             }
 
-            public void onTextureCreated(Texture texture) {
+            public void onTextureCreated(TERecorder.Texture texture) {
             }
         };
-        this.mRecorder.setNativeInitListener(new VERecorderNativeInitListener() {
+        this.mRecorder.setNativeInitListener(new VEListener.VERecorderNativeInitListener() {
             public void onHardEncoderInit(boolean z) {
             }
 
             public void onNativeInit(int i, String str) {
                 TERecorder access$400 = LiveConfigChangeTTImpl.this.mRecorder;
                 if (access$400 != null) {
-                    LiveConfigChangeTTImpl.this.mTTNativeIsInit = true;
+                    boolean unused = LiveConfigChangeTTImpl.this.mTTNativeIsInit = true;
                     int slamDeviceConfig = access$400.slamDeviceConfig(true, true, true, true);
                     String access$100 = LiveConfigChangeTTImpl.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("slam config result = ");
-                    sb.append(slamDeviceConfig);
-                    Log.e(access$100, sb.toString());
+                    Log.e(access$100, "slam config result = " + slamDeviceConfig);
                     access$400.setUseLargeMattingModel(true);
                     if (LiveConfigChangeTTImpl.this.mStickerPath != null) {
                         access$400.switchEffect(LiveConfigChangeTTImpl.this.mStickerPath);
                     }
-                    LiveFilterItem findLiveFilter = EffectController.getInstance().findLiveFilter(LiveConfigChangeTTImpl.this.mContext, DataRepository.dataItemLive().getLiveFilter());
+                    LiveBeautyFilterFragment.LiveFilterItem findLiveFilter = EffectController.getInstance().findLiveFilter(LiveConfigChangeTTImpl.this.mContext, DataRepository.dataItemLive().getLiveFilter());
                     LiveConfigChangeTTImpl.this.setFilter(true, findLiveFilter != null ? findLiveFilter.directoryName : "");
                     LiveConfigChangeTTImpl.this.updateBeauty();
                 }
@@ -678,11 +606,8 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
         this.mRecorder.setRenderCallback(r0);
         int startPreview = this.mRecorder.startPreview(surface);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("previewResult: ");
-        sb.append(startPreview);
-        Log.d(str, sb.toString());
-        this.mRecorder.addSlamDetectListener(new OnSlamDetectListener() {
+        Log.d(str, "previewResult: " + startPreview);
+        this.mRecorder.addSlamDetectListener(new TERecorder.OnSlamDetectListener() {
             public void onSlam(boolean z) {
                 if (z) {
                     Log.d(LiveConfigChangeTTImpl.TAG, "onSlam open, register tt ar sensor");
@@ -707,10 +632,9 @@ public class LiveConfigChangeTTImpl implements LiveConfigChanges {
             if (countDownTimer != null) {
                 countDownTimer.cancel();
             }
-            float f2 = (float) (((long) this.mMaxVideoDurationInMs) - this.mTotalRecordingTime);
-            float f3 = this.mCurrentSpeed;
-            long j = (long) (f3 * 1000.0f);
-            AnonymousClass6 r1 = new CountDownTimer((long) (f2 * f3), j) {
+            float f2 = this.mCurrentSpeed;
+            long j = (long) (f2 * 1000.0f);
+            AnonymousClass6 r1 = new CountDownTimer((long) (((float) (((long) this.mMaxVideoDurationInMs) - this.mTotalRecordingTime)) * f2), j) {
                 public void onFinish() {
                     if (LiveConfigChangeTTImpl.this.mMediaRecorderRecording && LiveConfigChangeTTImpl.this.mActivity != null && LiveConfigChangeTTImpl.this.mActivity.getCurrentModule() != null && (LiveConfigChangeTTImpl.this.mActivity.getCurrentModule() instanceof LiveModule)) {
                         ((LiveModule) LiveConfigChangeTTImpl.this.mActivity.getCurrentModule()).stopVideoRecording(true, false);

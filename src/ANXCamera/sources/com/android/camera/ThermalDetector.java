@@ -8,7 +8,7 @@ import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
+import com.android.camera.protocol.ModeProtocol;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,12 +50,9 @@ public class ThermalDetector {
                 if (intent != null && TextUtils.equals(intent.getAction(), ThermalDetector.ACTION_TEMP_CHANGED)) {
                     int intExtra = intent.getIntExtra(ThermalDetector.EXTRA_TEMP_STAGE, -1);
                     String access$200 = ThermalDetector.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onReceive stage = ");
-                    sb.append(intExtra);
-                    Log.d(access$200, sb.toString());
+                    Log.d(access$200, "onReceive stage = " + intExtra);
                     if (ThermalDetector.this.mTempStage != intExtra) {
-                        ThermalDetector.this.mTempStage = intExtra;
+                        int unused = ThermalDetector.this.mTempStage = intExtra;
                         ThermalDetector thermalDetector = ThermalDetector.this;
                         thermalDetector.onThermalNotification(thermalDetector.mTempStage);
                     }
@@ -75,12 +72,9 @@ public class ThermalDetector {
     /* access modifiers changed from: private */
     public void onThermalNotification(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onThermalNotification stage=");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "onThermalNotification stage=" + i);
         if (i != -1) {
-            ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+            ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
             if (configChanges == null) {
                 Log.w(TAG, "onThermalNotification config is null");
                 return;
@@ -124,10 +118,7 @@ public class ThermalDetector {
         try {
             int parseInt = Integer.parseInt(str);
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("readStageFromFile value = ");
-            sb.append(parseInt);
-            Log.d(str2, sb.toString());
+            Log.d(str2, "readStageFromFile value = " + parseInt);
             if (parseInt < 0 || parseInt > 3) {
                 return 0;
             }

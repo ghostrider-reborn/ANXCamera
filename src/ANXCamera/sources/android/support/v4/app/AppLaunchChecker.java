@@ -17,13 +17,13 @@ public class AppLaunchChecker {
 
     public static void onActivityCreate(@NonNull Activity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREFS_NAME, 0);
-        String str = KEY_STARTED_FROM_LAUNCHER;
-        if (!sharedPreferences.getBoolean(str, false)) {
+        if (!sharedPreferences.getBoolean(KEY_STARTED_FROM_LAUNCHER, false)) {
             Intent intent = activity.getIntent();
-            if (intent != null) {
-                if ("android.intent.action.MAIN".equals(intent.getAction()) && (intent.hasCategory("android.intent.category.LAUNCHER") || intent.hasCategory(IntentCompat.CATEGORY_LEANBACK_LAUNCHER))) {
-                    sharedPreferences.edit().putBoolean(str, true).apply();
-                }
+            if (intent == null || !"android.intent.action.MAIN".equals(intent.getAction())) {
+                return;
+            }
+            if (intent.hasCategory("android.intent.category.LAUNCHER") || intent.hasCategory(IntentCompat.CATEGORY_LEANBACK_LAUNCHER)) {
+                sharedPreferences.edit().putBoolean(KEY_STARTED_FROM_LAUNCHER, true).apply();
             }
         }
     }

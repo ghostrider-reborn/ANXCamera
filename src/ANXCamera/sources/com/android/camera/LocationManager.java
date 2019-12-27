@@ -51,26 +51,16 @@ public class LocationManager {
 
         public void onLocationChanged(Location location) {
             if (location.getLatitude() != 0.0d || location.getLongitude() != 0.0d) {
-                if (LocationManager.this.mRecordLocation) {
-                    if ("gps".equals(this.mProvider)) {
-                        LocationManager.this.cancelTimer();
-                        if (LocationManager.this.mListener != null) {
-                            LocationManager.this.mListener.showGpsOnScreenIndicator(true);
-                        }
+                if (LocationManager.this.mRecordLocation && "gps".equals(this.mProvider)) {
+                    LocationManager.this.cancelTimer();
+                    if (LocationManager.this.mListener != null) {
+                        LocationManager.this.mListener.showGpsOnScreenIndicator(true);
                     }
                 }
-                boolean z = this.mValid;
-                String str = LocationManager.TAG;
-                if (!z) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Got first location, it is from ");
-                    sb.append(this.mProvider);
-                    Log.d(str, sb.toString());
+                if (!this.mValid) {
+                    Log.d(LocationManager.TAG, "Got first location, it is from " + this.mProvider);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("update location, it is from ");
-                    sb2.append(this.mProvider);
-                    Log.v(str, sb2.toString());
+                    Log.v(LocationManager.TAG, "update location, it is from " + this.mProvider);
                 }
                 this.mLastLocation.set(location);
                 LocationManager.this.updateCacheLocation(this.mLastLocation);
@@ -118,30 +108,17 @@ public class LocationManager {
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:8:0x0027, code lost:
-        if ("gps".equals(r6.getProvider()) != false) goto L_0x0029;
-     */
     private Location getBetterLocation(Location location, Location location2) {
-        if (location2 == null) {
-            return location;
-        }
-        if (location != null && location.getTime() >= location2.getTime()) {
-            if (location.getTime() == location2.getTime()) {
-            }
-            return location;
-        }
-        location = location2;
-        return location;
+        return location2 == null ? location : (location == null || location.getTime() < location2.getTime() || (location.getTime() == location2.getTime() && "gps".equals(location2.getProvider()))) ? location2 : location;
     }
 
     private void getLastLocation() {
         Location location;
-        String str = TAG;
         try {
             this.mLastKnownLocation = getBetterLocation(this.mLocationManager.getLastKnownLocation("gps"), this.mLocationManager.getLastKnownLocation("network"));
             location = getBetterLocation(this.mCacheLocation, this.mLastKnownLocation);
         } catch (SecurityException e2) {
-            Log.e(str, "fail to request last location update, ignore", e2);
+            Log.e(TAG, "fail to request last location update, ignore", e2);
             location = this.mCacheLocation;
         }
         if (isValidLastKnownLocation(location)) {
@@ -152,7 +129,7 @@ public class LocationManager {
         StringBuilder sb = new StringBuilder();
         sb.append("last cache location is ");
         sb.append(this.mCacheLocation != null ? "not null" : TEDefine.FACE_BEAUTY_NULL);
-        Log.d(str, sb.toString());
+        Log.d(TAG, sb.toString());
     }
 
     public static LocationManager instance() {
@@ -164,9 +141,6 @@ public class LocationManager {
     }
 
     private void startReceivingLocationUpdates() {
-        String str = "provider does not exist ";
-        String str2 = "fail to request location update, ignore";
-        String str3 = TAG;
         if (this.mLocationManager == null) {
             this.mLocationManager = (android.location.LocationManager) CameraAppImpl.getAndroidContext().getSystemService("location");
         }
@@ -175,12 +149,9 @@ public class LocationManager {
             try {
                 locationManager.requestLocationUpdates("network", 1000, 0.0f, this.mLocationListeners[1], this.mThreadHandler.getLooper());
             } catch (SecurityException e2) {
-                Log.i(str3, str2, e2);
+                Log.i(TAG, "fail to request location update, ignore", e2);
             } catch (IllegalArgumentException e3) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(e3.getMessage());
-                Log.d(str3, sb.toString());
+                Log.d(TAG, "provider does not exist " + e3.getMessage());
             }
             try {
                 this.mLocationManager.requestLocationUpdates("gps", 1000, 0.0f, this.mLocationListeners[0], this.mThreadHandler.getLooper());
@@ -189,37 +160,33 @@ public class LocationManager {
                 this.mTimer.schedule(new TimerTask() {
                     public void run() {
                         LocationManager.this.stopReceivingGPSLocationUpdates();
-                        LocationManager.this.mTimer = null;
+                        Timer unused = LocationManager.this.mTimer = null;
                     }
                 }, 60000);
                 if (this.mListener != null) {
                     this.mListener.showGpsOnScreenIndicator(false);
                 }
             } catch (SecurityException e4) {
-                Log.i(str3, str2, e4);
+                Log.i(TAG, "fail to request location update, ignore", e4);
             } catch (IllegalArgumentException e5) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(e5.getMessage());
-                Log.d(str3, sb2.toString());
+                Log.d(TAG, "provider does not exist " + e5.getMessage());
             }
-            Log.d(str3, "startReceivingLocationUpdates");
+            Log.d(TAG, "startReceivingLocationUpdates");
             getLastLocation();
         }
     }
 
     /* access modifiers changed from: private */
     public void stopReceivingGPSLocationUpdates() {
-        String str = TAG;
         android.location.LocationManager locationManager = this.mLocationManager;
         if (locationManager != null) {
             try {
                 locationManager.removeUpdates(this.mLocationListeners[0]);
             } catch (Exception e2) {
-                Log.i(str, "fail to remove location listeners, ignore", e2);
+                Log.i(TAG, "fail to remove location listeners, ignore", e2);
             }
             this.mLocationListeners[0].mValid = false;
-            Log.d(str, "stopReceivingGPSLocationUpdates");
+            Log.d(TAG, "stopReceivingGPSLocationUpdates");
         }
         Listener listener = this.mListener;
         if (listener != null) {
@@ -228,26 +195,23 @@ public class LocationManager {
     }
 
     private void stopReceivingLocationUpdates() {
-        String str;
         cancelTimer();
         if (this.mLocationManager != null) {
             int i = 0;
             while (true) {
                 LocationListener[] locationListenerArr = this.mLocationListeners;
-                int length = locationListenerArr.length;
-                str = TAG;
-                if (i >= length) {
+                if (i >= locationListenerArr.length) {
                     break;
                 }
                 try {
                     this.mLocationManager.removeUpdates(locationListenerArr[i]);
                 } catch (Exception e2) {
-                    Log.i(str, "fail to remove location listeners, ignore", e2);
+                    Log.i(TAG, "fail to remove location listeners, ignore", e2);
                 }
                 this.mLocationListeners[i].mValid = false;
                 i++;
             }
-            Log.d(str, "stopReceivingLocationUpdates");
+            Log.d(TAG, "stopReceivingLocationUpdates");
         }
         Listener listener = this.mListener;
         if (listener != null) {
@@ -269,10 +233,7 @@ public class LocationManager {
     private static Location validateLocation(Location location) {
         long currentTimeMillis = System.currentTimeMillis();
         if (location != null && Math.abs(location.getTime() - currentTimeMillis) > LOCATION_TIME_THRESHOLD) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("validateLocation: modify to now from ");
-            sb.append(location.getTime());
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "validateLocation: modify to now from " + location.getTime());
             location.setTime(currentTimeMillis);
         }
         return location;
@@ -285,24 +246,19 @@ public class LocationManager {
         int i = 0;
         while (true) {
             LocationListener[] locationListenerArr = this.mLocationListeners;
-            int length = locationListenerArr.length;
-            String str = TAG;
-            if (i < length) {
+            if (i < locationListenerArr.length) {
                 Location current = locationListenerArr[i].current();
                 if (current != null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("get current location, it is from ");
-                    sb.append(this.mLocationListeners[i].mProvider);
-                    Log.v(str, sb.toString());
+                    Log.v(TAG, "get current location, it is from " + this.mLocationListeners[i].mProvider);
                     validateLocation(current);
                     return current;
                 }
                 i++;
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("No location received yet. cache location is ");
-                sb2.append(this.mCacheLocation != null ? "not null" : TEDefine.FACE_BEAUTY_NULL);
-                Log.d(str, sb2.toString());
+                StringBuilder sb = new StringBuilder();
+                sb.append("No location received yet. cache location is ");
+                sb.append(this.mCacheLocation != null ? "not null" : TEDefine.FACE_BEAUTY_NULL);
+                Log.d(TAG, sb.toString());
                 Location location = this.mCacheLocation;
                 validateLocation(location);
                 return location;

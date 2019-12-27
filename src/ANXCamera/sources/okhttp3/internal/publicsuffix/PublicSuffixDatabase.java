@@ -168,19 +168,13 @@ public final class PublicSuffixDatabase {
             }
             str3 = null;
             if (str3 == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("!");
-                sb.append(str3);
-                return sb.toString().split("\\.");
+                return ("!" + str3).split("\\.");
             } else if (str == null && str2 == null) {
                 return PREVAILING_RULE;
             } else {
                 String[] split = str != null ? str.split("\\.") : EMPTY_RULE;
                 String[] split2 = str2 != null ? str2.split("\\.") : EMPTY_RULE;
-                if (split.length <= split2.length) {
-                    split = split2;
-                }
-                return split;
+                return split.length > split2.length ? split : split2;
             }
         }
         str2 = null;
@@ -227,6 +221,7 @@ public final class PublicSuffixDatabase {
                 Platform.get().log(5, "Failed to read public suffix list", e2);
                 if (z) {
                     Thread.currentThread().interrupt();
+                    return;
                 }
                 return;
             } catch (Throwable th) {
@@ -245,8 +240,7 @@ public final class PublicSuffixDatabase {
         int i;
         int i2;
         if (str != null) {
-            String str2 = "\\.";
-            String[] split = IDN.toUnicode(str).split(str2);
+            String[] split = IDN.toUnicode(str).split("\\.");
             String[] findMatchingRule = findMatchingRule(split);
             if (split.length == findMatchingRule.length && findMatchingRule[0].charAt(0) != '!') {
                 return null;
@@ -259,7 +253,7 @@ public final class PublicSuffixDatabase {
                 i = findMatchingRule.length + 1;
             }
             StringBuilder sb = new StringBuilder();
-            String[] split2 = str.split(str2);
+            String[] split2 = str.split("\\.");
             for (int i3 = i2 - i; i3 < split2.length; i3++) {
                 sb.append(split2[i3]);
                 sb.append('.');
@@ -270,7 +264,7 @@ public final class PublicSuffixDatabase {
         throw new NullPointerException("domain == null");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setListBytes(byte[] bArr, byte[] bArr2) {
         this.publicSuffixListBytes = bArr;
         this.publicSuffixExceptionListBytes = bArr2;

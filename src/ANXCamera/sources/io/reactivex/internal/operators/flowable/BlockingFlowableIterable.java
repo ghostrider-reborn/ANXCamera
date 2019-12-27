@@ -127,7 +127,7 @@ public final class BlockingFlowableIterable<T> implements Iterable<T> {
             signalConsumer();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void signalConsumer() {
             this.lock.lock();
             try {
@@ -145,7 +145,7 @@ public final class BlockingFlowableIterable<T> implements Iterable<T> {
 
     public Iterator<T> iterator() {
         BlockingFlowableIterator blockingFlowableIterator = new BlockingFlowableIterator(this.bufferSize);
-        this.source.subscribe((FlowableSubscriber<? super T>) blockingFlowableIterator);
+        this.source.subscribe(blockingFlowableIterator);
         return blockingFlowableIterator;
     }
 }

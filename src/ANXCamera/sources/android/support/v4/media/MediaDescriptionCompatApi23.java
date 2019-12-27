@@ -12,7 +12,7 @@ class MediaDescriptionCompatApi23 {
         }
 
         public static void setMediaUri(Object obj, Uri uri) {
-            ((android.media.MediaDescription.Builder) obj).setMediaUri(uri);
+            ((MediaDescription.Builder) obj).setMediaUri(uri);
         }
     }
 

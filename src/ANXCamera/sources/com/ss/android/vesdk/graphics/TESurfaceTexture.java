@@ -2,7 +2,7 @@ package com.ss.android.vesdk.graphics;
 
 import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
-import android.os.Build.VERSION;
+import android.os.Build;
 
 public class TESurfaceTexture extends SurfaceTexture {
     private boolean mAbandoned;
@@ -47,7 +47,7 @@ public class TESurfaceTexture extends SurfaceTexture {
     }
 
     public boolean isReleased() {
-        return VERSION.SDK_INT >= 26 ? super.isReleased() : this.mAbandoned;
+        return Build.VERSION.SDK_INT >= 26 ? super.isReleased() : this.mAbandoned;
     }
 
     public synchronized void release() {

@@ -3,7 +3,7 @@ package com.android.camera.effect.renders;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.location.Location;
 import android.net.Uri;
@@ -14,7 +14,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import com.android.camera.CameraAppImpl;
@@ -42,7 +42,6 @@ import com.android.camera.effect.framework.image.MemImage;
 import com.android.camera.effect.framework.utils.CounterUtil;
 import com.android.camera.log.Log;
 import com.android.camera.storage.ImageSaver;
-import com.android.camera.storage.ImageSaver.ImageSaverCallback;
 import com.android.camera.storage.Storage;
 import com.android.camera.watermark.WaterMarkBitmap;
 import com.android.camera.watermark.WaterMarkData;
@@ -113,8 +112,7 @@ public class SnapshotEffectRender {
     /* access modifiers changed from: private */
     public boolean mInitGraphicBuffer;
     private boolean mIsImageCaptureIntent;
-    /* access modifiers changed from: private */
-    public volatile int mJpegQueueSize = 0;
+    private volatile int mJpegQueueSize = 0;
     /* access modifiers changed from: private */
     public final Object mLock = new Object();
     /* access modifiers changed from: private */
@@ -129,7 +127,7 @@ public class SnapshotEffectRender {
     /* access modifiers changed from: private */
     public PbufferSurface mRenderSurface;
     /* access modifiers changed from: private */
-    public WeakReference<ImageSaverCallback> mSaverCallback;
+    public WeakReference<ImageSaver.ImageSaverCallback> mSaverCallback;
     /* access modifiers changed from: private */
     public Splitter mSplitter;
     /* access modifiers changed from: private */
@@ -177,29 +175,24 @@ public class SnapshotEffectRender {
             Size size3 = size;
             Size size4 = size2;
             SnapshotEffectRender.this.mRenderSurface.makeCurrent();
-            String access$1000 = SnapshotEffectRender.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("applyEffect: applyToThumb = ");
-            sb.append(z2);
-            Log.d(access$1000, sb.toString());
+            Log.d(SnapshotEffectRender.TAG, "applyEffect: applyToThumb = " + z2);
             byte[] thumbnailBytes = z2 ? drawJPEGAttribute2.mExif.getThumbnailBytes() : drawJPEGAttribute2.mData;
             if (thumbnailBytes == null) {
-                String access$10002 = SnapshotEffectRender.TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Null ");
-                sb2.append(z2 ? "thumb!" : "jpeg!");
-                Log.w(access$10002, sb2.toString());
+                String access$1000 = SnapshotEffectRender.TAG;
+                StringBuilder sb = new StringBuilder();
+                sb.append("Null ");
+                sb.append(z2 ? "thumb!" : "jpeg!");
+                Log.w(access$1000, sb.toString());
                 return null;
             } else if (!z2 && drawJPEGAttribute2.mEffectIndex == FilterInfo.FILTER_ID_NONE && !CameraSettings.isAgeGenderAndMagicMirrorWaterOpen() && !CameraSettings.isGradienterOn() && !CameraSettings.isTiltShiftOn()) {
                 return applyEffectOnlyWatermarkRange(drawJPEGAttribute2, size3, size4);
             } else {
                 CounterUtil counterUtil = new CounterUtil();
-                String str = "init Texture";
-                counterUtil.reset(str);
+                counterUtil.reset("init Texture");
                 int[] iArr3 = new int[1];
                 GLES20.glGenTextures(1, iArr3, 0);
                 int[] initTexture = ShaderNativeUtil.initTexture(thumbnailBytes, iArr3[0], i);
-                counterUtil.tick(str);
+                counterUtil.tick("init Texture");
                 int i12 = initTexture[0];
                 int i13 = initTexture[1];
                 int i14 = z2 ? initTexture[0] : drawJPEGAttribute2.mPreviewWidth;
@@ -257,17 +250,11 @@ public class SnapshotEffectRender {
                 } else if (size3 != null) {
                     size3.width = i16;
                     size3.height = i2;
-                    String access$10003 = SnapshotEffectRender.TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("thumbSize=");
-                    sb3.append(size3.width);
-                    sb3.append("*");
-                    sb3.append(size3.height);
-                    Log.d(access$10003, sb3.toString());
+                    Log.d(SnapshotEffectRender.TAG, "thumbSize=" + size3.width + "*" + size3.height);
                 }
                 if (drawJPEGAttribute2.mApplyWaterMark) {
                     if (!z2) {
-                        int[] watermarkRange = Util.getWatermarkRange(i16, i2, (drawJPEGAttribute2.mJpegOrientation + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawJPEGAttribute2.mDeviceWaterMarkEnabled, drawJPEGAttribute2.mTimeWaterMarkText != null, 0.11f);
+                        int[] watermarkRange = Util.getWatermarkRange(i16, i2, (drawJPEGAttribute2.mJpegOrientation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawJPEGAttribute2.mDeviceWaterMarkEnabled, drawJPEGAttribute2.mTimeWaterMarkText != null, 0.11f);
                         i10 = 0;
                         i9 = i18;
                         i8 = 1;
@@ -287,16 +274,16 @@ public class SnapshotEffectRender {
                         bArr2 = null;
                     }
                     i6 = i11;
-                    drawTimeWaterMark(drawJPEGAttribute, i9, i7, i11, i2, drawJPEGAttribute2.mJpegOrientation, null);
+                    drawTimeWaterMark(drawJPEGAttribute, i9, i7, i11, i2, drawJPEGAttribute2.mJpegOrientation, (WaterMark) null);
                     if (DataRepository.dataItemFeature().Oc()) {
                         PictureInfo pictureInfo = drawJPEGAttribute2.mInfo;
                         if (pictureInfo != null && pictureInfo.isFrontCamera()) {
-                            drawFrontCameraWaterMark(drawJPEGAttribute, i9, i7, i6, i2, drawJPEGAttribute2.mJpegOrientation, null);
+                            drawFrontCameraWaterMark(drawJPEGAttribute, i9, i7, i6, i2, drawJPEGAttribute2.mJpegOrientation, (WaterMark) null);
                             iArr = iArr2;
                             bArr = bArr2;
                         }
                     }
-                    drawDoubleShotWaterMark(drawJPEGAttribute, i9, i7, i6, i2, drawJPEGAttribute2.mJpegOrientation, null);
+                    drawDoubleShotWaterMark(drawJPEGAttribute, i9, i7, i6, i2, drawJPEGAttribute2.mJpegOrientation, (WaterMark) null);
                     iArr = iArr2;
                     bArr = bArr2;
                 } else {
@@ -347,11 +334,7 @@ public class SnapshotEffectRender {
             }
             long currentTimeMillis = System.currentTimeMillis();
             int[] decompressPicture = ShaderNativeUtil.decompressPicture(drawJPEGAttribute2.mData, 1);
-            String access$1000 = SnapshotEffectRender.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("jpeg decompress total time =");
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            Log.d(access$1000, sb.toString());
+            Log.d(SnapshotEffectRender.TAG, "jpeg decompress total time =" + (System.currentTimeMillis() - currentTimeMillis));
             int i5 = drawJPEGAttribute2.mPreviewWidth;
             int i6 = drawJPEGAttribute2.mPreviewHeight;
             int i7 = decompressPicture[0];
@@ -378,13 +361,13 @@ public class SnapshotEffectRender {
                 ShaderNativeUtil.getCenterSquareImage(i, i4);
                 return ShaderNativeUtil.compressPicture(i3, i2, SnapshotEffectRender.this.mQuality);
             }
-            int[] watermarkRange = Util.getWatermarkRange(drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight, (drawJPEGAttribute2.mJpegOrientation + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawJPEGAttribute2.mDeviceWaterMarkEnabled, drawJPEGAttribute2.mTimeWaterMarkText != null, 0.11f);
+            int[] watermarkRange = Util.getWatermarkRange(drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight, (drawJPEGAttribute2.mJpegOrientation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawJPEGAttribute2.mDeviceWaterMarkEnabled, drawJPEGAttribute2.mTimeWaterMarkText != null, 0.11f);
             int i9 = watermarkRange[2];
             int i10 = watermarkRange[3];
             SnapshotEffectRender.this.mRenderSurface.makeCurrent();
             SnapshotEffectRender.this.mGraphicBuffer.reszieBuffer(i9, i10);
-            SnapshotEffectRender.this.mBlockWidth = i9;
-            SnapshotEffectRender.this.mBlockHeight = i10;
+            int unused = SnapshotEffectRender.this.mBlockWidth = i9;
+            int unused2 = SnapshotEffectRender.this.mBlockHeight = i10;
             long currentTimeMillis2 = System.currentTimeMillis();
             int[] iArr = {OpenGlUtils.genTexture()};
             int i11 = i2;
@@ -392,12 +375,12 @@ public class SnapshotEffectRender {
             byte[] jpegFromMemImage = ShaderNativeUtil.getJpegFromMemImage(watermarkRange[0] + i, watermarkRange[1] + i4, watermarkRange[2], watermarkRange[3], SnapshotEffectRender.this.mQuality);
             int i13 = (((watermarkRange[1] + i4) * i7) + watermarkRange[0] + i) * 3;
             ShaderNativeUtil.updateTextureWidthStride(iArr[0], i9, i10, i7, i13);
-            String access$10002 = SnapshotEffectRender.TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("get pixel and upload total time =");
+            String access$1000 = SnapshotEffectRender.TAG;
+            StringBuilder sb = new StringBuilder();
+            sb.append("get pixel and upload total time =");
             int i14 = i4;
-            sb2.append(System.currentTimeMillis() - currentTimeMillis2);
-            Log.d(access$10002, sb2.toString());
+            sb.append(System.currentTimeMillis() - currentTimeMillis2);
+            Log.d(access$1000, sb.toString());
             Render effectRender = getEffectRender(drawJPEGAttribute2.mEffectIndex);
             if (effectRender == null) {
                 Log.w(SnapshotEffectRender.TAG, "init render failed");
@@ -413,9 +396,8 @@ public class SnapshotEffectRender {
             effectRender.setJpegOrientation(drawJPEGAttribute2.mJpegOrientation);
             SnapshotEffectRender.this.mGLCanvas.beginBindFrameBuffer(SnapshotEffectRender.this.mGraphicBuffer.getFrameBufferId(), i9, i10);
             long currentTimeMillis3 = System.currentTimeMillis();
-            PipeRender pipeRender = (PipeRender) effectRender;
             DrawIntTexAttribute drawIntTexAttribute = new DrawIntTexAttribute(iArr[0], 0, 0, i9, i10, true);
-            pipeRender.drawOnExtraFrameBufferOnce(drawIntTexAttribute);
+            ((PipeRender) effectRender).drawOnExtraFrameBufferOnce(drawIntTexAttribute);
             effectRender.deleteBuffer();
             int i15 = -watermarkRange[0];
             int i16 = -watermarkRange[1];
@@ -425,16 +407,12 @@ public class SnapshotEffectRender {
             byte[] bArr = jpegFromMemImage;
             int i20 = i14;
             Render render = effectRender;
-            drawTimeWaterMark(drawJPEGAttribute, i15, i16, i12, i11, drawJPEGAttribute2.mJpegOrientation, null);
+            drawTimeWaterMark(drawJPEGAttribute, i15, i16, i12, i11, drawJPEGAttribute2.mJpegOrientation, (WaterMark) null);
             if (DataRepository.dataItemFeature().Oc()) {
                 PictureInfo pictureInfo = drawJPEGAttribute2.mInfo;
                 if (pictureInfo != null && pictureInfo.isFrontCamera()) {
-                    drawFrontCameraWaterMark(drawJPEGAttribute, i19, i17, i12, i11, drawJPEGAttribute2.mJpegOrientation, null);
-                    String access$10003 = SnapshotEffectRender.TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("drawTime=");
-                    sb3.append(System.currentTimeMillis() - currentTimeMillis3);
-                    Log.d(access$10003, sb3.toString());
+                    drawFrontCameraWaterMark(drawJPEGAttribute, i19, i17, i12, i11, drawJPEGAttribute2.mJpegOrientation, (WaterMark) null);
+                    Log.d(SnapshotEffectRender.TAG, "drawTime=" + (System.currentTimeMillis() - currentTimeMillis3));
                     render.deleteBuffer();
                     GLES20.glFinish();
                     if (drawJPEGAttribute2.mRequestModuleIdx != 165) {
@@ -445,11 +423,7 @@ public class SnapshotEffectRender {
                     }
                     long currentTimeMillis4 = System.currentTimeMillis();
                     byte[] compressPicture = ShaderNativeUtil.compressPicture(i12, i11, SnapshotEffectRender.this.mQuality);
-                    String access$10004 = SnapshotEffectRender.TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("compress=");
-                    sb4.append(System.currentTimeMillis() - currentTimeMillis4);
-                    Log.d(access$10004, sb4.toString());
+                    Log.d(SnapshotEffectRender.TAG, "compress=" + (System.currentTimeMillis() - currentTimeMillis4));
                     if (GLES20.glIsTexture(iArr[0])) {
                         GLES20.glDeleteTextures(1, iArr, 0);
                     }
@@ -460,23 +434,15 @@ public class SnapshotEffectRender {
                     return compressPicture;
                 }
             }
-            drawDoubleShotWaterMark(drawJPEGAttribute, i19, i17, i12, i11, drawJPEGAttribute2.mJpegOrientation, null);
-            String access$100032 = SnapshotEffectRender.TAG;
-            StringBuilder sb32 = new StringBuilder();
-            sb32.append("drawTime=");
-            sb32.append(System.currentTimeMillis() - currentTimeMillis3);
-            Log.d(access$100032, sb32.toString());
+            drawDoubleShotWaterMark(drawJPEGAttribute, i19, i17, i12, i11, drawJPEGAttribute2.mJpegOrientation, (WaterMark) null);
+            Log.d(SnapshotEffectRender.TAG, "drawTime=" + (System.currentTimeMillis() - currentTimeMillis3));
             render.deleteBuffer();
             GLES20.glFinish();
             if (drawJPEGAttribute2.mRequestModuleIdx != 165) {
             }
             long currentTimeMillis42 = System.currentTimeMillis();
             byte[] compressPicture2 = ShaderNativeUtil.compressPicture(i12, i11, SnapshotEffectRender.this.mQuality);
-            String access$100042 = SnapshotEffectRender.TAG;
-            StringBuilder sb42 = new StringBuilder();
-            sb42.append("compress=");
-            sb42.append(System.currentTimeMillis() - currentTimeMillis42);
-            Log.d(access$100042, sb42.toString());
+            Log.d(SnapshotEffectRender.TAG, "compress=" + (System.currentTimeMillis() - currentTimeMillis42));
             if (GLES20.glIsTexture(iArr[0])) {
             }
             SnapshotEffectRender.this.mGLCanvas.endBindFrameBuffer();
@@ -492,6 +458,7 @@ public class SnapshotEffectRender {
         /* JADX WARNING: Removed duplicated region for block: B:52:0x0488  */
         /* JADX WARNING: Removed duplicated region for block: B:55:0x049d  */
         /* JADX WARNING: Removed duplicated region for block: B:58:0x04be  */
+        /* JADX WARNING: Removed duplicated region for block: B:65:? A[RETURN, SYNTHETIC] */
         private void blockSplitApplyEffect(DrawJPEGAttribute drawJPEGAttribute, int i, boolean z, Size size, Size size2) {
             int i2;
             int i3;
@@ -505,22 +472,18 @@ public class SnapshotEffectRender {
             DrawJPEGAttribute drawJPEGAttribute2 = drawJPEGAttribute;
             boolean z2 = z;
             Size size3 = size2;
-            String access$1000 = SnapshotEffectRender.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("applyEffect: applyToThumb = ");
-            sb.append(z2);
-            Log.d(access$1000, sb.toString());
+            Log.d(SnapshotEffectRender.TAG, "applyEffect: applyToThumb = " + z2);
             byte[] thumbnailBytes = z2 ? drawJPEGAttribute2.mExif.getThumbnailBytes() : drawJPEGAttribute2.mData;
             if (thumbnailBytes == null) {
-                String access$10002 = SnapshotEffectRender.TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Null ");
-                sb2.append(z2 ? "thumb!" : "jpeg!");
-                Log.w(access$10002, sb2.toString());
+                String access$1000 = SnapshotEffectRender.TAG;
+                StringBuilder sb = new StringBuilder();
+                sb.append("Null ");
+                sb.append(z2 ? "thumb!" : "jpeg!");
+                Log.w(access$1000, sb.toString());
                 return;
             }
             SnapshotEffectRender.this.mRenderSurface.makeCurrent();
-            SnapshotEffectRender.this.mTextureId = OpenGlUtils.genTexture();
+            int unused = SnapshotEffectRender.this.mTextureId = OpenGlUtils.genTexture();
             SnapshotEffectRender.this.mMemImage.getPixelsFromJpg(thumbnailBytes);
             int i9 = SnapshotEffectRender.this.mMemImage.mWidth;
             int i10 = SnapshotEffectRender.this.mMemImage.mHeight;
@@ -529,7 +492,7 @@ public class SnapshotEffectRender {
             SnapshotEffectRender.this.mRenderCounter.reset("[NewEffectFramework]start");
             CounterUtil counterUtil = new CounterUtil();
             counterUtil.reset("local start");
-            List split = SnapshotEffectRender.this.mSplitter.split(SnapshotEffectRender.this.mMemImage.mWidth, SnapshotEffectRender.this.mMemImage.mHeight, SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight, SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
+            List<Block> split = SnapshotEffectRender.this.mSplitter.split(SnapshotEffectRender.this.mMemImage.mWidth, SnapshotEffectRender.this.mMemImage.mHeight, SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight, SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
             counterUtil.tick("local start setImageSettings");
             Render effectRender = getEffectRender(drawJPEGAttribute2.mEffectIndex);
             if (effectRender == null) {
@@ -549,10 +512,9 @@ public class SnapshotEffectRender {
             effectRender.setJpegOrientation(drawJPEGAttribute2.mJpegOrientation);
             counterUtil.tick("local start render");
             SnapshotEffectRender.this.mGLCanvas.beginBindFrameBuffer(SnapshotEffectRender.this.mGraphicBuffer.getFrameBufferId(), SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
-            String str = "local beginBindFrameBuffer";
-            counterUtil.tick(str);
+            counterUtil.tick("local beginBindFrameBuffer");
             SnapshotEffectRender.this.mGLCanvas.getState().pushState();
-            counterUtil.tick(str);
+            counterUtil.tick("local beginBindFrameBuffer");
             if (drawJPEGAttribute2.mRequestModuleIdx != 165) {
                 i2 = i9;
                 i3 = i10;
@@ -567,27 +529,26 @@ public class SnapshotEffectRender {
                 WaterMark waterMark = null;
                 if (!drawJPEGAttribute2.mApplyWaterMark) {
                     i6 = i3;
-                    int[] watermarkRange = Util.getWatermarkRange(drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight, (drawJPEGAttribute2.mJpegOrientation + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawJPEGAttribute2.mDeviceWaterMarkEnabled, drawJPEGAttribute2.mTimeWaterMarkText != null, 0.11f);
+                    int[] watermarkRange = Util.getWatermarkRange(drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight, (drawJPEGAttribute2.mJpegOrientation + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, drawJPEGAttribute2.mDeviceWaterMarkEnabled, drawJPEGAttribute2.mTimeWaterMarkText != null, 0.11f);
                     i7 = i2;
-                    RectF rectF2 = new RectF((float) (watermarkRange[0] + i4), (float) (watermarkRange[1] + i5), (float) (watermarkRange[0] + i4 + watermarkRange[2]), (float) (watermarkRange[1] + i5 + watermarkRange[3]));
                     ShaderNativeUtil.genWaterMarkRange(watermarkRange[0] + i4, watermarkRange[1] + i5, watermarkRange[2], watermarkRange[3], 3);
                     iArr = watermarkRange;
-                    rectF = rectF2;
+                    rectF = new RectF((float) (watermarkRange[0] + i4), (float) (watermarkRange[1] + i5), (float) (watermarkRange[0] + i4 + watermarkRange[2]), (float) (watermarkRange[1] + i5 + watermarkRange[3]));
                 } else {
                     i6 = i3;
                     i7 = i2;
                     iArr = null;
                     rectF = null;
                 }
-                RectF rectF3 = new RectF();
+                RectF rectF2 = new RectF();
                 WaterMark waterMark2 = null;
                 WaterMark waterMark3 = null;
                 i8 = 0;
                 while (i8 < split.size()) {
                     SnapshotEffectRender.this.mFrameCounter.reset(String.format("[loop%d/%d]begin", new Object[]{Integer.valueOf(i8), Integer.valueOf(split.size())}));
-                    Block block = (Block) split.get(i8);
+                    Block block = split.get(i8);
                     int i13 = block.mWidth;
-                    RectF rectF4 = rectF;
+                    RectF rectF3 = rectF;
                     int i14 = block.mHeight;
                     int[] iArr2 = iArr;
                     int i15 = block.mRowStride;
@@ -603,20 +564,19 @@ public class SnapshotEffectRender {
                     int i21 = i17 * i19;
                     SnapshotEffectRender.this.mMemImage.textureWithStride(SnapshotEffectRender.this.mTextureId, i13, i14, i15, i21);
                     SnapshotEffectRender.this.mFrameCounter.tick(String.format("[loop%d/%d]gl uploadtexture textureId %d", new Object[]{Integer.valueOf(i8), Integer.valueOf(split.size()), Integer.valueOf(SnapshotEffectRender.this.mTextureId)}));
-                    PipeRender pipeRender = (PipeRender) effectRender;
                     DrawIntTexAttribute drawIntTexAttribute = new DrawIntTexAttribute(SnapshotEffectRender.this.mTextureId, 0, 0, i13, i14, true);
-                    pipeRender.drawOnExtraFrameBufferOnce(drawIntTexAttribute);
+                    ((PipeRender) effectRender).drawOnExtraFrameBufferOnce(drawIntTexAttribute);
                     int[] offset = block.getOffset(i9, i10);
-                    rectF3.left = (float) offset[0];
-                    rectF3.top = (float) offset[1];
-                    rectF3.right = (float) (offset[0] + i13);
-                    rectF3.bottom = (float) (offset[1] + i14);
+                    rectF2.left = (float) offset[0];
+                    rectF2.top = (float) offset[1];
+                    rectF2.right = (float) (offset[0] + i13);
+                    rectF2.bottom = (float) (offset[1] + i14);
                     int i22 = i4 - offset[0];
                     int i23 = i20 - offset[1];
                     SnapshotEffectRender.this.mGLCanvas.getState().pushState();
                     DrawJPEGAttribute drawJPEGAttribute3 = drawJPEGAttribute;
                     Render render = effectRender;
-                    List list = split;
+                    List<Block> list = split;
                     int i24 = i21;
                     int i25 = i20;
                     drawJPEGAttribute2 = drawJPEGAttribute3;
@@ -625,16 +585,16 @@ public class SnapshotEffectRender {
                     int i28 = i6;
                     int i29 = i8;
                     int i30 = i9;
-                    RectF rectF5 = rectF3;
+                    RectF rectF4 = rectF2;
                     int[] iArr3 = iArr2;
                     int i31 = i10;
                     int[] iArr4 = iArr3;
                     int i32 = i14;
-                    RectF rectF6 = rectF4;
+                    RectF rectF5 = rectF3;
                     drawAgeGenderAndMagicMirrorWater(drawJPEGAttribute3.mWaterInfos, -offset[0], -offset[1], i9, i10, i18, i16, drawJPEGAttribute3.mJpegOrientation, drawJPEGAttribute3.mIsPortraitRawData);
                     if (drawJPEGAttribute2.mApplyWaterMark) {
-                        if (rectangle_collision(rectF5.left, rectF5.top, rectF5.width(), rectF5.height(), rectF6.left, rectF6.top, rectF6.width(), rectF6.height())) {
-                            float[] intersectRect = getIntersectRect(rectF5.left, rectF5.top, rectF5.right, rectF5.bottom, rectF6.left, rectF6.top, rectF6.right, rectF6.bottom);
+                        if (rectangle_collision(rectF4.left, rectF4.top, rectF4.width(), rectF4.height(), rectF5.left, rectF5.top, rectF5.width(), rectF5.height())) {
+                            float[] intersectRect = getIntersectRect(rectF4.left, rectF4.top, rectF4.right, rectF4.bottom, rectF5.left, rectF5.top, rectF5.right, rectF5.bottom);
                             ShaderNativeUtil.mergeWaterMarkRange((int) intersectRect[0], (int) intersectRect[1], (int) (intersectRect[2] - intersectRect[0]), (int) (intersectRect[3] - intersectRect[1]), offset[0], offset[1], 3);
                             waterMark = drawTimeWaterMark(drawJPEGAttribute, i22, i23, i7, i28, drawJPEGAttribute2.mJpegOrientation, waterMark);
                             if (DataRepository.dataItemFeature().Oc()) {
@@ -652,8 +612,8 @@ public class SnapshotEffectRender {
                     SnapshotEffectRender.this.mGraphicBuffer.readBuffer(i27, i32, i24);
                     SnapshotEffectRender.this.mFrameCounter.tick(String.format("[loop%d/%d]gl readPixelAndMerge", new Object[]{Integer.valueOf(i29), Integer.valueOf(list.size())}));
                     i8 = i29 + 1;
-                    rectF3 = rectF5;
-                    rectF = rectF6;
+                    rectF2 = rectF4;
+                    rectF = rectF5;
                     i6 = i28;
                     i10 = i31;
                     i12 = i16;
@@ -676,10 +636,12 @@ public class SnapshotEffectRender {
                 }
                 SnapshotEffectRender.this.mGLCanvas.getState().popState();
                 SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
-                if (drawJPEGAttribute2.mApplyWaterMark) {
+                if (!drawJPEGAttribute2.mApplyWaterMark) {
                     drawJPEGAttribute2.mDataOfTheRegionUnderWatermarks = ShaderNativeUtil.getWaterMarkRange(SnapshotEffectRender.this.mQuality, 3);
                     drawJPEGAttribute2.mCoordinatesOfTheRegionUnderWatermarks = iArr5;
+                    return;
                 }
+                return;
             } else {
                 i5 = ((i10 - i9) / 2) - ((SnapshotEffectRender.this.mSquareModeExtraMargin * i9) / Util.sWindowWidth);
                 i3 = i9;
@@ -691,7 +653,7 @@ public class SnapshotEffectRender {
             WaterMark waterMark4 = null;
             if (!drawJPEGAttribute2.mApplyWaterMark) {
             }
-            RectF rectF32 = new RectF();
+            RectF rectF22 = new RectF();
             WaterMark waterMark22 = null;
             WaterMark waterMark32 = null;
             i8 = 0;
@@ -706,15 +668,15 @@ public class SnapshotEffectRender {
             }
             SnapshotEffectRender.this.mGLCanvas.getState().popState();
             SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
-            if (drawJPEGAttribute2.mApplyWaterMark) {
+            if (!drawJPEGAttribute2.mApplyWaterMark) {
             }
         }
 
         private void checkFrameBuffer(int i, int i2) {
             if (SnapshotEffectRender.this.mFrameBuffer == null || SnapshotEffectRender.this.mFrameBuffer.getWidth() < i || SnapshotEffectRender.this.mFrameBuffer.getHeight() < i2) {
-                SnapshotEffectRender.this.mFrameBuffer = null;
+                FrameBuffer unused = SnapshotEffectRender.this.mFrameBuffer = null;
                 SnapshotEffectRender snapshotEffectRender = SnapshotEffectRender.this;
-                snapshotEffectRender.mFrameBuffer = new FrameBuffer(snapshotEffectRender.mGLCanvas, i, i2, 0);
+                FrameBuffer unused2 = snapshotEffectRender.mFrameBuffer = new FrameBuffer(snapshotEffectRender.mGLCanvas, i, i2, 0);
             }
         }
 
@@ -756,12 +718,12 @@ public class SnapshotEffectRender {
                 boolean equals = CameraSettings.getCustomWatermark().equals(CameraSettings.getDefaultWatermarkStr());
                 if (!drawJPEGAttribute2.mIsUtralPixelWatermarkEnabled || DataRepository.dataItemFeature().Ra() || !equals) {
                     if (!SnapshotEffectRender.this.mCurrentCustomWaterMarkText.equals(CameraSettings.getCustomWatermark())) {
-                        SnapshotEffectRender.this.mCurrentCustomWaterMarkText = CameraSettings.getCustomWatermark();
+                        String unused = SnapshotEffectRender.this.mCurrentCustomWaterMarkText = CameraSettings.getCustomWatermark();
                         SnapshotEffectRender snapshotEffectRender = SnapshotEffectRender.this;
-                        snapshotEffectRender.mDualCameraWaterMarkBitmap = snapshotEffectRender.loadCameraWatermark(snapshotEffectRender.mContext);
+                        Bitmap unused2 = snapshotEffectRender.mDualCameraWaterMarkBitmap = snapshotEffectRender.loadCameraWatermark(snapshotEffectRender.mContext);
                     } else if (SnapshotEffectRender.this.mDualCameraWaterMarkBitmap == null) {
                         SnapshotEffectRender snapshotEffectRender2 = SnapshotEffectRender.this;
-                        snapshotEffectRender2.mDualCameraWaterMarkBitmap = snapshotEffectRender2.loadCameraWatermark(snapshotEffectRender2.mContext);
+                        Bitmap unused3 = snapshotEffectRender2.mDualCameraWaterMarkBitmap = snapshotEffectRender2.loadCameraWatermark(snapshotEffectRender2.mContext);
                     }
                     if (SnapshotEffectRender.this.mDualCameraWaterMarkBitmap != null) {
                         bitmap2 = SnapshotEffectRender.this.mDualCameraWaterMarkBitmap;
@@ -776,7 +738,7 @@ public class SnapshotEffectRender {
                 }
                 if (SnapshotEffectRender.this.mUltraPixelCameraWaterMarkBitmap == null) {
                     SnapshotEffectRender snapshotEffectRender3 = SnapshotEffectRender.this;
-                    snapshotEffectRender3.mUltraPixelCameraWaterMarkBitmap = snapshotEffectRender3.loadUltraPixelWatermark(snapshotEffectRender3.mContext);
+                    Bitmap unused4 = snapshotEffectRender3.mUltraPixelCameraWaterMarkBitmap = snapshotEffectRender3.loadUltraPixelWatermark(snapshotEffectRender3.mContext);
                 }
                 if (SnapshotEffectRender.this.mUltraPixelCameraWaterMarkBitmap != null) {
                     bitmap2 = SnapshotEffectRender.this.mUltraPixelCameraWaterMarkBitmap;
@@ -821,12 +783,12 @@ public class SnapshotEffectRender {
             }
             Log.d(SnapshotEffectRender.TAG, String.format(Locale.US, "downScale: %d width: %d %d parallel: %b", new Object[]{Integer.valueOf(i), Integer.valueOf(drawJPEGAttribute.mWidth), Integer.valueOf(drawJPEGAttribute.mPreviewWidth), Boolean.valueOf(z2)}));
             if (drawJPEGAttribute.mEffectIndex == FilterInfo.FILTER_ID_NONE && !CameraSettings.isAgeGenderAndMagicMirrorWaterOpen() && !CameraSettings.isGradienterOn() && !CameraSettings.isTiltShiftOn()) {
-                return saveMainJpeg(drawJPEGAttribute, z, z2, applyEffectOnlyWatermarkRange(drawJPEGAttribute, null, size));
+                return saveMainJpeg(drawJPEGAttribute, z, z2, applyEffectOnlyWatermarkRange(drawJPEGAttribute, (Size) null, size));
             }
             if (CameraSettings.isGradienterOn() || CameraSettings.isTiltShiftOn()) {
-                saveMainJpeg(drawJPEGAttribute, false, z2, applyEffect(drawJPEGAttribute, i, false, null, size));
+                saveMainJpeg(drawJPEGAttribute, false, z2, applyEffect(drawJPEGAttribute, i, false, (Size) null, size));
             } else {
-                blockSplitApplyEffect(drawJPEGAttribute, i, false, null, size);
+                blockSplitApplyEffect(drawJPEGAttribute, i, false, (Size) null, size);
                 SnapshotEffectRender.this.mRenderCounter.tick("[NewEffectFramework] done");
                 saveMainJpeg(drawJPEGAttribute, false, z2, SnapshotEffectRender.this.mMemImage.encodeJpeg(SnapshotEffectRender.this.mQuality, drawJPEGAttribute.mWidth, drawJPEGAttribute.mHeight));
             }
@@ -843,7 +805,7 @@ public class SnapshotEffectRender {
                 }
             }
             Size size = new Size();
-            byte[] applyEffect = applyEffect(drawJPEGAttribute, 1, true, size, null);
+            byte[] applyEffect = applyEffect(drawJPEGAttribute, 1, true, size, (Size) null);
             String access$1000 = SnapshotEffectRender.TAG;
             StringBuilder sb = new StringBuilder();
             sb.append("drawThumbJpeg: thumbLen=");
@@ -854,8 +816,8 @@ public class SnapshotEffectRender {
             }
             boolean z2 = drawJPEGAttribute2.mJpegOrientation != 0;
             if (z && drawJPEGAttribute2.mExif.getThumbnailBytes() != null) {
-                drawJPEGAttribute2.mUri = Storage.addImage(SnapshotEffectRender.this.mContext, drawJPEGAttribute2.mTitle, drawJPEGAttribute2.mDate, drawJPEGAttribute2.mLoc, drawJPEGAttribute2.mJpegOrientation, drawJPEGAttribute2.mExif.getThumbnailBytes(), size.width, size.height, false, false, false, z2, false, drawJPEGAttribute2.mAlgorithmName, null);
-                ImageSaverCallback imageSaverCallback = (ImageSaverCallback) SnapshotEffectRender.this.mSaverCallback.get();
+                drawJPEGAttribute2.mUri = Storage.addImage(SnapshotEffectRender.this.mContext, drawJPEGAttribute2.mTitle, drawJPEGAttribute2.mDate, drawJPEGAttribute2.mLoc, drawJPEGAttribute2.mJpegOrientation, drawJPEGAttribute2.mExif.getThumbnailBytes(), size.width, size.height, false, false, false, z2, false, drawJPEGAttribute2.mAlgorithmName, (PictureInfo) null);
+                ImageSaver.ImageSaverCallback imageSaverCallback = (ImageSaver.ImageSaverCallback) SnapshotEffectRender.this.mSaverCallback.get();
                 Uri uri = drawJPEGAttribute2.mUri;
                 if (!(uri == null || imageSaverCallback == null)) {
                     imageSaverCallback.onNewUriArrived(uri, drawJPEGAttribute2.mTitle);
@@ -958,15 +920,15 @@ public class SnapshotEffectRender {
 
         private void initEGL(EGLContext eGLContext, boolean z) {
             if (SnapshotEffectRender.this.mEglCore == null) {
-                SnapshotEffectRender.this.mEglCore = new EglCore(eGLContext, 2);
+                EglCore unused = SnapshotEffectRender.this.mEglCore = new EglCore(eGLContext, 2);
             }
             if (z && SnapshotEffectRender.this.mRenderSurface != null) {
                 SnapshotEffectRender.this.mRenderSurface.release();
-                SnapshotEffectRender.this.mRenderSurface = null;
+                PbufferSurface unused2 = SnapshotEffectRender.this.mRenderSurface = null;
             }
             if (SnapshotEffectRender.this.mRenderSurface == null) {
                 SnapshotEffectRender snapshotEffectRender = SnapshotEffectRender.this;
-                snapshotEffectRender.mRenderSurface = new PbufferSurface(snapshotEffectRender.mEglCore, 1, 1);
+                PbufferSurface unused3 = snapshotEffectRender.mRenderSurface = new PbufferSurface(snapshotEffectRender.mEglCore, 1, 1);
             }
             SnapshotEffectRender.this.mRenderSurface.makeCurrent();
         }
@@ -976,9 +938,9 @@ public class SnapshotEffectRender {
         }
 
         private void release() {
-            SnapshotEffectRender.this.mFrameBuffer = null;
+            FrameBuffer unused = SnapshotEffectRender.this.mFrameBuffer = null;
             SnapshotEffectRender.this.mGLCanvas.recycledResources();
-            SnapshotEffectRender.this.mGLCanvas = null;
+            SnapshotCanvas unused2 = SnapshotEffectRender.this.mGLCanvas = null;
             SnapshotEffectRender.this.destroy();
         }
 
@@ -1009,6 +971,7 @@ public class SnapshotEffectRender {
                         str2 = drawJPEGAttribute2.mTitle;
                     }
                     access$3700.addImage(bArr3, z3, str3, str2, drawJPEGAttribute2.mDate, drawJPEGAttribute2.mUri, drawJPEGAttribute2.mLoc, drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight, drawJPEGAttribute2.mExif, drawJPEGAttribute2.mJpegOrientation, false, false, str == null ? drawJPEGAttribute2.mFinalImage : false, false, z2, drawJPEGAttribute2.mAlgorithmName, drawJPEGAttribute2.mInfo, drawJPEGAttribute2.mPreviewThumbnailHash);
+                    return true;
                 } else if (drawJPEGAttribute2.mUri == null) {
                     Log.d(SnapshotEffectRender.TAG, "addImageForEffect");
                     Context access$1600 = SnapshotEffectRender.this.mContext;
@@ -1016,12 +979,10 @@ public class SnapshotEffectRender {
                         str = drawJPEGAttribute2.mTitle;
                     }
                     Storage.addImageForEffect(access$1600, str, drawJPEGAttribute2.mDate, drawJPEGAttribute2.mLoc, drawJPEGAttribute2.mJpegOrientation, drawJPEGAttribute2.mData, drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight, false, z2, drawJPEGAttribute2.mAlgorithmName, drawJPEGAttribute2.mInfo);
+                    return true;
                 } else {
                     String access$10002 = SnapshotEffectRender.TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("updateImage: uri=");
-                    sb2.append(drawJPEGAttribute2.mUri);
-                    Log.d(access$10002, sb2.toString());
+                    Log.d(access$10002, "updateImage: uri=" + drawJPEGAttribute2.mUri);
                     Context access$16002 = SnapshotEffectRender.this.mContext;
                     byte[] bArr4 = drawJPEGAttribute2.mData;
                     ExifInterface exifInterface = drawJPEGAttribute2.mExif;
@@ -1035,8 +996,11 @@ public class SnapshotEffectRender {
                         str2 = drawJPEGAttribute2.mTitle;
                     }
                     Storage.updateImage(access$16002, bArr4, exifInterface, uri, str4, location, i, i2, i3, str2);
+                    return true;
                 }
-            } else if (drawJPEGAttribute2.mExif != null) {
+            } else if (drawJPEGAttribute2.mExif == null) {
+                return true;
+            } else {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 try {
                     drawJPEGAttribute2.mExif.writeExif(drawJPEGAttribute2.mData, (OutputStream) byteArrayOutputStream);
@@ -1045,129 +1009,109 @@ public class SnapshotEffectRender {
                         drawJPEGAttribute2.mData = byteArray;
                     }
                     byteArrayOutputStream.close();
+                    return true;
                 } catch (IOException e2) {
                     Log.e(SnapshotEffectRender.TAG, e2.getMessage(), e2);
+                    return true;
                 }
             }
-            return true;
         }
 
-        /* JADX WARNING: type inference failed for: r2v0 */
-        /* JADX WARNING: type inference failed for: r2v1, types: [boolean] */
-        /* JADX WARNING: type inference failed for: r2v2 */
-        /* JADX WARNING: type inference failed for: r2v3, types: [int] */
-        /* JADX WARNING: type inference failed for: r2v4, types: [int] */
-        /* JADX WARNING: type inference failed for: r2v5 */
-        /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r2v0
-  assigns: [?[int, float, boolean, short, byte, char, OBJECT, ARRAY], int]
-  uses: [boolean, int]
-  mth insns count: 181
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$0(DepthTraversal.java:13)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:13)
-        	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-        	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-        	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-        	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-         */
-        /* JADX WARNING: Unknown variable types count: 2 */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v0, resolved type: boolean} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v1, resolved type: boolean} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: boolean} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v3, resolved type: boolean} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v4, resolved type: int} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v5, resolved type: boolean} */
+        /* JADX WARNING: Multi-variable type inference failed */
         public void handleMessage(Message message) {
             if (SnapshotEffectRender.this.mSaverCallback.get() != null) {
-                ? r2 = 0;
+                boolean z = false;
                 switch (message.what) {
                     case 0:
-                        initEGL(null, false);
-                        SnapshotEffectRender.this.mGLCanvas = new SnapshotCanvas();
-                        SnapshotEffectRender.this.mGraphicBuffer = new GraphicBuffer();
-                        ImageSaverCallback imageSaverCallback = (ImageSaverCallback) SnapshotEffectRender.this.mSaverCallback.get();
+                        initEGL((EGLContext) null, false);
+                        SnapshotCanvas unused = SnapshotEffectRender.this.mGLCanvas = new SnapshotCanvas();
+                        GraphicBuffer unused2 = SnapshotEffectRender.this.mGraphicBuffer = new GraphicBuffer();
+                        ImageSaver.ImageSaverCallback imageSaverCallback = (ImageSaver.ImageSaverCallback) SnapshotEffectRender.this.mSaverCallback.get();
                         if (imageSaverCallback != null) {
                             SnapshotEffectRender.this.mGLCanvas.setSize(imageSaverCallback.getCameraScreenNail().getWidth(), imageSaverCallback.getCameraScreenNail().getHeight());
                         }
                         SnapshotEffectRender.this.mEglThreadBlockVar.open();
-                        break;
+                        return;
                     case 1:
                         DrawJPEGAttribute drawJPEGAttribute = (DrawJPEGAttribute) message.obj;
                         if (message.arg1 > 0) {
-                            r2 = 1;
+                            z = true;
                         }
-                        drawMainJpeg(drawJPEGAttribute, true, r2);
+                        drawMainJpeg(drawJPEGAttribute, true, z);
                         SnapshotEffectRender.this.mGLCanvas.recycledResources();
                         if (SnapshotEffectRender.this.mReleasePending && !hasMessages(1)) {
                             release();
                         }
                         synchronized (SnapshotEffectRender.this.mLock) {
-                            SnapshotEffectRender.this.mJpegQueueSize = SnapshotEffectRender.this.mJpegQueueSize - 1;
+                            SnapshotEffectRender.access$610(SnapshotEffectRender.this);
                         }
-                        break;
+                        return;
                     case 2:
                         DrawJPEGAttribute drawJPEGAttribute2 = (DrawJPEGAttribute) message.obj;
-                        boolean z = message.arg1 > 0;
-                        boolean z2 = message.arg2 > 0;
+                        boolean z2 = message.arg1 > 0;
+                        boolean z3 = message.arg2 > 0;
                         int access$700 = SnapshotEffectRender.this.mBlockWidth;
                         int access$800 = SnapshotEffectRender.this.mBlockHeight;
                         int access$900 = SnapshotEffectRender.this.calEachBlockHeight(drawJPEGAttribute2.mWidth, drawJPEGAttribute2.mHeight);
                         int i = drawJPEGAttribute2.mWidth;
-                        if (i != 0 && drawJPEGAttribute2.mHeight != 0) {
-                            SnapshotEffectRender.this.mBlockWidth = i;
-                            SnapshotEffectRender.this.mBlockHeight = drawJPEGAttribute2.mHeight / access$900;
-                            if (!(access$700 == SnapshotEffectRender.this.mBlockWidth && access$800 == SnapshotEffectRender.this.mBlockHeight) && SnapshotEffectRender.this.mInitGraphicBuffer) {
-                                SnapshotEffectRender.this.mRenderSurface.makeCurrent();
-                                SnapshotEffectRender.this.mGraphicBuffer.reszieBuffer(SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
-                                SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
-                            } else {
-                                SnapshotEffectRender.this.mRenderSurface.makeCurrent();
-                                SnapshotEffectRender.this.mGraphicBuffer.initBuffer(SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
-                                SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
-                                SnapshotEffectRender.this.mInitGraphicBuffer = true;
-                            }
-                            if (z && !z2) {
-                                drawThumbJpeg(drawJPEGAttribute2, false);
-                            }
-                            SnapshotEffectRender.this.mTotalCounter.reset("TOTAL");
-                            drawMainJpeg(drawJPEGAttribute2, false, z2);
-                            SnapshotEffectRender.this.mRenderSurface.makeCurrent();
-                            SnapshotEffectRender.this.mGLCanvas.recycledResources();
-                            SnapshotEffectRender.this.mGraphicBuffer.release();
-                            SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
-                            SnapshotEffectRender.this.mTotalCounter.tick("TOTAL");
-                            SnapshotEffectRender.this.mEglThreadBlockVar.open();
-                            break;
-                        } else {
+                        if (i == 0 || drawJPEGAttribute2.mHeight == 0) {
                             Object[] objArr = new Object[3];
                             objArr[0] = Integer.valueOf(drawJPEGAttribute2.mWidth);
                             objArr[1] = Integer.valueOf(drawJPEGAttribute2.mHeight);
                             byte[] bArr = drawJPEGAttribute2.mData;
                             if (bArr != null) {
-                                r2 = bArr.length;
+                                z = bArr.length;
                             }
-                            objArr[2] = Integer.valueOf(r2);
+                            objArr[2] = Integer.valueOf(z);
                             Log.e(SnapshotEffectRender.TAG, String.format("jpeg data is broken width %d height %d length %d", objArr));
                             SnapshotEffectRender.this.mEglThreadBlockVar.open();
-                            break;
+                            return;
                         }
-                        break;
+                        int unused3 = SnapshotEffectRender.this.mBlockWidth = i;
+                        int unused4 = SnapshotEffectRender.this.mBlockHeight = drawJPEGAttribute2.mHeight / access$900;
+                        if (!(access$700 == SnapshotEffectRender.this.mBlockWidth && access$800 == SnapshotEffectRender.this.mBlockHeight) && SnapshotEffectRender.this.mInitGraphicBuffer) {
+                            SnapshotEffectRender.this.mRenderSurface.makeCurrent();
+                            SnapshotEffectRender.this.mGraphicBuffer.reszieBuffer(SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
+                            SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
+                        } else {
+                            SnapshotEffectRender.this.mRenderSurface.makeCurrent();
+                            SnapshotEffectRender.this.mGraphicBuffer.initBuffer(SnapshotEffectRender.this.mBlockWidth, SnapshotEffectRender.this.mBlockHeight);
+                            SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
+                            boolean unused5 = SnapshotEffectRender.this.mInitGraphicBuffer = true;
+                        }
+                        if (z2 && !z3) {
+                            drawThumbJpeg(drawJPEGAttribute2, false);
+                        }
+                        SnapshotEffectRender.this.mTotalCounter.reset("TOTAL");
+                        drawMainJpeg(drawJPEGAttribute2, false, z3);
+                        SnapshotEffectRender.this.mRenderSurface.makeCurrent();
+                        SnapshotEffectRender.this.mGLCanvas.recycledResources();
+                        SnapshotEffectRender.this.mGraphicBuffer.release();
+                        SnapshotEffectRender.this.mRenderSurface.makeNothingCurrent();
+                        SnapshotEffectRender.this.mTotalCounter.tick("TOTAL");
+                        SnapshotEffectRender.this.mEglThreadBlockVar.open();
+                        return;
                     case 3:
                         drawThumbJpeg((DrawJPEGAttribute) message.obj, true);
-                        break;
+                        return;
                     case 4:
                         drawThumbJpeg((DrawJPEGAttribute) message.obj, true);
                         SnapshotEffectRender.this.mEglThreadBlockVar.open();
-                        break;
+                        return;
                     case 5:
                         release();
-                        break;
+                        return;
                     case 6:
                         SnapshotEffectRender.this.mGLCanvas.prepareEffectRenders(false, message.arg1);
-                        break;
+                        return;
+                    default:
+                        return;
                 }
             }
         }
@@ -1204,7 +1148,7 @@ public class SnapshotEffectRender {
         }
     }
 
-    public SnapshotEffectRender(ImageSaverCallback imageSaverCallback, boolean z) {
+    public SnapshotEffectRender(ImageSaver.ImageSaverCallback imageSaverCallback, boolean z) {
         Log.d(TAG, "SnapshotEffectRender: has been created!!!");
         this.mSaverCallback = new WeakReference<>(imageSaverCallback);
         this.mContext = CameraAppImpl.getAndroidContext();
@@ -1238,6 +1182,12 @@ public class SnapshotEffectRender {
             this.mFrontCameraWaterMarkPaddingYRatio = getResourceFloat(R.dimen.frontcamera_watermark_padding_y_ratio, 0.0f);
         }
         this.mSquareModeExtraMargin = this.mContext.getResources().getDimensionPixelSize(R.dimen.square_mode_bottom_cover_extra_margin);
+    }
+
+    static /* synthetic */ int access$610(SnapshotEffectRender snapshotEffectRender) {
+        int i = snapshotEffectRender.mJpegQueueSize;
+        snapshotEffectRender.mJpegQueueSize = i - 1;
+        return i;
     }
 
     /* access modifiers changed from: private */
@@ -1310,7 +1260,7 @@ public class SnapshotEffectRender {
         throw r0;
      */
     public Bitmap loadCameraWatermark(Context context) {
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         options.inPurgeable = true;
         options.inPremultiplied = false;
@@ -1323,8 +1273,8 @@ public class SnapshotEffectRender {
         }
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
-            Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, null, options);
-            $closeResource(null, fileInputStream);
+            Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, (Rect) null, options);
+            $closeResource((Throwable) null, fileInputStream);
             return decodeStream;
         } catch (Exception e2) {
             Log.d(TAG, "Failed to load app camera watermark ", e2);
@@ -1347,7 +1297,7 @@ public class SnapshotEffectRender {
         throw r0;
      */
     public Bitmap loadUltraPixelWatermark(Context context) {
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         options.inPurgeable = true;
         options.inPremultiplied = false;
@@ -1358,8 +1308,8 @@ public class SnapshotEffectRender {
             }
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
-                Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, null, options);
-                $closeResource(null, fileInputStream);
+                Bitmap decodeStream = BitmapFactory.decodeStream(fileInputStream, (Rect) null, options);
+                $closeResource((Throwable) null, fileInputStream);
                 return decodeStream;
             } catch (Exception e2) {
                 Log.d(TAG, "Failed to load app camera watermark ", e2);
@@ -1408,10 +1358,7 @@ public class SnapshotEffectRender {
             return typedValue.getFloat();
         } catch (Exception unused) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Missing resource ");
-            sb.append(Integer.toHexString(i));
-            Log.e(str, sb.toString());
+            Log.e(str, "Missing resource " + Integer.toHexString(i));
             return f2;
         }
     }
@@ -1426,11 +1373,7 @@ public class SnapshotEffectRender {
 
     public boolean processorJpegAsync(DrawJPEGAttribute drawJPEGAttribute, boolean z) {
         boolean z2;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("queueSize=");
-        sb.append(this.mJpegQueueSize);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "queueSize=" + this.mJpegQueueSize);
         if (z || this.mJpegQueueSize < 7) {
             if (!z) {
                 boolean z3 = this.mJpegQueueSize == 0;
@@ -1442,7 +1385,7 @@ public class SnapshotEffectRender {
                 }
                 if (!this.mIsImageCaptureIntent && z3 && this.mExifNeeded && z2) {
                     if (!drawJPEGAttribute.mNeedThumbnail) {
-                        ImageSaverCallback imageSaverCallback = (ImageSaverCallback) this.mSaverCallback.get();
+                        ImageSaver.ImageSaverCallback imageSaverCallback = (ImageSaver.ImageSaverCallback) this.mSaverCallback.get();
                         if (imageSaverCallback != null) {
                             imageSaverCallback.getThumbnailUpdater().updatePreviewThumbnailUri(drawJPEGAttribute.mUri);
                         }
@@ -1453,7 +1396,7 @@ public class SnapshotEffectRender {
                             if (uri != null) {
                                 drawJPEGAttribute.mFinalImage = false;
                                 Thumbnail createThumbnail = Thumbnail.createThumbnail(uri, thumbnailBitmap, drawJPEGAttribute.mJpegOrientation, false);
-                                ImageSaverCallback imageSaverCallback2 = (ImageSaverCallback) this.mSaverCallback.get();
+                                ImageSaver.ImageSaverCallback imageSaverCallback2 = (ImageSaver.ImageSaverCallback) this.mSaverCallback.get();
                                 if (imageSaverCallback2 != null) {
                                     imageSaverCallback2.getThumbnailUpdater().setThumbnail(createThumbnail, true, true);
                                 }
@@ -1468,11 +1411,7 @@ public class SnapshotEffectRender {
             this.mEglHandler.obtainMessage(1, z ? 1 : 0, 0, drawJPEGAttribute).sendToTarget();
             return true;
         }
-        String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("queueSize is full, drop it ");
-        sb2.append(drawJPEGAttribute.mTitle);
-        Log.d(str2, sb2.toString());
+        Log.d(TAG, "queueSize is full, drop it " + drawJPEGAttribute.mTitle);
         return false;
     }
 

@@ -21,7 +21,7 @@ public final class SingleDelay<T> extends Single<T> {
 
         final class OnError implements Runnable {
 
-            /* renamed from: e reason: collision with root package name */
+            /* renamed from: e  reason: collision with root package name */
             private final Throwable f328e;
 
             OnError(Throwable th) {

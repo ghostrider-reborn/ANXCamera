@@ -5,8 +5,8 @@ import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.media.BaseMediaPlayer.PlayerEventCallback;
-import android.support.v4.media.MediaSession2.OnDataSourceMissingHelper;
+import android.support.v4.media.BaseMediaPlayer;
+import android.support.v4.media.MediaSession2;
 import android.support.v4.util.ArrayMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,9 +23,9 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
     @GuardedBy("mLock")
     public PlayItem mCurrent;
     @GuardedBy("mLock")
-    private OnDataSourceMissingHelper mDsmHelper;
+    private MediaSession2.OnDataSourceMissingHelper mDsmHelper;
     /* access modifiers changed from: private */
-    public final PlayItem mEopPlayItem = new PlayItem(-1, null);
+    public final PlayItem mEopPlayItem = new PlayItem(-1, (DataSourceDesc) null);
     @GuardedBy("mLock")
     private Map<MediaItem2, DataSourceDesc> mItemDsdMap = new ArrayMap();
     /* access modifiers changed from: private */
@@ -47,7 +47,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
     @GuardedBy("mLock")
     public ArrayList<MediaItem2> mShuffledList = new ArrayList<>();
 
-    private class MyPlayerEventCallback extends PlayerEventCallback {
+    private class MyPlayerEventCallback extends BaseMediaPlayer.PlayerEventCallback {
         private MyPlayerEventCallback() {
         }
 
@@ -58,7 +58,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
             synchronized (SessionPlaylistAgentImplBase.this.mLock) {
                 if (SessionPlaylistAgentImplBase.this.mPlayer == baseMediaPlayer) {
                     if (dataSourceDesc == null && SessionPlaylistAgentImplBase.this.mCurrent != null) {
-                        SessionPlaylistAgentImplBase.this.mCurrent = SessionPlaylistAgentImplBase.this.getNextValidPlayItemLocked(SessionPlaylistAgentImplBase.this.mCurrent.shuffledIdx, 1);
+                        PlayItem unused = SessionPlaylistAgentImplBase.this.mCurrent = SessionPlaylistAgentImplBase.this.getNextValidPlayItemLocked(SessionPlaylistAgentImplBase.this.mCurrent.shuffledIdx, 1);
                         SessionPlaylistAgentImplBase.this.updateCurrentIfNeededLocked();
                     }
                 }
@@ -72,7 +72,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
         public int shuffledIdx;
 
         PlayItem(SessionPlaylistAgentImplBase sessionPlaylistAgentImplBase, int i) {
-            this(i, null);
+            this(i, (DataSourceDesc) null);
         }
 
         PlayItem(int i, DataSourceDesc dataSourceDesc) {
@@ -89,7 +89,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isValid() {
             if (this == SessionPlaylistAgentImplBase.this.mEopPlayItem) {
                 return true;
@@ -136,10 +136,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
         if (i < 0) {
             return 0;
         }
-        if (i > i2) {
-            i = i2;
-        }
-        return i;
+        return i > i2 ? i2 : i;
     }
 
     /* access modifiers changed from: private */
@@ -149,28 +146,23 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
             i = i2 > 0 ? -1 : size;
         }
         int i3 = i;
-        int i4 = 0;
-        while (true) {
-            PlayItem playItem = null;
-            if (i4 >= size) {
-                return null;
-            }
+        for (int i4 = 0; i4 < size; i4++) {
             i3 += i2;
             if (i3 < 0 || i3 >= this.mPlaylist.size()) {
-                if (this.mRepeatMode == 0) {
-                    if (i4 != size - 1) {
-                        playItem = this.mEopPlayItem;
-                    }
-                    return playItem;
+                if (this.mRepeatMode != 0) {
+                    i3 = i3 < 0 ? this.mPlaylist.size() - 1 : 0;
+                } else if (i4 == size - 1) {
+                    return null;
+                } else {
+                    return this.mEopPlayItem;
                 }
-                i3 = i3 < 0 ? this.mPlaylist.size() - 1 : 0;
             }
-            DataSourceDesc retrieveDataSourceDescLocked = retrieveDataSourceDescLocked((MediaItem2) this.mShuffledList.get(i3));
+            DataSourceDesc retrieveDataSourceDescLocked = retrieveDataSourceDescLocked(this.mShuffledList.get(i3));
             if (retrieveDataSourceDescLocked != null) {
                 return new PlayItem(i3, retrieveDataSourceDescLocked);
             }
-            i4++;
         }
+        return null;
     }
 
     private boolean hasValidItem() {
@@ -188,11 +180,11 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
             this.mItemDsdMap.put(mediaItem2, dataSourceDesc);
             return dataSourceDesc;
         }
-        DataSourceDesc dataSourceDesc2 = (DataSourceDesc) this.mItemDsdMap.get(mediaItem2);
+        DataSourceDesc dataSourceDesc2 = this.mItemDsdMap.get(mediaItem2);
         if (dataSourceDesc2 != null) {
             return dataSourceDesc2;
         }
-        OnDataSourceMissingHelper onDataSourceMissingHelper = this.mDsmHelper;
+        MediaSession2.OnDataSourceMissingHelper onDataSourceMissingHelper = this.mDsmHelper;
         if (onDataSourceMissingHelper != null) {
             dataSourceDesc2 = onDataSourceMissingHelper.onDataSourceMissing(this.mSession.getInstance(), mediaItem2);
             if (dataSourceDesc2 != null) {
@@ -214,7 +206,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
                 this.mCurrent = getNextValidPlayItemLocked(this.mShuffledList.size() - 1, 1);
             } else {
                 PlayItem playItem = this.mCurrent;
-                playItem.mediaItem = (MediaItem2) this.mShuffledList.get(playItem.shuffledIdx);
+                playItem.mediaItem = this.mShuffledList.get(playItem.shuffledIdx);
                 if (retrieveDataSourceDescLocked(this.mCurrent.mediaItem) == null) {
                     this.mCurrent = getNextValidPlayItemLocked(this.mCurrent.shuffledIdx, 1);
                 }
@@ -269,7 +261,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public int getCurShuffledIndex() {
         int i;
@@ -369,7 +361,7 @@ class SessionPlaylistAgentImplBase extends MediaPlaylistAgent {
         }
     }
 
-    public void setOnDataSourceMissingHelper(OnDataSourceMissingHelper onDataSourceMissingHelper) {
+    public void setOnDataSourceMissingHelper(MediaSession2.OnDataSourceMissingHelper onDataSourceMissingHelper) {
         synchronized (this.mLock) {
             this.mDsmHelper = onDataSourceMissingHelper;
         }

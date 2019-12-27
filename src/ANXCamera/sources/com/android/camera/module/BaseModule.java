@@ -26,18 +26,18 @@ import com.android.camera.CameraSize;
 import com.android.camera.FileCompat;
 import com.android.camera.HybridZoomingSystem;
 import com.android.camera.JpegEncodingQualityMappings;
-import com.android.camera.LocalParallelService.LocalBinder;
+import com.android.camera.LocalParallelService;
 import com.android.camera.MutexModeManager;
-import com.android.camera.MutexModeManager.MutexCallBack;
 import com.android.camera.R;
+import com.android.camera.SensorStateManager;
 import com.android.camera.ThermalDetector;
 import com.android.camera.Util;
 import com.android.camera.constant.AutoFocus;
 import com.android.camera.constant.GlobalConstant;
-import com.android.camera.constant.UpdateConstant.UpdateType;
+import com.android.camera.constant.UpdateConstant;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.global.DataItemGlobal;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.effect.EffectController;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.lib.compatibility.related.vibrator.ViberatorContext;
@@ -49,23 +49,13 @@ import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.parallel.AlgoConnector;
 import com.android.camera.preferences.SettingsOverrider;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.EvChangedProtocol;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.StandaloneMacroProtocol;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
-import com.android.camera.protocol.ModeProtocol.UltraWideProtocol;
-import com.android.camera.protocol.ModeProtocol.ZoomProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.ImageSaver;
 import com.android.camera.storage.Storage;
-import com.android.camera.ui.FocusView.ExposureViewListener;
+import com.android.camera.ui.FocusView;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.CameraMetaDataCallback;
 import com.android.camera2.CameraCapabilities;
 import com.android.camera2.CaptureResultParser;
 import com.mi.config.a;
@@ -83,7 +73,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class BaseModule implements Module, ExposureViewListener, CameraMetaDataCallback, EvChangedProtocol, ZoomProtocol, MutexCallBack, UltraWideProtocol, StandaloneMacroProtocol, Consumer<int[]> {
+public abstract class BaseModule implements Module, FocusView.ExposureViewListener, Camera2Proxy.CameraMetaDataCallback, ModeProtocol.EvChangedProtocol, ModeProtocol.ZoomProtocol, MutexModeManager.MutexCallBack, ModeProtocol.UltraWideProtocol, ModeProtocol.StandaloneMacroProtocol, Consumer<int[]> {
     protected static final int BACK_PRESSED_TIME_INTERVAL = 3000;
     public static final int[] CAMERA_MODES = {0, 2, 4, 6};
     public static final int CAMERA_MODE_IMAGE_CAPTURE = 2;
@@ -135,7 +125,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     protected long mLastBackPressedTime;
     private Disposable mLensDirtyDetectDisposable;
     private Disposable mLensDirtyDetectHintDisposable;
-    protected MainContentProtocol mMainProtocol;
+    protected ModeProtocol.MainContentProtocol mMainProtocol;
     protected long mMainThreadId = Thread.currentThread().getId();
     protected int mMaxFaceCount;
     private float mMaxZoomRatio = 1.0f;
@@ -260,27 +250,15 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         this.mActivity.onModeSelected(StartControl.create(currentMode).setStartDelay(0).setResetType(5).setViewConfigType(2).setNeedReConfigureData(z).setNeedBlurAnimation(z2));
     }
 
-    public void accept(@UpdateType int[] iArr) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        sb.append("accept ");
-        sb.append(join(iArr));
-        sb.append(". ");
-        sb.append(this);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.e(str, sb2);
+    public void accept(@UpdateConstant.UpdateType int[] iArr) throws Exception {
+        Log.e(TAG, "accept " + join(iArr) + ". " + this);
         if (this.mUpdateWorkThreadDisposable.isDisposed()) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("mUpdateWorkThreadDisposable isDisposed");
-            sb3.append(this);
-            sb3.append(" ");
-            sb3.append(this.mUpdateWorkThreadDisposable);
-            Log.e(str, sb3.toString());
+            Log.e(TAG, "mUpdateWorkThreadDisposable isDisposed" + this + " " + this.mUpdateWorkThreadDisposable);
         } else if (isDeviceAlive()) {
-            Log.e(str, "begin to consumePreference..");
+            Log.e(TAG, "begin to consumePreference..");
             consumePreference(iArr);
             if (!isAlive() || this.mActivity.getCameraScreenNail().getSurfaceCreatedTimestamp() != this.mSurfaceCreatedTimestamp) {
-                Log.d(str, "skip resumePreview on accept");
+                Log.d(TAG, "skip resumePreview on accept");
             } else {
                 this.mCamera2Device.resumePreview();
             }
@@ -296,10 +274,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     public void applyZoomRatio() {
         if (this.mCamera2Device != null) {
             float deviceBasedZoomRatio = getDeviceBasedZoomRatio();
-            StringBuilder sb = new StringBuilder();
-            sb.append("applyZoomRatio(): apply zoom ratio to device = ");
-            sb.append(deviceBasedZoomRatio);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "applyZoomRatio(): apply zoom ratio to device = " + deviceBasedZoomRatio);
             this.mCamera2Device.setZoomRatio(deviceBasedZoomRatio);
         }
     }
@@ -313,10 +288,10 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         if (CameraSettings.isStereoModeOn()) {
             List<String> supportedSettingKeys = getSupportedSettingKeys();
             if (supportedSettingKeys != null) {
-                ProviderEditor editor = DataRepository.dataItemConfig().editor();
-                for (String str : supportedSettingKeys) {
-                    if (CameraSettings.isSwitchOn(str)) {
-                        editor.remove(str);
+                DataProvider.ProviderEditor editor = DataRepository.dataItemConfig().editor();
+                for (String next : supportedSettingKeys) {
+                    if (CameraSettings.isSwitchOn(next)) {
+                        editor.remove(next);
                     }
                 }
                 editor.apply();
@@ -333,19 +308,14 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     public void checkDisplayOrientation() {
         this.mDisplayRotation = Util.getDisplayRotation(this.mActivity);
         this.mCameraDisplayOrientation = Util.getDisplayOrientation(this.mDisplayRotation, this.mBogusCameraId);
-        StringBuilder sb = new StringBuilder();
-        sb.append("checkDisplayOrientation: ");
-        sb.append(this.mDisplayRotation);
-        sb.append(" | ");
-        sb.append(this.mCameraDisplayOrientation);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "checkDisplayOrientation: " + this.mDisplayRotation + " | " + this.mCameraDisplayOrientation);
         if (this.mActivity.getCameraScreenNail() != null) {
             this.mActivity.getCameraScreenNail().setDisplayOrientation(this.mDisplayRotation);
         }
     }
 
     /* access modifiers changed from: protected */
-    public void consumePreference(@UpdateType int... iArr) {
+    public void consumePreference(@UpdateConstant.UpdateType int... iArr) {
     }
 
     /* access modifiers changed from: protected */
@@ -354,13 +324,8 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     }
 
     public void enableCameraControls(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("enableCameraControls: enable = ");
-        sb.append(z);
-        sb.append(", caller: ");
-        sb.append(Util.getCallers(1));
-        Log.d(TAG, sb.toString());
-        setIgnoreTouchEvent(!z);
+        Log.d(TAG, "enableCameraControls: enable = " + z + ", caller: " + Util.getCallers(1));
+        setIgnoreTouchEvent(z ^ true);
     }
 
     public void enterMutexMode(int i) {
@@ -519,11 +484,8 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     /* access modifiers changed from: protected */
     public void handlePendingScreenSlide() {
         if (this.mPendingScreenSlideKeyCode > 0 && this.mActivity != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("process pending screen slide: ");
-            sb.append(this.mPendingScreenSlideKeyCode);
-            Log.d(TAG, sb.toString());
-            this.mActivity.handleScreenSlideKeyEvent(this.mPendingScreenSlideKeyCode, null);
+            Log.d(TAG, "process pending screen slide: " + this.mPendingScreenSlideKeyCode);
+            this.mActivity.handleScreenSlideKeyEvent(this.mPendingScreenSlideKeyCode, (KeyEvent) null);
             this.mPendingScreenSlideKeyCode = 0;
         }
     }
@@ -569,7 +531,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
 
     /* access modifiers changed from: protected */
     public void hideTipMessage(@StringRes int i) {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips == null) {
             return;
         }
@@ -616,14 +578,13 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
             if (i != 165) {
                 if (i == 167) {
                     setMinZoomRatio(1.0f);
-                    if (!CameraSettings.isUltraWideConfigOpen(this.mModuleIndex) && !CameraSettings.isMacroModeEnabled(this.mModuleIndex)) {
-                        if (!"macro".equals(DataRepository.dataItemConfig().getManuallyDualLens().getComponentValue(this.mModuleIndex))) {
-                            setMaxZoomRatio(this.mCameraCapabilities.getMaxZoomRatio());
-                            return;
-                        }
+                    if (CameraSettings.isUltraWideConfigOpen(this.mModuleIndex) || CameraSettings.isMacroModeEnabled(this.mModuleIndex) || "macro".equals(DataRepository.dataItemConfig().getManuallyDualLens().getComponentValue(this.mModuleIndex))) {
+                        setMaxZoomRatio(2.0f);
+                        return;
+                    } else {
+                        setMaxZoomRatio(this.mCameraCapabilities.getMaxZoomRatio());
+                        return;
                     }
-                    setMaxZoomRatio(2.0f);
-                    return;
                 } else if (i != 169) {
                     if (i != 174) {
                         switch (i) {
@@ -734,16 +695,12 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
 
     /* access modifiers changed from: protected */
     public void initializeZoomRatio() {
-        boolean z = HybridZoomingSystem.IS_3_OR_MORE_SAT;
-        String str = "resetZoomRatio(): set zoom ratio to 1.0";
-        String str2 = TAG;
-        if (!z || !isBackCamera()) {
-            Log.d(str2, str);
+        if (!HybridZoomingSystem.IS_3_OR_MORE_SAT || !isBackCamera()) {
+            Log.d(TAG, "resetZoomRatio(): set zoom ratio to 1.0");
             setZoomRatio(1.0f);
             return;
         }
         int i = this.mModuleIndex;
-        String str3 = "resetZoomRatio(): set zoom ratio to ";
         if (!(i == 165 || i == 167)) {
             if (i != 169) {
                 if (!(i == 177 || i == 173)) {
@@ -755,7 +712,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
                             case 163:
                                 break;
                             default:
-                                Log.d(str2, str);
+                                Log.d(TAG, "resetZoomRatio(): set zoom ratio to 1.0");
                                 setZoomRatio(1.0f);
                                 return;
                         }
@@ -763,25 +720,21 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
                 }
             }
             if (!CameraSettings.isUltraWideConfigOpen(this.mModuleIndex)) {
-                String str4 = "resetZoomRatio(): set zoom ratio to 0.6";
                 if (CameraSettings.isAutoZoomEnabled(this.mModuleIndex) || CameraSettings.isSuperEISEnabled(this.mModuleIndex)) {
-                    Log.d(str2, str4);
+                    Log.d(TAG, "resetZoomRatio(): set zoom ratio to 0.6");
                     setZoomRatio(0.6f);
                     return;
                 } else if (CameraSettings.isMacroModeEnabled(this.mModuleIndex) && DataRepository.dataItemFeature().ad() && (isStandaloneMacroCamera() || isUltraWideBackCamera())) {
-                    Log.d(str2, str);
+                    Log.d(TAG, "resetZoomRatio(): set zoom ratio to 1.0");
                     setZoomRatio(1.0f);
                     return;
                 } else if (CameraSettings.isMacroModeEnabled(this.mModuleIndex)) {
-                    Log.d(str2, str4);
+                    Log.d(TAG, "resetZoomRatio(): set zoom ratio to 0.6");
                     setZoomRatio(0.6f);
                     return;
                 } else {
                     String zoomRatioHistory = HybridZoomingSystem.getZoomRatioHistory(this.mModuleIndex, Float.toString(1.0f));
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str3);
-                    sb.append(zoomRatioHistory);
-                    Log.d(str2, sb.toString());
+                    Log.d(TAG, "resetZoomRatio(): set zoom ratio to " + zoomRatioHistory);
                     setZoomRatio(HybridZoomingSystem.toFloat(zoomRatioHistory, 1.0f));
                     return;
                 }
@@ -791,27 +744,18 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         }
         if (CameraSettings.isMacroModeEnabled(this.mModuleIndex) && DataRepository.dataItemFeature().ad()) {
             String zoomRatioHistory2 = HybridZoomingSystem.getZoomRatioHistory(this.mModuleIndex, Float.toString(HybridZoomingSystem.sDefaultStandaloneMacroOpticalZoomRatio));
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str3);
-            sb2.append(HybridZoomingSystem.sDefaultStandaloneMacroOpticalZoomRatio);
-            Log.d(str2, sb2.toString());
+            Log.d(TAG, "resetZoomRatio(): set zoom ratio to " + HybridZoomingSystem.sDefaultStandaloneMacroOpticalZoomRatio);
             setZoomRatio(HybridZoomingSystem.toFloat(zoomRatioHistory2, HybridZoomingSystem.sDefaultStandaloneMacroOpticalZoomRatio));
         } else if (CameraSettings.isMacroModeEnabled(this.mModuleIndex) && !DataRepository.dataItemFeature().ad()) {
             String zoomRatioHistory3 = HybridZoomingSystem.getZoomRatioHistory(this.mModuleIndex, Float.toString(0.6f));
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str3);
-            sb3.append(zoomRatioHistory3);
-            Log.d(str2, sb3.toString());
+            Log.d(TAG, "resetZoomRatio(): set zoom ratio to " + zoomRatioHistory3);
             setZoomRatio(HybridZoomingSystem.toFloat(zoomRatioHistory3, 0.6f));
         } else if (!CameraSettings.isUltraPixelRearOn()) {
             String zoomRatioHistory4 = HybridZoomingSystem.getZoomRatioHistory(this.mModuleIndex, Float.toString(1.0f));
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(str3);
-            sb4.append(zoomRatioHistory4);
-            Log.d(str2, sb4.toString());
+            Log.d(TAG, "resetZoomRatio(): set zoom ratio to " + zoomRatioHistory4);
             setZoomRatio(HybridZoomingSystem.toFloat(zoomRatioHistory4, 1.0f));
         } else {
-            Log.d(str2, str);
+            Log.d(TAG, "resetZoomRatio(): set zoom ratio to 1.0");
             setZoomRatio(1.0f);
         }
     }
@@ -872,11 +816,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
             if (DEBUG) {
                 new RuntimeException(format).printStackTrace();
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append(Util.getCallers(1));
-                sb.append("|");
-                sb.append(format);
-                Log.e(TAG, sb.toString());
+                Log.e(TAG, Util.getCallers(1) + "|" + format);
             }
         }
         return z;
@@ -1100,43 +1040,32 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         Camera camera = this.mActivity;
         if (camera != null && !camera.isFinishing() && intent != null) {
             String action = intent.getAction();
-            StringBuilder sb = new StringBuilder();
-            sb.append("onReceive: action=");
-            sb.append(action);
-            String sb2 = sb.toString();
-            String str = TAG;
-            Log.v(str, sb2);
+            Log.v(TAG, "onReceive: action=" + action);
             if ("android.intent.action.MEDIA_MOUNTED".equals(action)) {
-                Log.d(str, "SD card available");
+                Log.d(TAG, "SD card available");
                 Storage.initStorage(context);
                 this.mActivity.getScreenHint().updateHint();
             } else if ("android.intent.action.MEDIA_UNMOUNTED".equals(action)) {
-                Log.d(str, "SD card unavailable");
+                Log.d(TAG, "SD card unavailable");
                 FileCompat.updateSDPath();
                 this.mActivity.getScreenHint().updateHint();
                 this.mActivity.getThumbnailUpdater().getLastThumbnail();
             } else if ("android.intent.action.MEDIA_SCANNER_STARTED".equals(action)) {
-                Log.d(str, "media scanner started");
+                Log.d(TAG, "media scanner started");
             } else if ("android.intent.action.MEDIA_SCANNER_FINISHED".equals(action)) {
                 this.mActivity.getThumbnailUpdater().getLastThumbnail();
-                Log.d(str, "media scanner finisheded");
+                Log.d(TAG, "media scanner finisheded");
             }
         }
     }
 
     /* access modifiers changed from: protected */
     public void onCameraException() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onCameraException: ");
-        sb.append(this.mModuleIndex);
-        sb.append(" | ");
-        sb.append(this.mBogusCameraId);
-        Log.e(TAG, sb.toString());
+        Log.e(TAG, "onCameraException: " + this.mModuleIndex + " | " + this.mBogusCameraId);
         if (currentIsMainThread()) {
             if ((this.mOpenCameraFail || this.mCameraHardwareError) && !this.mActivity.isActivityPaused() && this.mActivity.couldShowErrorDialog()) {
                 Camera camera = this.mActivity;
-                int i = Util.isInVideoCall(camera) ? R.string.cannot_connect_camera_volte_call : CameraSettings.updateOpenCameraFailTimes() > 1 ? R.string.cannot_connect_camera_twice : R.string.cannot_connect_camera_once;
-                Util.showErrorAndFinish(camera, i);
+                Util.showErrorAndFinish(camera, Util.isInVideoCall(camera) ? R.string.cannot_connect_camera_volte_call : CameraSettings.updateOpenCameraFailTimes() > 1 ? R.string.cannot_connect_camera_twice : R.string.cannot_connect_camera_once);
                 this.mActivity.showErrorDialog();
             }
             if (this.mCameraDisabled && this.mActivity.couldShowErrorDialog()) {
@@ -1163,46 +1092,24 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     /* access modifiers changed from: protected */
     public void onCapabilityChanged(CameraCapabilities cameraCapabilities) {
         initByCapability(cameraCapabilities);
-        StringBuilder sb = new StringBuilder();
-        sb.append("onCapabilityChanged: mFocusAreaSupported = ");
-        sb.append(this.mFocusAreaSupported);
-        sb.append(", mAELockOnlySupported = ");
-        sb.append(this.mAELockOnlySupported);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "onCapabilityChanged: mFocusAreaSupported = " + this.mFocusAreaSupported + ", mAELockOnlySupported = " + this.mAELockOnlySupported);
     }
 
     public void onCreate(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onCreate moduleIndex->");
-        sb.append(i);
-        sb.append(", cameraId->");
-        sb.append(i2);
-        String str = " ";
-        sb.append(str);
-        sb.append(this);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        Log.d(str2, sb2);
+        Log.d(TAG, "onCreate moduleIndex->" + i + ", cameraId->" + i2 + " " + this);
         this.mModuleIndex = i;
         this.mBogusCameraId = i2;
         this.mErrorCallback = new CameraErrorCallbackImpl(this.mActivity);
-        this.mMainProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        this.mMainProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         this.mMutexModePicker = new MutexModeManager(this);
         this.mUpdateWorkThreadDisposable = Observable.create(new ObservableOnSubscribe<int[]>() {
             public void subscribe(ObservableEmitter<int[]> observableEmitter) throws Exception {
-                BaseModule.this.mUpdateWorkThreadEmitter = observableEmitter.serialize();
+                ObservableEmitter unused = BaseModule.this.mUpdateWorkThreadEmitter = observableEmitter.serialize();
             }
-        }).observeOn(GlobalConstant.sCameraSetupScheduler).subscribe((Consumer<? super T>) this);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("create disposable ");
-        sb3.append(this);
-        sb3.append(str);
-        sb3.append(this.mUpdateWorkThreadDisposable);
-        Log.d(str2, sb3.toString());
-        if (DataRepository.dataItemFeature().Pb() && CameraSettings.isLensDirtyDetectEnabled()) {
-            if (DataRepository.dataItemGlobal().getBoolean(CameraSettings.KEY_LENS_DIRTY_TIP, getResources().getBoolean(R.bool.pref_lens_dirty_tip_default))) {
-                this.mLensDirtyDetectDisposable = Completable.complete().delay(15000, TimeUnit.MILLISECONDS, GlobalConstant.sCameraSetupScheduler).doOnComplete(new ActionUpdateLensDirtyDetect(this, true)).subscribe();
-            }
+        }).observeOn(GlobalConstant.sCameraSetupScheduler).subscribe(this);
+        Log.d(TAG, "create disposable " + this + " " + this.mUpdateWorkThreadDisposable);
+        if (DataRepository.dataItemFeature().Pb() && CameraSettings.isLensDirtyDetectEnabled() && DataRepository.dataItemGlobal().getBoolean(CameraSettings.KEY_LENS_DIRTY_TIP, getResources().getBoolean(R.bool.pref_lens_dirty_tip_default))) {
+            this.mLensDirtyDetectDisposable = Completable.complete().delay(15000, TimeUnit.MILLISECONDS, GlobalConstant.sCameraSetupScheduler).doOnComplete(new ActionUpdateLensDirtyDetect(this, true)).subscribe();
         }
         setCreated(true);
         this.mIsDeparted.set(false);
@@ -1211,11 +1118,10 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
 
     @CallSuper
     public void onDestroy() {
-        String str = TAG;
-        Log.d(str, "onDestroy: E");
+        Log.d(TAG, "onDestroy: E");
         Camera camera = this.mActivity;
         if (camera != null) {
-            camera.getSensorStateManager().setSensorStateListener(null);
+            camera.getSensorStateManager().setSensorStateListener((SensorStateManager.SensorStateListener) null);
         }
         setCreated(false);
         ImageSaver imageSaver = this.mActivity.getImageSaver();
@@ -1223,12 +1129,12 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
             imageSaver.onModuleDestroy();
         }
         if (isParallelSessionEnable()) {
-            LocalBinder localBinder = AlgoConnector.getInstance().getLocalBinder();
+            LocalParallelService.LocalBinder localBinder = AlgoConnector.getInstance().getLocalBinder();
             if (localBinder != null) {
                 localBinder.stopPostProcessor(this.mActivity.hashCode());
             }
         }
-        Log.d(str, "onDestroy: X");
+        Log.d(TAG, "onDestroy: X");
     }
 
     public void onEvChanged(int i, int i2) {
@@ -1314,12 +1220,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
             return true;
         } else if (i != 701 || !this.mActivity.getCameraIntentManager().isFromScreenSlide().booleanValue() || this.mActivity.isModeSwitched()) {
             this.mPendingScreenSlideKeyCode = i;
-            StringBuilder sb = new StringBuilder();
-            sb.append("pending screen slide: ");
-            sb.append(i);
-            sb.append(", reason: ");
-            sb.append(getUnInterruptableReason());
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "pending screen slide: " + i + ", reason: " + getUnInterruptableReason());
             return false;
         } else {
             this.mActivity.moveTaskToBack(false);
@@ -1408,19 +1309,11 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     }
 
     public boolean onScale(float f2, float f3, float f4) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onScale(): scale = ");
-        sb.append(f4);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "onScale(): scale = " + f4);
         if (isZoomEnabled()) {
             this.mZoomScaled += (f4 - 1.0f) / 4.0f;
             float min = Math.min(this.mMaxZoomRatio, 10.0f) * this.mZoomScaled;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("onScale(): delta = ");
-            sb3.append(min);
-            Log.d(str, sb3.toString());
+            Log.d(TAG, "onScale(): delta = " + min);
             if (Math.abs(min) >= 0.01f && onZoomingActionUpdate(this.mZoomRatio + min, 2)) {
                 this.mZoomScaled = 0.0f;
                 return true;
@@ -1498,26 +1391,14 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
             return false;
         }
         String simpleName = getClass().getSimpleName();
-        StringBuilder sb = new StringBuilder();
-        sb.append("onZoomingActionUpdate(): newValue = ");
-        sb.append(f2);
-        sb.append(", minValue = ");
-        sb.append(this.mMinZoomRatio);
-        sb.append(", maxValue = ");
-        sb.append(this.mMaxZoomRatio);
-        Log.d(simpleName, sb.toString());
+        Log.d(simpleName, "onZoomingActionUpdate(): newValue = " + f2 + ", minValue = " + this.mMinZoomRatio + ", maxValue = " + this.mMaxZoomRatio);
         float f3 = this.mZoomRatio;
         float clamp = HybridZoomingSystem.clamp(f2, this.mMinZoomRatio, this.mMaxZoomRatio);
         if (f3 == clamp) {
             return false;
         }
         String simpleName2 = getClass().getSimpleName();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("onZoomingActionUpdate(): changed from ");
-        sb2.append(f3);
-        sb2.append(" to ");
-        sb2.append(clamp);
-        Log.d(simpleName2, sb2.toString());
+        Log.d(simpleName2, "onZoomingActionUpdate(): changed from " + f3 + " to " + clamp);
         setZoomRatio(clamp);
         if (onInterceptZoomingEvent(f3, clamp, i)) {
             return false;
@@ -1539,14 +1420,14 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         } else {
             updatePreferenceInWorkThread(24);
         }
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController == null || !dualController.isZoomVisible() || CameraSettings.isMacroModeEnabled(this.mModuleIndex)) {
             updateStatusBar(2);
         } else {
             dualController.updateZoomRatio(i);
         }
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (bottomPopupTips != null) {
                 if (f3 < 1.0f || clamp >= 1.0f) {
                     if (i2 < 0 && clamp >= 1.0f && bottomPopupTips.containTips(R.string.ultra_wide_open_tip_sat)) {
@@ -1620,8 +1501,8 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     /* access modifiers changed from: protected */
     @CallSuper
     public void restoreBottom() {
-        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.handleBackStackFromShutter();
         }
@@ -1660,13 +1541,13 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
                     this.mCamera2Device.setAWBMode(0);
                 }
                 this.mCamera2Device.setCustomAWB(CameraSettings.getCustomWB());
+                return;
+            }
+            int parseInt = Util.parseInt(str, 1);
+            if (Util.isSupported(parseInt, this.mCameraCapabilities.getSupportedAWBModes())) {
+                this.mCamera2Device.setAWBMode(parseInt);
             } else {
-                int parseInt = Util.parseInt(str, 1);
-                if (Util.isSupported(parseInt, this.mCameraCapabilities.getSupportedAWBModes())) {
-                    this.mCamera2Device.setAWBMode(parseInt);
-                } else {
-                    this.mCamera2Device.setAWBMode(1);
-                }
+                this.mCamera2Device.setAWBMode(1);
             }
         }
     }
@@ -1698,10 +1579,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
 
     /* access modifiers changed from: protected */
     public void setCameraState(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setCameraState: ");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setCameraState: " + i);
         this.mCameraState = i;
     }
 
@@ -1710,10 +1588,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         if (isDeviceAlive()) {
             int parseInt = Util.parseInt(str, 0);
             if (Util.isSupported(parseInt, this.mCameraCapabilities.getSupportedColorEffects())) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("colorEffect: ");
-                sb.append(str);
-                Log.d(TAG, sb.toString());
+                Log.d(TAG, "colorEffect: " + str);
                 this.mCamera2Device.setColorEffect(parseInt);
             }
         }
@@ -1763,10 +1638,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     /* access modifiers changed from: protected */
     public void setFlashMode(String str) {
         if (isDeviceAlive()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("flashMode: ");
-            sb.append(str);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "flashMode: " + str);
             int parseInt = Util.parseInt(str, 0);
             if ((ThermalDetector.getInstance().thermalConstrained() && DataRepository.dataItemConfig().getComponentFlash().isHardwareSupported()) || (isFrontCamera() && this.mActivity.isScreenSlideOff())) {
                 parseInt = 0;
@@ -1792,18 +1664,12 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     }
 
     public void setMaxZoomRatio(float f2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setMaxZoomRatio(): ");
-        sb.append(f2);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setMaxZoomRatio(): " + f2);
         this.mMaxZoomRatio = f2;
     }
 
     public void setMinZoomRatio(float f2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setMinZoomRatio(): ");
-        sb.append(f2);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setMinZoomRatio(): " + f2);
         this.mMinZoomRatio = f2;
     }
 
@@ -1823,10 +1689,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     /* access modifiers changed from: protected */
     @WorkerThread
     public void setZoomRatio(float f2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setZoomRatio(): ");
-        sb.append(f2);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "setZoomRatio(): " + f2);
         this.mZoomRatio = f2;
         CameraSettings.writeZoom(f2);
         HybridZoomingSystem.setZoomRatioHistory(this.mModuleIndex, String.valueOf(f2));
@@ -1849,7 +1712,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void trackGeneralInfo(int i, boolean z) {
         CameraStatUtil.trackGeneralInfo(i, z, this.mModuleIndex, getTriggerMode(), isFrontCamera(), this.mMutexModePicker, this.mFlashAutoModeState);
     }
@@ -1858,7 +1721,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     public void trackModeCustomInfo(int i) {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void trackPictureTaken(int i, boolean z, boolean z2, String str, boolean z3, boolean z4) {
         CameraStatUtil.trackPictureTaken(i, z, this.mModuleIndex, isFrontCamera(), z2, str);
         trackModeCustomInfo(i);
@@ -1885,10 +1748,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
         if (isDeviceAlive()) {
             int parseInt = Util.parseInt(str, 3);
             if (Util.isSupported(parseInt, this.mCameraCapabilities.getSupportedAntiBandingModes())) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("antiBanding: ");
-                sb.append(str);
-                Log.d(TAG, sb.toString());
+                Log.d(TAG, "antiBanding: " + str);
                 this.mCamera2Device.setAntiBanding(parseInt);
             }
         }
@@ -1902,12 +1762,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     /* access modifiers changed from: protected */
     public void updateCameraScreenNailSize(int i, int i2) {
         String simpleName = getClass().getSimpleName();
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateCameraScreenNailSize: ");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        Log.d(simpleName, sb.toString());
+        Log.d(simpleName, "updateCameraScreenNailSize: " + i + "x" + i2);
         this.mActivity.getCameraScreenNail().setPreviewSize(i, i2);
         this.mMainProtocol.setPreviewSize(i, i2);
     }
@@ -1952,28 +1807,17 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
     }
 
     @WorkerThread
-    public final void updatePreferenceInWorkThread(@UpdateType int... iArr) {
+    public final void updatePreferenceInWorkThread(@UpdateConstant.UpdateType int... iArr) {
         Disposable disposable = this.mUpdateWorkThreadDisposable;
-        String str = TAG;
         if (disposable == null || disposable.isDisposed()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("the mUpdateWorkThreadDisposable is not available.");
-            sb.append(this.mUpdateWorkThreadDisposable);
-            sb.append(". ");
-            sb.append(this);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "the mUpdateWorkThreadDisposable is not available." + this.mUpdateWorkThreadDisposable + ". " + this);
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("types:");
-        sb2.append(join(iArr));
-        sb2.append(", ");
-        sb2.append(this);
-        Log.e(str, sb2.toString());
+        Log.e(TAG, "types:" + join(iArr) + ", " + this);
         this.mUpdateWorkThreadEmitter.onNext(iArr);
     }
 
-    public final void updatePreferenceTrampoline(@UpdateType int... iArr) {
+    public final void updatePreferenceTrampoline(@UpdateConstant.UpdateType int... iArr) {
         consumePreference(iArr);
     }
 
@@ -2000,12 +1844,12 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
 
     /* access modifiers changed from: protected */
     public void updateStatusBar(int i) {
-        ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).alertUpdateValue(i);
+        ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).alertUpdateValue(i);
     }
 
     /* access modifiers changed from: protected */
     public void updateTipMessage(int i, @StringRes int i2, int i3) {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.showTips(i, i2, i3);
         }
@@ -2013,7 +1857,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
 
     /* access modifiers changed from: protected */
     public void updateZoomRatioToggleButtonState(boolean z) {
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController != null) {
             dualController.setRecordingOrPausing(z);
             if (z) {
@@ -2023,7 +1867,7 @@ public abstract class BaseModule implements Module, ExposureViewListener, Camera
                 dualController.setImmersiveModeEnabled(false);
             }
         }
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert == null) {
             return;
         }

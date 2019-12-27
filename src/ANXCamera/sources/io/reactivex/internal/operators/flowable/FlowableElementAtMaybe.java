@@ -83,11 +83,11 @@ public final class FlowableElementAtMaybe<T> extends Maybe<T> implements FuseToF
 
     public Flowable<T> fuseToFlowable() {
         FlowableElementAt flowableElementAt = new FlowableElementAt(this.source, this.index, null, false);
-        return RxJavaPlugins.onAssembly((Flowable<T>) flowableElementAt);
+        return RxJavaPlugins.onAssembly(flowableElementAt);
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(MaybeObserver<? super T> maybeObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new ElementAtSubscriber<Object>(maybeObserver, this.index));
+        this.source.subscribe(new ElementAtSubscriber(maybeObserver, this.index));
     }
 }

@@ -16,53 +16,35 @@ public class ShaderUtil {
     public static void checkGlError(String str) {
         int glGetError = GLES20.glGetError();
         if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("ES20_ERROR: op ");
-            sb.append(str);
-            String str2 = ": glError ";
-            sb.append(str2);
-            sb.append(glGetError);
-            Log.e(TAG, sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(str2);
-            sb2.append(glGetError);
-            throw new RuntimeException(sb2.toString());
+            Log.e(TAG, "ES20_ERROR: op " + str + ": glError " + glGetError);
+            throw new RuntimeException(str + ": glError " + glGetError);
         }
     }
 
     public static int createProgram(String str, String str2) {
         int loadShader = loadShader(35633, str);
-        String str3 = TAG;
         if (loadShader == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Fail to init vertex shader ");
-            sb.append(str);
-            Log.e(str3, sb.toString());
+            Log.e(TAG, "Fail to init vertex shader " + str);
             return 0;
         }
         int loadShader2 = loadShader(35632, str2);
         if (loadShader2 == 0) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Fail to init fragment shader ");
-            sb2.append(str2);
-            Log.e(str3, sb2.toString());
+            Log.e(TAG, "Fail to init fragment shader " + str2);
             return 0;
         }
         int glCreateProgram = GLES20.glCreateProgram();
         if (glCreateProgram != 0) {
             GLES20.glGetError();
             GLES20.glAttachShader(glCreateProgram, loadShader);
-            String str4 = "glAttachShader";
-            checkGlError(str4);
+            checkGlError("glAttachShader");
             GLES20.glAttachShader(glCreateProgram, loadShader2);
-            checkGlError(str4);
+            checkGlError("glAttachShader");
             GLES20.glLinkProgram(glCreateProgram);
             int[] iArr = new int[1];
             GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
             if (iArr[0] != 1) {
-                Log.e(str3, "Could not link program: ");
-                Log.e(str3, GLES20.glGetProgramInfoLog(glCreateProgram));
+                Log.e(TAG, "Could not link program: ");
+                Log.e(TAG, GLES20.glGetProgramInfoLog(glCreateProgram));
                 GLES20.glDeleteProgram(glCreateProgram);
                 glCreateProgram = 0;
             }
@@ -76,10 +58,7 @@ public class ShaderUtil {
         String str2 = null;
         try {
             AssetManager assets = CameraAppImpl.getAndroidContext().getAssets();
-            StringBuilder sb = new StringBuilder();
-            sb.append("shading_script/");
-            sb.append(str);
-            InputStream open = assets.open(sb.toString());
+            InputStream open = assets.open("shading_script/" + str);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             while (true) {
                 int read = open.read();
@@ -120,18 +99,11 @@ public class ShaderUtil {
         if (iArr[0] != 0) {
             return glCreateShader;
         }
+        Log.e(TAG, "Could not compile shader " + i + ":" + str);
         StringBuilder sb = new StringBuilder();
-        sb.append("Could not compile shader ");
-        sb.append(i);
-        sb.append(":");
-        sb.append(str);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        Log.e(str2, sb2);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("Info: ");
-        sb3.append(GLES20.glGetShaderInfoLog(glCreateShader));
-        Log.e(str2, sb3.toString());
+        sb.append("Info: ");
+        sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
+        Log.e(TAG, sb.toString());
         GLES20.glDeleteShader(glCreateShader);
         return 0;
     }
@@ -181,12 +153,11 @@ public class ShaderUtil {
         float f2;
         int i4;
         int[] iArr2 = iArr;
-        String str = TAG;
         if (buffer == null || buffer2 == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("invalid channel ");
             sb.append(buffer == null ? "Y" : "UV");
-            Log.e(str, sb.toString());
+            Log.e(TAG, sb.toString());
             return;
         }
         int i5 = 0;
@@ -197,7 +168,7 @@ public class ShaderUtil {
                 i5 = iArr2.length;
             }
             sb2.append(i5);
-            Log.e(str, sb2.toString());
+            Log.e(TAG, sb2.toString());
             return;
         }
         if (iArr2[0] == -1) {

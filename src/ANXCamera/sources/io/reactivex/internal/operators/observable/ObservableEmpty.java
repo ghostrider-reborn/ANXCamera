@@ -17,6 +17,6 @@ public final class ObservableEmpty extends Observable<Object> implements ScalarC
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Observer<? super Object> observer) {
-        EmptyDisposable.complete(observer);
+        EmptyDisposable.complete((Observer<?>) observer);
     }
 }

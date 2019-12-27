@@ -1,6 +1,6 @@
 package org.greenrobot.greendao.internal;
 
-import com.android.gallery3d.exif.ExifInterface.GpsTrackRef;
+import com.android.gallery3d.exif.ExifInterface;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.database.DatabaseStatement;
 
@@ -80,7 +80,7 @@ public class TableStatements {
 
     public String getSelectAll() {
         if (this.selectAll == null) {
-            this.selectAll = SqlUtils.createSqlSelect(this.tablename, GpsTrackRef.TRUE_DIRECTION, this.allColumns, false);
+            this.selectAll = SqlUtils.createSqlSelect(this.tablename, ExifInterface.GpsTrackRef.TRUE_DIRECTION, this.allColumns, false);
         }
         return this.selectAll;
     }
@@ -89,7 +89,7 @@ public class TableStatements {
         if (this.selectByKey == null) {
             StringBuilder sb = new StringBuilder(getSelectAll());
             sb.append("WHERE ");
-            SqlUtils.appendColumnsEqValue(sb, GpsTrackRef.TRUE_DIRECTION, this.pkColumns);
+            SqlUtils.appendColumnsEqValue(sb, ExifInterface.GpsTrackRef.TRUE_DIRECTION, this.pkColumns);
             this.selectByKey = sb.toString();
         }
         return this.selectByKey;
@@ -97,17 +97,14 @@ public class TableStatements {
 
     public String getSelectByRowId() {
         if (this.selectByRowId == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(getSelectAll());
-            sb.append("WHERE ROWID=?");
-            this.selectByRowId = sb.toString();
+            this.selectByRowId = getSelectAll() + "WHERE ROWID=?";
         }
         return this.selectByRowId;
     }
 
     public String getSelectKeys() {
         if (this.selectKeys == null) {
-            this.selectKeys = SqlUtils.createSqlSelect(this.tablename, GpsTrackRef.TRUE_DIRECTION, this.pkColumns, false);
+            this.selectKeys = SqlUtils.createSqlSelect(this.tablename, ExifInterface.GpsTrackRef.TRUE_DIRECTION, this.pkColumns, false);
         }
         return this.selectKeys;
     }

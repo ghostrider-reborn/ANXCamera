@@ -6,10 +6,9 @@ import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.log.Log;
 import com.android.camera.module.BaseModule;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.OnFaceBeautyChangedProtocol;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 
-public class BeautyChangeImpl implements OnFaceBeautyChangedProtocol {
+public class BeautyChangeImpl implements ModeProtocol.OnFaceBeautyChangedProtocol {
     private static final String TAG = "BeautyChangeImpl";
     private ActivityBase mActivity;
 
@@ -43,13 +42,10 @@ public class BeautyChangeImpl implements OnFaceBeautyChangedProtocol {
                 boolean determineStatus = componentRunningShine.determineStatus(moduleIndex);
                 if (currentStatus != determineStatus) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("beauty status changed: ");
-                    sb.append(determineStatus);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "beauty status changed: " + determineStatus);
                     baseModule.getHandler().post(new Runnable() {
                         public void run() {
-                            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(212);
+                            ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(212);
                         }
                     });
                 }

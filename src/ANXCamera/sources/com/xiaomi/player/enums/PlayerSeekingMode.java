@@ -12,7 +12,6 @@ public enum PlayerSeekingMode {
     }
 
     public static PlayerSeekingMode int2enum(int i) {
-        PlayerSeekingMode[] values;
         PlayerSeekingMode playerSeekingMode = PlayerSeekingNormalMode;
         for (PlayerSeekingMode playerSeekingMode2 : values()) {
             if (playerSeekingMode2.ordinal() == i) {

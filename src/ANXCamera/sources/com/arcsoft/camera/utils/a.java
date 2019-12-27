@@ -21,31 +21,16 @@ public class a {
             return null;
         }
         if (!str.endsWith(File.separator)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(File.separator);
-            str = sb.toString();
+            str = str + File.separator;
         }
         String charSequence = DateFormat.format("yyyyMMdd", System.currentTimeMillis()).toString();
-        StringBuilder sb2 = new StringBuilder();
-        String str4 = "_";
-        sb2.append(str4);
-        sb2.append(String.format("%03d", new Object[]{Integer.valueOf(i2)}));
-        sb2.append(str4);
-        sb2.append(i);
-        String sb3 = sb2.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str);
-        sb4.append(str2);
-        sb4.append(charSequence);
-        sb4.append(sb3);
-        sb4.append(str3);
-        String sb5 = sb4.toString();
-        File file = new File(sb5);
+        String str4 = "_" + String.format("%03d", new Object[]{Integer.valueOf(i2)}) + "_" + i;
+        String str5 = str + str2 + charSequence + str4 + str3;
+        File file = new File(str5);
         if (file.exists()) {
             file.delete();
         }
-        return sb5;
+        return str5;
     }
 
     public static boolean a(InputStream inputStream, String str) {
@@ -64,18 +49,19 @@ public class a {
             byte[] bArr = new byte[1024];
             while (true) {
                 int read = inputStream.read(bArr);
-                if (read == -1) {
-                    break;
+                if (read != -1) {
+                    fileOutputStream.write(bArr, 0, read);
+                } else {
+                    inputStream.close();
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                    return true;
                 }
-                fileOutputStream.write(bArr, 0, read);
             }
-            inputStream.close();
-            fileOutputStream.flush();
-            fileOutputStream.close();
         } catch (Exception e2) {
             e2.printStackTrace();
+            return true;
         }
-        return true;
     }
 
     public static boolean a(byte[] bArr, int i, int i2, int i3, String str) {
@@ -84,15 +70,12 @@ public class a {
             int i4 = 0;
             while (file.exists()) {
                 i4++;
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i4);
-                file = new File(sb.toString());
+                file = new File(str + i4);
             }
             file.getParentFile().mkdirs();
             try {
                 FileOutputStream fileOutputStream = new FileOutputStream(str);
-                YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, null);
+                YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, (int[]) null);
                 yuvImage.compressToJpeg(new Rect(0, 0, yuvImage.getWidth(), yuvImage.getHeight()), i3, fileOutputStream);
                 fileOutputStream.flush();
                 fileOutputStream.close();
@@ -141,18 +124,12 @@ public class a {
             return null;
         }
         if (!str.isEmpty() && !str.endsWith(File.separator)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(File.separator);
-            str = sb.toString();
+            str = str + File.separator;
         }
         if (!str2.isEmpty() && str2.startsWith(File.separator)) {
             str2.substring(str2.indexOf(File.separator) + 1);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(str2);
-        return sb2.toString();
+        return str + str2;
     }
 
     public static boolean n(String str) {

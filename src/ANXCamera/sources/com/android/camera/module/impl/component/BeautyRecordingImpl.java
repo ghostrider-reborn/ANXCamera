@@ -1,40 +1,39 @@
 package com.android.camera.module.impl.component;
 
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BeautyRecording;
-import com.android.camera.protocol.ModeProtocol.HandleBeautyRecording;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class BeautyRecordingImpl implements BeautyRecording {
-    private ArrayList<HandleBeautyRecording> recordingArrayList = new ArrayList<>();
+public class BeautyRecordingImpl implements ModeProtocol.BeautyRecording {
+    private ArrayList<ModeProtocol.HandleBeautyRecording> recordingArrayList = new ArrayList<>();
 
     public static BeautyRecordingImpl create() {
         return new BeautyRecordingImpl();
     }
 
-    public <P extends HandleBeautyRecording> void addBeautyStack(P p) {
+    public <P extends ModeProtocol.HandleBeautyRecording> void addBeautyStack(P p) {
         this.recordingArrayList.add(p);
     }
 
     public void handleAngleChang(float f2) {
-        Iterator it = this.recordingArrayList.iterator();
+        Iterator<ModeProtocol.HandleBeautyRecording> it = this.recordingArrayList.iterator();
         while (it.hasNext()) {
-            ((HandleBeautyRecording) it.next()).onAngleChanged(f2);
+            it.next().onAngleChanged(f2);
         }
     }
 
     public void handleBeautyRecordingStart() {
-        Iterator it = this.recordingArrayList.iterator();
+        Iterator<ModeProtocol.HandleBeautyRecording> it = this.recordingArrayList.iterator();
         while (it.hasNext()) {
-            ((HandleBeautyRecording) it.next()).onBeautyRecordingStart();
+            it.next().onBeautyRecordingStart();
         }
     }
 
     public void handleBeautyRecordingStop() {
-        Iterator it = this.recordingArrayList.iterator();
+        Iterator<ModeProtocol.HandleBeautyRecording> it = this.recordingArrayList.iterator();
         while (it.hasNext()) {
-            ((HandleBeautyRecording) it.next()).onBeautyRecordingStop();
+            it.next().onBeautyRecordingStop();
         }
     }
 
@@ -42,7 +41,7 @@ public class BeautyRecordingImpl implements BeautyRecording {
         ModeCoordinatorImpl.getInstance().attachProtocol(173, this);
     }
 
-    public <P extends HandleBeautyRecording> void removeBeautyStack(P p) {
+    public <P extends ModeProtocol.HandleBeautyRecording> void removeBeautyStack(P p) {
         this.recordingArrayList.remove(p);
     }
 

@@ -9,12 +9,7 @@ public class LensliteApi {
     private static final String TAG = "LensliteApi";
 
     public static LensliteApi create(Context context, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("create: context = ");
-        sb.append(context);
-        sb.append(", imagePoolSize = ");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "create: context = " + context + ", imagePoolSize = " + i);
         return null;
     }
 

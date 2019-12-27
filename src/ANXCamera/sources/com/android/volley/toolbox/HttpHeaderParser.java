@@ -1,6 +1,6 @@
 package com.android.volley.toolbox;
 
-import com.android.volley.Cache.Entry;
+import com.android.volley.Cache;
 import com.android.volley.Header;
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyLog;
@@ -30,7 +30,7 @@ public class HttpHeaderParser {
         return simpleDateFormat;
     }
 
-    public static Entry parseCacheHeaders(NetworkResponse networkResponse) {
+    public static Cache.Entry parseCacheHeaders(NetworkResponse networkResponse) {
         boolean z;
         long j;
         long j2;
@@ -39,9 +39,9 @@ public class HttpHeaderParser {
         NetworkResponse networkResponse2 = networkResponse;
         long currentTimeMillis = System.currentTimeMillis();
         Map<String, String> map = networkResponse2.headers;
-        String str = (String) map.get("Date");
+        String str = map.get("Date");
         long parseDateAsEpoch = str != null ? parseDateAsEpoch(str) : 0;
-        String str2 = (String) map.get(HttpRequest.HEADER_CACHE_CONTROL);
+        String str2 = map.get(HttpRequest.HEADER_CACHE_CONTROL);
         int i = 0;
         if (str2 != null) {
             String[] split = str2.split(",", 0);
@@ -72,16 +72,16 @@ public class HttpHeaderParser {
             j2 = 0;
             j = 0;
         }
-        String str3 = (String) map.get(HttpRequest.HEADER_EXPIRES);
+        String str3 = map.get(HttpRequest.HEADER_EXPIRES);
         long parseDateAsEpoch2 = str3 != null ? parseDateAsEpoch(str3) : 0;
-        String str4 = (String) map.get(HttpRequest.HEADER_LAST_MODIFIED);
+        String str4 = map.get(HttpRequest.HEADER_LAST_MODIFIED);
         long parseDateAsEpoch3 = str4 != null ? parseDateAsEpoch(str4) : 0;
-        String str5 = (String) map.get(HttpRequest.HEADER_ETAG);
+        String str5 = map.get(HttpRequest.HEADER_ETAG);
         if (z) {
             j4 = currentTimeMillis + (j2 * 1000);
             if (i == 0) {
                 j3 = (j * 1000) + j4;
-                Entry entry = new Entry();
+                Cache.Entry entry = new Cache.Entry();
                 entry.data = networkResponse2.data;
                 entry.etag = str5;
                 entry.softTtl = j4;
@@ -97,7 +97,7 @@ public class HttpHeaderParser {
         } else {
             j3 = (parseDateAsEpoch2 - parseDateAsEpoch) + currentTimeMillis;
             j4 = j3;
-            Entry entry2 = new Entry();
+            Cache.Entry entry2 = new Cache.Entry();
             entry2.data = networkResponse2.data;
             entry2.etag = str5;
             entry2.softTtl = j4;
@@ -109,7 +109,7 @@ public class HttpHeaderParser {
             return entry2;
         }
         j3 = j4;
-        Entry entry22 = new Entry();
+        Cache.Entry entry22 = new Cache.Entry();
         entry22.data = networkResponse2.data;
         entry22.etag = str5;
         entry22.softTtl = j4;
@@ -126,7 +126,7 @@ public class HttpHeaderParser {
     }
 
     public static String parseCharset(Map<String, String> map, String str) {
-        String str2 = (String) map.get("Content-Type");
+        String str2 = map.get("Content-Type");
         if (str2 != null) {
             String[] split = str2.split(";", 0);
             for (int i = 1; i < split.length; i++) {
@@ -150,16 +150,16 @@ public class HttpHeaderParser {
 
     static List<Header> toAllHeaderList(Map<String, String> map) {
         ArrayList arrayList = new ArrayList(map.size());
-        for (Map.Entry entry : map.entrySet()) {
-            arrayList.add(new Header((String) entry.getKey(), (String) entry.getValue()));
+        for (Map.Entry next : map.entrySet()) {
+            arrayList.add(new Header((String) next.getKey(), (String) next.getValue()));
         }
         return arrayList;
     }
 
     static Map<String, String> toHeaderMap(List<Header> list) {
         TreeMap treeMap = new TreeMap(String.CASE_INSENSITIVE_ORDER);
-        for (Header header : list) {
-            treeMap.put(header.getName(), header.getValue());
+        for (Header next : list) {
+            treeMap.put(next.getName(), next.getValue());
         }
         return treeMap;
     }

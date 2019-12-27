@@ -1,10 +1,9 @@
 package com.android.gallery3d.exif;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.v4.internal.view.SupportMenu;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -22,7 +21,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel.MapMode;
+import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -181,8 +180,8 @@ public class ExifInterface {
     private ExifData mData = new ExifData(DEFAULT_BYTE_ORDER);
     private final DateFormat mDateTimeStampFormat = new SimpleDateFormat(DATETIME_FORMAT_STR);
     private final DateFormat mGPSDateStampFormat = new SimpleDateFormat(GPS_DATE_FORMAT_STR);
-    private final Calendar mGPSTimeStampCalendar;
-    private SparseIntArray mTagInfo;
+    private final Calendar mGPSTimeStampCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+    private SparseIntArray mTagInfo = null;
 
     public interface ColorSpace {
         public static final short SRGB = 1;
@@ -420,10 +419,7 @@ public class ExifInterface {
     }
 
     public ExifInterface() {
-        String str = "UTC";
-        this.mGPSTimeStampCalendar = Calendar.getInstance(TimeZone.getTimeZone(str));
-        this.mTagInfo = null;
-        this.mGPSDateStampFormat.setTimeZone(TimeZone.getTimeZone(str));
+        this.mGPSDateStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private boolean addExifTag(int i, Object obj) {
@@ -450,10 +446,7 @@ public class ExifInterface {
             Log.e(ExifInterface.class.getName(), e2.getMessage(), e2);
         }
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("addXiaomiComment cost=");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        Log.v(str2, sb.toString());
+        Log.v(str2, "addXiaomiComment cost=" + (System.currentTimeMillis() - currentTimeMillis));
         return bArr;
     }
 
@@ -475,9 +468,8 @@ public class ExifInterface {
         }
     }
 
-    /* JADX WARNING: Incorrect type for immutable var: ssa=short, code=int, for r2v0, types: [int, short] */
-    public static int defineTag(int i, int i2) {
-        return (i << 16) | (i2 & SupportMenu.USER_MASK);
+    public static int defineTag(int i, short s) {
+        return (i << 16) | (s & ColorSpace.UNCALIBRATED);
     }
 
     private void doExifStreamIO(InputStream inputStream, OutputStream outputStream) throws IOException {
@@ -509,9 +501,8 @@ public class ExifInterface {
         int[] iArr = new int[arrayList.size()];
         Iterator it = arrayList.iterator();
         while (it.hasNext()) {
-            int i4 = i2 + 1;
             iArr[i2] = ((Integer) it.next()).intValue();
-            i2 = i4;
+            i2++;
         }
         return iArr;
     }
@@ -531,9 +522,9 @@ public class ExifInterface {
     }
 
     public static short getExifOrientationValue(int i) {
-        int i2 = i % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        int i2 = i % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         if (i2 < 0) {
-            i2 += ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+            i2 += MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         if (i2 < 90) {
             return 1;
@@ -819,10 +810,7 @@ public class ExifInterface {
             Log.e(ExifInterface.class.getName(), e2.getMessage(), e2);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("removeParallelProcessComment cost=");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        Log.v(str, sb.toString());
+        Log.v(str, "removeParallelProcessComment cost=" + (System.currentTimeMillis() - currentTimeMillis));
         return bArr;
     }
 
@@ -839,7 +827,7 @@ public class ExifInterface {
             exifInterface.writeExif(bitmap, (OutputStream) fileOutputStream);
             return;
         }
-        bitmap.compress(CompressFormat.JPEG, 100, fileOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
         fileOutputStream.flush();
     }
 
@@ -857,10 +845,7 @@ public class ExifInterface {
 
     public boolean addAlgorithmComment(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("addAlgorithmComment: ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "addAlgorithmComment: " + str);
         return addExifTag(TAG_ALGORITHM_COMMENT, str);
     }
 
@@ -929,10 +914,7 @@ public class ExifInterface {
 
     public boolean addParallelProcessComment(String str, int i, int i2, int i3) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("algo exif: addParallel ");
-        sb.append(str);
-        Log.i(str2, sb.toString());
+        Log.i(str2, "algo exif: addParallel " + str);
         return addExifTag(TAG_PARALLEL_PROCESS_COMMENT, str) && addExifTag(TAG_ORIENTATION, Short.valueOf(getExifOrientationValue(i))) && addExifTag(TAG_IMAGE_WIDTH, Integer.valueOf(i2)) && addExifTag(TAG_IMAGE_LENGTH, Integer.valueOf(i3));
     }
 
@@ -987,7 +969,8 @@ public class ExifInterface {
         }
         short typeFromInfo = getTypeFromInfo(i2);
         int componentCountFromInfo = getComponentCountFromInfo(i2);
-        ExifTag exifTag = new ExifTag(getTrueTagKey(i), typeFromInfo, componentCountFromInfo, getTrueIfd(i), componentCountFromInfo != 0);
+        boolean z = componentCountFromInfo != 0;
+        ExifTag exifTag = new ExifTag(getTrueTagKey(i), typeFromInfo, componentCountFromInfo, getTrueIfd(i), z);
         return exifTag;
     }
 
@@ -1099,7 +1082,7 @@ public class ExifInterface {
             try {
                 return getExifWriterStream((OutputStream) new FileOutputStream(str));
             } catch (FileNotFoundException e2) {
-                closeSilently(null);
+                closeSilently((Closeable) null);
                 throw e2;
             }
         } else {
@@ -1165,44 +1148,35 @@ public class ExifInterface {
 
     /* access modifiers changed from: protected */
     public int getTagDefinitionForTag(short s, short s2, int i, int i2) {
-        int i3;
         boolean z;
         int[] tagDefinitionsForTagId = getTagDefinitionsForTagId(s);
-        int i4 = -1;
         if (tagDefinitionsForTagId == null) {
             return -1;
         }
         SparseIntArray tagInfo = getTagInfo();
-        int length = tagDefinitionsForTagId.length;
-        int i5 = 0;
-        while (true) {
-            if (i5 >= length) {
-                break;
-            }
-            i3 = tagDefinitionsForTagId[i5];
-            int i6 = tagInfo.get(i3);
-            short typeFromInfo = getTypeFromInfo(i6);
-            int componentCountFromInfo = getComponentCountFromInfo(i6);
-            int[] allowedIfdsFromInfo = getAllowedIfdsFromInfo(i6);
-            int length2 = allowedIfdsFromInfo.length;
-            int i7 = 0;
+        for (int i3 : tagDefinitionsForTagId) {
+            int i4 = tagInfo.get(i3);
+            short typeFromInfo = getTypeFromInfo(i4);
+            int componentCountFromInfo = getComponentCountFromInfo(i4);
+            int[] allowedIfdsFromInfo = getAllowedIfdsFromInfo(i4);
+            int length = allowedIfdsFromInfo.length;
+            int i5 = 0;
             while (true) {
-                if (i7 >= length2) {
+                if (i5 >= length) {
                     z = false;
                     break;
-                } else if (allowedIfdsFromInfo[i7] == i2) {
+                } else if (allowedIfdsFromInfo[i5] == i2) {
                     z = true;
                     break;
                 } else {
-                    i7++;
+                    i5++;
                 }
             }
-            if (!(z && s2 == typeFromInfo && (i == componentCountFromInfo || componentCountFromInfo == 0))) {
-                i5++;
+            if (z && s2 == typeFromInfo && (i == componentCountFromInfo || componentCountFromInfo == 0)) {
+                return i3;
             }
         }
-        i4 = i3;
-        return i4;
+        return -1;
     }
 
     /* access modifiers changed from: protected */
@@ -1214,9 +1188,8 @@ public class ExifInterface {
         for (int defineTag : ifds) {
             int defineTag2 = defineTag(defineTag, s);
             if (tagInfo.get(defineTag2) != 0) {
-                int i2 = i + 1;
                 iArr[i] = defineTag2;
-                i = i2;
+                i++;
             }
         }
         if (i == 0) {
@@ -1373,14 +1346,7 @@ public class ExifInterface {
 
     public boolean isTagCountDefined(int i) {
         int i2 = getTagInfo().get(i);
-        boolean z = false;
-        if (i2 == 0) {
-            return false;
-        }
-        if (getComponentCountFromInfo(i2) != 0) {
-            z = true;
-        }
-        return z;
+        return (i2 == 0 || getComponentCountFromInfo(i2) == 0) ? false : true;
     }
 
     public boolean isThumbnailCompressed() {
@@ -1392,10 +1358,7 @@ public class ExifInterface {
             try {
                 this.mData = new ExifReader(this).read(inputStream);
             } catch (ExifInvalidFormatException e2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Invalid exif format : ");
-                sb.append(e2);
-                throw new IOException(sb.toString());
+                throw new IOException("Invalid exif format : " + e2);
             }
         } else {
             throw new IllegalArgumentException(NULL_ARGUMENT_STRING);
@@ -1431,7 +1394,7 @@ public class ExifInterface {
     }
 
     public void removeCompressedThumbnail() {
-        this.mData.setCompressedThumbnail(null);
+        this.mData.setCompressedThumbnail((byte[]) null);
     }
 
     public void removeParallelProcessComment() {
@@ -1446,48 +1409,38 @@ public class ExifInterface {
         this.mTagInfo = null;
     }
 
-    /* JADX WARNING: type inference failed for: r0v0 */
-    /* JADX WARNING: type inference failed for: r0v1, types: [java.io.Closeable] */
-    /* JADX WARNING: type inference failed for: r11v1 */
-    /* JADX WARNING: type inference failed for: r0v2, types: [java.io.Closeable] */
-    /* JADX WARNING: type inference failed for: r0v3 */
-    /* JADX WARNING: type inference failed for: r11v2 */
-    /* JADX WARNING: type inference failed for: r0v4 */
-    /* JADX WARNING: type inference failed for: r11v5 */
-    /* JADX WARNING: type inference failed for: r0v5 */
-    /* JADX WARNING: type inference failed for: r0v6 */
-    /* JADX WARNING: type inference failed for: r0v7 */
-    /* JADX WARNING: type inference failed for: r11v6 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v0, resolved type: java.io.BufferedInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v1, resolved type: java.io.BufferedInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v2, resolved type: java.io.BufferedInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v3, resolved type: java.io.BufferedInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v4, resolved type: java.io.RandomAccessFile} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v4, resolved type: java.io.BufferedInputStream} */
     /* JADX WARNING: Code restructure failed: missing block: B:25:0x005a, code lost:
         r10 = th;
-        r0 = r0;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:26:0x005c, code lost:
         r10 = e;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:27:0x005d, code lost:
-        r11 = 0;
-        r0 = r0;
+        r11 = null;
      */
     /* JADX WARNING: Failed to process nested try/catch */
     /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:25:0x005a A[ExcHandler: all (th java.lang.Throwable), Splitter:B:1:0x0001] */
-    /* JADX WARNING: Unknown variable types count: 4 */
     public boolean rewriteExif(String str, Collection<ExifTag> collection) throws FileNotFoundException, IOException {
-        ? r11;
-        ? r0;
+        BufferedInputStream bufferedInputStream;
         RandomAccessFile randomAccessFile;
-        ? r02 = 0;
+        BufferedInputStream bufferedInputStream2 = null;
         try {
             File file = new File(str);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
             try {
                 long offsetToExifEndFromSOF = (long) ExifParser.parse(bufferedInputStream, this).getOffsetToExifEndFromSOF();
                 bufferedInputStream.close();
                 randomAccessFile = new RandomAccessFile(file, "rw");
                 if (randomAccessFile.length() >= offsetToExifEndFromSOF) {
-                    boolean rewriteExif = rewriteExif((ByteBuffer) randomAccessFile.getChannel().map(MapMode.READ_WRITE, 0, offsetToExifEndFromSOF), collection);
-                    closeSilently(null);
+                    boolean rewriteExif = rewriteExif((ByteBuffer) randomAccessFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, offsetToExifEndFromSOF), collection);
+                    closeSilently((Closeable) null);
                     randomAccessFile.close();
                     return rewriteExif;
                 }
@@ -1496,23 +1449,21 @@ public class ExifInterface {
                 throw new IOException("Invalid exif format : ", e2);
             } catch (IOException e3) {
                 e = e3;
-                r0 = r02;
-                r11 = bufferedInputStream;
                 try {
-                    closeSilently(r0);
+                    closeSilently(bufferedInputStream2);
                     throw e;
                 } catch (Throwable th) {
                     th = th;
-                    ? r03 = r11;
-                    closeSilently(r03);
+                    bufferedInputStream2 = bufferedInputStream;
+                    closeSilently(bufferedInputStream2);
                     throw th;
                 }
             }
         } catch (IOException e4) {
             e = e4;
-            r0 = randomAccessFile;
-            r11 = 0;
-            closeSilently(r0);
+            bufferedInputStream2 = randomAccessFile;
+            bufferedInputStream = null;
+            closeSilently(bufferedInputStream2);
             throw e;
         } catch (Throwable th2) {
         }
@@ -1526,16 +1477,13 @@ public class ExifInterface {
             }
             return exifModifier.commit();
         } catch (ExifInvalidFormatException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid exif format : ");
-            sb.append(e2);
-            throw new IOException(sb.toString());
+            throw new IOException("Invalid exif format : " + e2);
         }
     }
 
     public boolean setCompressedThumbnail(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        if (!bitmap.compress(CompressFormat.JPEG, 90, byteArrayOutputStream)) {
+        if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)) {
             return false;
         }
         return setCompressedThumbnail(byteArrayOutputStream.toByteArray());
@@ -1613,7 +1561,7 @@ public class ExifInterface {
             throw new IllegalArgumentException(NULL_ARGUMENT_STRING);
         }
         OutputStream exifWriterStream = getExifWriterStream(outputStream);
-        bitmap.compress(CompressFormat.JPEG, 90, exifWriterStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, exifWriterStream);
         exifWriterStream.flush();
     }
 
@@ -1624,7 +1572,7 @@ public class ExifInterface {
         OutputStream outputStream = null;
         try {
             outputStream = getExifWriterStream(str);
-            bitmap.compress(CompressFormat.JPEG, 90, outputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
             outputStream.flush();
             outputStream.close();
         } catch (IOException e2) {

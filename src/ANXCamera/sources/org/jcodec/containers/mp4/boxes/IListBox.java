@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.jcodec.common.io.NIOUtils;
 import org.jcodec.containers.mp4.Boxes;
 import org.jcodec.containers.mp4.IBoxFactory;
@@ -37,11 +36,11 @@ public class IListBox extends Box {
 
     /* access modifiers changed from: protected */
     public void doWrite(ByteBuffer byteBuffer) {
-        for (Entry entry : this.values.entrySet()) {
+        for (Map.Entry next : this.values.entrySet()) {
             ByteBuffer duplicate = byteBuffer.duplicate();
             byteBuffer.putInt(0);
-            byteBuffer.putInt(((Integer) entry.getKey()).intValue());
-            for (Box write : (List) entry.getValue()) {
+            byteBuffer.putInt(((Integer) next.getKey()).intValue());
+            for (Box write : (List) next.getValue()) {
                 write.write(byteBuffer);
             }
             duplicate.putInt(byteBuffer.position() - duplicate.position());
@@ -50,7 +49,7 @@ public class IListBox extends Box {
 
     public int estimateSize() {
         int i = 8;
-        for (Entry value : this.values.entrySet()) {
+        for (Map.Entry<Integer, List<Box>> value : this.values.entrySet()) {
             for (Box estimateSize : (List) value.getValue()) {
                 i += estimateSize.estimateSize() + 8;
             }

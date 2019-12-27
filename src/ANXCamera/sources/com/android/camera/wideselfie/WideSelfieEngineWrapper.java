@@ -14,7 +14,7 @@ import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.text.TextUtils;
 import android.util.SizeF;
 import com.android.camera.R;
@@ -52,12 +52,8 @@ public class WideSelfieEngineWrapper {
             ProcessResult processResult = (ProcessResult) message.obj;
             int i2 = message.arg1;
             int i3 = message.arg2;
-            String str = WideSelfieEngineWrapper.TAG;
             if (i2 != 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("ProcessResult resultCode ");
-                sb.append(i2);
-                Log.w(str, sb.toString());
+                Log.w(WideSelfieEngineWrapper.TAG, "ProcessResult resultCode " + i2);
             }
             WideSelfStateCallback wideSelfStateCallback = (WideSelfStateCallback) WideSelfieEngineWrapper.this.mWideSelfCallbackRef.get();
             if (i3 == 0) {
@@ -92,27 +88,22 @@ public class WideSelfieEngineWrapper {
                     wideSelfStateCallback.onMove(processResult.direction, processResult.progress, new Point(i, i6), processResult.progressBarThumbOffset, processResult.progress != 100 || i2 == 28679);
                 }
             } else if (i3 == 2) {
-                WideSelfieEngineWrapper.this.mWideSelfieCurrentCommand = -1;
+                int unused = WideSelfieEngineWrapper.this.mWideSelfieCurrentCommand = -1;
                 if (wideSelfStateCallback != null) {
                     byte[] bArr = processResult.resultImageArray;
                     if (bArr != null) {
                         wideSelfStateCallback.onNv21Available(bArr, processResult.resultImageWidth, processResult.resultImageHeight, WideSelfieEngineWrapper.this.mStitchResult);
                         WideSelfieEngine.getSingleInstance().uninit();
-                        WideSelfieEngine.getSingleInstance().setOnCallback(null);
-                        WideSelfieEngineWrapper.this.mEngineInitialized = false;
-                        Log.d(str, "WideSelfieEngine uninit");
+                        WideSelfieEngine.getSingleInstance().setOnCallback((WideSelfieCallback) null);
+                        boolean unused2 = WideSelfieEngineWrapper.this.mEngineInitialized = false;
+                        Log.d(WideSelfieEngineWrapper.TAG, "WideSelfieEngine uninit");
                     }
                 }
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("not save, callback ");
-                sb2.append(wideSelfStateCallback);
-                sb2.append(", resultImageArray = ");
-                sb2.append(processResult.resultImageArray);
-                Log.w(str, sb2.toString());
+                Log.w(WideSelfieEngineWrapper.TAG, "not save, callback " + wideSelfStateCallback + ", resultImageArray = " + processResult.resultImageArray);
                 WideSelfieEngine.getSingleInstance().uninit();
-                WideSelfieEngine.getSingleInstance().setOnCallback(null);
-                WideSelfieEngineWrapper.this.mEngineInitialized = false;
-                Log.d(str, "WideSelfieEngine uninit");
+                WideSelfieEngine.getSingleInstance().setOnCallback((WideSelfieCallback) null);
+                boolean unused3 = WideSelfieEngineWrapper.this.mEngineInitialized = false;
+                Log.d(WideSelfieEngineWrapper.TAG, "WideSelfieEngine uninit");
             }
         }
     };
@@ -207,21 +198,17 @@ public class WideSelfieEngineWrapper {
     }
 
     public void onBurstCapture(byte[] bArr) {
-        boolean z = this.mEngineInitialized;
-        String str = TAG;
-        if (!z) {
-            Log.w(str, "onBurstCapture mEngineInitialized false");
-            return;
-        }
-        if (this.mState.get() == 8194) {
-            Log.d(str, "onBurstCapture AWS_STATE_CAPTURING");
+        if (!this.mEngineInitialized) {
+            Log.w(TAG, "onBurstCapture mEngineInitialized false");
+        } else if (this.mState.get() == 8194) {
+            Log.d(TAG, "onBurstCapture AWS_STATE_CAPTURING");
             this.mWideSelfieCurrentCommand = 0;
             WideSelfieEngine.getSingleInstance().process(0, bArr);
             if (!this.mCanStopCapture) {
                 this.mCanStopCapture = true;
             }
         } else if (this.mState.compareAndSet(AWS_STATE_STITCHING, AWS_STATE_PREVIEW)) {
-            Log.d(str, "onBurstCapture STITCHING E");
+            Log.d(TAG, "onBurstCapture STITCHING E");
             byte[] bArr2 = new byte[1];
             WideSelfStateCallback wideSelfStateCallback = (WideSelfStateCallback) this.mWideSelfCallbackRef.get();
             if (wideSelfStateCallback != null) {
@@ -229,19 +216,16 @@ public class WideSelfieEngineWrapper {
             }
             this.mWideSelfieCurrentCommand = 1;
             this.mStitchResult = WideSelfieEngine.getSingleInstance().process(1, bArr2);
-            StringBuilder sb = new StringBuilder();
-            sb.append("onBurstCapture mStitchResult ");
-            sb.append(this.mStitchResult);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "onBurstCapture mStitchResult " + this.mStitchResult);
             this.mWideSelfieCurrentCommand = 2;
             WideSelfieEngine.getSingleInstance().process(2, bArr2);
-            Log.d(str, "onBurstCapture STITCHING X");
+            Log.d(TAG, "onBurstCapture STITCHING X");
             this.mCanStopCapture = false;
         }
     }
 
     public void onDestroy() {
-        this.mHandle.removeCallbacksAndMessages(null);
+        this.mHandle.removeCallbacksAndMessages((Object) null);
     }
 
     public void pause() {
@@ -267,12 +251,7 @@ public class WideSelfieEngineWrapper {
             float dimensionPixelSize = ((float) i) / ((float) this.mContext.getResources().getDimensionPixelSize(R.dimen.wide_selfie_progress_thumbnail_background_height));
             this.nThumbnailWidth = (int) (((float) this.mPreviewWidth) / dimensionPixelSize);
             this.nThumbnailHeight = (int) (((float) this.mPreviewHeight) / dimensionPixelSize);
-            StringBuilder sb = new StringBuilder();
-            sb.append("mFullImageWidth = ");
-            sb.append(this.mFullImageWidth);
-            sb.append(", mFullImageHeight = ");
-            sb.append(this.mFullImageHeight);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "mFullImageWidth = " + this.mFullImageWidth + ", mFullImageHeight = " + this.mFullImageHeight);
             try {
                 this.mAngleSize = getAngleValue(((CameraManager) this.mContext.getSystemService("camera")).getCameraCharacteristics(str));
             } catch (CameraAccessException e2) {
@@ -287,12 +266,7 @@ public class WideSelfieEngineWrapper {
 
     public int startCapture() {
         int i;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startCapture orientation = ");
-        sb.append(this.mWideSelfieOrientation);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "startCapture orientation = " + this.mWideSelfieOrientation);
         AwsInitParameter defaultInitParams = AwsInitParameter.getDefaultInitParams(this.mFullImageWidth, this.mFullImageHeight, 2050, this.mWideSelfieOrientation);
         WideSelfieConfig instance = WideSelfieConfig.getInstance(this.mContext);
         if (this.mWideSelfieOrientation % 180 == 90) {
@@ -315,33 +289,29 @@ public class WideSelfieEngineWrapper {
         defaultInitParams.maxResultWidth = i;
         defaultInitParams.progressBarThumbHeight = this.mWideSelfieOrientation % 180 == 90 ? this.nThumbnailWidth : this.nThumbnailHeight;
         defaultInitParams.thumbnailWidth = 480;
-        defaultInitParams.thumbnailHeight = ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        defaultInitParams.thumbnailHeight = MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         defaultInitParams.guideStopBarThumbHeight = 0;
         defaultInitParams.cameraViewAngleForWidth = this.mAngleSize.getWidth();
         defaultInitParams.cameraViewAngleForHeight = this.mAngleSize.getHeight();
-        Log.d(str, String.format("startCapture maxResultWidth = %d, progressBarThumbHeight = %d, thumbnailWidth = %d, thumbnailHeight = %d,  guideStopBarThumbHeight = %d", new Object[]{Integer.valueOf(i), Integer.valueOf(defaultInitParams.progressBarThumbHeight), Integer.valueOf(defaultInitParams.thumbnailWidth), Integer.valueOf(defaultInitParams.thumbnailHeight), Integer.valueOf(defaultInitParams.guideStopBarThumbHeight)}));
+        Log.d(TAG, String.format("startCapture maxResultWidth = %d, progressBarThumbHeight = %d, thumbnailWidth = %d, thumbnailHeight = %d,  guideStopBarThumbHeight = %d", new Object[]{Integer.valueOf(i), Integer.valueOf(defaultInitParams.progressBarThumbHeight), Integer.valueOf(defaultInitParams.thumbnailWidth), Integer.valueOf(defaultInitParams.thumbnailHeight), Integer.valueOf(defaultInitParams.guideStopBarThumbHeight)}));
         int init = WideSelfieEngine.getSingleInstance().init(defaultInitParams);
         this.mEngineInitialized = true;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("WideSelfieEngine init, result = ");
-        sb3.append(init);
-        Log.d(str, sb3.toString());
+        Log.d(TAG, "WideSelfieEngine init, result = " + init);
         WideSelfieEngine.getSingleInstance().setOnCallback(this.mWideSelfieCallback);
         this.mState.set(8194);
         return init;
     }
 
     public boolean stopCapture() {
-        String str = TAG;
-        Log.d(str, "stopCapture E");
+        Log.d(TAG, "stopCapture E");
         if (!this.mCanStopCapture) {
-            Log.w(str, "stopCapture failed, can't stop");
+            Log.w(TAG, "stopCapture failed, can't stop");
             return false;
         } else if (!this.mState.compareAndSet(8194, AWS_STATE_STITCHING)) {
-            Log.w(str, "stopCapture failed, error state");
+            Log.w(TAG, "stopCapture failed, error state");
             return false;
         } else {
-            Log.d(str, "stopCapture X");
+            Log.d(TAG, "stopCapture X");
             return true;
         }
     }

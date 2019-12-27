@@ -1,18 +1,16 @@
 package android.support.v4.os;
 
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.util.Locale;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 final class LocaleHelper {
     private LocaleHelper() {
     }
 
     static Locale forLanguageTag(String str) {
-        String str2 = "-";
-        if (str.contains(str2)) {
-            String[] split = str.split(str2, -1);
+        if (str.contains("-")) {
+            String[] split = str.split("-", -1);
             if (split.length > 2) {
                 return new Locale(split[0], split[1], split[2]);
             }
@@ -22,12 +20,10 @@ final class LocaleHelper {
             if (split.length == 1) {
                 return new Locale(split[0]);
             }
+        } else if (!str.contains("_")) {
+            return new Locale(str);
         } else {
-            String str3 = "_";
-            if (!str.contains(str3)) {
-                return new Locale(str);
-            }
-            String[] split2 = str.split(str3, -1);
+            String[] split2 = str.split("_", -1);
             if (split2.length > 2) {
                 return new Locale(split2[0], split2[1], split2[2]);
             }
@@ -38,11 +34,7 @@ final class LocaleHelper {
                 return new Locale(split2[0]);
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Can not parse language tag: [");
-        sb.append(str);
-        sb.append("]");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Can not parse language tag: [" + str + "]");
     }
 
     static String toLanguageTag(Locale locale) {

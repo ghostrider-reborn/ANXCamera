@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.media.MediaSession2.ControllerInfo;
-import android.support.v4.media.MediaSession2.SessionCallback;
+import android.support.v4.media.MediaSession2;
+import android.support.v4.media.MediaSessionService2;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -42,7 +42,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
 
     public static final class MediaLibrarySession extends MediaSession2 {
 
-        public static final class Builder extends BuilderBase<MediaLibrarySession, Builder, MediaLibrarySessionCallback> {
+        public static final class Builder extends MediaSession2.BuilderBase<MediaLibrarySession, Builder, MediaLibrarySessionCallback> {
             public Builder(@NonNull MediaLibraryService2 mediaLibraryService2, @NonNull Executor executor, @NonNull MediaLibrarySessionCallback mediaLibrarySessionCallback) {
                 super(mediaLibraryService2);
                 setSessionCallback(executor, mediaLibrarySessionCallback);
@@ -51,7 +51,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             @NonNull
             public MediaLibrarySession build() {
                 if (this.mCallbackExecutor == null) {
-                    this.mCallbackExecutor = new MainHandlerExecutor(this.mContext);
+                    this.mCallbackExecutor = new MediaSession2.MainHandlerExecutor(this.mContext);
                 }
                 if (this.mCallback == null) {
                     this.mCallback = new MediaLibrarySessionCallback() {
@@ -92,86 +92,86 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             }
         }
 
-        public static class MediaLibrarySessionCallback extends SessionCallback {
+        public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
             @Nullable
-            public List<MediaItem2> onGetChildren(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle) {
+            public List<MediaItem2> onGetChildren(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle) {
                 return null;
             }
 
             @Nullable
-            public MediaItem2 onGetItem(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @NonNull String str) {
+            public MediaItem2 onGetItem(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str) {
                 return null;
             }
 
             @Nullable
-            public LibraryRoot onGetLibraryRoot(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @Nullable Bundle bundle) {
+            public LibraryRoot onGetLibraryRoot(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @Nullable Bundle bundle) {
                 return null;
             }
 
             @Nullable
-            public List<MediaItem2> onGetSearchResult(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle) {
+            public List<MediaItem2> onGetSearchResult(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle) {
                 return null;
             }
 
-            public void onSearch(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle) {
+            public void onSearch(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle) {
             }
 
-            public void onSubscribe(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle) {
+            public void onSubscribe(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle) {
             }
 
-            public void onUnsubscribe(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull ControllerInfo controllerInfo, @NonNull String str) {
+            public void onUnsubscribe(@NonNull MediaLibrarySession mediaLibrarySession, @NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str) {
             }
         }
 
-        interface SupportLibraryImpl extends SupportLibraryImpl {
+        interface SupportLibraryImpl extends MediaSession2.SupportLibraryImpl {
             MediaLibrarySessionCallback getCallback();
 
             MediaLibrarySession getInstance();
 
             IBinder getLegacySessionBinder();
 
-            void notifyChildrenChanged(@NonNull ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle);
+            void notifyChildrenChanged(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle);
 
             void notifyChildrenChanged(@NonNull String str, int i, @Nullable Bundle bundle);
 
-            void notifySearchResultChanged(@NonNull ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle);
+            void notifySearchResultChanged(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle);
 
-            void onGetChildrenOnExecutor(@NonNull ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle);
+            void onGetChildrenOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle);
 
-            void onGetItemOnExecutor(@NonNull ControllerInfo controllerInfo, @NonNull String str);
+            void onGetItemOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str);
 
-            void onGetLibraryRootOnExecutor(@NonNull ControllerInfo controllerInfo, @Nullable Bundle bundle);
+            void onGetLibraryRootOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @Nullable Bundle bundle);
 
-            void onGetSearchResultOnExecutor(@NonNull ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle);
+            void onGetSearchResultOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, int i2, @Nullable Bundle bundle);
 
-            void onSearchOnExecutor(@NonNull ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle);
+            void onSearchOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle);
 
-            void onSubscribeOnExecutor(@NonNull ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle);
+            void onSubscribeOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, @Nullable Bundle bundle);
 
-            void onUnsubscribeOnExecutor(@NonNull ControllerInfo controllerInfo, @NonNull String str);
+            void onUnsubscribeOnExecutor(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str);
         }
 
-        MediaLibrarySession(Context context, String str, BaseMediaPlayer baseMediaPlayer, MediaPlaylistAgent mediaPlaylistAgent, VolumeProviderCompat volumeProviderCompat, PendingIntent pendingIntent, Executor executor, SessionCallback sessionCallback) {
+        MediaLibrarySession(Context context, String str, BaseMediaPlayer baseMediaPlayer, MediaPlaylistAgent mediaPlaylistAgent, VolumeProviderCompat volumeProviderCompat, PendingIntent pendingIntent, Executor executor, MediaSession2.SessionCallback sessionCallback) {
             super(context, str, baseMediaPlayer, mediaPlaylistAgent, volumeProviderCompat, pendingIntent, executor, sessionCallback);
         }
 
-        /* access modifiers changed from: 0000 */
-        public SupportLibraryImpl createImpl(Context context, String str, BaseMediaPlayer baseMediaPlayer, MediaPlaylistAgent mediaPlaylistAgent, VolumeProviderCompat volumeProviderCompat, PendingIntent pendingIntent, Executor executor, SessionCallback sessionCallback) {
+        /* access modifiers changed from: package-private */
+        public SupportLibraryImpl createImpl(Context context, String str, BaseMediaPlayer baseMediaPlayer, MediaPlaylistAgent mediaPlaylistAgent, VolumeProviderCompat volumeProviderCompat, PendingIntent pendingIntent, Executor executor, MediaSession2.SessionCallback sessionCallback) {
             MediaLibrarySessionImplBase mediaLibrarySessionImplBase = new MediaLibrarySessionImplBase(this, context, str, baseMediaPlayer, mediaPlaylistAgent, volumeProviderCompat, pendingIntent, executor, sessionCallback);
             return mediaLibrarySessionImplBase;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public MediaLibrarySessionCallback getCallback() {
             return (MediaLibrarySessionCallback) super.getCallback();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SupportLibraryImpl getImpl() {
             return (SupportLibraryImpl) super.getImpl();
         }
 
-        public void notifyChildrenChanged(@NonNull ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle) {
+        public void notifyChildrenChanged(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle) {
             getImpl().notifyChildrenChanged(controllerInfo, str, i, bundle);
         }
 
@@ -179,13 +179,13 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             getImpl().notifyChildrenChanged(str, i, bundle);
         }
 
-        public void notifySearchResultChanged(@NonNull ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle) {
+        public void notifySearchResultChanged(@NonNull MediaSession2.ControllerInfo controllerInfo, @NonNull String str, int i, @Nullable Bundle bundle) {
             getImpl().notifySearchResultChanged(controllerInfo, str, i, bundle);
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    public SupportLibraryImpl createImpl() {
+    /* access modifiers changed from: package-private */
+    public MediaSessionService2.SupportLibraryImpl createImpl() {
         return new MediaLibraryService2ImplBase();
     }
 

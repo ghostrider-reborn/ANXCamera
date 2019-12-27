@@ -81,12 +81,7 @@ public abstract class FocusManagerAbstract {
         if (i != this.mRenderWidth || i2 != this.mRenderHeight) {
             this.mRenderWidth = i;
             this.mRenderHeight = i2;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setRenderSize: ");
-            sb.append(this.mRenderWidth);
-            sb.append(" | ");
-            sb.append(this.mRenderHeight);
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "setRenderSize: " + this.mRenderWidth + " | " + this.mRenderHeight);
             setMatrix();
         }
     }

@@ -30,19 +30,19 @@ public final class q implements j {
     }
 
     public void onDestroy() {
-        for (o onDestroy : l.b(this.targets)) {
+        for (T onDestroy : l.b(this.targets)) {
             onDestroy.onDestroy();
         }
     }
 
     public void onStart() {
-        for (o onStart : l.b(this.targets)) {
+        for (T onStart : l.b(this.targets)) {
             onStart.onStart();
         }
     }
 
     public void onStop() {
-        for (o onStop : l.b(this.targets)) {
+        for (T onStop : l.b(this.targets)) {
             onStop.onStop();
         }
     }

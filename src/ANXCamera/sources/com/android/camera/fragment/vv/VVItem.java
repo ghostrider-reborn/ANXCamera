@@ -1,7 +1,7 @@
 package com.android.camera.fragment.vv;
 
 import android.os.Parcel;
-import android.os.Parcelable.Creator;
+import android.os.Parcelable;
 import android.os.statistics.E2EScenario;
 import com.android.camera.Util;
 import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
@@ -12,7 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class VVItem extends BaseResourceItem {
-    public static final Creator<VVItem> CREATOR = new Creator<VVItem>() {
+    public static final Parcelable.Creator<VVItem> CREATOR = new Parcelable.Creator<VVItem>() {
         public VVItem createFromParcel(Parcel parcel) {
             return new VVItem(parcel);
         }
@@ -66,7 +66,7 @@ public class VVItem extends BaseResourceItem {
     }
 
     public long getDuration(int i) {
-        return ((Long) this.durationList.get(i)).longValue();
+        return this.durationList.get(i).longValue();
     }
 
     public int getEssentialFragmentSize() {
@@ -78,30 +78,12 @@ public class VVItem extends BaseResourceItem {
     }
 
     public void onDecompressFinished(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append("pv/cover.png");
-        this.coverPath = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append("pv/preview.mov");
-        this.previewVideoPath = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str);
-        sb3.append("filter.png");
-        this.filterPath = sb3.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str);
-        sb4.append(ComposerHelper.CONFIG_FILE_NAME);
-        this.configJsonPath = sb4.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(str);
-        sb5.append("compose.json");
-        this.composeJsonPath = sb5.toString();
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(str);
-        sb6.append("bgm.mp3");
-        this.musicPath = sb6.toString();
+        this.coverPath = str + "pv/cover.png";
+        this.previewVideoPath = str + "pv/preview.mov";
+        this.filterPath = str + "filter.png";
+        this.configJsonPath = str + ComposerHelper.CONFIG_FILE_NAME;
+        this.composeJsonPath = str + "compose.json";
+        this.musicPath = str + "bgm.mp3";
     }
 
     public void parseSummaryData(JSONObject jSONObject, int i) {
@@ -119,11 +101,10 @@ public class VVItem extends BaseResourceItem {
         for (int i3 = 0; i3 < optJSONArray2.length(); i3++) {
             JSONObject optJSONObject = optJSONArray2.optJSONObject(i3);
             String optString = optJSONObject.optString("lang");
-            String str2 = "name";
             if (optString.equalsIgnoreCase(E2EScenario.DEFAULT_CATEGORY)) {
-                this.name = optJSONObject.optString(str2);
+                this.name = optJSONObject.optString("name");
             } else if (optString.equalsIgnoreCase(str)) {
-                this.name = optJSONObject.optString(str2);
+                this.name = optJSONObject.optString("name");
                 return;
             }
         }

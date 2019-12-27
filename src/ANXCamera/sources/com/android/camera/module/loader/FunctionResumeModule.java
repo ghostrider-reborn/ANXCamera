@@ -18,7 +18,7 @@ public class FunctionResumeModule extends Func1Base<BaseModule, BaseModule> {
         }
         DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
         DataRepository.getInstance().backUp().revertRunning(DataRepository.dataItemRunning(), dataItemGlobal.getDataBackUpKey(this.mTargetMode), dataItemGlobal.getCurrentCameraId());
-        BaseModule baseModule = (BaseModule) nullHolder.get();
+        BaseModule baseModule = nullHolder.get();
         baseModule.setCameraDevice(Camera2OpenManager.getInstance().getCurrentCamera2Device());
         baseModule.onCreate(this.mTargetMode, dataItemGlobal.getCurrentCameraId());
         baseModule.onResume();

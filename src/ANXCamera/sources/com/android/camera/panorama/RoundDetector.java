@@ -5,7 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.util.Range;
 import com.android.camera.log.Log;
 import java.util.Locale;
@@ -37,13 +37,13 @@ public class RoundDetector implements SensorEventListener {
         public LoopRange(int i, int i2, int i3) {
             if (i <= i2) {
                 this.mRange = new Range<>(Integer.valueOf(i), Integer.valueOf(i2));
-                this.mRangeSecond = new Range<>(Integer.valueOf(-1), Integer.valueOf(-1));
+                this.mRangeSecond = new Range<>(-1, -1);
                 boolean[] zArr = this.mRangePassed;
                 zArr[0] = false;
                 zArr[1] = true;
                 return;
             }
-            this.mRange = new Range<>(Integer.valueOf(0), Integer.valueOf(Math.max(5, i2)));
+            this.mRange = new Range<>(0, Integer.valueOf(Math.max(5, i2)));
             this.mRangeSecond = new Range<>(Integer.valueOf(Math.min(i, i3 - 5)), Integer.valueOf(i3));
             boolean[] zArr2 = this.mRangePassed;
             zArr2[0] = false;
@@ -70,7 +70,7 @@ public class RoundDetector implements SensorEventListener {
         }
 
         public String toString() {
-            if (((Integer) this.mRangeSecond.getUpper()).intValue() < 0) {
+            if (this.mRangeSecond.getUpper().intValue() < 0) {
                 return this.mRange.toString();
             }
             return String.format("%s, %s", new Object[]{this.mRangeSecond.toString(), this.mRange.toString()});
@@ -82,12 +82,12 @@ public class RoundDetector implements SensorEventListener {
             super(i, i2, i3);
             if (i > i2) {
                 this.mRange = new Range<>(Integer.valueOf(Math.min(i, i3 - 5)), Integer.valueOf(i3));
-                this.mRangeSecond = new Range<>(Integer.valueOf(0), Integer.valueOf(Math.max(5, i2)));
+                this.mRangeSecond = new Range<>(0, Integer.valueOf(Math.max(5, i2)));
             }
         }
 
         public String toString() {
-            if (((Integer) this.mRangeSecond.getUpper()).intValue() < 0) {
+            if (this.mRangeSecond.getUpper().intValue() < 0) {
                 return this.mRange.toString();
             }
             return String.format("%s, %s", new Object[]{this.mRange.toString(), this.mRangeSecond.toString()});
@@ -95,17 +95,11 @@ public class RoundDetector implements SensorEventListener {
     }
 
     private static int correctionCircleDegree(int i) {
-        if (i < 0) {
-            return i + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
-        }
-        if (360 < i) {
-            i -= ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
-        }
-        return i;
+        return i < 0 ? i + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : 360 < i ? i - MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : i;
     }
 
     private LoopRange emptyRange() {
-        return new LoopRange(-1, -1, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
+        return new LoopRange(-1, -1, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
     }
 
     protected static int radianToDegree(float f2) {
@@ -165,13 +159,13 @@ public class RoundDetector implements SensorEventListener {
                 SensorManager.getOrientation(this.mOutR, fArr3);
                 int radianToDegree = radianToDegree(fArr3[0]);
                 if (radianToDegree < 0) {
-                    radianToDegree += ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                    radianToDegree += MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                 }
                 SensorManager.remapCoordinateSystem(this.mInR, 1, 3, this.mOutR);
                 SensorManager.getOrientation(this.mOutR, fArr3);
                 int radianToDegree2 = radianToDegree(fArr3[0]);
                 if (radianToDegree2 < 0) {
-                    radianToDegree2 += ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                    radianToDegree2 += MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
                 }
                 synchronized (SynchronizedObject) {
                     this.mCurrentDegreeLandscape = radianToDegree;
@@ -214,12 +208,12 @@ public class RoundDetector implements SensorEventListener {
                 if (correctionCircleDegree < i3) {
                     correctionCircleDegree = 360;
                 }
-                this.mEndDegreeRange = new LoopRangeLeft(correctionCircleDegree, correctionCircleDegree2, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
+                this.mEndDegreeRange = new LoopRangeLeft(correctionCircleDegree, correctionCircleDegree2, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
             } else {
                 if (i3 < correctionCircleDegree2) {
                     correctionCircleDegree2 = 0;
                 }
-                this.mEndDegreeRange = new LoopRange(correctionCircleDegree, correctionCircleDegree2, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
+                this.mEndDegreeRange = new LoopRange(correctionCircleDegree, correctionCircleDegree2, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
             }
             this.mDirection = i2;
             this.mStartDegree = i3;

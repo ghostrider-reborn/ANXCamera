@@ -20,15 +20,11 @@ public class Pair<F, S> {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (!(obj instanceof Pair)) {
             return false;
         }
         Pair pair = (Pair) obj;
-        if (ObjectsCompat.equals(pair.first, this.first) && ObjectsCompat.equals(pair.second, this.second)) {
-            z = true;
-        }
-        return z;
+        return ObjectsCompat.equals(pair.first, this.first) && ObjectsCompat.equals(pair.second, this.second);
     }
 
     public int hashCode() {
@@ -43,12 +39,6 @@ public class Pair<F, S> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Pair{");
-        sb.append(String.valueOf(this.first));
-        sb.append(" ");
-        sb.append(String.valueOf(this.second));
-        sb.append("}");
-        return sb.toString();
+        return "Pair{" + String.valueOf(this.first) + " " + String.valueOf(this.second) + "}";
     }
 }

@@ -21,7 +21,7 @@ public class ReflectUtils {
             throw new NullPointerException("object must not be null");
         } else if (str != null) {
             synchronized (sAdditionalFields) {
-                HashMap hashMap = (HashMap) sAdditionalFields.get(obj);
+                HashMap hashMap = sAdditionalFields.get(obj);
                 if (hashMap == null) {
                     return null;
                 }
@@ -65,11 +65,7 @@ public class ReflectUtils {
         if (replace.startsWith("[")) {
             return replace;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("L");
-        sb.append(replace);
-        sb.append(";");
-        return sb.toString();
+        return "L" + replace + ";";
     }
 
     public static String getSignature(Class<?>[] clsArr, Class<?> cls) {
@@ -95,7 +91,7 @@ public class ReflectUtils {
             throw new NullPointerException("object must not be null");
         } else if (str != null) {
             synchronized (sAdditionalFields) {
-                HashMap hashMap = (HashMap) sAdditionalFields.get(obj);
+                HashMap hashMap = sAdditionalFields.get(obj);
                 if (hashMap == null) {
                     return null;
                 }
@@ -116,7 +112,7 @@ public class ReflectUtils {
             throw new NullPointerException("object must not be null");
         } else if (str != null) {
             synchronized (sAdditionalFields) {
-                hashMap = (HashMap) sAdditionalFields.get(obj);
+                hashMap = sAdditionalFields.get(obj);
                 if (hashMap == null) {
                     hashMap = new HashMap();
                     sAdditionalFields.put(obj, hashMap);

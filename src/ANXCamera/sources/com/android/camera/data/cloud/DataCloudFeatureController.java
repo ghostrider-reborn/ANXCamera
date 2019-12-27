@@ -1,15 +1,14 @@
 package com.android.camera.data.cloud;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import com.android.camera.CameraAppImpl;
-import com.android.camera.data.cloud.DataCloud.CloudFeature;
+import com.android.camera.data.cloud.DataCloud;
 import com.android.camera.data.data.config.SupportedConfigFactory;
 import com.android.camera.data.data.config.SupportedConfigs;
 import com.android.camera.log.Log;
 import java.util.Collection;
 
-public class DataCloudFeatureController implements CloudFeature {
+public class DataCloudFeatureController implements DataCloud.CloudFeature {
     public static final String KEY = "cloud_feature";
     private static final String TAG = "DataCloudFeatureController";
     private SharedPreferences mPreferences;
@@ -26,7 +25,7 @@ public class DataCloudFeatureController implements CloudFeature {
         this.mPreferences = CameraAppImpl.getAndroidContext().getSharedPreferences(provideKey(), 0);
     }
 
-    public Editor editor() {
+    public SharedPreferences.Editor editor() {
         return getSharedPreferences().edit();
     }
 
@@ -43,10 +42,7 @@ public class DataCloudFeatureController implements CloudFeature {
                 z = sharedPreferences.getBoolean(SupportedConfigFactory.getConfigKey(config), true);
             } catch (RuntimeException unused) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("unknown config ");
-                sb.append(config);
-                Log.w(str, sb.toString());
+                Log.w(str, "unknown config " + config);
             }
             if (z) {
                 supportedConfigs2.add(config);

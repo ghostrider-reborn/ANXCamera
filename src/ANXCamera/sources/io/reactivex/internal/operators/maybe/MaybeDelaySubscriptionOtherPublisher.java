@@ -96,7 +96,7 @@ public final class MaybeDelaySubscriptionOtherPublisher<T, U> extends AbstractMa
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             MaybeSource<T> maybeSource = this.source;
             this.source = null;

@@ -15,7 +15,7 @@ public final class ObservableFlattenIterable<T, R> extends AbstractObservableWit
     static final class FlattenIterableObserver<T, R> implements Observer<T>, Disposable {
         final Observer<? super R> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f316d;
         final Function<? super T, ? extends Iterable<? extends R>> mapper;
 
@@ -66,6 +66,7 @@ public final class ObservableFlattenIterable<T, R> extends AbstractObservableWit
                                 Exceptions.throwIfFatal(th);
                                 this.f316d.dispose();
                                 onError(th);
+                                return;
                             }
                         } catch (Throwable th2) {
                             Exceptions.throwIfFatal(th2);

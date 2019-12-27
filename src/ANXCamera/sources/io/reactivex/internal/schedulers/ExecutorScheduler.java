@@ -1,7 +1,6 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -50,7 +49,7 @@ public final class ExecutorScheduler extends Scheduler {
         }
 
         public void dispose() {
-            if (getAndSet(null) != null) {
+            if (getAndSet((Object) null) != null) {
                 this.timed.dispose();
                 this.direct.dispose();
             }
@@ -71,7 +70,7 @@ public final class ExecutorScheduler extends Scheduler {
                 try {
                     runnable.run();
                 } finally {
-                    lazySet(null);
+                    lazySet((Object) null);
                     this.timed.lazySet(DisposableHelper.DISPOSED);
                     this.direct.lazySet(DisposableHelper.DISPOSED);
                 }
@@ -79,7 +78,7 @@ public final class ExecutorScheduler extends Scheduler {
         }
     }
 
-    public static final class ExecutorWorker extends Worker implements Runnable {
+    public static final class ExecutorWorker extends Scheduler.Worker implements Runnable {
         volatile boolean disposed;
         final Executor executor;
         final MpscLinkedQueue<Runnable> queue;
@@ -169,11 +168,11 @@ public final class ExecutorScheduler extends Scheduler {
             int i = 1;
             while (!this.disposed) {
                 while (true) {
-                    Runnable runnable = (Runnable) mpscLinkedQueue.poll();
-                    if (runnable == null) {
+                    Runnable poll = mpscLinkedQueue.poll();
+                    if (poll == null) {
                         break;
                     }
-                    runnable.run();
+                    poll.run();
                     if (this.disposed) {
                         mpscLinkedQueue.clear();
                         return;
@@ -237,7 +236,7 @@ public final class ExecutorScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
+    public Scheduler.Worker createWorker() {
         return new ExecutorWorker(this.executor);
     }
 
@@ -250,7 +249,7 @@ public final class ExecutorScheduler extends Scheduler {
                 scheduledDirectTask.setFuture(((ExecutorService) this.executor).submit(scheduledDirectTask));
                 return scheduledDirectTask;
             }
-            BooleanRunnable booleanRunnable = new BooleanRunnable(onSchedule);
+            ExecutorWorker.BooleanRunnable booleanRunnable = new ExecutorWorker.BooleanRunnable(onSchedule);
             this.executor.execute(booleanRunnable);
             return booleanRunnable;
         } catch (RejectedExecutionException e2) {

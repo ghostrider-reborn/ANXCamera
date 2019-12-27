@@ -1,10 +1,10 @@
 package com.android.camera.module.impl.component;
 
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.OnFaceBeautyChangedProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.ss.android.vesdk.TERecorder;
 
-public class LiveBeautyChangeImpl implements OnFaceBeautyChangedProtocol {
+public class LiveBeautyChangeImpl implements ModeProtocol.OnFaceBeautyChangedProtocol {
     private TERecorder mRecorder;
 
     public LiveBeautyChangeImpl(TERecorder tERecorder) {

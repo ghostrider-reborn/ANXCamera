@@ -83,7 +83,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
             this.emissions = new long[length];
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancel(int i) {
             if (this.requests.decrementAndGet(i) == 0) {
                 this.cancelled = true;
@@ -94,7 +94,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 if (this.sourceMode == 1) {
@@ -105,7 +105,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainAsync() {
             SimpleQueue<T> simpleQueue = this.queue;
             Subscriber<? super T>[] subscriberArr = this.subscribers;
@@ -142,7 +142,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
                                 i6++;
                             } else {
                                 try {
-                                    Object poll = simpleQueue.poll();
+                                    T poll = simpleQueue.poll();
                                     if (poll != null) {
                                         subscriberArr[i].onNext(poll);
                                         jArr[i] = j2 + 1;
@@ -200,7 +200,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainSync() {
             SimpleQueue<T> simpleQueue = this.queue;
             Subscriber<? super T>[] subscriberArr = this.subscribers;
@@ -227,7 +227,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
                         i4++;
                     } else {
                         try {
-                            Object poll = simpleQueue.poll();
+                            T poll = simpleQueue.poll();
                             if (poll == null) {
                                 int length3 = subscriberArr.length;
                                 while (i3 < length3) {
@@ -321,7 +321,7 @@ public final class ParallelFromPublisher<T> extends ParallelFlowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setupSubscribers() {
             Subscriber<? super T>[] subscriberArr = this.subscribers;
             int length = subscriberArr.length;

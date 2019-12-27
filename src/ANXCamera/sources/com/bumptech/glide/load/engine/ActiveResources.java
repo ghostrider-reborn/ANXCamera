@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.c;
+import com.bumptech.glide.load.engine.u;
 import com.bumptech.glide.util.i;
 import com.bumptech.glide.util.l;
 import java.lang.ref.ReferenceQueue;
@@ -21,7 +22,7 @@ final class ActiveResources {
     final Map<c, ResourceWeakReference> activeEngineResources = new HashMap();
     @Nullable
     private volatile DequeuedResourceCallback cb;
-    private a listener;
+    private u.a listener;
     private final Handler pa = new Handler(Looper.getMainLooper(), new C0095a(this));
     @Nullable
     private ReferenceQueue<u<?>> pe;
@@ -42,8 +43,8 @@ final class ActiveResources {
         final boolean yf;
 
         ResourceWeakReference(@NonNull c cVar, @NonNull u<?> uVar, @NonNull ReferenceQueue<? super u<?>> referenceQueue, boolean z) {
-            A<?> a2;
             super(uVar, referenceQueue);
+            A<?> a2;
             i.checkNotNull(cVar);
             this.key = cVar;
             if (!uVar.ug() || !z) {
@@ -57,7 +58,7 @@ final class ActiveResources {
             this.yf = uVar.ug();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void reset() {
             this.resource = null;
             clear();
@@ -77,7 +78,7 @@ final class ActiveResources {
         return this.pe;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(@NonNull ResourceWeakReference resourceWeakReference) {
         l.Ih();
         this.activeEngineResources.remove(resourceWeakReference.key);
@@ -91,15 +92,15 @@ final class ActiveResources {
         }
     }
 
-    /* access modifiers changed from: 0000 */
-    public void a(a aVar) {
+    /* access modifiers changed from: package-private */
+    public void a(u.a aVar) {
         this.listener = aVar;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
     public u<?> b(c cVar) {
-        ResourceWeakReference resourceWeakReference = (ResourceWeakReference) this.activeEngineResources.get(cVar);
+        ResourceWeakReference resourceWeakReference = this.activeEngineResources.get(cVar);
         if (resourceWeakReference == null) {
             return null;
         }
@@ -110,15 +111,15 @@ final class ActiveResources {
         return uVar;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void b(c cVar, u<?> uVar) {
-        ResourceWeakReference resourceWeakReference = (ResourceWeakReference) this.activeEngineResources.put(cVar, new ResourceWeakReference(cVar, uVar, dk(), this.Sb));
-        if (resourceWeakReference != null) {
-            resourceWeakReference.reset();
+        ResourceWeakReference put = this.activeEngineResources.put(cVar, new ResourceWeakReference(cVar, uVar, dk(), this.Sb));
+        if (put != null) {
+            put.reset();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void bg() {
         while (!this.re) {
             try {
@@ -133,21 +134,21 @@ final class ActiveResources {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void d(c cVar) {
-        ResourceWeakReference resourceWeakReference = (ResourceWeakReference) this.activeEngineResources.remove(cVar);
-        if (resourceWeakReference != null) {
-            resourceWeakReference.reset();
+        ResourceWeakReference remove = this.activeEngineResources.remove(cVar);
+        if (remove != null) {
+            remove.reset();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void setDequeuedResourceCallback(DequeuedResourceCallback dequeuedResourceCallback) {
         this.cb = dequeuedResourceCallback;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void shutdown() {
         this.re = true;

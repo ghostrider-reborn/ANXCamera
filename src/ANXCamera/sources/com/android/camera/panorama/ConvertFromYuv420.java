@@ -13,13 +13,13 @@ public class ConvertFromYuv420 implements IImage2BytesConverter {
         public byte[] image2bytes(Image image) {
             String imageFormat = PanoramaGP3ImageFormat.getImageFormat(image);
             if (PanoramaGP3ImageFormat.YUV420_PLANAR.equals(imageFormat)) {
-                ConvertFromYuv420.this.mImage2BytesConverter = new ConvertFromYuv420Planar();
+                IImage2BytesConverter unused = ConvertFromYuv420.this.mImage2BytesConverter = new ConvertFromYuv420Planar();
             } else if (PanoramaGP3ImageFormat.YUV420_SEMIPLANAR.equals(imageFormat)) {
-                ConvertFromYuv420.this.mImage2BytesConverter = new ConvertFromYuv420SemiPlanar();
+                IImage2BytesConverter unused2 = ConvertFromYuv420.this.mImage2BytesConverter = new ConvertFromYuv420SemiPlanar();
             } else if (!PanoramaGP3ImageFormat.YVU420_SEMIPLANAR.equals(imageFormat)) {
                 return new byte[0];
             } else {
-                ConvertFromYuv420.this.mImage2BytesConverter = new ConvertFromYvu420SemiPlanar();
+                IImage2BytesConverter unused3 = ConvertFromYuv420.this.mImage2BytesConverter = new ConvertFromYvu420SemiPlanar();
             }
             return ConvertFromYuv420.this.mImage2BytesConverter.image2bytes(image);
         }

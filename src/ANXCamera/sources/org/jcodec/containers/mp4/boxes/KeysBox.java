@@ -14,6 +14,7 @@ public class KeysBox extends NodeBox {
 
     public KeysBox(Header header) {
         super(header);
+        this.factory = new SimpleBoxFactory(new LocalBoxes());
     }
 
     public static KeysBox createKeysBox() {

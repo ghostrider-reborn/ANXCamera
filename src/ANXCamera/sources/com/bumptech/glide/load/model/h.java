@@ -1,17 +1,16 @@
 package com.bumptech.glide.load.model;
 
 import android.util.Base64;
-import com.bumptech.glide.load.model.g.a;
-import com.bumptech.glide.load.model.g.c;
+import com.bumptech.glide.load.model.g;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 /* compiled from: DataUrlLoader */
-class h implements a<InputStream> {
-    final /* synthetic */ c this$0;
+class h implements g.a<InputStream> {
+    final /* synthetic */ g.c this$0;
 
-    h(c cVar) {
+    h(g.c cVar) {
         this.this$0 = cVar;
     }
 

@@ -34,18 +34,9 @@ public class HostListStatusUpdateTaskResult extends BaseTaskResult {
 
     public String toString() {
         String str = "HostListStatusUpdateTaskResult{ Hosts{";
-        for (Host host : this.mHosts) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(host.toString());
-            sb.append(", ");
-            str = sb.toString();
+        while (this.mHosts.iterator().hasNext()) {
+            str = str + r0.next().toString() + ", ";
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(" }, mExceptionResult=");
-        sb2.append(this.mExceptionResult);
-        sb2.append('}');
-        return sb2.toString();
+        return str + " }, mExceptionResult=" + this.mExceptionResult + '}';
     }
 }

@@ -20,10 +20,7 @@ public interface FileSystem {
 
         public void delete(File file) throws IOException {
             if (!file.delete() && file.exists()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("failed to delete ");
-                sb.append(file);
-                throw new IOException(sb.toString());
+                throw new IOException("failed to delete " + file);
             }
         }
 
@@ -40,18 +37,12 @@ public interface FileSystem {
                     if (file2.delete()) {
                         i++;
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("failed to delete ");
-                        sb.append(file2);
-                        throw new IOException(sb.toString());
+                        throw new IOException("failed to delete " + file2);
                     }
                 }
                 return;
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("not a readable directory: ");
-            sb2.append(file);
-            throw new IOException(sb2.toString());
+            throw new IOException("not a readable directory: " + file);
         }
 
         public boolean exists(File file) {
@@ -61,12 +52,7 @@ public interface FileSystem {
         public void rename(File file, File file2) throws IOException {
             delete(file2);
             if (!file.renameTo(file2)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("failed to rename ");
-                sb.append(file);
-                sb.append(" to ");
-                sb.append(file2);
-                throw new IOException(sb.toString());
+                throw new IOException("failed to rename " + file + " to " + file2);
             }
         }
 

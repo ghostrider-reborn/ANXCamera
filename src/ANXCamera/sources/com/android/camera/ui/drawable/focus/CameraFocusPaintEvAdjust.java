@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Rect;
 import com.android.camera.Util;
@@ -38,31 +37,16 @@ public class CameraFocusPaintEvAdjust extends CameraPaintBase {
         int width = this.mDisplayRect.width();
         int height = this.mDisplayRect.height();
         int i = this.mRotation;
-        boolean z = true;
         if ((i / 90) % 2 == 0) {
-            if (this.mRtl) {
-                if ((this.mMiddleX - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) < ((float) TRIANGLE_MIN_MARGIN)) {
-                    z = false;
-                }
-                return z;
-            }
-            if (((((float) width) - this.mMiddleX) - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) >= ((float) TRIANGLE_MIN_MARGIN)) {
-                z = false;
-            }
-            return z;
-        } else if (i == 90) {
-            if (((((float) height) - this.mMiddleY) - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) >= ((float) TRIANGLE_MIN_MARGIN)) {
-                z = false;
-            }
-            return z;
-        } else if (i != 270) {
-            return false;
-        } else {
-            if ((this.mMiddleY - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) >= ((float) TRIANGLE_MIN_MARGIN)) {
-                z = false;
-            }
-            return z;
+            return this.mRtl ? (this.mMiddleX - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) >= ((float) TRIANGLE_MIN_MARGIN) : ((((float) width) - this.mMiddleX) - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) < ((float) TRIANGLE_MIN_MARGIN);
         }
+        if (i == 90) {
+            return ((((float) height) - this.mMiddleY) - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) < ((float) TRIANGLE_MIN_MARGIN);
+        }
+        if (i == 270) {
+            return (this.mMiddleY - ((float) CameraFocusAnimateDrawable.BIG_RADIUS)) - ((float) MARGIN) < ((float) TRIANGLE_MIN_MARGIN);
+        }
+        return false;
     }
 
     /* access modifiers changed from: protected */
@@ -89,31 +73,29 @@ public class CameraFocusPaintEvAdjust extends CameraPaintBase {
         float f7 = this.mMiddleY - ((float) (this.mLineHeight / 2));
         if (this.mShowLine) {
             int i3 = TRIANGLE_BASE_HEIGHT;
-            float f8 = (f4 - ((float) i3)) - f7;
             int i4 = this.mLineMargin;
-            if (f8 > ((float) i4)) {
-                float f9 = (f4 - ((float) i3)) - ((float) i4);
+            if ((f4 - ((float) i3)) - f7 > ((float) i4)) {
+                float f8 = (f4 - ((float) i3)) - ((float) i4);
                 this.mLinePaint.setColor(this.mCurrentColor);
                 this.mLinePaint.setAlpha(204);
-                canvas.drawLine(f5, f7, f6, f9, this.mLinePaint);
+                canvas.drawLine(f5, f7, f6, f8, this.mLinePaint);
             }
         }
-        float f10 = this.mMiddleY + this.mCurrentOffsetY + this.mCurrentDistanceY + ((float) (TRIANGLE_BASE_DIS / 2));
-        path.moveTo(f3, f10);
-        path.lineTo(((float) TRIANGLE_BASE_LEN) + f3, f10);
-        path.lineTo(((float) (TRIANGLE_BASE_LEN / 2)) + f3, ((float) TRIANGLE_BASE_HEIGHT) + f10);
-        path.lineTo(f3, f10);
+        float f9 = this.mMiddleY + this.mCurrentOffsetY + this.mCurrentDistanceY + ((float) (TRIANGLE_BASE_DIS / 2));
+        path.moveTo(f3, f9);
+        path.lineTo(((float) TRIANGLE_BASE_LEN) + f3, f9);
+        path.lineTo(((float) (TRIANGLE_BASE_LEN / 2)) + f3, ((float) TRIANGLE_BASE_HEIGHT) + f9);
+        path.lineTo(f3, f9);
         canvas.drawPath(path, this.mPaint);
         if (this.mShowLine) {
-            float f11 = this.mMiddleY + ((float) (this.mLineHeight / 2));
+            float f10 = this.mMiddleY + ((float) (this.mLineHeight / 2));
             int i5 = this.mLineMargin;
-            float f12 = f11 - ((float) i5);
             int i6 = TRIANGLE_BASE_HEIGHT;
-            if (f12 > ((float) i6) + f10) {
-                float f13 = f10 + ((float) i6) + ((float) i5);
+            if (f10 - ((float) i5) > ((float) i6) + f9) {
+                float f11 = f9 + ((float) i6) + ((float) i5);
                 this.mLinePaint.setColor(this.mCurrentColor);
                 this.mLinePaint.setAlpha(204);
-                canvas.drawLine(f5, f13, f6, f11, this.mLinePaint);
+                canvas.drawLine(f5, f11, f6, f10, this.mLinePaint);
             }
         }
     }
@@ -124,11 +106,11 @@ public class CameraFocusPaintEvAdjust extends CameraPaintBase {
 
     /* access modifiers changed from: protected */
     public void initPaint(Context context) {
-        this.mPaint.setStyle(Style.FILL);
+        this.mPaint.setStyle(Paint.Style.FILL);
         this.mPaint.setAntiAlias(true);
         this.mLinePaint = new Paint();
         this.mLinePaint.setAntiAlias(true);
-        this.mLinePaint.setStyle(Style.FILL);
+        this.mLinePaint.setStyle(Paint.Style.FILL);
         this.mLinePaint.setStrokeWidth((float) this.mLineWidth);
         this.mLinePaint.setColor(Color.argb(102, 255, 255, 255));
     }

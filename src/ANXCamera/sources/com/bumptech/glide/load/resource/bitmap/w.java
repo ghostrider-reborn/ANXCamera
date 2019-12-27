@@ -21,10 +21,7 @@ public final class w extends g {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof w)) {
-            return false;
-        }
-        return this.vi == ((w) obj).vi;
+        return (obj instanceof w) && this.vi == ((w) obj).vi;
     }
 
     public int hashCode() {

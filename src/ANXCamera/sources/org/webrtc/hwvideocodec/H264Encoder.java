@@ -1,14 +1,14 @@
 package org.webrtc.hwvideocodec;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecInfo.CodecCapabilities;
 import android.media.MediaCodecList;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Surface;
 import java.nio.ByteBuffer;
 
 /* compiled from: MediaCodecVideoEncoder */
@@ -53,90 +53,66 @@ class H264Encoder {
         return i;
     }
 
-    /* JADX WARNING: type inference failed for: r2v0 */
-    /* JADX WARNING: type inference failed for: r2v3 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v0, resolved type: org.webrtc.hwvideocodec.H264Encoder$EncoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: org.webrtc.hwvideocodec.H264Encoder$EncoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v3, resolved type: org.webrtc.hwvideocodec.H264Encoder$EncoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v2, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v3, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r7v7, resolved type: java.lang.String} */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 2 */
     private static EncoderProperties findHwEncoder(String str) {
         String str2;
         String str3;
-        String[] supportedTypes;
         String str4 = str;
-        String str5 = TAG;
-        ? r2 = 0;
+        EncoderProperties encoderProperties = null;
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("sdk version is: ");
-            sb.append(VERSION.SDK_INT);
-            Log.i(str5, sb.toString());
-            if (VERSION.SDK_INT < 16) {
+            Log.i(TAG, "sdk version is: " + Build.VERSION.SDK_INT);
+            if (Build.VERSION.SDK_INT < 16) {
                 return null;
             }
             int i = 0;
-            int i2 = 0;
-            while (true) {
-                str2 = "codec name: ";
-                if (i2 >= MediaCodecList.getCodecCount()) {
-                    break;
-                }
+            for (int i2 = 0; i2 < MediaCodecList.getCodecCount(); i2++) {
                 MediaCodecInfo codecInfoAt = MediaCodecList.getCodecInfoAt(i2);
                 if (codecInfoAt.isEncoder()) {
-                    for (String str6 : codecInfoAt.getSupportedTypes()) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(str2);
-                        sb2.append(str6);
-                        sb2.append(" company:");
-                        sb2.append(codecInfoAt.getName());
-                        Log.i(str5, sb2.toString());
+                    for (String str5 : codecInfoAt.getSupportedTypes()) {
+                        Log.i(TAG, "codec name: " + str5 + " company:" + codecInfoAt.getName());
                     }
                 }
-                i2++;
             }
             int i3 = 0;
-            EncoderProperties encoderProperties = r2;
             while (i3 < MediaCodecList.getCodecCount()) {
                 MediaCodecInfo codecInfoAt2 = MediaCodecList.getCodecInfoAt(i3);
                 if (codecInfoAt2.isEncoder()) {
-                    String[] supportedTypes2 = codecInfoAt2.getSupportedTypes();
-                    int length = supportedTypes2.length;
+                    String[] supportedTypes = codecInfoAt2.getSupportedTypes();
+                    int length = supportedTypes.length;
                     int i4 = i;
                     while (true) {
                         if (i4 >= length) {
-                            str3 = encoderProperties;
+                            str2 = encoderProperties;
                             break;
                         }
-                        String str7 = supportedTypes2[i4];
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append(str2);
-                        sb3.append(str7);
-                        Log.i(str5, sb3.toString());
-                        if (str7.equals(str4)) {
-                            str3 = codecInfoAt2.getName();
+                        Log.i(TAG, "codec name: " + str3);
+                        if (str3.equals(str4)) {
+                            str2 = codecInfoAt2.getName();
                             break;
                         }
                         i4++;
                     }
-                    if (str3 != 0) {
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("Found candidate encoder ");
-                        sb4.append(str3);
-                        Log.i(str5, sb4.toString());
-                        CodecCapabilities capabilitiesForType = codecInfoAt2.getCapabilitiesForType(str4);
+                    if (str2 != 0) {
+                        Log.i(TAG, "Found candidate encoder " + str2);
+                        MediaCodecInfo.CodecCapabilities capabilitiesForType = codecInfoAt2.getCapabilitiesForType(str4);
                         int[] iArr = capabilitiesForType.colorFormats;
                         int length2 = iArr.length;
                         for (int i5 = i; i5 < length2; i5++) {
                             int i6 = iArr[i5];
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append("   Color: 0x");
-                            sb5.append(Integer.toHexString(i6));
-                            Log.i(str5, sb5.toString());
+                            Log.i(TAG, "   Color: 0x" + Integer.toHexString(i6));
                         }
-                        isQcomPlatform = str3.startsWith(supportedHwCodecPrefixes[i]);
+                        isQcomPlatform = str2.startsWith(supportedHwCodecPrefixes[i]);
                         String[] strArr = supportedHwCodecPrefixes;
                         int length3 = strArr.length;
                         int i7 = i;
                         while (i7 < length3) {
-                            if (str3.startsWith(strArr[i7])) {
+                            if (str2.startsWith(strArr[i7])) {
                                 int[] iArr2 = supportedColorList;
                                 int length4 = iArr2.length;
                                 int i8 = i;
@@ -148,24 +124,19 @@ class H264Encoder {
                                     while (i10 < length5) {
                                         int i11 = iArr3[i10];
                                         if (i11 == i9) {
-                                            StringBuilder sb6 = new StringBuilder();
-                                            sb6.append("Found target encoder ");
-                                            sb6.append(str3);
-                                            sb6.append(". Color: 0x");
-                                            sb6.append(Integer.toHexString(i11));
-                                            Log.i(str5, sb6.toString());
-                                            return new EncoderProperties(str3, i11);
+                                            Log.i(TAG, "Found target encoder " + str2 + ". Color: 0x" + Integer.toHexString(i11));
+                                            return new EncoderProperties(str2, i11);
                                         }
                                         i10++;
-                                        String str8 = str;
+                                        String str6 = str;
                                     }
                                     i8++;
-                                    String str9 = str;
+                                    String str7 = str;
                                 }
                                 continue;
                             }
                             i7++;
-                            String str10 = str;
+                            String str8 = str;
                             i = 0;
                         }
                         continue;
@@ -173,12 +144,12 @@ class H264Encoder {
                 }
                 i3++;
                 str4 = str;
+                encoderProperties = null;
                 i = 0;
-                encoderProperties = 0;
             }
             return encoderProperties;
         } catch (Exception e2) {
-            Log.e(str5, "find exception at findHwEncoder:", e2);
+            Log.e(TAG, "find exception at findHwEncoder:", e2);
             return null;
         }
     }
@@ -197,17 +168,16 @@ class H264Encoder {
     public native void SendFrame(byte[] bArr, long j, long j2, boolean z);
 
     public boolean encodeFrameInput(H264I420Frame h264I420Frame, boolean z) {
-        String str = TAG;
         if (z) {
             try {
-                Log.i(str, "force a key frame");
+                Log.i(TAG, "force a key frame");
             } catch (Exception e2) {
-                Log.e(str, "find exception at encodeFrameInput encoder:", e2);
+                Log.e(TAG, "find exception at encodeFrameInput encoder:", e2);
                 return false;
             }
         }
         int dequeueInputBuffer = this.mediaCodec.dequeueInputBuffer(-1);
-        if (z && VERSION.SDK_INT >= 19) {
+        if (z && Build.VERSION.SDK_INT >= 19) {
             Bundle bundle = new Bundle();
             bundle.putInt("request-sync", 0);
             this.mediaCodec.setParameters(bundle);
@@ -227,11 +197,10 @@ class H264Encoder {
     }
 
     public void encodeFrameOutput(boolean z) {
-        String str = TAG;
         try {
-            BufferInfo bufferInfo = new BufferInfo();
+            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             if (z) {
-                Log.i(str, "flush output queue");
+                Log.i(TAG, "flush output queue");
             }
             int dequeueOutputBuffer = this.mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
             boolean z2 = dequeueOutputBuffer >= 0;
@@ -250,7 +219,7 @@ class H264Encoder {
                     byte b2 = bArr[4] & 31;
                     boolean z3 = b2 >= 5 && b2 <= 8;
                     if (z3) {
-                        Log.i(str, "h264 add frame header  cdr flag");
+                        Log.i(TAG, "h264 add frame header  cdr flag");
                     }
                     SendFrame(bArr, this.nativeContext, j, z3);
                     this.mediaCodec.releaseOutputBuffer(dequeueOutputBuffer, false);
@@ -259,7 +228,7 @@ class H264Encoder {
                         Thread.sleep(10);
                         i -= 10;
                     } catch (Exception e2) {
-                        Log.e(str, "find exception at ThreadSleep:", e2);
+                        Log.e(TAG, "find exception at ThreadSleep:", e2);
                     }
                 }
                 dequeueOutputBuffer = this.mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
@@ -269,7 +238,7 @@ class H264Encoder {
                 }
             }
         } catch (Exception e3) {
-            Log.e(str, "find exception at encodeFrameOutput:", e3);
+            Log.e(TAG, "find exception at encodeFrameOutput:", e3);
         }
     }
 
@@ -279,37 +248,25 @@ class H264Encoder {
     }
 
     public boolean initEncoder(int i, int i2, int i3, int i4, int i5, long j, boolean z) {
-        String str = TAG;
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("H264 encoder creat width");
-            sb.append(i2);
-            sb.append("height:");
-            sb.append(i3);
-            sb.append("framerate:");
-            sb.append(i4);
-            sb.append("bitrate:");
-            sb.append(i5);
-            sb.append("this:");
-            sb.append(this);
-            Log.i(str, sb.toString());
-            String str2 = i == 0 ? AVC_MIME_TYPE : i == 1 ? HEVC_MIME_TYPE : null;
+            Log.i(TAG, "H264 encoder creat width" + i2 + "height:" + i3 + "framerate:" + i4 + "bitrate:" + i5 + "this:" + this);
+            String str = i == 0 ? AVC_MIME_TYPE : i == 1 ? HEVC_MIME_TYPE : null;
             this.m_width = i2;
             this.m_height = i3;
             this.nativeContext = j;
             this.m_info = null;
             this.dequedBufferIndex = -1;
-            EncoderProperties findHwEncoder = findHwEncoder(str2);
+            EncoderProperties findHwEncoder = findHwEncoder(str);
             if (findHwEncoder == null) {
-                Log.i(str, "Can not find HW AVC encoder");
+                Log.i(TAG, "Can not find HW AVC encoder");
                 return false;
             }
             this.mediaCodec = MediaCodec.createByCodecName(findHwEncoder.codecName);
             if (this.mediaCodec == null) {
-                Log.i(str, "creatByCodecName failed");
+                Log.i(TAG, "creatByCodecName failed");
                 return false;
             }
-            MediaFormat createVideoFormat = MediaFormat.createVideoFormat(str2, i2, i3);
+            MediaFormat createVideoFormat = MediaFormat.createVideoFormat(str, i2, i3);
             createVideoFormat.setInteger("bitrate", i5);
             createVideoFormat.setInteger("frame-rate", i4);
             if (!z) {
@@ -318,16 +275,16 @@ class H264Encoder {
             this.supportColorFormat = findHwEncoder.colorFormat;
             createVideoFormat.setInteger("color-format", findHwEncoder.colorFormat);
             createVideoFormat.setInteger("i-frame-interval", 2);
-            this.mediaCodec.configure(createVideoFormat, null, null, 1);
+            this.mediaCodec.configure(createVideoFormat, (Surface) null, (MediaCrypto) null, 1);
             this.mediaCodec.start();
             this.Constructed = true;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("avc encoder creat done, isSemiPlanar:");
-            sb2.append(findHwEncoder.colorFormat == 21);
-            Log.i(str, sb2.toString());
+            StringBuilder sb = new StringBuilder();
+            sb.append("avc encoder creat done, isSemiPlanar:");
+            sb.append(findHwEncoder.colorFormat == 21);
+            Log.i(TAG, sb.toString());
             return true;
         } catch (Exception e2) {
-            Log.e(str, "find exception at initEncoder:", e2);
+            Log.e(TAG, "find exception at initEncoder:", e2);
             return false;
         }
     }
@@ -337,47 +294,40 @@ class H264Encoder {
     }
 
     public void release() {
-        String str = TAG;
         try {
             this.Constructed = false;
-            Log.i(str, "avc encoder release begin");
+            Log.i(TAG, "avc encoder release begin");
             this.mediaCodec.stop();
             this.mediaCodec.release();
             this.mediaCodec = null;
             this.m_info = null;
-            Log.i(str, "avc encoder release done");
+            Log.i(TAG, "avc encoder release done");
         } catch (Exception e2) {
-            Log.e(str, "find exception at release encoder:", e2);
+            Log.e(TAG, "find exception at release encoder:", e2);
         }
     }
 
     public void reset() {
-        String str = TAG;
         try {
             if (this.Constructed) {
                 this.mediaCodec.flush();
-                Log.i(str, "avc encoder reset done");
+                Log.i(TAG, "avc encoder reset done");
             }
         } catch (Exception e2) {
-            Log.e(str, "find exception at reset encoder:", e2);
+            Log.e(TAG, "find exception at reset encoder:", e2);
         }
     }
 
     public void setBitrate(int i) {
-        String str = TAG;
         try {
-            if (this.Constructed && VERSION.SDK_INT >= 19) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("setRates: ");
-                sb.append(i);
-                sb.append(" kbps ");
-                Log.i(str, sb.toString());
+            if (this.Constructed && Build.VERSION.SDK_INT >= 19) {
+                Log.i(TAG, "setRates: " + i + " kbps ");
                 Bundle bundle = new Bundle();
                 bundle.putInt("video-bitrate", i);
                 this.mediaCodec.setParameters(bundle);
             }
         } catch (Exception e2) {
-            Log.e(str, "find exception at setBitrate encoder:", e2);
+            Log.e(TAG, "find exception at setBitrate encoder:", e2);
         }
     }
 }

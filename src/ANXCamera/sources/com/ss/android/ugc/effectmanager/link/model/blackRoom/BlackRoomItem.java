@@ -35,15 +35,7 @@ public abstract class BlackRoomItem {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("BlackRoomItem{name=");
-        sb.append(getItemName());
-        sb.append("lockedCount=");
-        sb.append(this.lockedCount);
-        sb.append(", inBlackRoom=");
-        sb.append(this.inBlackRoom);
-        sb.append('}');
-        return sb.toString();
+        return "BlackRoomItem{name=" + getItemName() + "lockedCount=" + this.lockedCount + ", inBlackRoom=" + this.inBlackRoom + '}';
     }
 
     public void unlockFromBlackRoom() {

@@ -1,6 +1,6 @@
 package com.android.gallery3d.exif;
 
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -90,7 +90,7 @@ class CountedDataInputStream extends FilterInputStream {
     }
 
     public int readUnsignedShort() throws IOException {
-        return readShort() & ColorSpace.UNCALIBRATED;
+        return readShort() & ExifInterface.ColorSpace.UNCALIBRATED;
     }
 
     public void setByteOrder(ByteOrder byteOrder) {

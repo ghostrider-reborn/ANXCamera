@@ -46,9 +46,8 @@ public class Latin1Converter {
                     i5++;
                     i6 <<= 1;
                 }
-                int i7 = i3 + 1;
                 bArr[i3] = (byte) charAt;
-                i3 = i7;
+                i3++;
                 i2 = i5;
                 z = true;
             } else {
@@ -57,8 +56,8 @@ public class Latin1Converter {
             i++;
         }
         if (z) {
-            for (int i8 = 0; i8 < i3; i8++) {
-                byteBuffer2.append(convertToUTF8(bArr[i8]));
+            for (int i7 = 0; i7 < i3; i7++) {
+                byteBuffer2.append(convertToUTF8(bArr[i7]));
             }
         }
         return byteBuffer2;

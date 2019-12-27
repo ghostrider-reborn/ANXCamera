@@ -2,7 +2,7 @@ package com.ss.android.medialib.camera;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.media.Image.Plane;
+import android.media.Image;
 
 public class ImageFrame {
     public static final int BMP = 2;
@@ -15,7 +15,7 @@ public class ImageFrame {
     int format;
     int height;
     byte[] mBuf;
-    Plane[] mPlans;
+    Image.Plane[] mPlans;
     int width;
 
     public ImageFrame(Bitmap bitmap2, int i) {
@@ -31,7 +31,7 @@ public class ImageFrame {
     }
 
     @TargetApi(19)
-    public ImageFrame(Plane[] planeArr, int i, int i2, int i3) {
+    public ImageFrame(Image.Plane[] planeArr, int i, int i2, int i3) {
         this.mPlans = planeArr;
         this.format = i;
         this.width = i2;
@@ -54,7 +54,7 @@ public class ImageFrame {
         return this.height;
     }
 
-    public Plane[] getPlans() {
+    public Image.Plane[] getPlans() {
         return this.mPlans;
     }
 

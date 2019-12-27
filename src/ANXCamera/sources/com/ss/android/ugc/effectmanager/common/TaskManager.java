@@ -48,10 +48,10 @@ public class TaskManager {
         boolean z;
         if (baseTask != null) {
             checkInit();
-            Iterator it = this.mInterceptions.values().iterator();
+            Iterator<BaseInterceptor> it = this.mInterceptions.values().iterator();
             while (true) {
                 if (it.hasNext()) {
-                    if (((BaseInterceptor) it.next()).intercept(baseTask)) {
+                    if (it.next().intercept(baseTask)) {
                         z = true;
                         break;
                     }
@@ -75,7 +75,7 @@ public class TaskManager {
     }
 
     public void enableInterception(String str, boolean z) {
-        BaseInterceptor baseInterceptor = (BaseInterceptor) this.mInterceptions.get(str);
+        BaseInterceptor baseInterceptor = this.mInterceptions.get(str);
         if (baseInterceptor != null) {
             baseInterceptor.enable(z);
         }

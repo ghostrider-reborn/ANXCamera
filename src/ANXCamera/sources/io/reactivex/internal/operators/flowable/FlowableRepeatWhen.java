@@ -29,7 +29,7 @@ public final class FlowableRepeatWhen<T> extends AbstractFlowableWithUpstream<T,
         }
 
         public void onComplete() {
-            again(Integer.valueOf(0));
+            again(0);
         }
 
         public void onError(Throwable th) {
@@ -65,9 +65,10 @@ public final class FlowableRepeatWhen<T> extends AbstractFlowableWithUpstream<T,
 
         public void onNext(Object obj) {
             if (getAndIncrement() == 0) {
-                while (!SubscriptionHelper.isCancelled((Subscription) this.subscription.get())) {
+                while (!SubscriptionHelper.isCancelled(this.subscription.get())) {
                     this.source.subscribe(this.subscriber);
                     if (decrementAndGet() == 0) {
+                        return;
                     }
                 }
             }
@@ -138,7 +139,7 @@ public final class FlowableRepeatWhen<T> extends AbstractFlowableWithUpstream<T,
             whenReceiver.subscriber = repeatWhenSubscriber;
             subscriber.onSubscribe(repeatWhenSubscriber);
             publisher.subscribe(whenReceiver);
-            whenReceiver.onNext(Integer.valueOf(0));
+            whenReceiver.onNext(0);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
             EmptySubscription.error(th, subscriber);

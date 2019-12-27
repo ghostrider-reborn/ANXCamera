@@ -16,7 +16,7 @@ public final class MaybeToSingle<T> extends Single<T> implements HasUpstreamMayb
     static final class ToSingleMaybeSubscriber<T> implements MaybeObserver<T>, Disposable {
         final SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f305d;
         final T defaultValue;
 

@@ -21,5 +21,6 @@ public class DrawMeshAttribute extends DrawAttribute {
         this.mIndexBuffer = i3;
         this.mBasicTexture = basicTexture;
         this.mIndexCount = i4;
+        this.mTarget = 2;
     }
 }

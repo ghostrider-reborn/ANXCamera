@@ -16,6 +16,6 @@ public abstract class Boxes {
     }
 
     public Class<? extends Box> toClass(String str) {
-        return (Class) this.mappings.get(str);
+        return this.mappings.get(str);
     }
 }

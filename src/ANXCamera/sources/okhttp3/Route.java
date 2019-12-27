@@ -2,7 +2,6 @@ package okhttp3;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.Proxy.Type;
 import javax.annotation.Nullable;
 
 public final class Route {
@@ -31,11 +30,8 @@ public final class Route {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Route) {
             Route route = (Route) obj;
-            if (route.address.equals(this.address) && route.proxy.equals(this.proxy) && route.inetSocketAddress.equals(this.inetSocketAddress)) {
-                return true;
-            }
+            return route.address.equals(this.address) && route.proxy.equals(this.proxy) && route.inetSocketAddress.equals(this.inetSocketAddress);
         }
-        return false;
     }
 
     public int hashCode() {
@@ -47,7 +43,7 @@ public final class Route {
     }
 
     public boolean requiresTunnel() {
-        return this.address.sslSocketFactory != null && this.proxy.type() == Type.HTTP;
+        return this.address.sslSocketFactory != null && this.proxy.type() == Proxy.Type.HTTP;
     }
 
     public InetSocketAddress socketAddress() {
@@ -55,10 +51,6 @@ public final class Route {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Route{");
-        sb.append(this.inetSocketAddress);
-        sb.append("}");
-        return sb.toString();
+        return "Route{" + this.inetSocketAddress + "}";
     }
 }

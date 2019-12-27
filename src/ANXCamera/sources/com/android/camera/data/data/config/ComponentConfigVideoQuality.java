@@ -2,7 +2,7 @@ package com.android.camera.data.data.config;
 
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import com.android.camera.CameraSettings;
@@ -11,6 +11,7 @@ import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.ComponentDataItem;
+import com.android.camera.fragment.beauty.BeautyValues;
 import com.android.camera.log.Log;
 import com.android.camera2.CameraCapabilities;
 import com.android.camera2.MiCustomFpsRange;
@@ -51,8 +52,8 @@ public class ComponentConfigVideoQuality extends ComponentData {
         }
         List<MiCustomFpsRange> supportedCustomFpsRange = cameraCapabilities.getSupportedCustomFpsRange();
         if (supportedCustomFpsRange != null && !supportedCustomFpsRange.isEmpty()) {
-            for (MiCustomFpsRange miCustomFpsRange : supportedCustomFpsRange) {
-                if (miCustomFpsRange.getWidth() == i && miCustomFpsRange.getHeight() == i2) {
+            for (MiCustomFpsRange next : supportedCustomFpsRange) {
+                if (next.getWidth() == i && next.getHeight() == i2) {
                     return true;
                 }
             }
@@ -66,10 +67,7 @@ public class ComponentConfigVideoQuality extends ComponentData {
             return true;
         }
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("checkValueValid: invalid value: ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "checkValueValid: invalid value: " + str);
         return false;
     }
 
@@ -95,21 +93,17 @@ public class ComponentConfigVideoQuality extends ComponentData {
         }
         String defaultValue = getDefaultValue(i);
         String string = this.mParentDataItem.getString(getKey(i), defaultValue);
-        if (string != null && !string.equals(defaultValue) && !checkValueValid(string)) {
-            String simpleName = ComponentConfigVideoQuality.class.getSimpleName();
-            StringBuilder sb = new StringBuilder();
-            sb.append("reset invalid value ");
-            sb.append(string);
-            Log.e(simpleName, sb.toString());
-            int indexOf = string.indexOf(",");
-            if (indexOf > 0) {
-                String substring = string.substring(0, indexOf);
-                string = isContain(substring, this.mItems) ? substring : getDefaultValue(i);
-            } else {
-                string = getDefaultValue(i);
-            }
+        if (string == null || string.equals(defaultValue) || checkValueValid(string)) {
+            return string;
         }
-        return string;
+        String simpleName = ComponentConfigVideoQuality.class.getSimpleName();
+        Log.e(simpleName, "reset invalid value " + string);
+        int indexOf = string.indexOf(",");
+        if (indexOf <= 0) {
+            return getDefaultValue(i);
+        }
+        String substring = string.substring(0, indexOf);
+        return isContain(substring, this.mItems) ? substring : getDefaultValue(i);
     }
 
     @NonNull
@@ -137,8 +131,8 @@ public class ComponentConfigVideoQuality extends ComponentData {
         if (list != null) {
             int size = list.size();
             for (int i2 = 0; i2 < size; i2++) {
-                if (TextUtils.equals(((ComponentDataItem) this.mItems.get(i2)).mValue, persistValue)) {
-                    return ((ComponentDataItem) this.mItems.get((i2 + 1) % size)).mValue;
+                if (TextUtils.equals(this.mItems.get(i2).mValue, persistValue)) {
+                    return this.mItems.get((i2 + 1) % size).mValue;
                 }
             }
         }
@@ -152,33 +146,31 @@ public class ComponentConfigVideoQuality extends ComponentData {
         int i6 = i3;
         ArrayList arrayList = new ArrayList();
         this.mForceValue = null;
-        List supportedOutputSize = cameraCapabilities2.getSupportedOutputSize(MediaRecorder.class);
+        List<CameraSize> supportedOutputSize = cameraCapabilities2.getSupportedOutputSize(MediaRecorder.class);
         int i7 = CameraSettings.get4kProfile();
-        String str = "5";
-        String str2 = "6";
         if (i4 == 162 || i4 == 169) {
             if (CameraSettings.isStereoModeOn() || CameraSettings.isAutoZoomEnabled(i) || CameraSettings.isSuperEISEnabled(i)) {
-                this.mForceValue = str2;
+                this.mForceValue = "6";
             }
-            if (CameraSettings.isFaceBeautyOn(i4, null) || CameraSettings.isVideoBokehOn()) {
-                this.mForceValue = str;
+            if (CameraSettings.isFaceBeautyOn(i4, (BeautyValues) null) || CameraSettings.isVideoBokehOn()) {
+                this.mForceValue = "5";
             }
             if (supportedOutputSize.contains(new CameraSize(1280, Util.LIMIT_SURFACE_WIDTH)) && CamcorderProfile.hasProfile(i5, 5)) {
-                String str3 = this.mForceValue;
-                if (str3 == null || !str3.equals(str)) {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30, (int) R.drawable.ic_config_720p_30, (int) R.string.pref_video_quality_entry_720p, str));
+                String str = this.mForceValue;
+                if (str == null || !str.equals("5")) {
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30, (int) R.drawable.ic_config_720p_30, (int) R.string.pref_video_quality_entry_720p, "5"));
                 } else {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30_disable, (int) R.drawable.ic_config_720p_30_disable, (int) R.string.pref_video_quality_entry_720p, str));
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30_disable, (int) R.drawable.ic_config_720p_30_disable, (int) R.string.pref_video_quality_entry_720p, "5"));
                 }
             }
-            if (supportedOutputSize.contains(new CameraSize(1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT)) && CamcorderProfile.hasProfile(i5, 6)) {
-                String str4 = this.mForceValue;
-                if (str4 == null || !str4.equals(str2)) {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30, (int) R.drawable.ic_config_1080p_30, (int) R.string.pref_video_quality_entry_1080p, str2));
+            if (supportedOutputSize.contains(new CameraSize(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT)) && CamcorderProfile.hasProfile(i5, 6)) {
+                String str2 = this.mForceValue;
+                if (str2 == null || !str2.equals("6")) {
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30, (int) R.drawable.ic_config_1080p_30, (int) R.string.pref_video_quality_entry_1080p, "6"));
                 } else {
-                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30_disable, (int) R.drawable.ic_config_1080p_30_disable, (int) R.string.pref_video_quality_entry_1080p, str2));
+                    arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30_disable, (int) R.drawable.ic_config_1080p_30_disable, (int) R.string.pref_video_quality_entry_1080p, "6"));
                 }
-                if (i4 != 169 && isSupportFpsRange(1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, i6, cameraCapabilities2)) {
+                if (i4 != 169 && isSupportFpsRange(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, i6, cameraCapabilities2)) {
                     arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_60, (int) R.drawable.ic_config_1080p_60, (int) R.string.pref_video_quality_entry_1080p_60fps, QUALITY_1080P_60FPS));
                 }
             }
@@ -190,17 +182,17 @@ public class ComponentConfigVideoQuality extends ComponentData {
             }
         }
         if (arrayList.size() == 1) {
-            if (((ComponentDataItem) arrayList.get(0)).mValue.equals(str)) {
-                this.mForceValue = str;
+            if (((ComponentDataItem) arrayList.get(0)).mValue.equals("5")) {
+                this.mForceValue = "5";
                 arrayList.clear();
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30_disable, (int) R.drawable.ic_config_720p_30_disable, (int) R.string.pref_video_quality_entry_720p, str));
-            } else if (((ComponentDataItem) arrayList.get(0)).mValue.equals(str2)) {
-                this.mForceValue = str2;
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_720p_30_disable, (int) R.drawable.ic_config_720p_30_disable, (int) R.string.pref_video_quality_entry_720p, "5"));
+            } else if (((ComponentDataItem) arrayList.get(0)).mValue.equals("6")) {
+                this.mForceValue = "6";
                 arrayList.clear();
-                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30_disable, (int) R.drawable.ic_config_1080p_30_disable, (int) R.string.pref_video_quality_entry_1080p, str2));
+                arrayList.add(new ComponentDataItem((int) R.drawable.ic_config_1080p_30_disable, (int) R.drawable.ic_config_1080p_30_disable, (int) R.string.pref_video_quality_entry_1080p, "6"));
             }
         } else if (i5 == 1) {
-            this.mDefaultValue = str2;
+            this.mDefaultValue = "6";
         } else if (i5 == 0) {
             String string = CameraSettings.getString(R.string.pref_video_quality_default);
             if (!isContain(string, arrayList)) {

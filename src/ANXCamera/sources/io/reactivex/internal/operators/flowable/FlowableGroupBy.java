@@ -76,41 +76,44 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber, SpscLinkedArrayQueue<?> spscLinkedArrayQueue) {
             if (this.cancelled.get()) {
                 spscLinkedArrayQueue.clear();
                 return true;
-            }
-            if (this.delayError) {
-                if (z && z2) {
-                    Throwable th = this.error;
-                    if (th != null) {
-                        subscriber.onError(th);
-                    } else {
-                        subscriber.onComplete();
-                    }
-                    return true;
+            } else if (this.delayError) {
+                if (!z || !z2) {
+                    return false;
                 }
-            } else if (z) {
+                Throwable th = this.error;
+                if (th != null) {
+                    subscriber.onError(th);
+                } else {
+                    subscriber.onComplete();
+                }
+                return true;
+            } else if (!z) {
+                return false;
+            } else {
                 Throwable th2 = this.error;
                 if (th2 != null) {
                     spscLinkedArrayQueue.clear();
                     subscriber.onError(th2);
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     subscriber.onComplete();
                     return true;
                 }
             }
-            return false;
         }
 
         public void clear() {
             this.queue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 if (this.outputFused) {
@@ -121,7 +124,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainFused() {
             SpscLinkedArrayQueue<GroupedFlowable<K, V>> spscLinkedArrayQueue = this.queue;
             Subscriber<? super GroupedFlowable<K, V>> subscriber = this.actual;
@@ -141,20 +144,22 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                     Throwable th2 = this.error;
                     if (th2 != null) {
                         subscriber.onError(th2);
+                        return;
                     } else {
                         subscriber.onComplete();
+                        return;
                     }
-                    return;
-                }
-                i = addAndGet(-i);
-                if (i == 0) {
-                    return;
+                } else {
+                    i = addAndGet(-i);
+                    if (i == 0) {
+                        return;
+                    }
                 }
             }
             spscLinkedArrayQueue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainNormal() {
             int i;
             SpscLinkedArrayQueue<GroupedFlowable<K, V>> spscLinkedArrayQueue = this.queue;
@@ -169,13 +174,13 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                         break;
                     }
                     boolean z = this.done;
-                    GroupedFlowable groupedFlowable = (GroupedFlowable) spscLinkedArrayQueue.poll();
-                    boolean z2 = groupedFlowable == null;
+                    GroupedFlowable poll = spscLinkedArrayQueue.poll();
+                    boolean z2 = poll == null;
                     if (!checkTerminated(z, z2, subscriber, spscLinkedArrayQueue)) {
                         if (z2) {
                             break;
                         }
-                        subscriber.onNext(groupedFlowable);
+                        subscriber.onNext(poll);
                         j2++;
                     } else {
                         return;
@@ -201,7 +206,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
 
         public void onComplete() {
             if (!this.done) {
-                for (GroupedUnicast onComplete : this.groups.values()) {
+                for (GroupedUnicast<K, V> onComplete : this.groups.values()) {
                     onComplete.onComplete();
                 }
                 this.groups.clear();
@@ -215,7 +220,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                 RxJavaPlugins.onError(th);
                 return;
             }
-            for (GroupedUnicast onError : this.groups.values()) {
+            for (GroupedUnicast<K, V> onError : this.groups.values()) {
                 onError.onError(th);
             }
             this.groups.clear();
@@ -231,7 +236,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                     Object apply = this.keySelector.apply(t);
                     boolean z = false;
                     Object obj = apply != null ? apply : NULL_KEY;
-                    GroupedUnicast groupedUnicast = (GroupedUnicast) this.groups.get(obj);
+                    GroupedUnicast groupedUnicast = this.groups.get(obj);
                     if (groupedUnicast == null) {
                         if (!this.cancelled.get()) {
                             groupedUnicast = GroupedUnicast.createWith(apply, this.bufferSize, this, this.delayError);
@@ -273,7 +278,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
 
         @Nullable
         public GroupedFlowable<K, V> poll() {
-            return (GroupedFlowable) this.queue.poll();
+            return this.queue.poll();
         }
 
         public void request(long j) {
@@ -350,24 +355,29 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<? super T> subscriber, boolean z3) {
             if (this.cancelled.get()) {
                 this.queue.clear();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 if (!z3) {
                     Throwable th = this.error;
                     if (th != null) {
                         this.queue.clear();
                         subscriber.onError(th);
                         return true;
-                    } else if (z2) {
+                    } else if (!z2) {
+                        return false;
+                    } else {
                         subscriber.onComplete();
                         return true;
                     }
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     Throwable th2 = this.error;
                     if (th2 != null) {
                         subscriber.onError(th2);
@@ -377,14 +387,13 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                     return true;
                 }
             }
-            return false;
         }
 
         public void clear() {
             this.queue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 if (this.outputFused) {
@@ -395,10 +404,10 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainFused() {
             SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
-            Subscriber subscriber = (Subscriber) this.actual.get();
+            Subscriber subscriber = this.actual.get();
             int i = 1;
             while (true) {
                 if (subscriber != null) {
@@ -420,16 +429,17 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                         Throwable th2 = this.error;
                         if (th2 != null) {
                             subscriber.onError(th2);
+                            return;
                         } else {
                             subscriber.onComplete();
+                            return;
                         }
-                        return;
                     }
                 }
                 i = addAndGet(-i);
                 if (i != 0) {
                     if (subscriber == null) {
-                        subscriber = (Subscriber) this.actual.get();
+                        subscriber = this.actual.get();
                     }
                 } else {
                     return;
@@ -437,12 +447,12 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainNormal() {
             int i;
             SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
             boolean z = this.delayError;
-            Subscriber subscriber = (Subscriber) this.actual.get();
+            Subscriber subscriber = this.actual.get();
             int i2 = 1;
             while (true) {
                 if (subscriber != null) {
@@ -454,7 +464,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                             break;
                         }
                         boolean z2 = this.done;
-                        Object poll = spscLinkedArrayQueue.poll();
+                        T poll = spscLinkedArrayQueue.poll();
                         boolean z3 = poll == null;
                         if (!checkTerminated(z2, z3, subscriber, z)) {
                             if (z3) {
@@ -479,7 +489,7 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                 i2 = addAndGet(-i2);
                 if (i2 != 0) {
                     if (subscriber == null) {
-                        subscriber = (Subscriber) this.actual.get();
+                        subscriber = this.actual.get();
                     }
                 } else {
                     return;
@@ -515,10 +525,11 @@ public final class FlowableGroupBy<T, K, V> extends AbstractFlowableWithUpstream
                 return poll;
             }
             int i = this.produced;
-            if (i != 0) {
-                this.produced = 0;
-                this.parent.s.request((long) i);
+            if (i == 0) {
+                return null;
             }
+            this.produced = 0;
+            this.parent.s.request((long) i);
             return null;
         }
 

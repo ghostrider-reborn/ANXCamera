@@ -1,8 +1,7 @@
 package com.bumptech.glide.load.b.b;
 
 import android.content.Context;
-import android.content.res.Resources.NotFoundException;
-import android.content.res.Resources.Theme;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
@@ -18,15 +17,15 @@ public final class a {
     private a() {
     }
 
-    public static Drawable a(Context context, @DrawableRes int i, @Nullable Theme theme) {
+    public static Drawable a(Context context, @DrawableRes int i, @Nullable Resources.Theme theme) {
         return a(context, context, i, theme);
     }
 
     public static Drawable a(Context context, Context context2, @DrawableRes int i) {
-        return a(context, context2, i, null);
+        return a(context, context2, i, (Resources.Theme) null);
     }
 
-    private static Drawable a(Context context, Context context2, @DrawableRes int i, @Nullable Theme theme) {
+    private static Drawable a(Context context, Context context2, @DrawableRes int i, @Nullable Resources.Theme theme) {
         try {
             if (Dj) {
                 return c(context2, i, theme);
@@ -38,7 +37,7 @@ public final class a {
                 return ContextCompat.getDrawable(context2, i);
             }
             throw e2;
-        } catch (NotFoundException unused2) {
+        } catch (Resources.NotFoundException unused2) {
         }
         if (theme == null) {
             theme = context2.getTheme();
@@ -46,11 +45,11 @@ public final class a {
         return b(context2, i, theme);
     }
 
-    private static Drawable b(Context context, @DrawableRes int i, @Nullable Theme theme) {
+    private static Drawable b(Context context, @DrawableRes int i, @Nullable Resources.Theme theme) {
         return ResourcesCompat.getDrawable(context.getResources(), i, theme);
     }
 
-    private static Drawable c(Context context, @DrawableRes int i, @Nullable Theme theme) {
+    private static Drawable c(Context context, @DrawableRes int i, @Nullable Resources.Theme theme) {
         if (theme != null) {
             context = new ContextThemeWrapper(context, theme);
         }

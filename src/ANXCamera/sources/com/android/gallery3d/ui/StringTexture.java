@@ -2,13 +2,12 @@ package com.android.gallery3d.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.TextUtils.TruncateAt;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.Util;
 import com.android.camera.lib.compatibility.util.CompatibilityUtils;
@@ -20,11 +19,11 @@ public class StringTexture extends CanvasTexture {
     public static final float WATER_MARK_SHADOW_D = 5.0f;
     public static final float WATER_MARK_SHADOW_Y = 3.0f;
     public static final int WATER_MARK_SHADOW_Y_COLOR = 771751936;
-    private final FontMetricsInt mMetrics;
+    private final Paint.FontMetricsInt mMetrics;
     private final TextPaint mPaint;
     private final String mText;
 
-    private StringTexture(String str, TextPaint textPaint, FontMetricsInt fontMetricsInt, int i, int i2) {
+    private StringTexture(String str, TextPaint textPaint, Paint.FontMetricsInt fontMetricsInt, int i, int i2) {
         super(i, i2);
         this.mText = str;
         this.mPaint = textPaint;
@@ -60,7 +59,7 @@ public class StringTexture extends CanvasTexture {
             defaultPaint.setTypeface(Typeface.defaultFromStyle(1));
         }
         if (f3 > 0.0f) {
-            str = TextUtils.ellipsize(str, defaultPaint, f3, TruncateAt.END).toString();
+            str = TextUtils.ellipsize(str, defaultPaint, f3, TextUtils.TruncateAt.END).toString();
         }
         return newInstance(str, defaultPaint, i2);
     }
@@ -70,7 +69,7 @@ public class StringTexture extends CanvasTexture {
     }
 
     private static StringTexture newInstance(String str, TextPaint textPaint, int i) {
-        FontMetricsInt fontMetricsInt = textPaint.getFontMetricsInt();
+        Paint.FontMetricsInt fontMetricsInt = textPaint.getFontMetricsInt();
         int ceil = ((int) Math.ceil((double) textPaint.measureText(str))) + (i == 1 ? 5 : 0);
         int i2 = fontMetricsInt.descent - fontMetricsInt.ascent;
         StringTexture stringTexture = new StringTexture(str, textPaint, fontMetricsInt, ceil <= 0 ? 1 : ceil, i2 <= 0 ? 1 : i2);
@@ -78,7 +77,7 @@ public class StringTexture extends CanvasTexture {
     }
 
     private static void setLongshotMode(TextPaint textPaint, float f2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             CompatibilityUtils.setTextPaintLetterSpacing(textPaint, f2);
         }
     }

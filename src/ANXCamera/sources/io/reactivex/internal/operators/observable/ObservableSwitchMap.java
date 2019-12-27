@@ -59,7 +59,7 @@ public final class ObservableSwitchMap<T, R> extends AbstractObservableWithUpstr
     }
 
     static final class SwitchMapObserver<T, R> extends AtomicInteger implements Observer<T>, Disposable {
-        static final SwitchMapInnerObserver<Object, Object> CANCELLED = new SwitchMapInnerObserver<>(null, -1, 1);
+        static final SwitchMapInnerObserver<Object, Object> CANCELLED = new SwitchMapInnerObserver<>((SwitchMapObserver<Object, Object>) null, -1, 1);
         private static final long serialVersionUID = -3491074160481096299L;
         final AtomicReference<SwitchMapInnerObserver<T, R>> active = new AtomicReference<>();
         final Observer<? super R> actual;
@@ -92,20 +92,20 @@ public final class ObservableSwitchMap<T, R> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeInner() {
-            SwitchMapInnerObserver<Object, Object> switchMapInnerObserver = (SwitchMapInnerObserver) this.active.get();
+            SwitchMapInnerObserver<Object, Object> switchMapInnerObserver = this.active.get();
             SwitchMapInnerObserver<Object, Object> switchMapInnerObserver2 = CANCELLED;
             if (switchMapInnerObserver != switchMapInnerObserver2) {
-                SwitchMapInnerObserver<Object, Object> switchMapInnerObserver3 = (SwitchMapInnerObserver) this.active.getAndSet(switchMapInnerObserver2);
-                if (switchMapInnerObserver3 != CANCELLED && switchMapInnerObserver3 != null) {
-                    switchMapInnerObserver3.cancel();
+                SwitchMapInnerObserver<Object, Object> andSet = this.active.getAndSet(switchMapInnerObserver2);
+                if (andSet != CANCELLED && andSet != null) {
+                    andSet.cancel();
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
-        /* JADX WARNING: Removed duplicated region for block: B:78:0x000b A[SYNTHETIC] */
+        /* access modifiers changed from: package-private */
+        /* JADX WARNING: Removed duplicated region for block: B:77:0x000b A[SYNTHETIC] */
         public void drain() {
             if (getAndIncrement() == 0) {
                 Observer<? super R> observer = this.actual;
@@ -119,10 +119,11 @@ public final class ObservableSwitchMap<T, R> extends AbstractObservableWithUpstr
                                 Throwable th = (Throwable) this.errors.get();
                                 if (th != null) {
                                     observer.onError(th);
+                                    return;
                                 } else {
                                     observer.onComplete();
+                                    return;
                                 }
-                                return;
                             }
                         } else if (((Throwable) this.errors.get()) != null) {
                             observer.onError(this.errors.terminate());
@@ -132,30 +133,30 @@ public final class ObservableSwitchMap<T, R> extends AbstractObservableWithUpstr
                             return;
                         }
                     }
-                    SwitchMapInnerObserver switchMapInnerObserver = (SwitchMapInnerObserver) this.active.get();
+                    SwitchMapInnerObserver<T, R> switchMapInnerObserver = this.active.get();
                     if (switchMapInnerObserver != null) {
                         SpscLinkedArrayQueue<R> spscLinkedArrayQueue = switchMapInnerObserver.queue;
                         if (switchMapInnerObserver.done) {
                             boolean isEmpty = spscLinkedArrayQueue.isEmpty();
                             if (this.delayErrors) {
                                 if (isEmpty) {
-                                    this.active.compareAndSet(switchMapInnerObserver, null);
+                                    this.active.compareAndSet(switchMapInnerObserver, (Object) null);
                                 }
                             } else if (((Throwable) this.errors.get()) != null) {
                                 observer.onError(this.errors.terminate());
                                 return;
                             } else if (isEmpty) {
-                                this.active.compareAndSet(switchMapInnerObserver, null);
+                                this.active.compareAndSet(switchMapInnerObserver, (Object) null);
                             }
                         }
                         while (!this.cancelled) {
                             if (switchMapInnerObserver == this.active.get()) {
                                 if (this.delayErrors || ((Throwable) this.errors.get()) == null) {
                                     boolean z3 = switchMapInnerObserver.done;
-                                    Object poll = spscLinkedArrayQueue.poll();
+                                    R poll = spscLinkedArrayQueue.poll();
                                     boolean z4 = poll == null;
                                     if (z3 && z4) {
-                                        this.active.compareAndSet(switchMapInnerObserver, null);
+                                        this.active.compareAndSet(switchMapInnerObserver, (Object) null);
                                     } else if (!z4) {
                                         observer.onNext(poll);
                                     } else if (z) {
@@ -180,7 +181,7 @@ public final class ObservableSwitchMap<T, R> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(SwitchMapInnerObserver<T, R> switchMapInnerObserver, Throwable th) {
             if (switchMapInnerObserver.index != this.unique || !this.errors.addThrowable(th)) {
                 RxJavaPlugins.onError(th);
@@ -217,28 +218,25 @@ public final class ObservableSwitchMap<T, R> extends AbstractObservableWithUpstr
         }
 
         public void onNext(T t) {
+            SwitchMapInnerObserver<Object, Object> switchMapInnerObserver;
             long j = this.unique + 1;
             this.unique = j;
-            SwitchMapInnerObserver switchMapInnerObserver = (SwitchMapInnerObserver) this.active.get();
-            if (switchMapInnerObserver != null) {
-                switchMapInnerObserver.cancel();
+            SwitchMapInnerObserver switchMapInnerObserver2 = this.active.get();
+            if (switchMapInnerObserver2 != null) {
+                switchMapInnerObserver2.cancel();
             }
             try {
                 Object apply = this.mapper.apply(t);
                 ObjectHelper.requireNonNull(apply, "The ObservableSource returned is null");
                 ObservableSource observableSource = (ObservableSource) apply;
-                SwitchMapInnerObserver switchMapInnerObserver2 = new SwitchMapInnerObserver(this, j, this.bufferSize);
-                while (true) {
-                    SwitchMapInnerObserver<Object, Object> switchMapInnerObserver3 = (SwitchMapInnerObserver) this.active.get();
-                    if (switchMapInnerObserver3 != CANCELLED) {
-                        if (this.active.compareAndSet(switchMapInnerObserver3, switchMapInnerObserver2)) {
-                            observableSource.subscribe(switchMapInnerObserver2);
-                            break;
-                        }
-                    } else {
-                        break;
+                SwitchMapInnerObserver switchMapInnerObserver3 = new SwitchMapInnerObserver(this, j, this.bufferSize);
+                do {
+                    switchMapInnerObserver = this.active.get();
+                    if (switchMapInnerObserver == CANCELLED) {
+                        return;
                     }
-                }
+                } while (!this.active.compareAndSet(switchMapInnerObserver, switchMapInnerObserver3));
+                observableSource.subscribe(switchMapInnerObserver3);
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
                 this.s.dispose();

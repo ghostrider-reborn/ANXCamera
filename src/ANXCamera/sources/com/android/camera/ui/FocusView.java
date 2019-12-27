@@ -10,13 +10,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.util.Range;
 import android.util.Rational;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -25,14 +24,10 @@ import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.EvChangedProtocol;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.drawable.focus.CameraFocusAnimateDrawable;
 import com.android.camera.ui.drawable.focus.CameraIndicatorState;
@@ -141,20 +136,20 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
                 if (i == 4 || i == 5) {
                     if (!FocusView.this.mIsDraw || !FocusView.this.mIsDown) {
                         FocusView.this.reset(6);
-                    } else {
-                        FocusView.this.clearMessages();
-                        sendEmptyMessageDelayed(5, 50);
+                        return;
                     }
+                    FocusView.this.clearMessages();
+                    sendEmptyMessageDelayed(5, 50);
                 } else if (i == 6) {
                     FocusView.this.resetCenter();
                 } else if (i == 7) {
                     long uptimeMillis = SystemClock.uptimeMillis() - FocusView.this.mEVAnimationStartTime;
                     if (uptimeMillis >= 520) {
-                        FocusView.this.mCurrentViewState = 1;
-                        FocusView.this.mCursorState = 0;
+                        int unused = FocusView.this.mCurrentViewState = 1;
+                        int unused2 = FocusView.this.mCursorState = 0;
                         return;
                     }
-                    FocusView.this.mEVAnimationRatio = ((float) uptimeMillis) / 500.0f;
+                    float unused3 = FocusView.this.mEVAnimationRatio = ((float) uptimeMillis) / 500.0f;
                     FocusView.this.calculateAttribute();
                     FocusView.this.invalidate();
                     sendEmptyMessageDelayed(7, 20);
@@ -180,7 +175,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
     public int mRotation;
     /* access modifiers changed from: private */
     public int mScrollDistanceY;
-    private SimpleOnGestureListener mSimpleOnGestureListener = new SimpleOnGestureListener() {
+    private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
         public boolean onDown(MotionEvent motionEvent) {
             boolean z = false;
             if (!FocusView.this.mIsDraw) {
@@ -191,12 +186,12 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
                 z = true;
             }
             if (FocusView.this.mCurrentViewState != 0 || !z || !FocusView.this.isInCircle(motionEvent.getX() - ((float) FocusView.this.mDisplayRect.left), motionEvent.getY() - ((float) FocusView.this.mDisplayRect.top), ((float) CameraFocusAnimateDrawable.BIG_RADIUS) * 0.5f)) {
-                FocusView.this.mIsDown = true;
+                boolean unused = FocusView.this.mIsDown = true;
                 FocusView.this.removeMessages();
                 FocusView.this.setTouchDown();
             } else if (FocusView.this.mAdapter != null) {
-                ((MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).removeTiltShiftMask();
-                CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+                ((ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166)).removeTiltShiftMask();
+                ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
                 if (cameraAction != null && !cameraAction.isDoingAction()) {
                     cameraAction.onShutterButtonClick(90);
                 }
@@ -227,32 +222,31 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
                 if (access$2000 == 270) {
                     f4 = ((float) access$2100) - f2;
                 }
-                float f5 = ((float) Util.sWindowHeight) / 2.0f;
                 int i2 = FocusView.MAX_SLIDE_DISTANCE;
-                i = (int) (((float) access$2100) / (f5 / (((float) i2) / 4.0f)));
-                FocusView.this.mCurrentDistanceY = Util.clamp(i, ((-i2) / 2) - FocusView.TRIANGLE_BASE_DIS, FocusView.MAX_SLIDE_DISTANCE / 2);
+                i = (int) (((float) access$2100) / ((((float) Util.sWindowHeight) / 2.0f) / (((float) i2) / 4.0f)));
+                int unused = FocusView.this.mCurrentDistanceY = Util.clamp(i, ((-i2) / 2) - FocusView.TRIANGLE_BASE_DIS, FocusView.MAX_SLIDE_DISTANCE / 2);
                 if (i == FocusView.this.mCurrentDistanceY) {
-                    FocusView.this.mScrollDistanceY = access$2100;
+                    int unused2 = FocusView.this.mScrollDistanceY = access$2100;
                 }
-                FocusView.this.mBeingEvAdjusted = true;
+                boolean unused3 = FocusView.this.mBeingEvAdjusted = true;
                 access$2500 = FocusView.this.getItemByCoordinate();
                 if (access$2500 != FocusView.this.mCurrentItem) {
                     if (FocusView.this.mCurrentViewState != 3 && access$2500 < FocusView.this.mCurrentItem && FocusView.this.mCurrentItem >= FocusView.this.mAdapter.getCenterIndex() && access$2500 < FocusView.this.mAdapter.getCenterIndex()) {
                         FocusView.this.startAnimation();
                         FocusView focusView = FocusView.this;
-                        focusView.mLastItem = focusView.mCurrentItem;
-                        FocusView.this.mCurrentViewState = 3;
+                        int unused4 = focusView.mLastItem = focusView.mCurrentItem;
+                        int unused5 = FocusView.this.mCurrentViewState = 3;
                     } else if (FocusView.this.mCurrentViewState != 4 && access$2500 > FocusView.this.mCurrentItem && FocusView.this.mCurrentItem < FocusView.this.mAdapter.getCenterIndex() && access$2500 >= FocusView.this.mAdapter.getCenterIndex()) {
                         FocusView.this.startAnimation();
                         FocusView focusView2 = FocusView.this;
-                        focusView2.mLastItem = focusView2.mCurrentItem;
-                        FocusView.this.mCurrentViewState = 4;
+                        int unused6 = focusView2.mLastItem = focusView2.mCurrentItem;
+                        int unused7 = FocusView.this.mCurrentViewState = 4;
                     }
                     FocusView.this.setCurrentItem(access$2500, false);
                 }
                 FocusView.this.mCameraFocusAnimateDrawable.setEvChanged((float) FocusView.this.mCurrentDistanceY, FocusView.this.mEvValue);
                 if (FocusView.this.mCurrentViewState == 0 || FocusView.this.mCurrentViewState == 1) {
-                    FocusView.this.mCurrentViewState = 1;
+                    int unused8 = FocusView.this.mCurrentViewState = 1;
                     FocusView.this.calculateAttribute();
                     FocusView.this.invalidate();
                 }
@@ -261,18 +255,17 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
                 f4 = ((float) access$2100) + f3;
             }
             access$2100 = (int) f4;
-            float f52 = ((float) Util.sWindowHeight) / 2.0f;
             int i22 = FocusView.MAX_SLIDE_DISTANCE;
-            i = (int) (((float) access$2100) / (f52 / (((float) i22) / 4.0f)));
-            FocusView.this.mCurrentDistanceY = Util.clamp(i, ((-i22) / 2) - FocusView.TRIANGLE_BASE_DIS, FocusView.MAX_SLIDE_DISTANCE / 2);
+            i = (int) (((float) access$2100) / ((((float) Util.sWindowHeight) / 2.0f) / (((float) i22) / 4.0f)));
+            int unused9 = FocusView.this.mCurrentDistanceY = Util.clamp(i, ((-i22) / 2) - FocusView.TRIANGLE_BASE_DIS, FocusView.MAX_SLIDE_DISTANCE / 2);
             if (i == FocusView.this.mCurrentDistanceY) {
             }
-            FocusView.this.mBeingEvAdjusted = true;
+            boolean unused10 = FocusView.this.mBeingEvAdjusted = true;
             access$2500 = FocusView.this.getItemByCoordinate();
             if (access$2500 != FocusView.this.mCurrentItem) {
             }
             FocusView.this.mCameraFocusAnimateDrawable.setEvChanged((float) FocusView.this.mCurrentDistanceY, FocusView.this.mEvValue);
-            FocusView.this.mCurrentViewState = 1;
+            int unused11 = FocusView.this.mCurrentViewState = 1;
             FocusView.this.calculateAttribute();
             FocusView.this.invalidate();
             return true;
@@ -426,7 +419,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
         if (this.mCursorState == 2) {
             int i2 = this.mCurrentViewState;
             if (!(i2 == 3 || i2 == 4)) {
-                i = Util.clamp(this.mCurrentItem >= this.mAdapter.getCenterIndex() ? ((this.mCurrentItem - this.mAdapter.getCenterIndex()) * ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) / this.mAdapter.getCenterIndex() : 0, 0, (int) ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
+                i = Util.clamp(this.mCurrentItem >= this.mAdapter.getCenterIndex() ? ((this.mCurrentItem - this.mAdapter.getCenterIndex()) * MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) / this.mAdapter.getCenterIndex() : 0, 0, (int) MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
                 return 360 - i;
             }
         }
@@ -434,7 +427,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
         if (i3 == 1) {
             int clamp = Util.clamp(this.mBottomRelative - this.mCurrentDistanceY, 0, MAX_SLIDE_DISTANCE);
             int i4 = MAX_SLIDE_DISTANCE;
-            i = Util.clamp(clamp >= i4 / 2 ? ((clamp - (i4 / 2)) * ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) / (i4 / 2) : 0, 0, (int) ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
+            i = Util.clamp(clamp >= i4 / 2 ? ((clamp - (i4 / 2)) * MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) / (i4 / 2) : 0, 0, (int) MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
             return 360 - i;
         } else if (i3 == 3) {
             return Util.clamp((int) (this.mEVAnimationRatio * 2.0f * 135.0f), 0, 135);
@@ -567,7 +560,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
         if (i != this.mCurrentItem) {
             this.mCurrentItem = i;
             if (this.mAdapter != null) {
-                EvChangedProtocol evChangedProtocol = (EvChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(169);
+                ModeProtocol.EvChangedProtocol evChangedProtocol = (ModeProtocol.EvChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(169);
                 if (evChangedProtocol == null) {
                     Log.d(TAG, "needEvPresenter");
                 } else {
@@ -591,7 +584,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
     }
 
     private void showTipMessage(int i, @StringRes int i2) {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             if (bottomPopupTips.isPortraitHintVisible()) {
                 bottomPopupTips.setPortraitHintVisible(8);
@@ -610,7 +603,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
     private void stopEvAdjust() {
         if (this.mBeingEvAdjusted) {
             this.mBeingEvAdjusted = false;
-            EvChangedProtocol evChangedProtocol = (EvChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(169);
+            ModeProtocol.EvChangedProtocol evChangedProtocol = (ModeProtocol.EvChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(169);
             if (evChangedProtocol != null) {
                 evChangedProtocol.onEvChanged(0, 2);
             }
@@ -633,10 +626,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
 
     public void clear(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("clear: ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "clear: " + i);
         CameraFocusAnimateDrawable cameraFocusAnimateDrawable = this.mCameraFocusAnimateDrawable;
         if (cameraFocusAnimateDrawable != null) {
             cameraFocusAnimateDrawable.cancelFocusingAnimation();
@@ -680,11 +670,11 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
         CameraFocusAnimateDrawable cameraFocusAnimateDrawable = this.mCameraFocusAnimateDrawable;
         if (cameraFocusAnimateDrawable != null) {
             cameraFocusAnimateDrawable.cancelFocusingAnimation();
-            this.mCameraFocusAnimateDrawable.setCallback(null);
+            this.mCameraFocusAnimateDrawable.setCallback((Drawable.Callback) null);
         }
         Handler handler = this.mHandler;
         if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+            handler.removeCallbacksAndMessages((Object) null);
         }
     }
 
@@ -736,21 +726,18 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
     public void reInit() {
         Log.d(TAG, "onCameraOpen>>");
         initRect();
-        Range exposureCompensationRange = Camera2DataContainer.getInstance().getCurrentCameraCapabilities().getExposureCompensationRange();
-        int intValue = ((Integer) exposureCompensationRange.getLower()).intValue();
-        int intValue2 = ((Integer) exposureCompensationRange.getUpper()).intValue();
+        Range<Integer> exposureCompensationRange = Camera2DataContainer.getInstance().getCurrentCameraCapabilities().getExposureCompensationRange();
+        int intValue = exposureCompensationRange.getLower().intValue();
+        int intValue2 = exposureCompensationRange.getUpper().intValue();
         if (b.Ln) {
             intValue = -3;
             intValue2 = 4;
         }
-        if (!(intValue2 == 0 || intValue2 == intValue)) {
+        if (intValue2 != 0 && intValue2 != intValue) {
             float f2 = GAP_NUM;
             this.mAdapter = new FloatSlideAdapter(intValue, intValue2, f2 == 0.0f ? 1.0f : ((float) (intValue2 - intValue)) / f2);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onCameraOpen: adapter=");
-            sb.append(this.mAdapter);
-            Log.w(str, sb.toString());
+            Log.w(str, "onCameraOpen: adapter=" + this.mAdapter);
             if (this.mAdapter != null) {
                 resetEvValue();
                 this.mCurrentMode = DataRepository.dataItemGlobal().getCurrentMode();
@@ -810,7 +797,7 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
         this.mCameraFocusAnimateDrawable.setCenter(i2, i3);
         removeMessages();
         if (this.mEvValue != 0.0f && (i == 1 || i == 2 || i == 5)) {
-            EvChangedProtocol evChangedProtocol = (EvChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(169);
+            ModeProtocol.EvChangedProtocol evChangedProtocol = (ModeProtocol.EvChangedProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(169);
             if (evChangedProtocol != null) {
                 evChangedProtocol.resetEvValue();
             }
@@ -874,13 +861,9 @@ public class FocusView extends View implements FocusIndicator, V6FunctionUI, Rot
             if (this.mExposureViewListener.isSupportAELockOnly()) {
                 i = R.string.hint_ae_lock;
             }
-            if (b.Tc()) {
-                DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
-                String str = CameraSettings.KEY_EN_FIRST_CHOICE_LOCK_AE_AF_TOAST;
-                if (dataItemGlobal.getBoolean(str, false) && getResources().getConfiguration().getLocales().get(0).getLanguage().equalsIgnoreCase("en")) {
-                    DataRepository.dataItemGlobal().editor().putBoolean(str, false).apply();
-                    i = R.string.hint_ae_af_lock_extra;
-                }
+            if (b.Tc() && DataRepository.dataItemGlobal().getBoolean(CameraSettings.KEY_EN_FIRST_CHOICE_LOCK_AE_AF_TOAST, false) && getResources().getConfiguration().getLocales().get(0).getLanguage().equalsIgnoreCase("en")) {
+                DataRepository.dataItemGlobal().editor().putBoolean(CameraSettings.KEY_EN_FIRST_CHOICE_LOCK_AE_AF_TOAST, false).apply();
+                i = R.string.hint_ae_af_lock_extra;
             }
             showTipMessage(8, i);
             this.mCenterFlag = 5;

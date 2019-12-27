@@ -256,24 +256,15 @@ public class EffectConfiguration {
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:3:0x003c, code lost:
-        if (android.text.TextUtils.equals(com.ss.android.ugc.effectmanager.common.EffectConstants.CHANNEL_LOCAL_TEST, com.ss.android.ugc.effectmanager.EffectConfiguration.Builder.access$400(r5)) != false) goto L_0x003e;
-     */
     private EffectConfiguration(Builder builder) {
-        String str = EffectConstants.CHANNEL_ONLINE;
-        this.mChannel = str;
+        this.mChannel = EffectConstants.CHANNEL_ONLINE;
         this.mRetryCount = 3;
         this.mApiAddress = API_ADDRESS;
         this.mAccessKey = builder.accessKey;
         this.mSdkVersion = builder.sdkVersion;
         this.mAppVersion = builder.appVersion;
         this.mDeviceId = builder.deviceId;
-        String access$400 = builder.channel;
-        String str2 = EffectConstants.CHANNEL_TEST;
-        if (!TextUtils.equals(str2, access$400)) {
-        }
-        str = str2;
-        this.mChannel = str;
+        this.mChannel = (TextUtils.equals(EffectConstants.CHANNEL_TEST, builder.channel) || TextUtils.equals(EffectConstants.CHANNEL_LOCAL_TEST, builder.channel)) ? EffectConstants.CHANNEL_TEST : EffectConstants.CHANNEL_TEST;
         this.mPlatform = builder.platform;
         this.mDeviceType = builder.deviceType;
         this.mEffectDir = builder.effectDir;

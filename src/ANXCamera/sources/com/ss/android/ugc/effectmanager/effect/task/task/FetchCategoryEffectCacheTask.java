@@ -10,6 +10,7 @@ import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.common.task.NormalTask;
 import com.ss.android.ugc.effectmanager.common.utils.EffectCacheKeyGenerator;
 import com.ss.android.ugc.effectmanager.context.EffectContext;
+import com.ss.android.ugc.effectmanager.effect.model.CategoryEffectModel;
 import com.ss.android.ugc.effectmanager.effect.model.net.CategoryEffectListResponse;
 import com.ss.android.ugc.effectmanager.effect.task.result.FetchCategoryEffectTaskResult;
 import java.io.InputStream;
@@ -40,14 +41,14 @@ public class FetchCategoryEffectCacheTask extends NormalTask {
     public void execute() {
         InputStream queryToStream = this.mFileCache.queryToStream(EffectCacheKeyGenerator.generateCategoryEffectKey(this.panel, this.category, this.count, this.cursor, this.sortingPosition));
         if (queryToStream == null) {
-            sendMessage(21, new FetchCategoryEffectTaskResult(null, new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_CACHE)));
+            sendMessage(21, new FetchCategoryEffectTaskResult((CategoryEffectModel) null, new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_CACHE)));
             return;
         }
         CategoryEffectListResponse categoryEffectListResponse = (CategoryEffectListResponse) this.mJsonConverter.convertJsonToObj(queryToStream, CategoryEffectListResponse.class);
         if (categoryEffectListResponse == null || !categoryEffectListResponse.checkValue()) {
-            sendMessage(21, new FetchCategoryEffectTaskResult(null, new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_CACHE)));
+            sendMessage(21, new FetchCategoryEffectTaskResult((CategoryEffectModel) null, new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_CACHE)));
         } else {
-            sendMessage(21, new FetchCategoryEffectTaskResult(categoryEffectListResponse.getData().getCategoryEffects(), null));
+            sendMessage(21, new FetchCategoryEffectTaskResult(categoryEffectListResponse.getData().getCategoryEffects(), (ExceptionResult) null));
         }
     }
 }

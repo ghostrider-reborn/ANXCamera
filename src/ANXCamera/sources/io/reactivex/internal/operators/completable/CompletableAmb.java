@@ -54,14 +54,13 @@ public final class CompletableAmb extends Completable {
     public void subscribeActual(CompletableObserver completableObserver) {
         int i;
         CompletableSource[] completableSourceArr = this.sources;
-        String str = "One of the sources is null";
         if (completableSourceArr == null) {
             completableSourceArr = new CompletableSource[8];
             try {
                 i = 0;
                 for (CompletableSource completableSource : this.sourcesIterable) {
                     if (completableSource == null) {
-                        EmptyDisposable.error((Throwable) new NullPointerException(str), completableObserver);
+                        EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), completableObserver);
                         return;
                     }
                     if (i == completableSourceArr.length) {
@@ -90,13 +89,13 @@ public final class CompletableAmb extends Completable {
             CompletableSource completableSource2 = completableSourceArr[i3];
             if (!compositeDisposable.isDisposed()) {
                 if (completableSource2 == null) {
-                    NullPointerException nullPointerException = new NullPointerException(str);
+                    NullPointerException nullPointerException = new NullPointerException("One of the sources is null");
                     if (atomicBoolean.compareAndSet(false, true)) {
                         compositeDisposable.dispose();
                         completableObserver.onError(nullPointerException);
-                    } else {
-                        RxJavaPlugins.onError(nullPointerException);
+                        return;
                     }
+                    RxJavaPlugins.onError(nullPointerException);
                     return;
                 }
                 completableSource2.subscribe(amb);

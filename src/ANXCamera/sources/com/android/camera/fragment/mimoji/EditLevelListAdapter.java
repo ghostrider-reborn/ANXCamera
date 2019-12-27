@@ -3,18 +3,17 @@ package com.android.camera.fragment.mimoji;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.android.camera.R;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.android.camera.log.Log;
 import com.android.camera.ui.baseview.BaseNoScrollGridLayoutManager;
 import com.android.camera.ui.baseview.OnRecyclerItemClickListener;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.util.AvatarConfigUtils;
 import com.arcsoft.avatar.util.LOG;
 import java.util.ArrayList;
@@ -23,33 +22,31 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class EditLevelListAdapter extends Adapter<ViewHolder> {
+public class EditLevelListAdapter extends RecyclerView.Adapter<ViewHolder> {
     private static final int LIST_COLUMN_NUM = 3;
     /* access modifiers changed from: private */
     public static final String TAG = "EditLevelListAdapter";
     private AtomicBoolean isColorNeedNotify = new AtomicBoolean(true);
     private AvatarConfigItemClick mAvatarConfigItemClick = new AvatarConfigItemClick() {
-        public void onConfigItemClick(ASAvatarConfigInfo aSAvatarConfigInfo, boolean z, int i) {
+        public void onConfigItemClick(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo, boolean z, int i) {
             if (aSAvatarConfigInfo == null) {
                 Log.d(EditLevelListAdapter.TAG, "onConfigItemClick, ASAvatarConfigInfo is null");
                 return;
             }
             String access$200 = EditLevelListAdapter.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onConfigItemClick, ASAvatarConfigInfo = ");
-            sb.append(aSAvatarConfigInfo);
-            Log.d(access$200, sb.toString());
+            Log.d(access$200, "onConfigItemClick, ASAvatarConfigInfo = " + aSAvatarConfigInfo);
             EditLevelListAdapter.this.mItfGvOnItemClickListener.notifyUIChanged();
             AvatarEngineManager.getInstance().setAllNeedUpdate(true, z);
             AvatarEngineManager.getInstance().addAvatarConfig(aSAvatarConfigInfo);
             AvatarConfigUtils.updateConfigID(aSAvatarConfigInfo.configType, aSAvatarConfigInfo.configID, AvatarEngineManager.getInstance().getASAvatarConfigValue());
             EditLevelListAdapter.this.mRenderThread.setConfig(aSAvatarConfigInfo);
-            if (z) {
-                if (!EditLevelListAdapter.this.mRenderThread.getIsRendering()) {
-                    EditLevelListAdapter.this.mRenderThread.draw(false);
-                } else {
-                    EditLevelListAdapter.this.mRenderThread.setStopRender(true);
-                }
+            if (!z) {
+                return;
+            }
+            if (!EditLevelListAdapter.this.mRenderThread.getIsRendering()) {
+                EditLevelListAdapter.this.mRenderThread.draw(false);
+            } else {
+                EditLevelListAdapter.this.mRenderThread.setStopRender(true);
             }
         }
     };
@@ -64,7 +61,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
     /* access modifiers changed from: private */
     public MimojiThumbnailRenderThread mRenderThread;
 
-    public class ViewHolder extends android.support.v7.widget.RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         RecyclerView mColorRecycleView;
         RecyclerView mThumbnailGV;
         TextView mTvSubTitle;
@@ -87,20 +84,15 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
     /* access modifiers changed from: private */
     public void onGvItemClick(MimojiThumbnailRecyclerAdapter mimojiThumbnailRecyclerAdapter, int i, int i2) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("outerPosition = ");
-        sb.append(i);
-        sb.append(" Select index = ");
-        sb.append(i2);
-        Log.d(str, sb.toString());
+        Log.d(str, "outerPosition = " + i + " Select index = " + i2);
         CopyOnWriteArrayList<MimojiLevelBean> copyOnWriteArrayList = this.mLevelDatas;
         if (copyOnWriteArrayList == null || i < 0 || i >= copyOnWriteArrayList.size()) {
             Log.e(TAG, "gv mLevelDatas error");
             return;
         }
-        MimojiLevelBean mimojiLevelBean = (MimojiLevelBean) this.mLevelDatas.get(i);
+        MimojiLevelBean mimojiLevelBean = this.mLevelDatas.get(i);
         if (i2 >= 0 && i2 < mimojiLevelBean.thumnails.size()) {
-            ASAvatarConfigInfo aSAvatarConfigInfo = (ASAvatarConfigInfo) mimojiLevelBean.thumnails.get(i2);
+            AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo = mimojiLevelBean.thumnails.get(i2);
             AvatarEngineManager.getInstance().setInnerConfigSelectIndex(mimojiLevelBean.configType, (float) i2);
             if (aSAvatarConfigInfo != null) {
                 updateSelectView(mimojiThumbnailRecyclerAdapter, i, i2);
@@ -127,7 +119,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
         } else {
             textView.setVisibility(8);
         }
-        ArrayList colorConfigInfos = mimojiLevelBean.getColorConfigInfos();
+        ArrayList<AvatarConfig.ASAvatarConfigInfo> colorConfigInfos = mimojiLevelBean.getColorConfigInfos();
         if (colorConfigInfos != null && AvatarEngineManager.getInstance().getColorType(mimojiLevelBean.configType) >= 0) {
             if (colorConfigInfos.size() != 0) {
                 recyclerView.setVisibility(0);
@@ -155,51 +147,37 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
                     colorListAdapter.setClickCheck(this.mClickCheck);
                     recyclerView.setAdapter(colorListAdapter);
                     colorListAdapter.setData(colorConfigInfos);
-                    float innerConfigSelectIndex = AvatarEngineManager.getInstance().getInnerConfigSelectIndex(((ASAvatarConfigInfo) colorConfigInfos.get(0)).configType);
+                    float innerConfigSelectIndex = AvatarEngineManager.getInstance().getInnerConfigSelectIndex(colorConfigInfos.get(0).configType);
                     int i3 = this.mContext.getResources().getDisplayMetrics().widthPixels;
                     int i4 = 0;
                     for (i2 = 0; i2 < colorConfigInfos.size(); i2++) {
-                        if (innerConfigSelectIndex == ((float) ((ASAvatarConfigInfo) colorConfigInfos.get(i2)).configID)) {
+                        if (innerConfigSelectIndex == ((float) colorConfigInfos.get(i2).configID)) {
                             i4 = i2;
                         }
                     }
-                    String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("fmoji show color :");
-                    sb2.append(mimojiLevelBean.configTypeName);
-                    sb2.append("color size:");
-                    sb2.append(colorConfigInfos.size());
-                    sb2.append(" colorSelectPositon : ");
-                    sb2.append(i4);
-                    sb2.append("   curHolderPosition : ");
-                    sb2.append(i);
-                    Log.i(str2, sb2.toString());
+                    Log.i(TAG, "fmoji show color :" + mimojiLevelBean.configTypeName + "color size:" + colorConfigInfos.size() + " colorSelectPositon : " + i4 + "   curHolderPosition : " + i);
                     colorLayoutManagerMap.scrollToPositionWithOffset(i4, i3 / 2);
                     if (this.isColorNeedNotify.get() && i >= itemCount - 1) {
                         this.isColorNeedNotify.set(false);
                     }
                 } else {
-                    String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("fmoji show color isColorNeedNotify : ");
-                    sb3.append(this.isColorNeedNotify.get());
-                    LOG.d(str3, sb3.toString());
+                    LOG.d(TAG, "fmoji show color isColorNeedNotify : " + this.isColorNeedNotify.get());
                 }
             }
         }
         recyclerView.setVisibility(8);
         if (!this.isColorNeedNotify.get()) {
         }
-        String str4 = TAG;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("fmoji topic:");
-        sb4.append(mimojiLevelBean.configTypeName);
-        sb4.append("----");
-        sb4.append(mimojiLevelBean.configType);
-        sb4.append("----");
+        String str2 = TAG;
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append("fmoji topic:");
+        sb2.append(mimojiLevelBean.configTypeName);
+        sb2.append("----");
+        sb2.append(mimojiLevelBean.configType);
+        sb2.append("----");
         AvatarEngineManager.getInstance();
-        sb4.append(AvatarEngineManager.showConfigTypeName(mimojiLevelBean.configType));
-        Log.i(str4, sb4.toString());
+        sb2.append(AvatarEngineManager.showConfigTypeName(mimojiLevelBean.configType));
+        Log.i(str2, sb2.toString());
         colorLayoutManagerMap = AvatarEngineManager.getInstance().getColorLayoutManagerMap(recyclerView.hashCode() + i);
         if (colorLayoutManagerMap == null) {
         }
@@ -208,22 +186,12 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
         colorListAdapter2.setClickCheck(this.mClickCheck);
         recyclerView.setAdapter(colorListAdapter2);
         colorListAdapter2.setData(colorConfigInfos);
-        float innerConfigSelectIndex2 = AvatarEngineManager.getInstance().getInnerConfigSelectIndex(((ASAvatarConfigInfo) colorConfigInfos.get(0)).configType);
+        float innerConfigSelectIndex2 = AvatarEngineManager.getInstance().getInnerConfigSelectIndex(colorConfigInfos.get(0).configType);
         int i32 = this.mContext.getResources().getDisplayMetrics().widthPixels;
         int i42 = 0;
         while (i2 < colorConfigInfos.size()) {
         }
-        String str22 = TAG;
-        StringBuilder sb22 = new StringBuilder();
-        sb22.append("fmoji show color :");
-        sb22.append(mimojiLevelBean.configTypeName);
-        sb22.append("color size:");
-        sb22.append(colorConfigInfos.size());
-        sb22.append(" colorSelectPositon : ");
-        sb22.append(i42);
-        sb22.append("   curHolderPosition : ");
-        sb22.append(i);
-        Log.i(str22, sb22.toString());
+        Log.i(TAG, "fmoji show color :" + mimojiLevelBean.configTypeName + "color size:" + colorConfigInfos.size() + " colorSelectPositon : " + i42 + "   curHolderPosition : " + i);
         colorLayoutManagerMap.scrollToPositionWithOffset(i42, i32 / 2);
         this.isColorNeedNotify.set(false);
     }
@@ -234,10 +202,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
 
     public int getItemCount() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mLevelDatas getItemCount size: ");
-        sb.append(this.mLevelDatas.size());
-        Log.i(str, sb.toString());
+        Log.i(str, "mLevelDatas getItemCount size: " + this.mLevelDatas.size());
         CopyOnWriteArrayList<MimojiLevelBean> copyOnWriteArrayList = this.mLevelDatas;
         if (copyOnWriteArrayList == null) {
             return 0;
@@ -251,12 +216,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
             return;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("notifyThumbnailUpdate.... index = ");
-        sb.append(i2);
-        sb.append(", position = ");
-        sb.append(i3);
-        Log.d(str, sb.toString());
+        Log.d(str, "notifyThumbnailUpdate.... index = " + i2 + ", position = " + i3);
         CopyOnWriteArrayList<MimojiLevelBean> copyOnWriteArrayList = this.mLevelDatas;
         if (copyOnWriteArrayList == null || copyOnWriteArrayList.size() == 0 || i2 > this.mLevelDatas.size() - 1) {
             Log.e(TAG, "mLevelDatas Exception !!!!");
@@ -267,22 +227,22 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
             Log.e(TAG, "mHandler message error !!!!");
             return;
         }
-        this.mMimojiLevelBean = (MimojiLevelBean) this.mLevelDatas.get(i2);
-        ArrayList<ASAvatarConfigInfo> arrayList = this.mMimojiLevelBean.thumnails;
-        MimojiThumbnailRecyclerAdapter mimojiThumbnailRecyclerAdapter = (MimojiThumbnailRecyclerAdapter) this.mMimojiThumbnailAdapters.get(i2);
+        this.mMimojiLevelBean = this.mLevelDatas.get(i2);
+        ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList = this.mMimojiLevelBean.thumnails;
+        MimojiThumbnailRecyclerAdapter mimojiThumbnailRecyclerAdapter = this.mMimojiThumbnailAdapters.get(i2);
         if (arrayList == null || i3 < 0 || i3 >= arrayList.size()) {
             Log.e(TAG, "fmoji position message error !!!!");
         } else {
-            mimojiThumbnailRecyclerAdapter.updateData(i3, (ASAvatarConfigInfo) arrayList.get(i3));
+            mimojiThumbnailRecyclerAdapter.updateData(i3, arrayList.get(i3));
         }
     }
 
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, final int i) {
-        this.mMimojiLevelBean = (MimojiLevelBean) this.mLevelDatas.get(i);
+        this.mMimojiLevelBean = this.mLevelDatas.get(i);
         RecyclerView recyclerView = viewHolder.mThumbnailGV;
         showColor(viewHolder, this.mMimojiLevelBean, i);
         if (i < this.mMimojiThumbnailAdapters.size()) {
-            ArrayList<ASAvatarConfigInfo> arrayList = this.mMimojiLevelBean.thumnails;
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList = this.mMimojiLevelBean.thumnails;
             int i2 = 0;
             int size = arrayList == null ? 0 : arrayList.size();
             if (size == 0) {
@@ -290,7 +250,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
                 return;
             }
             recyclerView.setVisibility(0);
-            final MimojiThumbnailRecyclerAdapter mimojiThumbnailRecyclerAdapter = (MimojiThumbnailRecyclerAdapter) this.mMimojiThumbnailAdapters.get(i);
+            final MimojiThumbnailRecyclerAdapter mimojiThumbnailRecyclerAdapter = this.mMimojiThumbnailAdapters.get(i);
             recyclerView.setNestedScrollingEnabled(false);
             recyclerView.getItemAnimator().setChangeDuration(0);
             recyclerView.getItemAnimator().setRemoveDuration(0);
@@ -299,7 +259,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
                 recyclerView.setLayoutManager(new BaseNoScrollGridLayoutManager(this.mContext, 3));
             }
             recyclerView.setAdapter(mimojiThumbnailRecyclerAdapter);
-            LayoutParams layoutParams = (LayoutParams) recyclerView.getLayoutParams();
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) recyclerView.getLayoutParams();
             int i3 = size / 3;
             if (size % 3 != 0) {
                 i2 = 1;
@@ -317,8 +277,8 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
             }
             layoutParams.height = (dimensionPixelSize2 * i4) + (dimensionPixelSize * (i4 - 1));
             recyclerView.setLayoutParams(layoutParams);
-            mimojiThumbnailRecyclerAdapter.setOnRecyclerItemClickListener(new OnRecyclerItemClickListener<ASAvatarConfigInfo>() {
-                public void OnRecyclerItemClickListener(ASAvatarConfigInfo aSAvatarConfigInfo, int i) {
+            mimojiThumbnailRecyclerAdapter.setOnRecyclerItemClickListener(new OnRecyclerItemClickListener<AvatarConfig.ASAvatarConfigInfo>() {
+                public void OnRecyclerItemClickListener(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo, int i) {
                     if (EditLevelListAdapter.this.mClickCheck == null || EditLevelListAdapter.this.mClickCheck.checkClickable()) {
                         EditLevelListAdapter.this.onGvItemClick(mimojiThumbnailRecyclerAdapter, i, i);
                     }
@@ -335,21 +295,11 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
     }
 
     public synchronized void refreshData(List<MimojiLevelBean> list, boolean z, boolean z2) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("mLevelDatas refreshData list size: ");
-        sb.append(list.size());
-        sb.append("   mLevelDatas size");
-        sb.append(this.mLevelDatas.size());
-        sb.append("  isColor : ");
-        sb.append(z2);
-        sb.append("   loadThumbnailFromCache : ");
-        sb.append(z);
-        Log.i(str, sb.toString());
+        Log.i(TAG, "mLevelDatas refreshData list size: " + list.size() + "   mLevelDatas size" + this.mLevelDatas.size() + "  isColor : " + z2 + "   loadThumbnailFromCache : " + z);
         if (list != null) {
             if (list.size() != 0) {
                 int i = 0;
-                if (this.mLevelDatas == null || this.mLevelDatas.size() != list.size() || this.mMimojiThumbnailAdapters.size() == 0 || ((MimojiThumbnailRecyclerAdapter) this.mMimojiThumbnailAdapters.get(0)).getItemCount() <= 0 || getItemCount() == 0) {
+                if (this.mLevelDatas == null || this.mLevelDatas.size() != list.size() || this.mMimojiThumbnailAdapters.size() == 0 || this.mMimojiThumbnailAdapters.get(0).getItemCount() <= 0 || getItemCount() == 0) {
                     z2 = false;
                 }
                 if (z2) {
@@ -360,7 +310,7 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
                             break;
                         } else {
                             if (z) {
-                                ((MimojiThumbnailRecyclerAdapter) this.mMimojiThumbnailAdapters.get(i)).setDataList(((MimojiLevelBean) list.get(i)).thumnails);
+                                this.mMimojiThumbnailAdapters.get(i).setDataList(list.get(i).thumnails);
                             }
                             i++;
                         }
@@ -369,16 +319,12 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
                     setLevelDatas(list);
                     this.mMimojiThumbnailAdapters.clear();
                     while (i < this.mLevelDatas.size()) {
-                        this.mMimojiThumbnailAdapters.add(new MimojiThumbnailRecyclerAdapter(this.mContext, ((MimojiLevelBean) this.mLevelDatas.get(i)).configType));
+                        this.mMimojiThumbnailAdapters.add(new MimojiThumbnailRecyclerAdapter(this.mContext, this.mLevelDatas.get(i).configType));
                         i++;
                     }
                     notifyDataSetChanged();
                 }
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("fmoji refreshData isColorNeedNotify = ");
-                sb2.append(this.isColorNeedNotify.get());
-                Log.d(str2, sb2.toString());
+                Log.d(TAG, "fmoji refreshData isColorNeedNotify = " + this.isColorNeedNotify.get());
                 return;
             }
         }
@@ -406,18 +352,11 @@ public class EditLevelListAdapter extends Adapter<ViewHolder> {
     }
 
     public void updateSelectView(MimojiThumbnailRecyclerAdapter mimojiThumbnailRecyclerAdapter, int i, int i2) {
-        MimojiLevelBean mimojiLevelBean = (MimojiLevelBean) this.mLevelDatas.get(i);
+        MimojiLevelBean mimojiLevelBean = this.mLevelDatas.get(i);
         if (i2 < mimojiLevelBean.thumnails.size()) {
             String str = FragmentMimojiEdit.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("click Thumbnail configType:");
-            sb.append(this.mMimojiLevelBean.configType);
-            sb.append(" configName:");
-            sb.append(this.mMimojiLevelBean.configTypeName);
-            sb.append("configId :");
-            sb.append(((ASAvatarConfigInfo) mimojiLevelBean.thumnails.get(i2)).configID);
-            Log.i(str, sb.toString());
-            mimojiThumbnailRecyclerAdapter.setSelectItem(mimojiLevelBean.configType, ((ASAvatarConfigInfo) mimojiLevelBean.thumnails.get(i2)).configID);
+            Log.i(str, "click Thumbnail configType:" + this.mMimojiLevelBean.configType + " configName:" + this.mMimojiLevelBean.configTypeName + "configId :" + mimojiLevelBean.thumnails.get(i2).configID);
+            mimojiThumbnailRecyclerAdapter.setSelectItem(mimojiLevelBean.configType, mimojiLevelBean.thumnails.get(i2).configID);
             mimojiThumbnailRecyclerAdapter.notifyDataSetChanged();
         }
     }

@@ -44,7 +44,7 @@ public class TrunBox extends FullBox {
         public Factory dataOffset(long j) {
             TrunBox trunBox = this.box;
             trunBox.flags |= 1;
-            trunBox.dataOffset = (int) j;
+            int unused = trunBox.dataOffset = (int) j;
             return this;
         }
 
@@ -52,7 +52,7 @@ public class TrunBox extends FullBox {
             if (!this.box.isSampleFlagsAvailable()) {
                 TrunBox trunBox = this.box;
                 trunBox.flags |= 4;
-                trunBox.firstSampleFlags = i;
+                int unused = trunBox.firstSampleFlags = i;
                 return this;
             }
             throw new IllegalStateException("Sample flags already set on this object");
@@ -62,7 +62,7 @@ public class TrunBox extends FullBox {
             if (iArr.length == this.box.sampleCount) {
                 TrunBox trunBox = this.box;
                 trunBox.flags |= 2048;
-                trunBox.sampleCompositionOffset = iArr;
+                int[] unused = trunBox.sampleCompositionOffset = iArr;
                 return this;
             }
             throw new IllegalArgumentException("Argument array length not equal to sampleCount");
@@ -72,7 +72,7 @@ public class TrunBox extends FullBox {
             if (iArr.length == this.box.sampleCount) {
                 TrunBox trunBox = this.box;
                 trunBox.flags |= 256;
-                trunBox.sampleDuration = iArr;
+                int[] unused = trunBox.sampleDuration = iArr;
                 return this;
             }
             throw new IllegalArgumentException("Argument array length not equal to sampleCount");
@@ -84,7 +84,7 @@ public class TrunBox extends FullBox {
             } else if (!this.box.isFirstSampleFlagsAvailable()) {
                 TrunBox trunBox = this.box;
                 trunBox.flags |= 1024;
-                trunBox.sampleFlags = iArr;
+                int[] unused = trunBox.sampleFlags = iArr;
                 return this;
             } else {
                 throw new IllegalStateException("First sample flags already set on this object");
@@ -95,7 +95,7 @@ public class TrunBox extends FullBox {
             if (iArr.length == this.box.sampleCount) {
                 TrunBox trunBox = this.box;
                 trunBox.flags |= 512;
-                trunBox.sampleSize = iArr;
+                int[] unused = trunBox.sampleSize = iArr;
                 return this;
             }
             throw new IllegalArgumentException("Argument array length not equal to sampleCount");

@@ -25,7 +25,7 @@ public final class MaybeUsing<T, D> extends Maybe<T> {
         private static final long serialVersionUID = -674404550052917487L;
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f306d;
         final Consumer<? super D> disposer;
         final boolean eager;
@@ -43,7 +43,7 @@ public final class MaybeUsing<T, D> extends Maybe<T> {
             disposeResourceAfter();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeResourceAfter() {
             Object andSet = getAndSet(this);
             if (andSet != this) {
@@ -70,9 +70,11 @@ public final class MaybeUsing<T, D> extends Maybe<T> {
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         this.actual.onError(th);
+                        return;
                     }
+                } else {
+                    return;
                 }
-                return;
             }
             this.actual.onComplete();
             if (!this.eager) {
@@ -118,9 +120,11 @@ public final class MaybeUsing<T, D> extends Maybe<T> {
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         this.actual.onError(th);
+                        return;
                     }
+                } else {
+                    return;
                 }
-                return;
             }
             this.actual.onSuccess(t);
             if (!this.eager) {
@@ -150,7 +154,7 @@ public final class MaybeUsing<T, D> extends Maybe<T> {
             }
         } catch (Throwable th2) {
             Exceptions.throwIfFatal(th2);
-            EmptyDisposable.error(th2, maybeObserver);
+            EmptyDisposable.error(th2, (MaybeObserver<?>) maybeObserver);
         }
     }
 }

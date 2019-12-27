@@ -41,7 +41,7 @@ public final class ObservableUsing<T, D> extends Observable<T> {
             this.s.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeAfter() {
             if (compareAndSet(false, true)) {
                 try {
@@ -70,11 +70,11 @@ public final class ObservableUsing<T, D> extends Observable<T> {
                 }
                 this.s.dispose();
                 this.actual.onComplete();
-            } else {
-                this.actual.onComplete();
-                this.s.dispose();
-                disposeAfter();
+                return;
             }
+            this.actual.onComplete();
+            this.s.dispose();
+            disposeAfter();
         }
 
         public void onError(Throwable th) {
@@ -124,11 +124,11 @@ public final class ObservableUsing<T, D> extends Observable<T> {
                 ((ObservableSource) apply).subscribe(new UsingObserver(observer, call, this.disposer, this.eager));
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error((Throwable) new CompositeException(th, th), observer);
+                EmptyDisposable.error((Throwable) new CompositeException(th, th), (Observer<?>) observer);
             }
         } catch (Throwable th2) {
             Exceptions.throwIfFatal(th2);
-            EmptyDisposable.error(th2, observer);
+            EmptyDisposable.error(th2, (Observer<?>) observer);
         }
     }
 }

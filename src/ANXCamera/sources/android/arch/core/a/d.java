@@ -4,11 +4,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 /* compiled from: DefaultTaskExecutor */
 public class d extends e {
     private ExecutorService ja = Executors.newFixedThreadPool(2);

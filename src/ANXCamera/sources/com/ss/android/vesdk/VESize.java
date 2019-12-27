@@ -2,11 +2,10 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import com.android.camera.Util;
 
 public class VESize implements Parcelable {
-    public static final Creator<VESize> CREATOR = new Creator<VESize>() {
+    public static final Parcelable.Creator<VESize> CREATOR = new Parcelable.Creator<VESize>() {
         public VESize createFromParcel(Parcel parcel) {
             return new VESize(parcel);
         }

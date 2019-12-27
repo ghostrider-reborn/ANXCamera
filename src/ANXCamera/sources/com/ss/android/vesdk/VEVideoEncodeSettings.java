@@ -2,7 +2,6 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.IntRange;
 import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
@@ -21,7 +20,7 @@ import org.json.JSONObject;
 
 @Keep
 public class VEVideoEncodeSettings implements Parcelable {
-    public static final Creator<VEVideoEncodeSettings> CREATOR = new Creator<VEVideoEncodeSettings>() {
+    public static final Parcelable.Creator<VEVideoEncodeSettings> CREATOR = new Parcelable.Creator<VEVideoEncodeSettings>() {
         public VEVideoEncodeSettings createFromParcel(Parcel parcel) {
             return new VEVideoEncodeSettings(parcel);
         }
@@ -83,7 +82,7 @@ public class VEVideoEncodeSettings implements Parcelable {
     /* access modifiers changed from: private */
     public boolean useHWEncoder;
 
-    /* renamed from: com.ss.android.vesdk.VEVideoEncodeSettings$2 reason: invalid class name */
+    /* renamed from: com.ss.android.vesdk.VEVideoEncodeSettings$2  reason: invalid class name */
     static /* synthetic */ class AnonymousClass2 {
         static final /* synthetic */ int[] $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$ENCODE_BITRATE_MODE = new int[ENCODE_BITRATE_MODE.values().length];
 
@@ -136,20 +135,20 @@ public class VEVideoEncodeSettings implements Parcelable {
             if (vECloudConfig.mCompileEncodeMode != 1) {
                 z = false;
             }
-            this.exportVideoEncodeSettings.useHWEncoder = z;
-            this.exportVideoEncodeSettings.swCRF = vECloudConfig.mCompileEncodeSWCRF;
-            this.exportVideoEncodeSettings.swPreset = vECloudConfig.mCompileEncodeSWCRFPreset;
-            this.exportVideoEncodeSettings.bitrateMode = z ? getCompileHardwareBitrateModeFromCloud() : ENCODE_BITRATE_MODE.fromInteger(vECloudConfig.mCompileSWBitrateMode);
+            boolean unused = this.exportVideoEncodeSettings.useHWEncoder = z;
+            int unused2 = this.exportVideoEncodeSettings.swCRF = vECloudConfig.mCompileEncodeSWCRF;
+            int unused3 = this.exportVideoEncodeSettings.swPreset = vECloudConfig.mCompileEncodeSWCRFPreset;
+            ENCODE_BITRATE_MODE unused4 = this.exportVideoEncodeSettings.bitrateMode = z ? getCompileHardwareBitrateModeFromCloud() : ENCODE_BITRATE_MODE.fromInteger(vECloudConfig.mCompileSWBitrateMode);
             VEVideoEncodeSettings vEVideoEncodeSettings = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings.bps = z ? vECloudConfig.mCompileEncodeHWBPS : vEVideoEncodeSettings.bps;
+            int unused5 = vEVideoEncodeSettings.bps = z ? vECloudConfig.mCompileEncodeHWBPS : vEVideoEncodeSettings.bps;
             VEVideoEncodeSettings vEVideoEncodeSettings2 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings2.gopSize = z ? vEVideoEncodeSettings2.gopSize : vECloudConfig.mCompileEncodeSWGOP;
+            int unused6 = vEVideoEncodeSettings2.gopSize = z ? vEVideoEncodeSettings2.gopSize : vECloudConfig.mCompileEncodeSWGOP;
             VEVideoEncodeSettings vEVideoEncodeSettings3 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings3.encodeProfile = z ? vECloudConfig.mCompileHwProfile : vEVideoEncodeSettings3.encodeProfile;
+            int unused7 = vEVideoEncodeSettings3.encodeProfile = z ? vECloudConfig.mCompileHwProfile : vEVideoEncodeSettings3.encodeProfile;
             VEVideoEncodeSettings vEVideoEncodeSettings4 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings4.swMaxrate = z ? vEVideoEncodeSettings4.swMaxrate : (long) vECloudConfig.mCompileEncodeSWMaxrate;
+            long unused8 = vEVideoEncodeSettings4.swMaxrate = z ? vEVideoEncodeSettings4.swMaxrate : (long) vECloudConfig.mCompileEncodeSWMaxrate;
             VEVideoEncodeSettings vEVideoEncodeSettings5 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings5.swQP = z ? vEVideoEncodeSettings5.swQP : vECloudConfig.mCompileVideoSWQP;
+            int unused9 = vEVideoEncodeSettings5.swQP = z ? vEVideoEncodeSettings5.swQP : vECloudConfig.mCompileVideoSWQP;
         }
 
         private void overrideWithCloudConfigForImport() {
@@ -158,20 +157,20 @@ public class VEVideoEncodeSettings implements Parcelable {
             if (vECloudConfig.mImportEncodeMode != 1) {
                 z = false;
             }
-            this.exportVideoEncodeSettings.useHWEncoder = z;
-            this.exportVideoEncodeSettings.swCRF = vECloudConfig.mImportSWEncodeCRF;
-            this.exportVideoEncodeSettings.swPreset = vECloudConfig.mImportVideoSWPreset;
-            this.exportVideoEncodeSettings.bitrateMode = z ? getImportHardwareBitrateModeFromCloud() : ENCODE_BITRATE_MODE.fromInteger(vECloudConfig.mImportSWBitrateMode);
+            boolean unused = this.exportVideoEncodeSettings.useHWEncoder = z;
+            int unused2 = this.exportVideoEncodeSettings.swCRF = vECloudConfig.mImportSWEncodeCRF;
+            int unused3 = this.exportVideoEncodeSettings.swPreset = vECloudConfig.mImportVideoSWPreset;
+            ENCODE_BITRATE_MODE unused4 = this.exportVideoEncodeSettings.bitrateMode = z ? getImportHardwareBitrateModeFromCloud() : ENCODE_BITRATE_MODE.fromInteger(vECloudConfig.mImportSWBitrateMode);
             VEVideoEncodeSettings vEVideoEncodeSettings = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings.bps = z ? vECloudConfig.mImportHWEncodeBPS : vEVideoEncodeSettings.bps;
+            int unused5 = vEVideoEncodeSettings.bps = z ? vECloudConfig.mImportHWEncodeBPS : vEVideoEncodeSettings.bps;
             VEVideoEncodeSettings vEVideoEncodeSettings2 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings2.gopSize = z ? vEVideoEncodeSettings2.gopSize : vECloudConfig.mImportVideoSWGop;
+            int unused6 = vEVideoEncodeSettings2.gopSize = z ? vEVideoEncodeSettings2.gopSize : vECloudConfig.mImportVideoSWGop;
             VEVideoEncodeSettings vEVideoEncodeSettings3 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings3.encodeProfile = z ? vECloudConfig.mImportHwProfile : vEVideoEncodeSettings3.encodeProfile;
+            int unused7 = vEVideoEncodeSettings3.encodeProfile = z ? vECloudConfig.mImportHwProfile : vEVideoEncodeSettings3.encodeProfile;
             VEVideoEncodeSettings vEVideoEncodeSettings4 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings4.swMaxrate = z ? vEVideoEncodeSettings4.swMaxrate : (long) vECloudConfig.mImportVideoSWMaxrate;
+            long unused8 = vEVideoEncodeSettings4.swMaxrate = z ? vEVideoEncodeSettings4.swMaxrate : (long) vECloudConfig.mImportVideoSWMaxrate;
             VEVideoEncodeSettings vEVideoEncodeSettings5 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings5.swQP = z ? vEVideoEncodeSettings5.swQP : vECloudConfig.mImportVideoSWQP;
+            int unused9 = vEVideoEncodeSettings5.swQP = z ? vEVideoEncodeSettings5.swQP : vECloudConfig.mImportVideoSWQP;
         }
 
         private void overrideWithCloudConfigForRecord() {
@@ -180,21 +179,21 @@ public class VEVideoEncodeSettings implements Parcelable {
             if (vECloudConfig.mRecordEncodeMode != 1) {
                 z = false;
             }
-            this.exportVideoEncodeSettings.useHWEncoder = z;
-            this.exportVideoEncodeSettings.outputSize = new VESize(vECloudConfig.mRecordResolutionWidth, vECloudConfig.mRecordResolutionHeight);
-            this.exportVideoEncodeSettings.swCRF = vECloudConfig.mRecordSWEncodeCRF;
-            this.exportVideoEncodeSettings.swPreset = vECloudConfig.mRecordVideoSWPreset;
-            this.exportVideoEncodeSettings.bitrateMode = z ? getRecordHardwareBitrateModeFromCloud() : ENCODE_BITRATE_MODE.fromInteger(vECloudConfig.mRecordSWBitrateMode);
+            boolean unused = this.exportVideoEncodeSettings.useHWEncoder = z;
+            VESize unused2 = this.exportVideoEncodeSettings.outputSize = new VESize(vECloudConfig.mRecordResolutionWidth, vECloudConfig.mRecordResolutionHeight);
+            int unused3 = this.exportVideoEncodeSettings.swCRF = vECloudConfig.mRecordSWEncodeCRF;
+            int unused4 = this.exportVideoEncodeSettings.swPreset = vECloudConfig.mRecordVideoSWPreset;
+            ENCODE_BITRATE_MODE unused5 = this.exportVideoEncodeSettings.bitrateMode = z ? getRecordHardwareBitrateModeFromCloud() : ENCODE_BITRATE_MODE.fromInteger(vECloudConfig.mRecordSWBitrateMode);
             VEVideoEncodeSettings vEVideoEncodeSettings = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings.bps = z ? vECloudConfig.mRecordHWEncodeBPS : vEVideoEncodeSettings.bps;
+            int unused6 = vEVideoEncodeSettings.bps = z ? vECloudConfig.mRecordHWEncodeBPS : vEVideoEncodeSettings.bps;
             VEVideoEncodeSettings vEVideoEncodeSettings2 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings2.gopSize = z ? vEVideoEncodeSettings2.gopSize : vECloudConfig.mRecordVideoSWGop;
+            int unused7 = vEVideoEncodeSettings2.gopSize = z ? vEVideoEncodeSettings2.gopSize : vECloudConfig.mRecordVideoSWGop;
             VEVideoEncodeSettings vEVideoEncodeSettings3 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings3.encodeProfile = z ? vECloudConfig.mRecordHwProfile : vEVideoEncodeSettings3.encodeProfile;
+            int unused8 = vEVideoEncodeSettings3.encodeProfile = z ? vECloudConfig.mRecordHwProfile : vEVideoEncodeSettings3.encodeProfile;
             VEVideoEncodeSettings vEVideoEncodeSettings4 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings4.swMaxrate = z ? vEVideoEncodeSettings4.swMaxrate : (long) vECloudConfig.mRecordVideoSWMaxrate;
+            long unused9 = vEVideoEncodeSettings4.swMaxrate = z ? vEVideoEncodeSettings4.swMaxrate : (long) vECloudConfig.mRecordVideoSWMaxrate;
             VEVideoEncodeSettings vEVideoEncodeSettings5 = this.exportVideoEncodeSettings;
-            vEVideoEncodeSettings5.swQP = z ? vEVideoEncodeSettings5.swQP : vECloudConfig.mRecordVideoSWQP;
+            int unused10 = vEVideoEncodeSettings5.swQP = z ? vEVideoEncodeSettings5.swQP : vECloudConfig.mRecordVideoSWQP;
         }
 
         private void overrideWithUserConfig() {
@@ -213,21 +212,18 @@ public class VEVideoEncodeSettings implements Parcelable {
                 vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = this.exportVideoEncodeSettings.encodeProfile;
                 vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = this.exportVideoEncodeSettings.gopSize;
             }
-            this.exportVideoEncodeSettings.mVideoCompileEncodeSetting = vEVideoCompileEncodeSettings;
-            this.exportVideoEncodeSettings.mVideoWatermarkCompileEncodeSetting = vEVideoCompileEncodeSettings;
+            VEVideoCompileEncodeSettings unused = this.exportVideoEncodeSettings.mVideoCompileEncodeSetting = vEVideoCompileEncodeSettings;
+            VEVideoCompileEncodeSettings unused2 = this.exportVideoEncodeSettings.mVideoWatermarkCompileEncodeSetting = vEVideoCompileEncodeSettings;
         }
 
         private void parseExternalSettingsJsonStr(String str) {
             try {
                 JSONObject jSONObject = new JSONObject(str);
-                this.exportVideoEncodeSettings.mVideoCompileEncodeSetting = parseJsonToSetting(jSONObject.getJSONObject("compile"));
-                this.exportVideoEncodeSettings.mVideoWatermarkCompileEncodeSetting = parseJsonToSetting(jSONObject.getJSONObject("watermark_compile"));
+                VEVideoCompileEncodeSettings unused = this.exportVideoEncodeSettings.mVideoCompileEncodeSetting = parseJsonToSetting(jSONObject.getJSONObject("compile"));
+                VEVideoCompileEncodeSettings unused2 = this.exportVideoEncodeSettings.mVideoWatermarkCompileEncodeSetting = parseJsonToSetting(jSONObject.getJSONObject("watermark_compile"));
             } catch (JSONException e2) {
                 e2.printStackTrace();
-                StringBuilder sb = new StringBuilder();
-                sb.append("external json str parse error : ");
-                sb.append(e2.getLocalizedMessage());
-                VELogUtil.e(VEVideoEncodeSettings.TAG, sb.toString());
+                VELogUtil.e(VEVideoEncodeSettings.TAG, "external json str parse error : " + e2.getLocalizedMessage());
             }
         }
 
@@ -241,345 +237,247 @@ public class VEVideoEncodeSettings implements Parcelable {
         /* JADX WARNING: Removed duplicated region for block: B:88:0x01a5 A[Catch:{ JSONException -> 0x01ce }] */
         private VEVideoCompileEncodeSettings parseJsonToSetting(JSONObject jSONObject) {
             long j;
-            String str;
             int i;
-            String str2;
             int i2;
-            String str3;
             int i3;
             long j2;
             int i4;
             int i5;
-            String str4 = EnvironmentCompat.MEDIA_UNKNOWN;
             VEVideoCompileEncodeSettings vEVideoCompileEncodeSettings = new VEVideoCompileEncodeSettings();
             try {
                 String string = jSONObject.getString("encode_mode");
-                String str5 = "hw";
-                if (str4.equals(string)) {
+                if (EnvironmentCompat.MEDIA_UNKNOWN.equals(string)) {
                     if (this.mUsage == 2) {
                         vEVideoCompileEncodeSettings.useHWEncoder = this.exportVideoEncodeSettings.useHWEncoder;
                         VEVideoHWEncodeSettings vEVideoHWEncodeSettings = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                        String str6 = "bitrate";
                         if (this.mUsage == 2) {
-                            if (jSONObject.getJSONObject(str5).getInt(str6) == -1) {
+                            if (jSONObject.getJSONObject("hw").getInt("bitrate") == -1) {
                                 if (this.exportVideoEncodeSettings.useHWEncoder) {
                                     i5 = this.exportVideoEncodeSettings.bps;
                                     j = (long) i5;
                                     vEVideoHWEncodeSettings.mBitrate = j;
                                     VEVideoHWEncodeSettings vEVideoHWEncodeSettings2 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                                    str = "profile";
                                     if (this.mUsage == 2) {
-                                        if (str4.equals(jSONObject.getJSONObject(str5).getString(str))) {
+                                        if (EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("hw").getString("profile"))) {
                                             i = this.exportVideoEncodeSettings.useHWEncoder ? this.exportVideoEncodeSettings.encodeProfile : vEVideoCompileEncodeSettings.mHWEncodeSetting.mProfile;
                                             vEVideoHWEncodeSettings2.mProfile = i;
                                             VEVideoHWEncodeSettings vEVideoHWEncodeSettings3 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                                            str2 = "gop";
                                             if (this.mUsage == 2) {
-                                                if (jSONObject.getJSONObject(str5).getInt(str2) == -1) {
+                                                if (jSONObject.getJSONObject("hw").getInt("gop") == -1) {
                                                     i2 = this.exportVideoEncodeSettings.useHWEncoder ? this.exportVideoEncodeSettings.gopSize : vEVideoCompileEncodeSettings.mHWEncodeSetting.mGop;
                                                     vEVideoHWEncodeSettings3.mGop = i2;
                                                     vEVideoCompileEncodeSettings.mSWEncodeSetting.mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
                                                     VEVideoSWEncodeSettings vEVideoSWEncodeSettings = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                    String str7 = "crf";
-                                                    str3 = "sw";
                                                     if (this.mUsage == 2) {
-                                                        if (jSONObject.getJSONObject(str3).getInt(str7) == -1) {
+                                                        if (jSONObject.getJSONObject("sw").getInt("crf") == -1) {
                                                             i3 = this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mCrf : this.exportVideoEncodeSettings.swCRF;
                                                             vEVideoSWEncodeSettings.mCrf = i3;
                                                             VEVideoSWEncodeSettings vEVideoSWEncodeSettings2 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                            String str8 = "maxrate";
                                                             if (this.mUsage == 2) {
-                                                                if (jSONObject.getJSONObject(str3).getInt(str8) == -1) {
+                                                                if (jSONObject.getJSONObject("sw").getInt("maxrate") == -1) {
                                                                     j2 = this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mMaxRate : this.exportVideoEncodeSettings.swMaxrate;
                                                                     vEVideoSWEncodeSettings2.mMaxRate = j2;
                                                                     VEVideoSWEncodeSettings vEVideoSWEncodeSettings3 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                                    String str9 = "preset";
                                                                     if (this.mUsage == 2) {
-                                                                        if (jSONObject.getJSONObject(str3).getInt(str9) == -1) {
+                                                                        if (jSONObject.getJSONObject("sw").getInt("preset") == -1) {
                                                                             i4 = this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mPreset : this.exportVideoEncodeSettings.swPreset;
                                                                             vEVideoSWEncodeSettings3.mPreset = i4;
-                                                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings4 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                                            int i6 = (this.mUsage == 2 || !str4.equals(jSONObject.getJSONObject(str3).getString(str))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject(str3).getString(str)).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
-                                                                            vEVideoSWEncodeSettings4.mProfile = i6;
-                                                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings5 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                                            int i7 = (this.mUsage == 2 || jSONObject.getJSONObject(str3).getInt(str2) != -1) ? jSONObject.getJSONObject(str3).getInt(str2) : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
-                                                                            vEVideoSWEncodeSettings5.mGop = i7;
+                                                                            vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                                                            vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                                                             return vEVideoCompileEncodeSettings;
                                                                         }
                                                                     }
-                                                                    i4 = jSONObject.getJSONObject(str3).getInt(str9);
+                                                                    i4 = jSONObject.getJSONObject("sw").getInt("preset");
                                                                     vEVideoSWEncodeSettings3.mPreset = i4;
-                                                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings42 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                                    if (this.mUsage == 2) {
-                                                                    }
-                                                                    vEVideoSWEncodeSettings42.mProfile = i6;
-                                                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings52 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                                    if (this.mUsage == 2) {
-                                                                    }
-                                                                    vEVideoSWEncodeSettings52.mGop = i7;
+                                                                    vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                                                    vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                                                     return vEVideoCompileEncodeSettings;
                                                                 }
                                                             }
-                                                            j2 = (long) jSONObject.getJSONObject(str3).getInt(str8);
+                                                            j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                                                             vEVideoSWEncodeSettings2.mMaxRate = j2;
                                                             VEVideoSWEncodeSettings vEVideoSWEncodeSettings32 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                            String str92 = "preset";
                                                             if (this.mUsage == 2) {
                                                             }
-                                                            i4 = jSONObject.getJSONObject(str3).getInt(str92);
+                                                            i4 = jSONObject.getJSONObject("sw").getInt("preset");
                                                             vEVideoSWEncodeSettings32.mPreset = i4;
-                                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings422 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                            if (this.mUsage == 2) {
-                                                            }
-                                                            vEVideoSWEncodeSettings422.mProfile = i6;
-                                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings522 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                            if (this.mUsage == 2) {
-                                                            }
-                                                            vEVideoSWEncodeSettings522.mGop = i7;
+                                                            vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                                            vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                                             return vEVideoCompileEncodeSettings;
                                                         }
                                                     }
-                                                    i3 = jSONObject.getJSONObject(str3).getInt(str7);
+                                                    i3 = jSONObject.getJSONObject("sw").getInt("crf");
                                                     vEVideoSWEncodeSettings.mCrf = i3;
                                                     VEVideoSWEncodeSettings vEVideoSWEncodeSettings22 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                    String str82 = "maxrate";
                                                     if (this.mUsage == 2) {
                                                     }
-                                                    j2 = (long) jSONObject.getJSONObject(str3).getInt(str82);
+                                                    j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                                                     vEVideoSWEncodeSettings22.mMaxRate = j2;
                                                     VEVideoSWEncodeSettings vEVideoSWEncodeSettings322 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                    String str922 = "preset";
                                                     if (this.mUsage == 2) {
                                                     }
-                                                    i4 = jSONObject.getJSONObject(str3).getInt(str922);
+                                                    i4 = jSONObject.getJSONObject("sw").getInt("preset");
                                                     vEVideoSWEncodeSettings322.mPreset = i4;
-                                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings4222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                    if (this.mUsage == 2) {
-                                                    }
-                                                    vEVideoSWEncodeSettings4222.mProfile = i6;
-                                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings5222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                                    if (this.mUsage == 2) {
-                                                    }
-                                                    vEVideoSWEncodeSettings5222.mGop = i7;
+                                                    vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                                    vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                                     return vEVideoCompileEncodeSettings;
                                                 }
                                             }
-                                            i2 = jSONObject.getJSONObject(str5).getInt(str2);
+                                            i2 = jSONObject.getJSONObject("hw").getInt("gop");
                                             vEVideoHWEncodeSettings3.mGop = i2;
                                             vEVideoCompileEncodeSettings.mSWEncodeSetting.mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
-                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings6 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                            String str72 = "crf";
-                                            str3 = "sw";
+                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings4 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
                                             if (this.mUsage == 2) {
                                             }
-                                            i3 = jSONObject.getJSONObject(str3).getInt(str72);
-                                            vEVideoSWEncodeSettings6.mCrf = i3;
+                                            i3 = jSONObject.getJSONObject("sw").getInt("crf");
+                                            vEVideoSWEncodeSettings4.mCrf = i3;
                                             VEVideoSWEncodeSettings vEVideoSWEncodeSettings222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                            String str822 = "maxrate";
                                             if (this.mUsage == 2) {
                                             }
-                                            j2 = (long) jSONObject.getJSONObject(str3).getInt(str822);
+                                            j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                                             vEVideoSWEncodeSettings222.mMaxRate = j2;
                                             VEVideoSWEncodeSettings vEVideoSWEncodeSettings3222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                            String str9222 = "preset";
                                             if (this.mUsage == 2) {
                                             }
-                                            i4 = jSONObject.getJSONObject(str3).getInt(str9222);
+                                            i4 = jSONObject.getJSONObject("sw").getInt("preset");
                                             vEVideoSWEncodeSettings3222.mPreset = i4;
-                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings42222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                            if (this.mUsage == 2) {
-                                            }
-                                            vEVideoSWEncodeSettings42222.mProfile = i6;
-                                            VEVideoSWEncodeSettings vEVideoSWEncodeSettings52222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                            if (this.mUsage == 2) {
-                                            }
-                                            vEVideoSWEncodeSettings52222.mGop = i7;
+                                            vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                            vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                             return vEVideoCompileEncodeSettings;
                                         }
                                     }
-                                    i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject(str5).getString(str)).ordinal();
+                                    i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("hw").getString("profile")).ordinal();
                                     vEVideoHWEncodeSettings2.mProfile = i;
                                     VEVideoHWEncodeSettings vEVideoHWEncodeSettings32 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                                    str2 = "gop";
                                     if (this.mUsage == 2) {
                                     }
-                                    i2 = jSONObject.getJSONObject(str5).getInt(str2);
+                                    i2 = jSONObject.getJSONObject("hw").getInt("gop");
                                     vEVideoHWEncodeSettings32.mGop = i2;
                                     vEVideoCompileEncodeSettings.mSWEncodeSetting.mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
-                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings62 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                    String str722 = "crf";
-                                    str3 = "sw";
+                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings42 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
                                     if (this.mUsage == 2) {
                                     }
-                                    i3 = jSONObject.getJSONObject(str3).getInt(str722);
-                                    vEVideoSWEncodeSettings62.mCrf = i3;
+                                    i3 = jSONObject.getJSONObject("sw").getInt("crf");
+                                    vEVideoSWEncodeSettings42.mCrf = i3;
                                     VEVideoSWEncodeSettings vEVideoSWEncodeSettings2222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                    String str8222 = "maxrate";
                                     if (this.mUsage == 2) {
                                     }
-                                    j2 = (long) jSONObject.getJSONObject(str3).getInt(str8222);
+                                    j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                                     vEVideoSWEncodeSettings2222.mMaxRate = j2;
                                     VEVideoSWEncodeSettings vEVideoSWEncodeSettings32222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                    String str92222 = "preset";
                                     if (this.mUsage == 2) {
                                     }
-                                    i4 = jSONObject.getJSONObject(str3).getInt(str92222);
+                                    i4 = jSONObject.getJSONObject("sw").getInt("preset");
                                     vEVideoSWEncodeSettings32222.mPreset = i4;
-                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings422222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                    if (this.mUsage == 2) {
-                                    }
-                                    vEVideoSWEncodeSettings422222.mProfile = i6;
-                                    VEVideoSWEncodeSettings vEVideoSWEncodeSettings522222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                    if (this.mUsage == 2) {
-                                    }
-                                    vEVideoSWEncodeSettings522222.mGop = i7;
+                                    vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                    vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                     return vEVideoCompileEncodeSettings;
                                 }
                                 j = vEVideoCompileEncodeSettings.mHWEncodeSetting.mBitrate;
                                 vEVideoHWEncodeSettings.mBitrate = j;
                                 VEVideoHWEncodeSettings vEVideoHWEncodeSettings22 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                                str = "profile";
                                 if (this.mUsage == 2) {
                                 }
-                                i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject(str5).getString(str)).ordinal();
+                                i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("hw").getString("profile")).ordinal();
                                 vEVideoHWEncodeSettings22.mProfile = i;
                                 VEVideoHWEncodeSettings vEVideoHWEncodeSettings322 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                                str2 = "gop";
                                 if (this.mUsage == 2) {
                                 }
-                                i2 = jSONObject.getJSONObject(str5).getInt(str2);
+                                i2 = jSONObject.getJSONObject("hw").getInt("gop");
                                 vEVideoHWEncodeSettings322.mGop = i2;
                                 vEVideoCompileEncodeSettings.mSWEncodeSetting.mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
-                                VEVideoSWEncodeSettings vEVideoSWEncodeSettings622 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                String str7222 = "crf";
-                                str3 = "sw";
+                                VEVideoSWEncodeSettings vEVideoSWEncodeSettings422 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
                                 if (this.mUsage == 2) {
                                 }
-                                i3 = jSONObject.getJSONObject(str3).getInt(str7222);
-                                vEVideoSWEncodeSettings622.mCrf = i3;
+                                i3 = jSONObject.getJSONObject("sw").getInt("crf");
+                                vEVideoSWEncodeSettings422.mCrf = i3;
                                 VEVideoSWEncodeSettings vEVideoSWEncodeSettings22222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                String str82222 = "maxrate";
                                 if (this.mUsage == 2) {
                                 }
-                                j2 = (long) jSONObject.getJSONObject(str3).getInt(str82222);
+                                j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                                 vEVideoSWEncodeSettings22222.mMaxRate = j2;
                                 VEVideoSWEncodeSettings vEVideoSWEncodeSettings322222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                String str922222 = "preset";
                                 if (this.mUsage == 2) {
                                 }
-                                i4 = jSONObject.getJSONObject(str3).getInt(str922222);
+                                i4 = jSONObject.getJSONObject("sw").getInt("preset");
                                 vEVideoSWEncodeSettings322222.mPreset = i4;
-                                VEVideoSWEncodeSettings vEVideoSWEncodeSettings4222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                if (this.mUsage == 2) {
-                                }
-                                vEVideoSWEncodeSettings4222222.mProfile = i6;
-                                VEVideoSWEncodeSettings vEVideoSWEncodeSettings5222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                                if (this.mUsage == 2) {
-                                }
-                                vEVideoSWEncodeSettings5222222.mGop = i7;
+                                vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                                vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                                 return vEVideoCompileEncodeSettings;
                             }
                         }
-                        i5 = jSONObject.getJSONObject(str5).getInt(str6);
+                        i5 = jSONObject.getJSONObject("hw").getInt("bitrate");
                         j = (long) i5;
                         vEVideoHWEncodeSettings.mBitrate = j;
                         VEVideoHWEncodeSettings vEVideoHWEncodeSettings222 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                        str = "profile";
                         if (this.mUsage == 2) {
                         }
-                        i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject(str5).getString(str)).ordinal();
+                        i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("hw").getString("profile")).ordinal();
                         vEVideoHWEncodeSettings222.mProfile = i;
                         VEVideoHWEncodeSettings vEVideoHWEncodeSettings3222 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                        str2 = "gop";
                         if (this.mUsage == 2) {
                         }
-                        i2 = jSONObject.getJSONObject(str5).getInt(str2);
+                        i2 = jSONObject.getJSONObject("hw").getInt("gop");
                         vEVideoHWEncodeSettings3222.mGop = i2;
                         vEVideoCompileEncodeSettings.mSWEncodeSetting.mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
-                        VEVideoSWEncodeSettings vEVideoSWEncodeSettings6222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                        String str72222 = "crf";
-                        str3 = "sw";
+                        VEVideoSWEncodeSettings vEVideoSWEncodeSettings4222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
                         if (this.mUsage == 2) {
                         }
-                        i3 = jSONObject.getJSONObject(str3).getInt(str72222);
-                        vEVideoSWEncodeSettings6222.mCrf = i3;
+                        i3 = jSONObject.getJSONObject("sw").getInt("crf");
+                        vEVideoSWEncodeSettings4222.mCrf = i3;
                         VEVideoSWEncodeSettings vEVideoSWEncodeSettings222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                        String str822222 = "maxrate";
                         if (this.mUsage == 2) {
                         }
-                        j2 = (long) jSONObject.getJSONObject(str3).getInt(str822222);
+                        j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                         vEVideoSWEncodeSettings222222.mMaxRate = j2;
                         VEVideoSWEncodeSettings vEVideoSWEncodeSettings3222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                        String str9222222 = "preset";
                         if (this.mUsage == 2) {
                         }
-                        i4 = jSONObject.getJSONObject(str3).getInt(str9222222);
+                        i4 = jSONObject.getJSONObject("sw").getInt("preset");
                         vEVideoSWEncodeSettings3222222.mPreset = i4;
-                        VEVideoSWEncodeSettings vEVideoSWEncodeSettings42222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                        if (this.mUsage == 2) {
-                        }
-                        vEVideoSWEncodeSettings42222222.mProfile = i6;
-                        VEVideoSWEncodeSettings vEVideoSWEncodeSettings52222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                        if (this.mUsage == 2) {
-                        }
-                        vEVideoSWEncodeSettings52222222.mGop = i7;
+                        vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                        vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
                         return vEVideoCompileEncodeSettings;
                     }
                 }
-                vEVideoCompileEncodeSettings.useHWEncoder = str5.equals(string);
+                vEVideoCompileEncodeSettings.useHWEncoder = "hw".equals(string);
                 VEVideoHWEncodeSettings vEVideoHWEncodeSettings4 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                String str62 = "bitrate";
                 if (this.mUsage == 2) {
                 }
-                i5 = jSONObject.getJSONObject(str5).getInt(str62);
+                i5 = jSONObject.getJSONObject("hw").getInt("bitrate");
                 j = (long) i5;
                 vEVideoHWEncodeSettings4.mBitrate = j;
                 VEVideoHWEncodeSettings vEVideoHWEncodeSettings2222 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                str = "profile";
                 if (this.mUsage == 2) {
                 }
-                i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject(str5).getString(str)).ordinal();
+                i = VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("hw").getString("profile")).ordinal();
                 vEVideoHWEncodeSettings2222.mProfile = i;
                 VEVideoHWEncodeSettings vEVideoHWEncodeSettings32222 = vEVideoCompileEncodeSettings.mHWEncodeSetting;
-                str2 = "gop";
                 if (this.mUsage == 2) {
                 }
-                i2 = jSONObject.getJSONObject(str5).getInt(str2);
+                i2 = jSONObject.getJSONObject("hw").getInt("gop");
                 vEVideoHWEncodeSettings32222.mGop = i2;
                 vEVideoCompileEncodeSettings.mSWEncodeSetting.mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
-                VEVideoSWEncodeSettings vEVideoSWEncodeSettings62222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                String str722222 = "crf";
-                str3 = "sw";
+                VEVideoSWEncodeSettings vEVideoSWEncodeSettings42222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
                 if (this.mUsage == 2) {
                 }
-                i3 = jSONObject.getJSONObject(str3).getInt(str722222);
-                vEVideoSWEncodeSettings62222.mCrf = i3;
+                i3 = jSONObject.getJSONObject("sw").getInt("crf");
+                vEVideoSWEncodeSettings42222.mCrf = i3;
                 VEVideoSWEncodeSettings vEVideoSWEncodeSettings2222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                String str8222222 = "maxrate";
                 if (this.mUsage == 2) {
                 }
-                j2 = (long) jSONObject.getJSONObject(str3).getInt(str8222222);
+                j2 = (long) jSONObject.getJSONObject("sw").getInt("maxrate");
                 vEVideoSWEncodeSettings2222222.mMaxRate = j2;
                 VEVideoSWEncodeSettings vEVideoSWEncodeSettings32222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                String str92222222 = "preset";
                 if (this.mUsage == 2) {
                 }
-                i4 = jSONObject.getJSONObject(str3).getInt(str92222222);
+                i4 = jSONObject.getJSONObject("sw").getInt("preset");
                 vEVideoSWEncodeSettings32222222.mPreset = i4;
-                VEVideoSWEncodeSettings vEVideoSWEncodeSettings422222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                if (this.mUsage == 2) {
-                }
-                vEVideoSWEncodeSettings422222222.mProfile = i6;
-                VEVideoSWEncodeSettings vEVideoSWEncodeSettings522222222 = vEVideoCompileEncodeSettings.mSWEncodeSetting;
-                if (this.mUsage == 2) {
-                }
-                vEVideoSWEncodeSettings522222222.mGop = i7;
+                vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile = (this.mUsage == 2 || !EnvironmentCompat.MEDIA_UNKNOWN.equals(jSONObject.getJSONObject("sw").getString("profile"))) ? VEVideoEncodeProfile.valueOfString(jSONObject.getJSONObject("sw").getString("profile")).ordinal() : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mProfile : this.exportVideoEncodeSettings.encodeProfile;
+                vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop = (this.mUsage == 2 || jSONObject.getJSONObject("sw").getInt("gop") != -1) ? jSONObject.getJSONObject("sw").getInt("gop") : this.exportVideoEncodeSettings.useHWEncoder ? vEVideoCompileEncodeSettings.mSWEncodeSetting.mGop : this.exportVideoEncodeSettings.gopSize;
             } catch (JSONException e2) {
                 e2.printStackTrace();
-                StringBuilder sb = new StringBuilder();
-                sb.append("parseJsonToSetting : external json str parse error : ");
-                sb.append(e2.getLocalizedMessage());
-                VELogUtil.e(VEVideoEncodeSettings.TAG, sb.toString());
+                VELogUtil.e(VEVideoEncodeSettings.TAG, "parseJsonToSetting : external json str parse error : " + e2.getLocalizedMessage());
             }
             return vEVideoCompileEncodeSettings;
         }
@@ -609,18 +507,15 @@ public class VEVideoEncodeSettings implements Parcelable {
                 } else if (i == 3) {
                     overrideWithCloudConfigForImport();
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("CompileTime BUG, Unexpected usage = ");
-                    sb.append(this.mUsage);
-                    throw new IllegalStateException(sb.toString());
+                    throw new IllegalStateException("CompileTime BUG, Unexpected usage = " + this.mUsage);
                 }
                 return this;
             }
         }
 
         public Builder setBps(int i) {
-            this.exportVideoEncodeSettings.bitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_ABR;
-            this.exportVideoEncodeSettings.bps = i;
+            ENCODE_BITRATE_MODE unused = this.exportVideoEncodeSettings.bitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_ABR;
+            int unused2 = this.exportVideoEncodeSettings.bps = i;
             return this;
         }
 
@@ -630,114 +525,111 @@ public class VEVideoEncodeSettings implements Parcelable {
         }
 
         public Builder setEnableRemuxVideo(boolean z) {
-            this.exportVideoEncodeSettings.enableRemuxVideo = z;
+            boolean unused = this.exportVideoEncodeSettings.enableRemuxVideo = z;
             return this;
         }
 
         public Builder setEncodePreset(@NonNull ENCODE_PRESET encode_preset) {
-            this.exportVideoEncodeSettings.swPreset = encode_preset.ordinal();
+            int unused = this.exportVideoEncodeSettings.swPreset = encode_preset.ordinal();
             return this;
         }
 
         public Builder setEncodeProfile(@NonNull ENCODE_PROFILE encode_profile) {
-            this.exportVideoEncodeSettings.encodeProfile = encode_profile.ordinal();
+            int unused = this.exportVideoEncodeSettings.encodeProfile = encode_profile.ordinal();
             return this;
         }
 
         public Builder setEncodeStandard(ENCODE_STANDARD encode_standard) {
-            this.exportVideoEncodeSettings.encodeStandard = encode_standard.ordinal();
+            int unused = this.exportVideoEncodeSettings.encodeStandard = encode_standard.ordinal();
             return this;
         }
 
         public Builder setExternalSettings(String str) {
-            this.exportVideoEncodeSettings.externalSettingsJsonStr = str;
+            String unused = this.exportVideoEncodeSettings.externalSettingsJsonStr = str;
             return this;
         }
 
         public Builder setFps(int i) {
-            this.exportVideoEncodeSettings.fps = i;
+            int unused = this.exportVideoEncodeSettings.fps = i;
             return this;
         }
 
         public Builder setGopSize(int i) {
-            this.exportVideoEncodeSettings.gopSize = i;
+            int unused = this.exportVideoEncodeSettings.gopSize = i;
             return this;
         }
 
         public Builder setHasBFrame(boolean z) {
-            this.exportVideoEncodeSettings.hasBFrame = z;
+            boolean unused = this.exportVideoEncodeSettings.hasBFrame = z;
             return this;
         }
 
         public Builder setHwEnc(boolean z) {
-            this.exportVideoEncodeSettings.useHWEncoder = z;
+            boolean unused = this.exportVideoEncodeSettings.useHWEncoder = z;
             return this;
         }
 
         public Builder setQP(int i) {
-            this.exportVideoEncodeSettings.bitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_QP;
-            this.exportVideoEncodeSettings.swQP = i;
+            ENCODE_BITRATE_MODE unused = this.exportVideoEncodeSettings.bitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_QP;
+            int unused2 = this.exportVideoEncodeSettings.swQP = i;
             return this;
         }
 
         public Builder setResizeMode(int i) {
-            this.exportVideoEncodeSettings.resizeMode = i;
+            int unused = this.exportVideoEncodeSettings.resizeMode = i;
             return this;
         }
 
         public Builder setResizeX(float f2) {
-            this.exportVideoEncodeSettings.resizeX = f2;
+            float unused = this.exportVideoEncodeSettings.resizeX = f2;
             return this;
         }
 
         public Builder setResizeY(float f2) {
-            this.exportVideoEncodeSettings.resizeY = f2;
+            float unused = this.exportVideoEncodeSettings.resizeY = f2;
             return this;
         }
 
         public Builder setRotate(int i) {
-            this.exportVideoEncodeSettings.rotate = i;
+            int unused = this.exportVideoEncodeSettings.rotate = i;
             return this;
         }
 
         public Builder setSWCRF(int i) {
-            this.exportVideoEncodeSettings.bitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF;
-            this.exportVideoEncodeSettings.swCRF = i;
+            ENCODE_BITRATE_MODE unused = this.exportVideoEncodeSettings.bitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF;
+            int unused2 = this.exportVideoEncodeSettings.swCRF = i;
             return this;
         }
 
         public Builder setSpeed(float f2) {
-            this.exportVideoEncodeSettings.speed = f2;
+            float unused = this.exportVideoEncodeSettings.speed = f2;
             return this;
         }
 
         public Builder setSwMaxrate(long j) {
-            this.exportVideoEncodeSettings.swMaxrate = j;
+            long unused = this.exportVideoEncodeSettings.swMaxrate = j;
             return this;
         }
 
         public Builder setVideoBitrate(ENCODE_BITRATE_MODE encode_bitrate_mode, int i) {
-            this.exportVideoEncodeSettings.bitrateMode = encode_bitrate_mode;
+            ENCODE_BITRATE_MODE unused = this.exportVideoEncodeSettings.bitrateMode = encode_bitrate_mode;
             int i2 = AnonymousClass2.$SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$ENCODE_BITRATE_MODE[encode_bitrate_mode.ordinal()];
             if (i2 == 1) {
-                this.exportVideoEncodeSettings.bps = i;
+                int unused2 = this.exportVideoEncodeSettings.bps = i;
             } else if (i2 == 2) {
-                this.exportVideoEncodeSettings.swCRF = i;
+                int unused3 = this.exportVideoEncodeSettings.swCRF = i;
             } else if (i2 == 3) {
-                this.exportVideoEncodeSettings.swQP = i;
+                int unused4 = this.exportVideoEncodeSettings.swQP = i;
             } else if (i2 == 4) {
-                this.exportVideoEncodeSettings.bps = i;
+                int unused5 = this.exportVideoEncodeSettings.bps = i;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("CompileTime BUG. Unhandled enum value ");
-                sb.append(encode_bitrate_mode.toString());
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("CompileTime BUG. Unhandled enum value " + encode_bitrate_mode.toString());
             }
             return this;
         }
 
         public Builder setVideoBitrateMode(ENCODE_BITRATE_MODE encode_bitrate_mode) {
-            this.exportVideoEncodeSettings.bitrateMode = encode_bitrate_mode;
+            ENCODE_BITRATE_MODE unused = this.exportVideoEncodeSettings.bitrateMode = encode_bitrate_mode;
             return this;
         }
 
@@ -748,7 +640,7 @@ public class VEVideoEncodeSettings implements Parcelable {
         }
 
         public Builder setWatermarkParam(VEWatermarkParam vEWatermarkParam) {
-            this.exportVideoEncodeSettings.mWatermarkParam = vEWatermarkParam;
+            VEWatermarkParam unused = this.exportVideoEncodeSettings.mWatermarkParam = vEWatermarkParam;
             return this;
         }
     }
@@ -758,10 +650,10 @@ public class VEVideoEncodeSettings implements Parcelable {
         COMPILE_TYPE_GIF,
         COMPILE_TYPE_HIGH_GIF;
         
-        public static final Creator<COMPILE_TYPE> CREATOR = null;
+        public static final Parcelable.Creator<COMPILE_TYPE> CREATOR = null;
 
         static {
-            CREATOR = new Creator<COMPILE_TYPE>() {
+            CREATOR = new Parcelable.Creator<COMPILE_TYPE>() {
                 public COMPILE_TYPE createFromParcel(Parcel parcel) {
                     return COMPILE_TYPE.values()[parcel.readInt()];
                 }
@@ -787,12 +679,12 @@ public class VEVideoEncodeSettings implements Parcelable {
         ENCODE_BITRATE_QP,
         ENCODE_BITRATE_VBR;
         
-        public static final Creator<ENCODE_BITRATE_MODE> CREATOR = null;
+        public static final Parcelable.Creator<ENCODE_BITRATE_MODE> CREATOR = null;
         private static final ENCODE_BITRATE_MODE[] values = null;
 
         static {
             values = values();
-            CREATOR = new Creator<ENCODE_BITRATE_MODE>() {
+            CREATOR = new Parcelable.Creator<ENCODE_BITRATE_MODE>() {
                 public ENCODE_BITRATE_MODE createFromParcel(Parcel parcel) {
                     return ENCODE_BITRATE_MODE.values()[parcel.readInt()];
                 }
@@ -828,10 +720,10 @@ public class VEVideoEncodeSettings implements Parcelable {
         ENCODE_LEVEL_VERYSLOW,
         ENCODE_LEVEL_PLACEBO;
         
-        public static final Creator<ENCODE_PRESET> CREATOR = null;
+        public static final Parcelable.Creator<ENCODE_PRESET> CREATOR = null;
 
         static {
-            CREATOR = new Creator<ENCODE_PRESET>() {
+            CREATOR = new Parcelable.Creator<ENCODE_PRESET>() {
                 public ENCODE_PRESET createFromParcel(Parcel parcel) {
                     return ENCODE_PRESET.values()[parcel.readInt()];
                 }
@@ -857,10 +749,10 @@ public class VEVideoEncodeSettings implements Parcelable {
         ENCODE_PROFILE_MAIN,
         ENCODE_PROFILE_HIGH;
         
-        public static final Creator<ENCODE_PROFILE> CREATOR = null;
+        public static final Parcelable.Creator<ENCODE_PROFILE> CREATOR = null;
 
         static {
-            CREATOR = new Creator<ENCODE_PROFILE>() {
+            CREATOR = new Parcelable.Creator<ENCODE_PROFILE>() {
                 public ENCODE_PROFILE createFromParcel(Parcel parcel) {
                     return ENCODE_PROFILE.values()[parcel.readInt()];
                 }
@@ -885,10 +777,10 @@ public class VEVideoEncodeSettings implements Parcelable {
         ENCODE_STANDARD_H265,
         ENCODE_STANDARD_MPEG4;
         
-        public static final Creator<ENCODE_STANDARD> CREATOR = null;
+        public static final Parcelable.Creator<ENCODE_STANDARD> CREATOR = null;
 
         static {
-            CREATOR = new Creator<ENCODE_STANDARD>() {
+            CREATOR = new Parcelable.Creator<ENCODE_STANDARD>() {
                 public ENCODE_STANDARD createFromParcel(Parcel parcel) {
                     return ENCODE_STANDARD.values()[parcel.readInt()];
                 }
@@ -975,10 +867,7 @@ public class VEVideoEncodeSettings implements Parcelable {
         this.useHWEncoder = parcel.readByte() != 0;
         this.enableRemuxVideo = parcel.readByte() != 0;
         this.enableInterLeave = parcel.readByte() != 0;
-        if (parcel.readByte() != 0) {
-            z = true;
-        }
-        this.hasBFrame = z;
+        this.hasBFrame = parcel.readByte() != 0 ? true : z;
         this.swMaxrate = parcel.readLong();
         this.mWatermarkParam = (VEWatermarkParam) parcel.readParcelable(VEWatermarkParam.class.getClassLoader());
         this.mVideoWatermarkCompileEncodeSetting = (VEVideoCompileEncodeSettings) parcel.readParcelable(VEVideoCompileEncodeSettings.class.getClassLoader());
@@ -1272,57 +1161,7 @@ public class VEVideoEncodeSettings implements Parcelable {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VEVideoEncodeSettings{compileType=");
-        sb.append(this.compileType);
-        sb.append(", rotate=");
-        sb.append(this.rotate);
-        sb.append(", resizeMode=");
-        sb.append(this.resizeMode);
-        sb.append(", resizeX=");
-        sb.append(this.resizeX);
-        sb.append(", resizeY=");
-        sb.append(this.resizeY);
-        sb.append(", speed=");
-        sb.append(this.speed);
-        sb.append(", outputSize=");
-        sb.append(this.outputSize);
-        sb.append(", bitrateMode=");
-        sb.append(this.bitrateMode);
-        sb.append(", bps=");
-        sb.append(this.bps);
-        sb.append(", swCRF=");
-        sb.append(this.swCRF);
-        sb.append(", swQP=");
-        sb.append(this.swQP);
-        sb.append(", fps=");
-        sb.append(this.fps);
-        sb.append(", gopSize=");
-        sb.append(this.gopSize);
-        sb.append(", swPreset=");
-        sb.append(this.swPreset);
-        sb.append(", encodeStandard=");
-        sb.append(this.encodeStandard);
-        sb.append(", encodeProfile=");
-        sb.append(this.encodeProfile);
-        sb.append(", swMaxrate=");
-        sb.append(this.swMaxrate);
-        sb.append(", useHWEncoder=");
-        sb.append(this.useHWEncoder);
-        sb.append(", enableRemuxVideo=");
-        sb.append(this.enableRemuxVideo);
-        sb.append(", enableInterLeave=");
-        sb.append(this.enableInterLeave);
-        sb.append(", hasBFrame=");
-        sb.append(this.hasBFrame);
-        sb.append(", mWatermarkParam=");
-        sb.append(this.mWatermarkParam);
-        sb.append(", mVideoWatermarkCompileEncodeSetting=");
-        sb.append(this.mVideoWatermarkCompileEncodeSetting);
-        sb.append(", mVideoCompileEncodeSetting=");
-        sb.append(this.mVideoCompileEncodeSetting);
-        sb.append('}');
-        return sb.toString();
+        return "VEVideoEncodeSettings{compileType=" + this.compileType + ", rotate=" + this.rotate + ", resizeMode=" + this.resizeMode + ", resizeX=" + this.resizeX + ", resizeY=" + this.resizeY + ", speed=" + this.speed + ", outputSize=" + this.outputSize + ", bitrateMode=" + this.bitrateMode + ", bps=" + this.bps + ", swCRF=" + this.swCRF + ", swQP=" + this.swQP + ", fps=" + this.fps + ", gopSize=" + this.gopSize + ", swPreset=" + this.swPreset + ", encodeStandard=" + this.encodeStandard + ", encodeProfile=" + this.encodeProfile + ", swMaxrate=" + this.swMaxrate + ", useHWEncoder=" + this.useHWEncoder + ", enableRemuxVideo=" + this.enableRemuxVideo + ", enableInterLeave=" + this.enableInterLeave + ", hasBFrame=" + this.hasBFrame + ", mWatermarkParam=" + this.mWatermarkParam + ", mVideoWatermarkCompileEncodeSetting=" + this.mVideoWatermarkCompileEncodeSetting + ", mVideoCompileEncodeSetting=" + this.mVideoCompileEncodeSetting + '}';
     }
 
     public void writeToParcel(Parcel parcel, int i) {

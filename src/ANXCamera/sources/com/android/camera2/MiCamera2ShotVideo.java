@@ -2,16 +2,14 @@ package com.android.camera2;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
 import android.support.annotation.NonNull;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 
 public class MiCamera2ShotVideo extends MiCamera2Shot<byte[]> {
     /* access modifiers changed from: private */
@@ -22,30 +20,22 @@ public class MiCamera2ShotVideo extends MiCamera2Shot<byte[]> {
     }
 
     /* access modifiers changed from: protected */
-    public CaptureCallback generateCaptureCallback() {
-        return new CaptureCallback() {
+    public CameraCaptureSession.CaptureCallback generateCaptureCallback() {
+        return new CameraCaptureSession.CaptureCallback() {
             public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
                 String access$000 = MiCamera2ShotVideo.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted: ");
-                sb.append(totalCaptureResult.getFrameNumber());
-                Log.d(access$000, sb.toString());
+                Log.d(access$000, "onCaptureCompleted: " + totalCaptureResult.getFrameNumber());
             }
         };
     }
 
     /* access modifiers changed from: protected */
-    public Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
-        Builder createCaptureRequest = 2 == this.mMiCamera.getCapabilities().getSupportedHardwareLevel() ? this.mMiCamera.getCameraDevice().createCaptureRequest(2) : this.mMiCamera.getCameraDevice().createCaptureRequest(4);
+    public CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
+        CaptureRequest.Builder createCaptureRequest = 2 == this.mMiCamera.getCapabilities().getSupportedHardwareLevel() ? this.mMiCamera.getCameraDevice().createCaptureRequest(2) : this.mMiCamera.getCameraDevice().createCaptureRequest(4);
         ImageReader videoSnapshotImageReader = this.mMiCamera.getVideoSnapshotImageReader();
         createCaptureRequest.addTarget(videoSnapshotImageReader.getSurface());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("size=");
-        sb.append(videoSnapshotImageReader.getWidth());
-        sb.append("x");
-        sb.append(videoSnapshotImageReader.getHeight());
-        Log.d(str, sb.toString());
+        Log.d(str, "size=" + videoSnapshotImageReader.getWidth() + "x" + videoSnapshotImageReader.getHeight());
         if (this.mMiCamera.getPreviewSurface() != null) {
             createCaptureRequest.addTarget(this.mMiCamera.getPreviewSurface());
         }
@@ -58,7 +48,7 @@ public class MiCamera2ShotVideo extends MiCamera2Shot<byte[]> {
 
     /* access modifiers changed from: protected */
     public void notifyResultData(byte[] bArr) {
-        PictureCallback pictureCallback = getPictureCallback();
+        Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
         if (pictureCallback != null) {
             pictureCallback.onPictureTaken(bArr);
         } else {
@@ -80,7 +70,7 @@ public class MiCamera2ShotVideo extends MiCamera2Shot<byte[]> {
     /* access modifiers changed from: protected */
     public void startSessionCapture() {
         try {
-            Builder generateRequestBuilder = generateRequestBuilder();
+            CaptureRequest.Builder generateRequestBuilder = generateRequestBuilder();
             this.mMiCamera.getCaptureSession().capture(generateRequestBuilder.build(), generateCaptureCallback(), this.mCameraHandler);
         } catch (CameraAccessException e2) {
             e2.printStackTrace();

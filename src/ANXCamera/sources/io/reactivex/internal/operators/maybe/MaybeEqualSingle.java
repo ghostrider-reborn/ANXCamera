@@ -34,25 +34,25 @@ public final class MaybeEqualSingle<T> extends Single<Boolean> {
             this.observer2.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void done() {
             if (decrementAndGet() == 0) {
                 Object obj = this.observer1.value;
                 Object obj2 = this.observer2.value;
                 if (obj == null || obj2 == null) {
                     this.actual.onSuccess(Boolean.valueOf(obj == null && obj2 == null));
-                } else {
-                    try {
-                        this.actual.onSuccess(Boolean.valueOf(this.isEqual.test(obj, obj2)));
-                    } catch (Throwable th) {
-                        Exceptions.throwIfFatal(th);
-                        this.actual.onError(th);
-                    }
+                    return;
+                }
+                try {
+                    this.actual.onSuccess(Boolean.valueOf(this.isEqual.test(obj, obj2)));
+                } catch (Throwable th) {
+                    Exceptions.throwIfFatal(th);
+                    this.actual.onError(th);
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void error(EqualObserver<T> equalObserver, Throwable th) {
             if (getAndSet(0) > 0) {
                 EqualObserver<T> equalObserver2 = this.observer1;
@@ -71,7 +71,7 @@ public final class MaybeEqualSingle<T> extends Single<Boolean> {
             return DisposableHelper.isDisposed((Disposable) this.observer1.get());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(MaybeSource<? extends T> maybeSource, MaybeSource<? extends T> maybeSource2) {
             maybeSource.subscribe(this.observer1);
             maybeSource2.subscribe(this.observer2);

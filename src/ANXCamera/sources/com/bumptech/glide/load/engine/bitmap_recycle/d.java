@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.support.annotation.NonNull;
 
 /* compiled from: BitmapPool */
@@ -13,10 +12,10 @@ public interface d {
     void a(Bitmap bitmap);
 
     @NonNull
-    Bitmap c(int i, int i2, Config config);
+    Bitmap c(int i, int i2, Bitmap.Config config);
 
     @NonNull
-    Bitmap d(int i, int i2, Config config);
+    Bitmap d(int i, int i2, Bitmap.Config config);
 
     long getMaxSize();
 

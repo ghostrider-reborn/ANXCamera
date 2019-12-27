@@ -157,10 +157,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         }
         Segment segment = this.head.prev;
         int i = segment.limit;
-        if (i < 8192 && segment.owner) {
-            j -= (long) (i - segment.pos);
-        }
-        return j;
+        return (i >= 8192 || !segment.owner) ? j : j - ((long) (i - segment.pos));
     }
 
     public Buffer copyTo(OutputStream outputStream) throws IOException {
@@ -323,8 +320,9 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         }
         int i = 1;
         do {
-            for (int i2 = segment.pos; i2 < segment.limit; i2++) {
-                i = (i * 31) + segment.data[i2];
+            int i2 = segment.limit;
+            for (int i3 = segment.pos; i3 < i2; i3++) {
+                i = (i * 31) + segment.data[i3];
             }
             segment = segment.next;
         } while (segment != this.head);
@@ -567,10 +565,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
 
             public String toString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append(Buffer.this);
-                sb.append(".inputStream()");
-                return sb.toString();
+                return Buffer.this + ".inputStream()";
             }
         };
     }
@@ -588,10 +583,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
 
             public String toString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append(Buffer.this);
-                sb.append(".outputStream()");
-                return sb.toString();
+                return Buffer.this + ".outputStream()";
             }
 
             public void write(int i) {
@@ -655,10 +647,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             buffer.write(this, j);
             return j;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + j);
         }
     }
 
@@ -705,10 +694,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             readFully(bArr);
             return bArr;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("byteCount > Integer.MAX_VALUE: ");
-        sb.append(j);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("byteCount > Integer.MAX_VALUE: " + j);
     }
 
     public ByteString readByteString() {
@@ -725,13 +711,8 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
     /* JADX WARNING: Code restructure failed: missing block: B:17:0x004b, code lost:
         r0.readByte();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:18:0x004e, code lost:
-        r2 = new java.lang.StringBuilder();
-        r2.append("Number too large: ");
-        r2.append(r0.readUtf8());
-     */
     /* JADX WARNING: Code restructure failed: missing block: B:19:0x0068, code lost:
-        throw new java.lang.NumberFormatException(r2.toString());
+        throw new java.lang.NumberFormatException("Number too large: " + r0.readUtf8());
      */
     public long readDecimalLong() {
         long j = 0;
@@ -765,10 +746,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
                     } else if (i != 0) {
                         z2 = true;
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Expected leading [0-9] or '-' character but was 0x");
-                        sb.append(Integer.toHexString(b2));
-                        throw new NumberFormatException(sb.toString());
+                        throw new NumberFormatException("Expected leading [0-9] or '-' character but was 0x" + Integer.toHexString(b2));
                     }
                     i2++;
                     i++;
@@ -799,10 +777,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             readFrom(inputStream, j, false);
             return this;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("byteCount < 0: ");
-        sb.append(j);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("byteCount < 0: " + j);
     }
 
     public void readFully(Buffer buffer, long j) throws EOFException {
@@ -867,10 +842,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
                         } else if (i3 == 0) {
                             z = true;
                         } else {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Expected leading [0-9a-fA-F] character but was 0x");
-                            sb.append(Integer.toHexString(b2));
-                            throw new NumberFormatException(sb.toString());
+                            throw new NumberFormatException("Expected leading [0-9a-fA-F] character but was 0x" + Integer.toHexString(b2));
                         }
                         i = i2 + 10;
                     } else {
@@ -882,10 +854,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
                         i3++;
                     } else {
                         Buffer writeByte = new Buffer().writeHexadecimalUnsignedLong(j).writeByte((int) b2);
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Number too large: ");
-                        sb2.append(writeByte.readUtf8());
-                        throw new NumberFormatException(sb2.toString());
+                        throw new NumberFormatException("Number too large: " + writeByte.readUtf8());
                     }
                 }
                 if (i3 == 0) {
@@ -923,10 +892,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
             return b4;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("size < 4: ");
-        sb.append(this.size);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("size < 4: " + this.size);
     }
 
     public int readIntLe() {
@@ -944,15 +910,15 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
             byte[] bArr = segment.data;
             int i3 = i + 1;
-            long j2 = (((long) bArr[i]) & 255) << 56;
             int i4 = i3 + 1;
+            long j2 = (((long) bArr[i3]) & 255) << 48;
             int i5 = i4 + 1;
             int i6 = i5 + 1;
             int i7 = i6 + 1;
             int i8 = i7 + 1;
             int i9 = i8 + 1;
             int i10 = i9 + 1;
-            long j3 = ((((long) bArr[i3]) & 255) << 48) | j2 | ((((long) bArr[i4]) & 255) << 40) | ((((long) bArr[i5]) & 255) << 32) | ((((long) bArr[i6]) & 255) << 24) | ((((long) bArr[i7]) & 255) << 16) | ((((long) bArr[i8]) & 255) << 8) | (((long) bArr[i9]) & 255);
+            long j3 = j2 | ((((long) bArr[i]) & 255) << 56) | ((((long) bArr[i4]) & 255) << 40) | ((((long) bArr[i5]) & 255) << 32) | ((((long) bArr[i6]) & 255) << 24) | ((((long) bArr[i7]) & 255) << 16) | ((((long) bArr[i8]) & 255) << 8) | (((long) bArr[i9]) & 255);
             this.size = j - 8;
             if (i10 == i2) {
                 this.head = segment.pop();
@@ -962,10 +928,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
             return j3;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("size < 8: ");
-        sb.append(this.size);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("size < 8: " + this.size);
     }
 
     public long readLongLe() {
@@ -994,10 +957,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
             return (short) b2;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("size < 2: ");
-        sb.append(this.size);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("size < 2: " + this.size);
     }
 
     public short readShortLe() {
@@ -1009,10 +969,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         if (charset == null) {
             throw new IllegalArgumentException("charset == null");
         } else if (j > 2147483647L) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount > Integer.MAX_VALUE: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount > Integer.MAX_VALUE: " + j);
         } else if (j == 0) {
             return "";
         } else {
@@ -1095,30 +1052,25 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
                 skip(j);
                 return b3 > 1114111 ? REPLACEMENT_CHARACTER : ((b3 < 55296 || b3 > 57343) && b3 >= b2) ? b3 : REPLACEMENT_CHARACTER;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("size < ");
-            sb.append(i);
-            sb.append(": ");
-            sb.append(this.size);
-            sb.append(" (to read code point prefixed 0x");
-            sb.append(Integer.toHexString(b4));
-            sb.append(")");
-            throw new EOFException(sb.toString());
+            throw new EOFException("size < " + i + ": " + this.size + " (to read code point prefixed 0x" + Integer.toHexString(b4) + ")");
         }
         throw new EOFException();
     }
 
     @Nullable
     public String readUtf8Line() throws EOFException {
-        long indexOf = indexOf(10);
+        long indexOf = indexOf((byte) 10);
         if (indexOf != -1) {
             return readUtf8Line(indexOf);
         }
         long j = this.size;
-        return j != 0 ? readUtf8(j) : null;
+        if (j != 0) {
+            return readUtf8(j);
+        }
+        return null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String readUtf8Line(long j) throws EOFException {
         if (j > 0) {
             long j2 = j - 1;
@@ -1143,7 +1095,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             if (j != Long.MAX_VALUE) {
                 j2 = j + 1;
             }
-            long indexOf = indexOf(10, 0, j2);
+            long indexOf = indexOf((byte) 10, 0, j2);
             if (indexOf != -1) {
                 return readUtf8Line(indexOf);
             }
@@ -1152,18 +1104,9 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
             Buffer buffer = new Buffer();
             copyTo(buffer, 0, Math.min(32, size()));
-            StringBuilder sb = new StringBuilder();
-            sb.append("\\n not found: limit=");
-            sb.append(Math.min(size(), j));
-            sb.append(" content=");
-            sb.append(buffer.readByteString().hex());
-            sb.append(UIUtils.ELLIPSIS_CHAR);
-            throw new EOFException(sb.toString());
+            throw new EOFException("\\n not found: limit=" + Math.min(size(), j) + " content=" + buffer.readByteString().hex() + UIUtils.ELLIPSIS_CHAR);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("limit < 0: ");
-        sb2.append(j);
-        throw new IllegalArgumentException(sb2.toString());
+        throw new IllegalArgumentException("limit < 0: " + j);
     }
 
     public boolean request(long j) {
@@ -1176,7 +1119,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public List<Integer> segmentSizes() {
         if (this.head == null) {
             return Collections.emptyList();
@@ -1217,7 +1160,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         return -1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int selectPrefix(Options options) {
         Segment segment = this.head;
         ByteString[] byteStringArr = options.byteStrings;
@@ -1277,10 +1220,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         if (j <= 2147483647L) {
             return snapshot((int) j);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("size > Integer.MAX_VALUE: ");
-        sb.append(this.size);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("size > Integer.MAX_VALUE: " + this.size);
     }
 
     public ByteString snapshot(int i) {
@@ -1295,7 +1235,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         return snapshot().toString();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Segment writableSegment(int i) {
         if (i < 1 || i > 8192) {
             throw new IllegalArgumentException();
@@ -1309,10 +1249,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             return segment2;
         }
         Segment segment3 = segment.prev;
-        if (segment3.limit + i > 8192 || !segment3.owner) {
-            segment3 = segment3.push(SegmentPool.take());
-        }
-        return segment3;
+        return (segment3.limit + i > 8192 || !segment3.owner) ? segment3.push(SegmentPool.take()) : segment3;
     }
 
     public Buffer write(ByteString byteString) {
@@ -1495,9 +1432,8 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         bArr[i3] = (byte) ((i >>> 16) & 255);
         int i5 = i4 + 1;
         bArr[i4] = (byte) ((i >>> 8) & 255);
-        int i6 = i5 + 1;
         bArr[i5] = (byte) (i & 255);
-        writableSegment.limit = i6;
+        writableSegment.limit = i5 + 1;
         this.size += 4;
         return this;
     }
@@ -1524,9 +1460,8 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         bArr[i6] = (byte) ((int) ((j >>> 16) & 255));
         int i8 = i7 + 1;
         bArr[i7] = (byte) ((int) ((j >>> 8) & 255));
-        int i9 = i8 + 1;
         bArr[i8] = (byte) ((int) (j & 255));
-        writableSegment.limit = i9;
+        writableSegment.limit = i8 + 1;
         this.size += 8;
         return this;
     }
@@ -1541,9 +1476,8 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         int i2 = writableSegment.limit;
         int i3 = i2 + 1;
         bArr[i2] = (byte) ((i >>> 8) & 255);
-        int i4 = i3 + 1;
         bArr[i3] = (byte) (i & 255);
-        writableSegment.limit = i4;
+        writableSegment.limit = i3 + 1;
         this.size += 2;
         return this;
     }
@@ -1556,24 +1490,11 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         if (str == null) {
             throw new IllegalArgumentException("string == null");
         } else if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("beginIndex < 0: ");
-            sb.append(i);
-            throw new IllegalAccessError(sb.toString());
+            throw new IllegalAccessError("beginIndex < 0: " + i);
         } else if (i2 < i) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("endIndex < beginIndex: ");
-            sb2.append(i2);
-            sb2.append(" < ");
-            sb2.append(i);
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("endIndex < beginIndex: " + i2 + " < " + i);
         } else if (i2 > str.length()) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("endIndex > string.length: ");
-            sb3.append(i2);
-            sb3.append(" > ");
-            sb3.append(str.length());
-            throw new IllegalArgumentException(sb3.toString());
+            throw new IllegalArgumentException("endIndex > string.length: " + i2 + " > " + str.length());
         } else if (charset == null) {
             throw new IllegalArgumentException("charset == null");
         } else if (charset.equals(Util.UTF_8)) {
@@ -1623,17 +1544,9 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
         if (str == null) {
             throw new IllegalArgumentException("string == null");
         } else if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("beginIndex < 0: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("beginIndex < 0: " + i);
         } else if (i2 < i) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("endIndex < beginIndex: ");
-            sb2.append(i2);
-            sb2.append(" < ");
-            sb2.append(i);
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("endIndex < beginIndex: " + i2 + " < " + i);
         } else if (i2 <= str.length()) {
             while (i < i2) {
                 char charAt = str.charAt(i);
@@ -1649,15 +1562,13 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
                         if (charAt2 >= 128) {
                             break;
                         }
-                        int i5 = i4 + 1;
                         bArr[i4 + i3] = (byte) charAt2;
-                        i4 = i5;
+                        i4++;
                     }
-                    int i6 = i3 + i4;
-                    int i7 = writableSegment.limit;
-                    int i8 = i6 - i7;
-                    writableSegment.limit = i7 + i8;
-                    this.size += (long) i8;
+                    int i5 = writableSegment.limit;
+                    int i6 = (i3 + i4) - i5;
+                    writableSegment.limit = i5 + i6;
+                    this.size += (long) i6;
                     i = i4;
                 } else {
                     if (charAt < 2048) {
@@ -1668,17 +1579,17 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
                         writeByte(((charAt >> 6) & 63) | 128);
                         writeByte((int) (charAt & '?') | 128);
                     } else {
-                        int i9 = i + 1;
-                        char charAt3 = i9 < i2 ? str.charAt(i9) : 0;
+                        int i7 = i + 1;
+                        char charAt3 = i7 < i2 ? str.charAt(i7) : 0;
                         if (charAt > 56319 || charAt3 < 56320 || charAt3 > 57343) {
                             writeByte(63);
-                            i = i9;
+                            i = i7;
                         } else {
-                            int i10 = (((charAt & 10239) << 10) | (9215 & charAt3)) + 0;
-                            writeByte((i10 >> 18) | 240);
-                            writeByte(((i10 >> 12) & 63) | 128);
-                            writeByte(((i10 >> 6) & 63) | 128);
-                            writeByte((i10 & 63) | 128);
+                            int i8 = (((charAt & 10239) << 10) | (9215 & charAt3)) + 0;
+                            writeByte((i8 >> 18) | 240);
+                            writeByte(((i8 >> 12) & 63) | 128);
+                            writeByte(((i8 >> 6) & 63) | 128);
+                            writeByte((i8 & 63) | 128);
                             i += 2;
                         }
                     }
@@ -1687,12 +1598,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             }
             return this;
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("endIndex > string.length: ");
-            sb3.append(i2);
-            sb3.append(" > ");
-            sb3.append(str.length());
-            throw new IllegalArgumentException(sb3.toString());
+            throw new IllegalArgumentException("endIndex > string.length: " + i2 + " > " + str.length());
         }
     }
 
@@ -1716,10 +1622,7 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
             writeByte(((i >> 6) & 63) | 128);
             writeByte((i & 63) | 128);
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unexpected code point: ");
-            sb.append(Integer.toHexString(i));
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unexpected code point: " + Integer.toHexString(i));
         }
         return this;
     }

@@ -4,13 +4,10 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Drawable.Callback;
-import android.graphics.drawable.Drawable.ConstantState;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import com.bumptech.glide.util.i;
@@ -25,12 +22,12 @@ public class g extends Drawable {
     private Drawable wa;
 
     /* compiled from: FixedSizeDrawable */
-    static final class a extends ConstantState {
+    static final class a extends Drawable.ConstantState {
         final int height;
-        private final ConstantState wa;
+        private final Drawable.ConstantState wa;
         final int width;
 
-        a(ConstantState constantState, int i, int i2) {
+        a(Drawable.ConstantState constantState, int i, int i2) {
             this.wa = constantState;
             this.width = i;
             this.height = i2;
@@ -71,7 +68,7 @@ public class g extends Drawable {
     }
 
     private void Uj() {
-        this.matrix.setRectToRect(this.Ga, this.bounds, ScaleToFit.CENTER);
+        this.matrix.setRectToRect(this.Ga, this.bounds, Matrix.ScaleToFit.CENTER);
     }
 
     public void clearColorFilter() {
@@ -90,7 +87,7 @@ public class g extends Drawable {
         return this.wa.getAlpha();
     }
 
-    public Callback getCallback() {
+    public Drawable.Callback getCallback() {
         return this.wa.getCallback();
     }
 
@@ -98,7 +95,7 @@ public class g extends Drawable {
         return this.wa.getChangingConfigurations();
     }
 
-    public ConstantState getConstantState() {
+    public Drawable.ConstantState getConstantState() {
         return this.state;
     }
 
@@ -171,7 +168,7 @@ public class g extends Drawable {
         this.wa.setChangingConfigurations(i);
     }
 
-    public void setColorFilter(int i, @NonNull Mode mode) {
+    public void setColorFilter(int i, @NonNull PorterDuff.Mode mode) {
         this.wa.setColorFilter(i, mode);
     }
 

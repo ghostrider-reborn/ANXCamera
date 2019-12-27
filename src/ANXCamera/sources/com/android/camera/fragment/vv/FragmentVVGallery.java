@@ -4,19 +4,14 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.State;
 import android.view.View;
-import android.view.View.OnClickListener;
 import com.android.camera.R;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.BaseFragmentDelegate;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.android.camera.module.impl.component.LiveSubVVImpl;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
@@ -26,7 +21,7 @@ import io.reactivex.schedulers.Schedulers;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class FragmentVVGallery extends BaseFragment implements OnClickListener, HandleBackTrace {
+public class FragmentVVGallery extends BaseFragment implements View.OnClickListener, ModeProtocol.HandleBackTrace {
     private VVGalleryAdapter mGalleryAdapter;
     private View mProgressView;
     private RecyclerView mRecyclerView;
@@ -35,7 +30,7 @@ public class FragmentVVGallery extends BaseFragment implements OnClickListener, 
     /* access modifiers changed from: private */
     public VVList mVVList;
 
-    private static class EffectItemPadding extends ItemDecoration {
+    private static class EffectItemPadding extends RecyclerView.ItemDecoration {
         protected int mEffectListLeft;
         protected int mHorizontalPadding;
         protected int mVerticalPadding;
@@ -46,7 +41,7 @@ public class FragmentVVGallery extends BaseFragment implements OnClickListener, 
             this.mEffectListLeft = context.getResources().getDimensionPixelSize(R.dimen.effect_list_padding_left);
         }
 
-        public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+        public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
             int i = recyclerView.getChildPosition(view) == 0 ? this.mEffectListLeft : 0;
             int i2 = this.mVerticalPadding;
             rect.set(i, i2, this.mHorizontalPadding, i2);
@@ -124,7 +119,7 @@ public class FragmentVVGallery extends BaseFragment implements OnClickListener, 
         if (!isVisible()) {
             return false;
         }
-        ((ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).onConfigChanged(216);
+        ((ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164)).onConfigChanged(216);
         return true;
     }
 
@@ -133,7 +128,7 @@ public class FragmentVVGallery extends BaseFragment implements OnClickListener, 
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         registerBackStack(modeCoordinator, this);
     }
@@ -143,7 +138,7 @@ public class FragmentVVGallery extends BaseFragment implements OnClickListener, 
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         unRegisterBackStack(modeCoordinator, this);
     }

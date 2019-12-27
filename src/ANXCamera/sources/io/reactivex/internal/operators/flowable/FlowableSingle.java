@@ -80,6 +80,6 @@ public final class FlowableSingle<T> extends AbstractFlowableWithUpstream<T, T> 
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new SingleElementSubscriber<Object>(subscriber, this.defaultValue));
+        this.source.subscribe(new SingleElementSubscriber(subscriber, this.defaultValue));
     }
 }

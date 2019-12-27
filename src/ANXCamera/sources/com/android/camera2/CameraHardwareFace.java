@@ -42,8 +42,7 @@ public class CameraHardwareFace {
     public static CameraHardwareFace[] convertExCameraHardwareFace(Face[] faceArr, FaceAnalyzeInfo faceAnalyzeInfo) {
         int min = Math.min(faceArr.length, faceAnalyzeInfo.mAge.length);
         CameraHardwareFace[] cameraHardwareFaceArr = new CameraHardwareFace[min];
-        int i = 0;
-        while (i < min) {
+        for (int i = 0; i < min; i++) {
             cameraHardwareFaceArr[i] = new CameraHardwareFace();
             CameraHardwareFace cameraHardwareFace = cameraHardwareFaceArr[i];
             Face face = faceArr[i];
@@ -51,13 +50,11 @@ public class CameraHardwareFace {
             float f3 = faceAnalyzeInfo.mGender[i];
             float[] fArr = faceAnalyzeInfo.mFaceScore;
             copyExFace(cameraHardwareFace, face, f2, f3, fArr == null ? 0.0f : fArr[i], faceAnalyzeInfo.mProp[i]);
-            i++;
         }
         return cameraHardwareFaceArr;
     }
 
     private static void copyExFace(CameraHardwareFace cameraHardwareFace, Face face, float f2, float f3, float f4, float f5) {
-        Field[] fields;
         cameraHardwareFace.rect = face.getBounds();
         cameraHardwareFace.score = face.getScore();
         cameraHardwareFace.id = face.getId();

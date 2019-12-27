@@ -1,13 +1,13 @@
 package com.android.camera2;
 
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
-import android.hardware.camera2.CaptureRequest.Builder;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.os.Handler;
 import com.android.camera.Thumbnail;
 import com.android.camera.log.Log;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 import com.xiaomi.camera.core.ParallelCallback;
 import com.xiaomi.camera.core.ParallelTaskData;
 
@@ -20,7 +20,7 @@ public abstract class MiCamera2Shot<T> {
     protected boolean mDeparted;
     protected MiCamera2 mMiCamera;
     private ParallelCallback mParallelCallback;
-    private PictureCallback mPictureCallback;
+    private Camera2Proxy.PictureCallback mPictureCallback;
     protected int mPreviewThumbnailHash = -1;
     private boolean mQuickShotAnimation;
     private int mShutterFrameNum;
@@ -32,11 +32,11 @@ public abstract class MiCamera2Shot<T> {
     }
 
     /* access modifiers changed from: protected */
-    public abstract CaptureCallback generateCaptureCallback();
+    public abstract CameraCaptureSession.CaptureCallback generateCaptureCallback();
 
     /* access modifiers changed from: protected */
     public final ParallelTaskData generateParallelTaskData(long j) {
-        PictureCallback pictureCallback = getPictureCallback();
+        Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
         if (pictureCallback == null) {
             Log.e(getClass().getSimpleName(), "null callback is not allowed!");
             return null;
@@ -46,13 +46,13 @@ public abstract class MiCamera2Shot<T> {
     }
 
     /* access modifiers changed from: protected */
-    public abstract Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException;
+    public abstract CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException;
 
     public ParallelCallback getParallelCallback() {
         return this.mParallelCallback;
     }
 
-    public PictureCallback getPictureCallback() {
+    public Camera2Proxy.PictureCallback getPictureCallback() {
         return this.mPictureCallback;
     }
 
@@ -92,7 +92,7 @@ public abstract class MiCamera2Shot<T> {
             return false;
         }
         this.mShutterFrameNum = 2;
-        PictureCallback pictureCallback = getPictureCallback();
+        Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
         if (pictureCallback != null) {
             pictureCallback.onCaptureShutter(true);
         }
@@ -111,7 +111,7 @@ public abstract class MiCamera2Shot<T> {
         this.mParallelCallback = parallelCallback;
     }
 
-    public void setPictureCallback(PictureCallback pictureCallback) {
+    public void setPictureCallback(Camera2Proxy.PictureCallback pictureCallback) {
         this.mPictureCallback = pictureCallback;
     }
 

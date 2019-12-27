@@ -9,14 +9,14 @@ import android.widget.TextView;
 import com.android.camera.HybridZoomingSystem;
 import com.android.camera.R;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
+import com.android.camera.protocol.ModeProtocol;
 
 public class UltraWideNewbieDialogFragment extends AiSceneNewbieDialogFragment {
     public static final String TAG = "UltraWideHint";
 
     public boolean onBackEvent(int i) {
         boolean onBackEvent = super.onBackEvent(i);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.directShowLeftImageIntro();
         }

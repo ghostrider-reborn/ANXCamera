@@ -16,6 +16,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -38,7 +39,6 @@ public class XMPMetaParser {
     }
 
     /* JADX WARNING: type inference failed for: r9v0, types: [java.lang.Object[]] */
-    /* JADX WARNING: Incorrect type for immutable var: ssa=java.lang.Object[], code=null, for r9v0, types: [java.lang.Object[]] */
     /* JADX WARNING: Unknown variable types count: 1 */
     private static Object[] findRootNode(Node node, boolean z, Object[] r9) {
         NodeList childNodes = node.getChildNodes();
@@ -95,7 +95,7 @@ public class XMPMetaParser {
     private static Document parseInputSource(InputSource inputSource) throws XMPException {
         try {
             DocumentBuilder newDocumentBuilder = factory.newDocumentBuilder();
-            newDocumentBuilder.setErrorHandler(null);
+            newDocumentBuilder.setErrorHandler((ErrorHandler) null);
             return newDocumentBuilder.parse(inputSource);
         } catch (SAXException e2) {
             throw new XMPException("XML parsing failure", 201, e2);

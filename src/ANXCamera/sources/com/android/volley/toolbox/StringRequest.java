@@ -5,23 +5,21 @@ import android.support.annotation.Nullable;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
 import java.io.UnsupportedEncodingException;
 
 public class StringRequest extends Request<String> {
     @Nullable
     @GuardedBy("mLock")
-    private Listener<String> mListener;
+    private Response.Listener<String> mListener;
     private final Object mLock;
 
-    public StringRequest(int i, String str, Listener<String> listener, @Nullable ErrorListener errorListener) {
+    public StringRequest(int i, String str, Response.Listener<String> listener, @Nullable Response.ErrorListener errorListener) {
         super(i, str, errorListener);
         this.mLock = new Object();
         this.mListener = listener;
     }
 
-    public StringRequest(String str, Listener<String> listener, @Nullable ErrorListener errorListener) {
+    public StringRequest(String str, Response.Listener<String> listener, @Nullable Response.ErrorListener errorListener) {
         this(0, str, listener, errorListener);
     }
 
@@ -34,7 +32,7 @@ public class StringRequest extends Request<String> {
 
     /* access modifiers changed from: protected */
     public void deliverResponse(String str) {
-        Listener<String> listener;
+        Response.Listener<String> listener;
         synchronized (this.mLock) {
             listener = this.mListener;
         }

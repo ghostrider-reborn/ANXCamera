@@ -3,18 +3,16 @@ package com.android.camera.ui;
 import android.content.Context;
 import android.opengl.EGL14;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLSurfaceView.EGLConfigChooser;
-import android.opengl.GLSurfaceView.Renderer;
 import android.os.Process;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import com.android.camera.Camera;
-import com.android.camera.SurfaceTextureScreenNail.ExternalFrameProcessor;
+import com.android.camera.SurfaceTextureScreenNail;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
 import com.android.camera.module.BaseModule;
-import com.android.gallery3d.exif.ExifInterface.GpsStatus;
+import com.android.gallery3d.exif.ExifInterface;
 import com.android.gallery3d.ui.BasicTexture;
 import com.android.gallery3d.ui.GLCanvasImpl;
 import com.android.gallery3d.ui.UploadedTexture;
@@ -30,7 +28,7 @@ import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 import miui.reflect.Field;
 
-public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
+public class V6CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static final boolean DEBUG_FPS = false;
     private static final boolean DEBUG_INVALIDATE = false;
     private static final String TAG = "GLRootView";
@@ -49,7 +47,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
     private volatile boolean mRenderRequested;
     protected int mWidth;
 
-    private class MyEGLConfigChooser implements EGLConfigChooser {
+    private class MyEGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
         private final int[] ATTR_ID;
         private final String[] ATTR_NAME;
         private final int[] mConfigSpec;
@@ -71,7 +69,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
             iArr[12] = 12344;
             this.mConfigSpec = iArr;
             this.ATTR_ID = new int[]{12324, 12323, 12322, 12321, 12325, 12326, 12328, 12327};
-            this.ATTR_NAME = new String[]{"R", "G", Field.BYTE_SIGNATURE_PRIMITIVE, GpsStatus.IN_PROGRESS, Field.DOUBLE_SIGNATURE_PRIMITIVE, "S", "ID", "CAVEAT"};
+            this.ATTR_NAME = new String[]{"R", "G", Field.BYTE_SIGNATURE_PRIMITIVE, ExifInterface.GpsStatus.IN_PROGRESS, Field.DOUBLE_SIGNATURE_PRIMITIVE, "S", "ID", "CAVEAT"};
         }
 
         private EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay, EGLConfig[] eGLConfigArr) {
@@ -82,13 +80,9 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
             for (int i2 = 0; i2 < length; i2++) {
                 if (!egl10.eglGetConfigAttrib(eGLDisplay, eGLConfigArr[i2], 12324, iArr) || iArr[0] != 8) {
                     if (!egl10.eglGetConfigAttrib(eGLDisplay, eGLConfigArr[i2], 12326, iArr)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("eglGetConfigAttrib error: ");
-                        sb.append(egl10.eglGetError());
-                        throw new RuntimeException(sb.toString());
+                        throw new RuntimeException("eglGetConfigAttrib error: " + egl10.eglGetError());
                     } else if (iArr[0] != 0 && iArr[0] < i) {
-                        int i3 = iArr[0];
-                        i = i3;
+                        i = iArr[0];
                         eGLConfig = eGLConfigArr[i2];
                     }
                 }
@@ -114,10 +108,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
                     sb.append(" ");
                     i++;
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Config chosen: ");
-                    sb2.append(sb.toString());
-                    Log.i(V6CameraGLSurfaceView.TAG, sb2.toString());
+                    Log.i(V6CameraGLSurfaceView.TAG, "Config chosen: " + sb.toString());
                     return;
                 }
             }
@@ -125,7 +116,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
 
         public EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay) {
             int[] iArr = new int[1];
-            if (!egl10.eglChooseConfig(eGLDisplay, this.mConfigSpec, null, 0, iArr)) {
+            if (!egl10.eglChooseConfig(eGLDisplay, this.mConfigSpec, (EGLConfig[]) null, 0, iArr)) {
                 throw new RuntimeException("eglChooseConfig failed");
             } else if (iArr[0] > 0) {
                 EGLConfig[] eGLConfigArr = new EGLConfig[iArr[0]];
@@ -140,7 +131,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
     }
 
     public V6CameraGLSurfaceView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public V6CameraGLSurfaceView(Context context, AttributeSet attributeSet) {
@@ -168,10 +159,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
         if (j == 0) {
             this.mFrameCountingStart = nanoTime;
         } else if (nanoTime - j > 1000000000) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("fps: ");
-            sb.append((((double) this.mFrameCount) * 1.0E9d) / ((double) (nanoTime - this.mFrameCountingStart)));
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "fps: " + ((((double) this.mFrameCount) * 1.0E9d) / ((double) (nanoTime - this.mFrameCountingStart))));
             this.mFrameCountingStart = nanoTime;
             this.mFrameCount = 0;
         }
@@ -214,7 +202,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
             boolean isAnimationGaussian = this.mActivity.getCameraScreenNail().isAnimationGaussian();
             this.mActivity.getCameraScreenNail().draw(this.mCanvas);
             if (!isAnimationRunning || isAnimationGaussian) {
-                ExternalFrameProcessor externalFrameProcessor = this.mActivity.getCameraScreenNail().getExternalFrameProcessor();
+                SurfaceTextureScreenNail.ExternalFrameProcessor externalFrameProcessor = this.mActivity.getCameraScreenNail().getExternalFrameProcessor();
                 if (externalFrameProcessor != null) {
                     externalFrameProcessor.onDrawFrame(this.mActivity.getCameraScreenNail().getDisplayRect(), 0, 0, false);
                 }
@@ -242,14 +230,7 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
     }
 
     public void onSurfaceChanged(GL10 gl10, int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onSurfaceChanged: ");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        sb.append(", gl10: ");
-        sb.append(gl10.toString());
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "onSurfaceChanged: " + i + "x" + i2 + ", gl10: " + gl10.toString());
         Process.setThreadPriority(-4);
         Utils.assertTrue(this.mGL == ((GL11) gl10));
         this.mWidth = i;
@@ -266,16 +247,10 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
 
     /* JADX INFO: finally extract failed */
     public void onSurfaceCreated(GL10 gl10, EGLConfig eGLConfig) {
-        String str = TAG;
-        Log.i(str, "onSurfaceCreated");
+        Log.i(TAG, "onSurfaceCreated");
         GL11 gl11 = (GL11) gl10;
         if (this.mGL != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("GLObject has changed from ");
-            sb.append(this.mGL);
-            sb.append(" to ");
-            sb.append(gl11);
-            Log.i(str, sb.toString());
+            Log.i(TAG, "GLObject has changed from " + this.mGL + " to " + gl11);
         }
         this.mRenderLock.lock();
         try {
@@ -321,14 +296,11 @@ public class V6CameraGLSurfaceView extends GLSurfaceView implements Renderer {
     }
 
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        ExternalFrameProcessor externalFrameProcessor = this.mActivity.getCameraScreenNail().getExternalFrameProcessor();
+        SurfaceTextureScreenNail.ExternalFrameProcessor externalFrameProcessor = this.mActivity.getCameraScreenNail().getExternalFrameProcessor();
         if (externalFrameProcessor != null) {
             externalFrameProcessor.releaseRender();
         }
         super.surfaceDestroyed(surfaceHolder);
-        StringBuilder sb = new StringBuilder();
-        sb.append("surfaceDestroyed: mActivity = ");
-        sb.append(this.mActivity);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "surfaceDestroyed: mActivity = " + this.mActivity);
     }
 }

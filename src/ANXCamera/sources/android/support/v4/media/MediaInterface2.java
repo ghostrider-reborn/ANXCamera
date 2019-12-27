@@ -2,7 +2,7 @@ package android.support.v4.media;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.media.MediaSession2.OnDataSourceMissingHelper;
+import android.support.v4.media.MediaSession2;
 import java.util.List;
 
 class MediaInterface2 {
@@ -60,7 +60,7 @@ class MediaInterface2 {
 
         void replacePlaylistItem(int i, MediaItem2 mediaItem2);
 
-        void setOnDataSourceMissingHelper(OnDataSourceMissingHelper onDataSourceMissingHelper);
+        void setOnDataSourceMissingHelper(MediaSession2.OnDataSourceMissingHelper onDataSourceMissingHelper);
 
         void setPlaylist(List<MediaItem2> list, MediaMetadata2 mediaMetadata2);
 

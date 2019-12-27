@@ -1,9 +1,7 @@
 package com.android.camera.fragment.mimoji;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -16,7 +14,7 @@ public class BitmapUtils {
 
     public static Bitmap createBitmapFromStream(byte[] bArr, int i) {
         try {
-            Options options = new Options();
+            BitmapFactory.Options options = new BitmapFactory.Options();
             int i2 = 1;
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(bArr, 0, bArr.length, options);
@@ -28,21 +26,18 @@ public class BitmapUtils {
                     options.inSampleSize = i2;
                     options.inJustDecodeBounds = false;
                     options.inDither = false;
-                    options.inPreferredConfig = Config.ARGB_8888;
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                     return BitmapFactory.decodeByteArray(bArr, 0, bArr.length, options);
                 }
             }
             return null;
         } catch (OutOfMemoryError e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Got oom exception ");
-            sb.append(e2);
-            LOG.d(TAG, sb.toString());
+            LOG.d(TAG, "Got oom exception " + e2);
             return null;
         }
     }
 
-    public static int getBitmapSampleSize(Options options, int i) {
+    public static int getBitmapSampleSize(BitmapFactory.Options options, int i) {
         int i2 = 1;
         int ceil = i < 0 ? 1 : (int) Math.ceil(Math.sqrt((double) ((((float) options.outWidth) * ((float) options.outHeight)) / ((float) i))));
         if (i < 0) {
@@ -67,20 +62,21 @@ public class BitmapUtils {
         matrix.postScale(-1.0f, 1.0f);
         try {
             Bitmap createBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-            if (bitmap != createBitmap) {
-                bitmap.recycle();
-                bitmap = createBitmap;
+            if (bitmap == createBitmap) {
+                return bitmap;
             }
+            bitmap.recycle();
+            return createBitmap;
         } catch (OutOfMemoryError unused) {
             LOG.d(TAG, OUT_OF_MEMORY_STRING);
+            return bitmap;
         }
-        return bitmap;
     }
 
     public static Bitmap rawByteArray2RGBABitmap(byte[] bArr, int i, int i2) {
         Bitmap bitmap = null;
         try {
-            YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, null);
+            YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, (int[]) null);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             yuvImage.compressToJpeg(new Rect(0, 0, i, i2), 100, byteArrayOutputStream);
             bitmap = createBitmapFromStream(byteArrayOutputStream.toByteArray(), 0);
@@ -95,7 +91,7 @@ public class BitmapUtils {
     public static Bitmap rawByteArray2RGBABitmap(byte[] bArr, int i, int i2, int i3) {
         Bitmap bitmap = null;
         try {
-            YuvImage yuvImage = new YuvImage(bArr, 17, i3, i2, null);
+            YuvImage yuvImage = new YuvImage(bArr, 17, i3, i2, (int[]) null);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             yuvImage.compressToJpeg(new Rect(0, 0, i, i2), 100, byteArrayOutputStream);
             bitmap = createBitmapFromStream(byteArrayOutputStream.toByteArray(), 0);
@@ -108,8 +104,7 @@ public class BitmapUtils {
     }
 
     public static Bitmap rotateBitmap(Bitmap bitmap, int i) {
-        String str = TAG;
-        LOG.d(str, "Bitmap rotateBitmap <-----");
+        LOG.d(TAG, "Bitmap rotateBitmap <-----");
         if (i == 0 || bitmap == null) {
             return bitmap;
         }
@@ -127,10 +122,10 @@ public class BitmapUtils {
                 bitmap2 = bitmap;
             }
         } catch (OutOfMemoryError unused) {
-            LOG.d(str, OUT_OF_MEMORY_STRING);
+            LOG.d(TAG, OUT_OF_MEMORY_STRING);
         } catch (Exception unused2) {
         }
-        LOG.d(str, "Bitmap rotateBitmap ----->");
+        LOG.d(TAG, "Bitmap rotateBitmap ----->");
         return bitmap2;
     }
 

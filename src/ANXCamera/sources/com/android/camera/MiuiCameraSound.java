@@ -6,11 +6,9 @@ import android.content.res.AssetManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.media.SoundPool.Builder;
-import android.media.SoundPool.OnLoadCompleteListener;
 import com.android.camera.log.Log;
 import com.mi.config.b;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
@@ -41,7 +39,7 @@ public class MiuiCameraSound implements Consumer<PlayConfig> {
     public FlowableEmitter<PlayConfig> mFlowableEmitter;
     private boolean mForceSound;
     private long mLastPlayTime;
-    private OnLoadCompleteListener mLoadCompleteListener;
+    private SoundPool.OnLoadCompleteListener mLoadCompleteListener;
     /* access modifiers changed from: private */
     public int mSoundIdToPlay;
     private int[] mSoundIds;
@@ -58,30 +56,22 @@ public class MiuiCameraSound implements Consumer<PlayConfig> {
 
     public MiuiCameraSound(Context context, boolean z) {
         this.mLastPlayTime = 0;
-        this.mLoadCompleteListener = new OnLoadCompleteListener() {
+        this.mLoadCompleteListener = new SoundPool.OnLoadCompleteListener() {
             public void onLoadComplete(SoundPool soundPool, int i, int i2) {
                 if (i2 != 0) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unable to load sound for playback (status: ");
-                    sb.append(i2);
-                    sb.append(")");
-                    Log.e(MiuiCameraSound.TAG, sb.toString());
+                    Log.e(MiuiCameraSound.TAG, "Unable to load sound for playback (status: " + i2 + ")");
                 } else if (MiuiCameraSound.this.mSoundIdToPlay == i) {
                     soundPool.play(i, 1.0f, 1.0f, 0, 0, 1.0f);
-                    MiuiCameraSound.this.mSoundIdToPlay = -1;
+                    int unused = MiuiCameraSound.this.mSoundIdToPlay = -1;
                 }
             }
         };
-        this.mAudioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+        this.mAudioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
         this.mAssetManager = context.getAssets();
-        Builder builder = new Builder();
+        SoundPool.Builder builder = new SoundPool.Builder();
         int i = 1;
         builder.setMaxStreams(1);
-        AudioAttributes.Builder builder2 = new AudioAttributes.Builder();
-        if (!b.nj() || this.mForceSound) {
-            i = 7;
-        }
-        builder.setAudioAttributes(builder2.setInternalLegacyStreamType(i).build());
+        builder.setAudioAttributes(new AudioAttributes.Builder().setInternalLegacyStreamType((!b.nj() || this.mForceSound) ? 7 : i).build());
         this.mSoundPool = builder.build();
         this.mSoundPool.setOnLoadCompleteListener(this.mLoadCompleteListener);
         this.mSoundIds = new int[SOUND_FILES.length];
@@ -95,36 +85,31 @@ public class MiuiCameraSound implements Consumer<PlayConfig> {
                 this.mSoundIdToPlay = -1;
                 this.mDisposable = Flowable.create(new FlowableOnSubscribe<PlayConfig>() {
                     public void subscribe(FlowableEmitter<PlayConfig> flowableEmitter) throws Exception {
-                        MiuiCameraSound.this.mFlowableEmitter = flowableEmitter;
+                        FlowableEmitter unused = MiuiCameraSound.this.mFlowableEmitter = flowableEmitter;
                     }
                 }, BackpressureStrategy.DROP).observeOn(Schedulers.io()).onBackpressureDrop(new Consumer<PlayConfig>() {
                     public void accept(@NonNull PlayConfig playConfig) throws Exception {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("play sound too fast: ");
-                        sb.append(playConfig.soundId);
-                        Log.e(MiuiCameraSound.TAG, sb.toString());
+                        Log.e(MiuiCameraSound.TAG, "play sound too fast: " + playConfig.soundId);
                     }
-                }).subscribe((Consumer<? super T>) this);
+                }).subscribe(this);
                 return;
             }
         }
     }
 
     private int loadFromAsset(int i) {
-        String str = "IOException occurs when closing Camera Sound AssetFileDescriptor.";
-        String str2 = TAG;
         AssetFileDescriptor assetFileDescriptor = null;
         try {
-            assetFileDescriptor = this.mAssetManager.openFd(SOUND_FILES[i]);
-            int load = this.mSoundPool.load(assetFileDescriptor, 1);
-            if (assetFileDescriptor == null) {
+            AssetFileDescriptor openFd = this.mAssetManager.openFd(SOUND_FILES[i]);
+            int load = this.mSoundPool.load(openFd, 1);
+            if (openFd == null) {
                 return load;
             }
             try {
-                assetFileDescriptor.close();
+                openFd.close();
                 return load;
             } catch (IOException e2) {
-                Log.e(str2, str);
+                Log.e(TAG, "IOException occurs when closing Camera Sound AssetFileDescriptor.");
                 e2.printStackTrace();
                 return load;
             }
@@ -134,20 +119,21 @@ public class MiuiCameraSound implements Consumer<PlayConfig> {
                 try {
                     assetFileDescriptor.close();
                 } catch (IOException e4) {
-                    Log.e(str2, str);
+                    Log.e(TAG, "IOException occurs when closing Camera Sound AssetFileDescriptor.");
                     e4.printStackTrace();
                 }
             }
             return -1;
-        } finally {
+        } catch (Throwable th) {
             if (assetFileDescriptor != null) {
                 try {
                     assetFileDescriptor.close();
                 } catch (IOException e5) {
-                    Log.e(str2, str);
+                    Log.e(TAG, "IOException occurs when closing Camera Sound AssetFileDescriptor.");
                     e5.printStackTrace();
                 }
             }
+            throw th;
         }
     }
 
@@ -167,10 +153,7 @@ public class MiuiCameraSound implements Consumer<PlayConfig> {
                 }
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unknown sound requested: ");
-        sb.append(i);
-        throw new RuntimeException(sb.toString());
+        throw new RuntimeException("Unknown sound requested: " + i);
     }
 
     private void playSound(int i, float f2, int i2) {
@@ -205,10 +188,7 @@ public class MiuiCameraSound implements Consumer<PlayConfig> {
                 }
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unknown sound requested: ");
-        sb.append(i);
-        throw new RuntimeException(sb.toString());
+        throw new RuntimeException("Unknown sound requested: " + i);
     }
 
     public void playSound(int i) {

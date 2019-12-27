@@ -37,9 +37,8 @@ public class ConvertFromYuv420SemiPlanar implements IImage2BytesConverter {
             i = buffer2.remaining();
             buffer2.get(bArr, i2, i);
         }
-        int i5 = i2 + i;
         buffer3.position(buffer3.remaining() - 1);
-        buffer3.get(bArr, i5, 1);
+        buffer3.get(bArr, i2 + i, 1);
         buffer.clear();
         buffer2.clear();
         buffer3.clear();

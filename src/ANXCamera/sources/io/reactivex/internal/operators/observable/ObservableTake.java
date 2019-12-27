@@ -67,7 +67,7 @@ public final class ObservableTake<T> extends AbstractObservableWithUpstream<T, T
                 if (this.remaining == 0) {
                     this.done = true;
                     disposable.dispose();
-                    EmptyDisposable.complete(this.actual);
+                    EmptyDisposable.complete((Observer<?>) this.actual);
                     return;
                 }
                 this.actual.onSubscribe(this);

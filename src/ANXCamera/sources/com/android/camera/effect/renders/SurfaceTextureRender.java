@@ -23,10 +23,7 @@ public class SurfaceTextureRender extends ShaderRender {
         GLES20.glUseProgram(0);
         GLES20.glUseProgram(this.mProgram);
         if (!bindTexture((BasicTexture) extTexture, 33984)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("fail bind texture ");
-            sb.append(extTexture.getId());
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "fail bind texture " + extTexture.getId());
             return;
         }
         initAttributePointer();
@@ -81,15 +78,12 @@ public class SurfaceTextureRender extends ShaderRender {
             this.mAttributeTexCoorH = GLES20.glGetAttribLocation(this.mProgram, "aTexCoord");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(SurfaceTextureRender.class);
-        sb.append(": mProgram = 0");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(SurfaceTextureRender.class + ": mProgram = 0");
     }
 
     /* access modifiers changed from: protected */
     public void initSupportAttriList() {
-        this.mAttriSupportedList.add(Integer.valueOf(8));
+        this.mAttriSupportedList.add(8);
     }
 
     /* access modifiers changed from: protected */

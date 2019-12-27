@@ -5,6 +5,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 
 /* compiled from: UnitModelLoader */
 public class B<Model> implements t<Model, Model> {
@@ -40,7 +41,7 @@ public class B<Model> implements t<Model, Model> {
             return this.resource.getClass();
         }
 
-        public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super Model> aVar) {
+        public void a(@NonNull Priority priority, @NonNull d.a<? super Model> aVar) {
             aVar.b(this.resource);
         }
 
@@ -60,8 +61,8 @@ public class B<Model> implements t<Model, Model> {
         return INSTANCE;
     }
 
-    public com.bumptech.glide.load.model.t.a<Model> a(@NonNull Model model, int i, int i2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(model), new b(model));
+    public t.a<Model> a(@NonNull Model model, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(model), new b(model));
     }
 
     public boolean c(@NonNull Model model) {

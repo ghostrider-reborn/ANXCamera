@@ -1,7 +1,6 @@
 package com.arcsoft.avatar.recoder;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import android.os.Bundle;
 import android.view.Surface;
 import com.arcsoft.avatar.util.CodecLog;
@@ -23,22 +22,22 @@ public abstract class BaseEncoder {
     private long C = 0;
     private long D = 0;
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     protected boolean f96a;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     protected boolean f97b;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     protected boolean f98c;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     protected boolean f99d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     protected volatile boolean f100e;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     protected Object f101f;
     protected volatile long g;
     protected MuxerWrapper h;
@@ -79,23 +78,11 @@ public abstract class BaseEncoder {
         long nanoTime = System.nanoTime();
         long j2 = this.g;
         if (this.n.size() != 0) {
-            j2 = ((Long) this.n.poll()).longValue();
+            j2 = this.n.poll().longValue();
         }
         long j3 = (nanoTime - j2) / 1000;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getPTSUs TotalPauseTime=");
-        sb.append(this.g / 1000);
-        String sb2 = sb.toString();
-        String str = t;
-        CodecLog.d(str, sb2);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("getPTSUs preTime=");
-        sb3.append(this.z);
-        sb3.append(" ,currentTime=");
-        sb3.append(nanoTime / 1000);
-        sb3.append(" , result=");
-        sb3.append(j3);
-        CodecLog.d(str, sb3.toString());
+        CodecLog.d(t, "getPTSUs TotalPauseTime=" + (this.g / 1000));
+        CodecLog.d(t, "getPTSUs preTime=" + this.z + " ,currentTime=" + (nanoTime / 1000) + " , result=" + j3);
         long j4 = this.z;
         if (j3 < j4) {
             long j5 = j4 - j3;
@@ -114,15 +101,12 @@ public abstract class BaseEncoder {
             return;
         }
         String name = Thread.currentThread().getName();
-        StringBuilder sb = new StringBuilder();
-        sb.append("drain()->Encoder one frame. threadName in=");
-        sb.append(Thread.currentThread().getName());
-        CodecLog.d(t, sb.toString());
+        CodecLog.d(t, "drain()->Encoder one frame. threadName in=" + Thread.currentThread().getName());
         if (this.h == null) {
             CodecLog.e(t, "drain()->Muxer is not ready.");
             return;
         }
-        BufferInfo bufferInfo = new BufferInfo();
+        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
         int i2 = 0;
         while (true) {
             if (!this.f97b) {
@@ -135,41 +119,27 @@ public abstract class BaseEncoder {
                     break;
                 }
                 i2++;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("drain()->Encoded frame is preparing, wait ... waitCount = ");
-                sb2.append(i2);
-                CodecLog.d(t, sb2.toString());
+                CodecLog.d(t, "drain()->Encoded frame is preparing, wait ... waitCount = " + i2);
             } else if (-2 == dequeueOutputBuffer) {
                 if (!this.f98c) {
                     this.j = this.h.addTrack(this.i.getOutputFormat());
                     this.f98c = true;
                     if (!this.h.isStarted()) {
                         this.h.startMuxer();
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Muxer started: threadName =");
-                        sb3.append(Thread.currentThread().getName());
-                        CodecLog.d(t, sb3.toString());
+                        CodecLog.d(t, "Muxer started: threadName =" + Thread.currentThread().getName());
                         synchronized (this.h) {
                             while (!this.h.isStarted() && !this.f99d) {
                                 try {
                                     this.h.wait(100);
                                 } catch (InterruptedException e2) {
-                                    String str = t;
-                                    StringBuilder sb4 = new StringBuilder();
-                                    sb4.append("drain()->Wait for muxer started, but be interrupted : ");
-                                    sb4.append(e2.getMessage());
-                                    CodecLog.e(str, sb4.toString());
+                                    CodecLog.e(t, "drain()->Wait for muxer started, but be interrupted : " + e2.getMessage());
                                     this.f98c = false;
                                 }
                             }
                             long a2 = a();
                             this.D = a2;
                             this.h.setStartTime(a2);
-                            String str2 = t;
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append("Muxer start time =");
-                            sb5.append(a2);
-                            CodecLog.i(str2, sb5.toString());
+                            CodecLog.i(t, "Muxer start time =" + a2);
                         }
                     } else {
                         continue;
@@ -179,10 +149,7 @@ public abstract class BaseEncoder {
                     throw new RuntimeException("Format only allow change once, but Encoder meet twice!");
                 }
             } else if (dequeueOutputBuffer < 0) {
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append("drain()->Encoder meet bufferStatus =");
-                sb6.append(dequeueOutputBuffer);
-                CodecLog.i(t, sb6.toString());
+                CodecLog.i(t, "drain()->Encoder meet bufferStatus =" + dequeueOutputBuffer);
             } else {
                 ByteBuffer outputBuffer = this.i.getOutputBuffer(dequeueOutputBuffer);
                 if ((2 & bufferInfo.flags) != 0) {
@@ -195,19 +162,9 @@ public abstract class BaseEncoder {
                 if (bufferInfo.size != 0) {
                     outputBuffer.position(bufferInfo.offset);
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                    StringBuilder sb7 = new StringBuilder();
-                    sb7.append("drain()->Encoder one frame. threadName=");
-                    sb7.append(Thread.currentThread().getName());
-                    sb7.append(" timestamp original buffer info =");
-                    sb7.append(bufferInfo.presentationTimeUs);
-                    CodecLog.d(t, sb7.toString());
+                    CodecLog.d(t, "drain()->Encoder one frame. threadName=" + Thread.currentThread().getName() + " timestamp original buffer info =" + bufferInfo.presentationTimeUs);
                     bufferInfo.presentationTimeUs = a();
-                    StringBuilder sb8 = new StringBuilder();
-                    sb8.append("time_diff _");
-                    sb8.append(name);
-                    sb8.append("= ");
-                    sb8.append(bufferInfo.presentationTimeUs - this.y);
-                    CodecLog.d(t, sb8.toString());
+                    CodecLog.d(t, "time_diff _" + name + "= " + (bufferInfo.presentationTimeUs - this.y));
                     long j2 = bufferInfo.presentationTimeUs;
                     this.y = j2;
                     if (j2 - this.A >= 1000000) {
@@ -220,12 +177,7 @@ public abstract class BaseEncoder {
                     long j3 = bufferInfo.presentationTimeUs;
                     this.z = j3;
                     this.h.setCurrentTime(j3);
-                    StringBuilder sb9 = new StringBuilder();
-                    sb9.append("drain()->Encoder one frame. threadName=");
-                    sb9.append(Thread.currentThread().getName());
-                    sb9.append(" timestamp=");
-                    sb9.append(bufferInfo.presentationTimeUs);
-                    CodecLog.d(t, sb9.toString());
+                    CodecLog.d(t, "drain()->Encoder one frame. threadName=" + Thread.currentThread().getName() + " timestamp=" + bufferInfo.presentationTimeUs);
                 }
                 this.i.releaseOutputBuffer(dequeueOutputBuffer, false);
                 if ((bufferInfo.flags & 4) != 0) {
@@ -238,53 +190,41 @@ public abstract class BaseEncoder {
                 }
             }
         }
-        StringBuilder sb10 = new StringBuilder();
-        sb10.append("drain()->Encoder one frame. threadName out=");
-        sb10.append(Thread.currentThread().getName());
-        CodecLog.d(t, sb10.toString());
+        CodecLog.d(t, "drain()->Encoder one frame. threadName out=" + Thread.currentThread().getName());
     }
 
     public void encode(ByteBuffer byteBuffer, long j2) {
-        MediaCodec mediaCodec = this.i;
-        String str = t;
-        if (mediaCodec == null) {
-            CodecLog.e(str, "encode()->Encoder is not ready.");
+        if (this.i == null) {
+            CodecLog.e(t, "encode()->Encoder is not ready.");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("encode()->Encoder one frame. threadName in=");
-        sb.append(Thread.currentThread().getName());
-        CodecLog.d(str, sb.toString());
+        CodecLog.d(t, "encode()->Encoder one frame. threadName in=" + Thread.currentThread().getName());
         int i2 = 0;
         if (this.f97b) {
-            while (true) {
-                if (!this.f97b || this.f96a) {
-                    break;
-                }
+            while (this.f97b && !this.f96a) {
                 int dequeueInputBuffer = this.i.dequeueInputBuffer(500);
                 if (-1 == dequeueInputBuffer) {
-                    if (i2 >= 3) {
-                        CodecLog.d(str, "encode()->Encoder is busy, wait time out.");
-                        break;
+                    if (i2 < 3) {
+                        i2++;
+                        CodecLog.d(t, "encode()->Encoder is busy, wait ... waitCount = " + i2);
+                    } else {
+                        CodecLog.d(t, "encode()->Encoder is busy, wait time out.");
+                        return;
                     }
-                    i2++;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("encode()->Encoder is busy, wait ... waitCount = ");
-                    sb2.append(i2);
-                    CodecLog.d(str, sb2.toString());
                 } else if (dequeueInputBuffer >= 0) {
                     ByteBuffer inputBuffer = this.i.getInputBuffer(dequeueInputBuffer);
                     if (byteBuffer == null) {
                         this.f96a = true;
                         this.i.queueInputBuffer(dequeueInputBuffer, 0, 0, j2, 4);
-                        CodecLog.d(str, "encode()->Encoder meets end of stream.");
-                    } else {
-                        inputBuffer.clear();
-                        inputBuffer.put(byteBuffer);
-                        inputBuffer.flip();
-                        this.i.queueInputBuffer(dequeueInputBuffer, 0, inputBuffer.remaining(), j2, 0);
-                        CodecLog.d(str, "encode()->Encoder is fed a new frame.");
+                        CodecLog.d(t, "encode()->Encoder meets end of stream.");
+                        return;
                     }
+                    inputBuffer.clear();
+                    inputBuffer.put(byteBuffer);
+                    inputBuffer.flip();
+                    this.i.queueInputBuffer(dequeueInputBuffer, 0, inputBuffer.remaining(), j2, 0);
+                    CodecLog.d(t, "encode()->Encoder is fed a new frame.");
+                    return;
                 }
             }
         }
@@ -314,17 +254,13 @@ public abstract class BaseEncoder {
 
     public void pauseRecording() {
         this.f100e = true;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Log_mIsRequestPause_Vaule_pauseRecording ->mIsRequestPause=");
-        sb.append(this.f100e);
-        CodecLog.d(t, sb.toString());
+        CodecLog.d(t, "Log_mIsRequestPause_Vaule_pauseRecording ->mIsRequestPause=" + this.f100e);
     }
 
     public abstract void prepare(boolean z2);
 
     public void release(boolean z2) {
         MediaCodec mediaCodec = this.i;
-        Integer valueOf = Integer.valueOf(0);
         if (mediaCodec != null) {
             try {
                 mediaCodec.stop();
@@ -333,12 +269,12 @@ public abstract class BaseEncoder {
                 if (z2) {
                     RecordingListener recordingListener = this.o;
                     if (recordingListener != null) {
-                        recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_STOP, valueOf);
+                        recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_STOP, 0);
                     }
                 } else {
                     RecordingListener recordingListener2 = this.o;
                     if (recordingListener2 != null) {
-                        recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_STOP, valueOf);
+                        recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_STOP, 0);
                     }
                 }
             }
@@ -349,12 +285,12 @@ public abstract class BaseEncoder {
                 if (z2) {
                     RecordingListener recordingListener3 = this.o;
                     if (recordingListener3 != null) {
-                        recordingListener3.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_RELEASE, valueOf);
+                        recordingListener3.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_RELEASE, 0);
                     }
                 } else {
                     RecordingListener recordingListener4 = this.o;
                     if (recordingListener4 != null) {
-                        recordingListener4.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_RELEASE, valueOf);
+                        recordingListener4.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_RELEASE, 0);
                     }
                 }
             }
@@ -376,10 +312,7 @@ public abstract class BaseEncoder {
 
     public void resumeRecording() {
         this.f100e = false;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Log_mIsRequestPause_Vaule_resumeRecording ->mIsRequestPause=");
-        sb.append(this.f100e);
-        CodecLog.d(t, sb.toString());
+        CodecLog.d(t, "Log_mIsRequestPause_Vaule_resumeRecording ->mIsRequestPause=" + this.f100e);
     }
 
     public void setFrameQueue(FrameQueue frameQueue) {
@@ -394,16 +327,14 @@ public abstract class BaseEncoder {
     }
 
     public void startRecording() {
-        boolean z2 = this.f97b;
-        String str = t;
-        if (z2) {
-            CodecLog.i(str, "startRecording()-> encoder is started, you can not start it again");
+        if (this.f97b) {
+            CodecLog.i(t, "startRecording()-> encoder is started, you can not start it again");
             return;
         }
         this.f97b = true;
         this.f99d = false;
         this.f96a = false;
-        CodecLog.d(str, "startRecording()-> encoder is started.");
+        CodecLog.d(t, "startRecording()-> encoder is started.");
     }
 
     public void stopRecording() {

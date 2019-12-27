@@ -29,7 +29,7 @@ public class Platform {
         ArrayList arrayList = new ArrayList(list.size());
         int size = list.size();
         for (int i = 0; i < size; i++) {
-            Protocol protocol = (Protocol) list.get(i);
+            Protocol protocol = list.get(i);
             if (protocol != Protocol.HTTP_1_0) {
                 arrayList.add(protocol.toString());
             }
@@ -41,7 +41,7 @@ public class Platform {
         Buffer buffer = new Buffer();
         int size = list.size();
         for (int i = 0; i < size; i++) {
-            Protocol protocol = (Protocol) list.get(i);
+            Protocol protocol = list.get(i);
             if (protocol != Protocol.HTTP_1_0) {
                 buffer.writeByte(protocol.toString().length());
                 buffer.writeUtf8(protocol.toString());
@@ -68,7 +68,7 @@ public class Platform {
     }
 
     static <T> T readFieldOrNull(Object obj, Class<T> cls, String str) {
-        Class<Object> cls2 = obj.getClass();
+        Class cls2 = obj.getClass();
         while (cls2 != Object.class) {
             try {
                 Field declaredField = cls2.getDeclaredField(str);
@@ -86,9 +86,8 @@ public class Platform {
                 throw new AssertionError();
             }
         }
-        String str2 = "delegate";
-        if (!str.equals(str2)) {
-            Object readFieldOrNull = readFieldOrNull(obj, Object.class, str2);
+        if (!str.equals("delegate")) {
+            Object readFieldOrNull = readFieldOrNull(obj, Object.class, "delegate");
             if (readFieldOrNull != null) {
                 return readFieldOrNull(readFieldOrNull, cls, str);
             }
@@ -139,10 +138,7 @@ public class Platform {
 
     public void logCloseableLeak(String str, Object obj) {
         if (obj == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(" To see where this was allocated, set the OkHttpClient logger level to FINE: Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);");
-            str = sb.toString();
+            str = str + " To see where this was allocated, set the OkHttpClient logger level to FINE: Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);";
         }
         log(5, str, (Throwable) obj);
     }

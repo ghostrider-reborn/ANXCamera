@@ -21,13 +21,6 @@ public class BaseNetResponse {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("BaseNetResponse{status_code=");
-        sb.append(this.status_code);
-        sb.append(", message='");
-        sb.append(this.message);
-        sb.append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "BaseNetResponse{status_code=" + this.status_code + ", message='" + this.message + '\'' + '}';
     }
 }

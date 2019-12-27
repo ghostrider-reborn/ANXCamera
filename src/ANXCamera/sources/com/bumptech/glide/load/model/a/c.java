@@ -33,7 +33,7 @@ public class c implements t<Uri, InputStream> {
         this.li = tVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<InputStream> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
+    public t.a<InputStream> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
         return this.li.a(new l(uri.toString()), i, i2, gVar);
     }
 

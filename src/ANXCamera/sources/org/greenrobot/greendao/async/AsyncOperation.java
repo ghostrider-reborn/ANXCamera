@@ -60,7 +60,7 @@ public class AsyncOperation {
         return this.creatorStacktrace;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Database getDatabase() {
         Database database2 = this.database;
         return database2 != null ? database2 : this.dao.getDatabase();
@@ -128,12 +128,12 @@ public class AsyncOperation {
         return (this.flags & 1) != 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isMergeableWith(AsyncOperation asyncOperation) {
         return asyncOperation != null && isMergeTx() && asyncOperation.isMergeTx() && getDatabase() == asyncOperation.getDatabase();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void reset() {
         this.timeStarted = 0;
         this.timeCompleted = 0;
@@ -143,7 +143,7 @@ public class AsyncOperation {
         this.mergedOperationsCount = 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void setCompleted() {
         this.completed = true;
         notifyAll();

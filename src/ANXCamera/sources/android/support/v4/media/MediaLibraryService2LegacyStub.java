@@ -2,31 +2,30 @@ package android.support.v4.media;
 
 import android.os.BadParcelableException;
 import android.os.Bundle;
-import android.support.v4.media.MediaBrowserCompat.MediaItem;
-import android.support.v4.media.MediaBrowserServiceCompat.BrowserRoot;
-import android.support.v4.media.MediaBrowserServiceCompat.Result;
-import android.support.v4.media.MediaLibraryService2.LibraryRoot;
-import android.support.v4.media.MediaSession2.ControllerInfo;
-import android.support.v4.media.MediaSessionManager.RemoteUserInfo;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.MediaLibraryService2;
+import android.support.v4.media.MediaSession2;
+import android.support.v4.media.MediaSessionManager;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 class MediaLibraryService2LegacyStub extends MediaBrowserServiceCompat {
     /* access modifiers changed from: private */
-    public final SupportLibraryImpl mLibrarySession;
+    public final MediaLibraryService2.MediaLibrarySession.SupportLibraryImpl mLibrarySession;
 
-    MediaLibraryService2LegacyStub(SupportLibraryImpl supportLibraryImpl) {
+    MediaLibraryService2LegacyStub(MediaLibraryService2.MediaLibrarySession.SupportLibraryImpl supportLibraryImpl) {
         this.mLibrarySession = supportLibraryImpl;
     }
 
-    private ControllerInfo getController() {
-        List connectedControllers = this.mLibrarySession.getConnectedControllers();
-        RemoteUserInfo currentBrowserInfo = getCurrentBrowserInfo();
+    private MediaSession2.ControllerInfo getController() {
+        List<MediaSession2.ControllerInfo> connectedControllers = this.mLibrarySession.getConnectedControllers();
+        MediaSessionManager.RemoteUserInfo currentBrowserInfo = getCurrentBrowserInfo();
         if (currentBrowserInfo == null) {
             return null;
         }
         for (int i = 0; i < connectedControllers.size(); i++) {
-            ControllerInfo controllerInfo = (ControllerInfo) connectedControllers.get(i);
+            MediaSession2.ControllerInfo controllerInfo = connectedControllers.get(i);
             if (controllerInfo.getPackageName().equals(currentBrowserInfo.getPackageName()) && controllerInfo.getUid() == currentBrowserInfo.getUid()) {
                 return controllerInfo;
             }
@@ -34,31 +33,31 @@ class MediaLibraryService2LegacyStub extends MediaBrowserServiceCompat {
         return null;
     }
 
-    public void onCustomAction(String str, Bundle bundle, Result<Bundle> result) {
+    public void onCustomAction(String str, Bundle bundle, MediaBrowserServiceCompat.Result<Bundle> result) {
     }
 
-    public BrowserRoot onGetRoot(String str, int i, Bundle bundle) {
+    public MediaBrowserServiceCompat.BrowserRoot onGetRoot(String str, int i, Bundle bundle) {
         if (MediaUtils2.isDefaultLibraryRootHint(bundle)) {
             return MediaUtils2.sDefaultBrowserRoot;
         }
-        LibraryRoot onGetLibraryRoot = this.mLibrarySession.getCallback().onGetLibraryRoot(this.mLibrarySession.getInstance(), getController(), bundle);
+        MediaLibraryService2.LibraryRoot onGetLibraryRoot = this.mLibrarySession.getCallback().onGetLibraryRoot(this.mLibrarySession.getInstance(), getController(), bundle);
         if (onGetLibraryRoot == null) {
             return null;
         }
-        return new BrowserRoot(onGetLibraryRoot.getRootId(), onGetLibraryRoot.getExtras());
+        return new MediaBrowserServiceCompat.BrowserRoot(onGetLibraryRoot.getRootId(), onGetLibraryRoot.getExtras());
     }
 
-    public void onLoadChildren(String str, Result<List<MediaItem>> result) {
-        onLoadChildren(str, result, null);
+    public void onLoadChildren(String str, MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result) {
+        onLoadChildren(str, result, (Bundle) null);
     }
 
-    public void onLoadChildren(String str, Result<List<MediaItem>> result, Bundle bundle) {
+    public void onLoadChildren(String str, MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result, Bundle bundle) {
         result.detach();
-        final ControllerInfo controller = getController();
+        final MediaSession2.ControllerInfo controller = getController();
         Executor callbackExecutor = this.mLibrarySession.getCallbackExecutor();
         final Bundle bundle2 = bundle;
         final String str2 = str;
-        final Result<List<MediaItem>> result2 = result;
+        final MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result2 = result;
         AnonymousClass1 r0 = new Runnable() {
             public void run() {
                 Bundle bundle = bundle2;
@@ -74,15 +73,15 @@ class MediaLibraryService2LegacyStub extends MediaBrowserServiceCompat {
                     } catch (BadParcelableException unused) {
                     }
                 }
-                result2.sendResult(MediaUtils2.convertToMediaItemList(MediaLibraryService2LegacyStub.this.mLibrarySession.getCallback().onGetChildren(MediaLibraryService2LegacyStub.this.mLibrarySession.getInstance(), controller, str2, 1, Integer.MAX_VALUE, null)));
+                result2.sendResult(MediaUtils2.convertToMediaItemList(MediaLibraryService2LegacyStub.this.mLibrarySession.getCallback().onGetChildren(MediaLibraryService2LegacyStub.this.mLibrarySession.getInstance(), controller, str2, 1, Integer.MAX_VALUE, (Bundle) null)));
             }
         };
         callbackExecutor.execute(r0);
     }
 
-    public void onLoadItem(final String str, final Result<MediaItem> result) {
+    public void onLoadItem(final String str, final MediaBrowserServiceCompat.Result<MediaBrowserCompat.MediaItem> result) {
         result.detach();
-        final ControllerInfo controller = getController();
+        final MediaSession2.ControllerInfo controller = getController();
         this.mLibrarySession.getCallbackExecutor().execute(new Runnable() {
             public void run() {
                 MediaItem2 onGetItem = MediaLibraryService2LegacyStub.this.mLibrarySession.getCallback().onGetItem(MediaLibraryService2LegacyStub.this.mLibrarySession.getInstance(), controller, str);
@@ -95,9 +94,9 @@ class MediaLibraryService2LegacyStub extends MediaBrowserServiceCompat {
         });
     }
 
-    public void onSearch(final String str, final Bundle bundle, Result<List<MediaItem>> result) {
+    public void onSearch(final String str, final Bundle bundle, MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result) {
         result.detach();
-        final ControllerInfo controller = getController();
+        final MediaSession2.ControllerInfo controller = getController();
         bundle.setClassLoader(this.mLibrarySession.getContext().getClassLoader());
         try {
             final int i = bundle.getInt(MediaBrowserCompat.EXTRA_PAGE);
@@ -113,10 +112,10 @@ class MediaLibraryService2LegacyStub extends MediaBrowserServiceCompat {
             Executor callbackExecutor = this.mLibrarySession.getCallbackExecutor();
             final String str2 = str;
             final Bundle bundle2 = bundle;
-            final Result<List<MediaItem>> result2 = result;
+            final MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result2 = result;
             AnonymousClass3 r0 = new Runnable() {
                 public void run() {
-                    List onGetSearchResult = MediaLibraryService2LegacyStub.this.mLibrarySession.getCallback().onGetSearchResult(MediaLibraryService2LegacyStub.this.mLibrarySession.getInstance(), controller, str2, i, i2, bundle2);
+                    List<MediaItem2> onGetSearchResult = MediaLibraryService2LegacyStub.this.mLibrarySession.getCallback().onGetSearchResult(MediaLibraryService2LegacyStub.this.mLibrarySession.getInstance(), controller, str2, i, i2, bundle2);
                     if (onGetSearchResult == null) {
                         result2.sendResult(null);
                     } else {

@@ -5,10 +5,10 @@ import android.util.Log;
 /* compiled from: LogUtil */
 public class b {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private boolean f165a = false;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private String f166b;
 
     public b(String str) {

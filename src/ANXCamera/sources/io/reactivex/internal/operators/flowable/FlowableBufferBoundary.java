@@ -89,7 +89,7 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             this.bufferClose = function;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void boundaryError(Disposable disposable, Throwable th) {
             SubscriptionHelper.cancel(this.upstream);
             this.subscribers.delete(disposable);
@@ -109,7 +109,7 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:12:0x002d, code lost:
             if (r4 == false) goto L_0x0031;
          */
@@ -138,7 +138,7 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (getAndIncrement() == 0) {
@@ -202,7 +202,7 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             synchronized (this) {
                 Map<Long, C> map = this.buffers;
                 if (map != null) {
-                    for (Collection offer : map.values()) {
+                    for (C offer : map.values()) {
                         this.queue.offer(offer);
                     }
                     this.buffers = null;
@@ -229,7 +229,7 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             synchronized (this) {
                 Map<Long, C> map = this.buffers;
                 if (map != null) {
-                    for (Collection add : map.values()) {
+                    for (C add : map.values()) {
                         add.add(t);
                     }
                 }
@@ -245,10 +245,10 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void open(Open open) {
             try {
-                Object call = this.bufferSupplier.call();
+                C call = this.bufferSupplier.call();
                 ObjectHelper.requireNonNull(call, "The bufferSupplier returned a null Collection");
                 Collection collection = (Collection) call;
                 Object apply = this.bufferClose.apply(open);
@@ -272,7 +272,7 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void openComplete(BufferOpenSubscriber<Open> bufferOpenSubscriber) {
             this.subscribers.delete(bufferOpenSubscriber);
             if (this.subscribers.size() == 0) {
@@ -354,6 +354,6 @@ public final class FlowableBufferBoundary<T, U extends Collection<? super T>, Op
     public void subscribeActual(Subscriber<? super U> subscriber) {
         BufferBoundarySubscriber bufferBoundarySubscriber = new BufferBoundarySubscriber(subscriber, this.bufferOpen, this.bufferClose, this.bufferSupplier);
         subscriber.onSubscribe(bufferBoundarySubscriber);
-        this.source.subscribe((FlowableSubscriber<? super T>) bufferBoundarySubscriber);
+        this.source.subscribe(bufferBoundarySubscriber);
     }
 }

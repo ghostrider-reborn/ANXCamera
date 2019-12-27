@@ -3,7 +3,7 @@ package com.miui.extravideo.watermark;
 import android.graphics.Bitmap;
 import android.opengl.EGLContext;
 import android.opengl.GLES20;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import com.miui.extravideo.watermark.gles.EglCore;
 import com.miui.extravideo.watermark.gles.GLFrameBuffer;
 import com.miui.extravideo.watermark.gles.OpenGlUtils;
@@ -32,8 +32,7 @@ public class WatermarkRenderPipeline {
     public static int[] calcDualCameraWatermarkLocation(int i, int i2, int i3, int i4, float f2, float f3, float f4) {
         float min = ((float) Math.min(i, i2)) / 720.0f;
         int i5 = (int) (f2 * min * 1.0f);
-        int i6 = (int) ((((float) i5) * ((float) i3)) / ((float) i4));
-        return new int[]{Math.round(f3 * min) & -2, Math.round(f4 * min) & -2, i6, i5};
+        return new int[]{Math.round(f3 * min) & -2, Math.round(f4 * min) & -2, (int) ((((float) i5) * ((float) i3)) / ((float) i4)), i5};
     }
 
     private void checkPostFrameBuffer(int i, int i2) {
@@ -226,7 +225,7 @@ public class WatermarkRenderPipeline {
     }
 
     public int[] getWatermarkRange(int i, int i2, int i3, boolean z, boolean z2) {
-        return getWatermarkRange(i, i2, (i3 + 270) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, z, z2, 0.11f);
+        return getWatermarkRange(i, i2, (i3 + 270) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT, z, z2, 0.11f);
     }
 
     public void init(int i, int i2, Bitmap bitmap, float[] fArr, int i3) {
@@ -235,7 +234,7 @@ public class WatermarkRenderPipeline {
         this.mParentW = i;
         this.mParentH = i2;
         this.mWatermarkRotation = i3;
-        initEGL(null);
+        initEGL((EGLContext) null);
         this.mWatermarkRange = getWatermarkRange(i, i2, i3, true, false);
         int[] iArr = this.mWatermarkRange;
         this.mWatermarkW = iArr[2];
@@ -246,7 +245,7 @@ public class WatermarkRenderPipeline {
         this.mYuvToRgbRender = new YuvToRgbRender();
         this.mRgbToYuvRender = new RgbToYuvRender();
         int i6 = this.mWatermarkRotation;
-        if ((i6 + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i6 + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 270) {
+        if ((i6 + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i6 + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 270) {
             i4 = i;
             i5 = i2;
         } else {

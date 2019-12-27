@@ -35,10 +35,10 @@ public class AutoZoomUtils {
     }
 
     public static long mean(ArrayList<Long> arrayList) {
-        Iterator it = arrayList.iterator();
+        Iterator<Long> it = arrayList.iterator();
         long j = 0;
         while (it.hasNext()) {
-            j += ((Long) it.next()).longValue();
+            j += it.next().longValue();
         }
         return j / ((long) arrayList.size());
     }
@@ -48,7 +48,7 @@ public class AutoZoomUtils {
             return 0.0f;
         }
         Collections.sort(arrayList);
-        return arrayList.size() % 2 == 0 ? ((Float) arrayList.get(arrayList.size() / 2)).floatValue() + (((Float) arrayList.get((arrayList.size() / 2) - 1)).floatValue() / 2.0f) : ((Float) arrayList.get(arrayList.size() / 2)).floatValue();
+        return arrayList.size() % 2 == 0 ? arrayList.get(arrayList.size() / 2).floatValue() + (arrayList.get((arrayList.size() / 2) - 1).floatValue() / 2.0f) : arrayList.get(arrayList.size() / 2).floatValue();
     }
 
     public static void normalizedRectToSize(RectF rectF, Size size) {

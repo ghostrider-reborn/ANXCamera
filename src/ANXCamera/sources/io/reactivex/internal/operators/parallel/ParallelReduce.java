@@ -86,7 +86,7 @@ public final class ParallelReduce<T, R> extends ParallelFlowable<R> {
         return this.source.parallelism();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void reportError(Subscriber<?>[] subscriberArr, Throwable th) {
         for (Subscriber<?> error : subscriberArr) {
             EmptySubscription.error(th, error);
@@ -100,7 +100,7 @@ public final class ParallelReduce<T, R> extends ParallelFlowable<R> {
             int i = 0;
             while (i < length) {
                 try {
-                    Object call = this.initialSupplier.call();
+                    R call = this.initialSupplier.call();
                     ObjectHelper.requireNonNull(call, "The initialSupplier returned a null value");
                     subscriberArr2[i] = new ParallelReduceSubscriber(subscriberArr[i], call, this.reducer);
                     i++;

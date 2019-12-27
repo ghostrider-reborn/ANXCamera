@@ -54,7 +54,7 @@ public final class FlowableScanSeed<T, R> extends AbstractFlowableWithUpstream<T
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (getAndIncrement() == 0) {
@@ -83,7 +83,7 @@ public final class FlowableScanSeed<T, R> extends AbstractFlowableWithUpstream<T
                                     return;
                                 }
                             }
-                            Object poll = simplePlainQueue.poll();
+                            R poll = simplePlainQueue.poll();
                             boolean z2 = poll == null;
                             if (z && z2) {
                                 subscriber.onComplete();
@@ -179,9 +179,9 @@ public final class FlowableScanSeed<T, R> extends AbstractFlowableWithUpstream<T
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super R> subscriber) {
         try {
-            Object call = this.seedSupplier.call();
+            R call = this.seedSupplier.call();
             ObjectHelper.requireNonNull(call, "The seed supplied is null");
-            this.source.subscribe((FlowableSubscriber<? super T>) new ScanSeedSubscriber<Object>(subscriber, this.accumulator, call, Flowable.bufferSize()));
+            this.source.subscribe(new ScanSeedSubscriber(subscriber, this.accumulator, call, Flowable.bufferSize()));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
             EmptySubscription.error(th, subscriber);

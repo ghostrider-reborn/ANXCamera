@@ -64,7 +64,7 @@ public final class DisposableLambdaObserver<T> implements Observer<T>, Disposabl
             Exceptions.throwIfFatal(th);
             disposable.dispose();
             this.s = DisposableHelper.DISPOSED;
-            EmptyDisposable.error(th, this.actual);
+            EmptyDisposable.error(th, (Observer<?>) this.actual);
         }
     }
 }

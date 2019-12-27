@@ -11,7 +11,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.util.concurrent.atomic.AtomicReference;
 
 /* compiled from: ByteBufferUtil */
@@ -19,7 +18,7 @@ public final class a {
     private static final int BUFFER_SIZE = 16384;
     private static final AtomicReference<byte[]> Xl = new AtomicReference<>();
 
-    /* renamed from: com.bumptech.glide.util.a$a reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.util.a$a  reason: collision with other inner class name */
     /* compiled from: ByteBufferUtil */
     private static class C0013a extends InputStream {
         private static final int UNSET = -1;
@@ -153,16 +152,16 @@ public final class a {
             outputStream.write(bArr, i, g.limit + i);
             return;
         }
-        byte[] bArr2 = (byte[]) Xl.getAndSet(null);
-        if (bArr2 == null) {
-            bArr2 = new byte[16384];
+        byte[] andSet = Xl.getAndSet((Object) null);
+        if (andSet == null) {
+            andSet = new byte[16384];
         }
         while (byteBuffer.remaining() > 0) {
-            int min = Math.min(byteBuffer.remaining(), bArr2.length);
-            byteBuffer.get(bArr2, 0, min);
-            outputStream.write(bArr2, 0, min);
+            int min = Math.min(byteBuffer.remaining(), andSet.length);
+            byteBuffer.get(andSet, 0, min);
+            outputStream.write(andSet, 0, min);
         }
-        Xl.set(bArr2);
+        Xl.set(andSet);
     }
 
     @NonNull
@@ -201,7 +200,7 @@ public final class a {
                 try {
                     FileChannel channel = randomAccessFile.getChannel();
                     try {
-                        MappedByteBuffer load = channel.map(MapMode.READ_ONLY, 0, length).load();
+                        MappedByteBuffer load = channel.map(FileChannel.MapMode.READ_ONLY, 0, length).load();
                         if (channel != null) {
                             channel.close();
                         }
@@ -258,16 +257,16 @@ public final class a {
     @NonNull
     public static ByteBuffer g(@NonNull InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(16384);
-        byte[] bArr = (byte[]) Xl.getAndSet(null);
-        if (bArr == null) {
-            bArr = new byte[16384];
+        byte[] andSet = Xl.getAndSet((Object) null);
+        if (andSet == null) {
+            andSet = new byte[16384];
         }
         while (true) {
-            int read = inputStream.read(bArr);
+            int read = inputStream.read(andSet);
             if (read >= 0) {
-                byteArrayOutputStream.write(bArr, 0, read);
+                byteArrayOutputStream.write(andSet, 0, read);
             } else {
-                Xl.set(bArr);
+                Xl.set(andSet);
                 byte[] byteArray = byteArrayOutputStream.toByteArray();
                 return (ByteBuffer) ByteBuffer.allocateDirect(byteArray.length).put(byteArray).position(0);
             }

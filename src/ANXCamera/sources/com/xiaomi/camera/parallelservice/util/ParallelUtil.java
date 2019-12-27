@@ -34,11 +34,8 @@ public class ParallelUtil {
         public static void deleteInProvider(Context context, Uri uri) {
             if (context != null) {
                 String access$000 = ParallelUtil.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("deleteInProvider resultUri: ");
-                sb.append(uri);
-                Log.v(access$000, sb.toString());
-                context.getContentResolver().delete(uri, null, null);
+                Log.v(access$000, "deleteInProvider resultUri: " + uri);
+                context.getContentResolver().delete(uri, (String) null, (String[]) null);
             }
         }
     }
@@ -54,22 +51,14 @@ public class ParallelUtil {
 
     public static void insertImageToParallelService(Context context, long j, String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("algo db: first: ");
-        sb.append(j);
-        sb.append(" | ");
-        sb.append(str);
-        Log.i(str2, sb.toString());
+        Log.i(str2, "algo db: first: " + j + " | " + str);
         ContentValues contentValues = new ContentValues();
         contentValues.put(ProcessingMetadataQuery.MEDIA_STORE_ID, Long.valueOf(j));
         contentValues.put(ProcessingMetadataQuery.MEDIA_PATH, str);
         try {
             Uri insert = context.getContentResolver().insert(Uri.parse(PROCESSING_URI), contentValues);
             String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("algo db: uri: ");
-            sb2.append(insert.toString());
-            Log.i(str3, sb2.toString());
+            Log.i(str3, "algo db: uri: " + insert.toString());
         } catch (Exception e2) {
             Log.e(TAG, "Error! insert to parallel provider failed!!!", e2);
         }
@@ -77,12 +66,7 @@ public class ParallelUtil {
 
     public static void markTaskFinish(Context context, SaveTask saveTask, boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("algo db: finish: ");
-        sb.append(saveTask.getMediaStoreId());
-        sb.append(" | ");
-        sb.append(saveTask.getPath());
-        Log.d(str, sb.toString());
+        Log.d(str, "algo db: finish: " + saveTask.getMediaStoreId() + " | " + saveTask.getPath());
         if (z) {
             ParallelExifUtil.updateExif(saveTask.getPath());
         }

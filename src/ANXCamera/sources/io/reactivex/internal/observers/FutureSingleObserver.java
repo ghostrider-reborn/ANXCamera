@@ -26,13 +26,14 @@ public final class FutureSingleObserver<T> extends CountDownLatch implements Sin
         Disposable disposable;
         DisposableHelper disposableHelper;
         do {
-            disposable = (Disposable) this.s.get();
-            if (disposable != this) {
-                disposableHelper = DisposableHelper.DISPOSED;
-                if (disposable == disposableHelper) {
-                }
+            disposable = this.s.get();
+            if (disposable == this) {
+                return false;
             }
-            return false;
+            disposableHelper = DisposableHelper.DISPOSED;
+            if (disposable == disposableHelper) {
+                return false;
+            }
         } while (!this.s.compareAndSet(disposable, disposableHelper));
         if (disposable != null) {
             disposable.dispose();
@@ -77,7 +78,7 @@ public final class FutureSingleObserver<T> extends CountDownLatch implements Sin
     }
 
     public boolean isCancelled() {
-        return DisposableHelper.isDisposed((Disposable) this.s.get());
+        return DisposableHelper.isDisposed(this.s.get());
     }
 
     public boolean isDisposed() {
@@ -91,7 +92,7 @@ public final class FutureSingleObserver<T> extends CountDownLatch implements Sin
     public void onError(Throwable th) {
         Disposable disposable;
         do {
-            disposable = (Disposable) this.s.get();
+            disposable = this.s.get();
             if (disposable == DisposableHelper.DISPOSED) {
                 RxJavaPlugins.onError(th);
                 return;
@@ -106,7 +107,7 @@ public final class FutureSingleObserver<T> extends CountDownLatch implements Sin
     }
 
     public void onSuccess(T t) {
-        Disposable disposable = (Disposable) this.s.get();
+        Disposable disposable = this.s.get();
         if (disposable != DisposableHelper.DISPOSED) {
             this.value = t;
             this.s.compareAndSet(disposable, this);

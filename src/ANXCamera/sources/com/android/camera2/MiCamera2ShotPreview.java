@@ -1,12 +1,12 @@
 package com.android.camera2;
 
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
-import android.hardware.camera2.CaptureRequest.Builder;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.Image;
 import com.android.camera.log.Log;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 
 public class MiCamera2ShotPreview extends MiCamera2Shot<byte[]> {
     private static final String TAG = "MiCamera2ShotPreview";
@@ -16,12 +16,12 @@ public class MiCamera2ShotPreview extends MiCamera2Shot<byte[]> {
     }
 
     /* access modifiers changed from: protected */
-    public CaptureCallback generateCaptureCallback() {
+    public CameraCaptureSession.CaptureCallback generateCaptureCallback() {
         return null;
     }
 
     /* access modifiers changed from: protected */
-    public Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
+    public CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
         return null;
     }
 
@@ -39,7 +39,7 @@ public class MiCamera2ShotPreview extends MiCamera2Shot<byte[]> {
 
     /* access modifiers changed from: protected */
     public void startSessionCapture() {
-        PictureCallback pictureCallback = getPictureCallback();
+        Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
         if (pictureCallback != null) {
             pictureCallback.onCaptureShutter(true);
         } else {

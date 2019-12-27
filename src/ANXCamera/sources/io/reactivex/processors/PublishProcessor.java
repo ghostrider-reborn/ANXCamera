@@ -38,7 +38,7 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
             return get() == Long.MIN_VALUE;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isFull() {
             return get() == 0;
         }
@@ -63,10 +63,10 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
                 if (j != 0) {
                     this.actual.onNext(t);
                     BackpressureHelper.producedCancel(this, 1);
-                } else {
-                    cancel();
-                    this.actual.onError(new MissingBackpressureException("Could not emit value due to lack of requests"));
+                    return;
                 }
+                cancel();
+                this.actual.onError(new MissingBackpressureException("Could not emit value due to lack of requests"));
             }
         }
 
@@ -85,7 +85,7 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
         return new PublishProcessor<>();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(PublishSubscription<T> publishSubscription) {
         PublishSubscription[] publishSubscriptionArr;
         PublishSubscription[] publishSubscriptionArr2;
@@ -140,10 +140,10 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
     }
 
     public void onComplete() {
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj != obj2) {
-            for (PublishSubscription onComplete : (PublishSubscription[]) this.subscribers.getAndSet(obj2)) {
+        PublishSubscription<T>[] publishSubscriptionArr = this.subscribers.get();
+        PublishSubscription<T>[] publishSubscriptionArr2 = TERMINATED;
+        if (publishSubscriptionArr != publishSubscriptionArr2) {
+            for (PublishSubscription onComplete : (PublishSubscription[]) this.subscribers.getAndSet(publishSubscriptionArr2)) {
                 onComplete.onComplete();
             }
         }
@@ -151,14 +151,14 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
 
     public void onError(Throwable th) {
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj == obj2) {
+        PublishSubscription<T>[] publishSubscriptionArr = this.subscribers.get();
+        PublishSubscription<T>[] publishSubscriptionArr2 = TERMINATED;
+        if (publishSubscriptionArr == publishSubscriptionArr2) {
             RxJavaPlugins.onError(th);
             return;
         }
         this.error = th;
-        for (PublishSubscription onError : (PublishSubscription[]) this.subscribers.getAndSet(obj2)) {
+        for (PublishSubscription onError : (PublishSubscription[]) this.subscribers.getAndSet(publishSubscriptionArr2)) {
             onError.onError(th);
         }
     }
@@ -180,7 +180,7 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(PublishSubscription<T> publishSubscription) {
         PublishSubscription<T>[] publishSubscriptionArr;
         PublishSubscription[] publishSubscriptionArr2;
@@ -212,6 +212,8 @@ public final class PublishProcessor<T> extends FlowableProcessor<T> {
                 } else {
                     return;
                 }
+            } else {
+                return;
             }
         } while (!this.subscribers.compareAndSet(publishSubscriptionArr, publishSubscriptionArr2));
     }

@@ -42,7 +42,7 @@ public final class FlowableUsing<T, D> extends Flowable<T> {
             this.s.cancel();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeAfter() {
             if (compareAndSet(false, true)) {
                 try {
@@ -67,11 +67,11 @@ public final class FlowableUsing<T, D> extends Flowable<T> {
                 }
                 this.s.cancel();
                 this.actual.onComplete();
-            } else {
-                this.actual.onComplete();
-                this.s.cancel();
-                disposeAfter();
+                return;
             }
+            this.actual.onComplete();
+            this.s.cancel();
+            disposeAfter();
         }
 
         public void onError(Throwable th) {

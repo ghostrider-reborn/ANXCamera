@@ -19,7 +19,7 @@ public class RotateTextToast {
             RotateTextToast rotateTextToast = RotateTextToast.this;
             rotateTextToast.mLayoutRoot.removeView(rotateTextToast.mToast);
             RotateTextToast.this.mToast = null;
-            RotateTextToast.sRotateTextToast = null;
+            RotateTextToast unused = RotateTextToast.sRotateTextToast = null;
         }
     };
     RotateLayout mToast;

@@ -111,10 +111,7 @@ public final class Pipe {
             this.maxBufferSize = j;
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("maxBufferSize < 1: ");
-        sb.append(j);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("maxBufferSize < 1: " + j);
     }
 
     public Sink sink() {

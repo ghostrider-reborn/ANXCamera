@@ -12,7 +12,6 @@ public class OutputConfiguration {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -20,10 +19,7 @@ public class OutputConfiguration {
             return false;
         }
         OutputConfiguration outputConfiguration = (OutputConfiguration) obj;
-        if (!(this.mWidth == outputConfiguration.mWidth && this.mHeight == outputConfiguration.mHeight)) {
-            z = false;
-        }
-        return z;
+        return this.mWidth == outputConfiguration.mWidth && this.mHeight == outputConfiguration.mHeight;
     }
 
     public int getFormat() {

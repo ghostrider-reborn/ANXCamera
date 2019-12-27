@@ -44,10 +44,10 @@ public class HandlerHelper {
 
     public void release() {
         synchronized (this.mPendingMessageQueueLock) {
-            for (ResponseReceiverHandler responseReceiverHandler : this.mPendingMessageQueue) {
-                synchronized (responseReceiverHandler.lock) {
-                    responseReceiverHandler.releaseRequested = true;
-                    responseReceiverHandler.lock.notifyAll();
+            for (ResponseReceiverHandler next : this.mPendingMessageQueue) {
+                synchronized (next.lock) {
+                    next.releaseRequested = true;
+                    next.lock.notifyAll();
                 }
             }
         }
@@ -79,10 +79,7 @@ public class HandlerHelper {
                     obj2 = responseReceiverHandler.reply;
                 } catch (InterruptedException e2) {
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Interrupted: ");
-                    sb.append(e2);
-                    Log.e(str, sb.toString());
+                    Log.e(str, "Interrupted: " + e2);
                 }
             }
         }

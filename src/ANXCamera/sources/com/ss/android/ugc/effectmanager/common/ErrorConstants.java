@@ -44,9 +44,8 @@ public class ErrorConstants {
     public static final String LOG_NET_WORKER_NOT_SET = "Not set net worker";
 
     public static String APIErrorHandle(int i) {
-        String str = "未知错误";
         if (i == 1) {
-            return str;
+            return "未知错误";
         }
         if (i == 10014) {
             return "无效的effect id";
@@ -68,13 +67,13 @@ public class ErrorConstants {
                 return "sdk_version不合法";
             case 1004:
                 return "device_id不合法";
-            case MediaPlayer2.MEDIAPLAYER2_STATE_ERROR /*1005*/:
+            case MediaPlayer2.MEDIAPLAYER2_STATE_ERROR:
                 return "device_platform不合法";
-            case PointerIconCompat.TYPE_CELL /*1006*/:
+            case PointerIconCompat.TYPE_CELL:
                 return "device_type不合法";
-            case PointerIconCompat.TYPE_CROSSHAIR /*1007*/:
+            case PointerIconCompat.TYPE_CROSSHAIR:
                 return "channel不合法";
-            case PointerIconCompat.TYPE_TEXT /*1008*/:
+            case PointerIconCompat.TYPE_TEXT:
                 return "app_channel不合法";
             default:
                 switch (i) {
@@ -117,7 +116,7 @@ public class ErrorConstants {
                                     case CODE_IO_FAIL /*10012*/:
                                         return "io 错误";
                                     default:
-                                        return str;
+                                        return "未知错误";
                                 }
                         }
                 }

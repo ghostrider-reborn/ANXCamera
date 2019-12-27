@@ -61,7 +61,7 @@ public final class SpscLinkedArrayQueue<T> implements SimplePlainQueue<T> {
 
     private AtomicReferenceArray<Object> lvNextBufferAndUnlink(AtomicReferenceArray<Object> atomicReferenceArray, int i) {
         AtomicReferenceArray<Object> atomicReferenceArray2 = (AtomicReferenceArray) lvElement(atomicReferenceArray, i);
-        soElement(atomicReferenceArray, i, null);
+        soElement(atomicReferenceArray, i, (Object) null);
         return atomicReferenceArray2;
     }
 
@@ -79,7 +79,7 @@ public final class SpscLinkedArrayQueue<T> implements SimplePlainQueue<T> {
         int calcWrappedOffset = calcWrappedOffset(j, i);
         T lvElement = lvElement(atomicReferenceArray, calcWrappedOffset);
         if (lvElement != null) {
-            soElement(atomicReferenceArray, calcWrappedOffset, null);
+            soElement(atomicReferenceArray, calcWrappedOffset, (Object) null);
             soConsumerIndex(j + 1);
         }
         return lvElement;
@@ -163,16 +163,16 @@ public final class SpscLinkedArrayQueue<T> implements SimplePlainQueue<T> {
             soElement(atomicReferenceArray, calcWrappedOffset + 1, t2);
             soElement(atomicReferenceArray, calcWrappedOffset, t);
             soProducerIndex(j);
-        } else {
-            AtomicReferenceArray<Object> atomicReferenceArray2 = new AtomicReferenceArray<>(atomicReferenceArray.length());
-            this.producerBuffer = atomicReferenceArray2;
-            int calcWrappedOffset2 = calcWrappedOffset(lvProducerIndex, i);
-            soElement(atomicReferenceArray2, calcWrappedOffset2 + 1, t2);
-            soElement(atomicReferenceArray2, calcWrappedOffset2, t);
-            soNext(atomicReferenceArray, atomicReferenceArray2);
-            soElement(atomicReferenceArray, calcWrappedOffset2, HAS_NEXT);
-            soProducerIndex(j);
+            return true;
         }
+        AtomicReferenceArray<Object> atomicReferenceArray2 = new AtomicReferenceArray<>(atomicReferenceArray.length());
+        this.producerBuffer = atomicReferenceArray2;
+        int calcWrappedOffset2 = calcWrappedOffset(lvProducerIndex, i);
+        soElement(atomicReferenceArray2, calcWrappedOffset2 + 1, t2);
+        soElement(atomicReferenceArray2, calcWrappedOffset2, t);
+        soNext(atomicReferenceArray, atomicReferenceArray2);
+        soElement(atomicReferenceArray, calcWrappedOffset2, HAS_NEXT);
+        soProducerIndex(j);
         return true;
     }
 
@@ -193,7 +193,7 @@ public final class SpscLinkedArrayQueue<T> implements SimplePlainQueue<T> {
         T lvElement = lvElement(atomicReferenceArray, calcWrappedOffset);
         boolean z = lvElement == HAS_NEXT;
         if (lvElement != null && !z) {
-            soElement(atomicReferenceArray, calcWrappedOffset, null);
+            soElement(atomicReferenceArray, calcWrappedOffset, (Object) null);
             soConsumerIndex(lpConsumerIndex + 1);
             return lvElement;
         } else if (z) {

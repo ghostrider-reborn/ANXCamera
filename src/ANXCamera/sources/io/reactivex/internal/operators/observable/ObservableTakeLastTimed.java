@@ -23,7 +23,7 @@ public final class ObservableTakeLastTimed<T> extends AbstractObservableWithUpst
         volatile boolean cancelled;
         final long count;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f326d;
         final boolean delayError;
         Throwable error;
@@ -52,7 +52,7 @@ public final class ObservableTakeLastTimed<T> extends AbstractObservableWithUpst
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (compareAndSet(false, true)) {
                 Observer<? super T> observer = this.actual;
@@ -72,14 +72,16 @@ public final class ObservableTakeLastTimed<T> extends AbstractObservableWithUpst
                         Throwable th2 = this.error;
                         if (th2 != null) {
                             observer.onError(th2);
+                            return;
                         } else {
                             observer.onComplete();
+                            return;
                         }
-                        return;
-                    }
-                    Object poll2 = spscLinkedArrayQueue.poll();
-                    if (((Long) poll).longValue() >= this.scheduler.now(this.unit) - this.time) {
-                        observer.onNext(poll2);
+                    } else {
+                        Object poll2 = spscLinkedArrayQueue.poll();
+                        if (((Long) poll).longValue() >= this.scheduler.now(this.unit) - this.time) {
+                            observer.onNext(poll2);
+                        }
                     }
                 }
                 spscLinkedArrayQueue.clear();

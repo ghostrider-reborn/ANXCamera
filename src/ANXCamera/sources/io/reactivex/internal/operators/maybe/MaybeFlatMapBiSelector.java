@@ -87,7 +87,7 @@ public final class MaybeFlatMapBiSelector<T, U, R> extends AbstractMaybeWithUpst
                 Object apply = this.mapper.apply(t);
                 ObjectHelper.requireNonNull(apply, "The mapper returned a null MaybeSource");
                 MaybeSource maybeSource = (MaybeSource) apply;
-                if (DisposableHelper.replace(this.inner, null)) {
+                if (DisposableHelper.replace(this.inner, (Disposable) null)) {
                     InnerObserver<T, U, R> innerObserver = this.inner;
                     innerObserver.value = t;
                     maybeSource.subscribe(innerObserver);

@@ -33,15 +33,7 @@ public class MediaCodecCapability {
             i++;
             z = z2;
         }
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isFormatSupported(): format = ");
-        sb.append(mediaFormat);
-        sb.append(", mimeType = ");
-        sb.append(str);
-        sb.append(", supported = ");
-        sb.append(z);
-        Log.d(str2, sb.toString());
+        Log.d(TAG, "isFormatSupported(): format = " + mediaFormat + ", mimeType = " + str + ", supported = " + z);
         return z;
     }
 
@@ -50,20 +42,12 @@ public class MediaCodecCapability {
         boolean z = false;
         for (int i = 0; i < codecInfos.length && !z; i++) {
             MediaCodecInfo mediaCodecInfo = codecInfos[i];
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("codec.name = ");
-            sb.append(mediaCodecInfo.getName());
-            Log.d(str, sb.toString());
+            Log.d(TAG, "codec.name = " + mediaCodecInfo.getName());
             if (mediaCodecInfo.getName().equals(HW_VIDEO_CODEC_HEVC)) {
                 z = true;
             }
         }
-        String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("isH265EncodingSupported(): ");
-        sb2.append(z);
-        Log.d(str2, sb2.toString());
+        Log.d(TAG, "isH265EncodingSupported(): " + z);
         return z;
     }
 }

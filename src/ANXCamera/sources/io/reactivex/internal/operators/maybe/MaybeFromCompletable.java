@@ -14,7 +14,7 @@ public final class MaybeFromCompletable<T> extends Maybe<T> implements HasUpstre
     static final class FromCompletableObserver<T> implements CompletableObserver, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f291d;
 
         FromCompletableObserver(MaybeObserver<? super T> maybeObserver) {

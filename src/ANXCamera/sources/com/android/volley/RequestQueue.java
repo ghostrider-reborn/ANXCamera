@@ -73,9 +73,9 @@ public class RequestQueue {
 
     public void cancelAll(RequestFilter requestFilter) {
         synchronized (this.mCurrentRequests) {
-            for (Request request : this.mCurrentRequests) {
-                if (requestFilter.apply(request)) {
-                    request.cancel();
+            for (Request next : this.mCurrentRequests) {
+                if (requestFilter.apply(next)) {
+                    next.cancel();
                 }
             }
         }
@@ -93,7 +93,7 @@ public class RequestQueue {
         throw new IllegalArgumentException("Cannot cancelAll with a null tag");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public <T> void finish(Request<T> request) {
         synchronized (this.mCurrentRequests) {
             this.mCurrentRequests.remove(request);
@@ -131,7 +131,6 @@ public class RequestQueue {
     }
 
     public void stop() {
-        NetworkDispatcher[] networkDispatcherArr;
         CacheDispatcher cacheDispatcher = this.mCacheDispatcher;
         if (cacheDispatcher != null) {
             cacheDispatcher.quit();

@@ -9,7 +9,6 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -111,7 +110,7 @@ public class V6EffectCropView extends View implements V6FunctionUI {
         public void onAnimationStart(Animator animator) {
             super.onAnimationStart(animator);
             if (V6EffectCropView.this.mTiltShiftMaskFadeOutAnimator.isRunning()) {
-                V6EffectCropView.this.mTiltShiftMaskAlive = false;
+                boolean unused = V6EffectCropView.this.mTiltShiftMaskAlive = false;
             }
         }
     };
@@ -129,7 +128,7 @@ public class V6EffectCropView extends View implements V6FunctionUI {
 
     public V6EffectCropView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        this.mBorderPaint.setStyle(Style.STROKE);
+        this.mBorderPaint.setStyle(Paint.Style.STROKE);
         this.mBorderPaint.setColor(-1);
         this.mBorderPaint.setStrokeWidth((float) (b.isPad() ? 4 : 2));
         this.mCornerPaint = new Paint();
@@ -180,22 +179,20 @@ public class V6EffectCropView extends View implements V6FunctionUI {
             }
             int i9 = (int) (((float) point.x) + (((float) (height - point.y)) / f2));
             if (i9 >= 0 && i9 <= width) {
-                int i10 = i + 1;
                 pointArr[i] = new Point(i9, height);
-                i = i10;
+                i++;
             }
-            int i11 = (int) (((float) point.y) - (((float) point.x) * f2));
-            if (i11 >= 0 && i11 <= height && !isContained(pointArr, 0, i11)) {
-                int i12 = i + 1;
-                pointArr[i] = new Point(0, i11);
-                i = i12;
+            int i10 = (int) (((float) point.y) - (((float) point.x) * f2));
+            if (i10 >= 0 && i10 <= height && !isContained(pointArr, 0, i10)) {
+                pointArr[i] = new Point(0, i10);
+                i++;
             }
-            int i13 = (int) (((float) point.y) + (((float) (width - point.x)) * f2));
-            if (i13 < 0 || i13 > height || isContained(pointArr, width, i13)) {
+            int i11 = (int) (((float) point.y) + (((float) (width - point.x)) * f2));
+            if (i11 < 0 || i11 > height || isContained(pointArr, width, i11)) {
                 i2 = i;
             } else {
                 i2 = i + 1;
-                pointArr[i] = new Point(width, i13);
+                pointArr[i] = new Point(width, i11);
             }
             if (i2 == 1) {
                 i3 = i2 + 1;
@@ -204,8 +201,8 @@ public class V6EffectCropView extends View implements V6FunctionUI {
                 i3 = i2;
             }
             if (i3 == 2) {
-                int i14 = MIN_CROP_WIDTH_HEIGHT;
-                if (i14 * i14 <= squareOfPoints(pointArr[0], pointArr[1])) {
+                int i12 = MIN_CROP_WIDTH_HEIGHT;
+                if (i12 * i12 <= squareOfPoints(pointArr[0], pointArr[1])) {
                     this.mPoint1.set(pointArr[0].x, pointArr[0].y);
                     this.mPoint2.set(pointArr[1].x, pointArr[1].y);
                 }
@@ -229,9 +226,8 @@ public class V6EffectCropView extends View implements V6FunctionUI {
                 Point point4 = this.mPoint1;
                 int i4 = point4.y;
                 Point point5 = this.mPoint2;
-                int i5 = (int) (((float) ((i4 - point5.y) * i)) / sqrt);
-                int i6 = point4.x;
-                point.set(i6 + i5, i4 - ((int) (((float) ((i6 - point5.x) * i)) / sqrt)));
+                int i5 = point4.x;
+                point.set(i5 + ((int) (((float) ((i4 - point5.y) * i)) / sqrt)), i4 - ((int) (((float) ((i5 - point5.x) * i)) / sqrt)));
             }
         }
         return point;
@@ -363,7 +359,7 @@ public class V6EffectCropView extends View implements V6FunctionUI {
                     if (i == 1) {
                         V6EffectCropView.this.mTiltShiftMaskFadeOutAnimator.cancel();
                         if (!V6EffectCropView.this.mTiltShiftMaskAlive) {
-                            V6EffectCropView.this.mTiltShiftMaskAlive = true;
+                            boolean unused = V6EffectCropView.this.mTiltShiftMaskAlive = true;
                             V6EffectCropView.this.mTiltShiftMaskFadeInAnimator.setupStartValues();
                             V6EffectCropView.this.mTiltShiftMaskFadeInAnimator.start();
                         }
@@ -396,7 +392,7 @@ public class V6EffectCropView extends View implements V6FunctionUI {
                             V6EffectCropView.this.hideTiltShiftMask();
                         }
                         V6EffectCropView v6EffectCropView = V6EffectCropView.this;
-                        v6EffectCropView.mRangeWidth = v6EffectCropView.mAnimationStartRange + ((int) (((float) V6EffectCropView.this.mAnimateRangeWidth) * f2));
+                        int unused = v6EffectCropView.mRangeWidth = v6EffectCropView.mAnimationStartRange + ((int) (((float) V6EffectCropView.this.mAnimateRangeWidth) * f2));
                         V6EffectCropView.this.onCropChange();
                     } else if (i == 2) {
                         if (currentTimeMillis < 600) {
@@ -408,7 +404,7 @@ public class V6EffectCropView extends View implements V6FunctionUI {
                         float centerX = V6EffectCropView.this.mDefaultCircleBounds.centerX();
                         float centerY = V6EffectCropView.this.mDefaultCircleBounds.centerY();
                         V6EffectCropView v6EffectCropView2 = V6EffectCropView.this;
-                        v6EffectCropView2.mRadius = v6EffectCropView2.mAnimationStartRadius + ((int) (((float) V6EffectCropView.this.mAnimateRadius) * f2));
+                        int unused2 = v6EffectCropView2.mRadius = v6EffectCropView2.mAnimationStartRadius + ((int) (((float) V6EffectCropView.this.mAnimateRadius) * f2));
                         V6EffectCropView.this.mCropBounds.set(centerX - ((float) V6EffectCropView.this.mRadius), centerY - ((float) V6EffectCropView.this.mRadius), centerX + ((float) V6EffectCropView.this.mRadius), centerY + ((float) V6EffectCropView.this.mRadius));
                         V6EffectCropView.this.onCropChange();
                     }
@@ -458,7 +454,7 @@ public class V6EffectCropView extends View implements V6FunctionUI {
                 invalidate();
             } else {
                 this.mCropBounds.set(this.mDefaultRectBounds);
-                setLayerType(2, null);
+                setLayerType(2, (Paint) null);
             }
             EffectController.getInstance().setInvertFlag(0);
             onCropChange();
@@ -473,26 +469,18 @@ public class V6EffectCropView extends View implements V6FunctionUI {
     }
 
     private boolean isContained(Point[] pointArr, int i, int i2) {
-        boolean z = false;
-        if (pointArr != null && pointArr.length != 0) {
-            int length = pointArr.length;
-            int i3 = 0;
-            while (true) {
-                if (i3 >= length) {
-                    break;
-                }
-                Point point = pointArr[i3];
-                if (point == null) {
-                    return false;
-                }
-                if (point.x == i || point.y == i2) {
-                    z = true;
-                } else {
-                    i3++;
-                }
+        if (pointArr == null || pointArr.length == 0) {
+            return false;
+        }
+        for (Point point : pointArr) {
+            if (point == null) {
+                return false;
+            }
+            if (point.x == i || point.y == i2) {
+                return true;
             }
         }
-        return z;
+        return false;
     }
 
     private static boolean isTiltShift() {
@@ -503,14 +491,12 @@ public class V6EffectCropView extends View implements V6FunctionUI {
         if (this.mMovingEdges == 16) {
             this.mCropBounds.offset(f4 > 0.0f ? Math.min(this.mDisplayBounds.right - this.mCropBounds.right, f4) : Math.max(this.mDisplayBounds.left - this.mCropBounds.left, f4), f5 > 0.0f ? Math.min(this.mDisplayBounds.bottom - this.mCropBounds.bottom, f5) : Math.max(this.mDisplayBounds.top - this.mCropBounds.top, f5));
         } else {
-            float f6 = (float) (MIN_CROP_WIDTH_HEIGHT / 2);
-            float min = Math.min(this.mDisplayBounds.width(), this.mDisplayBounds.height()) / 2.0f;
             float centerX = this.mCropBounds.centerX();
             float centerY = this.mCropBounds.centerY();
-            float f7 = f2 - centerX;
-            float f8 = f3 - centerY;
-            float min2 = Math.min(min, Math.max(f6, (float) Math.sqrt((double) ((f7 * f7) + (f8 * f8)))));
-            this.mCropBounds.set(centerX - min2, centerY - min2, centerX + min2, centerY + min2);
+            float f6 = f2 - centerX;
+            float f7 = f3 - centerY;
+            float min = Math.min(Math.min(this.mDisplayBounds.width(), this.mDisplayBounds.height()) / 2.0f, Math.max((float) (MIN_CROP_WIDTH_HEIGHT / 2), (float) Math.sqrt((double) ((f6 * f6) + (f7 * f7)))));
+            this.mCropBounds.set(centerX - min, centerY - min, centerX + min, centerY + min);
         }
         onCropChange();
     }

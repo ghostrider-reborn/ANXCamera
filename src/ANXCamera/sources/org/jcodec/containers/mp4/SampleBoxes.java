@@ -1,7 +1,7 @@
 package org.jcodec.containers.mp4;
 
-import com.android.camera.CameraIntentManager.ControlActions;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.android.camera.CameraIntentManager;
+import com.ss.android.vesdk.VEEditor;
 import org.jcodec.containers.mp4.boxes.AudioSampleEntry;
 import org.jcodec.containers.mp4.boxes.SampleEntry;
 import org.jcodec.containers.mp4.boxes.TimecodeSampleEntry;
@@ -34,8 +34,7 @@ public class SampleBoxes extends Boxes {
         override("gif ", VideoSampleEntry.class);
         override("h263", VideoSampleEntry.class);
         override("tiff", VideoSampleEntry.class);
-        String str = "raw ";
-        override(str, VideoSampleEntry.class);
+        override("raw ", VideoSampleEntry.class);
         override("2vuY", VideoSampleEntry.class);
         override("yuv2", VideoSampleEntry.class);
         override("v308", VideoSampleEntry.class);
@@ -51,8 +50,7 @@ public class SampleBoxes extends Boxes {
         override("mjp2", VideoSampleEntry.class);
         override("ac-3", AudioSampleEntry.class);
         override("cac3", AudioSampleEntry.class);
-        String str2 = "ima4";
-        override(str2, AudioSampleEntry.class);
+        override("ima4", AudioSampleEntry.class);
         override("aac ", AudioSampleEntry.class);
         override("celp", AudioSampleEntry.class);
         override("hvxc", AudioSampleEntry.class);
@@ -74,13 +72,13 @@ public class SampleBoxes extends Boxes {
         override(Platform.stringFromBytes(new byte[]{109, 115, 0, 17}), AudioSampleEntry.class);
         override(Platform.stringFromBytes(new byte[]{109, 115, 0, 49}), AudioSampleEntry.class);
         override("aes3", AudioSampleEntry.class);
-        override(ControlActions.CONTROL_ACTION_UNKNOWN, AudioSampleEntry.class);
-        override(str, AudioSampleEntry.class);
+        override(CameraIntentManager.ControlActions.CONTROL_ACTION_UNKNOWN, AudioSampleEntry.class);
+        override("raw ", AudioSampleEntry.class);
         override("twos", AudioSampleEntry.class);
         override("sowt", AudioSampleEntry.class);
         override("MAC3 ", AudioSampleEntry.class);
         override("MAC6 ", AudioSampleEntry.class);
-        override(str2, AudioSampleEntry.class);
+        override("ima4", AudioSampleEntry.class);
         override("fl32", AudioSampleEntry.class);
         override("fl64", AudioSampleEntry.class);
         override("in24", AudioSampleEntry.class);
@@ -98,7 +96,7 @@ public class SampleBoxes extends Boxes {
         override("time", TimecodeSampleEntry.class);
         override("c608", SampleEntry.class);
         override("c708", SampleEntry.class);
-        override(MVConsts.TYPE_TEXT, SampleEntry.class);
+        override(VEEditor.MVConsts.TYPE_TEXT, SampleEntry.class);
         override("fdsc", SampleEntry.class);
     }
 }

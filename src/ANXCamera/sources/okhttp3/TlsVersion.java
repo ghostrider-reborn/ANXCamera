@@ -17,6 +17,7 @@ public enum TlsVersion {
         this.javaName = str;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Removed duplicated region for block: B:22:0x004b  */
     /* JADX WARNING: Removed duplicated region for block: B:36:0x0076  */
     public static TlsVersion forJavaName(String str) {
@@ -58,10 +59,7 @@ public enum TlsVersion {
                 if (c2 == 4) {
                     return SSL_3_0;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unexpected TLS version: ");
-                sb.append(str);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("Unexpected TLS version: " + str);
             }
         } else if (str.equals("SSLv3")) {
             c2 = 4;

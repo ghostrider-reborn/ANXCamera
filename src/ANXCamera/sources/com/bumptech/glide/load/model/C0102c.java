@@ -3,11 +3,13 @@ package com.bumptech.glide.load.model;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-/* renamed from: com.bumptech.glide.load.model.c reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.model.c  reason: case insensitive filesystem */
 /* compiled from: ByteArrayLoader */
 public class C0102c<Data> implements t<byte[], Data> {
     private final b<Data> Jh;
@@ -32,7 +34,7 @@ public class C0102c<Data> implements t<byte[], Data> {
         Data b(byte[] bArr);
     }
 
-    /* renamed from: com.bumptech.glide.load.model.c$c reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.load.model.c$c  reason: collision with other inner class name */
     /* compiled from: ByteArrayLoader */
     private static class C0010c<Data> implements com.bumptech.glide.load.a.d<Data> {
         private final b<Data> Jh;
@@ -48,7 +50,7 @@ public class C0102c<Data> implements t<byte[], Data> {
             return this.Jh.M();
         }
 
-        public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super Data> aVar) {
+        public void a(@NonNull Priority priority, @NonNull d.a<? super Data> aVar) {
             aVar.b(this.Jh.b(this.model));
         }
 
@@ -80,8 +82,8 @@ public class C0102c<Data> implements t<byte[], Data> {
         this.Jh = bVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<Data> a(@NonNull byte[] bArr, int i, int i2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(bArr), new C0010c(bArr, this.Jh));
+    public t.a<Data> a(@NonNull byte[] bArr, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(bArr), new C0010c(bArr, this.Jh));
     }
 
     /* renamed from: f */

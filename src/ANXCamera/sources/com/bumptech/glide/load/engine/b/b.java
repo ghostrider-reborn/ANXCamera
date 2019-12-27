@@ -44,18 +44,13 @@ public final class b implements ExecutorService {
 
         public synchronized Thread newThread(@NonNull Runnable runnable) {
             a aVar;
-            StringBuilder sb = new StringBuilder();
-            sb.append("glide-");
-            sb.append(this.name);
-            sb.append("-thread-");
-            sb.append(this.fh);
-            aVar = new a(this, runnable, sb.toString());
-            this.fh++;
+            aVar = new a(this, runnable, "glide-" + this.name + "-thread-" + this.fh);
+            this.fh = this.fh + 1;
             return aVar;
         }
     }
 
-    /* renamed from: com.bumptech.glide.load.engine.b.b$b reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.load.engine.b.b$b  reason: collision with other inner class name */
     /* compiled from: GlideExecutor */
     public interface C0008b {
         public static final C0008b DEFAULT = LOG;

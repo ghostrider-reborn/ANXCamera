@@ -11,7 +11,7 @@ import com.android.camera.db.element.SaveTask;
 import com.android.camera.log.Log;
 import com.xiaomi.camera.core.ParallelTaskData;
 import com.xiaomi.camera.core.PictureInfo;
-import com.xiaomi.camera.parallelservice.util.ParallelUtil.ParallelProvider;
+import com.xiaomi.camera.parallelservice.util.ParallelUtil;
 
 public final class PreviewSaveRequest extends AbstractSaveRequest {
     private static final String TAG = "PreviewSaveRequest";
@@ -90,23 +90,15 @@ public final class PreviewSaveRequest extends AbstractSaveRequest {
             synchronized (this.mSavePath.intern()) {
                 SaveTask itemByPath = DbRepository.dbItemSaveTask().getItemByPath(this.mSavePath);
                 if (itemByPath != null) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("save preview: task is exist! isValid = ");
-                    sb.append(itemByPath.isValid());
-                    Log.w(str, sb.toString());
+                    Log.w(TAG, "save preview: task is exist! isValid = " + itemByPath.isValid());
                     if (itemByPath.isValid()) {
-                        ParallelProvider.deleteInProvider(this.context, itemByPath.getMediaStoreId().longValue());
+                        ParallelUtil.ParallelProvider.deleteInProvider(this.context, itemByPath.getMediaStoreId().longValue());
                     }
                 } else {
                     SaveTask saveTask = (SaveTask) DbRepository.dbItemSaveTask().generateItem(this.date);
                     saveTask.setPath(this.mSavePath);
                     DbRepository.dbItemSaveTask().endItemAndInsert(saveTask, 0);
-                    String str2 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("insert preview picture:");
-                    sb2.append(this.mSavePath);
-                    Log.d(str2, sb2.toString());
+                    Log.d(TAG, "insert preview picture:" + this.mSavePath);
                     String fileTitleFromPath = Util.getFileTitleFromPath(this.mSavePath);
                     Uri addImage = Storage.addImage(this.context, fileTitleFromPath, this.date, this.loc, this.orientation, this.data, this.width, this.height, false, false, false, this.algorithmName != null && this.algorithmName.equals(Util.ALGORITHM_NAME_MIMOJI_CAPTURE), this.isParallelProcess, this.algorithmName, this.info);
                     Storage.getAvailableSpace();

@@ -27,10 +27,7 @@ public enum Protocol {
         if (str.equals(SPDY_3.protocol)) {
             return SPDY_3;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unexpected protocol: ");
-        sb.append(str);
-        throw new IOException(sb.toString());
+        throw new IOException("Unexpected protocol: " + str);
     }
 
     public String toString() {

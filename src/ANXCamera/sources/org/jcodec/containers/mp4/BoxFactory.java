@@ -2,7 +2,6 @@ package org.jcodec.containers.mp4;
 
 import org.jcodec.containers.mp4.boxes.AudioSampleEntry;
 import org.jcodec.containers.mp4.boxes.Box;
-import org.jcodec.containers.mp4.boxes.Box.LeafBox;
 import org.jcodec.containers.mp4.boxes.DataRefBox;
 import org.jcodec.containers.mp4.boxes.Header;
 import org.jcodec.containers.mp4.boxes.NodeBox;
@@ -31,9 +30,9 @@ public class BoxFactory implements IBoxFactory {
     }
 
     public Box newBox(Header header) {
-        Class cls = this.boxes.toClass(header.getFourcc());
+        Class<? extends Box> cls = this.boxes.toClass(header.getFourcc());
         if (cls == null) {
-            return new LeafBox(header);
+            return new Box.LeafBox(header);
         }
         Box box = (Box) Platform.newInstance(cls, new Object[]{header});
         if (box instanceof NodeBox) {

@@ -1,9 +1,8 @@
 package com.arcsoft.avatar.recoder;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.media.MediaCodec;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.opengl.EGL14;
 import android.opengl.EGLContext;
@@ -51,7 +50,7 @@ public class VideoEncoder extends BaseEncoder {
 
     public class SaveThread extends Thread {
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         private ByteBuffer f125b;
 
         public SaveThread(ByteBuffer byteBuffer) {
@@ -60,15 +59,11 @@ public class VideoEncoder extends BaseEncoder {
 
         public void run() {
             super.run();
-            Bitmap createBitmap = Bitmap.createBitmap(VideoEncoder.this.A, VideoEncoder.this.B, Config.ARGB_8888);
+            Bitmap createBitmap = Bitmap.createBitmap(VideoEncoder.this.A, VideoEncoder.this.B, Bitmap.Config.ARGB_8888);
             createBitmap.copyPixelsFromBuffer(this.f125b);
-            StringBuilder sb = new StringBuilder();
-            sb.append("/sdcard/Pictures/_");
-            sb.append(System.currentTimeMillis());
-            sb.append(Storage.JPEG_SUFFIX);
             try {
-                FileOutputStream fileOutputStream = new FileOutputStream(sb.toString());
-                createBitmap.compress(CompressFormat.JPEG, 100, fileOutputStream);
+                FileOutputStream fileOutputStream = new FileOutputStream("/sdcard/Pictures/_" + System.currentTimeMillis() + Storage.JPEG_SUFFIX);
+                createBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
                 fileOutputStream.close();
                 createBitmap.recycle();
             } catch (FileNotFoundException e2) {
@@ -91,23 +86,12 @@ public class VideoEncoder extends BaseEncoder {
         b();
         this.q = new ReentrantLock();
         this.r = this.q.newCondition();
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoEncoder constructor mCustomerBitRate = ");
-        sb.append(this.K);
-        String sb2 = sb.toString();
-        String str2 = u;
-        CodecLog.d(str2, sb2);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("VideoEncoder constructor mWidth = ");
-        sb3.append(i);
-        sb3.append(" ,mHeight = ");
-        sb3.append(i2);
-        CodecLog.d(str2, sb3.toString());
+        CodecLog.d(u, "VideoEncoder constructor mCustomerBitRate = " + this.K);
+        CodecLog.d(u, "VideoEncoder constructor mWidth = " + i + " ,mHeight = " + i2);
     }
 
     private void a(boolean z2) {
-        String str = u;
-        CodecLog.d(str, "initVideoEncoder()->in");
+        CodecLog.d(u, "initVideoEncoder()->in");
         this.z = MediaFormat.createVideoFormat(E, this.A, this.B);
         this.z.setInteger("color-format", 2130708361);
         this.z.setInteger("bitrate", this.K);
@@ -115,43 +99,40 @@ public class VideoEncoder extends BaseEncoder {
         this.z.setInteger("i-frame-interval", 10);
         try {
             this.i = MediaCodec.createEncoderByType(E);
-            StringBuilder sb = new StringBuilder();
-            sb.append("initVideoEncoder(): selected_codec_name = ");
-            sb.append(this.i.getName());
-            CodecLog.i(str, sb.toString());
+            CodecLog.i(u, "initVideoEncoder(): selected_codec_name = " + this.i.getName());
         } catch (IOException e2) {
-            CodecLog.e(str, "initVideoEncoder()->createEncoderByType failed.");
+            CodecLog.e(u, "initVideoEncoder()->createEncoderByType failed.");
             e2.printStackTrace();
             RecordingListener recordingListener = this.o;
             if (recordingListener != null) {
-                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CREATE, Integer.valueOf(0));
+                recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CREATE, 0);
             }
         }
         try {
-            this.i.configure(this.z, null, null, 1);
+            this.i.configure(this.z, (Surface) null, (MediaCrypto) null, 1);
         } catch (Exception e3) {
-            CodecLog.e(str, "initVideoEncoder()->configure failed.");
+            CodecLog.e(u, "initVideoEncoder()->configure failed.");
             e3.printStackTrace();
             RecordingListener recordingListener2 = this.o;
             if (recordingListener2 != null) {
-                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CONFIGURE, Integer.valueOf(0));
+                recordingListener2.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CONFIGURE, 0);
             }
         }
         if (z2) {
             try {
                 this.F = this.i.createInputSurface();
             } catch (Exception e4) {
-                CodecLog.e(str, "initVideoEncoder()->createInputSurface failed.");
+                CodecLog.e(u, "initVideoEncoder()->createInputSurface failed.");
                 e4.printStackTrace();
                 RecordingListener recordingListener3 = this.o;
                 if (recordingListener3 != null) {
-                    recordingListener3.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CONFIGURE, Integer.valueOf(0));
+                    recordingListener3.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CONFIGURE, 0);
                 }
             }
         } else {
             this.F = null;
         }
-        CodecLog.d(str, "initVideoEncoder()->out");
+        CodecLog.d(u, "initVideoEncoder()->out");
     }
 
     private void b() {
@@ -162,10 +143,7 @@ public class VideoEncoder extends BaseEncoder {
     public void c() {
         this.J = new GLRender(this.A, this.B, this.D, true);
         this.J.initRender(false);
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoEncoder initGL glError = ");
-        sb.append(GLES20.glGetError());
-        CodecLog.d(u, sb.toString());
+        CodecLog.d(u, "VideoEncoder initGL glError = " + GLES20.glGetError());
     }
 
     /* access modifiers changed from: private */
@@ -203,14 +181,10 @@ public class VideoEncoder extends BaseEncoder {
     }
 
     public void release(boolean z2) {
-        String str = u;
         try {
             this.q.lock();
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("release()-> meet error when get lock : ");
-            sb.append(e2.getMessage());
-            CodecLog.e(str, sb.toString());
+            CodecLog.e(u, "release()-> meet error when get lock : " + e2.getMessage());
         } catch (Throwable th) {
             sinalCondition();
             this.q.unlock();
@@ -223,7 +197,7 @@ public class VideoEncoder extends BaseEncoder {
             try {
                 thread.join();
             } catch (InterruptedException e3) {
-                CodecLog.d(str, "Encoder Thread has been Interrupted, errors may be occurred.");
+                CodecLog.d(u, "Encoder Thread has been Interrupted, errors may be occurred.");
                 e3.printStackTrace();
             } catch (Throwable th2) {
                 this.G = null;
@@ -237,10 +211,7 @@ public class VideoEncoder extends BaseEncoder {
             this.H = null;
         }
         this.I = EGL14.EGL_NO_CONTEXT;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("VideoEncoder release() encoder thread exit. threadName =");
-        sb2.append(ENCODER_THREAD_NAME);
-        CodecLog.d(str, sb2.toString());
+        CodecLog.d(u, "VideoEncoder release() encoder thread exit. threadName =" + ENCODER_THREAD_NAME);
         this.F = null;
         this.q = null;
         this.r = null;
@@ -257,13 +228,10 @@ public class VideoEncoder extends BaseEncoder {
     }
 
     public void startRecording() {
-        Thread thread = this.G;
-        String str = u;
-        if (thread == null) {
+        if (this.G == null) {
             super.startRecording();
             this.G = new Thread(ENCODER_THREAD_NAME) {
                 public void run() {
-                    String str = VideoEncoder.u;
                     super.run();
                     setName(VideoEncoder.NAME);
                     try {
@@ -278,7 +246,7 @@ public class VideoEncoder extends BaseEncoder {
                                     videoEncoder.lock();
                                     while (VideoEncoder.this.s.queueSize() == 0 && !VideoEncoder.this.f99d) {
                                         try {
-                                            CodecLog.d(str, "VideoEncoder frame_item_wait");
+                                            CodecLog.d(VideoEncoder.u, "VideoEncoder frame_item_wait");
                                             VideoEncoder.this.r.await();
                                         } catch (InterruptedException e2) {
                                             e2.printStackTrace();
@@ -287,10 +255,7 @@ public class VideoEncoder extends BaseEncoder {
                                     frameItem = VideoEncoder.this.s.getFrameForConsumer();
                                 } catch (Exception e3) {
                                     e3.printStackTrace();
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append("VideoEncoder meet exception when get item : ");
-                                    sb.append(e3.getMessage());
-                                    CodecLog.e(str, sb.toString());
+                                    CodecLog.e(VideoEncoder.u, "VideoEncoder meet exception when get item : " + e3.getMessage());
                                 } catch (Throwable th) {
                                     VideoEncoder.this.unLock();
                                     throw th;
@@ -299,15 +264,9 @@ public class VideoEncoder extends BaseEncoder {
                                 if (frameItem != null) {
                                     GLFramebuffer gLFramebuffer = frameItem.mFramebuffer;
                                     VideoEncoder.this.drain();
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append("VideoEncoder frame_item_index = ");
-                                    sb2.append(frameItem.mFrameIndex);
-                                    CodecLog.d(str, sb2.toString());
+                                    CodecLog.d(VideoEncoder.u, "VideoEncoder frame_item_index = " + frameItem.mFrameIndex);
                                     if (0 != frameItem.f102a) {
-                                        StringBuilder sb3 = new StringBuilder();
-                                        sb3.append("VideoEncoder wait gpu by sync = ");
-                                        sb3.append(frameItem.f102a);
-                                        CodecLog.d(str, sb3.toString());
+                                        CodecLog.d(VideoEncoder.u, "VideoEncoder wait gpu by sync = " + frameItem.f102a);
                                         GLES30.glWaitSync(frameItem.f102a, 0, -1);
                                     }
                                     VideoEncoder.this.J.renderWithTextureId(gLFramebuffer.getTextureId());
@@ -316,10 +275,7 @@ public class VideoEncoder extends BaseEncoder {
                                         VideoEncoder.this.s.addEmptyFrameForConsumer();
                                     } catch (Exception e4) {
                                         e4.printStackTrace();
-                                        StringBuilder sb4 = new StringBuilder();
-                                        sb4.append("VideoEncoder meet exception when add item : ");
-                                        sb4.append(e4.getMessage());
-                                        CodecLog.e(str, sb4.toString());
+                                        CodecLog.e(VideoEncoder.u, "VideoEncoder meet exception when add item : " + e4.getMessage());
                                     } catch (Throwable th2) {
                                         VideoEncoder.this.unLock();
                                         throw th2;
@@ -340,16 +296,16 @@ public class VideoEncoder extends BaseEncoder {
                         e5.printStackTrace();
                         RecordingListener recordingListener = VideoEncoder.this.o;
                         if (recordingListener != null) {
-                            recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_START, Integer.valueOf(0));
+                            recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_START, 0);
                         }
                     }
                 }
             };
             this.G.start();
-            CodecLog.d(str, "VideoEncoder is started.");
+            CodecLog.d(u, "VideoEncoder is started.");
             return;
         }
-        CodecLog.e(str, "startRecording()-> Video encoder thread has been started already, can not start twice.");
+        CodecLog.e(u, "startRecording()-> Video encoder thread has been started already, can not start twice.");
         throw new RuntimeException("Video encoder thread has been started already, can not start twice.");
     }
 
@@ -358,11 +314,7 @@ public class VideoEncoder extends BaseEncoder {
         try {
             this.q.lock();
         } catch (Exception e2) {
-            String str = u;
-            StringBuilder sb = new StringBuilder();
-            sb.append("stopRecording()-> meet error when get lock : ");
-            sb.append(e2.getMessage());
-            CodecLog.e(str, sb.toString());
+            CodecLog.e(u, "stopRecording()-> meet error when get lock : " + e2.getMessage());
         } catch (Throwable th) {
             sinalCondition();
             this.q.unlock();

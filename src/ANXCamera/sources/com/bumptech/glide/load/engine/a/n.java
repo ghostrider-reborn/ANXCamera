@@ -5,12 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.c;
 import com.bumptech.glide.load.engine.A;
-import com.bumptech.glide.load.engine.a.o.a;
+import com.bumptech.glide.load.engine.a.o;
 import com.bumptech.glide.util.f;
 
 /* compiled from: LruResourceCache */
 public class n extends f<c, A<?>> implements o {
-    private a listener;
+    private o.a listener;
 
     public n(long j) {
         super(j);
@@ -26,13 +26,13 @@ public class n extends f<c, A<?>> implements o {
         return (A) super.put(cVar, a2);
     }
 
-    public void a(@NonNull a aVar) {
+    public void a(@NonNull o.a aVar) {
         this.listener = aVar;
     }
 
     /* access modifiers changed from: protected */
     public void b(@NonNull c cVar, @Nullable A<?> a2) {
-        a aVar = this.listener;
+        o.a aVar = this.listener;
         if (aVar != null && a2 != null) {
             aVar.b(a2);
         }

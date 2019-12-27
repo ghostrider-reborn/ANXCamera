@@ -14,17 +14,17 @@ public class FragmentManagerNonConfig {
         this.mViewModelStores = list3;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public List<FragmentManagerNonConfig> getChildNonConfigs() {
         return this.mChildNonConfigs;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public List<Fragment> getFragments() {
         return this.mFragments;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public List<ViewModelStore> getViewModelStores() {
         return this.mViewModelStores;
     }

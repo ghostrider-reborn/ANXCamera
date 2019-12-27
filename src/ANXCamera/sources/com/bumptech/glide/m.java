@@ -52,7 +52,7 @@ public class m implements j, g<j<Drawable>> {
     }
 
     /* compiled from: RequestManager */
-    private static class b implements com.bumptech.glide.manager.c.a {
+    private static class b implements c.a {
         private final p Fc;
 
         b(@NonNull p pVar) {
@@ -97,7 +97,7 @@ public class m implements j, g<j<Drawable>> {
     private void g(@NonNull com.bumptech.glide.request.target.o<?> oVar) {
         if (!e(oVar) && !this.Kb.a(oVar) && oVar.getRequest() != null) {
             com.bumptech.glide.request.c request = oVar.getRequest();
-            oVar.f(null);
+            oVar.f((com.bumptech.glide.request.c) null);
             request.clear();
         }
     }
@@ -163,7 +163,7 @@ public class m implements j, g<j<Drawable>> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public f W() {
         return this.vc;
     }
@@ -192,13 +192,13 @@ public class m implements j, g<j<Drawable>> {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public <T> n<?, T> a(Class<T> cls) {
         return this.Kb.Ef().a(cls);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(@NonNull com.bumptech.glide.request.target.o<?> oVar, @NonNull com.bumptech.glide.request.c cVar) {
         this.Hc.f(oVar);
         this.Fc.i(cVar);
@@ -250,10 +250,10 @@ public class m implements j, g<j<Drawable>> {
     }
 
     public void e(@NonNull View view) {
-        d((com.bumptech.glide.request.target.o<?>) new a<Object>(view));
+        d((com.bumptech.glide.request.target.o<?>) new a(view));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean e(@NonNull com.bumptech.glide.request.target.o<?> oVar) {
         com.bumptech.glide.request.c request = oVar.getRequest();
         if (request == null) {
@@ -263,7 +263,7 @@ public class m implements j, g<j<Drawable>> {
             return false;
         }
         this.Hc.e(oVar);
-        oVar.f(null);
+        oVar.f((com.bumptech.glide.request.c) null);
         return true;
     }
 
@@ -298,7 +298,7 @@ public class m implements j, g<j<Drawable>> {
 
     public void onDestroy() {
         this.Hc.onDestroy();
-        for (com.bumptech.glide.request.target.o d2 : this.Hc.getAll()) {
+        for (com.bumptech.glide.request.target.o<?> d2 : this.Hc.getAll()) {
             d(d2);
         }
         this.Hc.clear();
@@ -320,13 +320,6 @@ public class m implements j, g<j<Drawable>> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
-        sb.append("{tracker=");
-        sb.append(this.Fc);
-        sb.append(", treeNode=");
-        sb.append(this.Gc);
-        sb.append("}");
-        return sb.toString();
+        return super.toString() + "{tracker=" + this.Fc + ", treeNode=" + this.Gc + "}";
     }
 }

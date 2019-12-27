@@ -1,17 +1,18 @@
 package com.bumptech.glide.load.engine;
 
-import com.bumptech.glide.util.a.d.a;
+import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.util.a.d;
 
 /* compiled from: Engine */
-class q implements a<EngineJob<?>> {
-    final /* synthetic */ EngineJobFactory this$0;
+class q implements d.a<EngineJob<?>> {
+    final /* synthetic */ Engine.EngineJobFactory this$0;
 
-    q(EngineJobFactory engineJobFactory) {
+    q(Engine.EngineJobFactory engineJobFactory) {
         this.this$0 = engineJobFactory;
     }
 
     public EngineJob<?> create() {
-        EngineJobFactory engineJobFactory = this.this$0;
+        Engine.EngineJobFactory engineJobFactory = this.this$0;
         EngineJob engineJob = new EngineJob(engineJobFactory.Nb, engineJobFactory.Mb, engineJobFactory.lf, engineJobFactory.Rb, engineJobFactory.listener, engineJobFactory.pool);
         return engineJob;
     }

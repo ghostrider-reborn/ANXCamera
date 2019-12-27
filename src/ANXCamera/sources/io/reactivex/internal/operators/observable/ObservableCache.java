@@ -47,7 +47,7 @@ public final class ObservableCache<T> extends AbstractObservableWithUpstream<T, 
         }
 
         public void connect() {
-            this.source.subscribe((Observer<? super T>) this);
+            this.source.subscribe(this);
             this.isConnected = true;
         }
 
@@ -209,20 +209,20 @@ public final class ObservableCache<T> extends AbstractObservableWithUpstream<T, 
 
     public static <T> Observable<T> from(Observable<T> observable, int i) {
         ObjectHelper.verifyPositive(i, "capacityHint");
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableCache<T>(observable, new CacheState(observable, i)));
+        return RxJavaPlugins.onAssembly(new ObservableCache(observable, new CacheState(observable, i)));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int cachedEventCount() {
         return this.state.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean hasObservers() {
         return ((ReplayDisposable[]) this.state.observers.get()).length != 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isConnected() {
         return this.state.isConnected;
     }

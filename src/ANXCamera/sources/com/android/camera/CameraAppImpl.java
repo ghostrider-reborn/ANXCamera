@@ -2,7 +2,7 @@ package com.android.camera;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import com.android.camera.network.util.NetworkUtils;
 import com.android.camera.parallel.AlgoConnector;
 import com.android.camera2.vendortag.CameraCharacteristicsVendorTags;
@@ -81,7 +81,7 @@ public class CameraAppImpl extends Application {
             if (getPackageManager().getApplicationInfo(getPackageName(), 128).metaData.getInt("com.xiaomi.camera.parallel.enable", 0) == 1) {
                 z = true;
             }
-        } catch (NameNotFoundException e2) {
+        } catch (PackageManager.NameNotFoundException e2) {
             e2.printStackTrace();
         }
         if (z) {

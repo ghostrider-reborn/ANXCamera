@@ -13,7 +13,7 @@ public enum NotificationLite {
     static final class DisposableNotification implements Serializable {
         private static final long serialVersionUID = -7482590109178395495L;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         final Disposable f341d;
 
         DisposableNotification(Disposable disposable) {
@@ -21,18 +21,14 @@ public enum NotificationLite {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("NotificationLite.Disposable[");
-            sb.append(this.f341d);
-            sb.append("]");
-            return sb.toString();
+            return "NotificationLite.Disposable[" + this.f341d + "]";
         }
     }
 
     static final class ErrorNotification implements Serializable {
         private static final long serialVersionUID = -8759979445933046293L;
 
-        /* renamed from: e reason: collision with root package name */
+        /* renamed from: e  reason: collision with root package name */
         final Throwable f342e;
 
         ErrorNotification(Throwable th) {
@@ -40,10 +36,10 @@ public enum NotificationLite {
         }
 
         public boolean equals(Object obj) {
-            if (!(obj instanceof ErrorNotification)) {
-                return false;
+            if (obj instanceof ErrorNotification) {
+                return ObjectHelper.equals(this.f342e, ((ErrorNotification) obj).f342e);
             }
-            return ObjectHelper.equals(this.f342e, ((ErrorNotification) obj).f342e);
+            return false;
         }
 
         public int hashCode() {
@@ -51,11 +47,7 @@ public enum NotificationLite {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("NotificationLite.Error[");
-            sb.append(this.f342e);
-            sb.append("]");
-            return sb.toString();
+            return "NotificationLite.Error[" + this.f342e + "]";
         }
     }
 
@@ -68,11 +60,7 @@ public enum NotificationLite {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("NotificationLite.Subscription[");
-            sb.append(this.s);
-            sb.append("]");
-            return sb.toString();
+            return "NotificationLite.Subscription[" + this.s + "]";
         }
     }
 

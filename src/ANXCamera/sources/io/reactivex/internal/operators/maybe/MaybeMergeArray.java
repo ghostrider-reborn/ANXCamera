@@ -94,7 +94,7 @@ public final class MaybeMergeArray<T> extends Flowable<T> {
             this.queue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 if (this.outputFused) {
@@ -105,7 +105,7 @@ public final class MaybeMergeArray<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainFused() {
             Subscriber<? super T> subscriber = this.actual;
             SimpleQueueWithConsumerIndex<Object> simpleQueueWithConsumerIndex = this.queue;
@@ -133,7 +133,7 @@ public final class MaybeMergeArray<T> extends Flowable<T> {
             simpleQueueWithConsumerIndex.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainNormal() {
             int i;
             Subscriber<? super T> subscriber = this.actual;
@@ -185,7 +185,7 @@ public final class MaybeMergeArray<T> extends Flowable<T> {
             } while (i2 != 0);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isCancelled() {
             return this.cancelled;
         }
@@ -266,7 +266,7 @@ public final class MaybeMergeArray<T> extends Flowable<T> {
 
         public void drop() {
             int i = this.consumerIndex;
-            lazySet(i, null);
+            lazySet(i, (Object) null);
             this.consumerIndex = i + 1;
         }
 
@@ -307,7 +307,7 @@ public final class MaybeMergeArray<T> extends Flowable<T> {
                 T t = get(i);
                 if (t != null) {
                     this.consumerIndex = i + 1;
-                    lazySet(i, null);
+                    lazySet(i, (Object) null);
                     return t;
                 }
             } while (atomicInteger.get() != i);

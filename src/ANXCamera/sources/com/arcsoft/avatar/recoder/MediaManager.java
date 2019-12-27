@@ -1,8 +1,6 @@
 package com.arcsoft.avatar.recoder;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.opengl.EGL14;
 import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
@@ -25,25 +23,25 @@ public class MediaManager implements RecordingListener {
     public static final int MUXER_VIDEO_AND_AUDIO_ENCODER = 2;
     public static final int MUXER_VIDEO_ENCODER = 1;
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f109a = "Arc_VideoEncoder";
     private static final int r = 2;
     /* access modifiers changed from: private */
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     public int f110b;
     /* access modifiers changed from: private */
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     public int f111c;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private int f112d;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private boolean f113e;
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private boolean f114f;
     private String g;
     private BaseEncoder h;
@@ -62,7 +60,7 @@ public class MediaManager implements RecordingListener {
 
     public class SaveThread extends Thread {
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         private ByteBuffer f116b;
 
         public SaveThread(ByteBuffer byteBuffer) {
@@ -71,15 +69,11 @@ public class MediaManager implements RecordingListener {
 
         public void run() {
             super.run();
-            Bitmap createBitmap = Bitmap.createBitmap(MediaManager.this.f110b, MediaManager.this.f111c, Config.ARGB_8888);
+            Bitmap createBitmap = Bitmap.createBitmap(MediaManager.this.f110b, MediaManager.this.f111c, Bitmap.Config.ARGB_8888);
             createBitmap.copyPixelsFromBuffer(this.f116b);
-            StringBuilder sb = new StringBuilder();
-            sb.append("/sdcard/Pictures/_");
-            sb.append(System.currentTimeMillis());
-            sb.append(".png");
             try {
-                FileOutputStream fileOutputStream = new FileOutputStream(sb.toString());
-                createBitmap.compress(CompressFormat.PNG, 100, fileOutputStream);
+                FileOutputStream fileOutputStream = new FileOutputStream("/sdcard/Pictures/_" + System.currentTimeMillis() + ".png");
+                createBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
                 fileOutputStream.close();
                 createBitmap.recycle();
             } catch (FileNotFoundException e2) {
@@ -116,12 +110,7 @@ public class MediaManager implements RecordingListener {
         this.s = iArr[0];
         this.t = iArr2[0];
         this.o = new Object();
-        StringBuilder sb = new StringBuilder();
-        sb.append("MediaManager constructor mFrameWidth = ");
-        sb.append(i2);
-        sb.append(" ,mFrameHeight = ");
-        sb.append(i3);
-        CodecLog.d(f109a, sb.toString());
+        CodecLog.d(f109a, "MediaManager constructor mFrameWidth = " + i2 + " ,mFrameHeight = " + i3);
     }
 
     public MediaManager(@NonNull String str, int i2, int i3, int i4, boolean z, int i5, RecordingListener recordingListener) {
@@ -150,12 +139,7 @@ public class MediaManager implements RecordingListener {
         this.s = iArr[0];
         this.t = iArr2[0];
         this.o = new Object();
-        StringBuilder sb = new StringBuilder();
-        sb.append("MediaManager constructor mFrameWidth = ");
-        sb.append(i2);
-        sb.append(" ,mFrameHeight = ");
-        sb.append(i3);
-        CodecLog.d(f109a, sb.toString());
+        CodecLog.d(f109a, "MediaManager constructor mFrameWidth = " + i2 + " ,mFrameHeight = " + i3);
     }
 
     private void a() {
@@ -164,12 +148,7 @@ public class MediaManager implements RecordingListener {
         if (i2 == i3) {
             this.f114f = true;
         } else if (i3 >= 3) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Init encoder count great than need. need=");
-            sb.append(this.m);
-            sb.append(" ,but got=");
-            sb.append(this.n);
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException("Init encoder count great than need. need=" + this.m + " ,but got=" + this.n);
         }
     }
 
@@ -177,28 +156,19 @@ public class MediaManager implements RecordingListener {
         ByteBuffer allocateDirect = ByteBuffer.allocateDirect(this.f110b * this.f111c * 4);
         allocateDirect.order(ByteOrder.nativeOrder());
         GLES20.glReadPixels(0, 0, this.f110b, this.f111c, 6408, 5121, allocateDirect);
-        StringBuilder sb = new StringBuilder();
-        sb.append("glReadPixels() glError = ");
-        sb.append(GLES20.glGetError());
-        CodecLog.d(f109a, sb.toString());
+        CodecLog.d(f109a, "glReadPixels() glError = " + GLES20.glGetError());
         new SaveThread(allocateDirect).start();
     }
 
     /* JADX INFO: finally extract failed */
     public void drawSurfaceWithTextureId(int i2) {
         boolean z;
-        String str = "drawSurfaceWithTextureId meet error when get lock : ";
-        boolean z2 = this.f114f;
-        String str2 = f109a;
-        if (!z2) {
-            CodecLog.e(str2, "drawSurfaceWithTextureId()-> MediaManager has not been initialized.");
+        if (!this.f114f) {
+            CodecLog.e(f109a, "drawSurfaceWithTextureId()-> MediaManager has not been initialized.");
         } else if (i2 <= 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("textureId must >0 , your textureId=");
-            sb.append(i2);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("textureId must >0 , your textureId=" + i2);
         } else if (this.l != null) {
-            CodecLog.d(str2, "drawSurfaceWithTextureId()->A-");
+            CodecLog.d(f109a, "drawSurfaceWithTextureId()->A-");
             FrameItem frameItem = null;
             try {
                 this.h.lock();
@@ -209,17 +179,14 @@ public class MediaManager implements RecordingListener {
                             z = true;
                         }
                     }
-                    CodecLog.d(str2, "drawSurfaceWithTextureId()-> get a null frame item.");
+                    CodecLog.d(f109a, "drawSurfaceWithTextureId()-> get a null frame item.");
                     this.h.unLock();
                     return;
                 }
                 z = false;
                 this.h.unLock();
             } catch (Exception e2) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(e2.getMessage());
-                CodecLog.d(str2, sb2.toString());
+                CodecLog.d(f109a, "drawSurfaceWithTextureId meet error when get lock : " + e2.getMessage());
                 this.h.unLock();
                 z = false;
             } catch (Throwable th) {
@@ -240,22 +207,12 @@ public class MediaManager implements RecordingListener {
                 frameItem.mIsEmpty = false;
                 int[] iArr = this.u;
                 GLES20.glViewport(iArr[0], iArr[1], iArr[2], iArr[3]);
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("drawSurfaceWithTextureId()-> A glError = ");
-                sb3.append(GLES20.glGetError());
-                sb3.append(", fbo = ");
-                sb3.append(frameItem);
-                sb3.append(" ,textureId = ");
-                sb3.append(frameItem.mFramebuffer.getTextureId());
-                CodecLog.d(str2, sb3.toString());
+                CodecLog.d(f109a, "drawSurfaceWithTextureId()-> A glError = " + GLES20.glGetError() + ", fbo = " + frameItem + " ,textureId = " + frameItem.mFramebuffer.getTextureId());
                 try {
                     this.h.lock();
                     this.q.addFrameForProducer();
                 } catch (Exception e3) {
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append(str);
-                    sb4.append(e3.getMessage());
-                    CodecLog.d(str2, sb4.toString());
+                    CodecLog.d(f109a, "drawSurfaceWithTextureId meet error when get lock : " + e3.getMessage());
                 } catch (Throwable th2) {
                     this.h.sinalCondition();
                     this.h.unLock();
@@ -263,7 +220,7 @@ public class MediaManager implements RecordingListener {
                 }
                 this.h.sinalCondition();
                 this.h.unLock();
-                CodecLog.d(str2, "drawSurfaceWithTextureId()->C");
+                CodecLog.d(f109a, "drawSurfaceWithTextureId()->C");
             }
         } else {
             throw new RuntimeException("Could not call drawSurfaceWithTextureId() in with a null GLRender.");
@@ -294,39 +251,31 @@ public class MediaManager implements RecordingListener {
     }
 
     public void initVideoEncoder(String str) {
-        String str2 = f109a;
-        CodecLog.e(str2, "MediaManager initVideoEncoder in");
+        CodecLog.e(f109a, "MediaManager initVideoEncoder in");
         VideoEncoder videoEncoder = new VideoEncoder(this.j, this.f110b, this.f111c, this.o, this, EGL14.EGL_NO_CONTEXT, 10000000, str);
         this.h = videoEncoder;
         this.h.prepare(false);
         this.f114f = true;
         this.n++;
         a();
-        StringBuilder sb = new StringBuilder();
-        sb.append("MediaManager initVideoEncoder out mInitedEncoderCount = ");
-        sb.append(this.n);
-        CodecLog.e(str2, sb.toString());
+        CodecLog.e(f109a, "MediaManager initVideoEncoder out mInitedEncoderCount = " + this.n);
     }
 
     public void initVideoEncoderWithSharedContext(EGLContext eGLContext, int i2, boolean z, String str) {
-        String str2 = f109a;
-        CodecLog.d(str2, "MediaManager initVideoEncoderWithSharedContext in");
+        CodecLog.d(f109a, "MediaManager initVideoEncoderWithSharedContext in");
         VideoEncoder videoEncoder = new VideoEncoder(this.j, this.f110b, this.f111c, this.o, this, eGLContext, i2, str);
         this.h = videoEncoder;
-        StringBuilder sb = new StringBuilder();
-        sb.append("MediaManager initVideoEncoderWithSharedContext encoder type = ");
-        sb.append(this.h.getEncoderType());
-        CodecLog.d(str2, sb.toString());
+        CodecLog.d(f109a, "MediaManager initVideoEncoderWithSharedContext encoder type = " + this.h.getEncoderType());
         this.k = true;
         if (this.k) {
             if (this.h.getInputSurface() != null) {
                 this.l = new GLRender(this.f110b, this.f111c, this.f112d, this.f113e);
                 this.l.initRender(z);
             } else {
-                CodecLog.e(str2, "initVideoEncoder()->getInputSurface null.");
+                CodecLog.e(f109a, "initVideoEncoder()->getInputSurface null.");
                 RecordingListener recordingListener = this.p;
                 if (recordingListener != null) {
-                    recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CONFIGURE, Integer.valueOf(0));
+                    recordingListener.onRecordingListener(NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_VIDEO_CONFIGURE, 0);
                 }
             }
         }
@@ -335,21 +284,11 @@ public class MediaManager implements RecordingListener {
         this.h.setFrameQueue(this.q);
         this.n++;
         a();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("MediaManager initVideoEncoderWithSharedContext out mInitedEncoderCount = ");
-        sb2.append(this.n);
-        CodecLog.e(str2, sb2.toString());
+        CodecLog.e(f109a, "MediaManager initVideoEncoderWithSharedContext out mInitedEncoderCount = " + this.n);
     }
 
     public void onRecordingListener(int i2, Object obj) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onRecordingListener()->in msg = ");
-        sb.append(i2);
-        sb.append(" ,value = ");
-        sb.append((Integer) obj);
-        String sb2 = sb.toString();
-        String str = f109a;
-        CodecLog.d(str, sb2);
+        CodecLog.d(f109a, "onRecordingListener()->in msg = " + i2 + " ,value = " + ((Integer) obj));
         int i3 = NotifyMessage.MSG_MEDIA_RECORDER_ERROR_MUXER;
         switch (i2) {
             case NotifyMessage.MSG_MEDIA_RECORDER_ERROR_ENCODER_AUDIO_CREATE /*545*/:
@@ -395,7 +334,7 @@ public class MediaManager implements RecordingListener {
         if (recordingListener != null) {
             recordingListener.onRecordingListener(i3, obj);
         }
-        CodecLog.d(str, "onRecordingListener()->out");
+        CodecLog.d(f109a, "onRecordingListener()->out");
     }
 
     public int pauseRecording() {
@@ -404,9 +343,10 @@ public class MediaManager implements RecordingListener {
             baseEncoder.pauseRecording();
         }
         BaseEncoder baseEncoder2 = this.h;
-        if (baseEncoder2 != null) {
-            baseEncoder2.pauseRecording();
+        if (baseEncoder2 == null) {
+            return 0;
         }
+        baseEncoder2.pauseRecording();
         return 0;
     }
 
@@ -436,24 +376,17 @@ public class MediaManager implements RecordingListener {
             throw new RuntimeException("Unit Encoder or Muxer is null.");
         }
         BaseEncoder baseEncoder = this.h;
-        String str = f109a;
         if (baseEncoder != null) {
             baseEncoder.startRecording();
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("startRecording()-> VideoEncoder is null. maxEncoderCount=");
-            sb.append(this.m);
-            CodecLog.i(str, sb.toString());
+            CodecLog.i(f109a, "startRecording()-> VideoEncoder is null. maxEncoderCount=" + this.m);
         }
         BaseEncoder baseEncoder2 = this.i;
         if (baseEncoder2 != null) {
             baseEncoder2.startRecording();
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("startRecording()-> AudioEncoder is null. maxEncoderCount=");
-        sb2.append(this.m);
-        CodecLog.i(str, sb2.toString());
+        CodecLog.i(f109a, "startRecording()-> AudioEncoder is null. maxEncoderCount=" + this.m);
     }
 
     public void stopRecording() {

@@ -156,10 +156,7 @@ final class RealBufferedSource implements BufferedSource {
             }
 
             public String toString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append(RealBufferedSource.this);
-                sb.append(".inputStream()");
-                return sb.toString();
+                return RealBufferedSource.this + ".inputStream()";
             }
         };
     }
@@ -202,10 +199,7 @@ final class RealBufferedSource implements BufferedSource {
         if (buffer2 == null) {
             throw new IllegalArgumentException("sink == null");
         } else if (j < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + j);
         } else if (!this.closed) {
             Buffer buffer3 = this.buffer;
             if (buffer3.size == 0 && this.source.read(buffer3, 8192) == -1) {
@@ -406,12 +400,15 @@ final class RealBufferedSource implements BufferedSource {
 
     @Nullable
     public String readUtf8Line() throws IOException {
-        long indexOf = indexOf(10);
+        long indexOf = indexOf((byte) 10);
         if (indexOf != -1) {
             return this.buffer.readUtf8Line(indexOf);
         }
         long j = this.buffer.size;
-        return j != 0 ? readUtf8(j) : null;
+        if (j != 0) {
+            return readUtf8(j);
+        }
+        return null;
     }
 
     public String readUtf8LineStrict() throws IOException {
@@ -421,7 +418,7 @@ final class RealBufferedSource implements BufferedSource {
     public String readUtf8LineStrict(long j) throws IOException {
         if (j >= 0) {
             long j2 = j == Long.MAX_VALUE ? Long.MAX_VALUE : j + 1;
-            long indexOf = indexOf(10, 0, j2);
+            long indexOf = indexOf((byte) 10, 0, j2);
             if (indexOf != -1) {
                 return this.buffer.readUtf8Line(indexOf);
             }
@@ -431,27 +428,15 @@ final class RealBufferedSource implements BufferedSource {
             Buffer buffer2 = new Buffer();
             Buffer buffer3 = this.buffer;
             buffer3.copyTo(buffer2, 0, Math.min(32, buffer3.size()));
-            StringBuilder sb = new StringBuilder();
-            sb.append("\\n not found: limit=");
-            sb.append(Math.min(this.buffer.size(), j));
-            sb.append(" content=");
-            sb.append(buffer2.readByteString().hex());
-            sb.append(UIUtils.ELLIPSIS_CHAR);
-            throw new EOFException(sb.toString());
+            throw new EOFException("\\n not found: limit=" + Math.min(this.buffer.size(), j) + " content=" + buffer2.readByteString().hex() + UIUtils.ELLIPSIS_CHAR);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("limit < 0: ");
-        sb2.append(j);
-        throw new IllegalArgumentException(sb2.toString());
+        throw new IllegalArgumentException("limit < 0: " + j);
     }
 
     public boolean request(long j) throws IOException {
         Buffer buffer2;
         if (j < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + j);
         } else if (!this.closed) {
             do {
                 buffer2 = this.buffer;
@@ -512,10 +497,6 @@ final class RealBufferedSource implements BufferedSource {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("buffer(");
-        sb.append(this.source);
-        sb.append(")");
-        return sb.toString();
+        return "buffer(" + this.source + ")";
     }
 }

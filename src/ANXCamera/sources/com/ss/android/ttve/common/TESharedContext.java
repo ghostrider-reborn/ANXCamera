@@ -29,11 +29,7 @@ public class TESharedContext {
         int eglGetError = EGL14.eglGetError();
         if (eglGetError != 12288) {
             String str2 = LOG_TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": EGL error: 0x");
-            sb.append(Integer.toHexString(eglGetError));
-            Log.e(str2, sb.toString());
+            Log.e(str2, str + ": EGL error: 0x" + Integer.toHexString(eglGetError));
             if (eglGetError == 12294) {
                 Log.e(LOG_TAG, "gl error EGL_BAD_CONTEXT");
             }
@@ -41,15 +37,15 @@ public class TESharedContext {
     }
 
     public static TESharedContext create() {
-        return create(EGL14.EGL_NO_CONTEXT, 64, 64, 1, null);
+        return create(EGL14.EGL_NO_CONTEXT, 64, 64, 1, (Object) null);
     }
 
     public static TESharedContext create(int i, int i2) {
-        return create(EGL14.EGL_NO_CONTEXT, i, i2, 1, null);
+        return create(EGL14.EGL_NO_CONTEXT, i, i2, 1, (Object) null);
     }
 
     public static TESharedContext create(EGLContext eGLContext, int i, int i2) {
-        return create(eGLContext, i, i2, 1, null);
+        return create(eGLContext, i, i2, 1, (Object) null);
     }
 
     public static TESharedContext create(EGLContext eGLContext, int i, int i2, int i3, Object obj) {
@@ -133,10 +129,7 @@ public class TESharedContext {
             int[] iArr9 = new int[1];
             EGL14.eglQueryContext(this.mDisplay, this.mContext, 12440, iArr9, 0);
             String str2 = LOG_TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("EGLContext created, client version ");
-            sb.append(iArr9[0]);
-            Log.i(str2, sb.toString());
+            Log.i(str2, "EGLContext created, client version " + iArr9[0]);
             return true;
         }
     }

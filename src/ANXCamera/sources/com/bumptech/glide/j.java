@@ -71,27 +71,18 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
         this.vc = jVar.vc;
     }
 
-    /* JADX WARNING: type inference failed for: r3v0, types: [com.bumptech.glide.request.d] */
-    /* JADX WARNING: type inference failed for: r1v9 */
-    /* JADX WARNING: type inference failed for: r3v5 */
-    /* JADX WARNING: type inference failed for: r0v4, types: [com.bumptech.glide.request.a] */
-    /* JADX WARNING: type inference failed for: r3v6 */
-    /* JADX WARNING: type inference failed for: r3v7 */
-    /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 4 */
     private c a(com.bumptech.glide.request.target.o<TranscodeType> oVar, @Nullable e<TranscodeType> eVar, @Nullable d dVar, n<?, ? super TranscodeType> nVar, Priority priority, int i, int i2, f fVar) {
         a aVar;
-        ? r3;
+        a aVar2;
         if (this.zc != null) {
-            ? aVar2 = new a(dVar);
+            aVar2 = new a(dVar);
             aVar = aVar2;
-            r3 = aVar2;
         } else {
-            aVar = 0;
-            r3 = dVar;
+            aVar = null;
+            aVar2 = dVar;
         }
-        c b2 = b(oVar, eVar, r3, nVar, priority, i, i2, fVar);
-        if (aVar == 0) {
+        c b2 = b(oVar, eVar, aVar2, nVar, priority, i, i2, fVar);
+        if (aVar == null) {
             return b2;
         }
         int fh = this.zc.vc.fh();
@@ -100,13 +91,8 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
             fh = fVar.fh();
             eh = fVar.eh();
         }
-        int i3 = fh;
-        int i4 = eh;
         j<TranscodeType> jVar = this.zc;
-        com.bumptech.glide.request.target.o<TranscodeType> oVar2 = oVar;
-        e<TranscodeType> eVar2 = eVar;
-        d dVar2 = aVar;
-        aVar.a(b2, jVar.a(oVar2, eVar2, dVar2, jVar.wc, jVar.vc.getPriority(), i3, i4, this.zc.vc));
+        aVar.a(b2, jVar.a(oVar, eVar, (d) aVar, jVar.wc, jVar.vc.getPriority(), fh, eh, this.zc.vc));
         return aVar;
     }
 
@@ -140,14 +126,12 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
                     fh = fVar.fh();
                     eh = fVar.eh();
                 }
-                int i3 = fh;
-                int i4 = eh;
                 i iVar = new i(dVar2);
                 c a2 = a(oVar, eVar, fVar, (d) iVar, nVar, priority, i, i2);
                 this.Dc = true;
                 j<TranscodeType> jVar2 = this.yc;
                 i iVar2 = iVar;
-                c a3 = jVar2.a(oVar, eVar, (d) iVar, nVar2, priority3, i3, i4, jVar2.vc);
+                c a3 = jVar2.a(oVar, eVar, (d) iVar, nVar2, priority3, fh, eh, jVar2.vc);
                 this.Dc = false;
                 iVar2.a(a2, a3);
                 return iVar2;
@@ -160,9 +144,9 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
             e<TranscodeType> eVar2 = eVar;
             i iVar4 = iVar3;
             n<?, ? super TranscodeType> nVar3 = nVar;
-            int i5 = i;
-            int i6 = i2;
-            iVar3.a(a(oVar, eVar2, fVar, (d) iVar4, nVar3, priority, i5, i6), a(oVar, eVar2, fVar.clone().g(this.Ac.floatValue()), (d) iVar4, nVar3, c(priority2), i5, i6));
+            int i3 = i;
+            int i4 = i2;
+            iVar3.a(a(oVar, eVar2, fVar, (d) iVar4, nVar3, priority, i3, i4), a(oVar, eVar2, fVar.clone().g(this.Ac.floatValue()), (d) iVar4, nVar3, c(priority2), i3, i4));
             return iVar3;
         }
     }
@@ -202,10 +186,7 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
         if (i == 3 || i == 4) {
             return Priority.IMMEDIATE;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("unknown priority: ");
-        sb.append(this.vc.getPriority());
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("unknown priority: " + this.vc.getPriority());
     }
 
     @NonNull
@@ -283,7 +264,7 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
     public j<TranscodeType> a(@Nullable j<TranscodeType>... jVarArr) {
         j<TranscodeType> jVar = null;
         if (jVarArr == null || jVarArr.length == 0) {
-            return b(null);
+            return b((j) null);
         }
         for (int length = jVarArr.length - 1; length >= 0; length--) {
             j<TranscodeType> jVar2 = jVarArr[length];
@@ -318,11 +299,11 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
             }
         }
         ViewTarget<ImageView, TranscodeType> a2 = this.Eb.a(imageView, this.uc);
-        b(a2, null, fVar);
+        b(a2, (e) null, fVar);
         return a2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public <Y extends com.bumptech.glide.request.target.o<TranscodeType>> Y a(@NonNull Y y, @Nullable e<TranscodeType> eVar) {
         b(y, eVar, If());
@@ -386,7 +367,7 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
 
     @NonNull
     public <Y extends com.bumptech.glide.request.target.o<TranscodeType>> Y c(@NonNull Y y) {
-        return a(y, null);
+        return a(y, (e) null);
     }
 
     @CheckResult
@@ -421,7 +402,7 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
 
     @NonNull
     public com.bumptech.glide.request.target.o<TranscodeType> i(int i, int i2) {
-        return c((Y) com.bumptech.glide.request.target.l.a(this.da, i, i2));
+        return c(com.bumptech.glide.request.target.l.a(this.da, i, i2));
     }
 
     @NonNull
@@ -430,7 +411,7 @@ public class j<TranscodeType> implements Cloneable, g<j<TranscodeType>> {
         if (l.Jh()) {
             this.Eb.Y().post(new h(this, requestFutureTarget));
         } else {
-            a((Y) requestFutureTarget, (e<TranscodeType>) requestFutureTarget);
+            a(requestFutureTarget, requestFutureTarget);
         }
         return requestFutureTarget;
     }

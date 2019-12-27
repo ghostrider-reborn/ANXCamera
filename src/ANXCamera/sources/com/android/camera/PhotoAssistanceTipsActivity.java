@@ -82,11 +82,7 @@ public class PhotoAssistanceTipsActivity extends BasePreferenceActivity {
                 } else if (preference instanceof PreferenceGroup) {
                     updatePreferences((PreferenceGroup) preference, sharedPreferences);
                 } else {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("no need update preference for ");
-                    sb.append(preference.getKey());
-                    Log.v(str, sb.toString());
+                    Log.v(TAG, "no need update preference for " + preference.getKey());
                 }
             }
         }

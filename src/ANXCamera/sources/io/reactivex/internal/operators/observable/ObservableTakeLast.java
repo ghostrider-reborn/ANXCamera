@@ -36,13 +36,14 @@ public final class ObservableTakeLast<T> extends AbstractObservableWithUpstream<
             Observer<? super T> observer = this.actual;
             while (!this.cancelled) {
                 Object poll = poll();
-                if (poll == null) {
-                    if (!this.cancelled) {
-                        observer.onComplete();
-                    }
+                if (poll != null) {
+                    observer.onNext(poll);
+                } else if (!this.cancelled) {
+                    observer.onComplete();
+                    return;
+                } else {
                     return;
                 }
-                observer.onNext(poll);
             }
         }
 

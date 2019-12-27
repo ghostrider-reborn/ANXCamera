@@ -18,11 +18,7 @@ public class CounterUtil {
     public void tick(String str) {
         long currentTimeMillis = System.currentTimeMillis();
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(":");
-        sb.append(currentTimeMillis - this.mTs);
-        Log.i(str2, sb.toString());
+        Log.i(str2, str + ":" + (currentTimeMillis - this.mTs));
         this.mTs = currentTimeMillis;
     }
 }

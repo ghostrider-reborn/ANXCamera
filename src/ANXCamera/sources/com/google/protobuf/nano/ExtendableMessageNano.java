@@ -54,15 +54,14 @@ public abstract class ExtendableMessageNano<M extends ExtendableMessageNano<M>> 
 
     public final <T> T getExtension(Extension<M, T> extension) {
         FieldArray fieldArray = this.unknownFieldData;
-        T t = null;
         if (fieldArray == null) {
             return null;
         }
         FieldData fieldData = fieldArray.get(WireFormatNano.getTagFieldNumber(extension.tag));
-        if (fieldData != null) {
-            t = fieldData.getValue(extension);
+        if (fieldData == null) {
+            return null;
         }
-        return t;
+        return fieldData.getValue(extension);
     }
 
     public final FieldArray getUnknownFieldArray() {
@@ -71,14 +70,7 @@ public abstract class ExtendableMessageNano<M extends ExtendableMessageNano<M>> 
 
     public final boolean hasExtension(Extension<M, ?> extension) {
         FieldArray fieldArray = this.unknownFieldData;
-        boolean z = false;
-        if (fieldArray == null) {
-            return false;
-        }
-        if (fieldArray.get(WireFormatNano.getTagFieldNumber(extension.tag)) != null) {
-            z = true;
-        }
-        return z;
+        return (fieldArray == null || fieldArray.get(WireFormatNano.getTagFieldNumber(extension.tag)) == null) ? false : true;
     }
 
     public final <T> M setExtension(Extension<M, T> extension, T t) {
@@ -140,9 +132,10 @@ public abstract class ExtendableMessageNano<M extends ExtendableMessageNano<M>> 
             }
         }
         codedInputByteBufferNano.checkLastTagWas(WireFormatNano.MESSAGE_SET_ITEM_END_TAG);
-        if (!(bArr == null || i2 == 0)) {
-            storeUnknownFieldData(i2, new UnknownFieldData(i2, bArr));
+        if (bArr == null || i2 == 0) {
+            return true;
         }
+        storeUnknownFieldData(i2, new UnknownFieldData(i2, bArr));
         return true;
     }
 

@@ -73,10 +73,7 @@ public abstract class ShaderRender extends Render {
     public void destroy() {
         if (this.mProgram != 0 && this.mGLCanvas != null) {
             String simpleName = getClass().getSimpleName();
-            StringBuilder sb = new StringBuilder();
-            sb.append("delete program ");
-            sb.append(this.mProgram);
-            Log.d(simpleName, sb.toString());
+            Log.d(simpleName, "delete program " + this.mProgram);
             this.mGLCanvas.deleteProgram(this.mProgram);
             this.mProgram = 0;
         }

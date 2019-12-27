@@ -22,10 +22,7 @@ public class ShaderProgram {
         }
         String glGetShaderInfoLog = GLES20.glGetShaderInfoLog(glCreateShader);
         GLES20.glDeleteShader(glCreateShader);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Shader compilation failed with: ");
-        sb.append(glGetShaderInfoLog);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Shader compilation failed with: " + glGetShaderInfoLog);
     }
 
     public void create(String str, String str2) {
@@ -48,37 +45,27 @@ public class ShaderProgram {
         this.programHandle = GLES20.glCreateProgram();
         OpenGlUtils.checkGlError("glCreateProgram");
         GLES20.glAttachShader(this.programHandle, i);
-        String str3 = "glAttachShader";
-        OpenGlUtils.checkGlError(str3);
+        OpenGlUtils.checkGlError("glAttachShader");
         GLES20.glAttachShader(this.programHandle, i2);
-        OpenGlUtils.checkGlError(str3);
+        OpenGlUtils.checkGlError("glAttachShader");
         GLES20.glLinkProgram(this.programHandle);
     }
 
     public int getAttributeLocation(String str) {
         if (this.attributes.containsKey(str)) {
-            return ((Integer) this.attributes.get(str)).intValue();
+            return this.attributes.get(str).intValue();
         }
         int glGetAttribLocation = GLES20.glGetAttribLocation(this.programHandle, str);
-        StringBuilder sb = new StringBuilder();
-        sb.append("glGetAttribLocation ");
-        sb.append(str);
-        OpenGlUtils.checkGlError(sb.toString());
+        OpenGlUtils.checkGlError("glGetAttribLocation " + str);
         if (glGetAttribLocation == -1) {
             glGetAttribLocation = GLES20.glGetUniformLocation(this.programHandle, str);
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("glGetUniformLocation ");
-            sb2.append(str);
-            OpenGlUtils.checkGlError(sb2.toString());
+            OpenGlUtils.checkGlError("glGetUniformLocation " + str);
         }
         if (glGetAttribLocation != -1) {
             this.attributes.put(str, Integer.valueOf(glGetAttribLocation));
             return glGetAttribLocation;
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("Can't find a location for attribute ");
-        sb3.append(str);
-        throw new IllegalStateException(sb3.toString());
+        throw new IllegalStateException("Can't find a location for attribute " + str);
     }
 
     public int getProgramHandle() {

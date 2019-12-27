@@ -3,18 +3,15 @@ package android.support.v4.app;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.StyleRes;
 import android.view.LayoutInflater;
 import android.view.View;
 
-public class DialogFragment extends Fragment implements OnCancelListener, OnDismissListener {
+public class DialogFragment extends Fragment implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     private static final String SAVED_BACK_STACK_ID = "android:backStackId";
     private static final String SAVED_CANCELABLE = "android:cancelable";
     private static final String SAVED_DIALOG_STATE_TAG = "android:savedDialogState";
@@ -43,7 +40,7 @@ public class DialogFragment extends Fragment implements OnCancelListener, OnDism
         dismissInternal(true);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dismissInternal(boolean z) {
         if (!this.mDismissed) {
             this.mDismissed = true;
@@ -56,14 +53,14 @@ public class DialogFragment extends Fragment implements OnCancelListener, OnDism
             if (this.mBackStackId >= 0) {
                 getFragmentManager().popBackStack(this.mBackStackId, 1);
                 this.mBackStackId = -1;
+                return;
+            }
+            FragmentTransaction beginTransaction = getFragmentManager().beginTransaction();
+            beginTransaction.remove(this);
+            if (z) {
+                beginTransaction.commitAllowingStateLoss();
             } else {
-                FragmentTransaction beginTransaction = getFragmentManager().beginTransaction();
-                beginTransaction.remove(this);
-                if (z) {
-                    beginTransaction.commitAllowingStateLoss();
-                } else {
-                    beginTransaction.commit();
-                }
+                beginTransaction.commit();
             }
         }
     }
@@ -169,12 +166,11 @@ public class DialogFragment extends Fragment implements OnCancelListener, OnDism
         }
         this.mDialog = onCreateDialog(bundle);
         Dialog dialog = this.mDialog;
-        String str = "layout_inflater";
         if (dialog == null) {
-            return (LayoutInflater) this.mHost.getContext().getSystemService(str);
+            return (LayoutInflater) this.mHost.getContext().getSystemService("layout_inflater");
         }
         setupDialog(dialog, this.mStyle);
-        return (LayoutInflater) this.mDialog.getContext().getSystemService(str);
+        return (LayoutInflater) this.mDialog.getContext().getSystemService("layout_inflater");
     }
 
     public void onSaveInstanceState(@NonNull Bundle bundle) {
@@ -248,7 +244,7 @@ public class DialogFragment extends Fragment implements OnCancelListener, OnDism
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void setupDialog(Dialog dialog, int i) {
         if (!(i == 1 || i == 2)) {
             if (i == 3) {

@@ -2,12 +2,14 @@ package com.xiaomi.camera.liveshot.encoder;
 
 import android.media.AudioRecord;
 import android.media.MediaCodec;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.os.Handler;
+import android.view.Surface;
 import com.android.camera.log.Log;
 import com.xiaomi.camera.liveshot.LivePhotoResult;
 import com.xiaomi.camera.liveshot.MediaCodecCapability;
-import com.xiaomi.camera.liveshot.encoder.CircularMediaEncoder.Snapshot;
+import com.xiaomi.camera.liveshot.encoder.CircularMediaEncoder;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -48,10 +50,7 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
                 try {
                     this.mMediaCodec = MediaCodec.createEncoderByType(this.mDesiredMediaFormat.getString("mime"));
                 } catch (IOException e3) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Failed to configure MediaCodec: ");
-                    sb.append(e3);
-                    throw new IllegalStateException(sb.toString());
+                    throw new IllegalStateException("Failed to configure MediaCodec: " + e3);
                 }
             }
             this.mIsInitialized = true;
@@ -95,19 +94,15 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
                 this.mAudioRecord.release();
             } catch (IllegalStateException e2) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Meet exception when mAudioRecord.release(): ");
-                sb.append(e2);
-                Log.d(str, sb.toString());
+                Log.d(str, "Meet exception when mAudioRecord.release(): " + e2);
             }
             this.mIsInitialized = false;
         }
     }
 
     public void doStart() {
-        String str = "start(): X";
         if (DEBUG) {
-            Log.d(TAG, str);
+            Log.d(TAG, "start(): X");
         }
         if (!this.mIsInitialized) {
             Log.d(TAG, "start(): not initialized yet");
@@ -115,7 +110,7 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
             Log.d(TAG, "start(): encoder is already running");
         } else {
             this.mCyclicBuffer.clear();
-            this.mMediaCodec.configure(this.mDesiredMediaFormat, null, null, 1);
+            this.mMediaCodec.configure(this.mDesiredMediaFormat, (Surface) null, (MediaCrypto) null, 1);
             this.mMediaCodec.setCallback(this, new Handler(this.mEncodingThread.getLooper()));
             super.doStart();
             this.mIsBuffering = true;
@@ -123,14 +118,11 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
             try {
                 this.mAudioRecord.startRecording();
                 if (DEBUG) {
-                    Log.d(TAG, str);
+                    Log.d(TAG, "start(): X");
                 }
             } catch (IllegalStateException e2) {
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("startRecording(): failed ");
-                sb.append(e2);
-                Log.e(str2, sb.toString());
+                String str = TAG;
+                Log.e(str, "startRecording(): failed " + e2);
             }
         }
     }
@@ -151,10 +143,7 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
                 this.mAudioRecord.stop();
             } catch (IllegalStateException e2) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Meet exception when mAudioRecord.stop(): ");
-                sb.append(e2);
-                Log.d(str, sb.toString());
+                Log.d(str, "Meet exception when mAudioRecord.stop(): " + e2);
             }
             if (DEBUG) {
                 Log.d(TAG, "mAudioRecord.stop(): X");
@@ -162,28 +151,21 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
             if (DEBUG) {
                 Log.d(TAG, "clear pending snapshot requests: E");
             }
-            ArrayList<Snapshot> arrayList = new ArrayList<>();
+            ArrayList<CircularMediaEncoder.Snapshot> arrayList = new ArrayList<>();
             synchronized (this.mSnapshots) {
                 arrayList.addAll(this.mSnapshots);
                 this.mSnapshots.clear();
             }
             if (DEBUG) {
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("cleared ");
-                sb2.append(arrayList.size());
-                sb2.append(" snapshot requests.");
-                Log.d(str2, sb2.toString());
+                Log.d(str2, "cleared " + arrayList.size() + " snapshot requests.");
             }
-            for (Snapshot putEos : arrayList) {
+            for (CircularMediaEncoder.Snapshot putEos : arrayList) {
                 try {
                     putEos.putEos();
                 } catch (InterruptedException e3) {
                     String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("Failed to putEos: ");
-                    sb3.append(e3);
-                    Log.d(str3, sb3.toString());
+                    Log.d(str3, "Failed to putEos: " + e3);
                 }
             }
             if (DEBUG) {
@@ -207,41 +189,35 @@ public class CircularAudioEncoder extends CircularMediaEncoder {
         Log.d(TAG, "audioCodec.dequeueInputBuffer(): E");
         ByteBuffer inputBuffer = mediaCodec.getInputBuffer(i);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("audioCodec.dequeueInputBuffer(");
-        sb.append(i);
-        sb.append("): X");
-        Log.d(str, sb.toString());
+        Log.d(str, "audioCodec.dequeueInputBuffer(" + i + "): X");
         int i2 = 0;
         int read = this.mAudioRecord.read(this.mSampleBuffer, 0, Math.min(inputBuffer.limit(), this.mNotificationPeriod * this.mFrameBytes));
-        if (read == -3) {
-            if (DEBUG) {
-                Log.d(TAG, "  ERROR_INVALID_OP");
-            }
-        } else if (read == -2) {
-            if (DEBUG) {
+        if (read != -3) {
+            if (read != -2) {
+                if (read != 0) {
+                    Log.d(TAG, "audioCodec.queueInputBuffer(): E");
+                    inputBuffer.clear();
+                    inputBuffer.put(this.mSampleBuffer, 0, read);
+                    int position = inputBuffer.position() + 0;
+                    long sampleDataBytes = (long) (position / getSampleDataBytes());
+                    long presentationTime = getPresentationTime(sampleDataBytes);
+                    if (!this.mIsBuffering) {
+                        i2 = 4;
+                    }
+                    this.mMediaCodec.queueInputBuffer(i, 0, position, presentationTime, i2);
+                    addSampleCount(sampleDataBytes);
+                    Log.d(TAG, "audioCodec.queueInputBuffer(): X");
+                    if (DEBUG) {
+                        Log.d(TAG, "audioCodec.onInputBufferAvailable(): X");
+                    }
+                } else if (DEBUG) {
+                    Log.d(TAG, "  END_OF_BUFFER");
+                }
+            } else if (DEBUG) {
                 Log.d(TAG, "  ERROR_BAD_VALUE");
             }
-        } else if (read != 0) {
-            Log.d(TAG, "audioCodec.queueInputBuffer(): E");
-            inputBuffer.clear();
-            inputBuffer.put(this.mSampleBuffer, 0, read);
-            int position = inputBuffer.position() + 0;
-            long sampleDataBytes = (long) (position / getSampleDataBytes());
-            long presentationTime = getPresentationTime(sampleDataBytes);
-            if (!this.mIsBuffering) {
-                i2 = 4;
-            }
-            this.mMediaCodec.queueInputBuffer(i, 0, position, presentationTime, i2);
-            addSampleCount(sampleDataBytes);
-            Log.d(TAG, "audioCodec.queueInputBuffer(): X");
-            if (DEBUG) {
-                Log.d(TAG, "audioCodec.onInputBufferAvailable(): X");
-            }
-        } else {
-            if (DEBUG) {
-                Log.d(TAG, "  END_OF_BUFFER");
-            }
+        } else if (DEBUG) {
+            Log.d(TAG, "  ERROR_INVALID_OP");
         }
     }
 }

@@ -3,10 +3,9 @@ package com.android.camera2;
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.Face;
@@ -24,7 +23,7 @@ import com.android.camera.module.SaveOutputImageTask;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.storage.SaverCallback;
 import com.android.camera.storage.Storage;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 import com.mi.config.b;
 import com.xiaomi.camera.base.PerformanceTracker;
 import com.xiaomi.camera.core.ParallelCallback;
@@ -96,14 +95,11 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
     }
 
     /* access modifiers changed from: protected */
-    public CaptureCallback generateCaptureCallback() {
-        return new CaptureCallback() {
+    public CameraCaptureSession.CaptureCallback generateCaptureCallback() {
+        return new CameraCaptureSession.CaptureCallback() {
             public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
                 String access$100 = MiCamera2ShotGroup.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted: ");
-                sb.append(totalCaptureResult.getFrameNumber());
-                Log.d(access$100, sb.toString());
+                Log.d(access$100, "onCaptureCompleted: " + totalCaptureResult.getFrameNumber());
                 MiCamera2ShotGroup miCamera2ShotGroup = MiCamera2ShotGroup.this;
                 miCamera2ShotGroup.mMiCamera.onCapturePictureFinished(miCamera2ShotGroup.mReceivedJpegCallbackNum >= MiCamera2ShotGroup.this.mTotalJpegCallbackNum, MiCamera2ShotGroup.this);
             }
@@ -111,10 +107,7 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
             public void onCaptureFailed(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull CaptureFailure captureFailure) {
                 super.onCaptureFailed(cameraCaptureSession, captureRequest, captureFailure);
                 String access$100 = MiCamera2ShotGroup.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureFailed: ");
-                sb.append(captureFailure.getReason());
-                Log.e(access$100, sb.toString());
+                Log.e(access$100, "onCaptureFailed: " + captureFailure.getReason());
                 MiCamera2ShotGroup miCamera2ShotGroup = MiCamera2ShotGroup.this;
                 miCamera2ShotGroup.mMiCamera.onCapturePictureFinished(false, miCamera2ShotGroup);
             }
@@ -129,17 +122,12 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
     }
 
     /* access modifiers changed from: protected */
-    public Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
-        Builder createCaptureRequest = this.mMiCamera.getCameraDevice().createCaptureRequest(2);
+    public CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
+        CaptureRequest.Builder createCaptureRequest = this.mMiCamera.getCameraDevice().createCaptureRequest(2);
         ImageReader photoImageReader = this.mMiCamera.getPhotoImageReader();
         createCaptureRequest.addTarget(photoImageReader.getSurface());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("size=");
-        sb.append(photoImageReader.getWidth());
-        sb.append("x");
-        sb.append(photoImageReader.getHeight());
-        Log.d(str, sb.toString());
+        Log.d(str, "size=" + photoImageReader.getWidth() + "x" + photoImageReader.getHeight());
         if (!isInQcfaMode() || Camera2DataContainer.getInstance().getBokehFrontCameraId() == this.mMiCamera.getId()) {
             createCaptureRequest.addTarget(this.mMiCamera.getPreviewSurface());
         }
@@ -161,10 +149,7 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
         }
         ParallelTaskDataParameter dataParameter = this.mCurrentParallelTaskData.getDataParameter();
         if (this.mGroupShotFolderName == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Util.createJpegName(System.currentTimeMillis()));
-            sb.append(dataParameter.getSuffix());
-            this.mGroupShotFolderName = sb.toString();
+            this.mGroupShotFolderName = Util.createJpegName(System.currentTimeMillis()) + dataParameter.getSuffix();
         }
         int attach = this.mGroupShot.attach(bArr2);
         if (Util.sIsDumpOrigJpg) {
@@ -185,7 +170,7 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
             }
             SaveOutputImageTask saveOutputImageTask = new SaveOutputImageTask((SaverCallback) getParallelCallback(), System.currentTimeMillis(), dataParameter.getLocation(), i2, i, orientation, this.mGroupShotFolderName, this.mGroupShot);
             saveOutputImageTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Void[0]);
-            PictureCallback pictureCallback = getPictureCallback();
+            Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
             if (pictureCallback != null) {
                 pictureCallback.onPictureTakenFinished(true);
             } else {
@@ -194,19 +179,14 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
         } else if (i3 == 1 && CameraSettings.isSaveGroushotPrimitiveOn()) {
             this.mCurrentParallelTaskData.setNeedThumbnail(false);
             this.mCurrentParallelTaskData.fillJpegData(bArr2, 0);
-            parallelCallback.onParallelProcessFinish(this.mCurrentParallelTaskData, null, null);
+            parallelCallback.onParallelProcessFinish(this.mCurrentParallelTaskData, (CaptureResult) null, (CameraCharacteristics) null);
         }
     }
 
     /* access modifiers changed from: protected */
     public void onImageReceived(Image image, int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onImageReceived: ");
-        sb.append(this.mReceivedJpegCallbackNum);
-        sb.append("/");
-        sb.append(this.mTotalJpegCallbackNum);
-        Log.d(str, sb.toString());
+        Log.d(str, "onImageReceived: " + this.mReceivedJpegCallbackNum + "/" + this.mTotalJpegCallbackNum);
         long timestamp = image.getTimestamp();
         if (0 == this.mCurrentParallelTaskData.getTimestamp()) {
             Log.w(TAG, "onImageReceived: image arrived first");
@@ -235,8 +215,8 @@ public class MiCamera2ShotGroup extends MiCamera2Shot<byte[]> {
                     return;
                 }
             }
-            CaptureCallback generateCaptureCallback = generateCaptureCallback();
-            Builder generateRequestBuilder = generateRequestBuilder();
+            CameraCaptureSession.CaptureCallback generateCaptureCallback = generateCaptureCallback();
+            CaptureRequest.Builder generateRequestBuilder = generateRequestBuilder();
             PerformanceTracker.trackPictureCapture(0);
             this.mMiCamera.getCaptureSession().capture(generateRequestBuilder.build(), generateCaptureCallback, this.mCameraHandler);
         } catch (CameraAccessException e2) {

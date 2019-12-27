@@ -1,10 +1,9 @@
 package com.android.camera.fragment.manually.adapter;
 
 import android.support.annotation.StringRes;
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,14 +13,14 @@ import com.android.camera.data.data.ComponentData;
 import com.android.camera.fragment.CommonRecyclerViewHolder;
 import java.util.List;
 
-public class ManuallyAdapter extends Adapter<CommonRecyclerViewHolder> {
+public class ManuallyAdapter extends RecyclerView.Adapter<CommonRecyclerViewHolder> {
     private List<ComponentData> mComponentDataList;
     private int mCurrentMode;
-    private OnClickListener mOnClickListener;
+    private View.OnClickListener mOnClickListener;
     @StringRes
     private int mSelectedTitle;
 
-    public ManuallyAdapter(int i, OnClickListener onClickListener, List<ComponentData> list) {
+    public ManuallyAdapter(int i, View.OnClickListener onClickListener, List<ComponentData> list) {
         this.mCurrentMode = i;
         this.mOnClickListener = onClickListener;
         this.mComponentDataList = list;
@@ -32,7 +31,7 @@ public class ManuallyAdapter extends Adapter<CommonRecyclerViewHolder> {
     }
 
     public void onBindViewHolder(CommonRecyclerViewHolder commonRecyclerViewHolder, int i) {
-        ComponentData componentData = (ComponentData) this.mComponentDataList.get(i);
+        ComponentData componentData = this.mComponentDataList.get(i);
         commonRecyclerViewHolder.itemView.setOnClickListener(this.mOnClickListener);
         commonRecyclerViewHolder.itemView.setTag(componentData);
         TextView textView = (TextView) commonRecyclerViewHolder.getView(R.id.manually_item_key);
@@ -59,11 +58,11 @@ public class ManuallyAdapter extends Adapter<CommonRecyclerViewHolder> {
             textView2.setVisibility(0);
             textView2.setText(valueDisplayString);
             imageView.setVisibility(8);
-        } else {
-            textView2.setVisibility(8);
-            imageView.setImageResource(componentData.getValueSelectedDrawable(this.mCurrentMode));
-            imageView.setVisibility(0);
+            return;
         }
+        textView2.setVisibility(8);
+        imageView.setImageResource(componentData.getValueSelectedDrawable(this.mCurrentMode));
+        imageView.setVisibility(0);
     }
 
     public CommonRecyclerViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {

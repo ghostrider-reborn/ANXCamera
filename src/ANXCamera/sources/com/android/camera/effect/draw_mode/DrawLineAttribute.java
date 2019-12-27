@@ -15,5 +15,6 @@ public class DrawLineAttribute extends DrawAttribute {
         this.mX2 = f4;
         this.mY2 = f5;
         this.mGLPaint = gLPaint;
+        this.mTarget = 0;
     }
 }

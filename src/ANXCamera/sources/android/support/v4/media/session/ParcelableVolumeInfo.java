@@ -2,10 +2,9 @@ package android.support.v4.media.session;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public class ParcelableVolumeInfo implements Parcelable {
-    public static final Creator<ParcelableVolumeInfo> CREATOR = new Creator<ParcelableVolumeInfo>() {
+    public static final Parcelable.Creator<ParcelableVolumeInfo> CREATOR = new Parcelable.Creator<ParcelableVolumeInfo>() {
         public ParcelableVolumeInfo createFromParcel(Parcel parcel) {
             return new ParcelableVolumeInfo(parcel);
         }

@@ -2,12 +2,14 @@ package com.android.camera.network.download;
 
 import android.os.AsyncTask;
 import com.android.camera.log.Log;
+import com.android.camera.network.download.ConnectionHelper;
 import com.android.camera.network.net.base.HTTP;
 import com.ss.android.vesdk.runtime.cloudconfig.HttpRequest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.security.MessageDigest;
@@ -63,7 +65,7 @@ class DownloadTask {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void publishProgress(int i) {
             super.publishProgress(new Integer[]{Integer.valueOf(i)});
         }
@@ -122,10 +124,7 @@ class DownloadTask {
 
     private static File getTempFile(File file) {
         String parent = file.getParent();
-        StringBuilder sb = new StringBuilder();
-        sb.append(file.getName());
-        sb.append(".download");
-        return new File(parent, sb.toString());
+        return new File(parent, file.getName() + ".download");
     }
 
     private static boolean isRetryState(int i) {
@@ -134,31 +133,29 @@ class DownloadTask {
 
     private static OutputStream openOutputStream(File file) {
         File parentFile = file.getParentFile();
-        boolean exists = parentFile.exists();
-        String str = TAG;
-        if (exists || parentFile.mkdirs()) {
+        if (parentFile.exists() || parentFile.mkdirs()) {
             if (file.exists()) {
                 if (file.isDirectory()) {
-                    Log.d(str, String.format("output file is a directory", new Object[0]));
+                    Log.d(TAG, String.format("output file is a directory", new Object[0]));
                     return null;
                 }
-                Log.w(str, String.format("output file will be overwritten", new Object[0]));
+                Log.w(TAG, String.format("output file will be overwritten", new Object[0]));
             }
             File tempFile = getTempFile(file);
             if (tempFile.exists()) {
-                Log.w(str, String.format("temp file exists, try delete", new Object[0]));
+                Log.w(TAG, String.format("temp file exists, try delete", new Object[0]));
                 if (!tempFile.delete()) {
-                    Log.w(str, String.format("temp file delete failed, will overwrite", new Object[0]));
+                    Log.w(TAG, String.format("temp file delete failed, will overwrite", new Object[0]));
                 }
             }
             try {
                 return new FileOutputStream(tempFile);
             } catch (FileNotFoundException e2) {
-                Log.w(str, (Throwable) e2);
+                Log.w(TAG, (Throwable) e2);
                 return null;
             }
         } else {
-            Log.d(str, String.format("create folder failed", new Object[0]));
+            Log.d(TAG, String.format("create folder failed", new Object[0]));
             return null;
         }
     }
@@ -186,9 +183,7 @@ class DownloadTask {
     /* access modifiers changed from: private */
     public int performRequest(Request request) {
         int process;
-        String format = String.format("start to download request[%s, %s, %s]", new Object[]{request.getTag(), request.getUri(), request.getDestination()});
-        String str = TAG;
-        Log.d(str, format);
+        Log.d(TAG, String.format("start to download request[%s, %s, %s]", new Object[]{request.getTag(), request.getUri(), request.getDestination()}));
         preRequest();
         int maxRetryTimes = request.getMaxRetryTimes();
         int i = 0;
@@ -197,7 +192,7 @@ class DownloadTask {
             if (!isRetryState(process)) {
                 break;
             }
-            Log.d(str, String.format("retry for %d", new Object[]{Integer.valueOf(process)}));
+            Log.d(TAG, String.format("retry for %d", new Object[]{Integer.valueOf(process)}));
             try {
                 Thread.sleep(RETRY_INTERVAL_MILLI, 0);
                 i++;
@@ -209,34 +204,31 @@ class DownloadTask {
     }
 
     private int postDownload() {
-        Verifier verifier = this.mCoreTask.mRequest.getVerifier();
-        String str = TAG;
-        if (verifier == null || this.mCoreTask.mRequest.getVerifier().verify(this.mTaskInfo.mDigest.digest())) {
-            Log.d(str, String.format("verify success", new Object[0]));
+        if (this.mCoreTask.mRequest.getVerifier() == null || this.mCoreTask.mRequest.getVerifier().verify(this.mTaskInfo.mDigest.digest())) {
+            Log.d(TAG, String.format("verify success", new Object[0]));
             return 0;
         }
-        Log.d(str, String.format("verify fail", new Object[0]));
+        Log.d(TAG, String.format("verify fail", new Object[0]));
         return 6;
     }
 
     private int postRequest(int i) {
-        String str = TAG;
         if (i != 0) {
             File tempFile = getTempFile(this.mCoreTask.mRequest.getDestination());
             if (tempFile.exists() && !tempFile.delete()) {
-                Log.d(str, String.format("delete tmp file failed %s", new Object[]{tempFile}));
+                Log.d(TAG, String.format("delete tmp file failed %s", new Object[]{tempFile}));
             }
         } else {
             File destination = this.mCoreTask.mRequest.getDestination();
             File tempFile2 = getTempFile(destination);
             if (!tempFile2.exists()) {
-                Log.w(str, String.format("downloaded file missing", new Object[0]));
+                Log.w(TAG, String.format("downloaded file missing", new Object[0]));
                 return 9;
             } else if (!tempFile2.renameTo(destination)) {
-                Log.w(str, String.format("downloaded file rename failed", new Object[0]));
+                Log.w(TAG, String.format("downloaded file rename failed", new Object[0]));
                 return 9;
             } else {
-                Log.w(str, String.format("rename tmp file success", new Object[0]));
+                Log.w(TAG, String.format("rename tmp file success", new Object[0]));
             }
         }
         return i;
@@ -255,108 +247,70 @@ class DownloadTask {
     }
 
     /* JADX WARNING: type inference failed for: r0v2 */
-    /* JADX WARNING: type inference failed for: r4v0, types: [java.io.InputStream] */
     /* JADX WARNING: type inference failed for: r0v3, types: [java.io.OutputStream] */
-    /* JADX WARNING: type inference failed for: r9v3, types: [java.io.OutputStream] */
     /* JADX WARNING: type inference failed for: r0v4, types: [java.io.InputStream] */
-    /* JADX WARNING: type inference failed for: r4v1 */
     /* JADX WARNING: type inference failed for: r0v5 */
-    /* JADX WARNING: type inference failed for: r9v5 */
-    /* JADX WARNING: type inference failed for: r4v2 */
-    /* JADX WARNING: type inference failed for: r4v5, types: [java.io.InputStream] */
     /* JADX WARNING: type inference failed for: r0v7 */
-    /* JADX WARNING: type inference failed for: r9v6 */
     /* JADX WARNING: type inference failed for: r0v8 */
     /* JADX WARNING: type inference failed for: r0v9 */
-    /* JADX WARNING: type inference failed for: r0v10, types: [java.io.OutputStream] */
     /* JADX WARNING: type inference failed for: r0v11 */
     /* JADX WARNING: type inference failed for: r0v12 */
     /* JADX WARNING: type inference failed for: r0v13 */
     /* JADX WARNING: type inference failed for: r0v14 */
-    /* JADX WARNING: type inference failed for: r4v6 */
     /* JADX WARNING: type inference failed for: r0v15 */
     /* JADX WARNING: type inference failed for: r0v16 */
     /* JADX WARNING: type inference failed for: r0v17 */
-    /* JADX WARNING: type inference failed for: r0v18 */
-    /* JADX WARNING: type inference failed for: r0v19 */
-    /* JADX WARNING: type inference failed for: r0v20 */
-    /* JADX WARNING: type inference failed for: r0v21 */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r0v9
-  assigns: []
-  uses: []
-  mth insns count: 136
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
+    /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:76:0x0107 A[SYNTHETIC, Splitter:B:76:0x0107] */
     /* JADX WARNING: Removed duplicated region for block: B:81:0x0111 A[SYNTHETIC, Splitter:B:81:0x0111] */
     /* JADX WARNING: Removed duplicated region for block: B:90:0x0122 A[SYNTHETIC, Splitter:B:90:0x0122] */
     /* JADX WARNING: Removed duplicated region for block: B:95:0x012c A[SYNTHETIC, Splitter:B:95:0x012c] */
-    /* JADX WARNING: Unknown variable types count: 9 */
     private int process(Request request) {
-        ? r4;
-        ? r0;
-        ? r9;
-        ? r02;
-        ? r03;
-        ? r04;
-        Holder open = ConnectionHelper.open(request.getUri(), request.getNetworkType());
-        HttpURLConnection httpURLConnection = (HttpURLConnection) open.value;
-        String str = TAG;
+        InputStream inputStream;
+        OutputStream outputStream;
+        ConnectionHelper.Holder<HttpURLConnection> open = ConnectionHelper.open(request.getUri(), request.getNetworkType());
+        HttpURLConnection httpURLConnection = open.value;
         if (httpURLConnection == null) {
-            Log.d(str, String.format("open connection failed", new Object[0]));
+            Log.d(TAG, String.format("open connection failed", new Object[0]));
             return translateErrorCode(open.reason);
         }
-        ? r05 = 0;
+        ? r0 = 0;
         try {
             configure(httpURLConnection);
             httpURLConnection.connect();
             int translateResponseCode = translateResponseCode(httpURLConnection.getResponseCode());
             if (translateResponseCode != 0) {
-                Log.d(str, String.format("response code not valid", new Object[0]));
+                Log.d(TAG, String.format("response code not valid", new Object[0]));
                 httpURLConnection.disconnect();
                 return translateResponseCode;
             }
             processHeader(httpURLConnection);
-            ? inputStream = httpURLConnection.getInputStream();
+            inputStream = httpURLConnection.getInputStream();
             try {
-                r03 = r05;
-                r04 = r05;
-                ? openOutputStream = openOutputStream(request.getDestination());
-                if (openOutputStream == 0) {
-                    Log.d(str, String.format("open output stream failed", new Object[0]));
+                OutputStream openOutputStream = openOutputStream(request.getDestination());
+                if (openOutputStream == null) {
+                    Log.d(TAG, String.format("open output stream failed", new Object[0]));
                     httpURLConnection.disconnect();
-                    if (inputStream != 0) {
+                    if (inputStream != null) {
                         try {
                             inputStream.close();
                         } catch (IOException e2) {
-                            Log.w(str, (Throwable) e2);
+                            Log.w(TAG, (Throwable) e2);
                         }
                     }
-                    if (openOutputStream != 0) {
+                    if (openOutputStream != null) {
                         try {
                             openOutputStream.close();
                         } catch (IOException e3) {
-                            Log.w(str, (Throwable) e3);
+                            Log.w(TAG, (Throwable) e3);
                         }
                     }
                     return 4;
                 }
-                r03 = openOutputStream;
-                r04 = openOutputStream;
+                r0 = openOutputStream;
+                r0 = openOutputStream;
                 preDownload(request);
-                Log.d(str, String.format("start to transfer data", new Object[0]));
+                Log.d(TAG, String.format("start to transfer data", new Object[0]));
                 byte[] bArr = new byte[8192];
                 int i = 0;
                 while (!this.mCoreTask.isCancelled()) {
@@ -368,74 +322,74 @@ class DownloadTask {
                     performProgressUpdate(bArr, i);
                 }
                 if (i == -1) {
-                    Log.d(str, String.format("download success", new Object[0]));
+                    Log.d(TAG, String.format("download success", new Object[0]));
                     int postDownload = postDownload();
                     httpURLConnection.disconnect();
-                    if (inputStream != 0) {
+                    if (inputStream != null) {
                         try {
                             inputStream.close();
                         } catch (IOException e4) {
-                            Log.w(str, (Throwable) e4);
+                            Log.w(TAG, (Throwable) e4);
                         }
                     }
-                    if (openOutputStream != 0) {
+                    if (openOutputStream != null) {
                         try {
                             openOutputStream.close();
                         } catch (IOException e5) {
-                            Log.w(str, (Throwable) e5);
+                            Log.w(TAG, (Throwable) e5);
                         }
                     }
                     return postDownload;
                 }
-                r03 = openOutputStream;
-                r04 = openOutputStream;
-                Log.d(str, String.format("cancelled, during download", new Object[0]));
-                r03 = openOutputStream;
-                r04 = openOutputStream;
+                r0 = openOutputStream;
+                r0 = openOutputStream;
+                Log.d(TAG, String.format("cancelled, during download", new Object[0]));
+                r0 = openOutputStream;
+                r0 = openOutputStream;
                 httpURLConnection.disconnect();
-                if (inputStream != 0) {
+                if (inputStream != null) {
                     try {
                         inputStream.close();
                     } catch (IOException e6) {
-                        Log.w(str, (Throwable) e6);
+                        Log.w(TAG, (Throwable) e6);
                     }
                 }
-                if (openOutputStream != 0) {
+                if (openOutputStream != null) {
                     try {
                         openOutputStream.close();
                     } catch (IOException e7) {
-                        Log.w(str, (Throwable) e7);
+                        Log.w(TAG, (Throwable) e7);
                     }
                 }
                 return 5;
             } catch (IOException e8) {
                 e = e8;
-                r9 = r03;
-                r02 = inputStream;
+                outputStream = r0;
+                r0 = inputStream;
                 try {
-                    Log.w(str, (Throwable) e);
+                    Log.w(TAG, (Throwable) e);
                     httpURLConnection.disconnect();
-                    if (r02 != 0) {
+                    if (r0 != 0) {
                         try {
-                            r02.close();
+                            r0.close();
                         } catch (IOException e9) {
-                            Log.w(str, (Throwable) e9);
+                            Log.w(TAG, (Throwable) e9);
                         }
                     }
-                    if (r9 != 0) {
+                    if (outputStream != null) {
                         try {
-                            r9.close();
+                            outputStream.close();
                         } catch (IOException e10) {
-                            Log.w(str, (Throwable) e10);
+                            Log.w(TAG, (Throwable) e10);
                         }
                     }
                     return 11;
                 } catch (Throwable th) {
                     th = th;
-                    r4 = r02;
-                    r0 = r9;
+                    inputStream = r0;
+                    r0 = outputStream;
                     httpURLConnection.disconnect();
-                    if (r4 != 0) {
+                    if (inputStream != null) {
                     }
                     if (r0 != 0) {
                     }
@@ -443,42 +397,39 @@ class DownloadTask {
                 }
             } catch (Throwable th2) {
                 th = th2;
-                r4 = inputStream;
-                r0 = r04;
+                r0 = r0;
                 httpURLConnection.disconnect();
-                if (r4 != 0) {
+                if (inputStream != null) {
                     try {
-                        r4.close();
+                        inputStream.close();
                     } catch (IOException e11) {
-                        Log.w(str, (Throwable) e11);
+                        Log.w(TAG, (Throwable) e11);
                     }
                 }
                 if (r0 != 0) {
                     try {
                         r0.close();
                     } catch (IOException e12) {
-                        Log.w(str, (Throwable) e12);
+                        Log.w(TAG, (Throwable) e12);
                     }
                 }
                 throw th;
             }
         } catch (IOException e13) {
             e = e13;
-            r9 = 0;
-            r02 = r05;
-            Log.w(str, (Throwable) e);
+            outputStream = null;
+            Log.w(TAG, (Throwable) e);
             httpURLConnection.disconnect();
-            if (r02 != 0) {
+            if (r0 != 0) {
             }
-            if (r9 != 0) {
+            if (outputStream != null) {
             }
             return 11;
         } catch (Throwable th3) {
             th = th3;
-            r4 = 0;
-            r0 = r05;
+            inputStream = null;
             httpURLConnection.disconnect();
-            if (r4 != 0) {
+            if (inputStream != null) {
             }
             if (r0 != 0) {
             }
@@ -509,9 +460,8 @@ class DownloadTask {
     }
 
     private static int translateResponseCode(int i) {
-        String str = TAG;
         if (i != 200) {
-            Log.d(str, String.format("processing http code %d", new Object[]{Integer.valueOf(i)}));
+            Log.d(TAG, String.format("processing http code %d", new Object[]{Integer.valueOf(i)}));
             int i2 = i / 100;
             if (i2 == 3) {
                 return 7;
@@ -526,31 +476,31 @@ class DownloadTask {
             }
             return 7;
         }
-        Log.d(str, String.format("http status is ok", new Object[0]));
+        Log.d(TAG, String.format("http status is ok", new Object[0]));
         return 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean cancel(boolean z) {
         return this.mCoreTask.cancel(z);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int execute() {
         return this.mCoreTask.doInBackground(new Void[0]).intValue();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void execute(Executor executor) {
         this.mCoreTask.executeOnExecutor(executor, new Void[0]);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public OnProgressListener getOnProgressListener() {
         return this.mOnProgressListener;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setOnProgressListener(OnProgressListener onProgressListener) {
         this.mOnProgressListener = onProgressListener;
     }

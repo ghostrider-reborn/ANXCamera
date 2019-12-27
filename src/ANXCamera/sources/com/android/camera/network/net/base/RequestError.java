@@ -26,10 +26,6 @@ public class RequestError extends VolleyError {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
-        sb.append(" code : ");
-        sb.append(this.mErrorCode);
-        return sb.toString();
+        return super.toString() + " code : " + this.mErrorCode;
     }
 }

@@ -38,7 +38,7 @@ public final class ObservableAnySingle<T> extends Single<Boolean> implements Fus
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
-                this.actual.onSuccess(Boolean.valueOf(false));
+                this.actual.onSuccess(false);
             }
         }
 
@@ -57,7 +57,7 @@ public final class ObservableAnySingle<T> extends Single<Boolean> implements Fus
                     if (this.predicate.test(t)) {
                         this.done = true;
                         this.s.dispose();
-                        this.actual.onSuccess(Boolean.valueOf(true));
+                        this.actual.onSuccess(true);
                     }
                 } catch (Throwable th) {
                     Exceptions.throwIfFatal(th);
@@ -81,7 +81,7 @@ public final class ObservableAnySingle<T> extends Single<Boolean> implements Fus
     }
 
     public Observable<Boolean> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableAny<T>(this.source, this.predicate));
+        return RxJavaPlugins.onAssembly(new ObservableAny(this.source, this.predicate));
     }
 
     /* access modifiers changed from: protected */

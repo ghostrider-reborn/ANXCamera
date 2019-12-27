@@ -25,12 +25,6 @@ public abstract class m<Z> extends b<Z> {
             nVar.b(this.width, this.height);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Width and height must both be > 0 or Target#SIZE_ORIGINAL, but given width: ");
-        sb.append(this.width);
-        sb.append(" and height: ");
-        sb.append(this.height);
-        sb.append(", either provide dimensions in the constructor or call override()");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Width and height must both be > 0 or Target#SIZE_ORIGINAL, but given width: " + this.width + " and height: " + this.height + ", either provide dimensions in the constructor or call override()");
     }
 }

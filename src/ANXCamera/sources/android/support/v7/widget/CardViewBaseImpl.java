@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RoundRectDrawableWithShadow;
 
 class CardViewBaseImpl implements CardViewImpl {
     /* access modifiers changed from: private */
@@ -49,7 +50,7 @@ class CardViewBaseImpl implements CardViewImpl {
     }
 
     public void initStatic() {
-        RoundRectDrawableWithShadow.sRoundRectHelper = new RoundRectHelper() {
+        RoundRectDrawableWithShadow.sRoundRectHelper = new RoundRectDrawableWithShadow.RoundRectHelper() {
             public void drawRoundRect(Canvas canvas, RectF rectF, float f2, Paint paint) {
                 Canvas canvas2 = canvas;
                 RectF rectF2 = rectF;
@@ -75,12 +76,11 @@ class CardViewBaseImpl implements CardViewImpl {
                     Paint paint3 = paint;
                     canvas.drawArc(CardViewBaseImpl.this.mCornerRect, 180.0f, 90.0f, true, paint3);
                     canvas2.restoreToCount(save);
-                    float f6 = (rectF2.left + f4) - 1.0f;
-                    float f7 = rectF2.top;
-                    canvas.drawRect(f6, f7, (rectF2.right - f4) + 1.0f, f7 + f4, paint3);
-                    float f8 = (rectF2.left + f4) - 1.0f;
-                    float f9 = rectF2.bottom;
-                    canvas.drawRect(f8, f9 - f4, (rectF2.right - f4) + 1.0f, f9, paint3);
+                    float f6 = rectF2.top;
+                    canvas.drawRect((rectF2.left + f4) - 1.0f, f6, (rectF2.right - f4) + 1.0f, f6 + f4, paint3);
+                    float f7 = rectF2.bottom;
+                    Canvas canvas3 = canvas;
+                    canvas3.drawRect((rectF2.left + f4) - 1.0f, f7 - f4, (rectF2.right - f4) + 1.0f, f7, paint3);
                 }
                 canvas.drawRect(rectF2.left, rectF2.top + f2, rectF2.right, rectF2.bottom - f2, paint);
             }

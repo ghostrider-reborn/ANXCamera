@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import com.miui.filtersdk.utils.OpenGlUtils;
 import com.miui.filtersdk.utils.Rotation;
 import com.miui.filtersdk.utils.TextureRotationUtil;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -44,12 +45,8 @@ public class GPUImageFilter {
         this.mFrameBufferTextures = null;
         this.mFrameWidth = -1;
         this.mFrameHeight = -1;
-        if (str == null) {
-            str = NO_FILTER_VERTEX_SHADER;
-        }
-        if (str2 == null) {
-            str2 = NO_FILTER_FRAGMENT_SHADER;
-        }
+        str = str == null ? NO_FILTER_VERTEX_SHADER : str;
+        str2 = str2 == null ? NO_FILTER_FRAGMENT_SHADER : str2;
         this.mRunOnDraw = new LinkedList<>();
         this.mVertexShader = str;
         this.mFragmentShader = str2;
@@ -150,7 +147,7 @@ public class GPUImageFilter {
             GLES20.glGenFramebuffers(1, this.mFrameBuffers, 0);
             GLES20.glGenTextures(1, this.mFrameBufferTextures, 0);
             GLES20.glBindTexture(3553, this.mFrameBufferTextures[0]);
-            GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, null);
+            GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
             GLES20.glTexParameterf(3553, 10240, 9729.0f);
             GLES20.glTexParameterf(3553, 10241, 9729.0f);
             GLES20.glTexParameterf(3553, 10242, 33071.0f);
@@ -309,7 +306,7 @@ public class GPUImageFilter {
     public void runPendingOnDrawTasks() {
         synchronized (this.mRunOnDraw) {
             while (!this.mRunOnDraw.isEmpty()) {
-                ((Runnable) this.mRunOnDraw.removeFirst()).run();
+                this.mRunOnDraw.removeFirst().run();
             }
         }
     }

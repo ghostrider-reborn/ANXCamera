@@ -1,12 +1,10 @@
 package com.ss.android.vesdk.runtime.cloudconfig;
 
 import android.content.Context;
-import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import com.ss.android.ttve.monitor.DeviceInfoDetector;
 import com.ss.android.ttve.monitor.MonitorUtils;
@@ -14,7 +12,6 @@ import com.ss.android.vesdk.runtime.VERuntime;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +25,7 @@ public class PerformanceConfig {
     public static final int ENABLE = 1;
     private static final String TAG = "PerfConfig";
     public static final int UNDEFINED = 0;
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public static int gServerLocation = 0;
     private static final String sConfigs = "ShortVideoConfig";
     /* access modifiers changed from: private */
@@ -42,44 +39,40 @@ public class PerformanceConfig {
 
         /* access modifiers changed from: protected */
         public Void doInBackground(Void... voidArr) {
-            String str = "Injector == null. VECloudConfig is not initialized!";
-            String str2 = "Parse json result failed! ";
-            String str3 = PerformanceConfig.TAG;
             try {
                 Context context = VERuntime.getInstance().getContext();
-                Map map = DeviceInfoDetector.toMap();
+                Map<String, String> map = DeviceInfoDetector.toMap();
                 map.put(MonitorUtils.KEY_PACKAGE_NAME, context.getPackageName());
                 map.put(MonitorUtils.KEY_MODEL, Build.MODEL);
-                map.put("os_version", VERSION.RELEASE);
+                map.put("os_version", Build.VERSION.RELEASE);
                 Locale locale = Locale.getDefault();
                 if (locale != null) {
                     map.put("locale", (locale.getCountry() == null ? "" : locale.getCountry()).toLowerCase());
                 }
                 map.put("platform", "android");
-                String body = HttpRequest.get((CharSequence) PerformanceConfig.getServerUrl(), map, true).body();
-                StringBuilder sb = new StringBuilder();
-                sb.append("cloud config result = ");
-                sb.append(body);
-                Log.d(str3, sb.toString());
+                String body = HttpRequest.get((CharSequence) PerformanceConfig.getServerUrl(), (Map<?, ?>) map, true).body();
+                Log.d(PerformanceConfig.TAG, "cloud config result = " + body);
                 try {
                     JSONObject jSONObject = new JSONObject(body);
                     if (PerformanceConfig.sInjector != null) {
-                        Map parse = PerformanceConfig.sInjector.parse(jSONObject);
+                        Map<String, String> parse = PerformanceConfig.sInjector.parse(jSONObject);
                         if (parse != null) {
                             PerformanceConfig.setPerformanceConfig(VERuntime.getInstance().getContext(), parse);
-                        } else {
-                            Log.e(str3, str2);
+                            return null;
                         }
+                        Log.e(PerformanceConfig.TAG, "Parse json result failed! ");
                         return null;
                     }
-                    Log.e(str3, str);
-                    throw new IllegalStateException(str);
+                    Log.e(PerformanceConfig.TAG, "Injector == null. VECloudConfig is not initialized!");
+                    throw new IllegalStateException("Injector == null. VECloudConfig is not initialized!");
                 } catch (JSONException e2) {
-                    Log.e(str3, str2, e2);
+                    Log.e(PerformanceConfig.TAG, "Parse json result failed! ", e2);
                     e2.printStackTrace();
+                    return null;
                 }
             } catch (Exception e3) {
-                Log.e(str3, "Fetch config failed! ", e3);
+                Log.e(PerformanceConfig.TAG, "Fetch config failed! ", e3);
+                return null;
             }
         }
 
@@ -94,9 +87,9 @@ public class PerformanceConfig {
 
     public static Map<String, String> getPerformanceConfig(Context context) {
         HashMap hashMap = new HashMap();
-        for (Entry entry : context.getSharedPreferences(sConfigs, 0).getAll().entrySet()) {
-            if (((String) entry.getKey()).startsWith(sPerfConfigPrefix)) {
-                hashMap.put(((String) entry.getKey()).substring(11), (String) entry.getValue());
+        for (Map.Entry next : context.getSharedPreferences(sConfigs, 0).getAll().entrySet()) {
+            if (((String) next.getKey()).startsWith(sPerfConfigPrefix)) {
+                hashMap.put(((String) next.getKey()).substring(11), (String) next.getValue());
             }
         }
         return hashMap;
@@ -105,11 +98,10 @@ public class PerformanceConfig {
     /* access modifiers changed from: private */
     public static String getServerUrl() {
         int i = gServerLocation;
-        String str = BASE_URL_CHINA;
-        return i != 0 ? i != 2 ? i != 3 ? str : BASE_URL_SINGAPORE : BASE_URL_US : str;
+        return i != 0 ? i != 2 ? i != 3 ? BASE_URL_CHINA : BASE_URL_SINGAPORE : BASE_URL_US : BASE_URL_CHINA;
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public static void restoreFromCache() {
         if (VERuntime.getInstance().getContext() != null) {
             setConfigsFromMap(getPerformanceConfig(VERuntime.getInstance().getContext()));
@@ -130,13 +122,10 @@ public class PerformanceConfig {
 
     public static void setPerformanceConfig(Context context, Map<String, String> map) {
         if (map != null) {
-            Set<Entry> entrySet = map.entrySet();
-            Editor edit = context.getSharedPreferences(sConfigs, 0).edit();
-            for (Entry entry : entrySet) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(sPerfConfigPrefix);
-                sb.append((String) entry.getKey());
-                edit.putString(sb.toString(), (String) entry.getValue());
+            Set<Map.Entry<String, String>> entrySet = map.entrySet();
+            SharedPreferences.Editor edit = context.getSharedPreferences(sConfigs, 0).edit();
+            for (Map.Entry next : entrySet) {
+                edit.putString(sPerfConfigPrefix + ((String) next.getKey()), (String) next.getValue());
             }
             edit.apply();
         }
@@ -145,12 +134,12 @@ public class PerformanceConfig {
     public static void setServerLocation(int i) {
         if (i == 0 || i == 2 || i == 3) {
             gServerLocation = i;
-            return;
+        } else {
+            Log.e(TAG, "SetServerLocation error", new IllegalArgumentException("Only china, us, and sea server is acceptable"));
         }
-        Log.e(TAG, "SetServerLocation error", new IllegalArgumentException("Only china, us, and sea server is acceptable"));
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public static void updateConfig(Map<String, String> map) {
         setConfigsFromMap(map);
         setPerformanceConfig(VERuntime.getInstance().getContext(), map);

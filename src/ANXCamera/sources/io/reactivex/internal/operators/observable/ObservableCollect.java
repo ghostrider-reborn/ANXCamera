@@ -84,7 +84,7 @@ public final class ObservableCollect<T, U> extends AbstractObservableWithUpstrea
             ObjectHelper.requireNonNull(call, "The initialSupplier returned a null value");
             this.source.subscribe(new CollectObserver(observer, call, this.collector));
         } catch (Throwable th) {
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

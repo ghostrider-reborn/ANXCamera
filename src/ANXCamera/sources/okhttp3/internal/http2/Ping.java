@@ -11,7 +11,7 @@ final class Ping {
     Ping() {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void cancel() {
         if (this.received == -1) {
             long j = this.sent;
@@ -24,7 +24,7 @@ final class Ping {
         throw new IllegalStateException();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void receive() {
         if (this.received != -1 || this.sent == -1) {
             throw new IllegalStateException();
@@ -45,7 +45,7 @@ final class Ping {
         return -2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void send() {
         if (this.sent == -1) {
             this.sent = System.nanoTime();

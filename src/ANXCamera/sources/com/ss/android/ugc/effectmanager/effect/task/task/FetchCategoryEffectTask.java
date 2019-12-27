@@ -108,11 +108,7 @@ public class FetchCategoryEffectTask extends NormalTask {
             hashMap.put(EffectConfiguration.KEY_CITY_CODE, this.mConfiguration.getCityCode());
         }
         this.mSelectedHost = this.mEffectContext.getLinkSelector().getBestHostUrl();
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mSelectedHost);
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_CATEGORY_EFFECT);
-        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, sb.toString());
+        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, this.mSelectedHost + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_CATEGORY_EFFECT);
         this.mRequestedUrl = buildRequestUrl;
         try {
             this.mRemoteIp = InetAddress.getByName(new URL(buildRequestUrl).getHost()).getHostAddress();
@@ -126,18 +122,13 @@ public class FetchCategoryEffectTask extends NormalTask {
 
     private void fillEffectPath(List<Effect> list) {
         if (list != null && !list.isEmpty()) {
-            for (Effect effect : list) {
+            for (Effect next : list) {
+                next.setZipPath(this.mConfiguration.getEffectDir().getAbsolutePath() + File.separator + next.getId() + ".zip");
                 StringBuilder sb = new StringBuilder();
                 sb.append(this.mConfiguration.getEffectDir().getAbsolutePath());
                 sb.append(File.separator);
-                sb.append(effect.getId());
-                sb.append(".zip");
-                effect.setZipPath(sb.toString());
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(this.mConfiguration.getEffectDir().getAbsolutePath());
-                sb2.append(File.separator);
-                sb2.append(effect.getId());
-                effect.setUnzipPath(sb2.toString());
+                sb.append(next.getId());
+                next.setUnzipPath(sb.toString());
             }
         }
     }
@@ -165,7 +156,7 @@ public class FetchCategoryEffectTask extends NormalTask {
                     if (isCanceled()) {
                         ExceptionResult exceptionResult = new ExceptionResult((int) ErrorConstants.CODE_CANCEL_DOWNLOAD);
                         exceptionResult.setTrackParams(this.mRequestedUrl, this.mSelectedHost, this.mRemoteIp);
-                        sendMessage(21, new FetchCategoryEffectTaskResult(null, exceptionResult));
+                        sendMessage(21, new FetchCategoryEffectTaskResult((CategoryEffectModel) null, exceptionResult));
                         return;
                     }
                     CategoryEffectListResponse categoryEffectListResponse = (CategoryEffectListResponse) this.mConfiguration.getEffectNetWorker().execute(buildEffectListRequest, this.mJsonConverter, CategoryEffectListResponse.class);
@@ -173,23 +164,23 @@ public class FetchCategoryEffectTask extends NormalTask {
                         CategoryEffectModel categoryEffects = categoryEffectListResponse.getData().getCategoryEffects();
                         fillEffectPath(categoryEffects.getEffects());
                         saveEffectList(categoryEffectListResponse);
-                        sendMessage(21, new FetchCategoryEffectTaskResult(categoryEffects, null));
+                        sendMessage(21, new FetchCategoryEffectTaskResult(categoryEffects, (ExceptionResult) null));
                         return;
                     } else if (this.mCurCnt == 0) {
                         ExceptionResult exceptionResult2 = new ExceptionResult((int) ErrorConstants.CODE_DOWNLOAD_ERROR);
                         exceptionResult2.setTrackParams(this.mRequestedUrl, this.mSelectedHost, this.mRemoteIp);
-                        sendMessage(21, new FetchCategoryEffectTaskResult(null, exceptionResult2));
+                        sendMessage(21, new FetchCategoryEffectTaskResult((CategoryEffectModel) null, exceptionResult2));
                         return;
                     }
                 } catch (Exception e2) {
                     if (this.mCurCnt == 0 || (e2 instanceof StatusCodeException)) {
-                        sendMessage(21, new FetchCategoryEffectTaskResult(null, new ExceptionResult(e2)));
+                        sendMessage(21, new FetchCategoryEffectTaskResult((CategoryEffectModel) null, new ExceptionResult(e2)));
                     }
                 }
             } else {
                 return;
             }
         }
-        sendMessage(21, new FetchCategoryEffectTaskResult(null, new ExceptionResult(e2)));
+        sendMessage(21, new FetchCategoryEffectTaskResult((CategoryEffectModel) null, new ExceptionResult(e2)));
     }
 }

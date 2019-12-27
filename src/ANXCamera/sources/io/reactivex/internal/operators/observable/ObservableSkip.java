@@ -10,7 +10,7 @@ public final class ObservableSkip<T> extends AbstractObservableWithUpstream<T, T
     static final class SkipObserver<T> implements Observer<T>, Disposable {
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f325d;
         long remaining;
 

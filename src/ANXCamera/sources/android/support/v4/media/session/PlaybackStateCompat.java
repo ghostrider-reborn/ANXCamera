@@ -1,14 +1,13 @@
 package android.support.v4.media.session;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
+import android.support.v4.media.session.PlaybackStateCompatApi21;
 import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,7 +38,7 @@ public final class PlaybackStateCompat implements Parcelable {
     public static final long ACTION_SKIP_TO_PREVIOUS = 16;
     public static final long ACTION_SKIP_TO_QUEUE_ITEM = 4096;
     public static final long ACTION_STOP = 1;
-    public static final Creator<PlaybackStateCompat> CREATOR = new Creator<PlaybackStateCompat>() {
+    public static final Parcelable.Creator<PlaybackStateCompat> CREATOR = new Parcelable.Creator<PlaybackStateCompat>() {
         public PlaybackStateCompat createFromParcel(Parcel parcel) {
             return new PlaybackStateCompat(parcel);
         }
@@ -97,7 +96,7 @@ public final class PlaybackStateCompat implements Parcelable {
     private Object mStateObj;
     final long mUpdateTime;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Actions {
     }
@@ -144,7 +143,7 @@ public final class PlaybackStateCompat implements Parcelable {
         }
 
         public Builder addCustomAction(String str, String str2, int i) {
-            return addCustomAction(new CustomAction(str, str2, i, null));
+            return addCustomAction(new CustomAction(str, str2, i, (Bundle) null));
         }
 
         public PlaybackStateCompat build() {
@@ -197,7 +196,7 @@ public final class PlaybackStateCompat implements Parcelable {
     }
 
     public static final class CustomAction implements Parcelable {
-        public static final Creator<CustomAction> CREATOR = new Creator<CustomAction>() {
+        public static final Parcelable.Creator<CustomAction> CREATOR = new Parcelable.Creator<CustomAction>() {
             public CustomAction createFromParcel(Parcel parcel) {
                 return new CustomAction(parcel);
             }
@@ -257,10 +256,10 @@ public final class PlaybackStateCompat implements Parcelable {
         }
 
         public static CustomAction fromCustomAction(Object obj) {
-            if (obj == null || VERSION.SDK_INT < 21) {
+            if (obj == null || Build.VERSION.SDK_INT < 21) {
                 return null;
             }
-            CustomAction customAction = new CustomAction(CustomAction.getAction(obj), CustomAction.getName(obj), CustomAction.getIcon(obj), CustomAction.getExtras(obj));
+            CustomAction customAction = new CustomAction(PlaybackStateCompatApi21.CustomAction.getAction(obj), PlaybackStateCompatApi21.CustomAction.getName(obj), PlaybackStateCompatApi21.CustomAction.getIcon(obj), PlaybackStateCompatApi21.CustomAction.getExtras(obj));
             customAction.mCustomActionObj = obj;
             return customAction;
         }
@@ -274,10 +273,10 @@ public final class PlaybackStateCompat implements Parcelable {
         }
 
         public Object getCustomAction() {
-            if (this.mCustomActionObj != null || VERSION.SDK_INT < 21) {
+            if (this.mCustomActionObj != null || Build.VERSION.SDK_INT < 21) {
                 return this.mCustomActionObj;
             }
-            this.mCustomActionObj = CustomAction.newInstance(this.mAction, this.mName, this.mIcon, this.mExtras);
+            this.mCustomActionObj = PlaybackStateCompatApi21.CustomAction.newInstance(this.mAction, this.mName, this.mIcon, this.mExtras);
             return this.mCustomActionObj;
         }
 
@@ -294,14 +293,7 @@ public final class PlaybackStateCompat implements Parcelable {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Action:mName='");
-            sb.append(this.mName);
-            sb.append(", mIcon=");
-            sb.append(this.mIcon);
-            sb.append(", mExtras=");
-            sb.append(this.mExtras);
-            return sb.toString();
+            return "Action:mName='" + this.mName + ", mIcon=" + this.mIcon + ", mExtras=" + this.mExtras;
         }
 
         public void writeToParcel(Parcel parcel, int i) {
@@ -312,27 +304,27 @@ public final class PlaybackStateCompat implements Parcelable {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ErrorCode {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaKeyAction {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RepeatMode {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShuffleMode {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {
     }
@@ -366,26 +358,26 @@ public final class PlaybackStateCompat implements Parcelable {
     }
 
     public static PlaybackStateCompat fromPlaybackState(Object obj) {
-        List list;
+        ArrayList arrayList;
         Object obj2 = obj;
         Bundle bundle = null;
-        if (obj2 == null || VERSION.SDK_INT < 21) {
+        if (obj2 == null || Build.VERSION.SDK_INT < 21) {
             return null;
         }
         List<Object> customActions = PlaybackStateCompatApi21.getCustomActions(obj);
         if (customActions != null) {
-            ArrayList arrayList = new ArrayList(customActions.size());
+            ArrayList arrayList2 = new ArrayList(customActions.size());
             for (Object fromCustomAction : customActions) {
-                arrayList.add(CustomAction.fromCustomAction(fromCustomAction));
+                arrayList2.add(CustomAction.fromCustomAction(fromCustomAction));
             }
-            list = arrayList;
+            arrayList = arrayList2;
         } else {
-            list = null;
+            arrayList = null;
         }
-        if (VERSION.SDK_INT >= 22) {
+        if (Build.VERSION.SDK_INT >= 22) {
             bundle = PlaybackStateCompatApi22.getExtras(obj);
         }
-        PlaybackStateCompat playbackStateCompat = new PlaybackStateCompat(PlaybackStateCompatApi21.getState(obj), PlaybackStateCompatApi21.getPosition(obj), PlaybackStateCompatApi21.getBufferedPosition(obj), PlaybackStateCompatApi21.getPlaybackSpeed(obj), PlaybackStateCompatApi21.getActions(obj), 0, PlaybackStateCompatApi21.getErrorMessage(obj), PlaybackStateCompatApi21.getLastPositionUpdateTime(obj), list, PlaybackStateCompatApi21.getActiveQueueItemId(obj), bundle);
+        PlaybackStateCompat playbackStateCompat = new PlaybackStateCompat(PlaybackStateCompatApi21.getState(obj), PlaybackStateCompatApi21.getPosition(obj), PlaybackStateCompatApi21.getBufferedPosition(obj), PlaybackStateCompatApi21.getPlaybackSpeed(obj), PlaybackStateCompatApi21.getActions(obj), 0, PlaybackStateCompatApi21.getErrorMessage(obj), PlaybackStateCompatApi21.getLastPositionUpdateTime(obj), arrayList, PlaybackStateCompatApi21.getActiveQueueItemId(obj), bundle);
         playbackStateCompat.mStateObj = obj2;
         return playbackStateCompat;
     }
@@ -457,7 +449,7 @@ public final class PlaybackStateCompat implements Parcelable {
     }
 
     public Object getPlaybackState() {
-        if (this.mStateObj == null && VERSION.SDK_INT >= 21) {
+        if (this.mStateObj == null && Build.VERSION.SDK_INT >= 21) {
             ArrayList arrayList = null;
             List<CustomAction> list = this.mCustomActions;
             if (list != null) {
@@ -467,7 +459,7 @@ public final class PlaybackStateCompat implements Parcelable {
                 }
             }
             ArrayList arrayList2 = arrayList;
-            if (VERSION.SDK_INT >= 22) {
+            if (Build.VERSION.SDK_INT >= 22) {
                 this.mStateObj = PlaybackStateCompatApi22.newInstance(this.mState, this.mPosition, this.mBufferedPosition, this.mSpeed, this.mActions, this.mErrorMessage, this.mUpdateTime, arrayList2, this.mActiveItemId, this.mExtras);
             } else {
                 this.mStateObj = PlaybackStateCompatApi21.newInstance(this.mState, this.mPosition, this.mBufferedPosition, this.mSpeed, this.mActions, this.mErrorMessage, this.mUpdateTime, arrayList2, this.mActiveItemId);
@@ -485,29 +477,7 @@ public final class PlaybackStateCompat implements Parcelable {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder("PlaybackState {");
-        sb.append("state=");
-        sb.append(this.mState);
-        sb.append(", position=");
-        sb.append(this.mPosition);
-        sb.append(", buffered position=");
-        sb.append(this.mBufferedPosition);
-        sb.append(", speed=");
-        sb.append(this.mSpeed);
-        sb.append(", updated=");
-        sb.append(this.mUpdateTime);
-        sb.append(", actions=");
-        sb.append(this.mActions);
-        sb.append(", error code=");
-        sb.append(this.mErrorCode);
-        sb.append(", error message=");
-        sb.append(this.mErrorMessage);
-        sb.append(", custom actions=");
-        sb.append(this.mCustomActions);
-        sb.append(", active item id=");
-        sb.append(this.mActiveItemId);
-        sb.append("}");
-        return sb.toString();
+        return "PlaybackState {" + "state=" + this.mState + ", position=" + this.mPosition + ", buffered position=" + this.mBufferedPosition + ", speed=" + this.mSpeed + ", updated=" + this.mUpdateTime + ", actions=" + this.mActions + ", error code=" + this.mErrorCode + ", error message=" + this.mErrorMessage + ", custom actions=" + this.mCustomActions + ", active item id=" + this.mActiveItemId + "}";
     }
 
     public void writeToParcel(Parcel parcel, int i) {

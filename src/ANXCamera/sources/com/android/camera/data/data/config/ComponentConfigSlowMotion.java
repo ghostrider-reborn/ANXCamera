@@ -16,15 +16,12 @@ public class ComponentConfigSlowMotion extends ComponentData {
     private static final String[] SLOW_MOTION_MODE;
 
     static {
-        boolean pc = DataRepository.dataItemFeature().pc();
-        String str = DATA_CONFIG_NEW_SLOW_MOTION_240;
-        String str2 = DATA_CONFIG_NEW_SLOW_MOTION_120;
-        if (pc) {
-            SLOW_MOTION_MODE = new String[]{DATA_CONFIG_NEW_SLOW_MOTION_960, str2, str};
+        if (DataRepository.dataItemFeature().pc()) {
+            SLOW_MOTION_MODE = new String[]{DATA_CONFIG_NEW_SLOW_MOTION_960, DATA_CONFIG_NEW_SLOW_MOTION_120, DATA_CONFIG_NEW_SLOW_MOTION_240};
         } else if (DataRepository.dataItemFeature().oc()) {
-            SLOW_MOTION_MODE = new String[]{str2, str};
+            SLOW_MOTION_MODE = new String[]{DATA_CONFIG_NEW_SLOW_MOTION_120, DATA_CONFIG_NEW_SLOW_MOTION_240};
         } else if (DataRepository.dataItemFeature().sc()) {
-            SLOW_MOTION_MODE = new String[]{str2};
+            SLOW_MOTION_MODE = new String[]{DATA_CONFIG_NEW_SLOW_MOTION_120};
         } else {
             SLOW_MOTION_MODE = null;
         }

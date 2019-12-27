@@ -4,14 +4,15 @@ import android.content.Context;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.request.a.k;
 
 /* compiled from: ViewAnimationFactory */
 public class h<R> implements g<R> {
-    private final a Tl;
+    private final k.a Tl;
     private f<R> transition;
 
     /* compiled from: ViewAnimationFactory */
-    private static class a implements a {
+    private static class a implements k.a {
         private final Animation animation;
 
         a(Animation animation2) {
@@ -24,7 +25,7 @@ public class h<R> implements g<R> {
     }
 
     /* compiled from: ViewAnimationFactory */
-    private static class b implements a {
+    private static class b implements k.a {
         private final int Sl;
 
         b(int i) {
@@ -37,14 +38,14 @@ public class h<R> implements g<R> {
     }
 
     public h(int i) {
-        this((a) new b(i));
+        this((k.a) new b(i));
     }
 
     public h(Animation animation) {
-        this((a) new a(animation));
+        this((k.a) new a(animation));
     }
 
-    h(a aVar) {
+    h(k.a aVar) {
         this.Tl = aVar;
     }
 

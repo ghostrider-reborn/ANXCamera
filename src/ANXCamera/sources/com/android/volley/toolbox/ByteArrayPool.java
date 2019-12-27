@@ -22,15 +22,15 @@ public class ByteArrayPool {
 
     private synchronized void trim() {
         while (this.mCurrentSize > this.mSizeLimit) {
-            byte[] bArr = (byte[]) this.mBuffersByLastUse.remove(0);
-            this.mBuffersBySize.remove(bArr);
-            this.mCurrentSize -= bArr.length;
+            byte[] remove = this.mBuffersByLastUse.remove(0);
+            this.mBuffersBySize.remove(remove);
+            this.mCurrentSize -= remove.length;
         }
     }
 
     public synchronized byte[] getBuf(int i) {
         for (int i2 = 0; i2 < this.mBuffersBySize.size(); i2++) {
-            byte[] bArr = (byte[]) this.mBuffersBySize.get(i2);
+            byte[] bArr = this.mBuffersBySize.get(i2);
             if (bArr.length >= i) {
                 this.mCurrentSize -= bArr.length;
                 this.mBuffersBySize.remove(i2);

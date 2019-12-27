@@ -3,17 +3,16 @@ package com.android.camera.module.impl.component;
 import android.content.Context;
 import android.graphics.Rect;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.Image;
 import android.opengl.GLES20;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.view.Surface;
 import com.android.camera.ActivityBase;
 import com.android.camera.CameraScreenNail;
 import com.android.camera.CameraSize;
-import com.android.camera.SurfaceTextureScreenNail.ExternalFrameProcessor;
+import com.android.camera.SurfaceTextureScreenNail;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.observeable.VMProcessing;
@@ -22,14 +21,12 @@ import com.android.camera.log.Log;
 import com.android.camera.module.BaseModule;
 import com.android.camera.module.LiveModuleSubVV;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.LiveConfigVV;
-import com.android.camera.protocol.ModeProtocol.LiveVVProcess;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.V6CameraGLSurfaceView;
 import com.android.camera2.Camera2Proxy;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import com.xiaomi.mediaprocess.EffectCameraNotifier;
 import com.xiaomi.mediaprocess.EffectMediaPlayer;
-import com.xiaomi.mediaprocess.EffectMediaPlayer.SurfaceGravity;
 import com.xiaomi.mediaprocess.EffectNotifier;
 import com.xiaomi.mediaprocess.MediaComposeFile;
 import com.xiaomi.mediaprocess.MediaEffectCamera;
@@ -53,31 +50,28 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, EffectCameraNotifier {
-    public static final String COMPOSE_PATH;
+public class LiveSubVVImpl implements ModeProtocol.LiveConfigVV, SurfaceTextureScreenNail.ExternalFrameProcessor, EffectCameraNotifier {
+    public static final String COMPOSE_PATH = (WORKSPACE_PATH + "compose/");
     private static final Executor PREVIEW_SAVER_EXECUTOR;
-    public static final String SEGMENTS_PATH;
+    public static final String SEGMENTS_PATH = (WORKSPACE_PATH + "segments");
     /* access modifiers changed from: private */
     public static final String TAG = "LiveSubVVImpl";
-    public static final String TEMPLATE_PATH;
-    public static final String VV_DIR;
-    private static final String WATERMARK_PATH;
-    public static final String WORKSPACE_PATH;
+    public static final String TEMPLATE_PATH = (VV_DIR + "template/");
+    public static final String VV_DIR = (Environment.getExternalStorageDirectory().getPath() + "/MIUI/Camera/vv/");
+    private static final String WATERMARK_PATH = (TEMPLATE_PATH + "watermark.mp4");
+    public static final String WORKSPACE_PATH = (VV_DIR + "workspace/");
     private static final BlockingQueue<Runnable> mPreviewRequestQueue = new LinkedBlockingQueue(32);
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
         public Thread newThread(Runnable runnable) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("camera-vv-");
-            sb.append(this.mCount.getAndIncrement());
-            Thread thread = new Thread(runnable, sb.toString());
+            Thread thread = new Thread(runnable, "camera-vv-" + this.mCount.getAndIncrement());
             thread.setPriority(10);
             return thread;
         }
     };
     /* access modifiers changed from: private */
-    public LiveVVProcess liveVVProcess;
+    public ModeProtocol.LiveVVProcess liveVVProcess;
     private ActivityBase mActivity;
     private V6CameraGLSurfaceView mCameraView;
     private MediaComposeFile mComposeFile;
@@ -117,10 +111,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         public void run() {
             long currentTimeMillis = System.currentTimeMillis();
             this.mMediaCamera.PushExtraYAndUVFrame(this.mPreviewImage);
-            StringBuilder sb = new StringBuilder();
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            sb.append("");
-            Log.e("push time：", sb.toString());
+            Log.e("push time：", (System.currentTimeMillis() - currentTimeMillis) + "");
             this.mPreviewImage.close();
             this.mPreviewImage = null;
             this.mMediaCamera = null;
@@ -128,30 +119,6 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
     }
 
     static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().getPath());
-        sb.append("/MIUI/Camera/vv/");
-        VV_DIR = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(VV_DIR);
-        sb2.append("template/");
-        TEMPLATE_PATH = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(VV_DIR);
-        sb3.append("workspace/");
-        WORKSPACE_PATH = sb3.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(WORKSPACE_PATH);
-        sb4.append("segments");
-        SEGMENTS_PATH = sb4.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(WORKSPACE_PATH);
-        sb5.append("compose/");
-        COMPOSE_PATH = sb5.toString();
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(TEMPLATE_PATH);
-        sb6.append("watermark.mp4");
-        WATERMARK_PATH = sb6.toString();
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, mPreviewRequestQueue, sThreadFactory);
         threadPoolExecutor.allowCoreThreadTimeOut(true);
         PREVIEW_SAVER_EXECUTOR = threadPoolExecutor;
@@ -183,11 +150,10 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         String str2 = vVItem.musicPath;
         ArrayList arrayList = new ArrayList(this.mTempVideoList);
         arrayList.add(WATERMARK_PATH);
-        String[] strArr = (String[]) arrayList.toArray(new String[0]);
         this.mMediaEffectGraph = new MediaEffectGraph();
         this.mMediaEffectGraph.ConstructMediaEffectGraph();
         this.mMediaEffectGraph.SetAudioMute(true);
-        this.mMediaEffectGraph.AddSourceAndEffectByTemplate(strArr, str);
+        this.mMediaEffectGraph.AddSourceAndEffectByTemplate((String[]) arrayList.toArray(new String[0]), str);
         this.mMediaEffectGraph.AddAudioTrack(str2, false);
     }
 
@@ -206,12 +172,9 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
     private void startCountDown(long j) {
         long j2 = j / 100;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startCountDown: ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "startCountDown: " + j);
         final long j3 = (j2 * 100) - 100;
-        Observable.intervalRange(0, j2, 0, 100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe((Observer<? super T>) new Observer<Long>() {
+        Observable.intervalRange(0, j2, 0, 100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Long>() {
             public void onComplete() {
                 Log.e(LiveSubVVImpl.TAG, "onFinish");
             }
@@ -224,22 +187,21 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
             }
 
             public void onSubscribe(Disposable disposable) {
-                LiveSubVVImpl.this.mRecordingTimerDisposable = disposable;
+                Disposable unused = LiveSubVVImpl.this.mRecordingTimerDisposable = disposable;
             }
         });
     }
 
     /* access modifiers changed from: private */
     public void updateRecordingTime(long j) {
-        float f2 = ((float) j) / 1000.0f;
-        this.liveVVProcess.updateRecordingTime(String.format(Locale.ENGLISH, "%.1fS", new Object[]{Float.valueOf(Math.abs(f2))}));
+        this.liveVVProcess.updateRecordingTime(String.format(Locale.ENGLISH, "%.1fS", new Object[]{Float.valueOf(Math.abs(((float) j) / 1000.0f))}));
     }
 
     public void OnNeedStopRecording() {
         Log.d(TAG, "OnNeedStopRecording");
         this.mHandler.post(new Runnable() {
             public void run() {
-                LiveSubVVImpl.this.mNeedStop = true;
+                boolean unused = LiveSubVVImpl.this.mNeedStop = true;
                 LiveSubVVImpl.this.stopRecording();
             }
         });
@@ -260,17 +222,13 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
             File file = new File(str);
             if (file.exists()) {
                 file.delete();
+                return;
             }
             return;
         }
         this.mTempVideoList.add(str);
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("OnRecordFinish | s: ");
-        sb.append(str);
-        sb.append(" | ");
-        sb.append(Thread.currentThread().getName());
-        Log.d(str2, sb.toString());
+        Log.d(str2, "OnRecordFinish | s: " + str + " | " + Thread.currentThread().getName());
         this.mHandler.post(new Runnable() {
             public void run() {
                 LiveSubVVImpl.this.notifyModuleRecordingFinish();
@@ -289,7 +247,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         }
         prepareEffectGraph();
         this.mComposeFile = new MediaComposeFile(this.mMediaEffectGraph);
-        this.mComposeFile.ConstructMediaComposeFile(1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, 31457280, 30);
+        this.mComposeFile.ConstructMediaComposeFile(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, 31457280, 30);
         this.mComposeFile.SetComposeNotify(new EffectNotifier() {
             public void OnReceiveFailed() {
                 android.util.Log.d(LiveSubVVImpl.TAG, "ComposeCameraRecord OnReceiveFinish");
@@ -306,11 +264,11 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
     }
 
     public void deleteLastFragment() {
+        List<String> list;
         if (!this.mTempVideoList.isEmpty()) {
             int size = this.mTempVideoList.size() - 1;
-            FileUtils.deleteFile((String) this.mTempVideoList.get(size));
-            List<String> list = this.mTempVideoList;
-            list.remove(list.size() - 1);
+            FileUtils.deleteFile(this.mTempVideoList.get(size));
+            list.remove(this.mTempVideoList.size() - 1);
             this.mCurrentIndex = this.mTempVideoList.size();
             this.liveVVProcess.onRecordingFragmentUpdate(size, -this.mCurrentVVItem.getDuration(size));
         }
@@ -333,7 +291,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
     }
 
     public String getSegmentPath(int i) {
-        return (String) this.mTempVideoList.get(i);
+        return this.mTempVideoList.get(i);
     }
 
     public void initResource() {
@@ -376,7 +334,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
     }
 
     public void onOrientationChanged(int i, int i2, int i3) {
-        if (!(this.mCurrentOrientation == i2 || this.mMediaCamera == null || isRecording())) {
+        if (this.mCurrentOrientation != i2 && this.mMediaCamera != null && !isRecording()) {
             this.mCurrentOrientation = i2;
             this.mMediaCamera.SetOrientation(180);
         }
@@ -390,10 +348,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         if (this.mLastFrameTime == -1) {
             this.mLastFrameTime = System.currentTimeMillis();
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(System.currentTimeMillis() - this.mLastFrameTime);
-            sb.append("");
-            Log.e("frame time：", sb.toString());
+            Log.e("frame time：", (System.currentTimeMillis() - this.mLastFrameTime) + "");
             this.mLastFrameTime = System.currentTimeMillis();
         }
         if (mPreviewRequestQueue.size() > 4) {
@@ -412,12 +367,12 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
             if (disposable != null && !disposable.isDisposed()) {
                 this.mRecordingTimerDisposable.dispose();
             }
-            LiveVVProcess liveVVProcess2 = this.liveVVProcess;
+            ModeProtocol.LiveVVProcess liveVVProcess2 = this.liveVVProcess;
             int i = this.mCurrentIndex;
             liveVVProcess2.onRecordingFragmentUpdate(i, -this.mCurrentVVItem.getDuration(i));
             return;
         }
-        LiveVVProcess liveVVProcess3 = this.liveVVProcess;
+        ModeProtocol.LiveVVProcess liveVVProcess3 = this.liveVVProcess;
         int i2 = this.mCurrentIndex;
         liveVVProcess3.onRecordingFragmentUpdate(i2, this.mCurrentVVItem.getDuration(i2));
     }
@@ -437,7 +392,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         }
         prepare(DataRepository.dataItemLive().getCurrentVVItem());
         this.mMediaCamera = new MediaEffectCamera();
-        this.mMediaCamera.ConstructMediaEffectCamera(1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, 20971520, 30, this);
+        this.mMediaCamera.ConstructMediaEffectCamera(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT, 20971520, 30, this);
     }
 
     public void prepare(VVItem vVItem) {
@@ -462,7 +417,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
             effectMediaPlayer.StopPreView();
         }
         saveWorkSpace();
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         Disposable disposable = this.mRecordingTimerDisposable;
         if (disposable != null) {
             disposable.dispose();
@@ -485,18 +440,18 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         this.mEffectMediaPlayer.SetPlayerNotify(new EffectNotifier() {
             public void OnReceiveFailed() {
                 Log.d("OnReceiveFailed:", "yes");
-                LiveSubVVImpl.this.mPlayFinished = true;
+                boolean unused = LiveSubVVImpl.this.mPlayFinished = true;
                 LiveSubVVImpl.this.liveVVProcess.onResultPreviewFinished(false);
             }
 
             public void OnReceiveFinish() {
                 Log.d("OnReceiveFinish:", "yes");
-                LiveSubVVImpl.this.mPlayFinished = true;
+                boolean unused = LiveSubVVImpl.this.mPlayFinished = true;
                 LiveSubVVImpl.this.liveVVProcess.onResultPreviewFinished(true);
             }
         });
         this.mEffectMediaPlayer.SetViewSurface(surface);
-        this.mEffectMediaPlayer.setGravity(SurfaceGravity.SurfaceGravityResizeAspectFit, 1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
+        this.mEffectMediaPlayer.setGravity(EffectMediaPlayer.SurfaceGravity.SurfaceGravityResizeAspectFit, 1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
         this.mEffectMediaPlayer.SetPlayLoop(true);
         this.mEffectMediaPlayer.SetGraphLoop(true);
         this.mEffectMediaPlayer.StartPreView();
@@ -512,12 +467,12 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
 
     public void startRecordingNextFragment() {
         this.mMediaRecorderRecordingPaused = false;
-        ((AudioManager) this.mActivity.getSystemService(MVConsts.TYPE_AUDIO)).requestAudioFocus(new OnAudioFocusChangeListener() {
+        ((AudioManager) this.mActivity.getSystemService(VEEditor.MVConsts.TYPE_AUDIO)).requestAudioFocus(new AudioManager.OnAudioFocusChangeListener() {
             public void onAudioFocusChange(int i) {
             }
         }, 3, 1);
         if (this.liveVVProcess == null) {
-            this.liveVVProcess = (LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230);
+            this.liveVVProcess = (ModeProtocol.LiveVVProcess) ModeCoordinatorImpl.getInstance().getAttachProtocol(230);
         }
         this.mCurrentIndex = this.mTempVideoList.size();
         if (this.mCurrentIndex == 0) {
@@ -533,20 +488,7 @@ public class LiveSubVVImpl implements LiveConfigVV, ExternalFrameProcessor, Effe
         for (int i = 0; i < this.mCurrentIndex; i++) {
             j += this.mCurrentVVItem.getDuration(i);
         }
-        String str4 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("start : !!");
-        sb.append(duration);
-        String str5 = " | ";
-        sb.append(str5);
-        sb.append(str);
-        sb.append(str5);
-        sb.append(str2);
-        sb.append(str5);
-        sb.append(str3);
-        sb.append(str5);
-        sb.append(j);
-        Log.e(str4, sb.toString());
+        Log.e(TAG, "start : !!" + duration + " | " + str + " | " + str2 + " | " + str3 + " | " + j);
         this.mMediaCamera.StartRecording(this.mCurrentIndex, SEGMENTS_PATH, str2, str3, str, j);
         this.mMediaRecorderRecording = true;
         startCountDown(duration);

@@ -45,7 +45,7 @@ public class ScaleGestureDetector {
     }
 
     public ScaleGestureDetector(Context context, OnScaleGestureListener onScaleGestureListener) {
-        this(context, onScaleGestureListener, null);
+        this(context, onScaleGestureListener, (Handler) null);
     }
 
     public ScaleGestureDetector(Context context, OnScaleGestureListener onScaleGestureListener, Handler handler) {

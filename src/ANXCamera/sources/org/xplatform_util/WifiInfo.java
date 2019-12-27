@@ -8,12 +8,12 @@ class WifiInfo {
     WifiInfo() {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String getBssid() {
         return this.BSSID;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String getSsid() {
         return this.SSID;
     }

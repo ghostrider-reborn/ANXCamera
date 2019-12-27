@@ -1,6 +1,6 @@
 package org.jcodec.containers.mp4;
 
-import org.jcodec.containers.mp4.boxes.Box.LeafBox;
+import org.jcodec.containers.mp4.boxes.Box;
 import org.jcodec.containers.mp4.boxes.ChunkOffsets64Box;
 import org.jcodec.containers.mp4.boxes.ChunkOffsetsBox;
 import org.jcodec.containers.mp4.boxes.ClearApertureBox;
@@ -95,7 +95,7 @@ public class DefaultBoxes extends Boxes {
         this.mappings.put(LoadSettingsBox.fourcc(), LoadSettingsBox.class);
         this.mappings.put("tapt", NodeBox.class);
         this.mappings.put("gmhd", NodeBox.class);
-        this.mappings.put("tmcd", LeafBox.class);
+        this.mappings.put("tmcd", Box.LeafBox.class);
         this.mappings.put("tref", NodeBox.class);
         this.mappings.put(ClearApertureBox.CLEF, ClearApertureBox.class);
         this.mappings.put(ProductionApertureBox.PROF, ProductionApertureBox.class);
@@ -105,7 +105,7 @@ public class DefaultBoxes extends Boxes {
         this.mappings.put(UdtaBox.fourcc(), UdtaBox.class);
         this.mappings.put(CompositionOffsetsBox.fourcc(), CompositionOffsetsBox.class);
         this.mappings.put(NameBox.fourcc(), NameBox.class);
-        this.mappings.put("mdta", LeafBox.class);
+        this.mappings.put("mdta", Box.LeafBox.class);
         this.mappings.put(MovieFragmentHeaderBox.fourcc(), MovieFragmentHeaderBox.class);
         this.mappings.put(TrackFragmentHeaderBox.fourcc(), TrackFragmentHeaderBox.class);
         this.mappings.put(MovieFragmentBox.fourcc(), MovieFragmentBox.class);

@@ -10,7 +10,7 @@ import com.bumptech.glide.load.g;
 import com.bumptech.glide.load.i;
 import java.io.File;
 
-/* renamed from: com.bumptech.glide.load.resource.bitmap.b reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.resource.bitmap.b  reason: case insensitive filesystem */
 /* compiled from: BitmapDrawableEncoder */
 public class C0105b implements i<BitmapDrawable> {
     private final d Bb;
@@ -27,6 +27,6 @@ public class C0105b implements i<BitmapDrawable> {
     }
 
     public boolean a(@NonNull A<BitmapDrawable> a2, @NonNull File file, @NonNull g gVar) {
-        return this.encoder.a(new f(((BitmapDrawable) a2.get()).getBitmap(), this.Bb), file, gVar);
+        return this.encoder.a(new f(a2.get().getBitmap(), this.Bb), file, gVar);
     }
 }

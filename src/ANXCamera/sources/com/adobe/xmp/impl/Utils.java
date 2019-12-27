@@ -16,24 +16,20 @@ public class Utils implements XMPConst {
     }
 
     static boolean checkUUIDFormat(String str) {
-        boolean z = false;
         if (str == null) {
             return false;
         }
         int i = 0;
         int i2 = 0;
-        boolean z2 = true;
+        boolean z = true;
         while (i < str.length()) {
             if (str.charAt(i) == '-') {
                 i2++;
-                z2 = z2 && (i == 8 || i == 13 || i == 18 || i == 23);
+                z = z && (i == 8 || i == 13 || i == 18 || i == 23);
             }
             i++;
         }
-        if (z2 && 4 == i2 && 36 == i) {
-            z = true;
-        }
-        return z;
+        return z && 4 == i2 && 36 == i;
     }
 
     public static String escapeXML(String str, boolean z, boolean z2) {

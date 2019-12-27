@@ -48,10 +48,7 @@ public class TaskSession {
         flush();
         destroy();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("close: session has closed: ");
-        sb.append(this);
-        Log.d(str, sb.toString());
+        Log.d(str, "close: session has closed: " + this);
     }
 
     /* access modifiers changed from: protected */
@@ -62,13 +59,10 @@ public class TaskSession {
 
     public void processFrame(@NonNull FrameData frameData, FrameCallback frameCallback) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("processFrame: ");
-        sb.append(frameData.toString());
-        Log.d(str, sb.toString());
+        Log.d(str, "processFrame: " + frameData.toString());
         int processFrame = MiCamAlgoInterfaceJNI.processFrame(this.mSessionHandle, frameData, frameCallback);
         if (processFrame == 0) {
-            frameCallback.onFrameProcessed(processFrame, "onProcessStarted", null);
+            frameCallback.onFrameProcessed(processFrame, "onProcessStarted", (Object) null);
         } else {
             Util.assertOrNot(processFrame);
         }

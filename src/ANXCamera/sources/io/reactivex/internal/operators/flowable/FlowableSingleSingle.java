@@ -91,11 +91,11 @@ public final class FlowableSingleSingle<T> extends Single<T> implements FuseToFl
     }
 
     public Flowable<T> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableSingle<T>(this.source, this.defaultValue));
+        return RxJavaPlugins.onAssembly(new FlowableSingle(this.source, this.defaultValue));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super T> singleObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new SingleElementSubscriber<Object>(singleObserver, this.defaultValue));
+        this.source.subscribe(new SingleElementSubscriber(singleObserver, this.defaultValue));
     }
 }

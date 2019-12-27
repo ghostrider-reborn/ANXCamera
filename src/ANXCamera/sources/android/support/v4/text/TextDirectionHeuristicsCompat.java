@@ -8,8 +8,8 @@ public final class TextDirectionHeuristicsCompat {
     public static final TextDirectionHeuristicCompat FIRSTSTRONG_LTR = new TextDirectionHeuristicInternal(FirstStrong.INSTANCE, false);
     public static final TextDirectionHeuristicCompat FIRSTSTRONG_RTL = new TextDirectionHeuristicInternal(FirstStrong.INSTANCE, true);
     public static final TextDirectionHeuristicCompat LOCALE = TextDirectionHeuristicLocale.INSTANCE;
-    public static final TextDirectionHeuristicCompat LTR = new TextDirectionHeuristicInternal(null, false);
-    public static final TextDirectionHeuristicCompat RTL = new TextDirectionHeuristicInternal(null, true);
+    public static final TextDirectionHeuristicCompat LTR = new TextDirectionHeuristicInternal((TextDirectionAlgorithm) null, false);
+    public static final TextDirectionHeuristicCompat RTL = new TextDirectionHeuristicInternal((TextDirectionAlgorithm) null, true);
     private static final int STATE_FALSE = 1;
     private static final int STATE_TRUE = 0;
     private static final int STATE_UNKNOWN = 2;
@@ -120,7 +120,7 @@ public final class TextDirectionHeuristicsCompat {
         static final TextDirectionHeuristicLocale INSTANCE = new TextDirectionHeuristicLocale();
 
         TextDirectionHeuristicLocale() {
-            super(null);
+            super((TextDirectionAlgorithm) null);
         }
 
         /* access modifiers changed from: protected */
@@ -141,19 +141,19 @@ public final class TextDirectionHeuristicsCompat {
 
     static int isRtlTextOrFormat(int i) {
         if (i != 0) {
-            if (!(i == 1 || i == 2)) {
-                switch (i) {
-                    case 14:
-                    case 15:
-                        break;
-                    case 16:
-                    case 17:
-                        break;
-                    default:
-                        return 2;
-                }
+            if (i == 1 || i == 2) {
+                return 0;
             }
-            return 0;
+            switch (i) {
+                case 14:
+                case 15:
+                    break;
+                case 16:
+                case 17:
+                    return 0;
+                default:
+                    return 2;
+            }
         }
         return 1;
     }

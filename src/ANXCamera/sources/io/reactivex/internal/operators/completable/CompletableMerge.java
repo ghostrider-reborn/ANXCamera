@@ -68,7 +68,7 @@ public final class CompletableMerge extends Completable {
             this.set.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete(MergeInnerObserver mergeInnerObserver) {
             this.set.delete(mergeInnerObserver);
             if (decrementAndGet() == 0) {
@@ -83,7 +83,7 @@ public final class CompletableMerge extends Completable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(MergeInnerObserver mergeInnerObserver, Throwable th) {
             this.set.delete(mergeInnerObserver);
             if (!this.delayErrors) {

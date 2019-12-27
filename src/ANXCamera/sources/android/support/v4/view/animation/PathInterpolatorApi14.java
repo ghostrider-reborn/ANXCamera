@@ -25,7 +25,7 @@ class PathInterpolatorApi14 implements Interpolator {
         this.mY = new float[i];
         float[] fArr = new float[2];
         for (int i2 = 0; i2 < i; i2++) {
-            pathMeasure.getPosTan((((float) i2) * length) / ((float) (i - 1)), fArr, null);
+            pathMeasure.getPosTan((((float) i2) * length) / ((float) (i - 1)), fArr, (float[]) null);
             this.mX[i2] = fArr[0];
             this.mY[i2] = fArr[1];
         }
@@ -67,9 +67,8 @@ class PathInterpolatorApi14 implements Interpolator {
         if (f3 == 0.0f) {
             return this.mY[i];
         }
-        float f4 = (f2 - fArr[i]) / f3;
         float[] fArr2 = this.mY;
-        float f5 = fArr2[i];
-        return f5 + (f4 * (fArr2[length] - f5));
+        float f4 = fArr2[i];
+        return f4 + (((f2 - fArr[i]) / f3) * (fArr2[length] - f4));
     }
 }

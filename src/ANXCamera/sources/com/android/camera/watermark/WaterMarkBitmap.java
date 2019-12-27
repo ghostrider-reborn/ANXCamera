@@ -16,26 +16,22 @@ public class WaterMarkBitmap {
 
     public WaterMarkData generateWaterMarkData() {
         List<WaterMarkData> list = this.mWaterInfos;
-        WaterMarkData waterMarkData = null;
         if (list == null || list.isEmpty()) {
             Log.e(TAG, "The watermark data is empty.");
             return null;
         }
-        int watermarkType = ((WaterMarkData) this.mWaterInfos.get(0)).getWatermarkType();
+        int watermarkType = this.mWaterInfos.get(0).getWatermarkType();
         if (watermarkType == 1) {
             this.mWaterMarkDrawable = new MagicMirrorWaterMarkDrawable(this.mWaterInfos);
-            waterMarkData = this.mWaterMarkDrawable.getWaterMarkData();
+            return this.mWaterMarkDrawable.getWaterMarkData();
         } else if (watermarkType != 2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("unexpected watermark type ");
-            sb.append(watermarkType);
-            Log.w(str, sb.toString());
+            Log.w(str, "unexpected watermark type " + watermarkType);
+            return null;
         } else {
             this.mWaterMarkDrawable = new AgeGenderWaterMarkDrawable(this.mWaterInfos);
-            waterMarkData = this.mWaterMarkDrawable.getWaterMarkData();
+            return this.mWaterMarkDrawable.getWaterMarkData();
         }
-        return waterMarkData;
     }
 
     public WaterMarkData getWaterMarkData() {

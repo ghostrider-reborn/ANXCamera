@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 public final class BlockingMultiObserver<T> extends CountDownLatch implements SingleObserver<T>, CompletableObserver, MaybeObserver<T> {
     volatile boolean cancelled;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     Disposable f268d;
     Throwable error;
     T value;
@@ -106,7 +106,7 @@ public final class BlockingMultiObserver<T> extends CountDownLatch implements Si
         return this.error;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispose() {
         this.cancelled = true;
         Disposable disposable = this.f268d;

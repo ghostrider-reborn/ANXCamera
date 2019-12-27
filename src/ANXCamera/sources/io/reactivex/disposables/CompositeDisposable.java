@@ -8,7 +8,6 @@ import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.internal.util.OpenHashSet;
 import java.util.ArrayList;
-import java.util.List;
 
 public final class CompositeDisposable implements Disposable, DisposableContainer {
     volatile boolean disposed;
@@ -90,7 +89,7 @@ public final class CompositeDisposable implements Disposable, DisposableContaine
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:18:0x0021, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:17:0x0021, code lost:
         return false;
      */
     public boolean delete(@NonNull Disposable disposable) {
@@ -124,31 +123,30 @@ public final class CompositeDisposable implements Disposable, DisposableContaine
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispose(OpenHashSet<Disposable> openHashSet) {
-        Object[] keys;
         if (openHashSet != null) {
-            List list = null;
+            ArrayList arrayList = null;
             for (Object obj : openHashSet.keys()) {
                 if (obj instanceof Disposable) {
                     try {
                         ((Disposable) obj).dispose();
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
-                        if (list == null) {
-                            list = new ArrayList();
+                        if (arrayList == null) {
+                            arrayList = new ArrayList();
                         }
-                        list.add(th);
+                        arrayList.add(th);
                     }
                 }
             }
-            if (list == null) {
+            if (arrayList == null) {
                 return;
             }
-            if (list.size() == 1) {
-                throw ExceptionHelper.wrapOrThrow((Throwable) list.get(0));
+            if (arrayList.size() == 1) {
+                throw ExceptionHelper.wrapOrThrow((Throwable) arrayList.get(0));
             }
-            throw new CompositeException((Iterable<? extends Throwable>) list);
+            throw new CompositeException((Iterable<? extends Throwable>) arrayList);
         }
     }
 

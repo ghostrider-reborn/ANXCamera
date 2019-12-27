@@ -7,10 +7,7 @@ public class LogUtils {
 
     public static void d(String str, String str2) {
         if (isDebug) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("djjowfy:  ");
-            sb.append(str);
-            Log.d(sb.toString(), str2);
+            Log.d("djjowfy:  " + str, str2);
         }
     }
 
@@ -20,10 +17,7 @@ public class LogUtils {
 
     public static void e(String str, String str2) {
         if (isDebug) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("djjowfy:  ");
-            sb.append(str);
-            Log.e(sb.toString(), str2);
+            Log.e("djjowfy:  " + str, str2);
         }
     }
 }

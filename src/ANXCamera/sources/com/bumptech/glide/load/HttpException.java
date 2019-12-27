@@ -9,10 +9,7 @@ public final class HttpException extends IOException {
     private final int statusCode;
 
     public HttpException(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Http request failed with status code: ");
-        sb.append(i);
-        this(sb.toString(), i);
+        this("Http request failed with status code: " + i, i);
     }
 
     public HttpException(String str) {
@@ -20,7 +17,7 @@ public final class HttpException extends IOException {
     }
 
     public HttpException(String str, int i) {
-        this(str, i, null);
+        this(str, i, (Throwable) null);
     }
 
     public HttpException(String str, int i, @Nullable Throwable th) {

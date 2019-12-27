@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.l;
 
@@ -11,7 +10,7 @@ class AttributeStrategy implements k {
 
     @VisibleForTesting
     static class Key implements l {
-        private Config config;
+        private Bitmap.Config config;
         private int height;
         private final KeyPool pool;
         private int width;
@@ -20,7 +19,7 @@ class AttributeStrategy implements k {
             this.pool = keyPool;
         }
 
-        public void e(int i, int i2, Config config2) {
+        public void e(int i, int i2, Bitmap.Config config2) {
             this.width = i;
             this.height = i2;
             this.config = config2;
@@ -36,7 +35,7 @@ class AttributeStrategy implements k {
 
         public int hashCode() {
             int i = ((this.width * 31) + this.height) * 31;
-            Config config2 = this.config;
+            Bitmap.Config config2 = this.config;
             return i + (config2 != null ? config2.hashCode() : 0);
         }
 
@@ -59,8 +58,8 @@ class AttributeStrategy implements k {
             return new Key(this);
         }
 
-        /* access modifiers changed from: 0000 */
-        public Key d(int i, int i2, Config config) {
+        /* access modifiers changed from: package-private */
+        public Key d(int i, int i2, Bitmap.Config config) {
             Key key = (Key) get();
             key.e(i, i2, config);
             return key;
@@ -70,15 +69,8 @@ class AttributeStrategy implements k {
     AttributeStrategy() {
     }
 
-    static String f(int i, int i2, Config config) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        sb.append("], ");
-        sb.append(config);
-        return sb.toString();
+    static String f(int i, int i2, Bitmap.Config config) {
+        return "[" + i + "x" + i2 + "], " + config;
     }
 
     private static String k(Bitmap bitmap) {
@@ -89,7 +81,7 @@ class AttributeStrategy implements k {
         this.dg.a(this.cg.d(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig()), bitmap);
     }
 
-    public String b(int i, int i2, Config config) {
+    public String b(int i, int i2, Bitmap.Config config) {
         return f(i, i2, config);
     }
 
@@ -97,8 +89,8 @@ class AttributeStrategy implements k {
         return l.j(bitmap);
     }
 
-    public Bitmap d(int i, int i2, Config config) {
-        return (Bitmap) this.dg.b(this.cg.d(i, i2, config));
+    public Bitmap d(int i, int i2, Bitmap.Config config) {
+        return this.dg.b(this.cg.d(i, i2, config));
     }
 
     public String e(Bitmap bitmap) {
@@ -106,13 +98,10 @@ class AttributeStrategy implements k {
     }
 
     public Bitmap removeLast() {
-        return (Bitmap) this.dg.removeLast();
+        return this.dg.removeLast();
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("AttributeStrategy:\n  ");
-        sb.append(this.dg);
-        return sb.toString();
+        return "AttributeStrategy:\n  " + this.dg;
     }
 }

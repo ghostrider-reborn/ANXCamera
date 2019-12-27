@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import okhttp3.internal.Util;
+import okhttp3.internal.http2.Hpack;
 import okio.Buffer;
 import okio.BufferedSink;
 
@@ -14,7 +15,7 @@ final class Http2Writer implements Closeable {
     private final boolean client;
     private boolean closed;
     private final Buffer hpackBuffer = new Buffer();
-    final Writer hpackWriter = new Writer(this.hpackBuffer);
+    final Hpack.Writer hpackWriter = new Hpack.Writer(this.hpackBuffer);
     private int maxFrameSize = 16384;
     private final BufferedSink sink;
 
@@ -28,7 +29,7 @@ final class Http2Writer implements Closeable {
             int min = (int) Math.min((long) this.maxFrameSize, j);
             long j2 = (long) min;
             j -= j2;
-            frameHeader(i, min, 9, j == 0 ? (byte) 4 : 0);
+            frameHeader(i, min, (byte) 9, j == 0 ? (byte) 4 : 0);
             this.sink.write(this.hpackBuffer, j2);
         }
     }
@@ -45,7 +46,7 @@ final class Http2Writer implements Closeable {
             if (settings.getHeaderTableSize() != -1) {
                 this.hpackWriter.setHeaderTableSizeSetting(settings.getHeaderTableSize());
             }
-            frameHeader(0, 0, 4, 1);
+            frameHeader(0, 0, (byte) 4, (byte) 1);
             this.sink.flush();
         } else {
             throw new IOException("closed");
@@ -81,9 +82,9 @@ final class Http2Writer implements Closeable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dataFrame(int i, byte b2, Buffer buffer, int i2) throws IOException {
-        frameHeader(i, i2, 0, b2);
+        frameHeader(i, i2, (byte) 0, b2);
         if (i2 > 0) {
             this.sink.write(buffer, (long) i2);
         }
@@ -120,7 +121,7 @@ final class Http2Writer implements Closeable {
         if (this.closed) {
             throw new IOException("closed");
         } else if (errorCode.httpCode != -1) {
-            frameHeader(0, bArr.length + 8, 7, 0);
+            frameHeader(0, bArr.length + 8, (byte) 7, (byte) 0);
             this.sink.writeInt(i);
             this.sink.writeInt(errorCode.httpCode);
             if (bArr.length > 0) {
@@ -141,7 +142,7 @@ final class Http2Writer implements Closeable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void headers(boolean z, int i, List<Header> list) throws IOException {
         if (!this.closed) {
             this.hpackWriter.writeHeaders(list);
@@ -153,7 +154,7 @@ final class Http2Writer implements Closeable {
             if (z) {
                 b2 = (byte) (b2 | 1);
             }
-            frameHeader(i, min, 1, b2);
+            frameHeader(i, min, (byte) 1, b2);
             this.sink.write(this.hpackBuffer, j);
             if (i2 > 0) {
                 writeContinuationFrames(i, size - j);
@@ -170,7 +171,7 @@ final class Http2Writer implements Closeable {
 
     public synchronized void ping(boolean z, int i, int i2) throws IOException {
         if (!this.closed) {
-            frameHeader(0, 8, 6, z ? (byte) 1 : 0);
+            frameHeader(0, 8, (byte) 6, z ? (byte) 1 : 0);
             this.sink.writeInt(i);
             this.sink.writeInt(i2);
             this.sink.flush();
@@ -186,7 +187,7 @@ final class Http2Writer implements Closeable {
             int min = (int) Math.min((long) (this.maxFrameSize - 4), size);
             long j = (long) min;
             int i3 = (size > j ? 1 : (size == j ? 0 : -1));
-            frameHeader(i, min + 4, 5, i3 == 0 ? (byte) 4 : 0);
+            frameHeader(i, min + 4, (byte) 5, i3 == 0 ? (byte) 4 : 0);
             this.sink.writeInt(i2 & Integer.MAX_VALUE);
             this.sink.write(this.hpackBuffer, j);
             if (i3 > 0) {
@@ -201,7 +202,7 @@ final class Http2Writer implements Closeable {
         if (this.closed) {
             throw new IOException("closed");
         } else if (errorCode.httpCode != -1) {
-            frameHeader(i, 4, 3, 0);
+            frameHeader(i, 4, (byte) 3, (byte) 0);
             this.sink.writeInt(errorCode.httpCode);
             this.sink.flush();
         } else {
@@ -212,11 +213,10 @@ final class Http2Writer implements Closeable {
     public synchronized void settings(Settings settings) throws IOException {
         if (!this.closed) {
             int i = 0;
-            frameHeader(0, settings.size() * 6, 4, 0);
+            frameHeader(0, settings.size() * 6, (byte) 4, (byte) 0);
             while (i < 10) {
                 if (settings.isSet(i)) {
-                    int i2 = i == 4 ? 3 : i == 7 ? 4 : i;
-                    this.sink.writeShort(i2);
+                    this.sink.writeShort(i == 4 ? 3 : i == 7 ? 4 : i);
                     this.sink.writeInt(settings.get(i));
                 }
                 i++;
@@ -250,7 +250,7 @@ final class Http2Writer implements Closeable {
             Http2.illegalArgument("windowSizeIncrement == 0 || windowSizeIncrement > 0x7fffffffL: %s", Long.valueOf(j));
             throw null;
         } else {
-            frameHeader(i, 4, 8, 0);
+            frameHeader(i, 4, (byte) 8, (byte) 0);
             this.sink.writeInt((int) j);
             this.sink.flush();
         }

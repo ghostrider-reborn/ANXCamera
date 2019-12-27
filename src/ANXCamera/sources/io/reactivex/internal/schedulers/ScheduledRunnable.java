@@ -28,7 +28,7 @@ public final class ScheduledRunnable extends AtomicReferenceArray<Object> implem
         return null;
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
     public void dispose() {
         Object obj;
         Object obj2;
@@ -70,7 +70,7 @@ public final class ScheduledRunnable extends AtomicReferenceArray<Object> implem
         try {
             this.actual.run();
         } catch (Throwable th) {
-            lazySet(2, null);
+            lazySet(2, (Object) null);
             Object obj3 = get(0);
             if (!(obj3 == PARENT_DISPOSED || !compareAndSet(0, obj3, DONE) || obj3 == null)) {
                 ((DisposableContainer) obj3).delete(this);
@@ -83,7 +83,7 @@ public final class ScheduledRunnable extends AtomicReferenceArray<Object> implem
             } while (!compareAndSet(1, obj2, DONE));
             throw th;
         }
-        lazySet(2, null);
+        lazySet(2, (Object) null);
         Object obj4 = get(0);
         if (!(obj4 == PARENT_DISPOSED || !compareAndSet(0, obj4, DONE) || obj4 == null)) {
             ((DisposableContainer) obj4).delete(this);

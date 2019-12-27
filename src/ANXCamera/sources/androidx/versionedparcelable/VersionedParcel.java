@@ -9,7 +9,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseBooleanArray;
@@ -22,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public abstract class VersionedParcel {
     private static final int Na = -1;
     private static final int Oa = -2;
@@ -47,7 +46,7 @@ public abstract class VersionedParcel {
 
     protected static <T extends i> T a(String str, VersionedParcel versionedParcel) {
         try {
-            return (i) Class.forName(str, true, VersionedParcel.class.getClassLoader()).getDeclaredMethod("read", new Class[]{VersionedParcel.class}).invoke(null, new Object[]{versionedParcel});
+            return (i) Class.forName(str, true, VersionedParcel.class.getClassLoader()).getDeclaredMethod("read", new Class[]{VersionedParcel.class}).invoke((Object) null, new Object[]{versionedParcel});
         } catch (IllegalAccessException e2) {
             throw new RuntimeException("VersionedParcel encountered IllegalAccessException", e2);
         } catch (InvocationTargetException e3) {
@@ -64,7 +63,7 @@ public abstract class VersionedParcel {
 
     protected static <T extends i> void a(T t, VersionedParcel versionedParcel) {
         try {
-            c(t).getDeclaredMethod("write", new Class[]{t.getClass(), VersionedParcel.class}).invoke(null, new Object[]{t, versionedParcel});
+            c(t).getDeclaredMethod("write", new Class[]{t.getClass(), VersionedParcel.class}).invoke((Object) null, new Object[]{t, versionedParcel});
         } catch (IllegalAccessException e2) {
             throw new RuntimeException("VersionedParcel encountered IllegalAccessException", e2);
         } catch (InvocationTargetException e3) {
@@ -98,12 +97,7 @@ public abstract class VersionedParcel {
             case -1:
                 return new SecurityException(str);
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown exception code: ");
-                sb.append(i);
-                sb.append(" msg ");
-                sb.append(str);
-                return new RuntimeException(sb.toString());
+                return new RuntimeException("Unknown exception code: " + i + " msg " + str);
         }
     }
 
@@ -115,10 +109,7 @@ public abstract class VersionedParcel {
         try {
             writeString(l(iVar.getClass()).getName());
         } catch (ClassNotFoundException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(iVar.getClass().getSimpleName());
-            sb.append(" does not have a Parcelizer");
-            throw new RuntimeException(sb.toString(), e2);
+            throw new RuntimeException(iVar.getClass().getSimpleName() + " does not have a Parcelizer", e2);
         }
     }
 
@@ -158,15 +149,12 @@ public abstract class VersionedParcel {
         if (t instanceof IBinder) {
             return 5;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(t.getClass().getName());
-        sb.append(" cannot be VersionedParcelled");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(t.getClass().getName() + " cannot be VersionedParcelled");
     }
 
     private void writeSerializable(Serializable serializable) {
         if (serializable == null) {
-            writeString(null);
+            writeString((String) null);
             return;
         }
         String name = serializable.getClass().getName();
@@ -178,11 +166,7 @@ public abstract class VersionedParcel {
             objectOutputStream.close();
             writeByteArray(byteArrayOutputStream.toByteArray());
         } catch (IOException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("VersionedParcelable encountered IOException writing serializable object (name = ");
-            sb.append(name);
-            sb.append(")");
-            throw new RuntimeException(sb.toString(), e2);
+            throw new RuntimeException("VersionedParcelable encountered IOException writing serializable object (name = " + name + ")", e2);
         }
     }
 
@@ -481,12 +465,12 @@ public abstract class VersionedParcel {
     /* access modifiers changed from: protected */
     public void b(i iVar) {
         if (iVar == null) {
-            writeString(null);
+            writeString((String) null);
             return;
         }
         d(iVar);
         VersionedParcel ka = ka();
-        a((T) iVar, ka);
+        a(iVar, ka);
         ka.ja();
     }
 
@@ -753,7 +737,6 @@ public abstract class VersionedParcel {
 
     /* access modifiers changed from: protected */
     public Serializable readSerializable() {
-        String str = ")";
         String readString = readString();
         if (readString == null) {
             return null;
@@ -761,17 +744,9 @@ public abstract class VersionedParcel {
         try {
             return (Serializable) new f(this, new ByteArrayInputStream(readByteArray())).readObject();
         } catch (IOException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("VersionedParcelable encountered IOException reading a Serializable object (name = ");
-            sb.append(readString);
-            sb.append(str);
-            throw new RuntimeException(sb.toString(), e2);
+            throw new RuntimeException("VersionedParcelable encountered IOException reading a Serializable object (name = " + readString + ")", e2);
         } catch (ClassNotFoundException e3) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("VersionedParcelable encountered ClassNotFoundException reading a Serializable object (name = ");
-            sb2.append(readString);
-            sb2.append(str);
-            throw new RuntimeException(sb2.toString(), e3);
+            throw new RuntimeException("VersionedParcelable encountered ClassNotFoundException reading a Serializable object (name = " + readString + ")", e3);
         }
     }
 
@@ -837,10 +812,9 @@ public abstract class VersionedParcel {
     /* access modifiers changed from: protected */
     public void writeBooleanArray(boolean[] zArr) {
         if (zArr != null) {
-            int length = zArr.length;
-            writeInt(length);
-            for (int i = 0; i < length; i++) {
-                writeInt(zArr[i] ? 1 : 0);
+            writeInt(r0);
+            for (boolean z : zArr) {
+                writeInt(z ? 1 : 0);
             }
             return;
         }

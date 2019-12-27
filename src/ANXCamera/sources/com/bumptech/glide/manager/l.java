@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -38,21 +38,16 @@ public class l extends Fragment {
         public Set<m> H() {
             Set<l> O = l.this.O();
             HashSet hashSet = new HashSet(O.size());
-            for (l lVar : O) {
-                if (lVar.Q() != null) {
-                    hashSet.add(lVar.Q());
+            for (l next : O) {
+                if (next.Q() != null) {
+                    hashSet.add(next.Q());
                 }
             }
             return hashSet;
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(super.toString());
-            sb.append("{fragment=");
-            sb.append(l.this);
-            sb.append("}");
-            return sb.toString();
+            return super.toString() + "{fragment=" + l.this + "}";
         }
     }
 
@@ -71,7 +66,7 @@ public class l extends Fragment {
     @Nullable
     @TargetApi(17)
     private Fragment Oj() {
-        Fragment parentFragment = VERSION.SDK_INT >= 17 ? getParentFragment() : null;
+        Fragment parentFragment = Build.VERSION.SDK_INT >= 17 ? getParentFragment() : null;
         return parentFragment != null ? parentFragment : this.fa;
     }
 
@@ -114,26 +109,26 @@ public class l extends Fragment {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @TargetApi(17)
     @NonNull
     public Set<l> O() {
         if (equals(this.ea)) {
             return Collections.unmodifiableSet(this.ca);
         }
-        if (this.ea == null || VERSION.SDK_INT < 17) {
+        if (this.ea == null || Build.VERSION.SDK_INT < 17) {
             return Collections.emptySet();
         }
         HashSet hashSet = new HashSet();
-        for (l lVar : this.ea.O()) {
-            if (d(lVar.getParentFragment())) {
-                hashSet.add(lVar);
+        for (l next : this.ea.O()) {
+            if (d(next.getParentFragment())) {
+                hashSet.add(next);
             }
         }
         return Collections.unmodifiableSet(hashSet);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public a P() {
         return this.aa;
@@ -149,7 +144,7 @@ public class l extends Fragment {
         return this.ba;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(@Nullable Fragment fragment) {
         this.fa = fragment;
         if (fragment != null && fragment.getActivity() != null) {
@@ -166,9 +161,8 @@ public class l extends Fragment {
         try {
             f(activity);
         } catch (IllegalStateException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                Log.w(str, "Unable to register fragment with root", e2);
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Unable to register fragment with root", e2);
             }
         }
     }
@@ -195,11 +189,6 @@ public class l extends Fragment {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
-        sb.append("{parent=");
-        sb.append(Oj());
-        sb.append("}");
-        return sb.toString();
+        return super.toString() + "{parent=" + Oj() + "}";
     }
 }

@@ -18,9 +18,10 @@ public class EffectCategoryIconsModel {
     }
 
     public boolean checkValued() {
-        if (this.url_list == null) {
-            this.url_list = new ArrayList();
+        if (this.url_list != null) {
+            return true;
         }
+        this.url_list = new ArrayList();
         return true;
     }
 

@@ -22,7 +22,7 @@ public final class MaybePeek<T> extends AbstractMaybeWithUpstream<T, T> {
     static final class MaybePeekObserver<T> implements MaybeObserver<T>, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f302d;
         final MaybePeek<T> parent;
 
@@ -46,7 +46,7 @@ public final class MaybePeek<T> extends AbstractMaybeWithUpstream<T, T> {
             return this.f302d.isDisposed();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onAfterTerminate() {
             try {
                 this.parent.onAfterTerminate.run();
@@ -78,7 +78,7 @@ public final class MaybePeek<T> extends AbstractMaybeWithUpstream<T, T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onErrorInner(Throwable th) {
             try {
                 this.parent.onErrorCall.accept(th);
@@ -101,7 +101,7 @@ public final class MaybePeek<T> extends AbstractMaybeWithUpstream<T, T> {
                     Exceptions.throwIfFatal(th);
                     disposable.dispose();
                     this.f302d = DisposableHelper.DISPOSED;
-                    EmptyDisposable.error(th, this.actual);
+                    EmptyDisposable.error(th, (MaybeObserver<?>) this.actual);
                 }
             }
         }

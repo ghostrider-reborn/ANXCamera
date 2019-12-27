@@ -24,7 +24,7 @@ public class Exif {
         if (r3 == 1296891946) goto L_0x007e;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:40:0x0078, code lost:
-        com.android.camera.log.Log.e(r5, "Invalid byte order");
+        com.android.camera.log.Log.e(TAG, "Invalid byte order");
      */
     /* JADX WARNING: Code restructure failed: missing block: B:41:0x007d, code lost:
         return 0;
@@ -80,74 +80,70 @@ public class Exif {
         if (r11 == 8) goto L_0x00be;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:62:0x00b8, code lost:
-        com.android.camera.log.Log.i(r5, "Unsupported orientation");
+        com.android.camera.log.Log.i(TAG, "Unsupported orientation");
      */
     /* JADX WARNING: Code restructure failed: missing block: B:63:0x00bd, code lost:
         return 0;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:65:0x00c0, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:64:0x00be, code lost:
         return 270;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:67:0x00c3, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:65:0x00c1, code lost:
         return 90;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:69:0x00c6, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:66:0x00c4, code lost:
         return 180;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:70:0x00c7, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:67:0x00c7, code lost:
         return 0;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:71:0x00c8, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:68:0x00c8, code lost:
         r1 = r1 + 12;
         r2 = r2 - 12;
         r4 = r9;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:72:0x00ce, code lost:
-        com.android.camera.log.Log.e(r5, "Invalid offset");
+    /* JADX WARNING: Code restructure failed: missing block: B:69:0x00ce, code lost:
+        com.android.camera.log.Log.e(TAG, "Invalid offset");
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:73:0x00d3, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:70:0x00d3, code lost:
         return 0;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:74:0x00d4, code lost:
-        com.android.camera.log.Log.i(r5, "Orientation not found");
+    /* JADX WARNING: Code restructure failed: missing block: B:71:0x00d4, code lost:
+        com.android.camera.log.Log.i(TAG, "Orientation not found");
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:75:0x00d9, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:72:0x00d9, code lost:
         return 0;
      */
     public static int getOrientation(byte[] bArr) {
-        String str;
         if (bArr == null) {
             return 0;
         }
         int i = 0;
         while (true) {
-            int i2 = i + 3;
-            int length = bArr.length;
-            str = TAG;
-            if (i2 >= length) {
+            if (i + 3 >= bArr.length) {
                 break;
             }
-            int i3 = i + 1;
+            int i2 = i + 1;
             if ((bArr[i] & 255) != 255) {
                 break;
             }
-            byte b2 = bArr[i3] & 255;
+            byte b2 = bArr[i2] & 255;
             if (b2 != 255) {
-                i3++;
+                i2++;
                 if (!(b2 == 216 || b2 == 1)) {
                     if (b2 != 217 && b2 != 218) {
-                        int pack = pack(bArr, i3, 2, false);
+                        int pack = pack(bArr, i2, 2, false);
                         if (pack < 2) {
                             break;
                         }
-                        int i4 = i3 + pack;
-                        if (i4 <= bArr.length) {
-                            if (b2 == 225 && pack >= 8 && pack(bArr, i3 + 2, 4, false) == 1165519206 && pack(bArr, i3 + 6, 2, false) == 0) {
-                                i = i3 + 8;
-                                int i5 = pack - 8;
+                        int i3 = i2 + pack;
+                        if (i3 <= bArr.length) {
+                            if (b2 == 225 && pack >= 8 && pack(bArr, i2 + 2, 4, false) == 1165519206 && pack(bArr, i2 + 6, 2, false) == 0) {
+                                i = i2 + 8;
+                                int i4 = pack - 8;
                                 break;
                             }
-                            i = i4;
+                            i = i3;
                         } else {
                             break;
                         }
@@ -156,9 +152,9 @@ public class Exif {
                     }
                 }
             }
-            i = i3;
+            i = i2;
         }
-        Log.e(str, "Invalid length");
+        Log.e(TAG, "Invalid length");
         return 0;
     }
 

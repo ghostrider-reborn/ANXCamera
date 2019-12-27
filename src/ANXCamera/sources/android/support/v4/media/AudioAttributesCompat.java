@@ -1,12 +1,12 @@
 package android.support.v4.media;
 
 import android.media.AudioAttributes;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
+import android.support.v4.media.AudioAttributesCompatApi21;
 import android.util.SparseIntArray;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -60,18 +60,18 @@ public class AudioAttributesCompat {
     /* access modifiers changed from: private */
     public static boolean sForceLegacyBehavior;
     /* access modifiers changed from: private */
-    public Wrapper mAudioAttributesWrapper;
+    public AudioAttributesCompatApi21.Wrapper mAudioAttributesWrapper;
     int mContentType;
     int mFlags;
     Integer mLegacyStream;
     int mUsage;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeContentType {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface AttributeUsage {
     }
@@ -105,20 +105,20 @@ public class AudioAttributesCompat {
         }
 
         public AudioAttributesCompat build() {
-            if (AudioAttributesCompat.sForceLegacyBehavior || VERSION.SDK_INT < 21) {
+            if (AudioAttributesCompat.sForceLegacyBehavior || Build.VERSION.SDK_INT < 21) {
                 AudioAttributesCompat audioAttributesCompat = new AudioAttributesCompat();
                 audioAttributesCompat.mContentType = this.mContentType;
                 audioAttributesCompat.mFlags = this.mFlags;
                 audioAttributesCompat.mUsage = this.mUsage;
                 audioAttributesCompat.mLegacyStream = this.mLegacyStream;
-                audioAttributesCompat.mAudioAttributesWrapper = null;
+                AudioAttributesCompatApi21.Wrapper unused = audioAttributesCompat.mAudioAttributesWrapper = null;
                 return audioAttributesCompat;
             }
             Object obj = this.mAAObject;
             if (obj != null) {
                 return AudioAttributesCompat.wrap(obj);
             }
-            android.media.AudioAttributes.Builder usage = new android.media.AudioAttributes.Builder().setContentType(this.mContentType).setFlags(this.mFlags).setUsage(this.mUsage);
+            AudioAttributes.Builder usage = new AudioAttributes.Builder().setContentType(this.mContentType).setFlags(this.mFlags).setUsage(this.mUsage);
             Integer num = this.mLegacyStream;
             if (num != null) {
                 usage.setLegacyStreamType(num.intValue());
@@ -170,7 +170,7 @@ public class AudioAttributesCompat {
                     this.mUsage = i;
                     break;
                 case 16:
-                    if (!AudioAttributesCompat.sForceLegacyBehavior && VERSION.SDK_INT > 25) {
+                    if (!AudioAttributesCompat.sForceLegacyBehavior && Build.VERSION.SDK_INT > 25) {
                         this.mUsage = i;
                         break;
                     } else {
@@ -200,44 +200,18 @@ public class AudioAttributesCompat {
         this.mFlags = 0;
     }
 
-    /* JADX WARNING: type inference failed for: r0v0 */
-    /* JADX WARNING: type inference failed for: r0v1, types: [java.lang.Integer] */
-    /* JADX WARNING: type inference failed for: r0v2, types: [java.lang.Integer] */
-    /* JADX WARNING: type inference failed for: r0v3, types: [android.support.v4.media.AudioAttributesCompat] */
-    /* JADX WARNING: type inference failed for: r0v4, types: [android.support.v4.media.AudioAttributesCompat] */
-    /* JADX WARNING: type inference failed for: r0v5 */
-    /* JADX WARNING: type inference failed for: r0v6 */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r0v0
-  assigns: [?[int, float, boolean, short, byte, char, OBJECT, ARRAY], android.support.v4.media.AudioAttributesCompat, java.lang.Integer]
-  uses: [java.lang.Integer, android.support.v4.media.AudioAttributesCompat]
-  mth insns count: 30
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 3 */
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static AudioAttributesCompat fromBundle(Bundle bundle) {
-        ? r0 = 0;
+        Integer num = null;
         if (bundle == null) {
             return null;
         }
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             AudioAttributes audioAttributes = (AudioAttributes) bundle.getParcelable(AUDIO_ATTRIBUTES_FRAMEWORKS);
-            if (audioAttributes != null) {
-                r0 = wrap(audioAttributes);
+            if (audioAttributes == null) {
+                return null;
             }
-            return r0;
+            return wrap(audioAttributes);
         }
         int i = bundle.getInt(AUDIO_ATTRIBUTES_USAGE, 0);
         int i2 = bundle.getInt(AUDIO_ATTRIBUTES_CONTENT_TYPE, 0);
@@ -246,54 +220,37 @@ public class AudioAttributesCompat {
         audioAttributesCompat.mUsage = i;
         audioAttributesCompat.mContentType = i2;
         audioAttributesCompat.mFlags = i3;
-        String str = AUDIO_ATTRIBUTES_LEGACY_STREAM_TYPE;
-        if (bundle.containsKey(str)) {
-            r0 = Integer.valueOf(bundle.getInt(str));
+        if (bundle.containsKey(AUDIO_ATTRIBUTES_LEGACY_STREAM_TYPE)) {
+            num = Integer.valueOf(bundle.getInt(AUDIO_ATTRIBUTES_LEGACY_STREAM_TYPE));
         }
-        audioAttributesCompat.mLegacyStream = r0;
+        audioAttributesCompat.mLegacyStream = num;
         return audioAttributesCompat;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static void setForceLegacyBehavior(boolean z) {
         sForceLegacyBehavior = z;
     }
 
     static int toVolumeStreamType(boolean z, int i, int i2) {
-        int i3 = 1;
         if ((i & 1) == 1) {
-            if (!z) {
-                i3 = 7;
-            }
-            return i3;
+            return z ? 1 : 7;
         }
-        int i4 = 0;
         if ((i & 4) == 4) {
-            if (!z) {
-                i4 = 6;
-            }
-            return i4;
+            return z ? 0 : 6;
         }
-        int i5 = 3;
         switch (i2) {
             case 0:
-                if (z) {
-                    i5 = Integer.MIN_VALUE;
-                }
-                return i5;
+                return z ? Integer.MIN_VALUE : 3;
             case 1:
             case 12:
             case 14:
             case 16:
                 return 3;
             case 2:
-                break;
+                return 0;
             case 3:
-                if (!z) {
-                    i4 = 8;
-                    break;
-                }
-                break;
+                return z ? 0 : 8;
             case 4:
                 return 4;
             case 5:
@@ -312,13 +269,8 @@ public class AudioAttributesCompat {
                 if (!z) {
                     return 3;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown usage value ");
-                sb.append(i2);
-                sb.append(" in audio attributes");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("Unknown usage value " + i2 + " in audio attributes");
         }
-        return i4;
     }
 
     static int toVolumeStreamType(boolean z, AudioAttributesCompat audioAttributesCompat) {
@@ -387,25 +339,21 @@ public class AudioAttributesCompat {
             case 16:
                 return new String("USAGE_ASSISTANT");
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("unknown usage ");
-                sb.append(i);
-                return new String(sb.toString());
+                return new String("unknown usage " + i);
         }
     }
 
     @Nullable
     public static AudioAttributesCompat wrap(@NonNull Object obj) {
-        if (VERSION.SDK_INT < 21 || sForceLegacyBehavior) {
+        if (Build.VERSION.SDK_INT < 21 || sForceLegacyBehavior) {
             return null;
         }
         AudioAttributesCompat audioAttributesCompat = new AudioAttributesCompat();
-        audioAttributesCompat.mAudioAttributesWrapper = Wrapper.wrap((AudioAttributes) obj);
+        audioAttributesCompat.mAudioAttributesWrapper = AudioAttributesCompatApi21.Wrapper.wrap((AudioAttributes) obj);
         return audioAttributesCompat;
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -413,24 +361,28 @@ public class AudioAttributesCompat {
             return false;
         }
         AudioAttributesCompat audioAttributesCompat = (AudioAttributesCompat) obj;
-        if (VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
-            Wrapper wrapper = this.mAudioAttributesWrapper;
+        if (Build.VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
+            AudioAttributesCompatApi21.Wrapper wrapper = this.mAudioAttributesWrapper;
             if (wrapper != null) {
                 return wrapper.unwrap().equals(audioAttributesCompat.unwrap());
             }
         }
         if (this.mContentType == audioAttributesCompat.getContentType() && this.mFlags == audioAttributesCompat.getFlags() && this.mUsage == audioAttributesCompat.getUsage()) {
             Integer num = this.mLegacyStream;
-            if (num == null) {
+            if (num != null) {
+                if (num.equals(audioAttributesCompat.mLegacyStream)) {
+                    return true;
+                }
+            } else if (audioAttributesCompat.mLegacyStream == null) {
+                return true;
             }
         }
-        z = false;
-        return z;
+        return false;
     }
 
     public int getContentType() {
-        if (VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
-            Wrapper wrapper = this.mAudioAttributesWrapper;
+        if (Build.VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
+            AudioAttributesCompatApi21.Wrapper wrapper = this.mAudioAttributesWrapper;
             if (wrapper != null) {
                 return wrapper.unwrap().getContentType();
             }
@@ -439,8 +391,8 @@ public class AudioAttributesCompat {
     }
 
     public int getFlags() {
-        if (VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
-            Wrapper wrapper = this.mAudioAttributesWrapper;
+        if (Build.VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
+            AudioAttributesCompatApi21.Wrapper wrapper = this.mAudioAttributesWrapper;
             if (wrapper != null) {
                 return wrapper.unwrap().getFlags();
             }
@@ -457,12 +409,12 @@ public class AudioAttributesCompat {
 
     public int getLegacyStreamType() {
         Integer num = this.mLegacyStream;
-        return num != null ? num.intValue() : (VERSION.SDK_INT < 21 || sForceLegacyBehavior) ? toVolumeStreamType(false, this.mFlags, this.mUsage) : AudioAttributesCompatApi21.toLegacyStreamType(this.mAudioAttributesWrapper);
+        return num != null ? num.intValue() : (Build.VERSION.SDK_INT < 21 || sForceLegacyBehavior) ? toVolumeStreamType(false, this.mFlags, this.mUsage) : AudioAttributesCompatApi21.toLegacyStreamType(this.mAudioAttributesWrapper);
     }
 
     public int getUsage() {
-        if (VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
-            Wrapper wrapper = this.mAudioAttributesWrapper;
+        if (Build.VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
+            AudioAttributesCompatApi21.Wrapper wrapper = this.mAudioAttributesWrapper;
             if (wrapper != null) {
                 return wrapper.unwrap().getUsage();
             }
@@ -471,12 +423,12 @@ public class AudioAttributesCompat {
     }
 
     public int getVolumeControlStream() {
-        return (VERSION.SDK_INT < 26 || sForceLegacyBehavior || unwrap() == null) ? toVolumeStreamType(true, this) : ((AudioAttributes) unwrap()).getVolumeControlStream();
+        return (Build.VERSION.SDK_INT < 26 || sForceLegacyBehavior || unwrap() == null) ? toVolumeStreamType(true, this) : ((AudioAttributes) unwrap()).getVolumeControlStream();
     }
 
     public int hashCode() {
-        if (VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
-            Wrapper wrapper = this.mAudioAttributesWrapper;
+        if (Build.VERSION.SDK_INT >= 21 && !sForceLegacyBehavior) {
+            AudioAttributesCompatApi21.Wrapper wrapper = this.mAudioAttributesWrapper;
             if (wrapper != null) {
                 return wrapper.unwrap().hashCode();
             }
@@ -484,11 +436,11 @@ public class AudioAttributesCompat {
         return Arrays.hashCode(new Object[]{Integer.valueOf(this.mContentType), Integer.valueOf(this.mFlags), Integer.valueOf(this.mUsage), this.mLegacyStream});
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             bundle.putParcelable(AUDIO_ATTRIBUTES_FRAMEWORKS, this.mAudioAttributesWrapper.unwrap());
         } else {
             bundle.putInt(AUDIO_ATTRIBUTES_USAGE, this.mUsage);
@@ -525,14 +477,14 @@ public class AudioAttributesCompat {
 
     @Nullable
     public Object unwrap() {
-        Wrapper wrapper = this.mAudioAttributesWrapper;
+        AudioAttributesCompatApi21.Wrapper wrapper = this.mAudioAttributesWrapper;
         if (wrapper != null) {
             return wrapper.unwrap();
         }
         return null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String usageToString() {
         return usageToString(this.mUsage);
     }

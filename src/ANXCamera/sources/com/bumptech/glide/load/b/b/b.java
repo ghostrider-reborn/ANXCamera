@@ -2,7 +2,6 @@ package com.bumptech.glide.load.b.b;
 
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Drawable.ConstantState;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.A;
 import com.bumptech.glide.load.engine.v;
@@ -19,7 +18,7 @@ public abstract class b<T extends Drawable> implements A<T>, v {
 
     @NonNull
     public final T get() {
-        ConstantState constantState = this.drawable.getConstantState();
+        Drawable.ConstantState constantState = this.drawable.getConstantState();
         return constantState == null ? this.drawable : constantState.newDrawable();
     }
 

@@ -1,9 +1,7 @@
 package com.miui.extravideo.common;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
-import android.media.MediaCodec.Callback;
-import android.media.MediaCodec.CodecException;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Handler;
@@ -11,8 +9,9 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Surface;
 import com.miui.extravideo.interpolation.EncodeBufferHolder;
-import java.lang.Thread.State;
+import java.lang.Thread;
 import java.nio.ByteBuffer;
 
 public class MediaEncoderAsync {
@@ -36,29 +35,27 @@ public class MediaEncoderAsync {
     /* access modifiers changed from: private */
     public MediaMuxer mediaMuxer;
 
-    private class CustomCallback extends Callback {
+    private class CustomCallback extends MediaCodec.Callback {
         private CustomCallback() {
         }
 
-        public void onError(@NonNull MediaCodec mediaCodec, @NonNull CodecException codecException) {
-            String str = MediaEncoderAsync.TAG;
-            Log.d(str, "onError", codecException);
+        public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException codecException) {
+            Log.d(MediaEncoderAsync.TAG, "onError", codecException);
             try {
                 if (MediaEncoderAsync.this.mListener != null) {
                     MediaEncoderAsync.this.mListener.onError();
                 }
             } catch (Exception e2) {
-                Log.d(str, "onError exception", e2);
+                Log.d(MediaEncoderAsync.TAG, "onError exception", e2);
             }
         }
 
         public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
-            String str = MediaEncoderAsync.TAG;
             try {
                 if (MediaEncoderAsync.this.mListener != null) {
                     MediaEncoderAsync.this.mListener.onInputBufferAvailable(MediaEncoderAsync.this.mEncodeBufferHolder);
                 }
-                Log.d(str, "onInputBufferAvailable");
+                Log.d(MediaEncoderAsync.TAG, "onInputBufferAvailable");
                 if (MediaEncoderAsync.this.mEncodeBufferHolder.flag == 4) {
                     MediaEncoderAsync.this.mEncoder.queueInputBuffer(i, 0, 0, 0, 4);
                 } else if (MediaEncoderAsync.this.mEncodeBufferHolder.data != null) {
@@ -70,48 +67,39 @@ public class MediaEncoderAsync {
                     MediaEncoderAsync.this.mEncoder.queueInputBuffer(i, 0, 0, 0, 0);
                 }
             } catch (Exception e2) {
-                Log.d(str, "onInputBufferAvailable exception", e2);
+                Log.d(MediaEncoderAsync.TAG, "onInputBufferAvailable exception", e2);
             }
         }
 
-        public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull BufferInfo bufferInfo) {
-            String str = ",";
-            String str2 = MediaEncoderAsync.TAG;
+        public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
             try {
                 ByteBuffer outputBuffer = MediaEncoderAsync.this.mEncoder.getOutputBuffer(i);
                 if (bufferInfo.size != 0) {
                     outputBuffer.position(bufferInfo.offset);
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("BufferInfo: ");
-                    sb.append(bufferInfo.offset);
-                    sb.append(str);
-                    sb.append(bufferInfo.size);
-                    sb.append(str);
-                    sb.append(bufferInfo.presentationTimeUs);
-                    Log.d(str2, sb.toString());
+                    Log.d(MediaEncoderAsync.TAG, "BufferInfo: " + bufferInfo.offset + "," + bufferInfo.size + "," + bufferInfo.presentationTimeUs);
                     try {
                         MediaEncoderAsync.this.mediaMuxer.writeSampleData(MediaEncoderAsync.this.mTrackIndex, outputBuffer, bufferInfo);
                     } catch (Exception e2) {
-                        Log.i(str2, "Too many frames", e2);
+                        Log.i(MediaEncoderAsync.TAG, "Too many frames", e2);
                     }
                     MediaEncoderAsync.this.mEncoder.releaseOutputBuffer(i, false);
                 }
                 if ((bufferInfo.flags & 4) != 0) {
-                    Log.i(str2, "end of stream reached");
+                    Log.i(MediaEncoderAsync.TAG, "end of stream reached");
                     if (MediaEncoderAsync.this.mListener != null) {
                         MediaEncoderAsync.this.mListener.onEncodeEnd(true);
                     }
                 }
             } catch (Exception e3) {
-                Log.d(str2, "onOutputBufferAvailable exception", e3);
+                Log.d(MediaEncoderAsync.TAG, "onOutputBufferAvailable exception", e3);
             }
         }
 
         public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
             MediaFormat outputFormat = MediaEncoderAsync.this.mEncoder.getOutputFormat();
             MediaEncoderAsync mediaEncoderAsync = MediaEncoderAsync.this;
-            mediaEncoderAsync.mTrackIndex = mediaEncoderAsync.mediaMuxer.addTrack(outputFormat);
+            int unused = mediaEncoderAsync.mTrackIndex = mediaEncoderAsync.mediaMuxer.addTrack(outputFormat);
             MediaEncoderAsync.this.mediaMuxer.start();
         }
     }
@@ -125,7 +113,7 @@ public class MediaEncoderAsync {
     }
 
     public MediaEncoderAsync(int i, int i2, int i3, String str, String str2) {
-        this(i, i2, i3, str, str2, null);
+        this(i, i2, i3, str, str2, (Handler) null);
     }
 
     public MediaEncoderAsync(int i, int i2, int i3, String str, String str2, Handler handler) {
@@ -135,9 +123,7 @@ public class MediaEncoderAsync {
         this.mWidth = i;
         this.mHeight = i2;
         this.mDegree = i3;
-        if (TextUtils.isEmpty(str)) {
-            str = MIME_TYPE;
-        }
+        str = TextUtils.isEmpty(str) ? MIME_TYPE : str;
         MediaFormat createVideoFormat = MediaFormat.createVideoFormat(str, this.mWidth, this.mHeight);
         createVideoFormat.setInteger("color-format", 2135033992);
         createVideoFormat.setInteger("frame-rate", 30);
@@ -146,7 +132,7 @@ public class MediaEncoderAsync {
         try {
             this.mEncoder = MediaCodec.createEncoderByType(str);
             this.mEncoder.setCallback(new CustomCallback(), handler);
-            this.mEncoder.configure(createVideoFormat, null, null, 1);
+            this.mEncoder.configure(createVideoFormat, (Surface) null, (MediaCrypto) null, 1);
             this.mediaMuxer = new MediaMuxer(str2, 0);
             this.mediaMuxer.setOrientationHint(this.mDegree);
         } catch (Exception e2) {
@@ -205,7 +191,7 @@ public class MediaEncoderAsync {
                 }
             });
             Thread thread = this.mHandler.getLooper().getThread();
-            if (thread.getState() == State.WAITING) {
+            if (thread.getState() == Thread.State.WAITING) {
                 thread.interrupt();
             }
         }

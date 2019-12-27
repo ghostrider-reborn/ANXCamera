@@ -3,16 +3,17 @@ package android.support.v4.media;
 import android.content.Context;
 import android.media.session.MediaSessionManager;
 import android.support.annotation.RequiresApi;
+import android.support.v4.media.MediaSessionManager;
 
 @RequiresApi(28)
 class MediaSessionManagerImplApi28 extends MediaSessionManagerImplApi21 {
     MediaSessionManager mObject;
 
-    static final class RemoteUserInfo implements RemoteUserInfoImpl {
-        android.media.session.MediaSessionManager.RemoteUserInfo mObject;
+    static final class RemoteUserInfo implements MediaSessionManager.RemoteUserInfoImpl {
+        MediaSessionManager.RemoteUserInfo mObject;
 
         RemoteUserInfo(String str, int i, int i2) {
-            this.mObject = new android.media.session.MediaSessionManager.RemoteUserInfo(str, i, i2);
+            this.mObject = new MediaSessionManager.RemoteUserInfo(str, i, i2);
         }
 
         public String getPackageName() {
@@ -30,10 +31,10 @@ class MediaSessionManagerImplApi28 extends MediaSessionManagerImplApi21 {
 
     MediaSessionManagerImplApi28(Context context) {
         super(context);
-        this.mObject = (MediaSessionManager) context.getSystemService("media_session");
+        this.mObject = (android.media.session.MediaSessionManager) context.getSystemService("media_session");
     }
 
-    public boolean isTrustedForMediaControl(RemoteUserInfoImpl remoteUserInfoImpl) {
+    public boolean isTrustedForMediaControl(MediaSessionManager.RemoteUserInfoImpl remoteUserInfoImpl) {
         if (remoteUserInfoImpl instanceof RemoteUserInfo) {
             return this.mObject.isTrustedForMediaControl(((RemoteUserInfo) remoteUserInfoImpl).mObject);
         }

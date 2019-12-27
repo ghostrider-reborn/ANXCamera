@@ -2,10 +2,8 @@ package com.android.camera2;
 
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -16,7 +14,7 @@ import android.view.Surface;
 import com.android.camera.CameraSize;
 import com.android.camera.log.Log;
 import com.android.camera.parallel.AlgoConnector;
-import com.android.camera2.Camera2Proxy.PictureCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.compat.MiCameraCompat;
 import com.mi.config.b;
 import com.xiaomi.camera.base.CameraDeviceUtil;
@@ -40,7 +38,7 @@ public class MiCamera2ShotParallelRepeating extends MiCamera2ShotParallel<byte[]
         this.mMiCamera.setAWBLock(false);
         this.mMiCamera.resumePreview();
         if (-1 != i) {
-            PictureCallback pictureCallback = getPictureCallback();
+            Camera2Proxy.PictureCallback pictureCallback = getPictureCallback();
             if (pictureCallback != null) {
                 pictureCallback.onPictureTakenFinished(z);
             } else {
@@ -51,26 +49,20 @@ public class MiCamera2ShotParallelRepeating extends MiCamera2ShotParallel<byte[]
     }
 
     /* access modifiers changed from: protected */
-    public CaptureCallback generateCaptureCallback() {
-        return new CaptureCallback() {
+    public CameraCaptureSession.CaptureCallback generateCaptureCallback() {
+        return new CameraCaptureSession.CaptureCallback() {
             long mCaptureTimestamp = -1;
 
             public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
                 super.onCaptureCompleted(cameraCaptureSession, captureRequest, totalCaptureResult);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted: frameNumber=");
-                sb.append(totalCaptureResult.getFrameNumber());
-                Log.d(MiCamera2ShotParallelRepeating.TAG, sb.toString());
-                MiCamera2ShotParallelRepeating.this.mRepeatingCaptureResult = totalCaptureResult;
+                Log.d(MiCamera2ShotParallelRepeating.TAG, "onCaptureCompleted: frameNumber=" + totalCaptureResult.getFrameNumber());
+                CaptureResult unused = MiCamera2ShotParallelRepeating.this.mRepeatingCaptureResult = totalCaptureResult;
                 AlgoConnector.getInstance().getLocalBinder().onCaptureCompleted(CameraDeviceUtil.getCustomCaptureResult(MiCamera2ShotParallelRepeating.this.mRepeatingCaptureResult), true);
             }
 
             public void onCaptureFailed(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull CaptureFailure captureFailure) {
                 super.onCaptureFailed(cameraCaptureSession, captureRequest, captureFailure);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureFailed: reason=");
-                sb.append(captureFailure.getReason());
-                Log.e(MiCamera2ShotParallelRepeating.TAG, sb.toString());
+                Log.e(MiCamera2ShotParallelRepeating.TAG, "onCaptureFailed: reason=" + captureFailure.getReason());
                 MiCamera2ShotParallelRepeating.this.onRepeatingEnd(false, -1);
                 if (this.mCaptureTimestamp != -1) {
                     AlgoConnector.getInstance().getLocalBinder().onCaptureFailed(this.mCaptureTimestamp, captureFailure.getReason());
@@ -79,36 +71,21 @@ public class MiCamera2ShotParallelRepeating extends MiCamera2ShotParallel<byte[]
 
             public void onCaptureSequenceAborted(@NonNull CameraCaptureSession cameraCaptureSession, int i) {
                 super.onCaptureSequenceAborted(cameraCaptureSession, i);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureSequenceAborted: sequenceId=");
-                sb.append(i);
-                Log.w(MiCamera2ShotParallelRepeating.TAG, sb.toString());
+                Log.w(MiCamera2ShotParallelRepeating.TAG, "onCaptureSequenceAborted: sequenceId=" + i);
                 MiCamera2ShotParallelRepeating.this.onRepeatingEnd(false, i);
                 ImagePool.getInstance().trimPoolBuffer();
             }
 
             public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession cameraCaptureSession, int i, long j) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureSequenceCompleted: sequenceId=");
-                sb.append(i);
-                sb.append(" frameNumber=");
-                sb.append(j);
-                Log.d(MiCamera2ShotParallelRepeating.TAG, sb.toString());
+                Log.d(MiCamera2ShotParallelRepeating.TAG, "onCaptureSequenceCompleted: sequenceId=" + i + " frameNumber=" + j);
                 MiCamera2ShotParallelRepeating.this.onRepeatingEnd(true, i);
                 ImagePool.getInstance().trimPoolBuffer();
             }
 
             public void onCaptureStarted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, long j, long j2) {
                 super.onCaptureStarted(cameraCaptureSession, captureRequest, j, j2);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureStarted: timestamp=");
-                sb.append(j);
-                sb.append(" frameNumber=");
-                sb.append(j2);
-                String sb2 = sb.toString();
-                String str = MiCamera2ShotParallelRepeating.TAG;
-                Log.d(str, sb2);
-                PictureCallback pictureCallback = MiCamera2ShotParallelRepeating.this.getPictureCallback();
+                Log.d(MiCamera2ShotParallelRepeating.TAG, "onCaptureStarted: timestamp=" + j + " frameNumber=" + j2);
+                Camera2Proxy.PictureCallback pictureCallback = MiCamera2ShotParallelRepeating.this.getPictureCallback();
                 if (pictureCallback != null) {
                     ParallelTaskData parallelTaskData = new ParallelTaskData(MiCamera2ShotParallelRepeating.this.mMiCamera.getId(), j, MiCamera2ShotParallelRepeating.this.mMiCamera.getCameraConfigs().getShotType(), MiCamera2ShotParallelRepeating.this.mMiCamera.getCameraConfigs().getShotPath());
                     MiCamera2ShotParallelRepeating miCamera2ShotParallelRepeating = MiCamera2ShotParallelRepeating.this;
@@ -120,30 +97,27 @@ public class MiCamera2ShotParallelRepeating extends MiCamera2ShotParallel<byte[]
                         AlgoConnector.getInstance().getLocalBinder().onCaptureStarted(onCaptureStart);
                         return;
                     }
-                    Log.w(str, "onCaptureStarted: null task data");
+                    Log.w(MiCamera2ShotParallelRepeating.TAG, "onCaptureStarted: null task data");
                     return;
                 }
-                Log.w(str, "onCaptureStarted: null picture callback");
+                Log.w(MiCamera2ShotParallelRepeating.TAG, "onCaptureStarted: null picture callback");
             }
         };
     }
 
     /* access modifiers changed from: protected */
-    public Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
-        Builder createCaptureRequest = b.isMTKPlatform() ? this.mMiCamera.getCameraDevice().createCaptureRequest(1) : this.mMiCamera.getCameraDevice().createCaptureRequest(2);
-        boolean isIn3OrMoreSatMode = isIn3OrMoreSatMode();
-        String str = "add surface %s to capture request, size is: %s";
-        String str2 = TAG;
-        if (isIn3OrMoreSatMode) {
+    public CaptureRequest.Builder generateRequestBuilder() throws CameraAccessException, IllegalStateException {
+        CaptureRequest.Builder createCaptureRequest = b.isMTKPlatform() ? this.mMiCamera.getCameraDevice().createCaptureRequest(1) : this.mMiCamera.getCameraDevice().createCaptureRequest(2);
+        if (isIn3OrMoreSatMode()) {
             Surface mainCaptureSurface = getMainCaptureSurface();
             Size surfaceSize = SurfaceUtils.getSurfaceSize(mainCaptureSurface);
-            Log.d(str2, String.format(Locale.ENGLISH, str, new Object[]{mainCaptureSurface, surfaceSize}));
+            Log.d(TAG, String.format(Locale.ENGLISH, "add surface %s to capture request, size is: %s", new Object[]{mainCaptureSurface, surfaceSize}));
             createCaptureRequest.addTarget(mainCaptureSurface);
             this.mCapturedImageSize = new CameraSize(surfaceSize);
         } else {
-            for (Surface surface : this.mMiCamera.getRemoteSurfaceList()) {
-                Log.d(str2, String.format(Locale.ENGLISH, str, new Object[]{surface, SurfaceUtils.getSurfaceSize(surface)}));
-                createCaptureRequest.addTarget(surface);
+            for (Surface next : this.mMiCamera.getRemoteSurfaceList()) {
+                Log.d(TAG, String.format(Locale.ENGLISH, "add surface %s to capture request, size is: %s", new Object[]{next, SurfaceUtils.getSurfaceSize(next)}));
+                createCaptureRequest.addTarget(next);
             }
             this.mCapturedImageSize = this.mMiCamera.getPictureSize();
         }
@@ -175,8 +149,7 @@ public class MiCamera2ShotParallelRepeating extends MiCamera2ShotParallel<byte[]
 
     /* access modifiers changed from: protected */
     public void startSessionCapture() {
-        String str = TAG;
-        Log.d(str, "startSessionCapture");
+        Log.d(TAG, "startSessionCapture");
         PerformanceTracker.trackPictureCapture(0);
         this.mMiCamera.pausePreview();
         try {
@@ -185,10 +158,10 @@ public class MiCamera2ShotParallelRepeating extends MiCamera2ShotParallel<byte[]
             e2.printStackTrace();
             this.mMiCamera.notifyOnError(e2.getReason());
         } catch (IllegalStateException e3) {
-            Log.e(str, "Failed to capture burst, IllegalState", e3);
+            Log.e(TAG, "Failed to capture burst, IllegalState", e3);
             this.mMiCamera.notifyOnError(256);
         } catch (IllegalArgumentException e4) {
-            Log.e(str, "Failed to capture a still picture, IllegalArgument", e4);
+            Log.e(TAG, "Failed to capture a still picture, IllegalArgument", e4);
             this.mMiCamera.notifyOnError(256);
         }
     }

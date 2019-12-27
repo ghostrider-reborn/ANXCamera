@@ -1,6 +1,6 @@
 package android.support.v4.view;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.view.ScaleGestureDetector;
 
 public final class ScaleGestureDetectorCompat {
@@ -8,7 +8,7 @@ public final class ScaleGestureDetectorCompat {
     }
 
     public static boolean isQuickScaleEnabled(ScaleGestureDetector scaleGestureDetector) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return scaleGestureDetector.isQuickScaleEnabled();
         }
         return false;
@@ -20,7 +20,7 @@ public final class ScaleGestureDetectorCompat {
     }
 
     public static void setQuickScaleEnabled(ScaleGestureDetector scaleGestureDetector, boolean z) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             scaleGestureDetector.setQuickScaleEnabled(z);
         }
     }

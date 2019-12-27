@@ -14,10 +14,10 @@ import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.mediacompat.Rating2;
-import android.support.v4.media.IMediaSession2.Stub;
-import android.support.v4.media.MediaController2.PlaybackInfo;
-import android.support.v4.media.MediaSession2.CommandButton;
-import android.support.v4.media.MediaSession2.ControllerInfo;
+import android.support.v4.media.IMediaSession2;
+import android.support.v4.media.MediaController2;
+import android.support.v4.media.MediaLibraryService2;
+import android.support.v4.media.MediaSession2;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
@@ -27,147 +27,148 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 @TargetApi(19)
-class MediaSession2Stub extends Stub {
+class MediaSession2Stub extends IMediaSession2.Stub {
     private static final boolean DEBUG = true;
     private static final String TAG = "MediaSession2Stub";
     /* access modifiers changed from: private */
     public static final SparseArray<SessionCommand2> sCommandsForOnCommandRequest = new SparseArray<>();
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
-    public final ArrayMap<ControllerInfo, SessionCommandGroup2> mAllowedCommandGroupMap = new ArrayMap<>();
+    public final ArrayMap<MediaSession2.ControllerInfo, SessionCommandGroup2> mAllowedCommandGroupMap = new ArrayMap<>();
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
     public final Set<IBinder> mConnectingControllers = new HashSet();
     final Context mContext;
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
-    public final ArrayMap<IBinder, ControllerInfo> mControllers = new ArrayMap<>();
+    public final ArrayMap<IBinder, MediaSession2.ControllerInfo> mControllers = new ArrayMap<>();
     /* access modifiers changed from: private */
     public final Object mLock = new Object();
-    final SupportLibraryImpl mSession;
+    final MediaSession2.SupportLibraryImpl mSession;
 
-    static final class Controller2Cb extends ControllerCb {
+    static final class Controller2Cb extends MediaSession2.ControllerCb {
         private final IMediaController2 mIControllerCallback;
 
         Controller2Cb(@NonNull IMediaController2 iMediaController2) {
             this.mIControllerCallback = iMediaController2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @NonNull
         public IBinder getId() {
             return this.mIControllerCallback.asBinder();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onAllowedCommandsChanged(SessionCommandGroup2 sessionCommandGroup2) throws RemoteException {
             this.mIControllerCallback.onAllowedCommandsChanged(sessionCommandGroup2.toBundle());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onBufferingStateChanged(MediaItem2 mediaItem2, int i, long j) throws RemoteException {
             this.mIControllerCallback.onBufferingStateChanged(mediaItem2 == null ? null : mediaItem2.toBundle(), i, j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onChildrenChanged(String str, int i, Bundle bundle) throws RemoteException {
             this.mIControllerCallback.onChildrenChanged(str, i, bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onCurrentMediaItemChanged(MediaItem2 mediaItem2) throws RemoteException {
             this.mIControllerCallback.onCurrentMediaItemChanged(mediaItem2 == null ? null : mediaItem2.toBundle());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onCustomCommand(SessionCommand2 sessionCommand2, Bundle bundle, ResultReceiver resultReceiver) throws RemoteException {
             this.mIControllerCallback.onCustomCommand(sessionCommand2.toBundle(), bundle, resultReceiver);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void onCustomLayoutChanged(List<CommandButton> list) throws RemoteException {
+        /* access modifiers changed from: package-private */
+        public void onCustomLayoutChanged(List<MediaSession2.CommandButton> list) throws RemoteException {
             this.mIControllerCallback.onCustomLayoutChanged(MediaUtils2.convertCommandButtonListToBundleList(list));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onDisconnected() throws RemoteException {
             this.mIControllerCallback.onDisconnected();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onError(int i, Bundle bundle) throws RemoteException {
             this.mIControllerCallback.onError(i, bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetChildrenDone(String str, int i, int i2, List<MediaItem2> list, Bundle bundle) throws RemoteException {
             this.mIControllerCallback.onGetChildrenDone(str, i, i2, MediaUtils2.convertMediaItem2ListToBundleList(list), bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetItemDone(String str, MediaItem2 mediaItem2) throws RemoteException {
             this.mIControllerCallback.onGetItemDone(str, mediaItem2 == null ? null : mediaItem2.toBundle());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetLibraryRootDone(Bundle bundle, String str, Bundle bundle2) throws RemoteException {
             this.mIControllerCallback.onGetLibraryRootDone(bundle, str, bundle2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onGetSearchResultDone(String str, int i, int i2, List<MediaItem2> list, Bundle bundle) throws RemoteException {
             this.mIControllerCallback.onGetSearchResultDone(str, i, i2, MediaUtils2.convertMediaItem2ListToBundleList(list), bundle);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void onPlaybackInfoChanged(PlaybackInfo playbackInfo) throws RemoteException {
+        /* access modifiers changed from: package-private */
+        public void onPlaybackInfoChanged(MediaController2.PlaybackInfo playbackInfo) throws RemoteException {
             this.mIControllerCallback.onPlaybackInfoChanged(playbackInfo.toBundle());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlaybackSpeedChanged(long j, long j2, float f2) throws RemoteException {
             this.mIControllerCallback.onPlaybackSpeedChanged(j, j2, f2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlayerStateChanged(long j, long j2, int i) throws RemoteException {
             this.mIControllerCallback.onPlayerStateChanged(j, j2, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlaylistChanged(List<MediaItem2> list, MediaMetadata2 mediaMetadata2) throws RemoteException {
             this.mIControllerCallback.onPlaylistChanged(MediaUtils2.convertMediaItem2ListToBundleList(list), mediaMetadata2 == null ? null : mediaMetadata2.toBundle());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onPlaylistMetadataChanged(MediaMetadata2 mediaMetadata2) throws RemoteException {
             this.mIControllerCallback.onPlaylistMetadataChanged(mediaMetadata2.toBundle());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRepeatModeChanged(int i) throws RemoteException {
             this.mIControllerCallback.onRepeatModeChanged(i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRoutesInfoChanged(List<Bundle> list) throws RemoteException {
             this.mIControllerCallback.onRoutesInfoChanged(list);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onSearchResultChanged(String str, int i, Bundle bundle) throws RemoteException {
             this.mIControllerCallback.onSearchResultChanged(str, i, bundle);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onSeekCompleted(long j, long j2, long j3) throws RemoteException {
             this.mIControllerCallback.onSeekCompleted(j, j2, j3);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onShuffleModeChanged(int i) throws RemoteException {
             this.mIControllerCallback.onShuffleModeChanged(i);
         }
@@ -175,7 +176,7 @@ class MediaSession2Stub extends Stub {
 
     @FunctionalInterface
     private interface SessionRunnable {
-        void run(ControllerInfo controllerInfo) throws RemoteException;
+        void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException;
     }
 
     static {
@@ -183,53 +184,53 @@ class MediaSession2Stub extends Stub {
         sessionCommandGroup2.addAllPlaybackCommands();
         sessionCommandGroup2.addAllPlaylistCommands();
         sessionCommandGroup2.addAllVolumeCommands();
-        for (SessionCommand2 sessionCommand2 : sessionCommandGroup2.getCommands()) {
-            sCommandsForOnCommandRequest.append(sessionCommand2.getCommandCode(), sessionCommand2);
+        for (SessionCommand2 next : sessionCommandGroup2.getCommands()) {
+            sCommandsForOnCommandRequest.append(next.getCommandCode(), next);
         }
     }
 
-    MediaSession2Stub(SupportLibraryImpl supportLibraryImpl) {
+    MediaSession2Stub(MediaSession2.SupportLibraryImpl supportLibraryImpl) {
         this.mSession = supportLibraryImpl;
         this.mContext = this.mSession.getContext();
     }
 
     /* access modifiers changed from: private */
-    public SupportLibraryImpl getLibrarySession() {
-        SupportLibraryImpl supportLibraryImpl = this.mSession;
-        if (supportLibraryImpl instanceof SupportLibraryImpl) {
-            return (SupportLibraryImpl) supportLibraryImpl;
+    public MediaLibraryService2.MediaLibrarySession.SupportLibraryImpl getLibrarySession() {
+        MediaSession2.SupportLibraryImpl supportLibraryImpl = this.mSession;
+        if (supportLibraryImpl instanceof MediaLibraryService2.MediaLibrarySession.SupportLibraryImpl) {
+            return (MediaLibraryService2.MediaLibrarySession.SupportLibraryImpl) supportLibraryImpl;
         }
         throw new RuntimeException("Session cannot be casted to library session");
     }
 
     /* access modifiers changed from: private */
-    public boolean isAllowedCommand(ControllerInfo controllerInfo, int i) {
+    public boolean isAllowedCommand(MediaSession2.ControllerInfo controllerInfo, int i) {
         SessionCommandGroup2 sessionCommandGroup2;
         synchronized (this.mLock) {
-            sessionCommandGroup2 = (SessionCommandGroup2) this.mAllowedCommandGroupMap.get(controllerInfo);
+            sessionCommandGroup2 = this.mAllowedCommandGroupMap.get(controllerInfo);
         }
         return sessionCommandGroup2 != null && sessionCommandGroup2.hasCommand(i);
     }
 
     /* access modifiers changed from: private */
-    public boolean isAllowedCommand(ControllerInfo controllerInfo, SessionCommand2 sessionCommand2) {
+    public boolean isAllowedCommand(MediaSession2.ControllerInfo controllerInfo, SessionCommand2 sessionCommand2) {
         SessionCommandGroup2 sessionCommandGroup2;
         synchronized (this.mLock) {
-            sessionCommandGroup2 = (SessionCommandGroup2) this.mAllowedCommandGroupMap.get(controllerInfo);
+            sessionCommandGroup2 = this.mAllowedCommandGroupMap.get(controllerInfo);
         }
         return sessionCommandGroup2 != null && sessionCommandGroup2.hasCommand(sessionCommand2);
     }
 
     private void onBrowserCommand(@NonNull IMediaController2 iMediaController2, int i, @NonNull SessionRunnable sessionRunnable) {
-        if (this.mSession instanceof SupportLibraryImpl) {
-            onSessionCommandInternal(iMediaController2, null, i, sessionRunnable);
+        if (this.mSession instanceof MediaLibraryService2.MediaLibrarySession.SupportLibraryImpl) {
+            onSessionCommandInternal(iMediaController2, (SessionCommand2) null, i, sessionRunnable);
             return;
         }
         throw new RuntimeException("MediaSession2 cannot handle MediaLibrarySession command");
     }
 
     private void onSessionCommand(@NonNull IMediaController2 iMediaController2, int i, @NonNull SessionRunnable sessionRunnable) {
-        onSessionCommandInternal(iMediaController2, null, i, sessionRunnable);
+        onSessionCommandInternal(iMediaController2, (SessionCommand2) null, i, sessionRunnable);
     }
 
     private void onSessionCommand(@NonNull IMediaController2 iMediaController2, @NonNull SessionCommand2 sessionCommand2, @NonNull SessionRunnable sessionRunnable) {
@@ -237,9 +238,9 @@ class MediaSession2Stub extends Stub {
     }
 
     private void onSessionCommandInternal(@NonNull IMediaController2 iMediaController2, @Nullable SessionCommand2 sessionCommand2, int i, @NonNull SessionRunnable sessionRunnable) {
-        final ControllerInfo controllerInfo;
+        final MediaSession2.ControllerInfo controllerInfo;
         synchronized (this.mLock) {
-            controllerInfo = iMediaController2 == null ? null : (ControllerInfo) this.mControllers.get(iMediaController2.asBinder());
+            controllerInfo = iMediaController2 == null ? null : this.mControllers.get(iMediaController2.asBinder());
         }
         if (!this.mSession.isClosed() && controllerInfo != null) {
             Executor callbackExecutor = this.mSession.getCallbackExecutor();
@@ -272,14 +273,7 @@ class MediaSession2Stub extends Stub {
                     if (r4.this$0.mSession.getCallback().onCommandRequest(r4.this$0.mSession.getInstance(), r3, r0) != false) goto L_0x0098;
                  */
                 /* JADX WARNING: Code restructure failed: missing block: B:21:0x006b, code lost:
-                    r1 = new java.lang.StringBuilder();
-                    r1.append("Command (");
-                    r1.append(r0);
-                    r1.append(") from ");
-                    r1.append(r3);
-                    r1.append(" was rejected by ");
-                    r1.append(r4.this$0.mSession);
-                    android.util.Log.d(android.support.v4.media.MediaSession2Stub.TAG, r1.toString());
+                    android.util.Log.d(android.support.v4.media.MediaSession2Stub.TAG, "Command (" + r0 + ") from " + r3 + " was rejected by " + r4.this$0.mSession);
                  */
                 /* JADX WARNING: Code restructure failed: missing block: B:22:0x0097, code lost:
                     return;
@@ -291,10 +285,13 @@ class MediaSession2Stub extends Stub {
                     r0 = move-exception;
                  */
                 /* JADX WARNING: Code restructure failed: missing block: B:26:0x00a1, code lost:
-                    r1 = new java.lang.StringBuilder();
-                    r1.append("Exception in ");
-                    r1.append(r3.toString());
-                    android.util.Log.w(android.support.v4.media.MediaSession2Stub.TAG, r1.toString(), r0);
+                    android.util.Log.w(android.support.v4.media.MediaSession2Stub.TAG, "Exception in " + r3.toString(), r0);
+                 */
+                /* JADX WARNING: Code restructure failed: missing block: B:34:?, code lost:
+                    return;
+                 */
+                /* JADX WARNING: Code restructure failed: missing block: B:35:?, code lost:
+                    return;
                  */
                 /* JADX WARNING: Code restructure failed: missing block: B:8:0x0018, code lost:
                     r0 = r4;
@@ -314,19 +311,15 @@ class MediaSession2Stub extends Stub {
     }
 
     private void releaseController(IMediaController2 iMediaController2) {
-        final ControllerInfo controllerInfo;
+        final MediaSession2.ControllerInfo remove;
         synchronized (this.mLock) {
-            controllerInfo = (ControllerInfo) this.mControllers.remove(iMediaController2.asBinder());
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("releasing ");
-            sb.append(controllerInfo);
-            Log.d(str, sb.toString());
+            remove = this.mControllers.remove(iMediaController2.asBinder());
+            Log.d(TAG, "releasing " + remove);
         }
-        if (!this.mSession.isClosed() && controllerInfo != null) {
+        if (!this.mSession.isClosed() && remove != null) {
             this.mSession.getCallbackExecutor().execute(new Runnable() {
                 public void run() {
-                    MediaSession2Stub.this.mSession.getCallback().onDisconnected(MediaSession2Stub.this.mSession.getInstance(), controllerInfo);
+                    MediaSession2Stub.this.mSession.getCallback().onDisconnected(MediaSession2Stub.this.mSession.getInstance(), remove);
                 }
             });
         }
@@ -334,15 +327,15 @@ class MediaSession2Stub extends Stub {
 
     public void addPlaylistItem(IMediaController2 iMediaController2, final int i, final Bundle bundle) {
         onSessionCommand(iMediaController2, 15, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
-                MediaSession2Stub.this.mSession.getInstance().addPlaylistItem(i, MediaItem2.fromBundle(bundle, null));
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
+                MediaSession2Stub.this.mSession.getInstance().addPlaylistItem(i, MediaItem2.fromBundle(bundle, (UUID) null));
             }
         });
     }
 
     public void adjustVolume(IMediaController2 iMediaController2, final int i, final int i2) throws RuntimeException {
         onSessionCommand(iMediaController2, 11, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 VolumeProviderCompat volumeProvider = MediaSession2Stub.this.mSession.getVolumeProvider();
                 if (volumeProvider == null) {
                     MediaSessionCompat sessionCompat = MediaSession2Stub.this.mSession.getSessionCompat();
@@ -358,7 +351,7 @@ class MediaSession2Stub extends Stub {
     }
 
     public void connect(final IMediaController2 iMediaController2, String str) throws RuntimeException {
-        final ControllerInfo controllerInfo = new ControllerInfo(str, Binder.getCallingPid(), Binder.getCallingUid(), new Controller2Cb(iMediaController2));
+        final MediaSession2.ControllerInfo controllerInfo = new MediaSession2.ControllerInfo(str, Binder.getCallingPid(), Binder.getCallingUid(), new Controller2Cb(iMediaController2));
         this.mSession.getCallbackExecutor().execute(new Runnable() {
             public void run() {
                 if (!MediaSession2Stub.this.mSession.isClosed()) {
@@ -367,12 +360,7 @@ class MediaSession2Stub extends Stub {
                     }
                     SessionCommandGroup2 onConnect = MediaSession2Stub.this.mSession.getCallback().onConnect(MediaSession2Stub.this.mSession.getInstance(), controllerInfo);
                     if (onConnect != null || controllerInfo.isTrusted()) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Accepting connection, controllerInfo=");
-                        sb.append(controllerInfo);
-                        sb.append(" allowedCommands=");
-                        sb.append(onConnect);
-                        Log.d(MediaSession2Stub.TAG, sb.toString());
+                        Log.d(MediaSession2Stub.TAG, "Accepting connection, controllerInfo=" + controllerInfo + " allowedCommands=" + onConnect);
                         if (onConnect == null) {
                             onConnect = new SessionCommandGroup2();
                         }
@@ -382,7 +370,7 @@ class MediaSession2Stub extends Stub {
                             MediaSession2Stub.this.mAllowedCommandGroupMap.put(controllerInfo, onConnect);
                         }
                         int playerState = MediaSession2Stub.this.mSession.getPlayerState();
-                        List list = null;
+                        List<MediaItem2> list = null;
                         Bundle bundle = MediaSession2Stub.this.mSession.getCurrentMediaItem() == null ? null : MediaSession2Stub.this.mSession.getCurrentMediaItem().toBundle();
                         long elapsedRealtime = SystemClock.elapsedRealtime();
                         long currentPosition = MediaSession2Stub.this.mSession.getCurrentPosition();
@@ -395,7 +383,7 @@ class MediaSession2Stub extends Stub {
                         if (onConnect.hasCommand(18)) {
                             list = MediaSession2Stub.this.mSession.getPlaylist();
                         }
-                        List convertMediaItem2ListToBundleList = MediaUtils2.convertMediaItem2ListToBundleList(list);
+                        List<Bundle> convertMediaItem2ListToBundleList = MediaUtils2.convertMediaItem2ListToBundleList(list);
                         if (!MediaSession2Stub.this.mSession.isClosed()) {
                             try {
                                 iMediaController2.onConnected(MediaSession2Stub.this, onConnect.toBundle(), playerState, bundle, elapsedRealtime, currentPosition, playbackSpeed, bufferedPosition, bundle2, repeatMode, shuffleMode, convertMediaItem2ListToBundleList, sessionActivity);
@@ -406,10 +394,7 @@ class MediaSession2Stub extends Stub {
                         synchronized (MediaSession2Stub.this.mLock) {
                             MediaSession2Stub.this.mConnectingControllers.remove(controllerInfo.getId());
                         }
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Rejecting connection, controllerInfo=");
-                        sb2.append(controllerInfo);
-                        Log.d(MediaSession2Stub.TAG, sb2.toString());
+                        Log.d(MediaSession2Stub.TAG, "Rejecting connection, controllerInfo=" + controllerInfo);
                         iMediaController2.onDisconnected();
                     }
                 }
@@ -419,7 +404,7 @@ class MediaSession2Stub extends Stub {
 
     public void fastForward(IMediaController2 iMediaController2) {
         onSessionCommand(iMediaController2, 7, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getCallback().onFastForward(MediaSession2Stub.this.mSession.getInstance(), controllerInfo);
             }
         });
@@ -431,19 +416,11 @@ class MediaSession2Stub extends Stub {
         final int i4 = i2;
         final Bundle bundle2 = bundle;
         AnonymousClass37 r0 = new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
-                String str = str2;
-                String str2 = MediaSession2Stub.TAG;
-                if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("getChildren(): Ignoring null parentId from ");
-                    sb.append(controllerInfo);
-                    Log.w(str2, sb.toString());
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
+                if (str2 == null) {
+                    Log.w(MediaSession2Stub.TAG, "getChildren(): Ignoring null parentId from " + controllerInfo);
                 } else if (i3 < 1 || i4 < 1) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("getChildren(): Ignoring page nor pageSize less than 1 from ");
-                    sb2.append(controllerInfo);
-                    Log.w(str2, sb2.toString());
+                    Log.w(MediaSession2Stub.TAG, "getChildren(): Ignoring page nor pageSize less than 1 from " + controllerInfo);
                 } else {
                     MediaSession2Stub.this.getLibrarySession().onGetChildrenOnExecutor(controllerInfo, str2, i3, i4, bundle2);
                 }
@@ -452,8 +429,8 @@ class MediaSession2Stub extends Stub {
         onBrowserCommand(iMediaController2, 29, r0);
     }
 
-    /* access modifiers changed from: 0000 */
-    public List<ControllerInfo> getConnectedControllers() {
+    /* access modifiers changed from: package-private */
+    public List<MediaSession2.ControllerInfo> getConnectedControllers() {
         ArrayList arrayList = new ArrayList();
         synchronized (this.mLock) {
             for (int i = 0; i < this.mControllers.size(); i++) {
@@ -465,12 +442,9 @@ class MediaSession2Stub extends Stub {
 
     public void getItem(IMediaController2 iMediaController2, final String str) throws RuntimeException {
         onBrowserCommand(iMediaController2, 30, new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("getItem(): Ignoring null mediaId from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "getItem(): Ignoring null mediaId from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.getLibrarySession().onGetItemOnExecutor(controllerInfo, str);
@@ -480,7 +454,7 @@ class MediaSession2Stub extends Stub {
 
     public void getLibraryRoot(IMediaController2 iMediaController2, final Bundle bundle) throws RuntimeException {
         onBrowserCommand(iMediaController2, 31, new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.getLibrarySession().onGetLibraryRootOnExecutor(controllerInfo, bundle);
             }
         });
@@ -492,19 +466,11 @@ class MediaSession2Stub extends Stub {
         final int i4 = i2;
         final Bundle bundle2 = bundle;
         AnonymousClass39 r0 = new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
-                boolean isEmpty = TextUtils.isEmpty(str2);
-                String str = MediaSession2Stub.TAG;
-                if (isEmpty) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("getSearchResult(): Ignoring empty query from ");
-                    sb.append(controllerInfo);
-                    Log.w(str, sb.toString());
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
+                if (TextUtils.isEmpty(str2)) {
+                    Log.w(MediaSession2Stub.TAG, "getSearchResult(): Ignoring empty query from " + controllerInfo);
                 } else if (i3 < 1 || i4 < 1) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("getSearchResult(): Ignoring page nor pageSize less than 1  from ");
-                    sb2.append(controllerInfo);
-                    Log.w(str, sb2.toString());
+                    Log.w(MediaSession2Stub.TAG, "getSearchResult(): Ignoring page nor pageSize less than 1  from " + controllerInfo);
                 } else {
                     MediaSession2Stub.this.getLibrarySession().onGetSearchResultOnExecutor(controllerInfo, str2, i3, i4, bundle2);
                 }
@@ -515,7 +481,7 @@ class MediaSession2Stub extends Stub {
 
     public void pause(IMediaController2 iMediaController2) throws RuntimeException {
         onSessionCommand(iMediaController2, 2, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.pause();
             }
         });
@@ -523,7 +489,7 @@ class MediaSession2Stub extends Stub {
 
     public void play(IMediaController2 iMediaController2) throws RuntimeException {
         onSessionCommand(iMediaController2, 1, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.play();
             }
         });
@@ -531,12 +497,9 @@ class MediaSession2Stub extends Stub {
 
     public void playFromMediaId(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onSessionCommand(iMediaController2, 22, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("playFromMediaId(): Ignoring null mediaId from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "playFromMediaId(): Ignoring null mediaId from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getCallback().onPlayFromMediaId(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, str, bundle);
@@ -546,12 +509,9 @@ class MediaSession2Stub extends Stub {
 
     public void playFromSearch(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onSessionCommand(iMediaController2, 24, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (TextUtils.isEmpty(str)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("playFromSearch(): Ignoring empty query from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "playFromSearch(): Ignoring empty query from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getCallback().onPlayFromSearch(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, str, bundle);
@@ -561,12 +521,9 @@ class MediaSession2Stub extends Stub {
 
     public void playFromUri(IMediaController2 iMediaController2, final Uri uri, final Bundle bundle) {
         onSessionCommand(iMediaController2, 23, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (uri == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("playFromUri(): Ignoring null uri from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "playFromUri(): Ignoring null uri from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getCallback().onPlayFromUri(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, uri, bundle);
@@ -576,7 +533,7 @@ class MediaSession2Stub extends Stub {
 
     public void prepare(IMediaController2 iMediaController2) throws RuntimeException {
         onSessionCommand(iMediaController2, 6, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.prepare();
             }
         });
@@ -584,12 +541,9 @@ class MediaSession2Stub extends Stub {
 
     public void prepareFromMediaId(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onSessionCommand(iMediaController2, 25, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("prepareFromMediaId(): Ignoring null mediaId from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "prepareFromMediaId(): Ignoring null mediaId from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getCallback().onPrepareFromMediaId(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, str, bundle);
@@ -599,12 +553,9 @@ class MediaSession2Stub extends Stub {
 
     public void prepareFromSearch(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onSessionCommand(iMediaController2, 27, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (TextUtils.isEmpty(str)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("prepareFromSearch(): Ignoring empty query from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "prepareFromSearch(): Ignoring empty query from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getCallback().onPrepareFromSearch(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, str, bundle);
@@ -614,12 +565,9 @@ class MediaSession2Stub extends Stub {
 
     public void prepareFromUri(IMediaController2 iMediaController2, final Uri uri, final Bundle bundle) {
         onSessionCommand(iMediaController2, 26, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (uri == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("prepareFromUri(): Ignoring null uri from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "prepareFromUri(): Ignoring null uri from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getCallback().onPrepareFromUri(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, uri, bundle);
@@ -631,21 +579,16 @@ class MediaSession2Stub extends Stub {
         releaseController(iMediaController2);
     }
 
-    /* access modifiers changed from: 0000 */
-    public void removeControllerInfo(ControllerInfo controllerInfo) {
+    /* access modifiers changed from: package-private */
+    public void removeControllerInfo(MediaSession2.ControllerInfo controllerInfo) {
         synchronized (this.mLock) {
-            ControllerInfo controllerInfo2 = (ControllerInfo) this.mControllers.remove(controllerInfo.getId());
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("releasing ");
-            sb.append(controllerInfo2);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "releasing " + this.mControllers.remove(controllerInfo.getId()));
         }
     }
 
     public void removePlaylistItem(IMediaController2 iMediaController2, final Bundle bundle) {
         onSessionCommand(iMediaController2, 16, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().removePlaylistItem(MediaItem2.fromBundle(bundle));
             }
         });
@@ -653,15 +596,15 @@ class MediaSession2Stub extends Stub {
 
     public void replacePlaylistItem(IMediaController2 iMediaController2, final int i, final Bundle bundle) {
         onSessionCommand(iMediaController2, 17, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
-                MediaSession2Stub.this.mSession.getInstance().replacePlaylistItem(i, MediaItem2.fromBundle(bundle, null));
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
+                MediaSession2Stub.this.mSession.getInstance().replacePlaylistItem(i, MediaItem2.fromBundle(bundle, (UUID) null));
             }
         });
     }
 
     public void reset(IMediaController2 iMediaController2) throws RuntimeException {
         onSessionCommand(iMediaController2, 3, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.reset();
             }
         });
@@ -669,7 +612,7 @@ class MediaSession2Stub extends Stub {
 
     public void rewind(IMediaController2 iMediaController2) {
         onSessionCommand(iMediaController2, 8, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getCallback().onRewind(MediaSession2Stub.this.mSession.getInstance(), controllerInfo);
             }
         });
@@ -677,12 +620,9 @@ class MediaSession2Stub extends Stub {
 
     public void search(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onBrowserCommand(iMediaController2, 33, new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (TextUtils.isEmpty(str)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("search(): Ignoring empty query from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "search(): Ignoring empty query from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.getLibrarySession().onSearchOnExecutor(controllerInfo, str, bundle);
@@ -692,7 +632,7 @@ class MediaSession2Stub extends Stub {
 
     public void seekTo(IMediaController2 iMediaController2, final long j) throws RuntimeException {
         onSessionCommand(iMediaController2, 9, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.seekTo(j);
             }
         });
@@ -700,7 +640,7 @@ class MediaSession2Stub extends Stub {
 
     public void selectRoute(IMediaController2 iMediaController2, final Bundle bundle) {
         onSessionCommand(iMediaController2, 37, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getCallback().onSelectRoute(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, bundle);
             }
         });
@@ -709,14 +649,14 @@ class MediaSession2Stub extends Stub {
     public void sendCustomCommand(IMediaController2 iMediaController2, Bundle bundle, final Bundle bundle2, final ResultReceiver resultReceiver) {
         final SessionCommand2 fromBundle = SessionCommand2.fromBundle(bundle);
         onSessionCommand(iMediaController2, SessionCommand2.fromBundle(bundle), (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getCallback().onCustomCommand(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, fromBundle, bundle2, resultReceiver);
             }
         });
     }
 
-    /* access modifiers changed from: 0000 */
-    public void setAllowedCommands(ControllerInfo controllerInfo, SessionCommandGroup2 sessionCommandGroup2) {
+    /* access modifiers changed from: package-private */
+    public void setAllowedCommands(MediaSession2.ControllerInfo controllerInfo, SessionCommandGroup2 sessionCommandGroup2) {
         synchronized (this.mLock) {
             this.mAllowedCommandGroupMap.put(controllerInfo, sessionCommandGroup2);
         }
@@ -724,7 +664,7 @@ class MediaSession2Stub extends Stub {
 
     public void setPlaybackSpeed(IMediaController2 iMediaController2, final float f2) {
         onSessionCommand(iMediaController2, 39, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().setPlaybackSpeed(f2);
             }
         });
@@ -732,12 +672,9 @@ class MediaSession2Stub extends Stub {
 
     public void setPlaylist(IMediaController2 iMediaController2, final List<Bundle> list, final Bundle bundle) {
         onSessionCommand(iMediaController2, 19, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (list == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("setPlaylist(): Ignoring null playlist from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "setPlaylist(): Ignoring null playlist from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.mSession.getInstance().setPlaylist(MediaUtils2.convertBundleListToMediaItem2List(list), MediaMetadata2.fromBundle(bundle));
@@ -747,42 +684,29 @@ class MediaSession2Stub extends Stub {
 
     public void setRating(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onSessionCommand(iMediaController2, 28, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
-                String str = str;
-                String str2 = MediaSession2Stub.TAG;
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("setRating(): Ignoring null mediaId from ");
-                    sb.append(controllerInfo);
-                    Log.w(str2, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "setRating(): Ignoring null mediaId from " + controllerInfo);
                     return;
                 }
                 Bundle bundle = bundle;
                 if (bundle == null) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("setRating(): Ignoring null ratingBundle from ");
-                    sb2.append(controllerInfo);
-                    Log.w(str2, sb2.toString());
+                    Log.w(MediaSession2Stub.TAG, "setRating(): Ignoring null ratingBundle from " + controllerInfo);
                     return;
                 }
                 Rating2 fromBundle = Rating2.fromBundle(bundle);
-                if (fromBundle == null) {
-                    if (bundle == null) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("setRating(): Ignoring null rating from ");
-                        sb3.append(controllerInfo);
-                        Log.w(str2, sb3.toString());
-                    }
-                    return;
+                if (fromBundle != null) {
+                    MediaSession2Stub.this.mSession.getCallback().onSetRating(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, str, fromBundle);
+                } else if (bundle == null) {
+                    Log.w(MediaSession2Stub.TAG, "setRating(): Ignoring null rating from " + controllerInfo);
                 }
-                MediaSession2Stub.this.mSession.getCallback().onSetRating(MediaSession2Stub.this.mSession.getInstance(), controllerInfo, str, fromBundle);
             }
         });
     }
 
     public void setRepeatMode(IMediaController2 iMediaController2, final int i) {
         onSessionCommand(iMediaController2, 14, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().setRepeatMode(i);
             }
         });
@@ -790,7 +714,7 @@ class MediaSession2Stub extends Stub {
 
     public void setShuffleMode(IMediaController2 iMediaController2, final int i) {
         onSessionCommand(iMediaController2, 13, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().setShuffleMode(i);
             }
         });
@@ -798,7 +722,7 @@ class MediaSession2Stub extends Stub {
 
     public void setVolumeTo(IMediaController2 iMediaController2, final int i, final int i2) throws RuntimeException {
         onSessionCommand(iMediaController2, 10, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 VolumeProviderCompat volumeProvider = MediaSession2Stub.this.mSession.getVolumeProvider();
                 if (volumeProvider == null) {
                     MediaSessionCompat sessionCompat = MediaSession2Stub.this.mSession.getSessionCompat();
@@ -815,7 +739,7 @@ class MediaSession2Stub extends Stub {
 
     public void skipToNextItem(IMediaController2 iMediaController2) {
         onSessionCommand(iMediaController2, 4, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().skipToNextItem();
             }
         });
@@ -823,12 +747,9 @@ class MediaSession2Stub extends Stub {
 
     public void skipToPlaylistItem(IMediaController2 iMediaController2, final Bundle bundle) {
         onSessionCommand(iMediaController2, 12, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (bundle == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("skipToPlaylistItem(): Ignoring null mediaItem from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "skipToPlaylistItem(): Ignoring null mediaItem from " + controllerInfo);
                 }
                 MediaSession2Stub.this.mSession.getInstance().skipToPlaylistItem(MediaItem2.fromBundle(bundle));
             }
@@ -837,7 +758,7 @@ class MediaSession2Stub extends Stub {
 
     public void skipToPreviousItem(IMediaController2 iMediaController2) {
         onSessionCommand(iMediaController2, 5, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().skipToPreviousItem();
             }
         });
@@ -845,12 +766,9 @@ class MediaSession2Stub extends Stub {
 
     public void subscribe(IMediaController2 iMediaController2, final String str, final Bundle bundle) {
         onBrowserCommand(iMediaController2, 34, new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("subscribe(): Ignoring null parentId from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "subscribe(): Ignoring null parentId from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.getLibrarySession().onSubscribeOnExecutor(controllerInfo, str, bundle);
@@ -860,7 +778,7 @@ class MediaSession2Stub extends Stub {
 
     public void subscribeRoutesInfo(IMediaController2 iMediaController2) {
         onSessionCommand(iMediaController2, 36, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getCallback().onSubscribeRoutesInfo(MediaSession2Stub.this.mSession.getInstance(), controllerInfo);
             }
         });
@@ -868,12 +786,9 @@ class MediaSession2Stub extends Stub {
 
     public void unsubscribe(IMediaController2 iMediaController2, final String str) {
         onBrowserCommand(iMediaController2, 35, new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 if (str == null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("unsubscribe(): Ignoring null parentId from ");
-                    sb.append(controllerInfo);
-                    Log.w(MediaSession2Stub.TAG, sb.toString());
+                    Log.w(MediaSession2Stub.TAG, "unsubscribe(): Ignoring null parentId from " + controllerInfo);
                     return;
                 }
                 MediaSession2Stub.this.getLibrarySession().onUnsubscribeOnExecutor(controllerInfo, str);
@@ -883,7 +798,7 @@ class MediaSession2Stub extends Stub {
 
     public void unsubscribeRoutesInfo(IMediaController2 iMediaController2) {
         onSessionCommand(iMediaController2, 37, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getCallback().onUnsubscribeRoutesInfo(MediaSession2Stub.this.mSession.getInstance(), controllerInfo);
             }
         });
@@ -891,7 +806,7 @@ class MediaSession2Stub extends Stub {
 
     public void updatePlaylistMetadata(IMediaController2 iMediaController2, final Bundle bundle) {
         onSessionCommand(iMediaController2, 21, (SessionRunnable) new SessionRunnable() {
-            public void run(ControllerInfo controllerInfo) throws RemoteException {
+            public void run(MediaSession2.ControllerInfo controllerInfo) throws RemoteException {
                 MediaSession2Stub.this.mSession.getInstance().updatePlaylistMetadata(MediaMetadata2.fromBundle(bundle));
             }
         });

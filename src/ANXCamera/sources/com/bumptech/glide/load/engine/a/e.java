@@ -1,10 +1,10 @@
 package com.bumptech.glide.load.engine.a;
 
-import com.bumptech.glide.load.engine.a.f.a;
+import com.bumptech.glide.load.engine.a.f;
 import java.io.File;
 
 /* compiled from: DiskLruCacheFactory */
-class e implements a {
+class e implements f.a {
     final /* synthetic */ String Dg;
     final /* synthetic */ String Eg;
 

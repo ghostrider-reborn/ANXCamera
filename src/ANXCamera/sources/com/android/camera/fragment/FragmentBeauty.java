@@ -3,17 +3,18 @@ package com.android.camera.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.SeekBar;
 import com.android.camera.CameraSettings;
+import com.android.camera.HybridZoomingSystem;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.animation.FragmentAnimationFactory;
@@ -27,7 +28,6 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.ComponentDataItem;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.data.data.runing.ComponentRunningShine;
-import com.android.camera.data.data.runing.ComponentRunningShine.ShineType;
 import com.android.camera.fragment.beauty.BeautyBodyFragment;
 import com.android.camera.fragment.beauty.BeautyEyeLightFragment;
 import com.android.camera.fragment.beauty.BeautyLevelFragment;
@@ -43,23 +43,9 @@ import com.android.camera.fragment.live.FragmentLiveSpeed;
 import com.android.camera.fragment.live.FragmentLiveSticker;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BokehFNumberController;
-import com.android.camera.protocol.ModeProtocol.BottomMenuProtocol;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.CameraModuleSpecial;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
-import com.android.camera.protocol.ModeProtocol.ManuallyAdjust;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.NoScrollViewPager;
 import com.android.camera.ui.SeekBarCompat;
-import com.android.camera.ui.SeekBarCompat.OnSeekBarCompatChangeListener;
-import com.android.camera.ui.SeekBarCompat.OnSeekBarCompatTouchListener;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -75,7 +61,7 @@ import java.util.List;
 import miui.view.animation.QuinticEaseInInterpolator;
 import miui.view.animation.QuinticEaseOutInterpolator;
 
-public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiBeautyProtocol, MakeupProtocol, Consumer<Integer>, OnClickListener {
+public class FragmentBeauty extends BaseFragment implements ModeProtocol.HandleBackTrace, ModeProtocol.MiBeautyProtocol, ModeProtocol.MakeupProtocol, Consumer<Integer>, View.OnClickListener {
     public static final int FRAGMENT_INFO = 251;
     private static final int INTERVAL = 5;
     private static final int SEEKBAR_PROGRESS_RATIO = 1;
@@ -134,10 +120,10 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
             resetFragment();
             view.setVisibility(4);
         } else if (i2 == 2) {
-            ((BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).onSwitchCameraActionMenu(0);
+            ((ModeProtocol.BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).onSwitchCameraActionMenu(0);
             Completable.create(new SlideOutOnSubscribe(view, 80).setDurationTime(140).setInterpolator(new QuinticEaseInInterpolator())).subscribe((Action) new c(this));
         } else if (i2 == 3) {
-            ((BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).onSwitchCameraActionMenu(0);
+            ((ModeProtocol.BottomMenuProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(197)).onSwitchCameraActionMenu(0);
             Completable.create(new AlphaOutOnSubscribe(view).setDurationTime(250).setInterpolator(new DecelerateInterpolator())).subscribe((Action) new a(this));
         }
         return true;
@@ -147,21 +133,18 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         if (this.mSeekBarDisposable == null) {
             this.mSeekBarDisposable = Flowable.create(new FlowableOnSubscribe<Integer>() {
                 public void subscribe(FlowableEmitter<Integer> flowableEmitter) throws Exception {
-                    FragmentBeauty.this.mFlowableEmitter = flowableEmitter;
+                    FlowableEmitter unused = FragmentBeauty.this.mFlowableEmitter = flowableEmitter;
                 }
             }, BackpressureStrategy.DROP).observeOn(GlobalConstant.sCameraSetupScheduler).onBackpressureDrop(new Consumer<Integer>() {
                 public void accept(@NonNull Integer num) throws Exception {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("seekbar change too fast :");
-                    sb.append(num.toString());
-                    Log.e(Log.VIEW_TAG, sb.toString());
+                    Log.e(Log.VIEW_TAG, "seekbar change too fast :" + num.toString());
                 }
-            }).subscribe((Consumer<? super T>) this);
+            }).subscribe(this);
             this.mAdjustSeekBar.setProgressDrawable(getResources().getDrawable(R.drawable.seekbar_style));
-            this.mAdjustSeekBar.setOnSeekBarChangeListener(new OnSeekBarCompatChangeListener() {
+            this.mAdjustSeekBar.setOnSeekBarChangeListener(new SeekBarCompat.OnSeekBarCompatChangeListener() {
                 public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
                     if (i == 0 || i == FragmentBeauty.this.mSeekBarMaxProgress || Math.abs(i - FragmentBeauty.this.mActiveProgress) > 5) {
-                        FragmentBeauty.this.mActiveProgress = i;
+                        int unused = FragmentBeauty.this.mActiveProgress = i;
                         FragmentBeauty.this.mFlowableEmitter.onNext(Integer.valueOf(i / 1));
                     }
                 }
@@ -172,7 +155,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
                 public void onStopTrackingTouch(SeekBar seekBar) {
                 }
             });
-            this.mAdjustSeekBar.setOnSeekBarCompatTouchListener(new OnSeekBarCompatTouchListener() {
+            this.mAdjustSeekBar.setOnSeekBarCompatTouchListener(new SeekBarCompat.OnSeekBarCompatTouchListener() {
                 private int getNextProgress(MotionEvent motionEvent) {
                     int width = FragmentBeauty.this.mAdjustSeekBar.getWidth();
                     int x = (int) (((FragmentBeauty.this.mIsRTL ? ((float) width) - motionEvent.getX() : motionEvent.getX()) / ((float) width)) * ((float) FragmentBeauty.this.mSeekBarMaxProgress));
@@ -221,9 +204,8 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
                 } else {
                     i = getResources().getDimensionPixelSize(R.dimen.beauty_fragment_height);
                 }
-                MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mBeautyExtraView.getLayoutParams();
-                ((MarginLayoutParams) this.mViewPager.getLayoutParams()).height = i;
-                marginLayoutParams.height = i;
+                ((ViewGroup.MarginLayoutParams) this.mViewPager.getLayoutParams()).height = i;
+                ((ViewGroup.MarginLayoutParams) this.mBeautyExtraView.getLayoutParams()).height = i;
                 if (this.mBeautySettingManager == null) {
                     this.mBeautySettingManager = new BeautySettingManager();
                 }
@@ -239,9 +221,8 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         this.mBeautyContent.setBackgroundResource(R.color.fullscreen_background);
         if (this.mCurrentMode != 165) {
         }
-        MarginLayoutParams marginLayoutParams2 = (MarginLayoutParams) this.mBeautyExtraView.getLayoutParams();
-        ((MarginLayoutParams) this.mViewPager.getLayoutParams()).height = i;
-        marginLayoutParams2.height = i;
+        ((ViewGroup.MarginLayoutParams) this.mViewPager.getLayoutParams()).height = i;
+        ((ViewGroup.MarginLayoutParams) this.mBeautyExtraView.getLayoutParams()).height = i;
         if (this.mBeautySettingManager == null) {
         }
         this.mCurrentState = 1;
@@ -314,32 +295,33 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
                 case 2:
                     this.mCurrentSettingBusiness = null;
                     setAdjustSeekBarVisible(false, true);
-                    break;
+                    return;
                 case 3:
                 case 4:
                 case 5:
                 case 6:
                 case 7:
                     this.mCurrentSettingBusiness = this.mBeautySettingManager.constructAndGetSetting(str, this.mComponentRunningShine.getTypeElementsBeauty());
-                    break;
+                    return;
                 default:
                     this.mCurrentSettingBusiness = null;
                     setAdjustSeekBarVisible(false, true);
-                    break;
+                    return;
             }
         }
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Code restructure failed: missing block: B:37:0x009a, code lost:
         if (r2.equals("1") != false) goto L_0x009e;
      */
     private void initViewPager() {
         ArrayList arrayList = new ArrayList();
-        Iterator it = this.mComponentRunningShine.getItems().iterator();
+        Iterator<ComponentDataItem> it = this.mComponentRunningShine.getItems().iterator();
         while (true) {
             char c2 = 0;
             if (it.hasNext()) {
-                String str = ((ComponentDataItem) it.next()).mValue;
+                String str = it.next().mValue;
                 int hashCode = str.hashCode();
                 switch (hashCode) {
                     case 49:
@@ -457,7 +439,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     /* renamed from: onDismissFinished */
     public void ea() {
         resetFragment();
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (!isHiddenBeautyPanelOnShutter() || (cameraAction != null && !cameraAction.isDoingAction() && !cameraAction.isRecording())) {
             resetTips();
         }
@@ -465,7 +447,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
 
     private void resetFragment() {
         this.mAdjustSeekBar.setVisibility(4);
-        this.mViewPager.setAdapter(null);
+        this.mViewPager.setAdapter((PagerAdapter) null);
         BaseFragmentPagerAdapter baseFragmentPagerAdapter = this.mBeautyPagerAdapter;
         if (baseFragmentPagerAdapter != null) {
             baseFragmentPagerAdapter.recycleFragmentList(getChildFragmentManager());
@@ -476,8 +458,8 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     /* JADX WARNING: Removed duplicated region for block: B:31:0x0088  */
     /* JADX WARNING: Removed duplicated region for block: B:33:? A[RETURN, SYNTHETIC] */
     private void resetTips() {
-        ConfigChanges configChanges;
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.ConfigChanges configChanges;
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.reInitTipImage();
         }
@@ -490,23 +472,23 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         showZoomTipImage();
         int i = this.mCurrentMode;
         if (i == 163) {
-            CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+            ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
             if (cameraModuleSpecial != null) {
                 cameraModuleSpecial.showOrHideChip(true);
             }
         } else if (i != 165) {
             if (i == 167) {
-                ManuallyAdjust manuallyAdjust = (ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
+                ModeProtocol.ManuallyAdjust manuallyAdjust = (ModeProtocol.ManuallyAdjust) ModeCoordinatorImpl.getInstance().getAttachProtocol(181);
                 if (manuallyAdjust != null) {
                     manuallyAdjust.setManuallyLayoutVisible(true);
                 }
             } else if (i == 171) {
-                BokehFNumberController bokehFNumberController = (BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
+                ModeProtocol.BokehFNumberController bokehFNumberController = (ModeProtocol.BokehFNumberController) ModeCoordinatorImpl.getInstance().getAttachProtocol(210);
                 if (bokehFNumberController != null) {
                     bokehFNumberController.showFNumberPanel(true);
                 }
             }
-            configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+            configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
             if (configChanges == null) {
                 configChanges.reCheckEyeLight();
                 return;
@@ -516,7 +498,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         if (bottomPopupTips != null) {
             bottomPopupTips.updateLyingDirectHint(false, true);
         }
-        configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
         if (configChanges == null) {
         }
     }
@@ -559,9 +541,9 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     }
 
     private void setViewPagerPageByType(String str) {
-        List items = this.mComponentRunningShine.getItems();
+        List<ComponentDataItem> items = this.mComponentRunningShine.getItems();
         for (int i = 0; i < items.size(); i++) {
-            if (((ComponentDataItem) items.get(i)).mValue.equals(str)) {
+            if (items.get(i).mValue.equals(str)) {
                 this.mViewPager.setCurrentItem(i, false);
                 return;
             }
@@ -583,7 +565,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
             if (this.mEyeLightFragment == null) {
                 this.mEyeLightFragment = new BeautyEyeLightFragment();
             }
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (z) {
                 topAlert.alertTopHint(0, (int) R.string.eye_light);
                 BeautyEyeLightFragment beautyEyeLightFragment = this.mEyeLightFragment;
@@ -612,7 +594,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
                         FragmentBeauty fragmentBeauty = FragmentBeauty.this;
                         fragmentBeauty.showHideExtraLayout(false, fragmentBeauty.mEyeLightFragment, FragmentBeauty.this.mEyeLightFragment.getFragmentTag());
                         FragmentBeauty.this.mEyeLightFragment.userInvisibleHit();
-                        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                         if (bottomPopupTips != null) {
                             bottomPopupTips.directlyHideTips();
                         }
@@ -627,9 +609,6 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:13:0x0023, code lost:
-        if (com.android.camera.HybridZoomingSystem.IS_3_OR_MORE_SAT == false) goto L_0x006e;
-     */
     private void showZoomTipImage() {
         int i = this.mCurrentMode;
         if (i != 165) {
@@ -642,19 +621,26 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
                                 break;
                             case 163:
                                 break;
+                            default:
+                                return;
                         }
                     }
                 }
             } else if (!DataRepository.dataItemFeature().Yb()) {
                 return;
             }
+            if (!HybridZoomingSystem.IS_3_OR_MORE_SAT) {
+                return;
+            }
         }
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
-        if (dualController != null && !CameraSettings.isFrontCamera() && !CameraSettings.isUltraWideConfigOpen(this.mCurrentMode) && !CameraSettings.isUltraPixelOn() && (!CameraSettings.isMacroModeEnabled(this.mCurrentMode) || DataRepository.dataItemFeature().mb())) {
-            dualController.showZoomButton();
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
-            if (topAlert != null) {
-                topAlert.clearAlertStatus();
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        if (dualController != null && !CameraSettings.isFrontCamera() && !CameraSettings.isUltraWideConfigOpen(this.mCurrentMode) && !CameraSettings.isUltraPixelOn()) {
+            if (!CameraSettings.isMacroModeEnabled(this.mCurrentMode) || DataRepository.dataItemFeature().mb()) {
+                dualController.showZoomButton();
+                ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                if (topAlert != null) {
+                    topAlert.clearAlertStatus();
+                }
             }
         }
     }
@@ -686,7 +672,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         return R.layout.fragment_beauty;
     }
 
-    public List<TypeItem> getSupportedBeautyItems(@ShineType String str) {
+    public List<TypeItem> getSupportedBeautyItems(@ComponentRunningShine.ShineType String str) {
         return this.mBeautySettingManager.constructAndGetSetting(str, this.mComponentRunningShine.getTypeElementsBeauty()).getSupportedTypeArray(str);
     }
 
@@ -732,25 +718,23 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     }
 
     public void onMakeupItemSelected(String str, boolean z) {
-        if (str == "pref_eye_light_type_key") {
-            if (z) {
-                showHideEyeLighting(!isEyeLightShow());
-            } else {
-                setAdjustSeekBarVisible(false, false);
+        if (str != "pref_eye_light_type_key") {
+            IBeautySettingBusiness iBeautySettingBusiness = this.mCurrentSettingBusiness;
+            if (iBeautySettingBusiness != null) {
+                iBeautySettingBusiness.setCurrentType(str);
+                this.mActiveProgress = this.mCurrentSettingBusiness.getProgressByCurrentItem() * 1;
+                int defaultProgressByCurrentItem = this.mCurrentSettingBusiness.getDefaultProgressByCurrentItem() * 1;
+                if (BeautyConstant.isSupportTwoWayAdjustable(str)) {
+                    setSeekBarMode(2, defaultProgressByCurrentItem);
+                } else {
+                    setSeekBarMode(1, defaultProgressByCurrentItem);
+                }
+                setAdjustSeekBarVisible(true, true);
             }
-            return;
-        }
-        IBeautySettingBusiness iBeautySettingBusiness = this.mCurrentSettingBusiness;
-        if (iBeautySettingBusiness != null) {
-            iBeautySettingBusiness.setCurrentType(str);
-            this.mActiveProgress = this.mCurrentSettingBusiness.getProgressByCurrentItem() * 1;
-            int defaultProgressByCurrentItem = this.mCurrentSettingBusiness.getDefaultProgressByCurrentItem() * 1;
-            if (BeautyConstant.isSupportTwoWayAdjustable(str)) {
-                setSeekBarMode(2, defaultProgressByCurrentItem);
-            } else {
-                setSeekBarMode(1, defaultProgressByCurrentItem);
-            }
-            setAdjustSeekBarVisible(true, true);
+        } else if (z) {
+            showHideEyeLighting(!isEyeLightShow());
+        } else {
+            setAdjustSeekBarVisible(false, false);
         }
     }
 
@@ -761,7 +745,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     public void onViewCreated(View view, @Nullable Bundle bundle) {
         super.onViewCreated(view, bundle);
         if (this.mCurrentMode == 163) {
-            CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+            ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
             if (cameraModuleSpecial != null) {
                 cameraModuleSpecial.showOrHideChip(false);
             }
@@ -789,7 +773,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         registerBackStack(modeCoordinator, this);
         modeCoordinator.attachProtocol(194, this);
@@ -810,9 +794,9 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
         if (baseFragmentPagerAdapter != null) {
             List<Fragment> fragmentList = baseFragmentPagerAdapter.getFragmentList();
             if (fragmentList != null) {
-                for (Fragment fragment : fragmentList) {
-                    if (fragment instanceof BeautyLevelFragment) {
-                        ((BeautyLevelFragment) fragment).setEnableClick(z);
+                for (Fragment next : fragmentList) {
+                    if (next instanceof BeautyLevelFragment) {
+                        ((BeautyLevelFragment) next).setEnableClick(z);
                         return;
                     }
                 }
@@ -823,7 +807,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     public void show() {
         if (this.mCurrentState != 1) {
             if (this.mCurrentMode == 163) {
-                CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+                ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
                 if (cameraModuleSpecial != null) {
                     cameraModuleSpecial.showOrHideChip(false);
                 }
@@ -839,7 +823,7 @@ public class FragmentBeauty extends BaseFragment implements HandleBackTrace, MiB
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         unRegisterBackStack(modeCoordinator, this);
         modeCoordinator.detachProtocol(194, this);

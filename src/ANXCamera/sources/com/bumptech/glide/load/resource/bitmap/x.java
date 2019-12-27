@@ -7,6 +7,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.b;
 import com.bumptech.glide.load.engine.bitmap_recycle.d;
 import com.bumptech.glide.load.g;
 import com.bumptech.glide.load.h;
+import com.bumptech.glide.load.resource.bitmap.o;
 import com.bumptech.glide.util.c;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +18,7 @@ public class x implements h<InputStream, Bitmap> {
     private final o wi;
 
     /* compiled from: StreamBitmapDecoder */
-    static class a implements com.bumptech.glide.load.resource.bitmap.o.a {
+    static class a implements o.a {
         private final RecyclableBufferedInputStream Zd;
         private final c rj;
 
@@ -60,7 +61,7 @@ public class x implements h<InputStream, Bitmap> {
         }
         c h = c.h(recyclableBufferedInputStream);
         try {
-            return this.wi.a((InputStream) new com.bumptech.glide.util.g(h), i, i2, gVar, (com.bumptech.glide.load.resource.bitmap.o.a) new a(recyclableBufferedInputStream, h));
+            return this.wi.a((InputStream) new com.bumptech.glide.util.g(h), i, i2, gVar, (o.a) new a(recyclableBufferedInputStream, h));
         } finally {
             h.release();
             if (z) {

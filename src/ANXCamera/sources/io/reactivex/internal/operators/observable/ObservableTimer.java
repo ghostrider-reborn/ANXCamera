@@ -32,7 +32,7 @@ public final class ObservableTimer extends Observable<Long> {
 
         public void run() {
             if (!isDisposed()) {
-                this.actual.onNext(Long.valueOf(0));
+                this.actual.onNext(0L);
                 lazySet(EmptyDisposable.INSTANCE);
                 this.actual.onComplete();
             }

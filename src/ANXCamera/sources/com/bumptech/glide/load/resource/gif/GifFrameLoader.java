@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
@@ -58,7 +57,7 @@ class GifFrameLoader {
             this.handler.sendMessageAtTime(this.handler.obtainMessage(1, this), this.xl);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Bitmap tg() {
             return this.resource;
         }
@@ -73,7 +72,7 @@ class GifFrameLoader {
         void m();
     }
 
-    private class b implements Callback {
+    private class b implements Handler.Callback {
         static final int Nj = 1;
         static final int Oj = 2;
 
@@ -85,24 +84,23 @@ class GifFrameLoader {
             if (i == 1) {
                 GifFrameLoader.this.onFrameReady((DelayTarget) message.obj);
                 return true;
-            }
-            if (i == 2) {
+            } else if (i != 2) {
+                return false;
+            } else {
                 GifFrameLoader.this.da.d((o<?>) (DelayTarget) message.obj);
+                return false;
             }
-            return false;
         }
     }
 
     GifFrameLoader(c cVar, com.bumptech.glide.b.a aVar, int i, int i2, com.bumptech.glide.load.j<Bitmap> jVar, Bitmap bitmap) {
-        this(cVar.Cf(), c.i(cVar.getContext()), aVar, null, b(c.i(cVar.getContext()), i, i2), jVar, bitmap);
+        this(cVar.Cf(), c.i(cVar.getContext()), aVar, (Handler) null, b(c.i(cVar.getContext()), i, i2), jVar, bitmap);
     }
 
     GifFrameLoader(d dVar, m mVar, com.bumptech.glide.b.a aVar, Handler handler2, j<Bitmap> jVar, com.bumptech.glide.load.j<Bitmap> jVar2, Bitmap bitmap) {
         this.callbacks = new ArrayList();
         this.da = mVar;
-        if (handler2 == null) {
-            handler2 = new Handler(Looper.getMainLooper(), new b());
-        }
+        handler2 = handler2 == null ? new Handler(Looper.getMainLooper(), new b()) : handler2;
         this.Bb = dVar;
         this.handler = handler2;
         this.Sj = jVar;
@@ -163,13 +161,13 @@ class GifFrameLoader {
         this.isRunning = false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Bitmap Gg() {
         DelayTarget delayTarget = this.current;
         return delayTarget != null ? delayTarget.tg() : this.firstFrame;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void Hg() {
         i.a(!this.isRunning, "Can't restart a running animation");
         this.Rj = true;
@@ -180,12 +178,12 @@ class GifFrameLoader {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Bitmap Z() {
         return this.firstFrame;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(com.bumptech.glide.load.j<Bitmap> jVar, Bitmap bitmap) {
         i.checkNotNull(jVar);
         this.Vf = jVar;
@@ -194,7 +192,7 @@ class GifFrameLoader {
         this.Sj = this.Sj.b(new com.bumptech.glide.request.f().c(jVar));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(a aVar) {
         if (this.Tj) {
             throw new IllegalStateException("Cannot subscribe to a cleared frame loader");
@@ -209,7 +207,7 @@ class GifFrameLoader {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void b(a aVar) {
         this.callbacks.remove(aVar);
         if (this.callbacks.isEmpty()) {
@@ -217,12 +215,12 @@ class GifFrameLoader {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public com.bumptech.glide.load.j<Bitmap> ba() {
         return this.Vf;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void clear() {
         this.callbacks.clear();
         Kk();
@@ -246,12 +244,12 @@ class GifFrameLoader {
         this.Tj = true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public ByteBuffer getBuffer() {
         return this.Pj.getData().asReadOnlyBuffer();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getCurrentIndex() {
         DelayTarget delayTarget = this.current;
         if (delayTarget != null) {
@@ -260,32 +258,32 @@ class GifFrameLoader {
         return -1;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getFrameCount() {
         return this.Pj.getFrameCount();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getHeight() {
         return Gg().getHeight();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getLoopCount() {
         return this.Pj.F();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getSize() {
         return this.Pj.x() + getFrameSize();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getWidth() {
         return Gg().getWidth();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void onFrameReady(DelayTarget delayTarget) {
         OnEveryFrameListener onEveryFrameListener = this.Vj;
@@ -303,7 +301,7 @@ class GifFrameLoader {
                 DelayTarget delayTarget2 = this.current;
                 this.current = delayTarget;
                 for (int size = this.callbacks.size() - 1; size >= 0; size--) {
-                    ((a) this.callbacks.get(size)).m();
+                    this.callbacks.get(size).m();
                 }
                 if (delayTarget2 != null) {
                     this.handler.obtainMessage(2, delayTarget2).sendToTarget();
@@ -313,7 +311,7 @@ class GifFrameLoader {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void setOnEveryFrameReadyListener(@Nullable OnEveryFrameListener onEveryFrameListener) {
         this.Vj = onEveryFrameListener;

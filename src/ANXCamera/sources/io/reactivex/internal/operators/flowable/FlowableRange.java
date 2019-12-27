@@ -31,7 +31,7 @@ public final class FlowableRange extends Flowable<Integer> {
             this.index = this.end;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void fastPath();
 
         public final boolean isEmpty() {
@@ -62,7 +62,7 @@ public final class FlowableRange extends Flowable<Integer> {
             return i & 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void slowPath(long j);
     }
 
@@ -75,7 +75,7 @@ public final class FlowableRange extends Flowable<Integer> {
             this.actual = conditionalSubscriber;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fastPath() {
             int i = this.end;
             ConditionalSubscriber<? super Integer> conditionalSubscriber = this.actual;
@@ -93,7 +93,7 @@ public final class FlowableRange extends Flowable<Integer> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(long j) {
             int i = this.end;
             int i2 = this.index;
@@ -103,16 +103,17 @@ public final class FlowableRange extends Flowable<Integer> {
                 long j3 = 0;
                 while (true) {
                     if (j3 == j2 || i2 == i) {
-                        if (i2 == i) {
-                            if (!this.cancelled) {
-                                conditionalSubscriber.onComplete();
+                        if (i2 != i) {
+                            j2 = get();
+                            if (j3 == j2) {
+                                this.index = i2;
+                                j2 = addAndGet(-j3);
                             }
+                        } else if (!this.cancelled) {
+                            conditionalSubscriber.onComplete();
                             return;
-                        }
-                        j2 = get();
-                        if (j3 == j2) {
-                            this.index = i2;
-                            j2 = addAndGet(-j3);
+                        } else {
+                            return;
                         }
                     } else if (!this.cancelled) {
                         if (conditionalSubscriber.tryOnNext(Integer.valueOf(i2))) {
@@ -136,7 +137,7 @@ public final class FlowableRange extends Flowable<Integer> {
             this.actual = subscriber;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fastPath() {
             int i = this.end;
             Subscriber<? super Integer> subscriber = this.actual;
@@ -154,7 +155,7 @@ public final class FlowableRange extends Flowable<Integer> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(long j) {
             int i = this.end;
             int i2 = this.index;
@@ -164,16 +165,17 @@ public final class FlowableRange extends Flowable<Integer> {
                 long j3 = 0;
                 while (true) {
                     if (j3 == j2 || i2 == i) {
-                        if (i2 == i) {
-                            if (!this.cancelled) {
-                                subscriber.onComplete();
+                        if (i2 != i) {
+                            j2 = get();
+                            if (j3 == j2) {
+                                this.index = i2;
+                                j2 = addAndGet(-j3);
                             }
+                        } else if (!this.cancelled) {
+                            subscriber.onComplete();
                             return;
-                        }
-                        j2 = get();
-                        if (j3 == j2) {
-                            this.index = i2;
-                            j2 = addAndGet(-j3);
+                        } else {
+                            return;
                         }
                     } else if (!this.cancelled) {
                         subscriber.onNext(Integer.valueOf(i2));

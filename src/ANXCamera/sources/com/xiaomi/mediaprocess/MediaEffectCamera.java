@@ -1,7 +1,6 @@
 package com.xiaomi.mediaprocess;
 
 import android.media.Image;
-import android.media.Image.Plane;
 import android.util.Log;
 import java.nio.ByteBuffer;
 import javax.microedition.khronos.egl.EGLContext;
@@ -43,29 +42,20 @@ public class MediaEffectCamera {
 
     public void CancelRecording() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cancel MediaFilterCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
+        Log.d(str, "Cancel MediaFilterCamera: " + this.mMediaFilterCamera);
         CancelRecordingJni(this.mMediaFilterCamera);
     }
 
     public void ConstructMediaEffectCamera(int i, int i2, int i3, int i4, EffectCameraNotifier effectCameraNotifier) {
         this.mMediaFilterCameraNotify = effectCameraNotifier;
-        this.mMediaFilterCamera = ConstructMediaEffectCameraJni(null, i, i2, i3, i4, this.mMediaFilterCameraNotify);
+        this.mMediaFilterCamera = ConstructMediaEffectCameraJni((EGLContext) null, i, i2, i3, i4, this.mMediaFilterCameraNotify);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("construct MediaFilterCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
+        Log.d(str, "construct MediaFilterCamera: " + this.mMediaFilterCamera);
     }
 
     public void DestructMediaEffectCamera() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("destruct MediaEffectCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
+        Log.d(str, "destruct MediaEffectCamera: " + this.mMediaFilterCamera);
         DestructMediaEffectCameraJni(this.mMediaFilterCamera);
         this.mMediaFilterCamera = 0;
         this.mMediaFilterCameraNotify = null;
@@ -78,38 +68,26 @@ public class MediaEffectCamera {
 
     public void PauseRecording() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Pause MediaFilterCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
+        Log.d(str, "Pause MediaFilterCamera: " + this.mMediaFilterCamera);
         PauseRecordingJni(this.mMediaFilterCamera);
     }
 
     public void PushExtraYAndUVFrame(Image image) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("PushExtraYUVFrame MediaFilterCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
-        Plane[] planes = image.getPlanes();
+        Log.d(str, "PushExtraYUVFrame MediaFilterCamera: " + this.mMediaFilterCamera);
+        Image.Plane[] planes = image.getPlanes();
         PushExtraYAndUVFrameJni(this.mMediaFilterCamera, planes[0].getBuffer(), planes[2].getBuffer(), planes[0].getRowStride(), image.getHeight(), image.getTimestamp() / 1000000);
     }
 
     public void ResumeRecording() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Resume MediaFilterCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
+        Log.d(str, "Resume MediaFilterCamera: " + this.mMediaFilterCamera);
         ResumeRecordingJni(this.mMediaFilterCamera);
     }
 
     public void SetOrientation(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SetOrientation MediaFilterCamera: ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "SetOrientation MediaFilterCamera: " + i);
         SetOrientationJni(this.mMediaFilterCamera, i);
     }
 
@@ -127,10 +105,7 @@ public class MediaEffectCamera {
 
     public void StopRecording() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Stop MediaFilterCamera: ");
-        sb.append(this.mMediaFilterCamera);
-        Log.d(str, sb.toString());
+        Log.d(str, "Stop MediaFilterCamera: " + this.mMediaFilterCamera);
         StopRecordingJni(this.mMediaFilterCamera);
     }
 }

@@ -46,14 +46,13 @@ public class AsyncTimeout extends Timeout {
     @Nullable
     static AsyncTimeout awaitTimeout() throws InterruptedException {
         AsyncTimeout asyncTimeout = head.next;
-        AsyncTimeout asyncTimeout2 = null;
         if (asyncTimeout == null) {
             long nanoTime = System.nanoTime();
             AsyncTimeout.class.wait(IDLE_TIMEOUT_MILLIS);
-            if (head.next == null && System.nanoTime() - nanoTime >= IDLE_TIMEOUT_NANOS) {
-                asyncTimeout2 = head;
+            if (head.next != null || System.nanoTime() - nanoTime < IDLE_TIMEOUT_NANOS) {
+                return null;
             }
-            return asyncTimeout2;
+            return head;
         }
         long remainingNanos = asyncTimeout.remainingNanos(System.nanoTime());
         if (remainingNanos > 0) {
@@ -133,15 +132,15 @@ public class AsyncTimeout extends Timeout {
         throw new IllegalStateException("Unbalanced enter/exit");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final IOException exit(IOException iOException) throws IOException {
         return !exit() ? iOException : newTimeoutException(iOException);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void exit(boolean z) throws IOException {
         if (exit() && z) {
-            throw newTimeoutException(null);
+            throw newTimeoutException((IOException) null);
         }
     }
 
@@ -195,11 +194,7 @@ public class AsyncTimeout extends Timeout {
             }
 
             public String toString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append("AsyncTimeout.sink(");
-                sb.append(sink);
-                sb.append(")");
-                return sb.toString();
+                return "AsyncTimeout.sink(" + sink + ")";
             }
 
             public void write(Buffer buffer, long j) throws IOException {
@@ -272,11 +267,7 @@ public class AsyncTimeout extends Timeout {
             }
 
             public String toString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append("AsyncTimeout.source(");
-                sb.append(source);
-                sb.append(")");
-                return sb.toString();
+                return "AsyncTimeout.source(" + source + ")";
             }
         };
     }

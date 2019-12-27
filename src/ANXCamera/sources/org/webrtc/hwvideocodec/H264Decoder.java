@@ -1,13 +1,13 @@
 package org.webrtc.hwvideocodec;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecInfo.CodecCapabilities;
 import android.media.MediaCodecList;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.util.Log;
+import android.view.Surface;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -69,7 +69,7 @@ class H264Decoder {
                     this.queue.offer(Integer.valueOf(i));
                     this.sum_time += i;
                     if (this.queue.size() > 25) {
-                        this.sum_time -= ((Integer) this.queue.poll()).intValue();
+                        this.sum_time -= this.queue.poll().intValue();
                     }
                     this.frame_rate = (this.queue.size() * 1000) / this.sum_time;
                 }
@@ -100,17 +100,9 @@ class H264Decoder {
     }
 
     private int dequeueOutputBuffer() {
-        String str = "slice-height";
-        String str2 = "stride";
-        String str3 = "color-format";
-        String str4 = "crop-right";
-        String str5 = "crop-left";
-        String str6 = "crop-bottom";
-        String str7 = "crop-top";
-        String str8 = TAG;
         int i = -2;
         try {
-            BufferInfo bufferInfo = new BufferInfo();
+            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             int dequeueOutputBuffer = this.mediaCodec.dequeueOutputBuffer(bufferInfo, 100000);
             this.timeStamp = bufferInfo.presentationTimeUs;
             while (true) {
@@ -126,54 +118,31 @@ class H264Decoder {
                     this.outputBuffers = this.mediaCodec.getOutputBuffers();
                 } else if (dequeueOutputBuffer == i) {
                     MediaFormat outputFormat = this.mediaCodec.getOutputFormat();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Format changed: ");
-                    sb.append(outputFormat.toString());
-                    Log.d(str8, sb.toString());
+                    Log.d(TAG, "Format changed: " + outputFormat.toString());
                     this.width = outputFormat.getInteger("width");
                     this.height = outputFormat.getInteger("height");
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("new width: ");
-                    sb2.append(this.width);
-                    sb2.append("new height:");
-                    sb2.append(this.height);
-                    Log.d(str8, sb2.toString());
-                    if (outputFormat.containsKey(str7)) {
-                        this.cropTop = outputFormat.getInteger(str7);
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Crop-top:");
-                        sb3.append(this.cropTop);
-                        Log.d(str8, sb3.toString());
+                    Log.d(TAG, "new width: " + this.width + "new height:" + this.height);
+                    if (outputFormat.containsKey("crop-top")) {
+                        this.cropTop = outputFormat.getInteger("crop-top");
+                        Log.d(TAG, "Crop-top:" + this.cropTop);
                     }
-                    if (outputFormat.containsKey(str6)) {
-                        this.cropBottom = outputFormat.getInteger(str6);
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("Crop-bottom:");
-                        sb4.append(this.cropBottom);
-                        Log.d(str8, sb4.toString());
+                    if (outputFormat.containsKey("crop-bottom")) {
+                        this.cropBottom = outputFormat.getInteger("crop-bottom");
+                        Log.d(TAG, "Crop-bottom:" + this.cropBottom);
                     }
-                    if (outputFormat.containsKey(str5)) {
-                        this.cropLeft = outputFormat.getInteger(str5);
-                        StringBuilder sb5 = new StringBuilder();
-                        sb5.append("Crop-left:");
-                        sb5.append(this.cropLeft);
-                        Log.d(str8, sb5.toString());
+                    if (outputFormat.containsKey("crop-left")) {
+                        this.cropLeft = outputFormat.getInteger("crop-left");
+                        Log.d(TAG, "Crop-left:" + this.cropLeft);
                     }
-                    if (outputFormat.containsKey(str4)) {
-                        this.cropRight = outputFormat.getInteger(str4);
-                        StringBuilder sb6 = new StringBuilder();
-                        sb6.append("Crop-right:");
-                        sb6.append(this.cropRight);
-                        Log.d(str8, sb6.toString());
+                    if (outputFormat.containsKey("crop-right")) {
+                        this.cropRight = outputFormat.getInteger("crop-right");
+                        Log.d(TAG, "Crop-right:" + this.cropRight);
                     }
-                    if (outputFormat.containsKey(str3)) {
-                        int integer = outputFormat.getInteger(str3);
+                    if (outputFormat.containsKey("color-format")) {
+                        int integer = outputFormat.getInteger("color-format");
                         this.colorFormat = integer;
                         this.outputColorFormat = integer;
-                        StringBuilder sb7 = new StringBuilder();
-                        sb7.append("Color: 0x");
-                        sb7.append(Integer.toHexString(this.colorFormat));
-                        Log.d(str8, sb7.toString());
+                        Log.d(TAG, "Color: 0x" + Integer.toHexString(this.colorFormat));
                         int[] iArr = supportedColorList;
                         int length = iArr.length;
                         boolean z = false;
@@ -189,22 +158,17 @@ class H264Decoder {
                             i2++;
                         }
                         if (!z) {
-                            Log.e(str8, "Non supported color format");
+                            Log.e(TAG, "Non supported color format");
                             return -2;
                         }
                     }
-                    if (outputFormat.containsKey(str2)) {
-                        this.stride = outputFormat.getInteger(str2);
+                    if (outputFormat.containsKey("stride")) {
+                        this.stride = outputFormat.getInteger("stride");
                     }
-                    if (outputFormat.containsKey(str)) {
-                        this.sliceHeight = outputFormat.getInteger(str);
+                    if (outputFormat.containsKey("slice-height")) {
+                        this.sliceHeight = outputFormat.getInteger("slice-height");
                     }
-                    StringBuilder sb8 = new StringBuilder();
-                    sb8.append("Frame stride and slice height: ");
-                    sb8.append(this.stride);
-                    sb8.append(" x ");
-                    sb8.append(this.sliceHeight);
-                    Log.i(str8, sb8.toString());
+                    Log.i(TAG, "Frame stride and slice height: " + this.stride + " x " + this.sliceHeight);
                     this.stride = Math.max(this.width, this.stride);
                     this.sliceHeight = Math.max(this.height, this.sliceHeight);
                 }
@@ -214,10 +178,7 @@ class H264Decoder {
                 i = -2;
             }
         } catch (Exception e2) {
-            StringBuilder sb9 = new StringBuilder();
-            sb9.append("find exception at dequeueOutputBuffer:");
-            sb9.append(e2);
-            Log.e(str8, sb9.toString());
+            Log.e(TAG, "find exception at dequeueOutputBuffer:" + e2);
             return -2;
         }
     }
@@ -241,27 +202,27 @@ class H264Decoder {
         }
     }
 
-    /* JADX WARNING: type inference failed for: r2v0 */
-    /* JADX WARNING: type inference failed for: r2v3 */
-    /* JADX WARNING: type inference failed for: r2v6 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v0, resolved type: org.webrtc.hwvideocodec.H264Decoder$DecoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v1, resolved type: org.webrtc.hwvideocodec.H264Decoder$DecoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: org.webrtc.hwvideocodec.H264Decoder$DecoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v3, resolved type: org.webrtc.hwvideocodec.H264Decoder$DecoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r6v2, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r6v3, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v6, resolved type: org.webrtc.hwvideocodec.H264Decoder$DecoderProperties} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r6v7, resolved type: java.lang.String} */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 3 */
     private static DecoderProperties findHwDecoder(String str) {
-        DecoderProperties decoderProperties;
         String str2;
-        int[] iArr;
-        String[] strArr;
-        int[] iArr2;
-        String str3 = str;
-        String str4 = TAG;
-        ? r2 = 0;
+        String str3;
+        String name;
+        String str4 = str;
+        DecoderProperties decoderProperties = null;
         try {
-            if (VERSION.SDK_INT < 19) {
-                Log.i(str4, "sdk version too low");
+            if (Build.VERSION.SDK_INT < 19) {
+                Log.i(TAG, "sdk version too low");
                 return null;
             }
             int i = 0;
-            DecoderProperties decoderProperties2 = r2;
             while (i < MediaCodecList.getCodecCount()) {
                 MediaCodecInfo codecInfoAt = MediaCodecList.getCodecInfoAt(i);
                 if (!codecInfoAt.isEncoder()) {
@@ -270,82 +231,63 @@ class H264Decoder {
                     int i2 = 0;
                     while (true) {
                         if (i2 >= length) {
-                            str2 = decoderProperties2;
+                            str2 = decoderProperties;
                             break;
                         }
-                        String str5 = supportedTypes[i2];
-                        if (str5.equals(str3)) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("mimeType is ");
-                            sb.append(str5);
-                            Log.i(str4, sb.toString());
-                            String name = codecInfoAt.getName();
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("name is  ");
-                            sb2.append(name);
-                            Log.i(str4, sb2.toString());
+                        if (supportedTypes[i2].equals(str4)) {
+                            Log.i(TAG, "mimeType is " + r9);
+                            Log.i(TAG, "name is  " + name);
                             str2 = name;
                             break;
                         }
                         i2++;
                     }
                     if (str2 != 0) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Found candidate decoder ");
-                        sb3.append(str2);
-                        Log.d(str4, sb3.toString());
-                        CodecCapabilities capabilitiesForType = codecInfoAt.getCapabilitiesForType(str3);
+                        Log.d(TAG, "Found candidate decoder " + str2);
+                        MediaCodecInfo.CodecCapabilities capabilitiesForType = codecInfoAt.getCapabilitiesForType(str4);
                         for (int i3 : capabilitiesForType.colorFormats) {
-                            StringBuilder sb4 = new StringBuilder();
-                            sb4.append("   Color: 0x");
-                            sb4.append(Integer.toHexString(i3));
-                            Log.d(str4, sb4.toString());
+                            Log.d(TAG, "   Color: 0x" + Integer.toHexString(i3));
                         }
-                        for (String str6 : supportedHwCodecPrefixes) {
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append(" hwCodecPrefix :");
-                            sb5.append(str6);
-                            Log.i(str4, sb5.toString());
-                            if (str2.startsWith(str6)) {
-                                for (int i4 : supportedColorList) {
-                                    int[] iArr3 = capabilitiesForType.colorFormats;
-                                    int length2 = iArr3.length;
-                                    int i5 = 0;
-                                    while (i5 < length2) {
+                        String[] strArr = supportedHwCodecPrefixes;
+                        int length2 = strArr.length;
+                        int i4 = 0;
+                        while (i4 < length2) {
+                            Log.i(TAG, " hwCodecPrefix :" + str3);
+                            if (str2.startsWith(str3)) {
+                                for (int i5 : supportedColorList) {
+                                    int[] iArr = capabilitiesForType.colorFormats;
+                                    int length3 = iArr.length;
+                                    int i6 = 0;
+                                    while (i6 < length3) {
                                         try {
-                                            int i6 = iArr3[i5];
-                                            if (i6 == i4) {
-                                                StringBuilder sb6 = new StringBuilder();
-                                                sb6.append("Found target decoder ");
-                                                sb6.append(str2);
-                                                sb6.append(". Color: 0x");
-                                                sb6.append(Integer.toHexString(i6));
-                                                Log.d(str4, sb6.toString());
-                                                return new DecoderProperties(str2, i6);
+                                            int i7 = iArr[i6];
+                                            if (i7 == i5) {
+                                                Log.d(TAG, "Found target decoder " + str2 + ". Color: 0x" + Integer.toHexString(i7));
+                                                return new DecoderProperties(str2, i7);
                                             }
-                                            i5++;
+                                            i6++;
                                         } catch (Exception e2) {
                                             e = e2;
-                                            decoderProperties = 0;
-                                            Log.e(str4, "find exception at findHwDecoder:", e);
+                                            decoderProperties = null;
+                                            Log.e(TAG, "find exception at findHwDecoder:", e);
                                             return decoderProperties;
                                         }
                                     }
                                 }
                                 continue;
                             }
+                            i4++;
                         }
                         continue;
                     }
                 }
                 i++;
-                decoderProperties2 = 0;
+                decoderProperties = null;
             }
-            return decoderProperties2;
+            return decoderProperties;
         } catch (Exception e3) {
             e = e3;
-            decoderProperties = r2;
-            Log.e(str4, "find exception at findHwDecoder:", e);
+            Log.e(TAG, "find exception at findHwDecoder:", e);
             return decoderProperties;
         }
     }
@@ -379,8 +321,6 @@ class H264Decoder {
     public native void DeliverFrame(ByteBuffer byteBuffer, long j, int i, int i2, int i3, int i4, int i5, int i6, int i7, long j2, int i8);
 
     public boolean decodeFrameInputStream(H264I420Frame h264I420Frame) {
-        String str = TAG;
-        boolean z = false;
         try {
             int dequeueInputBuffer = dequeueInputBuffer();
             if (dequeueInputBuffer >= 0) {
@@ -388,13 +328,12 @@ class H264Decoder {
                 byteBuffer.clear();
                 byteBuffer.put(h264I420Frame.buffer);
                 this.counter++;
-                z = queueInputBuffer(dequeueInputBuffer, h264I420Frame.size, h264I420Frame.timeStamp);
-            } else {
-                Log.i(str, " get inputBuffer error, maybe discard a frame");
+                return queueInputBuffer(dequeueInputBuffer, h264I420Frame.size, h264I420Frame.timeStamp);
             }
-            return z;
+            Log.i(TAG, " get inputBuffer error, maybe discard a frame");
+            return false;
         } catch (Exception e2) {
-            Log.e(str, "find exception at decodeFrameInputStream:", e2);
+            Log.e(TAG, "find exception at decodeFrameInputStream:", e2);
             return false;
         }
     }
@@ -457,45 +396,46 @@ class H264Decoder {
     public void deliverDecodedFrame() {
         String str;
         int i;
-        String str2 = TAG;
         try {
             int dequeueOutputBuffer = dequeueOutputBuffer();
             if (dequeueOutputBuffer >= 0) {
                 if (this.nativeContext != 0) {
                     averageFrameRate(System.currentTimeMillis());
                     if (!this.drop_frame || this.last_drop || !dropFrame(this.frame_rate, System.currentTimeMillis())) {
-                        str = str2;
+                        ByteBuffer byteBuffer = this.outputBuffers[dequeueOutputBuffer];
+                        long j = this.nativeContext;
+                        int i2 = this.width;
+                        int i3 = this.height;
+                        int i4 = this.stride;
+                        int i5 = this.cropTop;
+                        int i6 = this.cropBottom;
+                        int i7 = this.cropLeft;
+                        int i8 = this.cropRight;
+                        long j2 = this.timeStamp;
+                        int i9 = this.outputColorFormat;
+                        str = TAG;
                         i = dequeueOutputBuffer;
                         try {
-                            DeliverFrame(this.outputBuffers[dequeueOutputBuffer], this.nativeContext, this.width, this.height, this.stride, this.cropTop, this.cropBottom, this.cropLeft, this.cropRight, this.timeStamp, this.outputColorFormat);
+                            DeliverFrame(byteBuffer, j, i2, i3, i4, i5, i6, i7, i8, j2, i9);
                             this.last_drop = false;
                             releaseOutputBuffer(i);
                         } catch (Exception e2) {
                             e = e2;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("find exception at deliverOutPutsTimer:");
-                            sb.append(e);
-                            Log.e(str, sb.toString());
+                            Log.e(str, "find exception at deliverOutPutsTimer:" + e);
                         }
                     } else {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("drop this frame! frame rate: ");
-                        sb2.append(this.frame_rate);
-                        Log.i(str2, sb2.toString());
+                        Log.i(TAG, "drop this frame! frame rate: " + this.frame_rate);
                         this.last_drop = true;
                     }
                 }
-                String str3 = str2;
+                Object obj = TAG;
                 i = dequeueOutputBuffer;
                 releaseOutputBuffer(i);
             }
         } catch (Exception e3) {
             e = e3;
-            str = str2;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("find exception at deliverOutPutsTimer:");
-            sb3.append(e);
-            Log.e(str, sb3.toString());
+            str = TAG;
+            Log.e(str, "find exception at deliverOutPutsTimer:" + e);
         }
     }
 
@@ -505,48 +445,27 @@ class H264Decoder {
     }
 
     public boolean initDecoder(int i, int i2, int i3, int i4, boolean z, long j) throws IOException {
-        String str = "color-format";
-        String str2 = TAG;
         try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("decoder init with:");
-            sb.append(i2);
-            sb.append(" height:");
-            sb.append(i3);
-            sb.append(" getWidth:");
-            sb.append(" context:");
-            sb.append(j);
-            sb.append(" frameRate:");
-            sb.append(i4);
-            Log.i(str2, sb.toString());
-            String str3 = i == 0 ? AVC_MIME_TYPE : i == 1 ? HEVC_MIME_TYPE : null;
-            DecoderProperties findHwDecoder = findHwDecoder(str3);
+            Log.i(TAG, "decoder init with:" + i2 + " height:" + i3 + " getWidth:" + " context:" + j + " frameRate:" + i4);
+            String str = i == 0 ? AVC_MIME_TYPE : i == 1 ? HEVC_MIME_TYPE : null;
+            DecoderProperties findHwDecoder = findHwDecoder(str);
             if (findHwDecoder == null) {
                 return false;
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Java initDecode: ");
-            sb2.append(i2);
-            sb2.append(" x ");
-            sb2.append(i3);
-            sb2.append(" drop_frame ");
-            sb2.append(z);
-            sb2.append(". Color: 0x");
-            sb2.append(Integer.toHexString(findHwDecoder.colorFormat));
-            Log.d(str2, sb2.toString());
+            Log.d(TAG, "Java initDecode: " + i2 + " x " + i3 + " drop_frame " + z + ". Color: 0x" + Integer.toHexString(findHwDecoder.colorFormat));
             this.width = i2;
             this.height = i3;
             this.drop_frame = z;
             this.stride = i2;
             this.sliceHeight = i3;
             this.cropTop = 0;
-            this.cropBottom = i3 - 1;
+            this.cropBottom = i3 + -1;
             this.cropLeft = 0;
-            this.cropRight = i2 - 1;
+            this.cropRight = i2 + -1;
             this.dequedBufferIndex = -1;
             this.nativeContext = j;
             this.timeStamp = 0;
-            MediaFormat createVideoFormat = MediaFormat.createVideoFormat(str3, i2, i3);
+            MediaFormat createVideoFormat = MediaFormat.createVideoFormat(str, i2, i3);
             if (i4 == 0) {
                 i4 = 60;
             }
@@ -556,43 +475,37 @@ class H264Decoder {
                 Log.i("hevc decoder", "decoder init error null");
                 return false;
             }
-            this.mediaCodec.configure(createVideoFormat, null, null, 0);
+            this.mediaCodec.configure(createVideoFormat, (Surface) null, (MediaCrypto) null, 0);
             this.mediaCodec.start();
             this.colorFormat = findHwDecoder.colorFormat;
             this.outputBuffers = this.mediaCodec.getOutputBuffers();
             this.inputBuffers = this.mediaCodec.getInputBuffers();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Input buffers: ");
-            sb3.append(this.inputBuffers.length);
-            sb3.append(". Output buffers: ");
-            sb3.append(this.outputBuffers.length);
-            Log.d(str2, sb3.toString());
+            Log.d(TAG, "Input buffers: " + this.inputBuffers.length + ". Output buffers: " + this.outputBuffers.length);
             MediaFormat outputFormat = this.mediaCodec.getOutputFormat();
-            if (outputFormat.containsKey(str)) {
-                this.outputColorFormat = outputFormat.getInteger(str);
+            if (outputFormat.containsKey("color-format")) {
+                this.outputColorFormat = outputFormat.getInteger("color-format");
             }
             this.running = true;
             this.outputThread = createOutputThread();
             this.outputThread.start();
-            Log.i(str2, "decoder init done");
+            Log.i(TAG, "decoder init done");
             return true;
         } catch (Exception e2) {
-            Log.e(str2, "find exception at initDecode :", e2);
+            Log.e(TAG, "find exception at initDecode :", e2);
             return false;
         }
     }
 
     public void release() {
-        String str = TAG;
         try {
-            Log.i(str, "decoder release begin");
+            Log.i(TAG, "decoder release begin");
             this.running = false;
             this.mediaCodec.stop();
             this.mediaCodec.release();
             this.mediaCodec = null;
-            Log.i(str, "decoder release done");
+            Log.i(TAG, "decoder release done");
         } catch (Exception e2) {
-            Log.e(str, "find exception at release:", e2);
+            Log.e(TAG, "find exception at release:", e2);
         }
     }
 }

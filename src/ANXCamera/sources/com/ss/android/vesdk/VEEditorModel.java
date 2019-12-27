@@ -2,12 +2,11 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.ColorInt;
-import com.ss.android.vesdk.VEEditor.VIDEO_RATIO;
+import com.ss.android.vesdk.VEEditor;
 
 public class VEEditorModel implements Parcelable {
-    public static final Creator<VEEditorModel> CREATOR = new Creator<VEEditorModel>() {
+    public static final Parcelable.Creator<VEEditorModel> CREATOR = new Parcelable.Creator<VEEditorModel>() {
         public VEEditorModel createFromParcel(Parcel parcel) {
             return new VEEditorModel(parcel);
         }
@@ -35,7 +34,7 @@ public class VEEditorModel implements Parcelable {
     public boolean separateAV;
     public String[] transitions;
     public boolean useColorFilterResIntensity;
-    public VIDEO_RATIO videoOutRes;
+    public VEEditor.VIDEO_RATIO videoOutRes;
     public String[] videoPaths;
     public String watermarkFile;
     public double watermarkHeight;
@@ -52,7 +51,7 @@ public class VEEditorModel implements Parcelable {
         this.outputPoint = parcel.readInt();
         boolean z = false;
         this.reverseDone = parcel.readInt() == 1;
-        this.videoOutRes = VIDEO_RATIO.values()[parcel.readInt()];
+        this.videoOutRes = VEEditor.VIDEO_RATIO.values()[parcel.readInt()];
         this.separateAV = parcel.readInt() == 1;
         this.masterTrackIndex = parcel.readInt();
         this.audioEffectFilterIndex = parcel.readInt();
@@ -90,10 +89,7 @@ public class VEEditorModel implements Parcelable {
         this.colorFilterRightPath = parcel.readString();
         this.colorFilterPosition = parcel.readFloat();
         this.colorFilterIntensity = parcel.readFloat();
-        if (parcel.readInt() == 1) {
-            z = true;
-        }
-        this.useColorFilterResIntensity = z;
+        this.useColorFilterResIntensity = parcel.readInt() == 1 ? true : z;
     }
 
     public int describeContents() {

@@ -58,7 +58,7 @@ public final class ObservableFromArray<T> extends Observable<T> {
             return 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             T[] tArr = this.array;
             int length = tArr.length;
@@ -66,11 +66,7 @@ public final class ObservableFromArray<T> extends Observable<T> {
                 T t = tArr[i];
                 if (t == null) {
                     Observer<? super T> observer = this.actual;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("The ");
-                    sb.append(i);
-                    sb.append("th element is null");
-                    observer.onError(new NullPointerException(sb.toString()));
+                    observer.onError(new NullPointerException("The " + i + "th element is null"));
                     return;
                 }
                 this.actual.onNext(t);

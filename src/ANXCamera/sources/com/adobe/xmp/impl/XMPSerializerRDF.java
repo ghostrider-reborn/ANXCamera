@@ -73,12 +73,7 @@ public class XMPSerializerRDF {
     }
 
     private boolean canBeRDFAttrProp(XMPNode xMPNode) {
-        if (!xMPNode.hasQualifier() && !xMPNode.getOptions().isURI() && !xMPNode.getOptions().isCompositeProperty()) {
-            if (!XMPConst.ARRAY_ITEM_NAME.equals(xMPNode.getName())) {
-                return true;
-            }
-        }
-        return false;
+        return !xMPNode.hasQualifier() && !xMPNode.getOptions().isURI() && !xMPNode.getOptions().isCompositeProperty() && !XMPConst.ARRAY_ITEM_NAME.equals(xMPNode.getName());
     }
 
     private void declareNamespace(String str, String str2, Set set, int i) throws IOException {
@@ -87,10 +82,7 @@ public class XMPSerializerRDF {
             if (qName.hasPrefix()) {
                 str = qName.getPrefix();
                 XMPSchemaRegistry schemaRegistry = XMPMetaFactory.getSchemaRegistry();
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(":");
-                str2 = schemaRegistry.getNamespaceURI(sb.toString());
+                str2 = schemaRegistry.getNamespaceURI(str + ":");
                 declareNamespace(str, str2, set, i);
             } else {
                 return;
@@ -114,7 +106,7 @@ public class XMPSerializerRDF {
         } else if (xMPNode.getOptions().isStruct()) {
             Iterator iterateChildren = xMPNode.iterateChildren();
             while (iterateChildren.hasNext()) {
-                declareNamespace(((XMPNode) iterateChildren.next()).getName(), null, set, i);
+                declareNamespace(((XMPNode) iterateChildren.next()).getName(), (String) null, set, i);
             }
         }
         Iterator iterateChildren2 = xMPNode.iterateChildren();
@@ -124,7 +116,7 @@ public class XMPSerializerRDF {
         Iterator iterateQualifier = xMPNode.iterateQualifier();
         while (iterateQualifier.hasNext()) {
             XMPNode xMPNode2 = (XMPNode) iterateQualifier.next();
-            declareNamespace(xMPNode2.getName(), null, set, i);
+            declareNamespace(xMPNode2.getName(), (String) null, set, i);
             declareUsedNamespaces(xMPNode2, set, i);
         }
     }
@@ -181,23 +173,13 @@ public class XMPSerializerRDF {
             return str;
         }
         for (int baseIndent = this.options.getBaseIndent(); baseIndent > 0; baseIndent--) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(this.options.getIndent());
-            str = sb.toString();
+            str = str + this.options.getIndent();
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(PACKET_TRAILER);
-        String sb3 = sb2.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(sb3);
-        sb4.append(this.options.getReadOnlyPacket() ? 'r' : 'w');
-        String sb5 = sb4.toString();
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(sb5);
-        sb6.append(PACKET_TRAILER2);
-        return sb6.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(str + PACKET_TRAILER);
+        sb.append(this.options.getReadOnlyPacket() ? 'r' : 'w');
+        String sb2 = sb.toString();
+        return sb2 + PACKET_TRAILER2;
     }
 
     private void serializeCompactRDFArrayProp(XMPNode xMPNode, int i) throws IOException, XMPException {
@@ -414,7 +396,6 @@ public class XMPSerializerRDF {
     /* JADX WARNING: Removed duplicated region for block: B:67:0x01b6  */
     /* JADX WARNING: Removed duplicated region for block: B:84:? A[RETURN, SYNTHETIC] */
     private void serializePrettyRDFProperty(XMPNode xMPNode, boolean z, int i) throws IOException, XMPException {
-        String str;
         boolean z2;
         XMPNode xMPNode2 = xMPNode;
         int i2 = i;
@@ -432,7 +413,6 @@ public class XMPSerializerRDF {
         boolean z4 = false;
         boolean z5 = false;
         while (true) {
-            str = "=\"";
             z2 = true;
             if (!iterateQualifier.hasNext()) {
                 break;
@@ -445,32 +425,27 @@ public class XMPSerializerRDF {
                 if (!z) {
                     write(32);
                     write(xMPNode3.getName());
-                    write(str);
+                    write("=\"");
                     appendNodeValue(xMPNode3.getValue(), true);
                     write(34);
                 }
             }
         }
-        String str2 = " rdf:parseType=\"Resource\">";
         if (!z4 || z) {
-            String str3 = "/>";
             if (!xMPNode.getOptions().isCompositeProperty()) {
                 if (xMPNode.getOptions().isURI()) {
                     write(" rdf:resource=\"");
                     appendNodeValue(xMPNode.getValue(), true);
                     write("\"/>");
                     writeNewline();
-                } else {
-                    if (xMPNode.getValue() != null) {
-                        if (!"".equals(xMPNode.getValue())) {
-                            write(62);
-                            appendNodeValue(xMPNode.getValue(), false);
-                            z2 = false;
-                            z3 = true;
-                        }
-                    }
-                    write(str3);
+                } else if (xMPNode.getValue() == null || "".equals(xMPNode.getValue())) {
+                    write("/>");
                     writeNewline();
+                } else {
+                    write(62);
+                    appendNodeValue(xMPNode.getValue(), false);
+                    z2 = false;
+                    z3 = true;
                 }
             } else if (xMPNode.getOptions().isArray()) {
                 write(62);
@@ -494,20 +469,20 @@ public class XMPSerializerRDF {
                         writeIndent(i2 + 1);
                         write(32);
                         write(xMPNode4.getName());
-                        write(str);
+                        write("=\"");
                         appendNodeValue(xMPNode4.getValue(), true);
                         write(34);
                     } else {
                         throw new XMPException("Can't mix rdf:resource and complex fields", 202);
                     }
                 }
-                write(str3);
+                write("/>");
                 writeNewline();
             } else if (!xMPNode.hasChildren()) {
                 write(" rdf:parseType=\"Resource\"/>");
                 writeNewline();
             } else {
-                write(str2);
+                write(" rdf:parseType=\"Resource\">");
                 writeNewline();
                 Iterator iterateChildren3 = xMPNode.iterateChildren();
                 while (iterateChildren3.hasNext()) {
@@ -526,7 +501,7 @@ public class XMPSerializerRDF {
             }
             return;
         } else if (!z5) {
-            write(str2);
+            write(" rdf:parseType=\"Resource\">");
             writeNewline();
             int i4 = i2 + 1;
             serializePrettyRDFProperty(xMPNode2, true, i4);

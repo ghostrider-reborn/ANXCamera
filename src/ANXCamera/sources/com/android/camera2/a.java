@@ -1,13 +1,13 @@
 package com.android.camera2;
 
-import android.hardware.camera2.CaptureRequest.Builder;
+import android.hardware.camera2.CaptureRequest;
 import java.util.function.BiConsumer;
 
 /* compiled from: lambda */
 public final /* synthetic */ class a implements BiConsumer {
-    private final /* synthetic */ Builder ub;
+    private final /* synthetic */ CaptureRequest.Builder ub;
 
-    public /* synthetic */ a(Builder builder) {
+    public /* synthetic */ a(CaptureRequest.Builder builder) {
         this.ub = builder;
     }
 

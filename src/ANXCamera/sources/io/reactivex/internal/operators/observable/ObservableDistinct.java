@@ -53,7 +53,7 @@ public final class ObservableDistinct<T, K> extends AbstractObservableWithUpstre
             if (!this.done) {
                 if (this.sourceMode == 0) {
                     try {
-                        Object apply = this.keySelector.apply(t);
+                        K apply = this.keySelector.apply(t);
                         ObjectHelper.requireNonNull(apply, "The keySelector returned a null key");
                         if (this.collection.add(apply)) {
                             this.actual.onNext(t);
@@ -71,7 +71,7 @@ public final class ObservableDistinct<T, K> extends AbstractObservableWithUpstre
         public T poll() throws Exception {
             T poll;
             Collection<? super K> collection2;
-            Object apply;
+            K apply;
             do {
                 poll = this.qs.poll();
                 if (poll == null) {
@@ -103,7 +103,7 @@ public final class ObservableDistinct<T, K> extends AbstractObservableWithUpstre
             this.source.subscribe(new DistinctObserver(observer, this.keySelector, (Collection) call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

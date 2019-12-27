@@ -1,6 +1,6 @@
 package okio;
 
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.nio.charset.Charset;
 
 final class Util {
@@ -33,7 +33,7 @@ final class Util {
     }
 
     public static short reverseBytesShort(short s) {
-        short s2 = s & ColorSpace.UNCALIBRATED;
+        short s2 = s & ExifInterface.ColorSpace.UNCALIBRATED;
         return (short) (((s2 & 255) << 8) | ((65280 & s2) >>> 8));
     }
 

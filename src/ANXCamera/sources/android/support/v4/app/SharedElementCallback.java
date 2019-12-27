@@ -2,7 +2,6 @@ package android.support.v4.app;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -13,7 +12,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +38,7 @@ public abstract class SharedElementCallback {
         }
         int i = (int) (((float) intrinsicWidth) * min);
         int i2 = (int) (((float) intrinsicHeight) * min);
-        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(createBitmap);
         Rect bounds = drawable.getBounds();
         int i3 = bounds.left;
@@ -64,7 +62,7 @@ public abstract class SharedElementCallback {
                     Bundle bundle = new Bundle();
                     bundle.putParcelable(BUNDLE_SNAPSHOT_BITMAP, createDrawableBitmap);
                     bundle.putString(BUNDLE_SNAPSHOT_IMAGE_SCALETYPE, imageView.getScaleType().toString());
-                    if (imageView.getScaleType() == ScaleType.MATRIX) {
+                    if (imageView.getScaleType() == ImageView.ScaleType.MATRIX) {
                         float[] fArr = new float[9];
                         imageView.getImageMatrix().getValues(fArr);
                         bundle.putFloatArray(BUNDLE_SNAPSHOT_IMAGE_MATRIX, fArr);
@@ -75,48 +73,50 @@ public abstract class SharedElementCallback {
         }
         int round = Math.round(rectF.width());
         int round2 = Math.round(rectF.height());
-        Bitmap bitmap = null;
-        if (round > 0 && round2 > 0) {
-            float min = Math.min(1.0f, 1048576.0f / ((float) (round * round2)));
-            int i = (int) (((float) round) * min);
-            int i2 = (int) (((float) round2) * min);
-            if (this.mTempMatrix == null) {
-                this.mTempMatrix = new Matrix();
-            }
-            this.mTempMatrix.set(matrix);
-            this.mTempMatrix.postTranslate(-rectF.left, -rectF.top);
-            this.mTempMatrix.postScale(min, min);
-            bitmap = Bitmap.createBitmap(i, i2, Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            canvas.concat(this.mTempMatrix);
-            view.draw(canvas);
+        if (round <= 0 || round2 <= 0) {
+            return null;
         }
-        return bitmap;
+        float min = Math.min(1.0f, 1048576.0f / ((float) (round * round2)));
+        int i = (int) (((float) round) * min);
+        int i2 = (int) (((float) round2) * min);
+        if (this.mTempMatrix == null) {
+            this.mTempMatrix = new Matrix();
+        }
+        this.mTempMatrix.set(matrix);
+        this.mTempMatrix.postTranslate(-rectF.left, -rectF.top);
+        this.mTempMatrix.postScale(min, min);
+        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(createBitmap);
+        canvas.concat(this.mTempMatrix);
+        view.draw(canvas);
+        return createBitmap;
     }
 
     public View onCreateSnapshotView(Context context, Parcelable parcelable) {
-        ImageView imageView = null;
         if (parcelable instanceof Bundle) {
             Bundle bundle = (Bundle) parcelable;
             Bitmap bitmap = (Bitmap) bundle.getParcelable(BUNDLE_SNAPSHOT_BITMAP);
             if (bitmap == null) {
                 return null;
             }
-            imageView = new ImageView(context);
+            ImageView imageView = new ImageView(context);
             imageView.setImageBitmap(bitmap);
-            imageView.setScaleType(ScaleType.valueOf(bundle.getString(BUNDLE_SNAPSHOT_IMAGE_SCALETYPE)));
-            if (imageView.getScaleType() == ScaleType.MATRIX) {
-                float[] floatArray = bundle.getFloatArray(BUNDLE_SNAPSHOT_IMAGE_MATRIX);
-                Matrix matrix = new Matrix();
-                matrix.setValues(floatArray);
-                imageView.setImageMatrix(matrix);
+            imageView.setScaleType(ImageView.ScaleType.valueOf(bundle.getString(BUNDLE_SNAPSHOT_IMAGE_SCALETYPE)));
+            if (imageView.getScaleType() != ImageView.ScaleType.MATRIX) {
+                return imageView;
             }
-        } else if (parcelable instanceof Bitmap) {
-            Bitmap bitmap2 = (Bitmap) parcelable;
-            imageView = new ImageView(context);
-            imageView.setImageBitmap(bitmap2);
+            float[] floatArray = bundle.getFloatArray(BUNDLE_SNAPSHOT_IMAGE_MATRIX);
+            Matrix matrix = new Matrix();
+            matrix.setValues(floatArray);
+            imageView.setImageMatrix(matrix);
+            return imageView;
+        } else if (!(parcelable instanceof Bitmap)) {
+            return null;
+        } else {
+            ImageView imageView2 = new ImageView(context);
+            imageView2.setImageBitmap((Bitmap) parcelable);
+            return imageView2;
         }
-        return imageView;
     }
 
     public void onMapSharedElements(List<String> list, Map<String, View> map) {

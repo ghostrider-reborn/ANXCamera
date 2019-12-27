@@ -25,22 +25,22 @@ public class AvcCBox extends Box {
     }
 
     public void doWrite(ByteBuffer byteBuffer) {
-        byteBuffer.put(1);
+        byteBuffer.put((byte) 1);
         byteBuffer.put((byte) this.profile);
         byteBuffer.put((byte) this.profileCompat);
         byteBuffer.put((byte) this.level);
-        byteBuffer.put(-1);
+        byteBuffer.put((byte) -1);
         byteBuffer.put((byte) (this.spsList.size() | 224));
-        for (ByteBuffer byteBuffer2 : this.spsList) {
-            byteBuffer.putShort((short) (byteBuffer2.remaining() + 1));
-            byteBuffer.put(103);
-            NIOUtils.write(byteBuffer, byteBuffer2);
+        for (ByteBuffer next : this.spsList) {
+            byteBuffer.putShort((short) (next.remaining() + 1));
+            byteBuffer.put((byte) 103);
+            NIOUtils.write(byteBuffer, next);
         }
         byteBuffer.put((byte) this.ppsList.size());
-        for (ByteBuffer byteBuffer3 : this.ppsList) {
-            byteBuffer.putShort((short) ((byte) (byteBuffer3.remaining() + 1)));
-            byteBuffer.put(104);
-            NIOUtils.write(byteBuffer, byteBuffer3);
+        for (ByteBuffer next2 : this.ppsList) {
+            byteBuffer.putShort((short) ((byte) (next2.remaining() + 1)));
+            byteBuffer.put((byte) 104);
+            NIOUtils.write(byteBuffer, next2);
         }
     }
 

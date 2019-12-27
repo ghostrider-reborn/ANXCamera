@@ -31,14 +31,14 @@ public final class AsyncSubject<T> extends Subject<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onComplete() {
             if (!isDisposed()) {
                 this.actual.onComplete();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onError(Throwable th) {
             if (isDisposed()) {
                 RxJavaPlugins.onError(th);
@@ -56,7 +56,7 @@ public final class AsyncSubject<T> extends Subject<T> {
         return new AsyncSubject<>();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(AsyncDisposable<T> asyncDisposable) {
         AsyncDisposable[] asyncDisposableArr;
         AsyncDisposable[] asyncDisposableArr2;
@@ -130,39 +130,39 @@ public final class AsyncSubject<T> extends Subject<T> {
     }
 
     public void onComplete() {
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj != obj2) {
+        AsyncDisposable<T>[] asyncDisposableArr = this.subscribers.get();
+        AsyncDisposable<T>[] asyncDisposableArr2 = TERMINATED;
+        if (asyncDisposableArr != asyncDisposableArr2) {
             T t = this.value;
-            AsyncDisposable[] asyncDisposableArr = (AsyncDisposable[]) this.subscribers.getAndSet(obj2);
+            AsyncDisposable[] asyncDisposableArr3 = (AsyncDisposable[]) this.subscribers.getAndSet(asyncDisposableArr2);
             int i = 0;
             if (t == null) {
-                int length = asyncDisposableArr.length;
+                int length = asyncDisposableArr3.length;
                 while (i < length) {
-                    asyncDisposableArr[i].onComplete();
+                    asyncDisposableArr3[i].onComplete();
                     i++;
                 }
-            } else {
-                int length2 = asyncDisposableArr.length;
-                while (i < length2) {
-                    asyncDisposableArr[i].complete(t);
-                    i++;
-                }
+                return;
+            }
+            int length2 = asyncDisposableArr3.length;
+            while (i < length2) {
+                asyncDisposableArr3[i].complete(t);
+                i++;
             }
         }
     }
 
     public void onError(Throwable th) {
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj == obj2) {
+        AsyncDisposable<T>[] asyncDisposableArr = this.subscribers.get();
+        AsyncDisposable<T>[] asyncDisposableArr2 = TERMINATED;
+        if (asyncDisposableArr == asyncDisposableArr2) {
             RxJavaPlugins.onError(th);
             return;
         }
         this.value = null;
         this.error = th;
-        for (AsyncDisposable onError : (AsyncDisposable[]) this.subscribers.getAndSet(obj2)) {
+        for (AsyncDisposable onError : (AsyncDisposable[]) this.subscribers.getAndSet(asyncDisposableArr2)) {
             onError.onError(th);
         }
     }
@@ -180,7 +180,7 @@ public final class AsyncSubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(AsyncDisposable<T> asyncDisposable) {
         AsyncDisposable<T>[] asyncDisposableArr;
         AsyncDisposable[] asyncDisposableArr2;

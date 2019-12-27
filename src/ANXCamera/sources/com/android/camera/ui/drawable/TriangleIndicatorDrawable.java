@@ -3,7 +3,6 @@ package com.android.camera.ui.drawable;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 
@@ -14,7 +13,7 @@ public class TriangleIndicatorDrawable extends Drawable {
     private int mWidth;
 
     public TriangleIndicatorDrawable() {
-        this.mPaint.setStyle(Style.FILL);
+        this.mPaint.setStyle(Paint.Style.FILL);
         this.mPaint.setColor(-1);
         this.mPaint.setAntiAlias(true);
     }

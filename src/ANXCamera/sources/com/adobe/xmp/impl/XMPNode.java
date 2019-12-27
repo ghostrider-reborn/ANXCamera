@@ -24,7 +24,7 @@ class XMPNode implements Comparable {
     private String value;
 
     public XMPNode(String str, PropertyOptions propertyOptions) {
-        this(str, null, propertyOptions);
+        this(str, (String) null, propertyOptions);
     }
 
     public XMPNode(String str, String str2, PropertyOptions propertyOptions) {
@@ -38,21 +38,13 @@ class XMPNode implements Comparable {
 
     private void assertChildNotExisting(String str) throws XMPException {
         if (!XMPConst.ARRAY_ITEM_NAME.equals(str) && findChildByName(str) != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Duplicate property or field node '");
-            sb.append(str);
-            sb.append("'");
-            throw new XMPException(sb.toString(), 203);
+            throw new XMPException("Duplicate property or field node '" + str + "'", 203);
         }
     }
 
     private void assertQualifierNotExisting(String str) throws XMPException {
         if (!XMPConst.ARRAY_ITEM_NAME.equals(str) && findQualifierByName(str) != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Duplicate '");
-            sb.append(str);
-            sb.append("' qualifier");
-            throw new XMPException(sb.toString(), 203);
+            throw new XMPException("Duplicate '" + str + "' qualifier", 203);
         }
     }
 
@@ -96,12 +88,7 @@ class XMPNode implements Comparable {
         if (z && hasQualifier()) {
             XMPNode[] xMPNodeArr = (XMPNode[]) getQualifier().toArray(new XMPNode[getQualifierLength()]);
             int i5 = 0;
-            while (xMPNodeArr.length > i5) {
-                if (!XMPConst.XML_LANG.equals(xMPNodeArr[i5].getName())) {
-                    if (!XMPConst.RDF_TYPE.equals(xMPNodeArr[i5].getName())) {
-                        break;
-                    }
-                }
+            while (xMPNodeArr.length > i5 && (XMPConst.XML_LANG.equals(xMPNodeArr[i5].getName()) || XMPConst.RDF_TYPE.equals(xMPNodeArr[i5].getName()))) {
                 i5++;
             }
             Arrays.sort(xMPNodeArr, i5, xMPNodeArr.length);
@@ -123,13 +110,15 @@ class XMPNode implements Comparable {
         }
     }
 
-    /* JADX WARNING: Incorrect type for immutable var: ssa=java.util.List, code=java.util.List<com.adobe.xmp.impl.XMPNode>, for r2v0, types: [java.util.List, java.util.List<com.adobe.xmp.impl.XMPNode>] */
-    private XMPNode find(List<XMPNode> list, String str) {
-        if (list != null) {
-            for (XMPNode xMPNode : list) {
-                if (xMPNode.getName().equals(str)) {
-                    return xMPNode;
-                }
+    private XMPNode find(List list, String str) {
+        if (list == null) {
+            return null;
+        }
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            XMPNode xMPNode = (XMPNode) it.next();
+            if (xMPNode.getName().equals(str)) {
+                return xMPNode;
             }
         }
         return null;
@@ -419,12 +408,7 @@ class XMPNode implements Comparable {
         if (hasQualifier()) {
             XMPNode[] xMPNodeArr = (XMPNode[]) getQualifier().toArray(new XMPNode[getQualifierLength()]);
             int i = 0;
-            while (xMPNodeArr.length > i) {
-                if (!XMPConst.XML_LANG.equals(xMPNodeArr[i].getName())) {
-                    if (!XMPConst.RDF_TYPE.equals(xMPNodeArr[i].getName())) {
-                        break;
-                    }
-                }
+            while (xMPNodeArr.length > i && (XMPConst.XML_LANG.equals(xMPNodeArr[i].getName()) || XMPConst.RDF_TYPE.equals(xMPNodeArr[i].getName()))) {
                 xMPNodeArr[i].sort();
                 i++;
             }

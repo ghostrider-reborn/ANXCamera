@@ -1,26 +1,23 @@
 package com.android.camera.fragment.vv;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.Surface;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -33,7 +30,7 @@ import com.android.camera.animation.type.AlphaInOnSubscribe;
 import com.android.camera.animation.type.AlphaOutOnSubscribe;
 import com.android.camera.constant.GlobalConstant;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.observeable.RxData.DataWrap;
+import com.android.camera.data.observeable.RxData;
 import com.android.camera.data.observeable.VMProcessing;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.BaseFragmentDelegate;
@@ -42,17 +39,11 @@ import com.android.camera.log.Log;
 import com.android.camera.module.LiveModuleSubVV;
 import com.android.camera.module.Module;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.LiveConfigVV;
-import com.android.camera.protocol.ModeProtocol.LiveVVProcess;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.CameraSnapView;
-import com.android.camera.ui.CameraSnapView.SnapListener;
 import com.android.camera.ui.TextureVideoView;
-import com.android.camera.ui.TextureVideoView.MediaPlayerCallback;
 import com.android.camera.ui.vv.VVProgressView;
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
@@ -61,7 +52,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class FragmentVVProcess extends BaseFragment implements OnClickListener, HandleBackTrace, LiveVVProcess, SnapListener {
+public class FragmentVVProcess extends BaseFragment implements View.OnClickListener, ModeProtocol.HandleBackTrace, ModeProtocol.LiveVVProcess, CameraSnapView.SnapListener {
     private static final String TAG = "FragmentVVProcess";
     private ViewGroup mBottomActionView;
     private ViewGroup mBottomLayout;
@@ -146,17 +137,17 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
 
     private void initTextureView() {
         this.mTextureVideoView = new TextureVideoView(getContext());
-        LayoutParams layoutParams = new LayoutParams(-1, -1);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(-1, -1);
         Rect displayRect = Util.getDisplayRect(getActivity());
         layoutParams.topMargin = displayRect.top;
         layoutParams.height = displayRect.height();
         this.mPreviewLayout.removeAllViews();
-        this.mPreviewLayout.setBackground(null);
+        this.mPreviewLayout.setBackground((Drawable) null);
         this.mPreviewLayout.addView(this.mTextureVideoView, layoutParams);
         this.mTextureVideoView.setClearSurface(true);
         this.mTextureVideoView.setScaleType(6);
         this.mTextureVideoView.setVisibility(4);
-        this.mTextureVideoView.setMediaPlayerCallback(new MediaPlayerCallback() {
+        this.mTextureVideoView.setMediaPlayerCallback(new TextureVideoView.MediaPlayerCallback() {
             public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
             }
 
@@ -165,20 +156,12 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
             }
 
             public boolean onError(MediaPlayer mediaPlayer, int i, int i2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(i);
-                sb.append(" | ");
-                sb.append(i2);
-                Log.e("onError:", sb.toString());
+                Log.e("onError:", i + " | " + i2);
                 return false;
             }
 
             public boolean onInfo(MediaPlayer mediaPlayer, int i, int i2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(i);
-                sb.append(" | ");
-                sb.append(i2);
-                Log.e("onInfo:", sb.toString());
+                Log.e("onInfo:", i + " | " + i2);
                 return false;
             }
 
@@ -187,8 +170,8 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
 
             public void onSurfaceReady(Surface surface) {
                 if (FragmentVVProcess.this.mWaitingResultSurfaceTexture) {
-                    FragmentVVProcess.this.mWaitingResultSurfaceTexture = false;
-                    FragmentVVProcess.this.mTextureVideoView.setVideoSpecifiedSize(1920, ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
+                    boolean unused = FragmentVVProcess.this.mWaitingResultSurfaceTexture = false;
+                    FragmentVVProcess.this.mTextureVideoView.setVideoSpecifiedSize(1920, MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_END_DEAULT);
                     FragmentVVProcess.this.startPlay(surface);
                 }
             }
@@ -196,7 +179,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
             public void onVideoSizeChanged(MediaPlayer mediaPlayer, int i, int i2) {
             }
         });
-        this.mTextureVideoView.setOnClickListener(new OnClickListener() {
+        this.mTextureVideoView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 FragmentVVProcess.this.pausePlay(false);
             }
@@ -218,10 +201,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
 
     private void onProcessingSateChanged(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("newState: ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "newState: " + i);
         switch (i) {
             case 2:
                 this.mPreviewStart.setVisibility(0);
@@ -296,34 +276,32 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
         TextureVideoView textureVideoView = this.mTextureVideoView;
         if (textureVideoView != null && textureVideoView.isPlaying()) {
             stopSegmentPreview();
-        } else if (!isFullSegmentsPlaying()) {
-            if (z && this.mVmProcessing.getCurrentState() == 5) {
-                this.mVmProcessing.updateState(2);
-            }
-        } else {
+        } else if (isFullSegmentsPlaying()) {
             if (z) {
                 this.mVmProcessing.updateState(2);
             } else {
                 this.mVmProcessing.updateState(5);
             }
-            LiveConfigVV liveConfigVV = (LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228);
+            ModeProtocol.LiveConfigVV liveConfigVV = (ModeProtocol.LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228);
             if (liveConfigVV != null) {
                 liveConfigVV.pausePlay();
             }
+        } else if (z && this.mVmProcessing.getCurrentState() == 5) {
+            this.mVmProcessing.updateState(2);
         }
     }
 
     private void previewLastSegment() {
         int i = 0;
         for (int i2 = 0; i2 < this.mDurationList.size(); i2++) {
-            if (((Long) this.mDurationList.get(i2)).longValue() > 0) {
+            if (this.mDurationList.get(i2).longValue() > 0) {
                 i = i2;
             }
         }
         this.mBottomActionView.setVisibility(4);
         this.mPreviewLayout.setBackgroundColor(ViewCompat.MEASURED_STATE_MASK);
         this.mTextureVideoView.setVisibility(0);
-        this.mTextureVideoView.setVideoPath(((LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228)).getSegmentPath(i));
+        this.mTextureVideoView.setVideoPath(((ModeProtocol.LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228)).getSegmentPath(i));
         this.mTextureVideoView.start();
     }
 
@@ -334,7 +312,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
                 return;
             }
             this.mVmProcessing.updateState(6);
-            ((LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228)).resumePlay();
+            ((ModeProtocol.LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228)).resumePlay();
         }
     }
 
@@ -343,28 +321,25 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
             getContext().startActivity(Intent.createChooser(getShareIntent(), getString(R.string.live_edit_share_title)));
         } catch (ActivityNotFoundException e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("failed to share video ");
-            sb.append(this.mSavedUri);
-            Log.e(str, sb.toString(), e2);
+            Log.e(str, "failed to share video " + this.mSavedUri, e2);
         }
     }
 
     private void showReverseConfirmDialog() {
         if (this.mReverseDialog == null) {
             CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_REVERSE);
-            Builder builder = new Builder(getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setMessage(R.string.live_reverse_message);
             builder.setCancelable(false);
             builder.setPositiveButton(R.string.live_reverse_confirm, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    FragmentVVProcess.this.mReverseDialog = null;
+                    AlertDialog unused = FragmentVVProcess.this.mReverseDialog = null;
                     ((LiveModuleSubVV) ((ActivityBase) FragmentVVProcess.this.getContext()).getCurrentModule()).doReverse();
                 }
             });
             builder.setNegativeButton(R.string.snap_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    FragmentVVProcess.this.mReverseDialog = null;
+                    AlertDialog unused = FragmentVVProcess.this.mReverseDialog = null;
                 }
             });
             this.mReverseDialog = builder.create();
@@ -383,7 +358,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
     public void startPlay(Surface surface) {
         if (!isFullSegmentsPlaying()) {
             this.mVmProcessing.updateState(6);
-            LiveConfigVV liveConfigVV = (LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228);
+            ModeProtocol.LiveConfigVV liveConfigVV = (ModeProtocol.LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228);
             if (liveConfigVV != null) {
                 liveConfigVV.startPlay(surface);
             }
@@ -395,7 +370,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
         final String asString = this.mSaveContentValues.getAsString("_data");
         Completable.create(new CompletableOnSubscribe() {
             public void subscribe(CompletableEmitter completableEmitter) throws Exception {
-                LiveConfigVV liveConfigVV = (LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228);
+                ModeProtocol.LiveConfigVV liveConfigVV = (ModeProtocol.LiveConfigVV) ModeCoordinatorImpl.getInstance().getAttachProtocol(228);
                 if (liveConfigVV != null) {
                     liveConfigVV.combineVideoAudio(asString);
                 }
@@ -414,10 +389,10 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
         this.mTextureVideoView.stop();
         this.mTextureVideoView.setVisibility(4);
         this.mBottomActionView.setVisibility(0);
-        this.mPreviewLayout.setBackground(null);
+        this.mPreviewLayout.setBackground((Drawable) null);
     }
 
-    public /* synthetic */ void a(DataWrap dataWrap) throws Exception {
+    public /* synthetic */ void a(RxData.DataWrap dataWrap) throws Exception {
         onProcessingSateChanged(((Integer) dataWrap.get()).intValue());
     }
 
@@ -479,10 +454,10 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
         this.mSegmentPreview.setOnClickListener(this);
         this.mPreviewNext.setOnClickListener(this);
         this.mBottomActionView = (FrameLayout) view.findViewById(R.id.vv_preview_bottom_action);
-        ((MarginLayoutParams) this.mBottomActionView.getLayoutParams()).height = Util.getBottomHeight(getResources());
+        ((ViewGroup.MarginLayoutParams) this.mBottomActionView.getLayoutParams()).height = Util.getBottomHeight(getResources());
         this.mBottomActionView.setOnClickListener(this);
         this.mBottomLayout = (RelativeLayout) view.findViewById(R.id.vv_preview_bottom_parent);
-        ((MarginLayoutParams) this.mBottomLayout.getLayoutParams()).bottomMargin = getResources().getDimensionPixelSize(R.dimen.bottom_margin_bottom) + Util.sNavigationBarHeight;
+        ((ViewGroup.MarginLayoutParams) this.mBottomLayout.getLayoutParams()).bottomMargin = getResources().getDimensionPixelSize(R.dimen.bottom_margin_bottom) + Util.sNavigationBarHeight;
         quit();
         this.mVmProcessing = (VMProcessing) DataRepository.dataItemObservable().get(VMProcessing.class);
         this.mVmProcessing.startObservable(this, new a(this));
@@ -495,16 +470,16 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
     public void onClick(View view) {
         if (this.mConcatProgress.getVisibility() != 0 && this.mCombineProgress.getVisibility() != 0 && this.mShareProgress.getVisibility() != 0) {
             switch (view.getId()) {
-                case R.id.vv_preview_back /*2131296623*/:
+                case R.id.vv_preview_back:
                     showExitConfirm();
                     return;
-                case R.id.vv_preview_next /*2131296630*/:
+                case R.id.vv_preview_next:
                     intoResultPreview();
                     return;
-                case R.id.vv_preview_play /*2131296631*/:
+                case R.id.vv_preview_play:
                     resumePlay();
                     return;
-                case R.id.vv_preview_save /*2131296632*/:
+                case R.id.vv_preview_save:
                     if (this.mSavedUri != null) {
                         quitLiveRecordPreview(true);
                         return;
@@ -512,17 +487,17 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
                         startSave();
                         return;
                     }
-                case R.id.vv_preview_share /*2131296634*/:
+                case R.id.vv_preview_share:
                     if (!checkAndShare()) {
                         this.mPendingShare = true;
                         startSave();
                         return;
                     }
                     return;
-                case R.id.vv_segment_preview /*2131296640*/:
+                case R.id.vv_segment_preview:
                     previewLastSegment();
                     return;
-                case R.id.vv_segment_reverse /*2131296641*/:
+                case R.id.vv_segment_reverse:
                     showReverseConfirmDialog();
                     return;
                 default:
@@ -602,7 +577,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
     }
 
     public void onSnapClick() {
-        if (!(this.mConcatProgress.getVisibility() == 0 || this.mCombineProgress.getVisibility() == 0 || this.mShareProgress.getVisibility() == 0)) {
+        if (this.mConcatProgress.getVisibility() != 0 && this.mCombineProgress.getVisibility() != 0 && this.mShareProgress.getVisibility() != 0) {
             if (this.mPreviewNext.getVisibility() == 0) {
                 this.mPreviewNext.performClick();
             } else if (this.mPreviewCombine.getVisibility() == 0) {
@@ -610,7 +585,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
             } else {
                 Module currentModule = ((Camera) getContext()).getCurrentModule();
                 if (currentModule == null || !currentModule.isIgnoreTouchEvent()) {
-                    CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+                    ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
                     if (cameraAction != null && this.mCurrentMode == 179 && !this.mVideoRecordingStarted) {
                         this.mVideoRecordingStarted = true;
                         cameraAction.onShutterButtonClick(10);
@@ -683,13 +658,13 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
         animateOut(this.mProgressView);
         animateOut(this.mLandscapeHint);
         BottomAnimationConfig configVariables = BottomAnimationConfig.generate(false, this.mCurrentMode, true, false, false).configVariables();
-        Iterator it = this.mDurationList.iterator();
+        Iterator<Long> it = this.mDurationList.iterator();
         while (true) {
             j = 0;
             if (!it.hasNext()) {
                 break;
             }
-            long longValue = ((Long) it.next()).longValue();
+            long longValue = it.next().longValue();
             if (longValue < 0) {
                 j = Math.abs(longValue);
                 break;
@@ -719,12 +694,10 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
         }
         pausePlay(false);
         this.mVmProcessing.reset();
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null) {
             Log.d(TAG, "concat error, action null");
-            return;
-        }
-        if (z) {
+        } else if (z) {
             cameraAction.onReviewDoneClicked();
         } else {
             cameraAction.onReviewCancelClicked();
@@ -732,7 +705,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(230, this);
         registerBackStack(modeCoordinator, this);
@@ -741,19 +714,19 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
     public void showExitConfirm() {
         if (this.mExitDialog == null) {
             CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_EXIT);
-            Builder builder = new Builder(getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setMessage(R.string.live_edit_exit_message);
             builder.setCancelable(false);
             builder.setPositiveButton(R.string.live_edit_exit_confirm, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_EXIT_CONFIRM);
-                    FragmentVVProcess.this.mExitDialog = null;
+                    AlertDialog unused = FragmentVVProcess.this.mExitDialog = null;
                     FragmentVVProcess.this.quitLiveRecordPreview(false);
                 }
             });
             builder.setNegativeButton(R.string.snap_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    FragmentVVProcess.this.mExitDialog = null;
+                    AlertDialog unused = FragmentVVProcess.this.mExitDialog = null;
                 }
             });
             this.mExitDialog = builder.create();
@@ -763,7 +736,7 @@ public class FragmentVVProcess extends BaseFragment implements OnClickListener, 
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(230, this);
         unRegisterBackStack(modeCoordinator, this);

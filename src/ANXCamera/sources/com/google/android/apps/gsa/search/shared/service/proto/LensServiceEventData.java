@@ -5,8 +5,6 @@ import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.FieldType;
 import com.google.protobuf.GeneratedMessageLite;
-import com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser;
-import com.google.protobuf.GeneratedMessageLite.MethodToInvoke;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Parser;
 import com.google.protobuf.ProtoField;
@@ -30,9 +28,9 @@ public final class LensServiceEventData extends GeneratedMessageLite<LensService
     @ProtoPresenceCheckedField(mask = 1, presenceBitsId = 0)
     private int serviceApiVersion_;
 
-    /* renamed from: com.google.android.apps.gsa.search.shared.service.proto.LensServiceEventData$1 reason: invalid class name */
+    /* renamed from: com.google.android.apps.gsa.search.shared.service.proto.LensServiceEventData$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke = new int[MethodToInvoke.values().length];
+        static final /* synthetic */ int[] $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke = new int[GeneratedMessageLite.MethodToInvoke.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(14:0|1|2|3|4|5|6|7|8|9|10|11|12|(3:13|14|16)) */
         /* JADX WARNING: Can't wrap try/catch for region: R(16:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|16) */
@@ -44,20 +42,20 @@ public final class LensServiceEventData extends GeneratedMessageLite<LensService
         /* JADX WARNING: Missing exception handler attribute for start block: B:7:0x002a */
         /* JADX WARNING: Missing exception handler attribute for start block: B:9:0x0035 */
         static {
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.NEW_MUTABLE_INSTANCE.ordinal()] = 1;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.NEW_BUILDER.ordinal()] = 2;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.BUILD_MESSAGE_INFO.ordinal()] = 3;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_DEFAULT_INSTANCE.ordinal()] = 4;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_PARSER.ordinal()] = 5;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_MEMOIZED_IS_INITIALIZED.ordinal()] = 6;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.NEW_MUTABLE_INSTANCE.ordinal()] = 1;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.NEW_BUILDER.ordinal()] = 2;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.BUILD_MESSAGE_INFO.ordinal()] = 3;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_DEFAULT_INSTANCE.ordinal()] = 4;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_PARSER.ordinal()] = 5;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_MEMOIZED_IS_INITIALIZED.ordinal()] = 6;
             try {
-                $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.SET_MEMOIZED_IS_INITIALIZED.ordinal()] = 7;
+                $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.SET_MEMOIZED_IS_INITIALIZED.ordinal()] = 7;
             } catch (NoSuchFieldError unused) {
             }
         }
     }
 
-    public static final class Builder extends com.google.protobuf.GeneratedMessageLite.Builder<LensServiceEventData, Builder> implements LensServiceEventDataOrBuilder {
+    public static final class Builder extends GeneratedMessageLite.Builder<LensServiceEventData, Builder> implements LensServiceEventDataOrBuilder {
         private Builder() {
             super(LensServiceEventData.DEFAULT_INSTANCE);
         }
@@ -171,30 +169,30 @@ public final class LensServiceEventData extends GeneratedMessageLite<LensService
     }
 
     /* access modifiers changed from: protected */
-    public final Object dynamicMethod(MethodToInvoke methodToInvoke, Object obj, Object obj2) {
+    public final Object dynamicMethod(GeneratedMessageLite.MethodToInvoke methodToInvoke, Object obj, Object obj2) {
         switch (AnonymousClass1.$SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[methodToInvoke.ordinal()]) {
             case 1:
                 return new LensServiceEventData();
             case 2:
-                return new Builder(null);
+                return new Builder((AnonymousClass1) null);
             case 3:
                 return newMessageInfo(DEFAULT_INSTANCE, "\u0001\u0001\u0000\u0001\u0001\u0001\u0001\u0002\u0000\u0000\u0000\u0001\u0004\u0000", new Object[]{"bitField0_", "serviceApiVersion_"});
             case 4:
                 return DEFAULT_INSTANCE;
             case 5:
-                DefaultInstanceBasedParser defaultInstanceBasedParser = PARSER;
+                GeneratedMessageLite.DefaultInstanceBasedParser defaultInstanceBasedParser = PARSER;
                 if (defaultInstanceBasedParser == null) {
                     synchronized (LensServiceEventData.class) {
                         defaultInstanceBasedParser = PARSER;
                         if (defaultInstanceBasedParser == null) {
-                            defaultInstanceBasedParser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                            defaultInstanceBasedParser = new GeneratedMessageLite.DefaultInstanceBasedParser(DEFAULT_INSTANCE);
                             PARSER = defaultInstanceBasedParser;
                         }
                     }
                 }
                 return defaultInstanceBasedParser;
             case 6:
-                return Byte.valueOf(1);
+                return (byte) 1;
             case 7:
                 return null;
             default:

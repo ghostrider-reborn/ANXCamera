@@ -5,8 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
@@ -77,25 +76,21 @@ public class CameraFocusPaintCenterIndicator extends CameraPaintBase {
             }
             CameraIndicatorState cameraIndicatorState = this.indicatorState;
             int i2 = cameraIndicatorState.mCurrentRayWidth;
-            float f2 = (float) ((-i2) / 2);
             int i3 = cameraIndicatorState.mCurrentRayBottom;
             Canvas canvas2 = canvas;
-            canvas2.drawRect(f2, (float) ((-i3) - cameraIndicatorState.mCurrentRayHeight), (float) (i2 / 2), (float) (-i3), this.mSunPaint);
+            canvas2.drawRect((float) ((-i2) / 2), (float) ((-i3) - cameraIndicatorState.mCurrentRayHeight), (float) (i2 / 2), (float) (-i3), this.mSunPaint);
             CameraIndicatorState cameraIndicatorState2 = this.indicatorState;
             int i4 = cameraIndicatorState2.mCurrentRayWidth;
-            float f3 = (float) ((-i4) / 2);
             int i5 = cameraIndicatorState2.mCurrentRayBottom;
-            canvas2.drawRect(f3, (float) i5, (float) (i4 / 2), (float) (i5 + cameraIndicatorState2.mCurrentRayHeight), this.mSunPaint);
+            canvas2.drawRect((float) ((-i4) / 2), (float) i5, (float) (i4 / 2), (float) (i5 + cameraIndicatorState2.mCurrentRayHeight), this.mSunPaint);
             CameraIndicatorState cameraIndicatorState3 = this.indicatorState;
             int i6 = cameraIndicatorState3.mCurrentRayBottom;
-            float f4 = (float) ((-i6) - cameraIndicatorState3.mCurrentRayHeight);
             int i7 = cameraIndicatorState3.mCurrentRayWidth;
-            canvas.drawRect(f4, (float) ((-i7) / 2), (float) (-i6), (float) (i7 / 2), this.mSunPaint);
+            canvas.drawRect((float) ((-i6) - cameraIndicatorState3.mCurrentRayHeight), (float) ((-i7) / 2), (float) (-i6), (float) (i7 / 2), this.mSunPaint);
             CameraIndicatorState cameraIndicatorState4 = this.indicatorState;
             int i8 = cameraIndicatorState4.mCurrentRayBottom;
-            float f5 = (float) i8;
             int i9 = cameraIndicatorState4.mCurrentRayWidth;
-            canvas.drawRect(f5, (float) ((-i9) / 2), (float) (i8 + cameraIndicatorState4.mCurrentRayHeight), (float) (i9 / 2), this.mSunPaint);
+            canvas.drawRect((float) i8, (float) ((-i9) / 2), (float) (i8 + cameraIndicatorState4.mCurrentRayHeight), (float) (i9 / 2), this.mSunPaint);
         }
         canvas.drawCircle(0.0f, 0.0f, (float) this.indicatorState.mCurrentRadius, this.mSunPaint);
     }
@@ -128,16 +123,16 @@ public class CameraFocusPaintCenterIndicator extends CameraPaintBase {
     /* access modifiers changed from: protected */
     public void initPaint(Context context) {
         this.mPaint.setAntiAlias(true);
-        this.mPaint.setStyle(Style.STROKE);
+        this.mPaint.setStyle(Paint.Style.STROKE);
         this.mSunPaint = new Paint();
         this.mSunPaint.setColor(-1);
-        this.mSunPaint.setStyle(Style.FILL);
+        this.mSunPaint.setStyle(Paint.Style.FILL);
         this.mSunPaint.setAntiAlias(true);
         this.mMinusMoonPaint = new Paint();
         this.mMinusMoonPaint.setColor(-1);
-        this.mMinusMoonPaint.setStyle(Style.FILL);
+        this.mMinusMoonPaint.setStyle(Paint.Style.FILL);
         this.mMinusMoonPaint.setAntiAlias(true);
-        this.mMinusMoonPaint.setXfermode(new PorterDuffXfermode(Mode.DST_OUT));
+        this.mMinusMoonPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
     }
 
     public void setAEAFIndicatorData(CameraIndicatorState cameraIndicatorState, Bitmap bitmap, Bitmap bitmap2) {

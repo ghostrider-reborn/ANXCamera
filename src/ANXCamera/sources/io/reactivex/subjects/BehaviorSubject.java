@@ -5,7 +5,6 @@ import io.reactivex.annotations.CheckReturnValue;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.functions.ObjectHelper;
 import io.reactivex.internal.util.AppendOnlyLinkedArrayList;
-import io.reactivex.internal.util.AppendOnlyLinkedArrayList.NonThrowingPredicate;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.internal.util.NotificationLite;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -27,7 +26,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
     final AtomicReference<Object> value;
     final Lock writeLock;
 
-    static final class BehaviorDisposable<T> implements Disposable, NonThrowingPredicate<Object> {
+    static final class BehaviorDisposable<T> implements Disposable, AppendOnlyLinkedArrayList.NonThrowingPredicate<Object> {
         final Observer<? super T> actual;
         volatile boolean cancelled;
         boolean emitting;
@@ -49,9 +48,9 @@ public final class BehaviorSubject<T> extends Subject<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:19:0x0031, code lost:
-            if (r0 == null) goto L_0x003d;
+            if (r0 == null) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:21:0x0037, code lost:
             if (test(r0) == false) goto L_0x003a;
@@ -62,7 +61,10 @@ public final class BehaviorSubject<T> extends Subject<T> {
         /* JADX WARNING: Code restructure failed: missing block: B:23:0x003a, code lost:
             emitLoop();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:24:0x003d, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:31:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:32:?, code lost:
             return;
          */
         public void emitFirst() {
@@ -84,7 +86,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:12:0x0013, code lost:
             r0.forEachWhile(r2);
          */
@@ -101,7 +103,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:25:0x0031, code lost:
             r2.fastPath = true;
          */
@@ -168,7 +170,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
         return new BehaviorSubject<>(t);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(BehaviorDisposable<T> behaviorDisposable) {
         BehaviorDisposable[] behaviorDisposableArr;
         BehaviorDisposable[] behaviorDisposableArr2;
@@ -218,14 +220,15 @@ public final class BehaviorSubject<T> extends Subject<T> {
         NotificationLite.getValue(t);
         if (tArr.length != 0) {
             tArr[0] = t;
-            if (tArr.length != 1) {
-                tArr[1] = null;
+            if (tArr.length == 1) {
+                return tArr;
             }
-        } else {
-            tArr = (Object[]) Array.newInstance(tArr.getClass().getComponentType(), 1);
-            tArr[0] = t;
+            tArr[1] = null;
+            return tArr;
         }
-        return tArr;
+        T[] tArr2 = (Object[]) Array.newInstance(tArr.getClass().getComponentType(), 1);
+        tArr2[0] = t;
+        return tArr2;
     }
 
     public boolean hasComplete() {
@@ -246,7 +249,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
     }
 
     public void onComplete() {
-        if (this.terminalEvent.compareAndSet(null, ExceptionHelper.TERMINATED)) {
+        if (this.terminalEvent.compareAndSet((Object) null, ExceptionHelper.TERMINATED)) {
             Object complete = NotificationLite.complete();
             for (BehaviorDisposable emitNext : terminate(complete)) {
                 emitNext.emitNext(complete, this.index);
@@ -256,7 +259,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
 
     public void onError(Throwable th) {
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
-        if (!this.terminalEvent.compareAndSet(null, th)) {
+        if (!this.terminalEvent.compareAndSet((Object) null, th)) {
             RxJavaPlugins.onError(th);
             return;
         }
@@ -283,7 +286,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(BehaviorDisposable<T> behaviorDisposable) {
         BehaviorDisposable<T>[] behaviorDisposableArr;
         BehaviorDisposable[] behaviorDisposableArr2;
@@ -315,11 +318,13 @@ public final class BehaviorSubject<T> extends Subject<T> {
                 } else {
                     return;
                 }
+            } else {
+                return;
             }
         } while (!this.subscribers.compareAndSet(behaviorDisposableArr, behaviorDisposableArr2));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setCurrent(Object obj) {
         this.writeLock.lock();
         try {
@@ -335,7 +340,7 @@ public final class BehaviorSubject<T> extends Subject<T> {
         BehaviorDisposable behaviorDisposable = new BehaviorDisposable(observer, this);
         observer.onSubscribe(behaviorDisposable);
         if (!add(behaviorDisposable)) {
-            Throwable th = (Throwable) this.terminalEvent.get();
+            Throwable th = this.terminalEvent.get();
             if (th == ExceptionHelper.TERMINATED) {
                 observer.onComplete();
             } else {
@@ -348,12 +353,12 @@ public final class BehaviorSubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int subscriberCount() {
         return ((BehaviorDisposable[]) this.subscribers.get()).length;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public BehaviorDisposable<T>[] terminate(Object obj) {
         BehaviorDisposable<T>[] behaviorDisposableArr = (BehaviorDisposable[]) this.subscribers.get();
         BehaviorDisposable<T>[] behaviorDisposableArr2 = TERMINATED;

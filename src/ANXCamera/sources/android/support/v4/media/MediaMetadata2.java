@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.mediacompat.Rating2;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
@@ -48,9 +47,9 @@ public final class MediaMetadata2 {
     public static final String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
     public static final String METADATA_KEY_MEDIA_URI = "android.media.metadata.MEDIA_URI";
     public static final String METADATA_KEY_NUM_TRACKS = "android.media.metadata.NUM_TRACKS";
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final String METADATA_KEY_RADIO_FREQUENCY = "android.media.metadata.RADIO_FREQUENCY";
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final String METADATA_KEY_RADIO_PROGRAM_NAME = "android.media.metadata.RADIO_PROGRAM_NAME";
     public static final String METADATA_KEY_RATING = "android.media.metadata.RATING";
     public static final String METADATA_KEY_TITLE = "android.media.metadata.TITLE";
@@ -63,16 +62,16 @@ public final class MediaMetadata2 {
     static final int METADATA_TYPE_LONG = 0;
     static final int METADATA_TYPE_RATING = 3;
     static final int METADATA_TYPE_TEXT = 1;
-    private static final String[] PREFERRED_BITMAP_ORDER;
+    private static final String[] PREFERRED_BITMAP_ORDER = {"android.media.metadata.DISPLAY_ICON", "android.media.metadata.ART", "android.media.metadata.ALBUM_ART"};
     private static final String[] PREFERRED_DESCRIPTION_ORDER = {"android.media.metadata.TITLE", "android.media.metadata.ARTIST", "android.media.metadata.ALBUM", "android.media.metadata.ALBUM_ARTIST", "android.media.metadata.WRITER", "android.media.metadata.AUTHOR", "android.media.metadata.COMPOSER"};
-    private static final String[] PREFERRED_URI_ORDER;
+    private static final String[] PREFERRED_URI_ORDER = {"android.media.metadata.DISPLAY_ICON_URI", "android.media.metadata.ART_URI", "android.media.metadata.ALBUM_ART_URI"};
     public static final long STATUS_DOWNLOADED = 2;
     public static final long STATUS_DOWNLOADING = 1;
     public static final long STATUS_NOT_DOWNLOADED = 0;
     private static final String TAG = "MediaMetadata2";
     final Bundle mBundle;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BitmapKey {
     }
@@ -88,7 +87,7 @@ public final class MediaMetadata2 {
             this.mBundle = new Bundle(mediaMetadata2.toBundle());
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public Builder(MediaMetadata2 mediaMetadata2, int i) {
             this(mediaMetadata2);
             for (String str : this.mBundle.keySet()) {
@@ -117,15 +116,11 @@ public final class MediaMetadata2 {
         public Builder putBitmap(@NonNull String str, @Nullable Bitmap bitmap) {
             if (str == null) {
                 throw new IllegalArgumentException("key shouldn't be null");
-            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || ((Integer) MediaMetadata2.METADATA_KEYS_TYPE.get(str)).intValue() == 2) {
+            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || MediaMetadata2.METADATA_KEYS_TYPE.get(str).intValue() == 2) {
                 this.mBundle.putParcelable(str, bitmap);
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The ");
-                sb.append(str);
-                sb.append(" key cannot be used to put a Bitmap");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("The " + str + " key cannot be used to put a Bitmap");
             }
         }
 
@@ -133,15 +128,11 @@ public final class MediaMetadata2 {
         public Builder putFloat(@NonNull String str, float f2) {
             if (str == null) {
                 throw new IllegalArgumentException("key shouldn't be null");
-            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || ((Integer) MediaMetadata2.METADATA_KEYS_TYPE.get(str)).intValue() == 4) {
+            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || MediaMetadata2.METADATA_KEYS_TYPE.get(str).intValue() == 4) {
                 this.mBundle.putFloat(str, f2);
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The ");
-                sb.append(str);
-                sb.append(" key cannot be used to put a float");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("The " + str + " key cannot be used to put a float");
             }
         }
 
@@ -149,15 +140,11 @@ public final class MediaMetadata2 {
         public Builder putLong(@NonNull String str, long j) {
             if (str == null) {
                 throw new IllegalArgumentException("key shouldn't be null");
-            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || ((Integer) MediaMetadata2.METADATA_KEYS_TYPE.get(str)).intValue() == 0) {
+            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || MediaMetadata2.METADATA_KEYS_TYPE.get(str).intValue() == 0) {
                 this.mBundle.putLong(str, j);
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The ");
-                sb.append(str);
-                sb.append(" key cannot be used to put a long");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("The " + str + " key cannot be used to put a long");
             }
         }
 
@@ -165,15 +152,11 @@ public final class MediaMetadata2 {
         public Builder putRating(@NonNull String str, @Nullable Rating2 rating2) {
             if (str == null) {
                 throw new IllegalArgumentException("key shouldn't be null");
-            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || ((Integer) MediaMetadata2.METADATA_KEYS_TYPE.get(str)).intValue() == 3) {
+            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || MediaMetadata2.METADATA_KEYS_TYPE.get(str).intValue() == 3) {
                 this.mBundle.putBundle(str, rating2 == null ? null : rating2.toBundle());
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The ");
-                sb.append(str);
-                sb.append(" key cannot be used to put a Rating");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("The " + str + " key cannot be used to put a Rating");
             }
         }
 
@@ -181,15 +164,11 @@ public final class MediaMetadata2 {
         public Builder putString(@NonNull String str, @Nullable String str2) {
             if (str == null) {
                 throw new IllegalArgumentException("key shouldn't be null");
-            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || ((Integer) MediaMetadata2.METADATA_KEYS_TYPE.get(str)).intValue() == 1) {
+            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || MediaMetadata2.METADATA_KEYS_TYPE.get(str).intValue() == 1) {
                 this.mBundle.putCharSequence(str, str2);
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The ");
-                sb.append(str);
-                sb.append(" key cannot be used to put a String");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("The " + str + " key cannot be used to put a String");
             }
         }
 
@@ -197,15 +176,11 @@ public final class MediaMetadata2 {
         public Builder putText(@NonNull String str, @Nullable CharSequence charSequence) {
             if (str == null) {
                 throw new IllegalArgumentException("key shouldn't be null");
-            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || ((Integer) MediaMetadata2.METADATA_KEYS_TYPE.get(str)).intValue() == 1) {
+            } else if (!MediaMetadata2.METADATA_KEYS_TYPE.containsKey(str) || MediaMetadata2.METADATA_KEYS_TYPE.get(str).intValue() == 1) {
                 this.mBundle.putCharSequence(str, charSequence);
                 return this;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The ");
-                sb.append(str);
-                sb.append(" key cannot be used to put a CharSequence");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("The " + str + " key cannot be used to put a CharSequence");
             }
         }
 
@@ -215,76 +190,60 @@ public final class MediaMetadata2 {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FloatKey {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface LongKey {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RatingKey {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TextKey {
     }
 
     static {
-        ArrayMap<String, Integer> arrayMap = METADATA_KEYS_TYPE;
-        Integer valueOf = Integer.valueOf(1);
-        arrayMap.put("android.media.metadata.TITLE", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.ARTIST", valueOf);
-        ArrayMap<String, Integer> arrayMap2 = METADATA_KEYS_TYPE;
-        Integer valueOf2 = Integer.valueOf(0);
-        arrayMap2.put("android.media.metadata.DURATION", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.ALBUM", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.AUTHOR", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.WRITER", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.COMPOSER", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.COMPILATION", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.DATE", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.YEAR", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.GENRE", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.TRACK_NUMBER", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.NUM_TRACKS", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.DISC_NUMBER", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.ALBUM_ARTIST", valueOf);
-        ArrayMap<String, Integer> arrayMap3 = METADATA_KEYS_TYPE;
-        Integer valueOf3 = Integer.valueOf(2);
-        String str = "android.media.metadata.ART";
-        arrayMap3.put(str, valueOf3);
-        String str2 = "android.media.metadata.ART_URI";
-        METADATA_KEYS_TYPE.put(str2, valueOf);
-        String str3 = "android.media.metadata.ALBUM_ART";
-        METADATA_KEYS_TYPE.put(str3, valueOf3);
-        String str4 = "android.media.metadata.ALBUM_ART_URI";
-        METADATA_KEYS_TYPE.put(str4, valueOf);
-        ArrayMap<String, Integer> arrayMap4 = METADATA_KEYS_TYPE;
-        Integer valueOf4 = Integer.valueOf(3);
-        arrayMap4.put("android.media.metadata.USER_RATING", valueOf4);
-        METADATA_KEYS_TYPE.put("android.media.metadata.RATING", valueOf4);
-        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_TITLE", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_SUBTITLE", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_DESCRIPTION", valueOf);
-        String str5 = "android.media.metadata.DISPLAY_ICON";
-        METADATA_KEYS_TYPE.put(str5, valueOf3);
-        String str6 = "android.media.metadata.DISPLAY_ICON_URI";
-        METADATA_KEYS_TYPE.put(str6, valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.MEDIA_ID", valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.MEDIA_URI", valueOf);
-        METADATA_KEYS_TYPE.put(METADATA_KEY_RADIO_FREQUENCY, Integer.valueOf(4));
-        METADATA_KEYS_TYPE.put(METADATA_KEY_RADIO_PROGRAM_NAME, valueOf);
-        METADATA_KEYS_TYPE.put("android.media.metadata.BT_FOLDER_TYPE", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.ADVERTISEMENT", valueOf2);
-        METADATA_KEYS_TYPE.put("android.media.metadata.DOWNLOAD_STATUS", valueOf2);
-        PREFERRED_BITMAP_ORDER = new String[]{str5, str, str3};
-        PREFERRED_URI_ORDER = new String[]{str6, str2, str4};
+        METADATA_KEYS_TYPE.put("android.media.metadata.TITLE", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ARTIST", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DURATION", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ALBUM", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.AUTHOR", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.WRITER", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.COMPOSER", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.COMPILATION", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DATE", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.YEAR", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.GENRE", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.TRACK_NUMBER", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.NUM_TRACKS", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DISC_NUMBER", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ALBUM_ARTIST", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ART", 2);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ART_URI", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ALBUM_ART", 2);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ALBUM_ART_URI", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.USER_RATING", 3);
+        METADATA_KEYS_TYPE.put("android.media.metadata.RATING", 3);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_TITLE", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_SUBTITLE", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_DESCRIPTION", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_ICON", 2);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DISPLAY_ICON_URI", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.MEDIA_ID", 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.MEDIA_URI", 1);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_RADIO_FREQUENCY, 4);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_RADIO_PROGRAM_NAME, 1);
+        METADATA_KEYS_TYPE.put("android.media.metadata.BT_FOLDER_TYPE", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.ADVERTISEMENT", 0);
+        METADATA_KEYS_TYPE.put("android.media.metadata.DOWNLOAD_STATUS", 0);
     }
 
     MediaMetadata2(Bundle bundle) {

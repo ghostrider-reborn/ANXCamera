@@ -6,6 +6,8 @@ import java.net.ProxySelector;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,13 +18,18 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import okhttp3.Call.Factory;
+import okhttp3.Call;
+import okhttp3.EventListener;
+import okhttp3.Headers;
+import okhttp3.Response;
+import okhttp3.WebSocket;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
 import okhttp3.internal.cache.InternalCache;
@@ -34,7 +41,7 @@ import okhttp3.internal.tls.CertificateChainCleaner;
 import okhttp3.internal.tls.OkHostnameVerifier;
 import okhttp3.internal.ws.RealWebSocket;
 
-public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
+public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory {
     static final List<ConnectionSpec> DEFAULT_CONNECTION_SPECS = Util.immutableList((T[]) new ConnectionSpec[]{ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT});
     static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList((T[]) new Protocol[]{Protocol.HTTP_2, Protocol.HTTP_1_1});
     final Authenticator authenticator;
@@ -296,16 +303,10 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
         public Builder protocols(List<Protocol> list) {
             ArrayList arrayList = new ArrayList(list);
             if (!arrayList.contains(Protocol.HTTP_1_1)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("protocols doesn't contain http/1.1: ");
-                sb.append(arrayList);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("protocols doesn't contain http/1.1: " + arrayList);
             } else if (arrayList.contains(Protocol.HTTP_1_0)) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("protocols must not contain http/1.0: ");
-                sb2.append(arrayList);
-                throw new IllegalArgumentException(sb2.toString());
-            } else if (!arrayList.contains(null)) {
+                throw new IllegalArgumentException("protocols must not contain http/1.0: " + arrayList);
+            } else if (!arrayList.contains((Object) null)) {
                 arrayList.remove(Protocol.SPDY_3);
                 this.protocols = Collections.unmodifiableList(arrayList);
                 return this;
@@ -342,7 +343,7 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
             return this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setInternalCache(@Nullable InternalCache internalCache2) {
             this.internalCache = internalCache2;
             this.cache = null;
@@ -364,12 +365,7 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
                     this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
                     return this;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unable to extract the trust manager on ");
-                sb.append(Platform.get());
-                sb.append(", sslSocketFactory is ");
-                sb.append(sSLSocketFactory.getClass());
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Unable to extract the trust manager on " + Platform.get() + ", sslSocketFactory is " + sSLSocketFactory.getClass());
             }
             throw new NullPointerException("sslSocketFactory == null");
         }
@@ -394,11 +390,11 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
 
     static {
         Internal.instance = new Internal() {
-            public void addLenient(okhttp3.Headers.Builder builder, String str) {
+            public void addLenient(Headers.Builder builder, String str) {
                 builder.addLenient(str);
             }
 
-            public void addLenient(okhttp3.Headers.Builder builder, String str, String str2) {
+            public void addLenient(Headers.Builder builder, String str, String str2) {
                 builder.addLenient(str, str2);
             }
 
@@ -406,7 +402,7 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
                 connectionSpec.apply(sSLSocket, z);
             }
 
-            public int code(okhttp3.Response.Builder builder) {
+            public int code(Response.Builder builder) {
                 return builder.code;
             }
 
@@ -470,7 +466,7 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
         this.cache = builder.cache;
         this.internalCache = builder.internalCache;
         this.socketFactory = builder.socketFactory;
-        Iterator it = this.connectionSpecs.iterator();
+        Iterator<ConnectionSpec> it = this.connectionSpecs.iterator();
         loop0:
         while (true) {
             z = false;
@@ -478,8 +474,8 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
                 if (!it.hasNext()) {
                     break loop0;
                 }
-                ConnectionSpec connectionSpec = (ConnectionSpec) it.next();
-                if (z || connectionSpec.isTls()) {
+                ConnectionSpec next = it.next();
+                if (z || next.isTls()) {
                     z = true;
                 }
             }
@@ -505,23 +501,17 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
         this.readTimeout = builder.readTimeout;
         this.writeTimeout = builder.writeTimeout;
         this.pingInterval = builder.pingInterval;
-        if (this.interceptors.contains(null)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Null interceptor: ");
-            sb.append(this.interceptors);
-            throw new IllegalStateException(sb.toString());
-        } else if (this.networkInterceptors.contains(null)) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Null network interceptor: ");
-            sb2.append(this.networkInterceptors);
-            throw new IllegalStateException(sb2.toString());
+        if (this.interceptors.contains((Object) null)) {
+            throw new IllegalStateException("Null interceptor: " + this.interceptors);
+        } else if (this.networkInterceptors.contains((Object) null)) {
+            throw new IllegalStateException("Null network interceptor: " + this.networkInterceptors);
         }
     }
 
     private SSLSocketFactory systemDefaultSslSocketFactory(X509TrustManager x509TrustManager) {
         try {
             SSLContext instance = SSLContext.getInstance("TLS");
-            instance.init(null, new TrustManager[]{x509TrustManager}, null);
+            instance.init((KeyManager[]) null, new TrustManager[]{x509TrustManager}, (SecureRandom) null);
             return instance.getSocketFactory();
         } catch (GeneralSecurityException e2) {
             throw Util.assertionError("No System TLS", e2);
@@ -531,15 +521,12 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
     private X509TrustManager systemDefaultTrustManager() {
         try {
             TrustManagerFactory instance = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            instance.init(null);
+            instance.init((KeyStore) null);
             TrustManager[] trustManagers = instance.getTrustManagers();
             if (trustManagers.length == 1 && (trustManagers[0] instanceof X509TrustManager)) {
                 return (X509TrustManager) trustManagers[0];
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unexpected default trust managers:");
-            sb.append(Arrays.toString(trustManagers));
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
         } catch (GeneralSecurityException e2) {
             throw Util.assertionError("No System TLS", e2);
         }
@@ -601,7 +588,7 @@ public class OkHttpClient implements Cloneable, Factory, WebSocket.Factory {
         return this.interceptors;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public InternalCache internalCache() {
         Cache cache2 = this.cache;
         return cache2 != null ? cache2.internalCache : this.internalCache;

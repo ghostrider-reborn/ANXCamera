@@ -6,10 +6,7 @@ public final class StreamResetException extends IOException {
     public final ErrorCode errorCode;
 
     public StreamResetException(ErrorCode errorCode2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("stream was reset: ");
-        sb.append(errorCode2);
-        super(sb.toString());
+        super("stream was reset: " + errorCode2);
         this.errorCode = errorCode2;
     }
 }

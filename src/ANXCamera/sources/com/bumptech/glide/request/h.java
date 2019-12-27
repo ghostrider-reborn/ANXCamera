@@ -1,9 +1,9 @@
 package com.bumptech.glide.request;
 
-import com.bumptech.glide.util.a.d.a;
+import com.bumptech.glide.util.a.d;
 
 /* compiled from: SingleRequest */
-class h implements a<SingleRequest<?>> {
+class h implements d.a<SingleRequest<?>> {
     h() {
     }
 

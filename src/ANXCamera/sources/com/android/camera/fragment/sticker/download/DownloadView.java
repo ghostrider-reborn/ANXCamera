@@ -1,7 +1,6 @@
 package com.android.camera.fragment.sticker.download;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import com.android.camera.R;
 import miui.view.animation.CubicEaseOutInterpolator;
 
@@ -29,7 +27,7 @@ public class DownloadView extends RelativeLayout {
     private ObjectAnimator mRotationAnimal;
     protected int mState;
 
-    private abstract class MyAnimalListener implements AnimatorListener {
+    private abstract class MyAnimalListener implements Animator.AnimatorListener {
         private MyAnimalListener() {
         }
 
@@ -71,7 +69,7 @@ public class DownloadView extends RelativeLayout {
     }
 
     /* access modifiers changed from: private */
-    public void hide(View view, AnimatorListener animatorListener) {
+    public void hide(View view, Animator.AnimatorListener animatorListener) {
         ObjectAnimator ofPropertyValuesHolder = ObjectAnimator.ofPropertyValuesHolder(view, new PropertyValuesHolder[]{PropertyValuesHolder.ofFloat("alpha", new float[]{getAlphaNormal(), 0.0f}), PropertyValuesHolder.ofFloat("scaleX", new float[]{1.0f, 0.6f}), PropertyValuesHolder.ofFloat("scaleY", new float[]{1.0f, 0.6f})});
         if (animatorListener != null) {
             ofPropertyValuesHolder.addListener(animatorListener);
@@ -83,7 +81,7 @@ public class DownloadView extends RelativeLayout {
     private void initView() {
         this.mImageView = new ImageView(getContext());
         addView(this.mImageView, -2, -2);
-        ((LayoutParams) this.mImageView.getLayoutParams()).addRule(13);
+        ((RelativeLayout.LayoutParams) this.mImageView.getLayoutParams()).addRule(13);
     }
 
     /* access modifiers changed from: private */
@@ -98,7 +96,7 @@ public class DownloadView extends RelativeLayout {
     }
 
     /* access modifiers changed from: private */
-    public void show(View view, AnimatorListener animatorListener) {
+    public void show(View view, Animator.AnimatorListener animatorListener) {
         ObjectAnimator ofPropertyValuesHolder = ObjectAnimator.ofPropertyValuesHolder(view, new PropertyValuesHolder[]{PropertyValuesHolder.ofFloat("alpha", new float[]{0.0f, getAlphaNormal()}), PropertyValuesHolder.ofFloat("scaleX", new float[]{0.6f, 1.0f}), PropertyValuesHolder.ofFloat("scaleY", new float[]{0.6f, 1.0f})});
         if (animatorListener != null) {
             ofPropertyValuesHolder.addListener(animatorListener);
@@ -156,20 +154,19 @@ public class DownloadView extends RelativeLayout {
 
     /* access modifiers changed from: protected */
     public int getStateImageResource(int i) {
-        int i2 = R.drawable.icon_sticker_download;
-        if (i != 0) {
-            if (i == 2) {
-                i2 = R.drawable.icon_sticker_downloading;
-            } else if (i == 3) {
-                return R.drawable.icon_sticker_downloaded;
-            } else {
-                if (i != 4) {
-                    i2 = 0;
-                }
-                return i2;
-            }
+        if (i == 0) {
+            return R.drawable.icon_sticker_download;
         }
-        return i2;
+        if (i == 2) {
+            return R.drawable.icon_sticker_downloading;
+        }
+        if (i == 3) {
+            return R.drawable.icon_sticker_downloaded;
+        }
+        if (i != 4) {
+            return 0;
+        }
+        return R.drawable.icon_sticker_download;
     }
 
     public void setOnDownloadSuccessListener(OnDownloadSuccessListener onDownloadSuccessListener) {

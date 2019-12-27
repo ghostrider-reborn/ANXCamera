@@ -10,10 +10,8 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
-import android.view.View.OnAttachStateChangeListener;
-import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import com.bumptech.glide.request.c;
 import com.bumptech.glide.util.i;
@@ -29,7 +27,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
     private static final String TAG = "ViewTarget";
     private final SizeDeterminer Bl;
     @Nullable
-    private OnAttachStateChangeListener Cl;
+    private View.OnAttachStateChangeListener Cl;
     private boolean Dl;
     private boolean El;
     protected final T view;
@@ -46,7 +44,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
         private final View view;
         private final List<n> wf = new ArrayList();
 
-        private static final class a implements OnPreDrawListener {
+        private static final class a implements ViewTreeObserver.OnPreDrawListener {
             private final WeakReference<SizeDeterminer> Il;
 
             a(@NonNull SizeDeterminer sizeDeterminer) {
@@ -54,17 +52,14 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
             }
 
             public boolean onPreDraw() {
-                String str = ViewTarget.TAG;
-                if (Log.isLoggable(str, 2)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("OnGlobalLayoutListener called attachStateListener=");
-                    sb.append(this);
-                    Log.v(str, sb.toString());
+                if (Log.isLoggable(ViewTarget.TAG, 2)) {
+                    Log.v(ViewTarget.TAG, "OnGlobalLayoutListener called attachStateListener=" + this);
                 }
                 SizeDeterminer sizeDeterminer = (SizeDeterminer) this.Il.get();
-                if (sizeDeterminer != null) {
-                    sizeDeterminer.Eh();
+                if (sizeDeterminer == null) {
+                    return true;
                 }
+                sizeDeterminer.Eh();
                 return true;
             }
         }
@@ -79,7 +74,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
 
         private int bl() {
             int paddingTop = this.view.getPaddingTop() + this.view.getPaddingBottom();
-            LayoutParams layoutParams = this.view.getLayoutParams();
+            ViewGroup.LayoutParams layoutParams = this.view.getLayoutParams();
             return c(this.view.getHeight(), layoutParams != null ? layoutParams.height : 0, paddingTop);
         }
 
@@ -98,16 +93,15 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
             if (this.view.isLayoutRequested() || i2 != -2) {
                 return 0;
             }
-            String str = ViewTarget.TAG;
-            if (Log.isLoggable(str, 4)) {
-                Log.i(str, "Glide treats LayoutParams.WRAP_CONTENT as a request for an image the size of this device's screen dimensions. If you want to load the original image and are ok with the corresponding memory cost and OOMs (depending on the input size), use .override(Target.SIZE_ORIGINAL). Otherwise, use LayoutParams.MATCH_PARENT, set layout_width and layout_height to fixed dimension, or use .override() with fixed dimensions.");
+            if (Log.isLoggable(ViewTarget.TAG, 4)) {
+                Log.i(ViewTarget.TAG, "Glide treats LayoutParams.WRAP_CONTENT as a request for an image the size of this device's screen dimensions. If you want to load the original image and are ok with the corresponding memory cost and OOMs (depending on the input size), use .override(Target.SIZE_ORIGINAL). Otherwise, use LayoutParams.MATCH_PARENT, set layout_width and layout_height to fixed dimension, or use .override() with fixed dimensions.");
             }
             return o(this.view.getContext());
         }
 
         private int cl() {
             int paddingLeft = this.view.getPaddingLeft() + this.view.getPaddingRight();
-            LayoutParams layoutParams = this.view.getLayoutParams();
+            ViewGroup.LayoutParams layoutParams = this.view.getLayoutParams();
             return c(this.view.getWidth(), layoutParams != null ? layoutParams.width : 0, paddingLeft);
         }
 
@@ -134,7 +128,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void Eh() {
             if (!this.wf.isEmpty()) {
                 int cl = cl();
@@ -146,7 +140,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void Fh() {
             ViewTreeObserver viewTreeObserver = this.view.getViewTreeObserver();
             if (viewTreeObserver.isAlive()) {
@@ -156,12 +150,12 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
             this.wf.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void a(@NonNull n nVar) {
             this.wf.remove(nVar);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void b(@NonNull n nVar) {
             int cl = cl();
             int bl = bl();
@@ -202,7 +196,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
     }
 
     private void _k() {
-        OnAttachStateChangeListener onAttachStateChangeListener = this.Cl;
+        View.OnAttachStateChangeListener onAttachStateChangeListener = this.Cl;
         if (onAttachStateChangeListener != null && !this.El) {
             this.view.addOnAttachStateChangeListener(onAttachStateChangeListener);
             this.El = true;
@@ -210,7 +204,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
     }
 
     private void al() {
-        OnAttachStateChangeListener onAttachStateChangeListener = this.Cl;
+        View.OnAttachStateChangeListener onAttachStateChangeListener = this.Cl;
         if (onAttachStateChangeListener != null && this.El) {
             this.view.removeOnAttachStateChangeListener(onAttachStateChangeListener);
             this.El = false;
@@ -243,7 +237,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void Bh() {
         c request = getRequest();
         if (request != null && !request.isCancelled() && !request.isPaused()) {
@@ -253,7 +247,7 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void Ch() {
         c request = getRequest();
         if (request != null && request.isPaused()) {
@@ -314,9 +308,6 @@ public abstract class ViewTarget<T extends View, Z> extends b<Z> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Target for: ");
-        sb.append(this.view);
-        return sb.toString();
+        return "Target for: " + this.view;
     }
 }

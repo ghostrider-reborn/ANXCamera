@@ -2,6 +2,7 @@ package com.android.camera.effect.framework.gles;
 
 import android.opengl.GLES30;
 import com.android.camera.effect.ShaderNativeUtil;
+import java.nio.Buffer;
 import java.nio.IntBuffer;
 
 public class InternalPBO {
@@ -14,7 +15,7 @@ public class InternalPBO {
         GLES30.glGenBuffers(1, allocate);
         this.mPboReadPixel = allocate.get(0);
         GLES30.glBindBuffer(35051, this.mPboReadPixel);
-        GLES30.glBufferData(35051, i * i2 * 3, null, 35045);
+        GLES30.glBufferData(35051, i * i2 * 3, (Buffer) null, 35045);
         GLES30.glBindBuffer(35051, 0);
     }
 
@@ -30,7 +31,7 @@ public class InternalPBO {
             initReadPixelBuffer(i, i2);
         } else if (this.mWidth < i || this.mHeight < i2) {
             GLES30.glBindBuffer(35051, this.mPboReadPixel);
-            GLES30.glBufferData(35051, i * i2 * 3, null, 35045);
+            GLES30.glBufferData(35051, i * i2 * 3, (Buffer) null, 35045);
             GLES30.glBindBuffer(35051, 0);
             this.mWidth = i;
             this.mHeight = i2;

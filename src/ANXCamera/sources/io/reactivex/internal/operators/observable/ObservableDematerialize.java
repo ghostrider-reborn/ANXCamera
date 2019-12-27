@@ -47,9 +47,7 @@ public final class ObservableDematerialize<T> extends AbstractObservableWithUpst
                 if (notification.isOnError()) {
                     RxJavaPlugins.onError(notification.getError());
                 }
-                return;
-            }
-            if (notification.isOnError()) {
+            } else if (notification.isOnError()) {
                 this.s.dispose();
                 onError(notification.getError());
             } else if (notification.isOnComplete()) {

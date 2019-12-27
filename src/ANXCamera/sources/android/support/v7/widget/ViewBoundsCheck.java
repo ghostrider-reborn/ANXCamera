@@ -1,7 +1,7 @@
 package android.support.v7.widget;
 
 import android.view.View;
-import com.arcsoft.camera.wideselfie.ArcWideSelfieDef.ResultCode;
+import com.arcsoft.camera.wideselfie.ArcWideSelfieDef;
 import com.arcsoft.supernight.SuperNightProcess;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,12 +40,12 @@ class ViewBoundsCheck {
         BoundFlags() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void addFlags(int i) {
             this.mBoundFlags = i | this.mBoundFlags;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean boundsMatch() {
             int i = this.mBoundFlags;
             if ((i & 7) != 0 && (i & (compare(this.mChildStart, this.mRvStart) << 0)) == 0) {
@@ -60,10 +60,10 @@ class ViewBoundsCheck {
                 return false;
             }
             int i4 = this.mBoundFlags;
-            return (i4 & ResultCode.AWS_MERR_BASE) == 0 || ((compare(this.mChildEnd, this.mRvEnd) << 12) & i4) != 0;
+            return (i4 & ArcWideSelfieDef.ResultCode.AWS_MERR_BASE) == 0 || ((compare(this.mChildEnd, this.mRvEnd) << 12) & i4) != 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int compare(int i, int i2) {
             if (i > i2) {
                 return 1;
@@ -71,12 +71,12 @@ class ViewBoundsCheck {
             return i == i2 ? 2 : 4;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void resetFlags() {
             this.mBoundFlags = 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setBounds(int i, int i2, int i3, int i4) {
             this.mRvStart = i;
             this.mRvEnd = i2;
@@ -84,7 +84,7 @@ class ViewBoundsCheck {
             this.mChildEnd = i4;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setFlags(int i, int i2) {
             this.mBoundFlags = (i & i2) | (this.mBoundFlags & (~i2));
         }
@@ -114,7 +114,7 @@ class ViewBoundsCheck {
         this.mCallback = callback;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public View findOneViewWithinBoundFlags(int i, int i2, int i3, int i4) {
         int parentStart = this.mCallback.getParentStart();
         int parentEnd = this.mCallback.getParentEnd();
@@ -142,7 +142,7 @@ class ViewBoundsCheck {
         return view;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isViewWithinBoundFlags(View view, int i) {
         this.mBoundFlags.setBounds(this.mCallback.getParentStart(), this.mCallback.getParentEnd(), this.mCallback.getChildStart(view), this.mCallback.getChildEnd(view));
         if (i == 0) {

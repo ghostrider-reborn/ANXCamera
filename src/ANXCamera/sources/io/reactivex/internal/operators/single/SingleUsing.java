@@ -25,7 +25,7 @@ public final class SingleUsing<T, U> extends Single<T> {
         private static final long serialVersionUID = -5331524057054083935L;
         final SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f339d;
         final Consumer<? super U> disposer;
         final boolean eager;
@@ -43,7 +43,7 @@ public final class SingleUsing<T, U> extends Single<T> {
             disposeAfter();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeAfter() {
             Object andSet = getAndSet(this);
             if (andSet != this) {
@@ -98,9 +98,11 @@ public final class SingleUsing<T, U> extends Single<T> {
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         this.actual.onError(th);
+                        return;
                     }
+                } else {
+                    return;
                 }
-                return;
             }
             this.actual.onSuccess(t);
             if (!this.eager) {
@@ -119,7 +121,7 @@ public final class SingleUsing<T, U> extends Single<T> {
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super T> singleObserver) {
         try {
-            Object call = this.resourceSupplier.call();
+            U call = this.resourceSupplier.call();
             try {
                 Object apply = this.singleFunction.apply(call);
                 ObjectHelper.requireNonNull(apply, "The singleFunction returned a null SingleSource");
@@ -128,14 +130,15 @@ public final class SingleUsing<T, U> extends Single<T> {
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
                 RxJavaPlugins.onError(th);
+                return;
             }
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error((Throwable) th, (SingleObserver<?>) singleObserver);
             if (!this.eager) {
                 this.disposer.accept(call);
             }
         } catch (Throwable th2) {
             Exceptions.throwIfFatal(th2);
-            EmptyDisposable.error(th2, singleObserver);
+            EmptyDisposable.error(th2, (SingleObserver<?>) singleObserver);
         }
     }
 }

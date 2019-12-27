@@ -1,7 +1,7 @@
 package android.support.v4.widget;
 
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.support.annotation.Nullable;
 
 public interface TintableCompoundButton {
@@ -9,9 +9,9 @@ public interface TintableCompoundButton {
     ColorStateList getSupportButtonTintList();
 
     @Nullable
-    Mode getSupportButtonTintMode();
+    PorterDuff.Mode getSupportButtonTintMode();
 
     void setSupportButtonTintList(@Nullable ColorStateList colorStateList);
 
-    void setSupportButtonTintMode(@Nullable Mode mode);
+    void setSupportButtonTintMode(@Nullable PorterDuff.Mode mode);
 }

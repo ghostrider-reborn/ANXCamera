@@ -14,7 +14,7 @@ import org.jcodec.api.NotSupportedException;
 import org.jcodec.common.AudioFormat;
 import org.jcodec.common.model.ChannelLabel;
 import org.jcodec.common.model.Label;
-import org.jcodec.containers.mp4.boxes.ChannelBox.ChannelDescription;
+import org.jcodec.containers.mp4.boxes.ChannelBox;
 import org.jcodec.containers.mp4.boxes.channel.ChannelLayout;
 import org.jcodec.platform.Platform;
 
@@ -135,7 +135,7 @@ public class AudioSampleEntry extends SampleEntry {
         return audioSampleEntry;
     }
 
-    public static Label[] extractLabels(ChannelDescription[] channelDescriptionArr) {
+    public static Label[] extractLabels(ChannelBox.ChannelDescription[] channelDescriptionArr) {
         Label[] labelArr = new Label[channelDescriptionArr.length];
         for (int i = 0; i < channelDescriptionArr.length; i++) {
             labelArr[i] = channelDescriptionArr[i].getLabel();
@@ -182,7 +182,7 @@ public class AudioSampleEntry extends SampleEntry {
         if (channelBox != null) {
             return getLabelsFromChan(channelBox);
         }
-        short channelCount2 = audioSampleEntry.getChannelCount();
+        int channelCount2 = audioSampleEntry.getChannelCount();
         switch (channelCount2) {
             case 1:
                 return new Label[]{Label.Mono};
@@ -214,11 +214,7 @@ public class AudioSampleEntry extends SampleEntry {
         if (audioFormat.getSampleSizeInBits() == 24) {
             return "in24";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Audio format ");
-        sb.append(audioFormat);
-        sb.append(" is not supported.");
-        throw new NotSupportedException(sb.toString());
+        throw new NotSupportedException("Audio format " + audioFormat + " is not supported.");
     }
 
     public static void setLabel(TrakBox trakBox, int i, Label label) {
@@ -229,9 +225,9 @@ public class AudioSampleEntry extends SampleEntry {
 
     public static void setLabels(Label[] labelArr, ChannelBox channelBox) {
         channelBox.setChannelLayout(ChannelLayout.kCAFChannelLayoutTag_UseChannelDescriptions.getCode());
-        ChannelDescription[] channelDescriptionArr = new ChannelDescription[labelArr.length];
+        ChannelBox.ChannelDescription[] channelDescriptionArr = new ChannelBox.ChannelDescription[labelArr.length];
         for (int i = 0; i < labelArr.length; i++) {
-            channelDescriptionArr[i] = new ChannelDescription(labelArr[i].getVal(), 0, new float[]{0.0f, 0.0f, 0.0f});
+            channelDescriptionArr[i] = new ChannelBox.ChannelDescription(labelArr[i].getVal(), 0, new float[]{0.0f, 0.0f, 0.0f});
         }
         channelBox.setDescriptions(channelDescriptionArr);
     }
@@ -241,10 +237,9 @@ public class AudioSampleEntry extends SampleEntry {
         int i = 0;
         int i2 = 0;
         while (i < labelArr.length) {
-            int i3 = i2 + 1;
-            channelLabelArr[i2] = (ChannelLabel) map.get(labelArr[i]);
+            channelLabelArr[i2] = map.get(labelArr[i]);
             i++;
-            i2 = i3;
+            i2++;
         }
         return channelLabelArr;
     }
@@ -318,16 +313,7 @@ public class AudioSampleEntry extends SampleEntry {
 
     public ByteOrder getEndian() {
         EndianBox endianBox = (EndianBox) NodeBox.findFirstPath(this, EndianBox.class, new String[]{WaveExtension.fourcc(), EndianBox.fourcc()});
-        if (endianBox != null) {
-            return endianBox.getEndian();
-        }
-        if ("twos".equals(this.header.getFourcc())) {
-            return ByteOrder.BIG_ENDIAN;
-        }
-        if ("lpcm".equals(this.header.getFourcc())) {
-            return (this.lpcmFlags & kAudioFormatFlagIsBigEndian) != 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
-        }
-        return "sowt".equals(this.header.getFourcc()) ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
+        return endianBox == null ? "twos".equals(this.header.getFourcc()) ? ByteOrder.BIG_ENDIAN : "lpcm".equals(this.header.getFourcc()) ? (this.lpcmFlags & kAudioFormatFlagIsBigEndian) != 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN : "sowt".equals(this.header.getFourcc()) ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN : endianBox.getEndian();
     }
 
     public AudioFormat getFormat() {
@@ -341,13 +327,13 @@ public class AudioSampleEntry extends SampleEntry {
             Label[] labelsFromChan = getLabelsFromChan(channelBox);
             return this.channelCount == 2 ? translate(translationStereo, labelsFromChan) : translate(translationSurround, labelsFromChan);
         }
-        short s = this.channelCount;
-        if (s == 1) {
+        int i = this.channelCount;
+        if (i == 1) {
             return new ChannelLabel[]{ChannelLabel.MONO};
-        } else if (s == 2) {
+        } else if (i == 2) {
             return new ChannelLabel[]{ChannelLabel.STEREO_LEFT, ChannelLabel.STEREO_RIGHT};
-        } else if (s != 6) {
-            ChannelLabel[] channelLabelArr = new ChannelLabel[s];
+        } else if (i != 6) {
+            ChannelLabel[] channelLabelArr = new ChannelLabel[i];
             Arrays.fill(channelLabelArr, ChannelLabel.MONO);
             return channelLabelArr;
         } else {
@@ -368,14 +354,7 @@ public class AudioSampleEntry extends SampleEntry {
     }
 
     public boolean isFloat() {
-        if (!"fl32".equals(this.header.getFourcc())) {
-            if (!"fl64".equals(this.header.getFourcc())) {
-                if (!"lpcm".equals(this.header.getFourcc()) || (this.lpcmFlags & kAudioFormatFlagIsFloat) == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return "fl32".equals(this.header.getFourcc()) || "fl64".equals(this.header.getFourcc()) || ("lpcm".equals(this.header.getFourcc()) && (this.lpcmFlags & kAudioFormatFlagIsFloat) != 0);
     }
 
     public boolean isPCM() {

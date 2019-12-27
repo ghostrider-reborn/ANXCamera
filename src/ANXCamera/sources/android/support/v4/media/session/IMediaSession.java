@@ -11,8 +11,8 @@ import android.os.RemoteException;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.RatingCompat;
-import android.support.v4.media.session.MediaSessionCompat.QueueItem;
-import android.support.v4.media.session.MediaSessionCompat.ResultReceiverWrapper;
+import android.support.v4.media.session.IMediaControllerCallback;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import java.util.List;
@@ -203,7 +203,7 @@ public interface IMediaSession extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     this.mRemote.transact(27, obtain, obtain2, 0);
                     obtain2.readException();
-                    return obtain2.readInt() != 0 ? (MediaMetadataCompat) MediaMetadataCompat.CREATOR.createFromParcel(obtain2) : null;
+                    return obtain2.readInt() != 0 ? MediaMetadataCompat.CREATOR.createFromParcel(obtain2) : null;
                 } finally {
                     obtain2.recycle();
                     obtain.recycle();
@@ -231,21 +231,21 @@ public interface IMediaSession extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     this.mRemote.transact(28, obtain, obtain2, 0);
                     obtain2.readException();
-                    return obtain2.readInt() != 0 ? (PlaybackStateCompat) PlaybackStateCompat.CREATOR.createFromParcel(obtain2) : null;
+                    return obtain2.readInt() != 0 ? PlaybackStateCompat.CREATOR.createFromParcel(obtain2) : null;
                 } finally {
                     obtain2.recycle();
                     obtain.recycle();
                 }
             }
 
-            public List<QueueItem> getQueue() throws RemoteException {
+            public List<MediaSessionCompat.QueueItem> getQueue() throws RemoteException {
                 Parcel obtain = Parcel.obtain();
                 Parcel obtain2 = Parcel.obtain();
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     this.mRemote.transact(29, obtain, obtain2, 0);
                     obtain2.readException();
-                    return obtain2.createTypedArrayList(QueueItem.CREATOR);
+                    return obtain2.createTypedArrayList(MediaSessionCompat.QueueItem.CREATOR);
                 } finally {
                     obtain2.recycle();
                     obtain.recycle();
@@ -329,7 +329,7 @@ public interface IMediaSession extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     this.mRemote.transact(10, obtain, obtain2, 0);
                     obtain2.readException();
-                    return obtain2.readInt() != 0 ? (ParcelableVolumeInfo) ParcelableVolumeInfo.CREATOR.createFromParcel(obtain2) : null;
+                    return obtain2.readInt() != 0 ? ParcelableVolumeInfo.CREATOR.createFromParcel(obtain2) : null;
                 } finally {
                     obtain2.recycle();
                     obtain.recycle();
@@ -703,7 +703,7 @@ public interface IMediaSession extends IInterface {
                 }
             }
 
-            public void sendCommand(String str, Bundle bundle, ResultReceiverWrapper resultReceiverWrapper) throws RemoteException {
+            public void sendCommand(String str, Bundle bundle, MediaSessionCompat.ResultReceiverWrapper resultReceiverWrapper) throws RemoteException {
                 Parcel obtain = Parcel.obtain();
                 Parcel obtain2 = Parcel.obtain();
                 try {
@@ -903,35 +903,21 @@ public interface IMediaSession extends IInterface {
             return this;
         }
 
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v1, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v4, resolved type: android.support.v4.media.session.MediaSessionCompat$ResultReceiverWrapper} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v7, resolved type: android.view.KeyEvent} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v10, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v13, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v16, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v19, resolved type: android.support.v4.media.RatingCompat} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v22, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v25, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v28, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v31, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v34, resolved type: android.support.v4.media.MediaDescriptionCompat} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v37, resolved type: android.support.v4.media.MediaDescriptionCompat} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v40, resolved type: android.support.v4.media.MediaDescriptionCompat} */
         /* JADX WARNING: type inference failed for: r1v0 */
-        /* JADX WARNING: type inference failed for: r1v1, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v3, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v4, types: [android.support.v4.media.session.MediaSessionCompat$ResultReceiverWrapper] */
-        /* JADX WARNING: type inference failed for: r1v6, types: [android.support.v4.media.session.MediaSessionCompat$ResultReceiverWrapper] */
-        /* JADX WARNING: type inference failed for: r1v7, types: [android.view.KeyEvent] */
-        /* JADX WARNING: type inference failed for: r1v9, types: [android.view.KeyEvent] */
-        /* JADX WARNING: type inference failed for: r1v10, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v12, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v13, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v15, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v16, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v18, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v19, types: [android.support.v4.media.RatingCompat] */
-        /* JADX WARNING: type inference failed for: r1v21, types: [android.support.v4.media.RatingCompat] */
-        /* JADX WARNING: type inference failed for: r1v22, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v24, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v25, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v27, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v28, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v30, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v31, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v33, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r1v34, types: [android.support.v4.media.MediaDescriptionCompat] */
-        /* JADX WARNING: type inference failed for: r1v36, types: [android.support.v4.media.MediaDescriptionCompat] */
-        /* JADX WARNING: type inference failed for: r1v37, types: [android.support.v4.media.MediaDescriptionCompat] */
-        /* JADX WARNING: type inference failed for: r1v39, types: [android.support.v4.media.MediaDescriptionCompat] */
-        /* JADX WARNING: type inference failed for: r1v40, types: [android.support.v4.media.MediaDescriptionCompat] */
-        /* JADX WARNING: type inference failed for: r1v42, types: [android.support.v4.media.MediaDescriptionCompat] */
         /* JADX WARNING: type inference failed for: r1v43 */
         /* JADX WARNING: type inference failed for: r1v44 */
         /* JADX WARNING: type inference failed for: r1v45 */
@@ -946,59 +932,33 @@ public interface IMediaSession extends IInterface {
         /* JADX WARNING: type inference failed for: r1v54 */
         /* JADX WARNING: type inference failed for: r1v55 */
         /* JADX WARNING: type inference failed for: r1v56 */
-        /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r1v0
-  assigns: [?[int, float, boolean, short, byte, char, OBJECT, ARRAY], android.support.v4.media.session.MediaSessionCompat$ResultReceiverWrapper, android.os.Bundle, android.view.KeyEvent, android.support.v4.media.RatingCompat, android.support.v4.media.MediaDescriptionCompat]
-  uses: [android.os.Bundle, android.support.v4.media.session.MediaSessionCompat$ResultReceiverWrapper, android.view.KeyEvent, android.support.v4.media.RatingCompat, android.support.v4.media.MediaDescriptionCompat]
-  mth insns count: 399
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$0(DepthTraversal.java:13)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:13)
-        	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-        	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-        	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-        	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-        	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-        	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-         */
-        /* JADX WARNING: Unknown variable types count: 15 */
+        /* JADX WARNING: Multi-variable type inference failed */
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
             ? r1 = 0;
-            String str = DESCRIPTOR;
             if (i == 51) {
-                parcel.enforceInterface(str);
-                RatingCompat ratingCompat = parcel.readInt() != 0 ? (RatingCompat) RatingCompat.CREATOR.createFromParcel(parcel) : null;
+                parcel.enforceInterface(DESCRIPTOR);
+                RatingCompat createFromParcel = parcel.readInt() != 0 ? RatingCompat.CREATOR.createFromParcel(parcel) : null;
                 if (parcel.readInt() != 0) {
                     r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                 }
-                rateWithExtras(ratingCompat, r1);
+                rateWithExtras(createFromParcel, r1);
                 parcel2.writeNoException();
                 return true;
             } else if (i != 1598968902) {
                 boolean z = false;
                 switch (i) {
                     case 1:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString = parcel.readString();
                         Bundle bundle = parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel) : null;
                         if (parcel.readInt() != 0) {
-                            r1 = (ResultReceiverWrapper) ResultReceiverWrapper.CREATOR.createFromParcel(parcel);
+                            r1 = MediaSessionCompat.ResultReceiverWrapper.CREATOR.createFromParcel(parcel);
                         }
                         sendCommand(readString, bundle, r1);
                         parcel2.writeNoException();
                         return true;
                     case 2:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             r1 = (KeyEvent) KeyEvent.CREATOR.createFromParcel(parcel);
                         }
@@ -1010,17 +970,17 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeInt(z);
                         return true;
                     case 3:
-                        parcel.enforceInterface(str);
-                        registerCallbackListener(android.support.v4.media.session.IMediaControllerCallback.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        registerCallbackListener(IMediaControllerCallback.Stub.asInterface(parcel.readStrongBinder()));
                         parcel2.writeNoException();
                         return true;
                     case 4:
-                        parcel.enforceInterface(str);
-                        unregisterCallbackListener(android.support.v4.media.session.IMediaControllerCallback.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        unregisterCallbackListener(IMediaControllerCallback.Stub.asInterface(parcel.readStrongBinder()));
                         parcel2.writeNoException();
                         return true;
                     case 5:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         boolean isTransportControlEnabled = isTransportControlEnabled();
                         parcel2.writeNoException();
                         if (isTransportControlEnabled) {
@@ -1029,19 +989,19 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeInt(z);
                         return true;
                     case 6:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String packageName = getPackageName();
                         parcel2.writeNoException();
                         parcel2.writeString(packageName);
                         return true;
                     case 7:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String tag = getTag();
                         parcel2.writeNoException();
                         parcel2.writeString(tag);
                         return true;
                     case 8:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         PendingIntent launchPendingIntent = getLaunchPendingIntent();
                         parcel2.writeNoException();
                         if (launchPendingIntent != null) {
@@ -1052,13 +1012,13 @@ public interface IMediaSession extends IInterface {
                         }
                         return true;
                     case 9:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         long flags = getFlags();
                         parcel2.writeNoException();
                         parcel2.writeLong(flags);
                         return true;
                     case 10:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         ParcelableVolumeInfo volumeAttributes = getVolumeAttributes();
                         parcel2.writeNoException();
                         if (volumeAttributes != null) {
@@ -1069,22 +1029,22 @@ public interface IMediaSession extends IInterface {
                         }
                         return true;
                     case 11:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         adjustVolume(parcel.readInt(), parcel.readInt(), parcel.readString());
                         parcel2.writeNoException();
                         return true;
                     case 12:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         setVolumeTo(parcel.readInt(), parcel.readInt(), parcel.readString());
                         parcel2.writeNoException();
                         return true;
                     case 13:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         play();
                         parcel2.writeNoException();
                         return true;
                     case 14:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString2 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1093,7 +1053,7 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 15:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString3 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1102,7 +1062,7 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 16:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         Uri uri = parcel.readInt() != 0 ? (Uri) Uri.CREATOR.createFromParcel(parcel) : null;
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1111,55 +1071,55 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 17:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         skipToQueueItem(parcel.readLong());
                         parcel2.writeNoException();
                         return true;
                     case 18:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         pause();
                         parcel2.writeNoException();
                         return true;
                     case 19:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         stop();
                         parcel2.writeNoException();
                         return true;
                     case 20:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         next();
                         parcel2.writeNoException();
                         return true;
                     case 21:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         previous();
                         parcel2.writeNoException();
                         return true;
                     case 22:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         fastForward();
                         parcel2.writeNoException();
                         return true;
                     case 23:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         rewind();
                         parcel2.writeNoException();
                         return true;
                     case 24:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         seekTo(parcel.readLong());
                         parcel2.writeNoException();
                         return true;
                     case 25:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r1 = (RatingCompat) RatingCompat.CREATOR.createFromParcel(parcel);
+                            r1 = RatingCompat.CREATOR.createFromParcel(parcel);
                         }
                         rate(r1);
                         parcel2.writeNoException();
                         return true;
                     case 26:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString4 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1168,7 +1128,7 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 27:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         MediaMetadataCompat metadata = getMetadata();
                         parcel2.writeNoException();
                         if (metadata != null) {
@@ -1179,7 +1139,7 @@ public interface IMediaSession extends IInterface {
                         }
                         return true;
                     case 28:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         PlaybackStateCompat playbackState = getPlaybackState();
                         parcel2.writeNoException();
                         if (playbackState != null) {
@@ -1190,13 +1150,13 @@ public interface IMediaSession extends IInterface {
                         }
                         return true;
                     case 29:
-                        parcel.enforceInterface(str);
-                        List queue = getQueue();
+                        parcel.enforceInterface(DESCRIPTOR);
+                        List<MediaSessionCompat.QueueItem> queue = getQueue();
                         parcel2.writeNoException();
                         parcel2.writeTypedList(queue);
                         return true;
                     case 30:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         CharSequence queueTitle = getQueueTitle();
                         parcel2.writeNoException();
                         if (queueTitle != null) {
@@ -1207,7 +1167,7 @@ public interface IMediaSession extends IInterface {
                         }
                         return true;
                     case 31:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         Bundle extras = getExtras();
                         parcel2.writeNoException();
                         if (extras != null) {
@@ -1218,18 +1178,18 @@ public interface IMediaSession extends IInterface {
                         }
                         return true;
                     case 32:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         int ratingType = getRatingType();
                         parcel2.writeNoException();
                         parcel2.writeInt(ratingType);
                         return true;
                     case 33:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         prepare();
                         parcel2.writeNoException();
                         return true;
                     case 34:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString5 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1238,7 +1198,7 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 35:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString6 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1247,7 +1207,7 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 36:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         Uri uri2 = parcel.readInt() != 0 ? (Uri) Uri.CREATOR.createFromParcel(parcel) : null;
                         if (parcel.readInt() != 0) {
                             r1 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1256,13 +1216,13 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 37:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         int repeatMode = getRepeatMode();
                         parcel2.writeNoException();
                         parcel2.writeInt(repeatMode);
                         return true;
                     case 38:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         boolean isShuffleModeEnabledRemoved = isShuffleModeEnabledRemoved();
                         parcel2.writeNoException();
                         if (isShuffleModeEnabledRemoved) {
@@ -1271,12 +1231,12 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeInt(z);
                         return true;
                     case 39:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         setRepeatMode(parcel.readInt());
                         parcel2.writeNoException();
                         return true;
                     case 40:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             z = true;
                         }
@@ -1284,36 +1244,36 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 41:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r1 = (MediaDescriptionCompat) MediaDescriptionCompat.CREATOR.createFromParcel(parcel);
+                            r1 = MediaDescriptionCompat.CREATOR.createFromParcel(parcel);
                         }
                         addQueueItem(r1);
                         parcel2.writeNoException();
                         return true;
                     case 42:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r1 = (MediaDescriptionCompat) MediaDescriptionCompat.CREATOR.createFromParcel(parcel);
+                            r1 = MediaDescriptionCompat.CREATOR.createFromParcel(parcel);
                         }
                         addQueueItemAt(r1, parcel.readInt());
                         parcel2.writeNoException();
                         return true;
                     case 43:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r1 = (MediaDescriptionCompat) MediaDescriptionCompat.CREATOR.createFromParcel(parcel);
+                            r1 = MediaDescriptionCompat.CREATOR.createFromParcel(parcel);
                         }
                         removeQueueItem(r1);
                         parcel2.writeNoException();
                         return true;
                     case 44:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         removeQueueItemAt(parcel.readInt());
                         parcel2.writeNoException();
                         return true;
                     case 45:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         boolean isCaptioningEnabled = isCaptioningEnabled();
                         parcel2.writeNoException();
                         if (isCaptioningEnabled) {
@@ -1322,7 +1282,7 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeInt(z);
                         return true;
                     case 46:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             z = true;
                         }
@@ -1330,13 +1290,13 @@ public interface IMediaSession extends IInterface {
                         parcel2.writeNoException();
                         return true;
                     case 47:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         int shuffleMode = getShuffleMode();
                         parcel2.writeNoException();
                         parcel2.writeInt(shuffleMode);
                         return true;
                     case 48:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         setShuffleMode(parcel.readInt());
                         parcel2.writeNoException();
                         return true;
@@ -1344,7 +1304,7 @@ public interface IMediaSession extends IInterface {
                         return super.onTransact(i, parcel, parcel2, i2);
                 }
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }
@@ -1370,7 +1330,7 @@ public interface IMediaSession extends IInterface {
 
     PlaybackStateCompat getPlaybackState() throws RemoteException;
 
-    List<QueueItem> getQueue() throws RemoteException;
+    List<MediaSessionCompat.QueueItem> getQueue() throws RemoteException;
 
     CharSequence getQueueTitle() throws RemoteException;
 
@@ -1426,7 +1386,7 @@ public interface IMediaSession extends IInterface {
 
     void seekTo(long j) throws RemoteException;
 
-    void sendCommand(String str, Bundle bundle, ResultReceiverWrapper resultReceiverWrapper) throws RemoteException;
+    void sendCommand(String str, Bundle bundle, MediaSessionCompat.ResultReceiverWrapper resultReceiverWrapper) throws RemoteException;
 
     void sendCustomAction(String str, Bundle bundle) throws RemoteException;
 

@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.a;
 
 import android.view.View;
+import com.bumptech.glide.request.a.f;
 
 /* compiled from: ViewPropertyTransition */
 public class j<R> implements f<R> {
@@ -15,10 +16,11 @@ public class j<R> implements f<R> {
         this.animator = aVar;
     }
 
-    public boolean a(R r, com.bumptech.glide.request.a.f.a aVar) {
-        if (aVar.getView() != null) {
-            this.animator.animate(aVar.getView());
+    public boolean a(R r, f.a aVar) {
+        if (aVar.getView() == null) {
+            return false;
         }
+        this.animator.animate(aVar.getView());
         return false;
     }
 }

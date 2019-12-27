@@ -2,11 +2,11 @@ package com.bumptech.glide.load.engine.a;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import com.bumptech.glide.load.engine.a.f.a;
+import com.bumptech.glide.load.engine.a.f;
 import java.io.File;
 
 /* compiled from: ExternalPreferredCacheDiskCacheFactory */
-class j implements a {
+class j implements f.a {
     final /* synthetic */ String Eg;
     final /* synthetic */ Context val$context;
 

@@ -25,7 +25,7 @@ public final class CompletableUsing<R> extends Completable {
         private static final long serialVersionUID = -674404550052917487L;
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f276d;
         final Consumer<? super R> disposer;
         final boolean eager;
@@ -43,7 +43,7 @@ public final class CompletableUsing<R> extends Completable {
             disposeResourceAfter();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeResourceAfter() {
             Object andSet = getAndSet(this);
             if (andSet != this) {
@@ -70,9 +70,11 @@ public final class CompletableUsing<R> extends Completable {
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
                         this.actual.onError(th);
+                        return;
                     }
+                } else {
+                    return;
                 }
-                return;
             }
             this.actual.onComplete();
             if (!this.eager) {
@@ -119,7 +121,7 @@ public final class CompletableUsing<R> extends Completable {
     /* access modifiers changed from: protected */
     public void subscribeActual(CompletableObserver completableObserver) {
         try {
-            Object call = this.resourceSupplier.call();
+            R call = this.resourceSupplier.call();
             try {
                 Object apply = this.completableFunction.apply(call);
                 ObjectHelper.requireNonNull(apply, "The completableFunction returned a null CompletableSource");

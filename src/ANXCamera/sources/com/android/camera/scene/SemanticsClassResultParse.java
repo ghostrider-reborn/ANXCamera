@@ -1,12 +1,12 @@
 package com.android.camera.scene;
 
-import android.content.res.Resources.NotFoundException;
+import android.content.res.Resources;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.module.BaseModule;
 import com.android.camera.module.Camera2Module;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera2.vendortag.struct.MarshalQueryableASDScene.ASDScene;
+import com.android.camera.protocol.ModeProtocol;
+import com.android.camera2.vendortag.struct.MarshalQueryableASDScene;
 import java.lang.ref.WeakReference;
 
 public class SemanticsClassResultParse extends AbASDResultParse {
@@ -14,10 +14,7 @@ public class SemanticsClassResultParse extends AbASDResultParse {
         super(weakReference);
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:14:0x003b, code lost:
-        if (r0 != 7) goto L_0x00a5;
-     */
-    private void updateASDScene(ASDScene aSDScene) {
+    private void updateASDScene(MarshalQueryableASDScene.ASDScene aSDScene) {
         int i = aSDScene.type;
         int i2 = aSDScene.value;
         BaseModule baseModule = (BaseModule) this.mModule.get();
@@ -25,10 +22,13 @@ public class SemanticsClassResultParse extends AbASDResultParse {
             Camera2Module camera2Module = (Camera2Module) baseModule;
             int sceneTipResId = MiAlgoAsdSceneProfile.getSceneTipResId(i, i2);
             if (MiAlgoAsdSceneProfile.isSceneChange(i, i2)) {
-                BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+                ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
                 if (!(i == 1 || i == 2)) {
                     if (i == 6) {
                         baseModule.showLensDirtyTip();
+                        return;
+                    } else if (i != 7) {
+                        return;
                     }
                 }
                 if (!isIntercept()) {
@@ -42,18 +42,20 @@ public class SemanticsClassResultParse extends AbASDResultParse {
                             if (z && !MiAlgoAsdSceneProfile.isCheckSceneEnable(i, i2)) {
                                 closeTip();
                             }
-                        } catch (NotFoundException unused) {
+                        } catch (Resources.NotFoundException unused) {
                         }
-                    } else if (MiAlgoAsdSceneProfile.isCheckSceneEnable(i, i2) && (sceneTipResId > 0 || 2 == i)) {
-                        if (2 == i) {
-                            camera2Module.showBacklightTip();
-                        } else {
-                            showTip(14, sceneTipResId, 2);
-                        }
-                        if (i == 1 || i == 2) {
-                            MiAlgoAsdSceneProfile.setTipEnable(1, true);
-                            MiAlgoAsdSceneProfile.setTipEnable(2, true);
-                        } else {
+                    } else if (MiAlgoAsdSceneProfile.isCheckSceneEnable(i, i2)) {
+                        if (sceneTipResId > 0 || 2 == i) {
+                            if (2 == i) {
+                                camera2Module.showBacklightTip();
+                            } else {
+                                showTip(14, sceneTipResId, 2);
+                            }
+                            if (i == 1 || i == 2) {
+                                MiAlgoAsdSceneProfile.setTipEnable(1, true);
+                                MiAlgoAsdSceneProfile.setTipEnable(2, true);
+                                return;
+                            }
                             MiAlgoAsdSceneProfile.setTipEnable(i, true);
                         }
                     }
@@ -62,18 +64,12 @@ public class SemanticsClassResultParse extends AbASDResultParse {
         }
     }
 
-    public void parseMiAlgoAsdResult(ASDScene[] aSDSceneArr) {
+    public void parseMiAlgoAsdResult(MarshalQueryableASDScene.ASDScene[] aSDSceneArr) {
         if (aSDSceneArr != null && aSDSceneArr.length > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("(Semantics)scenes size:");
-            sb.append(aSDSceneArr.length);
-            FunctionMiAlgoASDEngine.LOGD(sb.toString());
-            for (ASDScene aSDScene : aSDSceneArr) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("(Semantics)-->");
-                sb2.append(aSDScene.toString());
-                FunctionMiAlgoASDEngine.LOGD(sb2.toString());
-                updateASDScene(aSDScene);
+            FunctionMiAlgoASDEngine.LOGD("(Semantics)scenes size:" + aSDSceneArr.length);
+            for (MarshalQueryableASDScene.ASDScene aSDScene : aSDSceneArr) {
+                FunctionMiAlgoASDEngine.LOGD("(Semantics)-->" + aSDScene.toString());
+                updateASDScene(aSDSceneArr[r1]);
             }
         }
     }

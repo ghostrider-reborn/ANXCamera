@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.Loader.ForceLoadContentObserver;
+import android.support.v4.content.Loader;
 import android.support.v4.os.CancellationSignal;
 import android.support.v4.os.OperationCanceledException;
 import java.io.FileDescriptor;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
     CancellationSignal mCancellationSignal;
     Cursor mCursor;
-    final ForceLoadContentObserver mObserver = new ForceLoadContentObserver<>();
+    final Loader<Cursor>.ForceLoadContentObserver mObserver = new Loader.ForceLoadContentObserver();
     String[] mProjection;
     String mSelection;
     String[] mSelectionArgs;
@@ -45,19 +45,17 @@ public class CursorLoader extends AsyncTaskLoader<Cursor> {
     }
 
     public void deliverResult(Cursor cursor) {
-        if (isReset()) {
-            if (cursor != null) {
-                cursor.close();
+        if (!isReset()) {
+            Cursor cursor2 = this.mCursor;
+            this.mCursor = cursor;
+            if (isStarted()) {
+                super.deliverResult(cursor);
             }
-            return;
-        }
-        Cursor cursor2 = this.mCursor;
-        this.mCursor = cursor;
-        if (isStarted()) {
-            super.deliverResult(cursor);
-        }
-        if (!(cursor2 == null || cursor2 == cursor || cursor2.isClosed())) {
-            cursor2.close();
+            if (cursor2 != null && cursor2 != cursor && !cursor2.isClosed()) {
+                cursor2.close();
+            }
+        } else if (cursor != null) {
+            cursor.close();
         }
     }
 

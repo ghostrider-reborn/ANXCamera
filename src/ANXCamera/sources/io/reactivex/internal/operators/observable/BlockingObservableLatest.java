@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.Notification;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.internal.util.BlockingHelper;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.observers.DisposableObserver;
@@ -31,10 +30,10 @@ public final class BlockingObservableLatest<T> implements Iterable<T> {
                     try {
                         BlockingHelper.verifyNonBlocking();
                         this.notify.acquire();
-                        Notification<T> notification2 = (Notification) this.value.getAndSet(null);
-                        this.iteratorNotification = notification2;
-                        if (notification2.isOnError()) {
-                            throw ExceptionHelper.wrapOrThrow(notification2.getError());
+                        Notification<T> andSet = this.value.getAndSet((Object) null);
+                        this.iteratorNotification = andSet;
+                        if (andSet.isOnError()) {
+                            throw ExceptionHelper.wrapOrThrow(andSet.getError());
                         }
                     } catch (InterruptedException e2) {
                         dispose();
@@ -80,7 +79,7 @@ public final class BlockingObservableLatest<T> implements Iterable<T> {
 
     public Iterator<T> iterator() {
         BlockingObservableLatestIterator blockingObservableLatestIterator = new BlockingObservableLatestIterator();
-        Observable.wrap(this.source).materialize().subscribe((Observer<? super T>) blockingObservableLatestIterator);
+        Observable.wrap(this.source).materialize().subscribe(blockingObservableLatestIterator);
         return blockingObservableLatestIterator;
     }
 }

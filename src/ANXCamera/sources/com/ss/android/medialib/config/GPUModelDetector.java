@@ -276,12 +276,7 @@ public class GPUModelDetector {
         new Thread() {
             public void run() {
                 String nativeGetGPURenderer = GPUModelDetector.nativeGetGPURenderer();
-                StringBuilder sb = new StringBuilder();
-                sb.append("gpurender is");
-                sb.append(nativeGetGPURenderer);
-                String sb2 = sb.toString();
-                String str = GPUModelDetector.TAG;
-                Log.i(str, sb2);
+                Log.i(GPUModelDetector.TAG, "gpurender is" + nativeGetGPURenderer);
                 boolean z = false;
                 if (nativeGetGPURenderer != null) {
                     GPUModelInfo access$000 = GPUModelDetector.this.getGPUModel(nativeGetGPURenderer);
@@ -292,11 +287,8 @@ public class GPUModelDetector {
                     }
                 }
                 z = true;
-                GPUModelDetector.this.isSurpportAdvancedEffect = z;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("isSurpportAdvancedEffect:");
-                sb3.append(GPUModelDetector.this.isSurpportAdvancedEffect);
-                Log.i(str, sb3.toString());
+                boolean unused = GPUModelDetector.this.isSurpportAdvancedEffect = z;
+                Log.i(GPUModelDetector.TAG, "isSurpportAdvancedEffect:" + GPUModelDetector.this.isSurpportAdvancedEffect);
             }
         }.start();
     }
@@ -305,12 +297,7 @@ public class GPUModelDetector {
         new Thread() {
             public void run() {
                 String nativeGetGPURenderer = GPUModelDetector.nativeGetGPURenderer();
-                StringBuilder sb = new StringBuilder();
-                sb.append("gpurender is");
-                sb.append(nativeGetGPURenderer);
-                String sb2 = sb.toString();
-                String str = GPUModelDetector.TAG;
-                Log.i(str, sb2);
+                Log.i(GPUModelDetector.TAG, "gpurender is" + nativeGetGPURenderer);
                 boolean z = false;
                 if (nativeGetGPURenderer != null) {
                     GPUModelInfo access$000 = GPUModelDetector.this.getGPUModel(nativeGetGPURenderer);
@@ -321,11 +308,8 @@ public class GPUModelDetector {
                     }
                 }
                 z = true;
-                GPUModelDetector.this.isSurpportHighResolutionRecord = z;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("isSurpportHighResolutionSupport:");
-                sb3.append(GPUModelDetector.this.isSurpportHighResolutionRecord);
-                Log.i(str, sb3.toString());
+                boolean unused = GPUModelDetector.this.isSurpportHighResolutionRecord = z;
+                Log.i(GPUModelDetector.TAG, "isSurpportHighResolutionSupport:" + GPUModelDetector.this.isSurpportHighResolutionRecord);
             }
         }.start();
     }

@@ -8,11 +8,10 @@ import android.opengl.GLES20;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.R;
 import com.android.camera.effect.EffectController;
-import com.android.camera.effect.EffectController.EffectRectAttribute;
 import com.android.gallery3d.ui.GLCanvas;
 
 public abstract class RegionEffectRender extends ConvolutionEffectRender {
-    private EffectRectAttribute mAttribute;
+    private EffectController.EffectRectAttribute mAttribute;
     private int mThresholdHeight;
     private int mThresholdWidth;
     protected int mUniformEffectParameterH;
@@ -41,14 +40,14 @@ public abstract class RegionEffectRender extends ConvolutionEffectRender {
     private float[] getEffectArray(boolean z) {
         if (z) {
             Matrix changeMatrix = getChangeMatrix();
-            EffectRectAttribute effectRectAttribute = this.mAttribute;
+            EffectController.EffectRectAttribute effectRectAttribute = this.mAttribute;
             PointF pointF = effectRectAttribute.mPoint1;
             PointF pointF2 = effectRectAttribute.mPoint2;
             float[] fArr = {pointF.x, pointF.y, pointF2.x, pointF2.y, effectRectAttribute.mRangeWidth};
             changeMatrix.mapPoints(fArr, 0, fArr, 0, 2);
             return fArr;
         }
-        EffectRectAttribute effectAttribute = EffectController.getInstance().getEffectAttribute();
+        EffectController.EffectRectAttribute effectAttribute = EffectController.getInstance().getEffectAttribute();
         PointF pointF3 = effectAttribute.mPoint1;
         PointF pointF4 = effectAttribute.mPoint2;
         return new float[]{pointF3.x, pointF3.y, pointF4.x, pointF4.y, effectAttribute.mRangeWidth};
@@ -100,7 +99,7 @@ public abstract class RegionEffectRender extends ConvolutionEffectRender {
         }
         RectF effectRectF = EffectController.getInstance().getEffectRectF();
         if (this.mPreviewWidth <= this.mThresholdWidth || this.mPreviewHeight <= this.mThresholdHeight) {
-            setEffectRectF(null);
+            setEffectRectF((RectF) null);
         } else {
             setEffectRectF(effectRectF);
         }
@@ -133,7 +132,7 @@ public abstract class RegionEffectRender extends ConvolutionEffectRender {
         initEffectRect(z);
     }
 
-    public void setEffectRangeAttribute(EffectRectAttribute effectRectAttribute) {
+    public void setEffectRangeAttribute(EffectController.EffectRectAttribute effectRectAttribute) {
         this.mAttribute = effectRectAttribute;
         setEffectRectF(effectRectAttribute.mRectF);
     }

@@ -13,11 +13,10 @@ public final class MimeTypeFilter {
         if (str == null) {
             return null;
         }
-        String str2 = "/";
-        String[] split = str.split(str2);
-        for (String str3 : strArr) {
-            if (mimeTypeAgainstFilter(split, str3.split(str2))) {
-                return str3;
+        String[] split = str.split("/");
+        for (String str2 : strArr) {
+            if (mimeTypeAgainstFilter(split, str2.split("/"))) {
+                return str2;
             }
         }
         return null;
@@ -28,11 +27,10 @@ public final class MimeTypeFilter {
         if (strArr == null) {
             return null;
         }
-        String str2 = "/";
-        String[] split = str.split(str2);
-        for (String str3 : strArr) {
-            if (mimeTypeAgainstFilter(str3.split(str2), split)) {
-                return str3;
+        String[] split = str.split("/");
+        for (String str2 : strArr) {
+            if (mimeTypeAgainstFilter(str2.split("/"), split)) {
+                return str2;
             }
         }
         return null;
@@ -42,8 +40,7 @@ public final class MimeTypeFilter {
         if (str == null) {
             return false;
         }
-        String str3 = "/";
-        return mimeTypeAgainstFilter(str.split(str3), str2.split(str3));
+        return mimeTypeAgainstFilter(str.split("/"), str2.split("/"));
     }
 
     @NonNull
@@ -52,11 +49,10 @@ public final class MimeTypeFilter {
             return new String[0];
         }
         ArrayList arrayList = new ArrayList();
-        String str2 = "/";
-        String[] split = str.split(str2);
-        for (String str3 : strArr) {
-            if (mimeTypeAgainstFilter(str3.split(str2), split)) {
-                arrayList.add(str3);
+        String[] split = str.split("/");
+        for (String str2 : strArr) {
+            if (mimeTypeAgainstFilter(str2.split("/"), split)) {
+                arrayList.add(str2);
             }
         }
         return (String[]) arrayList.toArray(new String[arrayList.size()]);
@@ -70,9 +66,8 @@ public final class MimeTypeFilter {
         } else if (strArr.length != 2) {
             return false;
         } else {
-            String str = "*";
-            if (str.equals(strArr2[0]) || strArr2[0].equals(strArr[0])) {
-                return str.equals(strArr2[1]) || strArr2[1].equals(strArr[1]);
+            if ("*".equals(strArr2[0]) || strArr2[0].equals(strArr[0])) {
+                return "*".equals(strArr2[1]) || strArr2[1].equals(strArr[1]);
             }
             return false;
         }

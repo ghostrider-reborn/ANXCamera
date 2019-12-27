@@ -2,7 +2,7 @@ package android.support.v13.view.inputmethod;
 
 import android.content.ClipDescription;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
@@ -47,7 +47,7 @@ public final class InputConnectionCompat {
         if (!z) {
             return false;
         }
-        if (VERSION.SDK_INT >= 25) {
+        if (Build.VERSION.SDK_INT >= 25) {
             return inputConnection.commitContent((InputContentInfo) inputContentInfoCompat.unwrap(), i, bundle);
         }
         Bundle bundle2 = new Bundle();
@@ -66,7 +66,7 @@ public final class InputConnectionCompat {
         } else if (editorInfo == null) {
             throw new IllegalArgumentException("editorInfo must be non-null");
         } else if (onCommitContentListener != null) {
-            return VERSION.SDK_INT >= 25 ? new InputConnectionWrapper(inputConnection, false) {
+            return Build.VERSION.SDK_INT >= 25 ? new InputConnectionWrapper(inputConnection, false) {
                 public boolean commitContent(InputContentInfo inputContentInfo, int i, Bundle bundle) {
                     if (onCommitContentListener.onCommitContent(InputContentInfoCompat.wrap(inputContentInfo), i, bundle)) {
                         return true;
@@ -95,18 +95,15 @@ public final class InputConnectionCompat {
         try {
             resultReceiver = (ResultReceiver) bundle.getParcelable(COMMIT_CONTENT_RESULT_RECEIVER);
             try {
-                Uri uri = (Uri) bundle.getParcelable(COMMIT_CONTENT_CONTENT_URI_KEY);
-                ClipDescription clipDescription = (ClipDescription) bundle.getParcelable(COMMIT_CONTENT_DESCRIPTION_KEY);
-                Uri uri2 = (Uri) bundle.getParcelable(COMMIT_CONTENT_LINK_URI_KEY);
-                boolean onCommitContent = onCommitContentListener.onCommitContent(new InputContentInfoCompat(uri, clipDescription, uri2), bundle.getInt(COMMIT_CONTENT_FLAGS_KEY), (Bundle) bundle.getParcelable(COMMIT_CONTENT_OPTS_KEY));
+                boolean onCommitContent = onCommitContentListener.onCommitContent(new InputContentInfoCompat((Uri) bundle.getParcelable(COMMIT_CONTENT_CONTENT_URI_KEY), (ClipDescription) bundle.getParcelable(COMMIT_CONTENT_DESCRIPTION_KEY), (Uri) bundle.getParcelable(COMMIT_CONTENT_LINK_URI_KEY)), bundle.getInt(COMMIT_CONTENT_FLAGS_KEY), (Bundle) bundle.getParcelable(COMMIT_CONTENT_OPTS_KEY));
                 if (resultReceiver != null) {
-                    resultReceiver.send(onCommitContent ? 1 : 0, null);
+                    resultReceiver.send(onCommitContent ? 1 : 0, (Bundle) null);
                 }
                 return onCommitContent;
             } catch (Throwable th) {
                 th = th;
                 if (resultReceiver != null) {
-                    resultReceiver.send(0, null);
+                    resultReceiver.send(0, (Bundle) null);
                 }
                 throw th;
             }

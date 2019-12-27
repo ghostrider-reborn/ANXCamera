@@ -2,12 +2,10 @@ package com.bef.effectsdk;
 
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.Keep;
 import android.util.Log;
@@ -15,6 +13,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Locale;
 
@@ -31,21 +30,16 @@ public class OpenGLUtils {
 
     @Keep
     public static void byte2Bitmap(byte[] bArr, int i, int i2, String str) {
-        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(i, i2, Bitmap.Config.ARGB_8888);
         createBitmap.eraseColor(-16776961);
         createBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(bArr));
     }
 
     public static void checkGlError(String str) {
-        int glGetError = GLES20.glGetError();
-        if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": glError 0x");
-            sb.append(Integer.toHexString(glGetError));
-            String sb2 = sb.toString();
-            Log.e("GLES", sb2);
-            throw new RuntimeException(sb2);
+        if (GLES20.glGetError() != 0) {
+            String str2 = str + ": glError 0x" + Integer.toHexString(r0);
+            Log.e("GLES", str2);
+            throw new RuntimeException(str2);
         }
     }
 
@@ -67,7 +61,7 @@ public class OpenGLUtils {
         GLES20.glTexParameterf(i3, 10241, 9729.0f);
         GLES20.glTexParameterf(i3, 10242, 33071.0f);
         GLES20.glTexParameterf(i3, 10243, 33071.0f);
-        GLES20.glTexImage2D(i3, 0, 6408, i, i2, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(i3, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         return iArr[0];
     }
 
@@ -131,8 +125,8 @@ public class OpenGLUtils {
 
     @Keep
     public static Bitmap loadBitmap(byte[] bArr, int i, int i2, boolean z) {
-        Options options = new Options();
-        if (VERSION.SDK_INT >= 19) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        if (Build.VERSION.SDK_INT >= 19) {
             options.inPremultiplied = z;
         }
         return BitmapFactory.decodeByteArray(bArr, i, i2, options);
@@ -141,14 +135,13 @@ public class OpenGLUtils {
     public static int loadProgram(String str, String str2) {
         int[] iArr = new int[1];
         int loadShader = loadShader(str, 35633);
-        String str3 = "Load Program";
         if (loadShader == 0) {
-            Log.d(str3, "Vertex Shader Failed");
+            Log.d("Load Program", "Vertex Shader Failed");
             return 0;
         }
         int loadShader2 = loadShader(str2, 35632);
         if (loadShader2 == 0) {
-            Log.d(str3, "Fragment Shader Failed");
+            Log.d("Load Program", "Fragment Shader Failed");
             return 0;
         }
         int glCreateProgram = GLES20.glCreateProgram();
@@ -157,7 +150,7 @@ public class OpenGLUtils {
         GLES20.glLinkProgram(glCreateProgram);
         GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
         if (iArr[0] <= 0) {
-            Log.d(str3, "Linking Failed");
+            Log.d("Load Program", "Linking Failed");
             return 0;
         }
         GLES20.glDeleteShader(loadShader);
@@ -181,10 +174,7 @@ public class OpenGLUtils {
         if (iArr[0] != 0) {
             return glCreateShader;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Compilation\n");
-        sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
-        Log.e("Load Shader Failed", sb.toString());
+        Log.e("Load Shader Failed", "Compilation\n" + GLES20.glGetShaderInfoLog(glCreateShader));
         return 0;
     }
 

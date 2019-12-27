@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -71,7 +70,7 @@ public final class b implements Closeable {
         }
     }
 
-    /* renamed from: com.bumptech.glide.a.b$b reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.a.b$b  reason: collision with other inner class name */
     /* compiled from: DiskLruCache */
     public final class C0003b {
         private boolean Nc;
@@ -208,10 +207,7 @@ public final class b implements Closeable {
         }
 
         private IOException invalidLengths(String[] strArr) throws IOException {
-            StringBuilder sb = new StringBuilder();
-            sb.append("unexpected journal line: ");
-            sb.append(Arrays.toString(strArr));
-            throw new IOException(sb.toString());
+            throw new IOException("unexpected journal line: " + Arrays.toString(strArr));
         }
 
         /* access modifiers changed from: private */
@@ -234,11 +230,10 @@ public final class b implements Closeable {
         }
 
         public String Zf() throws IOException {
-            long[] jArr;
             StringBuilder sb = new StringBuilder();
-            for (long j : this.lengths) {
+            for (long append : this.lengths) {
                 sb.append(' ');
-                sb.append(j);
+                sb.append(append);
             }
             return sb.toString();
         }
@@ -289,7 +284,7 @@ public final class b implements Closeable {
 
     private b(File file, int i, int i2, long j) {
         File file2 = file;
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(0, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue(), new a(null));
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(0, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue(), new a((a) null));
         this.executorService = threadPoolExecutor;
         this.Oc = new a(this);
         this.directory = file2;
@@ -322,13 +317,7 @@ public final class b implements Closeable {
                     return bVar;
                 } catch (IOException e2) {
                     PrintStream printStream = System.out;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("DiskLruCache ");
-                    sb.append(file);
-                    sb.append(" is corrupt: ");
-                    sb.append(e2.getMessage());
-                    sb.append(", removing");
-                    printStream.println(sb.toString());
+                    printStream.println("DiskLruCache " + file + " is corrupt: " + e2.getMessage() + ", removing");
                     bVar.delete();
                 }
             }
@@ -353,10 +342,7 @@ public final class b implements Closeable {
                 while (i < this.valueCount) {
                     if (!bVar.written[i]) {
                         bVar.abort();
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Newly created entry didn't create value for index ");
-                        sb.append(i);
-                        throw new IllegalStateException(sb.toString());
+                        throw new IllegalStateException("Newly created entry didn't create value for index " + i);
                     } else if (!a2.q(i).exists()) {
                         bVar.abort();
                         return;
@@ -379,9 +365,9 @@ public final class b implements Closeable {
                 }
             }
             this.redundantOpCount++;
-            a2.currentEditor = null;
+            C0003b unused = a2.currentEditor = null;
             if (a2.readable || z) {
-                a2.readable = true;
+                boolean unused2 = a2.readable = true;
                 this.journalWriter.append(CLEAN);
                 this.journalWriter.append(' ');
                 this.journalWriter.append(a2.key);
@@ -390,7 +376,7 @@ public final class b implements Closeable {
                 if (z) {
                     long j2 = this.nextSequenceNumber;
                     this.nextSequenceNumber = 1 + j2;
-                    a2.sequenceNumber = j2;
+                    long unused3 = a2.sequenceNumber = j2;
                 }
             } else {
                 this.lruEntries.remove(a2.key);
@@ -429,16 +415,16 @@ public final class b implements Closeable {
      */
     public synchronized C0003b edit(String str, long j) throws IOException {
         checkNotClosed();
-        c cVar = (c) this.lruEntries.get(str);
+        c cVar = this.lruEntries.get(str);
         if (j == -1 || (cVar != null && cVar.sequenceNumber == j)) {
             if (cVar == null) {
-                cVar = new c(this, str, null);
+                cVar = new c(this, str, (a) null);
                 this.lruEntries.put(str, cVar);
             } else if (cVar.currentEditor != null) {
                 return null;
             }
-            C0003b bVar = new C0003b(this, cVar, null);
-            cVar.currentEditor = bVar;
+            C0003b bVar = new C0003b(this, cVar, (a) null);
+            C0003b unused = cVar.currentEditor = bVar;
             this.journalWriter.append(DIRTY);
             this.journalWriter.append(' ');
             this.journalWriter.append(str);
@@ -467,20 +453,20 @@ public final class b implements Closeable {
 
     private void processJournal() throws IOException {
         g(this.journalFileTmp);
-        Iterator it = this.lruEntries.values().iterator();
+        Iterator<c> it = this.lruEntries.values().iterator();
         while (it.hasNext()) {
-            c cVar = (c) it.next();
+            c next = it.next();
             int i = 0;
-            if (cVar.currentEditor == null) {
+            if (next.currentEditor == null) {
                 while (i < this.valueCount) {
-                    this.size += cVar.lengths[i];
+                    this.size += next.lengths[i];
                     i++;
                 }
             } else {
-                cVar.currentEditor = null;
+                C0003b unused = next.currentEditor = null;
                 while (i < this.valueCount) {
-                    g(cVar.p(i));
-                    g(cVar.q(i));
+                    g(next.p(i));
+                    g(next.q(i));
                     i++;
                 }
                 it.remove();
@@ -507,7 +493,6 @@ public final class b implements Closeable {
     /* JADX WARNING: Missing exception handler attribute for start block: B:16:0x005f */
     /* JADX WARNING: Unknown top exception splitter block from list: {B:23:0x008c=Splitter:B:23:0x008c, B:16:0x005f=Splitter:B:16:0x005f} */
     private void readJournal() throws IOException {
-        String str = ", ";
         d dVar = new d(new FileInputStream(this.journalFile), e.US_ASCII);
         try {
             String readLine = dVar.readLine();
@@ -516,17 +501,7 @@ public final class b implements Closeable {
             String readLine4 = dVar.readLine();
             String readLine5 = dVar.readLine();
             if (!MAGIC.equals(readLine) || !"1".equals(readLine2) || !Integer.toString(this.appVersion).equals(readLine3) || !Integer.toString(this.valueCount).equals(readLine4) || !"".equals(readLine5)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected journal header: [");
-                sb.append(readLine);
-                sb.append(str);
-                sb.append(readLine2);
-                sb.append(str);
-                sb.append(readLine4);
-                sb.append(str);
-                sb.append(readLine5);
-                sb.append("]");
-                throw new IOException(sb.toString());
+                throw new IOException("unexpected journal header: [" + readLine + ", " + readLine2 + ", " + readLine4 + ", " + readLine5 + "]");
             }
             int i = 0;
             while (true) {
@@ -541,7 +516,6 @@ public final class b implements Closeable {
     private void readJournalLine(String str) throws IOException {
         String str2;
         int indexOf = str.indexOf(32);
-        String str3 = "unexpected journal line: ";
         if (indexOf != -1) {
             int i = indexOf + 1;
             int indexOf2 = str.indexOf(32, i);
@@ -554,30 +528,24 @@ public final class b implements Closeable {
             } else {
                 str2 = str.substring(i, indexOf2);
             }
-            c cVar = (c) this.lruEntries.get(str2);
+            c cVar = this.lruEntries.get(str2);
             if (cVar == null) {
-                cVar = new c(this, str2, null);
+                cVar = new c(this, str2, (a) null);
                 this.lruEntries.put(str2, cVar);
             }
             if (indexOf2 != -1 && indexOf == 5 && str.startsWith(CLEAN)) {
                 String[] split = str.substring(indexOf2 + 1).split(" ");
-                cVar.readable = true;
-                cVar.currentEditor = null;
+                boolean unused = cVar.readable = true;
+                C0003b unused2 = cVar.currentEditor = null;
                 cVar.setLengths(split);
             } else if (indexOf2 == -1 && indexOf == 5 && str.startsWith(DIRTY)) {
-                cVar.currentEditor = new C0003b(this, cVar, null);
-            } else if (!(indexOf2 == -1 && indexOf == 4 && str.startsWith(READ))) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str3);
-                sb.append(str);
-                throw new IOException(sb.toString());
+                C0003b unused3 = cVar.currentEditor = new C0003b(this, cVar, (a) null);
+            } else if (indexOf2 != -1 || indexOf != 4 || !str.startsWith(READ)) {
+                throw new IOException("unexpected journal line: " + str);
             }
-            return;
+        } else {
+            throw new IOException("unexpected journal line: " + str);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str3);
-        sb2.append(str);
-        throw new IOException(sb2.toString());
     }
 
     /* JADX INFO: finally extract failed */
@@ -597,20 +565,11 @@ public final class b implements Closeable {
             bufferedWriter.write(Integer.toString(this.valueCount));
             bufferedWriter.write("\n");
             bufferedWriter.write("\n");
-            for (c cVar : this.lruEntries.values()) {
-                if (cVar.currentEditor != null) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("DIRTY ");
-                    sb.append(cVar.key);
-                    sb.append(10);
-                    bufferedWriter.write(sb.toString());
+            for (c next : this.lruEntries.values()) {
+                if (next.currentEditor != null) {
+                    bufferedWriter.write("DIRTY " + next.key + 10);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("CLEAN ");
-                    sb2.append(cVar.key);
-                    sb2.append(cVar.Zf());
-                    sb2.append(10);
-                    bufferedWriter.write(sb2.toString());
+                    bufferedWriter.write("CLEAN " + next.key + next.Zf() + 10);
                 }
             }
             bufferedWriter.close();
@@ -629,7 +588,7 @@ public final class b implements Closeable {
     /* access modifiers changed from: private */
     public void trimToSize() throws IOException {
         while (this.size > this.maxSize) {
-            remove((String) ((Entry) this.lruEntries.entrySet().iterator().next()).getKey());
+            remove((String) this.lruEntries.entrySet().iterator().next().getKey());
         }
     }
 
@@ -665,7 +624,7 @@ public final class b implements Closeable {
 
     public synchronized d get(String str) throws IOException {
         checkNotClosed();
-        c cVar = (c) this.lruEntries.get(str);
+        c cVar = this.lruEntries.get(str);
         if (cVar == null) {
             return null;
         }
@@ -685,7 +644,7 @@ public final class b implements Closeable {
         if (journalRebuildRequired()) {
             this.executorService.submit(this.Oc);
         }
-        d dVar = new d(this, str, cVar.sequenceNumber, cVar.cleanFiles, cVar.lengths, null);
+        d dVar = new d(this, str, cVar.sequenceNumber, cVar.cleanFiles, cVar.lengths, (a) null);
         return dVar;
     }
 
@@ -709,17 +668,14 @@ public final class b implements Closeable {
      */
     public synchronized boolean remove(String str) throws IOException {
         checkNotClosed();
-        c cVar = (c) this.lruEntries.get(str);
+        c cVar = this.lruEntries.get(str);
         if (cVar != null) {
             if (cVar.currentEditor == null) {
                 for (int i = 0; i < this.valueCount; i++) {
                     File p = cVar.p(i);
                     if (p.exists()) {
                         if (!p.delete()) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("failed to delete ");
-                            sb.append(p);
-                            throw new IOException(sb.toString());
+                            throw new IOException("failed to delete " + p);
                         }
                     }
                     this.size -= cVar.lengths[i];

@@ -38,38 +38,43 @@ public final class ObservableZip<T, R> extends Observable<R> {
             this.delayError = z;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancel() {
             clear();
             cancelSources();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelSources() {
             for (ZipObserver<T, R> dispose : this.observers) {
                 dispose.dispose();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Observer<? super R> observer, boolean z3, ZipObserver<?, ?> zipObserver) {
             if (this.cancelled) {
                 cancel();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 if (!z3) {
                     Throwable th = zipObserver.error;
                     if (th != null) {
                         cancel();
                         observer.onError(th);
                         return true;
-                    } else if (z2) {
+                    } else if (!z2) {
+                        return false;
+                    } else {
                         cancel();
                         observer.onComplete();
                         return true;
                     }
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     Throwable th2 = zipObserver.error;
                     cancel();
                     if (th2 != null) {
@@ -80,10 +85,9 @@ public final class ObservableZip<T, R> extends Observable<R> {
                     return true;
                 }
             }
-            return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
             for (ZipObserver<T, R> zipObserver : this.observers) {
                 zipObserver.queue.clear();
@@ -144,7 +148,7 @@ public final class ObservableZip<T, R> extends Observable<R> {
                             Object apply = this.zipper.apply(tArr.clone());
                             ObjectHelper.requireNonNull(apply, "The zipper returned a null value");
                             observer.onNext(apply);
-                            Arrays.fill(tArr, null);
+                            Arrays.fill(tArr, (Object) null);
                         } catch (Throwable th2) {
                             Exceptions.throwIfFatal(th2);
                             cancel();
@@ -231,15 +235,14 @@ public final class ObservableZip<T, R> extends Observable<R> {
                     System.arraycopy(observableSourceArr, 0, observableSourceArr2, 0, i);
                     observableSourceArr = observableSourceArr2;
                 }
-                int i2 = i + 1;
                 observableSourceArr[i] = observableSource;
-                i = i2;
+                i++;
             }
         } else {
             i = observableSourceArr.length;
         }
         if (i == 0) {
-            EmptyDisposable.complete(observer);
+            EmptyDisposable.complete((Observer<?>) observer);
         } else {
             new ZipCoordinator(observer, this.zipper, i, this.delayError).subscribe(observableSourceArr, this.bufferSize);
         }

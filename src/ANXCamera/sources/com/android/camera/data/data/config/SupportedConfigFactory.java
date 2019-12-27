@@ -3,7 +3,7 @@ package com.android.camera.data.data.config;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.CameraSettings;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.cloud.DataCloud.CloudFeature;
+import com.android.camera.data.cloud.DataCloud;
 import com.android.camera.data.data.runing.DataItemRunning;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera2.CameraCapabilities;
@@ -156,7 +156,7 @@ public class SupportedConfigFactory {
         }
     }
 
-    public static final SupportedConfigs getSupportedExtraConfigs(int i, int i2, CloudFeature cloudFeature, CameraCapabilities cameraCapabilities, boolean z) {
+    public static final SupportedConfigs getSupportedExtraConfigs(int i, int i2, DataCloud.CloudFeature cloudFeature, CameraCapabilities cameraCapabilities, boolean z) {
         int i3 = i;
         int i4 = i2;
         SupportedConfigs supportedConfigs = new SupportedConfigs();

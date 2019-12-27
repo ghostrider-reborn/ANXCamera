@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import com.bumptech.glide.n;
 import com.bumptech.glide.request.a.b;
 import com.bumptech.glide.request.a.c;
-import com.bumptech.glide.request.a.c.a;
 import com.bumptech.glide.request.a.g;
 
 /* compiled from: BitmapTransitionOptions */
@@ -17,7 +16,7 @@ public final class h extends n<h, Bitmap> {
     }
 
     @NonNull
-    public static h b(@NonNull a aVar) {
+    public static h b(@NonNull c.a aVar) {
         return new h().a(aVar);
     }
 
@@ -43,11 +42,11 @@ public final class h extends n<h, Bitmap> {
 
     @NonNull
     public h Xf() {
-        return a(new a());
+        return a(new c.a());
     }
 
     @NonNull
-    public h a(@NonNull a aVar) {
+    public h a(@NonNull c.a aVar) {
         return c(aVar.build());
     }
 
@@ -58,11 +57,11 @@ public final class h extends n<h, Bitmap> {
 
     @NonNull
     public h c(@NonNull g<Drawable> gVar) {
-        return (h) a((g<? super TranscodeType>) new b<Object>(gVar));
+        return (h) a(new b(gVar));
     }
 
     @NonNull
     public h m(int i) {
-        return a(new a(i));
+        return a(new c.a(i));
     }
 }

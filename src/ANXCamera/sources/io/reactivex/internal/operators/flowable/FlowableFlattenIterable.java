@@ -60,26 +60,28 @@ public final class FlowableFlattenIterable<T, R> extends AbstractFlowableWithUps
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber, SimpleQueue<?> simpleQueue) {
             if (this.cancelled) {
                 this.current = null;
                 simpleQueue.clear();
                 return true;
-            }
-            if (z) {
-                if (((Throwable) this.error.get()) != null) {
+            } else if (!z) {
+                return false;
+            } else {
+                if (this.error.get() != null) {
                     Throwable terminate = ExceptionHelper.terminate(this.error);
                     this.current = null;
                     simpleQueue.clear();
                     subscriber.onError(terminate);
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     subscriber.onComplete();
                     return true;
                 }
             }
-            return false;
         }
 
         public void clear() {
@@ -87,7 +89,7 @@ public final class FlowableFlattenIterable<T, R> extends AbstractFlowableWithUps
             this.queue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void consumedOne(boolean z) {
             if (z) {
                 int i = this.consumed + 1;
@@ -100,7 +102,7 @@ public final class FlowableFlattenIterable<T, R> extends AbstractFlowableWithUps
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:69:0x0120, code lost:
             if (r6 == null) goto L_0x012b;
          */
@@ -116,7 +118,7 @@ public final class FlowableFlattenIterable<T, R> extends AbstractFlowableWithUps
                     if (it == null) {
                         boolean z3 = this.done;
                         try {
-                            Object poll = simpleQueue.poll();
+                            T poll = simpleQueue.poll();
                             if (!checkTerminated(z3, poll == null ? z : false, subscriber, simpleQueue)) {
                                 if (poll != null) {
                                     try {
@@ -276,7 +278,7 @@ public final class FlowableFlattenIterable<T, R> extends AbstractFlowableWithUps
                 if (it != null) {
                     break;
                 }
-                Object poll = this.queue.poll();
+                T poll = this.queue.poll();
                 if (poll != null) {
                     it = ((Iterable) this.mapper.apply(poll)).iterator();
                     if (it.hasNext()) {
@@ -334,7 +336,7 @@ public final class FlowableFlattenIterable<T, R> extends AbstractFlowableWithUps
                 EmptySubscription.error(th2, subscriber);
             }
         } else {
-            flowable.subscribe((FlowableSubscriber<? super T>) new FlattenIterableSubscriber<Object>(subscriber, this.mapper, this.prefetch));
+            flowable.subscribe((FlowableSubscriber<? super T>) new FlattenIterableSubscriber(subscriber, this.mapper, this.prefetch));
         }
     }
 }

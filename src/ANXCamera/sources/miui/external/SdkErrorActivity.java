@@ -1,22 +1,21 @@
 package miui.external;
 
 import android.app.Activity;
-import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import miui.external.SdkConstants.SdkError;
+import miui.external.SdkConstants;
 
 public class SdkErrorActivity extends Activity implements SdkConstants {
-    private OnClickListener mDismissListener = new OnClickListener() {
+    private DialogInterface.OnClickListener mDismissListener = new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialogInterface, int i) {
             dialogInterface.dismiss();
             SdkErrorActivity.this.finish();
@@ -24,7 +23,7 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         }
     };
     private String mLanguage;
-    private OnClickListener mUpdateListener = new OnClickListener() {
+    private DialogInterface.OnClickListener mUpdateListener = new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialogInterface, int i) {
             dialogInterface.dismiss();
             final Dialog access$000 = SdkErrorActivity.this.createUpdateDialog();
@@ -49,9 +48,9 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         }
     };
 
-    /* renamed from: miui.external.SdkErrorActivity$3 reason: invalid class name */
+    /* renamed from: miui.external.SdkErrorActivity$3  reason: invalid class name */
     static /* synthetic */ class AnonymousClass3 {
-        static final /* synthetic */ int[] $SwitchMap$miui$external$SdkConstants$SdkError = new int[SdkError.values().length];
+        static final /* synthetic */ int[] $SwitchMap$miui$external$SdkConstants$SdkError = new int[SdkConstants.SdkError.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(6:0|1|2|3|4|6) */
         /* JADX WARNING: Code restructure failed: missing block: B:7:?, code lost:
@@ -60,8 +59,8 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         /* JADX WARNING: Failed to process nested try/catch */
         /* JADX WARNING: Missing exception handler attribute for start block: B:3:0x0014 */
         static {
-            $SwitchMap$miui$external$SdkConstants$SdkError[SdkError.NO_SDK.ordinal()] = 1;
-            $SwitchMap$miui$external$SdkConstants$SdkError[SdkError.LOW_SDK_VERSION.ordinal()] = 2;
+            $SwitchMap$miui$external$SdkConstants$SdkError[SdkConstants.SdkError.NO_SDK.ordinal()] = 1;
+            $SwitchMap$miui$external$SdkConstants$SdkError[SdkConstants.SdkError.LOW_SDK_VERSION.ordinal()] = 2;
         }
     }
 
@@ -77,8 +76,8 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         }
     }
 
-    private Dialog createDoubleActionDialog(String str, String str2, OnClickListener onClickListener, OnClickListener onClickListener2) {
-        return new Builder(this).setTitle(str).setMessage(str2).setPositiveButton(17039370, onClickListener).setNegativeButton(17039360, onClickListener2).setIcon(17301543).setCancelable(false).create();
+    private Dialog createDoubleActionDialog(String str, String str2, DialogInterface.OnClickListener onClickListener, DialogInterface.OnClickListener onClickListener2) {
+        return new AlertDialog.Builder(this).setTitle(str).setMessage(str2).setPositiveButton(17039370, onClickListener).setNegativeButton(17039360, onClickListener2).setIcon(17301543).setCancelable(false).create();
     }
 
     private Dialog createGenericErrorDialog() {
@@ -98,13 +97,12 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         String str;
         String str2;
         String str3 = "MIUI SDK版本过低";
-        String str4 = "MIUI SDK too old";
         if (!supportUpdateSdk()) {
             if (Locale.CHINESE.getLanguage().equals(this.mLanguage)) {
                 str2 = "请先升级MIUI SDK再运行本程序。";
             } else {
                 str2 = "Please upgrade MIUI SDK and then re-run this application.";
-                str3 = str4;
+                str3 = "MIUI SDK too old";
             }
             return createSingleActionDialog(str3, str2, this.mDismissListener);
         }
@@ -112,7 +110,7 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
             str = "请先升级MIUI SDK再运行本程序。是否现在升级？";
         } else {
             str = "Please upgrade MIUI SDK and then re-run this application. Upgrade now?";
-            str3 = str4;
+            str3 = "MIUI SDK too old";
         }
         return createDoubleActionDialog(str3, str, this.mUpdateListener, this.mDismissListener);
     }
@@ -130,8 +128,8 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         return createSingleActionDialog(str2, str, this.mDismissListener);
     }
 
-    private Dialog createSingleActionDialog(String str, String str2, OnClickListener onClickListener) {
-        return new Builder(this).setTitle(str).setMessage(str2).setPositiveButton(17039370, onClickListener).setIcon(17301543).setCancelable(false).create();
+    private Dialog createSingleActionDialog(String str, String str2, DialogInterface.OnClickListener onClickListener) {
+        return new AlertDialog.Builder(this).setTitle(str).setMessage(str2).setPositiveButton(17039370, onClickListener).setIcon(17301543).setCancelable(false).create();
     }
 
     /* access modifiers changed from: private */
@@ -178,7 +176,7 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
 
     private boolean supportUpdateSdk() {
         try {
-            return ((Boolean) SdkEntranceHelper.getSdkEntrance().getMethod("supportUpdate", new Class[]{Map.class}).invoke(null, new Object[]{null})).booleanValue();
+            return ((Boolean) SdkEntranceHelper.getSdkEntrance().getMethod("supportUpdate", new Class[]{Map.class}).invoke((Object) null, new Object[]{null})).booleanValue();
         } catch (Exception e2) {
             e2.printStackTrace();
             return false;
@@ -189,7 +187,7 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
     public boolean updateSdk() {
         try {
             HashMap hashMap = new HashMap();
-            return ((Boolean) SdkEntranceHelper.getSdkEntrance().getMethod("update", new Class[]{Map.class}).invoke(null, new Object[]{hashMap})).booleanValue();
+            return ((Boolean) SdkEntranceHelper.getSdkEntrance().getMethod("update", new Class[]{Map.class}).invoke((Object) null, new Object[]{hashMap})).booleanValue();
         } catch (Exception e2) {
             e2.printStackTrace();
             return false;
@@ -202,12 +200,11 @@ public class SdkErrorActivity extends Activity implements SdkConstants {
         super.onCreate(bundle);
         this.mLanguage = Locale.getDefault().getLanguage();
         Intent intent = getIntent();
-        SdkError sdkError = intent != null ? (SdkError) intent.getSerializableExtra(SdkError.INTENT_EXTRA_KEY) : null;
+        SdkConstants.SdkError sdkError = intent != null ? (SdkConstants.SdkError) intent.getSerializableExtra(SdkConstants.SdkError.INTENT_EXTRA_KEY) : null;
         if (sdkError == null) {
-            sdkError = SdkError.GENERIC;
+            sdkError = SdkConstants.SdkError.GENERIC;
         }
         int i = AnonymousClass3.$SwitchMap$miui$external$SdkConstants$SdkError[sdkError.ordinal()];
-        Dialog dialog = i != 1 ? i != 2 ? createGenericErrorDialog() : createLowSdkVersionDialog() : createNoSdkDialog();
-        new SdkDialogFragment(dialog).show(getFragmentManager(), "SdkErrorPromptDialog");
+        new SdkDialogFragment(i != 1 ? i != 2 ? createGenericErrorDialog() : createLowSdkVersionDialog() : createNoSdkDialog()).show(getFragmentManager(), "SdkErrorPromptDialog");
     }
 }

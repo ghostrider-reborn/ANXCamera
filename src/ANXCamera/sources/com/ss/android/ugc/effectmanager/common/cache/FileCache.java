@@ -21,50 +21,30 @@ public class FileCache implements ICache {
     }
 
     public boolean has(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mConfiguration.getEffectDir());
-        sb.append(File.separator);
-        sb.append(str);
-        return FileUtils.checkFileExists(sb.toString());
+        return FileUtils.checkFileExists(this.mConfiguration.getEffectDir() + File.separator + str);
     }
 
     public InputStream queryToStream(String str) {
         InputStream fileStream;
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mConfiguration.getEffectDir().getPath());
-        sb.append(File.separator);
-        sb.append(str);
-        String sb2 = sb.toString();
+        String str2 = this.mConfiguration.getEffectDir().getPath() + File.separator + str;
         synchronized (FileCache.class) {
-            fileStream = FileUtils.getFileStream(sb2);
+            fileStream = FileUtils.getFileStream(str2);
         }
         return fileStream;
     }
 
     public String queryToString(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mConfiguration.getEffectDir().getPath());
-        sb.append(File.separator);
-        sb.append(str);
-        String sb2 = sb.toString();
+        String str2 = this.mConfiguration.getEffectDir().getPath() + File.separator + str;
         synchronized (FileCache.class) {
-            String fileContent = FileUtils.getFileContent(sb2);
-            if (!TextUtils.isEmpty(fileContent)) {
-                return fileContent;
-            }
-            String str2 = "";
-            return str2;
+            String fileContent = FileUtils.getFileContent(str2);
+            return TextUtils.isEmpty(fileContent) ? "" : fileContent;
         }
     }
 
     public boolean remove(String str) {
         boolean removeFile;
         synchronized (FileCache.class) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.mConfiguration.getEffectDir());
-            sb.append(File.separator);
-            sb.append(str);
-            removeFile = FileUtils.removeFile(sb.toString());
+            removeFile = FileUtils.removeFile(this.mConfiguration.getEffectDir() + File.separator + str);
         }
         return removeFile;
     }
@@ -83,11 +63,7 @@ public class FileCache implements ICache {
 
     public void save(String str, String str2) {
         synchronized (FileCache.class) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.mConfiguration.getEffectDir());
-            sb.append(File.separator);
-            sb.append(str);
-            FileUtils.writeToExternal(str2, sb.toString());
+            FileUtils.writeToExternal(str2, this.mConfiguration.getEffectDir() + File.separator + str);
         }
     }
 }

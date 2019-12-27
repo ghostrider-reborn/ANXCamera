@@ -85,9 +85,9 @@ public final class FlowableBuffer<T, C extends Collection<? super T>> extends Ab
                     this.index = 0;
                     this.buffer = null;
                     this.actual.onNext(c2);
-                } else {
-                    this.index = i;
+                    return;
                 }
+                this.index = i;
             }
         }
 
@@ -163,7 +163,7 @@ public final class FlowableBuffer<T, C extends Collection<? super T>> extends Ab
                 int i2 = i + 1;
                 if (i == 0) {
                     try {
-                        Object call = this.bufferSupplier.call();
+                        C call = this.bufferSupplier.call();
                         ObjectHelper.requireNonNull(call, "The bufferSupplier returned a null buffer");
                         arrayDeque.offer((Collection) call);
                     } catch (Throwable th) {
@@ -180,7 +180,7 @@ public final class FlowableBuffer<T, C extends Collection<? super T>> extends Ab
                     this.produced++;
                     this.actual.onNext(collection);
                 }
-                Iterator it = arrayDeque.iterator();
+                Iterator<C> it = arrayDeque.iterator();
                 while (it.hasNext()) {
                     ((Collection) it.next()).add(t);
                 }
@@ -203,9 +203,9 @@ public final class FlowableBuffer<T, C extends Collection<? super T>> extends Ab
                 if (!QueueDrainHelper.postCompleteRequest(j, this.actual, this.buffers, this, this)) {
                     if (this.once.get() || !this.once.compareAndSet(false, true)) {
                         this.s.request(BackpressureHelper.multiplyCap((long) this.skip, j));
-                    } else {
-                        this.s.request(BackpressureHelper.addCap((long) this.size, BackpressureHelper.multiplyCap((long) this.skip, j - 1)));
+                        return;
                     }
+                    this.s.request(BackpressureHelper.addCap((long) this.size, BackpressureHelper.multiplyCap((long) this.skip, j - 1)));
                 }
             }
         }
@@ -317,11 +317,11 @@ public final class FlowableBuffer<T, C extends Collection<? super T>> extends Ab
         int i = this.size;
         int i2 = this.skip;
         if (i == i2) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new PublisherBufferExactSubscriber<Object>(subscriber, i, this.bufferSupplier));
+            this.source.subscribe(new PublisherBufferExactSubscriber(subscriber, i, this.bufferSupplier));
         } else if (i2 > i) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new PublisherBufferSkipSubscriber<Object>(subscriber, i, i2, this.bufferSupplier));
+            this.source.subscribe(new PublisherBufferSkipSubscriber(subscriber, i, i2, this.bufferSupplier));
         } else {
-            this.source.subscribe((FlowableSubscriber<? super T>) new PublisherBufferOverlappingSubscriber<Object>(subscriber, i, i2, this.bufferSupplier));
+            this.source.subscribe(new PublisherBufferOverlappingSubscriber(subscriber, i, i2, this.bufferSupplier));
         }
     }
 }

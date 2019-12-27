@@ -33,7 +33,7 @@ public final class ObservableAny<T> extends AbstractObservableWithUpstream<T, Bo
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
-                this.actual.onNext(Boolean.valueOf(false));
+                this.actual.onNext(false);
                 this.actual.onComplete();
             }
         }
@@ -53,7 +53,7 @@ public final class ObservableAny<T> extends AbstractObservableWithUpstream<T, Bo
                     if (this.predicate.test(t)) {
                         this.done = true;
                         this.s.dispose();
-                        this.actual.onNext(Boolean.valueOf(true));
+                        this.actual.onNext(true);
                         this.actual.onComplete();
                     }
                 } catch (Throwable th) {

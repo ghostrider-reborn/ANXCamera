@@ -33,10 +33,8 @@ public class FilterProcessor {
     }
 
     private static DrawYuvAttribute getDrawYuvAttribute(Image image, boolean z, ParallelTaskData parallelTaskData) {
-        Image image2 = image;
-        boolean z2 = z;
         ParallelTaskDataParameter dataParameter = parallelTaskData.getDataParameter();
-        DrawYuvAttribute drawYuvAttribute = new DrawYuvAttribute(image2, dataParameter.getPreviewSize(), dataParameter.getPictureSize(), dataParameter.getFilterId(), dataParameter.getOrientation(), dataParameter.getJpegRotation(), dataParameter.getShootRotation(), System.currentTimeMillis(), dataParameter.isMirror(), z2, dataParameter.isGradienterOn(), dataParameter.getTiltShiftMode(), dataParameter.getTimeWaterMarkString(), EffectController.getInstance().copyEffectRectAttribute(), dataParameter.getFaceWaterMarkList());
+        DrawYuvAttribute drawYuvAttribute = new DrawYuvAttribute(image, dataParameter.getPreviewSize(), dataParameter.getPictureSize(), dataParameter.getFilterId(), dataParameter.getOrientation(), dataParameter.getJpegRotation(), dataParameter.getShootRotation(), System.currentTimeMillis(), dataParameter.isMirror(), z, dataParameter.isGradienterOn(), dataParameter.getTiltShiftMode(), dataParameter.getTimeWaterMarkString(), EffectController.getInstance().copyEffectRectAttribute(), dataParameter.getFaceWaterMarkList());
         return drawYuvAttribute;
     }
 
@@ -57,15 +55,11 @@ public class FilterProcessor {
     }
 
     private boolean shouldApplyEffect(@NonNull ParallelTaskData parallelTaskData) {
-        boolean z = true;
         if (isWatermarkEnabled(parallelTaskData)) {
             return true;
         }
         ParallelTaskDataParameter dataParameter = parallelTaskData.getDataParameter();
-        if (dataParameter == null || (FilterInfo.FILTER_ID_NONE == dataParameter.getFilterId() && !dataParameter.isGradienterOn() && dataParameter.getTiltShiftMode() == null)) {
-            z = false;
-        }
-        return z;
+        return (dataParameter == null || (FilterInfo.FILTER_ID_NONE == dataParameter.getFilterId() && !dataParameter.isGradienterOn() && dataParameter.getTiltShiftMode() == null)) ? false : true;
     }
 
     public Image doFilterSync(@NonNull ParallelTaskData parallelTaskData, @NonNull Image image, int i) {
@@ -82,10 +76,7 @@ public class FilterProcessor {
             parallelTaskData.setDataOfTheRegionUnderWatermarks(drawYuvAttribute.mDataOfTheRegionUnderWatermarks);
             parallelTaskData.setCoordinatesOfTheRegionUnderWatermarks(drawYuvAttribute.mCoordinatesOfTheRegionUnderWatermarks);
             if (Util.isDumpImageEnabled()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("dump_3_");
-                sb.append(image.getTimestamp());
-                ImageUtil.dumpYuvImage(image, sb.toString());
+                ImageUtil.dumpYuvImage(image, "dump_3_" + image.getTimestamp());
             }
         }
         return image;

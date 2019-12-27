@@ -20,7 +20,7 @@ public final class ObservableDoFinally<T> extends AbstractObservableWithUpstream
         private static final long serialVersionUID = 4109457741734051389L;
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f311d;
         final Action onFinally;
         QueueDisposable<T> qd;
@@ -97,7 +97,7 @@ public final class ObservableDoFinally<T> extends AbstractObservableWithUpstream
             return requestFusion;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runFinally() {
             if (compareAndSet(0, 1)) {
                 try {

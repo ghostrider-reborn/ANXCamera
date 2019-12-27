@@ -47,9 +47,9 @@ public final class FlowableOnBackpressureError<T> extends AbstractFlowableWithUp
                 if (get() != 0) {
                     this.actual.onNext(t);
                     BackpressureHelper.produced(this, 1);
-                } else {
-                    onError(new MissingBackpressureException("could not emit value due to lack of requests"));
+                    return;
                 }
+                onError(new MissingBackpressureException("could not emit value due to lack of requests"));
             }
         }
 
@@ -74,6 +74,6 @@ public final class FlowableOnBackpressureError<T> extends AbstractFlowableWithUp
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new BackpressureErrorSubscriber<Object>(subscriber));
+        this.source.subscribe(new BackpressureErrorSubscriber(subscriber));
     }
 }

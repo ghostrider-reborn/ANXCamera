@@ -1,7 +1,7 @@
 package com.android.camera.snap;
 
 import android.content.Context;
-import android.media.AudioAttributes.Builder;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -13,12 +13,12 @@ import com.android.camera.ProximitySensorLock;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
-import com.android.camera.snap.SnapCamera.SnapStatusListener;
+import com.android.camera.snap.SnapCamera;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.Storage;
 
-public class SnapTrigger implements SnapStatusListener {
+public class SnapTrigger implements SnapCamera.SnapStatusListener {
     private static final int INTERVAL_DELAY = 200;
     private static final int MAX_BURST_COUNT = 100;
     public static final int MAX_VIDEO_DURATION = 300000;
@@ -49,20 +49,21 @@ public class SnapTrigger implements SnapStatusListener {
                 if (SnapTrigger.this.mPowerManager != null && SnapTrigger.this.mPowerManager.isScreenOn()) {
                     Log.d(SnapTrigger.TAG, "isScreenOn is true, stop take snap");
                     SnapTrigger.this.mHandler.removeMessages(101);
-                } else if (!SnapTrigger.this.shouldQuitSnap() && Storage.getAvailableSpace() >= Storage.LOW_STORAGE_THRESHOLD) {
+                } else if (SnapTrigger.this.shouldQuitSnap() || Storage.getAvailableSpace() < Storage.LOW_STORAGE_THRESHOLD) {
+                } else {
                     if (SnapTrigger.this.mCamera.isCamcorder()) {
                         SnapTrigger.this.shutdownWatchDog();
                         SnapTrigger.this.vibratorShort();
                         SnapTrigger.this.mCamera.startCamcorder();
                         Log.d(SnapTrigger.TAG, "take movie");
                         CameraStatUtil.trackSnapInfo(true);
-                    } else {
-                        SnapTrigger.this.triggerWatchdog(false);
-                        SnapTrigger.this.mCamera.takeSnap();
-                        SnapTrigger.this.mBurstCount = SnapTrigger.this.mBurstCount + 1;
-                        Log.d(SnapTrigger.TAG, "take snap");
-                        CameraStatUtil.trackSnapInfo(false);
+                        return;
                     }
+                    SnapTrigger.this.triggerWatchdog(false);
+                    SnapTrigger.this.mCamera.takeSnap();
+                    int unused = SnapTrigger.this.mBurstCount = SnapTrigger.this.mBurstCount + 1;
+                    Log.d(SnapTrigger.TAG, "take snap");
+                    CameraStatUtil.trackSnapInfo(false);
                 }
             }
         }
@@ -122,10 +123,7 @@ public class SnapTrigger implements SnapStatusListener {
         }
         boolean isNonUI = Util.isNonUI();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("shouldQuitSnap isNonUI = ");
-        sb.append(isNonUI);
-        Log.d(str, sb.toString());
+        Log.d(str, "shouldQuitSnap isNonUI = " + isNonUI);
         if (isNonUI) {
             CameraStatUtil.track(CameraStat.CATEGORY_COUNTER, CameraStat.KEY_POCKET_MODE_ENTER, CameraStat.PARAM_COMMON_MODE, CameraStat.POCKET_MODE_NONUI_ENTER_SNAP);
         }
@@ -144,10 +142,7 @@ public class SnapTrigger implements SnapStatusListener {
     public void triggerWatchdog(boolean z) {
         if (this.mHandler != null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("watch dog On -");
-            sb.append(z);
-            Log.d(str, sb.toString());
+            Log.d(str, "watch dog On -" + z);
             this.mHandler.removeMessages(101);
             this.mHandler.sendEmptyMessageDelayed(101, z ? 0 : 5000);
         }
@@ -156,7 +151,7 @@ public class SnapTrigger implements SnapStatusListener {
     private void vibrator(long[] jArr) {
         try {
             Log.d(TAG, "call vibrate to notify");
-            ((Vibrator) this.mContext.getSystemService("vibrator")).vibrate(VibrationEffect.createWaveform(jArr, -1), new Builder().setUsage(4).build());
+            ((Vibrator) this.mContext.getSystemService("vibrator")).vibrate(VibrationEffect.createWaveform(jArr, -1), new AudioAttributes.Builder().setUsage(4).build());
         } catch (Exception e2) {
             Log.e(TAG, "vibrator exception", e2);
         }
@@ -195,10 +190,7 @@ public class SnapTrigger implements SnapStatusListener {
         if (ProximitySensorLock.enabled() && !Util.isNonUIEnabled()) {
             this.mProximityLock = new ProximitySensorLock(this.mContext);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("init, create a new instance -> ");
-            sb.append(this.mProximityLock);
-            Log.d(str, sb.toString());
+            Log.d(str, "init, create a new instance -> " + this.mProximityLock);
             this.mProximityLock.startWatching();
         }
         return isRunning();

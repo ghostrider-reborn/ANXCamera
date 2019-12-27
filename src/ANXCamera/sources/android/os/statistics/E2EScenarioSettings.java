@@ -2,11 +2,10 @@ package android.os.statistics;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.io.Serializable;
 
 public final class E2EScenarioSettings implements Parcelable, Cloneable, Serializable {
-    public static final Creator<E2EScenarioSettings> CREATOR = new Creator<E2EScenarioSettings>() {
+    public static final Parcelable.Creator<E2EScenarioSettings> CREATOR = new Parcelable.Creator<E2EScenarioSettings>() {
         public E2EScenarioSettings createFromParcel(Parcel parcel) {
             return new E2EScenarioSettings(parcel);
         }

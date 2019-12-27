@@ -31,9 +31,10 @@ public class EffectPanelModel {
         if (this.icon == null) {
             this.icon = new UrlModel();
         }
-        if (this.tags == null) {
-            this.tags = new ArrayList();
+        if (this.tags != null) {
+            return true;
         }
+        this.tags = new ArrayList();
         return true;
     }
 

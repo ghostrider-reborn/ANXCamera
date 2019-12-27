@@ -1,7 +1,6 @@
 package com.ss.android.medialib.common;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import com.android.camera.storage.Storage;
 import com.ss.android.medialib.FileUtils;
 import com.ss.android.vesdk.VELogUtil;
@@ -13,45 +12,23 @@ public class ImageUtils {
     private static final String TAG = "ImageUtils";
 
     public static void saveBitmap(Bitmap bitmap) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(System.currentTimeMillis());
-        sb.append(Storage.JPEG_SUFFIX);
-        saveBitmap(bitmap, sb.toString());
+        saveBitmap(bitmap, System.currentTimeMillis() + Storage.JPEG_SUFFIX);
     }
 
     public static void saveBitmap(Bitmap bitmap, String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(FileUtils.getPath());
-        sb.append("/");
-        sb.append(str);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("saving Bitmap : ");
-        sb3.append(str);
-        VELogUtil.i(str2, sb3.toString());
-        saveBitmapWithPath(bitmap, sb2, CompressFormat.JPEG);
-        String str3 = TAG;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("Bitmap ");
-        sb4.append(str);
-        sb4.append(" saved!");
-        VELogUtil.i(str3, sb4.toString());
+        VELogUtil.i(TAG, "saving Bitmap : " + str);
+        saveBitmapWithPath(bitmap, FileUtils.getPath() + "/" + str, Bitmap.CompressFormat.JPEG);
+        VELogUtil.i(TAG, "Bitmap " + str + " saved!");
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:30:0x0071 A[SYNTHETIC, Splitter:B:30:0x0071] */
     /* JADX WARNING: Removed duplicated region for block: B:35:0x007b A[SYNTHETIC, Splitter:B:35:0x007b] */
-    /* JADX WARNING: Removed duplicated region for block: B:42:0x0087 A[SYNTHETIC, Splitter:B:42:0x0087] */
-    /* JADX WARNING: Removed duplicated region for block: B:47:0x0091 A[SYNTHETIC, Splitter:B:47:0x0091] */
-    public static void saveBitmapWithPath(Bitmap bitmap, String str, CompressFormat compressFormat) {
+    /* JADX WARNING: Removed duplicated region for block: B:41:0x0087 A[SYNTHETIC, Splitter:B:41:0x0087] */
+    /* JADX WARNING: Removed duplicated region for block: B:46:0x0091 A[SYNTHETIC, Splitter:B:46:0x0091] */
+    /* JADX WARNING: Removed duplicated region for block: B:52:? A[RETURN, SYNTHETIC] */
+    public static void saveBitmapWithPath(Bitmap bitmap, String str, Bitmap.CompressFormat compressFormat) {
         FileOutputStream fileOutputStream;
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        String str3 = "Bitmap ";
-        sb.append(str3);
-        sb.append(str);
-        sb.append("saving");
-        VELogUtil.i(str2, sb.toString());
+        VELogUtil.i(TAG, "Bitmap " + str + "saving");
         BufferedOutputStream bufferedOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(str);
@@ -70,12 +47,7 @@ public class ImageUtils {
                     } catch (IOException e3) {
                         e3.printStackTrace();
                     }
-                    String str4 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str3);
-                    sb2.append(str);
-                    sb2.append(" saved!");
-                    VELogUtil.i(str4, sb2.toString());
+                    VELogUtil.i(TAG, "Bitmap " + str + " saved!");
                 } catch (IOException e4) {
                     e = e4;
                     bufferedOutputStream = bufferedOutputStream2;

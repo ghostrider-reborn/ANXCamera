@@ -2,10 +2,7 @@ package android.support.v7.widget;
 
 import android.support.annotation.Nullable;
 import android.support.v4.os.TraceCompat;
-import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.LayoutManager.LayoutPrefetchRegistry;
-import android.support.v7.widget.RecyclerView.Recycler;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,27 +13,20 @@ final class GapWorker implements Runnable {
     static final ThreadLocal<GapWorker> sGapWorker = new ThreadLocal<>();
     static Comparator<Task> sTaskComparator = new Comparator<Task>() {
         public int compare(Task task, Task task2) {
-            int i = 1;
             if ((task.view == null) != (task2.view == null)) {
-                if (task.view != null) {
-                    i = -1;
-                }
-                return i;
+                return task.view == null ? 1 : -1;
             }
             boolean z = task.immediate;
             if (z != task2.immediate) {
-                if (z) {
-                    i = -1;
-                }
+                return z ? -1 : 1;
+            }
+            int i = task2.viewVelocity - task.viewVelocity;
+            if (i != 0) {
                 return i;
             }
-            int i2 = task2.viewVelocity - task.viewVelocity;
+            int i2 = task.distanceToItem - task2.distanceToItem;
             if (i2 != 0) {
                 return i2;
-            }
-            int i3 = task.distanceToItem - task2.distanceToItem;
-            if (i3 != 0) {
-                return i3;
             }
             return 0;
         }
@@ -46,7 +36,7 @@ final class GapWorker implements Runnable {
     ArrayList<RecyclerView> mRecyclerViews = new ArrayList<>();
     private ArrayList<Task> mTasks = new ArrayList<>();
 
-    static class LayoutPrefetchRegistryImpl implements LayoutPrefetchRegistry {
+    static class LayoutPrefetchRegistryImpl implements RecyclerView.LayoutManager.LayoutPrefetchRegistry {
         int mCount;
         int[] mPrefetchArray;
         int mPrefetchDx;
@@ -77,7 +67,7 @@ final class GapWorker implements Runnable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clearPrefetchPositions() {
             int[] iArr = this.mPrefetchArray;
             if (iArr != null) {
@@ -86,14 +76,14 @@ final class GapWorker implements Runnable {
             this.mCount = 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void collectPrefetchPositionsFromView(RecyclerView recyclerView, boolean z) {
             this.mCount = 0;
             int[] iArr = this.mPrefetchArray;
             if (iArr != null) {
                 Arrays.fill(iArr, -1);
             }
-            LayoutManager layoutManager = recyclerView.mLayout;
+            RecyclerView.LayoutManager layoutManager = recyclerView.mLayout;
             if (recyclerView.mAdapter != null && layoutManager != null && layoutManager.isItemPrefetchEnabled()) {
                 if (z) {
                     if (!recyclerView.mAdapterHelper.hasPendingUpdates()) {
@@ -111,7 +101,7 @@ final class GapWorker implements Runnable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean lastPrefetchIncludedPosition(int i) {
             if (this.mPrefetchArray != null) {
                 int i2 = this.mCount * 2;
@@ -124,7 +114,7 @@ final class GapWorker implements Runnable {
             return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setPrefetchVector(int i, int i2) {
             this.mPrefetchDx = i;
             this.mPrefetchDy = i2;
@@ -158,7 +148,7 @@ final class GapWorker implements Runnable {
         int size = this.mRecyclerViews.size();
         int i = 0;
         for (int i2 = 0; i2 < size; i2++) {
-            RecyclerView recyclerView = (RecyclerView) this.mRecyclerViews.get(i2);
+            RecyclerView recyclerView = this.mRecyclerViews.get(i2);
             if (recyclerView.getWindowVisibility() == 0) {
                 recyclerView.mPrefetchRegistry.collectPrefetchPositionsFromView(recyclerView, false);
                 i += recyclerView.mPrefetchRegistry.mCount;
@@ -167,7 +157,7 @@ final class GapWorker implements Runnable {
         this.mTasks.ensureCapacity(i);
         int i3 = 0;
         for (int i4 = 0; i4 < size; i4++) {
-            RecyclerView recyclerView2 = (RecyclerView) this.mRecyclerViews.get(i4);
+            RecyclerView recyclerView2 = this.mRecyclerViews.get(i4);
             if (recyclerView2.getWindowVisibility() == 0) {
                 LayoutPrefetchRegistryImpl layoutPrefetchRegistryImpl = recyclerView2.mPrefetchRegistry;
                 int abs = Math.abs(layoutPrefetchRegistryImpl.mPrefetchDx) + Math.abs(layoutPrefetchRegistryImpl.mPrefetchDy);
@@ -177,7 +167,7 @@ final class GapWorker implements Runnable {
                         task = new Task();
                         this.mTasks.add(task);
                     } else {
-                        task = (Task) this.mTasks.get(i5);
+                        task = this.mTasks.get(i5);
                     }
                     int i7 = layoutPrefetchRegistryImpl.mPrefetchArray[i6 + 1];
                     task.immediate = i7 <= abs;
@@ -194,7 +184,7 @@ final class GapWorker implements Runnable {
     }
 
     private void flushTaskWithDeadline(Task task, long j) {
-        ViewHolder prefetchPositionWithDeadline = prefetchPositionWithDeadline(task.view, task.position, task.immediate ? Long.MAX_VALUE : j);
+        RecyclerView.ViewHolder prefetchPositionWithDeadline = prefetchPositionWithDeadline(task.view, task.position, task.immediate ? Long.MAX_VALUE : j);
         if (prefetchPositionWithDeadline != null && prefetchPositionWithDeadline.mNestedRecyclerView != null && prefetchPositionWithDeadline.isBound() && !prefetchPositionWithDeadline.isInvalid()) {
             prefetchInnerRecyclerViewWithDeadline((RecyclerView) prefetchPositionWithDeadline.mNestedRecyclerView.get(), j);
         }
@@ -203,7 +193,7 @@ final class GapWorker implements Runnable {
     private void flushTasksWithDeadline(long j) {
         int i = 0;
         while (i < this.mTasks.size()) {
-            Task task = (Task) this.mTasks.get(i);
+            Task task = this.mTasks.get(i);
             if (task.view != null) {
                 flushTaskWithDeadline(task, j);
                 task.clear();
@@ -217,7 +207,7 @@ final class GapWorker implements Runnable {
     static boolean isPrefetchPositionAttached(RecyclerView recyclerView, int i) {
         int unfilteredChildCount = recyclerView.mChildHelper.getUnfilteredChildCount();
         for (int i2 = 0; i2 < unfilteredChildCount; i2++) {
-            ViewHolder childViewHolderInt = RecyclerView.getChildViewHolderInt(recyclerView.mChildHelper.getUnfilteredChildAt(i2));
+            RecyclerView.ViewHolder childViewHolderInt = RecyclerView.getChildViewHolderInt(recyclerView.mChildHelper.getUnfilteredChildAt(i2));
             if (childViewHolderInt.mPosition == i && !childViewHolderInt.isInvalid()) {
                 return true;
             }
@@ -246,14 +236,14 @@ final class GapWorker implements Runnable {
         }
     }
 
-    private ViewHolder prefetchPositionWithDeadline(RecyclerView recyclerView, int i, long j) {
+    private RecyclerView.ViewHolder prefetchPositionWithDeadline(RecyclerView recyclerView, int i, long j) {
         if (isPrefetchPositionAttached(recyclerView, i)) {
             return null;
         }
-        Recycler recycler = recyclerView.mRecycler;
+        RecyclerView.Recycler recycler = recyclerView.mRecycler;
         try {
             recyclerView.onEnterLayoutOrScroll();
-            ViewHolder tryGetViewHolderForPositionByDeadline = recycler.tryGetViewHolderForPositionByDeadline(i, false, j);
+            RecyclerView.ViewHolder tryGetViewHolderForPositionByDeadline = recycler.tryGetViewHolderForPositionByDeadline(i, false, j);
             if (tryGetViewHolderForPositionByDeadline != null) {
                 if (!tryGetViewHolderForPositionByDeadline.isBound() || tryGetViewHolderForPositionByDeadline.isInvalid()) {
                     recycler.addViewHolderToRecycledViewPool(tryGetViewHolderForPositionByDeadline, false);
@@ -271,7 +261,7 @@ final class GapWorker implements Runnable {
         this.mRecyclerViews.add(recyclerView);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void postFromTraversal(RecyclerView recyclerView, int i, int i2) {
         if (recyclerView.isAttachedToWindow() && this.mPostTimeNs == 0) {
             this.mPostTimeNs = recyclerView.getNanoTime();
@@ -280,7 +270,7 @@ final class GapWorker implements Runnable {
         recyclerView.mPrefetchRegistry.setPrefetchVector(i, i2);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void prefetch(long j) {
         buildTaskList();
         flushTasksWithDeadline(j);
@@ -297,7 +287,7 @@ final class GapWorker implements Runnable {
                 int size = this.mRecyclerViews.size();
                 long j = 0;
                 for (int i = 0; i < size; i++) {
-                    RecyclerView recyclerView = (RecyclerView) this.mRecyclerViews.get(i);
+                    RecyclerView recyclerView = this.mRecyclerViews.get(i);
                     if (recyclerView.getWindowVisibility() == 0) {
                         j = Math.max(recyclerView.getDrawingTime(), j);
                     }

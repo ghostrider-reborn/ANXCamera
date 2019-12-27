@@ -6,8 +6,6 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.ss.android.vesdk.runtime.cloudconfig.HttpRequest;
 import java.io.UnsupportedEncodingException;
@@ -20,16 +18,16 @@ public class JsonObjectRequest extends Request<JSONObject> implements Cacheable 
     private volatile byte[] mData = null;
     private Map<String, String> mHeaders = null;
     private volatile boolean mIsFromCache = false;
-    private Listener<JSONObject> mListener;
+    private Response.Listener<JSONObject> mListener;
     private Map<String, String> mParams = null;
 
-    public JsonObjectRequest(int i, String str, Listener<JSONObject> listener, ErrorListener errorListener) {
+    public JsonObjectRequest(int i, String str, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         super(i, str, errorListener);
         this.mListener = listener;
     }
 
     public static String parseCharset(Map<String, String> map, String str) {
-        String str2 = (String) map.get("Content-Type");
+        String str2 = map.get("Content-Type");
         if (str2 != null) {
             String[] split = str2.split(";");
             for (int i = 1; i < split.length; i++) {
@@ -44,7 +42,7 @@ public class JsonObjectRequest extends Request<JSONObject> implements Cacheable 
 
     /* access modifiers changed from: protected */
     public void deliverResponse(JSONObject jSONObject) {
-        Listener<JSONObject> listener = this.mListener;
+        Response.Listener<JSONObject> listener = this.mListener;
         if (listener != null) {
             listener.onResponse(jSONObject);
         }

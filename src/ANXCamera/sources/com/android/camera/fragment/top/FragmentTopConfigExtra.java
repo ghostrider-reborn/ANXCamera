@@ -6,11 +6,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.ScaleAnimation;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
@@ -28,9 +26,7 @@ import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.FragmentUtils;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
-import com.android.camera.protocol.ModeProtocol.TopConfigProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import io.reactivex.Completable;
 import java.util.List;
@@ -38,7 +34,7 @@ import miui.view.animation.QuarticEaseInOutInterpolator;
 import miui.view.animation.QuarticEaseOutInterpolator;
 import miui.view.animation.SineEaseInInterpolator;
 
-public class FragmentTopConfigExtra extends BaseFragment implements OnClickListener {
+public class FragmentTopConfigExtra extends BaseFragment implements View.OnClickListener {
     public static final int FRAGMENT_INFO = 245;
     public static final int TOP_CONFIG_EXTRA_ANIM_OUT_ALPHA_TIME = 120;
     /* access modifiers changed from: private */
@@ -227,7 +223,7 @@ public class FragmentTopConfigExtra extends BaseFragment implements OnClickListe
     }
 
     public void animateOut() {
-        AnonymousClass2 r0 = new AnimationListener() {
+        AnonymousClass2 r0 = new Animation.AnimationListener() {
             public void onAnimationEnd(Animation animation) {
                 if (FragmentTopConfigExtra.this.canProvide()) {
                     FragmentUtils.removeFragmentByTag(FragmentTopConfigExtra.this.getFragmentManager(), FragmentTopConfigExtra.this.getFragmentTag());
@@ -277,8 +273,8 @@ public class FragmentTopConfigExtra extends BaseFragment implements OnClickListe
             integer = supportedExtraConfigs.getLength();
         }
         int max = Math.max(1, integer);
-        ((MarginLayoutParams) this.mRecyclerView.getLayoutParams()).height = getResources().getDimensionPixelSize(R.dimen.config_item_height) * ((int) Math.ceil((double) (((float) supportedExtraConfigs.getLength()) / ((float) max))));
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        ((ViewGroup.MarginLayoutParams) this.mRecyclerView.getLayoutParams()).height = getResources().getDimensionPixelSize(R.dimen.config_item_height) * ((int) Math.ceil((double) (((float) supportedExtraConfigs.getLength()) / ((float) max))));
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
         this.mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), max));
         this.mExtraAdapter = new ExtraAdapter(supportedExtraConfigs, this);
         this.mExtraAdapter.setNewDegree(this.mDegree);
@@ -288,11 +284,11 @@ public class FragmentTopConfigExtra extends BaseFragment implements OnClickListe
 
     public void onClick(View view) {
         if (isEnableClick()) {
-            ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+            ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
             if (configChanges != null) {
                 int intValue = ((Integer) view.getTag()).intValue();
                 configChanges.onConfigChanged(intValue);
-                TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+                ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
                 if (Util.isAccessible()) {
                     this.mExtraAdapter.setOnClictTag(intValue);
                 }
@@ -302,7 +298,7 @@ public class FragmentTopConfigExtra extends BaseFragment implements OnClickListe
                     this.mRecyclerView.getAdapter().notifyDataSetChanged();
                 } else {
                     topAlert.hideExtraMenu();
-                    ((TopConfigProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(193)).startAiLens();
+                    ((ModeProtocol.TopConfigProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(193)).startAiLens();
                     CameraStat.recordCountEvent(CameraStat.CATEGORY_COUNTER, CameraStat.KEY_AI_DETECT_CHANGED);
                 }
             }

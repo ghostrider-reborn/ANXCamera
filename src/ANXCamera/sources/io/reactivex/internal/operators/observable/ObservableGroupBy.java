@@ -87,7 +87,7 @@ public final class ObservableGroupBy<T, K, V> extends AbstractObservableWithUpst
             try {
                 Object apply = this.keySelector.apply(t);
                 Object obj = apply != null ? apply : NULL_KEY;
-                GroupedUnicast groupedUnicast = (GroupedUnicast) this.groups.get(obj);
+                GroupedUnicast groupedUnicast = this.groups.get(obj);
                 if (groupedUnicast == null) {
                     if (!this.cancelled.get()) {
                         groupedUnicast = GroupedUnicast.createWith(apply, this.bufferSize, this, this.delayError);
@@ -171,30 +171,35 @@ public final class ObservableGroupBy<T, K, V> extends AbstractObservableWithUpst
             this.delayError = z;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Observer<? super T> observer, boolean z3) {
             if (this.cancelled.get()) {
                 this.queue.clear();
                 this.parent.cancel(this.key);
-                this.actual.lazySet(null);
+                this.actual.lazySet((Object) null);
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 if (!z3) {
                     Throwable th = this.error;
                     if (th != null) {
                         this.queue.clear();
-                        this.actual.lazySet(null);
+                        this.actual.lazySet((Object) null);
                         observer.onError(th);
                         return true;
-                    } else if (z2) {
-                        this.actual.lazySet(null);
+                    } else if (!z2) {
+                        return false;
+                    } else {
+                        this.actual.lazySet((Object) null);
                         observer.onComplete();
                         return true;
                     }
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     Throwable th2 = this.error;
-                    this.actual.lazySet(null);
+                    this.actual.lazySet((Object) null);
                     if (th2 != null) {
                         observer.onError(th2);
                     } else {
@@ -203,28 +208,27 @@ public final class ObservableGroupBy<T, K, V> extends AbstractObservableWithUpst
                     return true;
                 }
             }
-            return false;
         }
 
         public void dispose() {
             if (this.cancelled.compareAndSet(false, true) && getAndIncrement() == 0) {
-                this.actual.lazySet(null);
+                this.actual.lazySet((Object) null);
                 this.parent.cancel(this.key);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
                 boolean z = this.delayError;
-                Observer observer = (Observer) this.actual.get();
+                Observer observer = this.actual.get();
                 int i = 1;
                 while (true) {
                     if (observer != null) {
                         while (true) {
                             boolean z2 = this.done;
-                            Object poll = spscLinkedArrayQueue.poll();
+                            T poll = spscLinkedArrayQueue.poll();
                             boolean z3 = poll == null;
                             if (!checkTerminated(z2, z3, observer, z)) {
                                 if (z3) {
@@ -239,7 +243,7 @@ public final class ObservableGroupBy<T, K, V> extends AbstractObservableWithUpst
                     i = addAndGet(-i);
                     if (i != 0) {
                         if (observer == null) {
-                            observer = (Observer) this.actual.get();
+                            observer = this.actual.get();
                         }
                     } else {
                         return;
@@ -273,12 +277,12 @@ public final class ObservableGroupBy<T, K, V> extends AbstractObservableWithUpst
                 observer.onSubscribe(this);
                 this.actual.lazySet(observer);
                 if (this.cancelled.get()) {
-                    this.actual.lazySet(null);
+                    this.actual.lazySet((Object) null);
                 } else {
                     drain();
                 }
             } else {
-                EmptyDisposable.error((Throwable) new IllegalStateException("Only one Observer allowed!"), observer);
+                EmptyDisposable.error((Throwable) new IllegalStateException("Only one Observer allowed!"), (Observer<?>) observer);
             }
         }
     }

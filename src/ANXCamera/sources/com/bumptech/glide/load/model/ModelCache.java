@@ -21,15 +21,15 @@ public class ModelCache<A, B> {
         }
 
         static <A> ModelKey<A> b(A a2, int i, int i2) {
-            ModelKey<A> modelKey;
+            ModelKey<A> poll;
             synchronized (_h) {
-                modelKey = (ModelKey) _h.poll();
+                poll = _h.poll();
             }
-            if (modelKey == null) {
-                modelKey = new ModelKey<>();
+            if (poll == null) {
+                poll = new ModelKey<>();
             }
-            modelKey.d(a2, i, i2);
-            return modelKey;
+            poll.d(a2, i, i2);
+            return poll;
         }
 
         private void d(A a2, int i, int i2) {

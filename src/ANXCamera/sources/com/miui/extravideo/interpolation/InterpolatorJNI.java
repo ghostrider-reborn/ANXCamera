@@ -126,17 +126,9 @@ class InterpolatorJNI {
             return -2147483646;
         }
         int[] iArr = new int[1];
-        double[] dArr = new double[2];
-        int processJNI = processJNI(this.handler, bArr, i, i2, iArr, dArr, z) | 0;
-        double nanoTime = ((double) (System.nanoTime() - System.nanoTime())) / 1000000.0d;
-        StringBuilder sb = new StringBuilder();
-        sb.append("processJNI diff = ");
-        sb.append(nanoTime);
-        sb.append(", skip_engine_process=");
-        sb.append(z);
-        sb.append(", index=");
-        sb.append(i);
-        Log.i("FN_FF", sb.toString());
+        long nanoTime = System.nanoTime();
+        int processJNI = processJNI(this.handler, bArr, i, i2, iArr, new double[2], z) | 0;
+        Log.i("FN_FF", "processJNI diff = " + (((double) (System.nanoTime() - nanoTime)) / 1000000.0d) + ", skip_engine_process=" + z + ", index=" + i);
         int i3 = iArr[0];
         if (i3 == 1) {
             this.failureCode = "Local motion";

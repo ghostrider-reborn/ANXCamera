@@ -27,12 +27,12 @@ class JdkWithJettyBootPlatform extends Platform {
 
         public Object invoke(Object obj, Method method, Object[] objArr) throws Throwable {
             String name = method.getName();
-            Class<String> returnType = method.getReturnType();
+            Class<?> returnType = method.getReturnType();
             if (objArr == null) {
                 objArr = Util.EMPTY_STRING_ARRAY;
             }
             if (name.equals("supports") && Boolean.TYPE == returnType) {
-                return Boolean.valueOf(true);
+                return true;
             }
             if (name.equals("unsupported") && Void.TYPE == returnType) {
                 this.unsupported = true;
@@ -50,7 +50,7 @@ class JdkWithJettyBootPlatform extends Platform {
                             return str;
                         }
                     }
-                    String str2 = (String) this.protocols.get(0);
+                    String str2 = this.protocols.get(0);
                     this.selected = str2;
                     return str2;
                 } else if ((!name.equals("protocolSelected") && !name.equals("selected")) || objArr.length != 1) {
@@ -72,21 +72,11 @@ class JdkWithJettyBootPlatform extends Platform {
     }
 
     public static Platform buildIfSupported() {
-        String str = "org.eclipse.jetty.alpn.ALPN";
         try {
-            Class cls = Class.forName("org.eclipse.jetty.alpn.ALPN");
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append("$Provider");
-            Class cls2 = Class.forName(sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append("$ClientProvider");
-            Class cls3 = Class.forName(sb2.toString());
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str);
-            sb3.append("$ServerProvider");
-            Class cls4 = Class.forName(sb3.toString());
+            Class<?> cls = Class.forName("org.eclipse.jetty.alpn.ALPN");
+            Class<?> cls2 = Class.forName("org.eclipse.jetty.alpn.ALPN" + "$Provider");
+            Class<?> cls3 = Class.forName("org.eclipse.jetty.alpn.ALPN" + "$ClientProvider");
+            Class<?> cls4 = Class.forName("org.eclipse.jetty.alpn.ALPN" + "$ServerProvider");
             Method method = cls.getMethod("put", new Class[]{SSLSocket.class, cls2});
             Method method2 = method;
             JdkWithJettyBootPlatform jdkWithJettyBootPlatform = new JdkWithJettyBootPlatform(method2, cls.getMethod("get", new Class[]{SSLSocket.class}), cls.getMethod("remove", new Class[]{SSLSocket.class}), cls3, cls4);
@@ -98,17 +88,17 @@ class JdkWithJettyBootPlatform extends Platform {
 
     public void afterHandshake(SSLSocket sSLSocket) {
         try {
-            this.removeMethod.invoke(null, new Object[]{sSLSocket});
+            this.removeMethod.invoke((Object) null, new Object[]{sSLSocket});
         } catch (IllegalAccessException | InvocationTargetException e2) {
             throw Util.assertionError("unable to remove alpn", e2);
         }
     }
 
     public void configureTlsExtensions(SSLSocket sSLSocket, String str, List<Protocol> list) {
-        List alpnProtocolNames = Platform.alpnProtocolNames(list);
+        List<String> alpnProtocolNames = Platform.alpnProtocolNames(list);
         try {
             Object newProxyInstance = Proxy.newProxyInstance(Platform.class.getClassLoader(), new Class[]{this.clientProviderClass, this.serverProviderClass}, new JettyNegoProvider(alpnProtocolNames));
-            this.putMethod.invoke(null, new Object[]{sSLSocket, newProxyInstance});
+            this.putMethod.invoke((Object) null, new Object[]{sSLSocket, newProxyInstance});
         } catch (IllegalAccessException | InvocationTargetException e2) {
             throw Util.assertionError("unable to set alpn", e2);
         }
@@ -116,17 +106,15 @@ class JdkWithJettyBootPlatform extends Platform {
 
     public String getSelectedProtocol(SSLSocket sSLSocket) {
         try {
-            Object[] objArr = {sSLSocket};
-            String str = null;
-            JettyNegoProvider jettyNegoProvider = (JettyNegoProvider) Proxy.getInvocationHandler(this.getMethod.invoke(null, objArr));
-            if (jettyNegoProvider.unsupported || jettyNegoProvider.selected != null) {
-                if (!jettyNegoProvider.unsupported) {
-                    str = jettyNegoProvider.selected;
-                }
-                return str;
+            JettyNegoProvider jettyNegoProvider = (JettyNegoProvider) Proxy.getInvocationHandler(this.getMethod.invoke((Object) null, new Object[]{sSLSocket}));
+            if (!jettyNegoProvider.unsupported && jettyNegoProvider.selected == null) {
+                Platform.get().log(4, "ALPN callback dropped: HTTP/2 is disabled. Is alpn-boot on the boot class path?", (Throwable) null);
+                return null;
+            } else if (jettyNegoProvider.unsupported) {
+                return null;
+            } else {
+                return jettyNegoProvider.selected;
             }
-            Platform.get().log(4, "ALPN callback dropped: HTTP/2 is disabled. Is alpn-boot on the boot class path?", null);
-            return null;
         } catch (IllegalAccessException | InvocationTargetException e2) {
             throw Util.assertionError("unable to get selected protocol", e2);
         }

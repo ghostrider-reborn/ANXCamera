@@ -2,8 +2,7 @@ package com.bumptech.glide.util;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -67,7 +66,7 @@ public final class l {
     @NonNull
     public static <T> List<T> b(@NonNull Collection<T> collection) {
         ArrayList arrayList = new ArrayList(collection.size());
-        for (Object next : collection) {
+        for (T next : collection) {
             if (next != null) {
                 arrayList.add(next);
             }
@@ -85,10 +84,7 @@ public final class l {
     }
 
     public static boolean c(@Nullable Object obj, @Nullable Object obj2) {
-        if (obj != null) {
-            return obj instanceof r ? ((r) obj).d(obj2) : obj.equals(obj2);
-        }
-        return obj2 == null;
+        return obj == null ? obj2 == null : obj instanceof r ? ((r) obj).d(obj2) : obj.equals(obj2);
     }
 
     @NonNull
@@ -104,9 +100,9 @@ public final class l {
         return obj == null ? obj2 == null : obj.equals(obj2);
     }
 
-    private static int e(@Nullable Config config) {
+    private static int e(@Nullable Bitmap.Config config) {
         if (config == null) {
-            config = Config.ARGB_8888;
+            config = Bitmap.Config.ARGB_8888;
         }
         int i = k.sg[config.ordinal()];
         if (i == 1) {
@@ -118,7 +114,7 @@ public final class l {
         return i != 4 ? 4 : 8;
     }
 
-    public static int g(int i, int i2, @Nullable Config config) {
+    public static int g(int i, int i2, @Nullable Bitmap.Config config) {
         return i * i2 * e(config);
     }
 
@@ -146,7 +142,7 @@ public final class l {
     @TargetApi(19)
     public static int j(@NonNull Bitmap bitmap) {
         if (!bitmap.isRecycled()) {
-            if (VERSION.SDK_INT >= 19) {
+            if (Build.VERSION.SDK_INT >= 19) {
                 try {
                     return bitmap.getAllocationByteCount();
                 } catch (NullPointerException unused) {
@@ -154,16 +150,7 @@ public final class l {
             }
             return bitmap.getHeight() * bitmap.getRowBytes();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Cannot obtain size for recycled Bitmap: ");
-        sb.append(bitmap);
-        sb.append("[");
-        sb.append(bitmap.getWidth());
-        sb.append("x");
-        sb.append(bitmap.getHeight());
-        sb.append("] ");
-        sb.append(bitmap.getConfig());
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Cannot obtain size for recycled Bitmap: " + bitmap + "[" + bitmap.getWidth() + "x" + bitmap.getHeight() + "] " + bitmap.getConfig());
     }
 
     public static int n(int i, int i2) {

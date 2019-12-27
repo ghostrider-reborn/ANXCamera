@@ -31,7 +31,7 @@ public class VolleyError extends Exception {
         return this.networkTimeMs;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setNetworkTimeMs(long j) {
         this.networkTimeMs = j;
     }

@@ -33,7 +33,7 @@ public class MtkBoost implements BaseBoostFramework {
         }
         try {
             if (mBoostClass != null) {
-                Constructor constructor = mBoostClass.getConstructor(new Class[0]);
+                Constructor<?> constructor = mBoostClass.getConstructor(new Class[0]);
                 constructor.setAccessible(true);
                 this.mPerf = constructor.newInstance(new Object[0]);
             }
@@ -43,51 +43,39 @@ public class MtkBoost implements BaseBoostFramework {
     }
 
     private boolean startBoostInternal(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("startBoostInternal ");
-        sb.append(i);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "startBoostInternal " + i);
         if (this.mPerf == null) {
-            Log.d(str, "not init boost pref");
+            Log.d(TAG, "not init boost pref");
             return false;
         }
         try {
             if (mStartBoost != null) {
-                Log.d(str, "ready to boost");
+                Log.d(TAG, "ready to boost");
                 mStartBoost.setAccessible(true);
                 mStartBoost.invoke(this.mPerf, new Object[]{Integer.valueOf(i), mFBoostParamVal});
                 return true;
             }
         } catch (Exception e2) {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("start boost exception ");
-            sb3.append(e2);
-            Log.e(str, sb3.toString());
+            Log.e(TAG, "start boost exception " + e2);
             e2.printStackTrace();
         }
         return false;
     }
 
     private void stopBoostInternal() {
-        String str = TAG;
-        Log.d(str, "stopBoostInternal:");
+        Log.d(TAG, "stopBoostInternal:");
         if (this.mPerf == null) {
-            Log.d(str, "not init boost pref, not need to stop");
+            Log.d(TAG, "not init boost pref, not need to stop");
             return;
         }
         try {
             if (mStopBoost != null) {
-                Log.d(str, "ready to stop boost");
+                Log.d(TAG, "ready to stop boost");
                 mStopBoost.setAccessible(true);
                 mStopBoost.invoke(this.mPerf, new Object[0]);
             }
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("stop boost exception ");
-            sb.append(e2);
-            Log.e(str, sb.toString());
+            Log.e(TAG, "stop boost exception " + e2);
             e2.printStackTrace();
         }
     }
@@ -98,10 +86,7 @@ public class MtkBoost implements BaseBoostFramework {
 
     public boolean startBoost(int i) {
         boolean startBoostInternal = startBoostInternal(i);
-        StringBuilder sb = new StringBuilder();
-        sb.append("startBoost: isBoostStarted ");
-        sb.append(startBoostInternal);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "startBoost: isBoostStarted " + startBoostInternal);
         return startBoostInternal;
     }
 

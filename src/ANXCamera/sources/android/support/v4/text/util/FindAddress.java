@@ -1,14 +1,13 @@
 package android.support.v4.text.util;
 
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.VisibleForTesting;
 import java.util.Locale;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 class FindAddress {
     private static final String HOUSE_COMPONENT = "(?:one|\\d+([a-z](?=[^a-z]|$)|st|nd|rd|th)?)";
     private static final String HOUSE_END = "(?=[,\"'\t                　\n\u000b\f\r  ]|$)";
@@ -45,7 +44,7 @@ class FindAddress {
             this.mException2 = i3;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean matches(String str) {
             int parseInt = Integer.parseInt(str.substring(0, 2));
             return (this.mLow <= parseInt && parseInt <= this.mHigh) || parseInt == this.mException1 || parseInt == this.mException2;
@@ -219,7 +218,6 @@ class FindAddress {
     }
 
     private static boolean isValidZipCode(String str, MatchResult matchResult) {
-        boolean z = false;
         if (matchResult == null) {
             return false;
         }
@@ -235,18 +233,13 @@ class FindAddress {
             }
             groupCount = i;
         }
-        if (sZipCodeRe.matcher(str).matches() && sStateZipCodeRanges[groupCount].matches(str)) {
-            z = true;
-        }
-        return z;
+        return sZipCodeRe.matcher(str).matches() && sStateZipCodeRanges[groupCount].matches(str);
     }
 
     @VisibleForTesting
     public static MatchResult matchHouseNumber(String str, int i) {
-        if (i > 0) {
-            if (HOUSE_PRE_DELIM.indexOf(str.charAt(i - 1)) == -1) {
-                return null;
-            }
+        if (i > 0 && HOUSE_PRE_DELIM.indexOf(str.charAt(i - 1)) == -1) {
+            return null;
         }
         Matcher region = sHouseNumberRe.matcher(str).region(i, str.length());
         if (region.lookingAt()) {
@@ -260,16 +253,13 @@ class FindAddress {
 
     @VisibleForTesting
     public static MatchResult matchState(String str, int i) {
-        MatchResult matchResult = null;
-        if (i > 0) {
-            if (WORD_DELIM.indexOf(str.charAt(i - 1)) == -1) {
-                return null;
-            }
+        if (i > 0 && WORD_DELIM.indexOf(str.charAt(i - 1)) == -1) {
+            return null;
         }
         Matcher region = sStateRe.matcher(str).region(i, str.length());
         if (region.lookingAt()) {
-            matchResult = region.toMatchResult();
+            return region.toMatchResult();
         }
-        return matchResult;
+        return null;
     }
 }

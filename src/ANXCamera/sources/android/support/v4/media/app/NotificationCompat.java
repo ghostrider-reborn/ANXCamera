@@ -3,21 +3,18 @@ package android.support.v4.media.app;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.media.session.MediaSession;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.mediacompat.R;
 import android.support.v4.app.BundleCompat;
 import android.support.v4.app.NotificationBuilderWithBuilderAccessor;
-import android.support.v4.app.NotificationCompat.Action;
-import android.support.v4.app.NotificationCompat.Builder;
-import android.support.v4.app.NotificationCompat.Style;
-import android.support.v4.media.session.MediaSessionCompat.Token;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.widget.RemoteViews;
 
 public class NotificationCompat {
@@ -27,28 +24,28 @@ public class NotificationCompat {
             remoteViews.setInt(R.id.status_bar_latest_event_content, "setBackgroundColor", this.mBuilder.getColor() != 0 ? this.mBuilder.getColor() : this.mBuilder.mContext.getResources().getColor(R.color.notification_material_background_media_default_color));
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public void apply(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 24) {
-                notificationBuilderWithBuilderAccessor.getBuilder().setStyle(fillInMediaStyle(new android.app.Notification.DecoratedMediaCustomViewStyle()));
+            if (Build.VERSION.SDK_INT >= 24) {
+                notificationBuilderWithBuilderAccessor.getBuilder().setStyle(fillInMediaStyle(new Notification.DecoratedMediaCustomViewStyle()));
             } else {
                 super.apply(notificationBuilderWithBuilderAccessor);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getBigContentViewLayoutResource(int i) {
             return i <= 3 ? R.layout.notification_template_big_media_narrow_custom : R.layout.notification_template_big_media_custom;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getContentViewLayoutResource() {
             return this.mBuilder.getContentView() != null ? R.layout.notification_template_media_custom : super.getContentViewLayoutResource();
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public RemoteViews makeBigContentView(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 24) {
+            if (Build.VERSION.SDK_INT >= 24) {
                 return null;
             }
             RemoteViews bigContentView = this.mBuilder.getBigContentView() != null ? this.mBuilder.getBigContentView() : this.mBuilder.getContentView();
@@ -57,20 +54,20 @@ public class NotificationCompat {
             }
             RemoteViews generateBigContentView = generateBigContentView();
             buildIntoRemoteViews(generateBigContentView, bigContentView);
-            if (VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 setBackgroundColor(generateBigContentView);
             }
             return generateBigContentView;
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public RemoteViews makeContentView(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 24) {
+            if (Build.VERSION.SDK_INT >= 24) {
                 return null;
             }
             boolean z = true;
             boolean z2 = this.mBuilder.getContentView() != null;
-            if (VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 if (!z2 && this.mBuilder.getBigContentView() == null) {
                     z = false;
                 }
@@ -92,9 +89,9 @@ public class NotificationCompat {
             return null;
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public RemoteViews makeHeadsUpContentView(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 24) {
+            if (Build.VERSION.SDK_INT >= 24) {
                 return null;
             }
             RemoteViews headsUpContentView = this.mBuilder.getHeadsUpContentView() != null ? this.mBuilder.getHeadsUpContentView() : this.mBuilder.getContentView();
@@ -103,97 +100,96 @@ public class NotificationCompat {
             }
             RemoteViews generateBigContentView = generateBigContentView();
             buildIntoRemoteViews(generateBigContentView, headsUpContentView);
-            if (VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 setBackgroundColor(generateBigContentView);
             }
             return generateBigContentView;
         }
     }
 
-    public static class MediaStyle extends Style {
+    public static class MediaStyle extends NotificationCompat.Style {
         private static final int MAX_MEDIA_BUTTONS = 5;
         private static final int MAX_MEDIA_BUTTONS_IN_COMPACT = 3;
         int[] mActionsToShowInCompact = null;
         PendingIntent mCancelButtonIntent;
         boolean mShowCancelButton;
-        Token mToken;
+        MediaSessionCompat.Token mToken;
 
         public MediaStyle() {
         }
 
-        public MediaStyle(Builder builder) {
+        public MediaStyle(NotificationCompat.Builder builder) {
             setBuilder(builder);
         }
 
-        private RemoteViews generateMediaActionButton(Action action) {
+        private RemoteViews generateMediaActionButton(NotificationCompat.Action action) {
             boolean z = action.getActionIntent() == null;
             RemoteViews remoteViews = new RemoteViews(this.mBuilder.mContext.getPackageName(), R.layout.notification_media_action);
             remoteViews.setImageViewResource(R.id.action0, action.getIcon());
             if (!z) {
                 remoteViews.setOnClickPendingIntent(R.id.action0, action.getActionIntent());
             }
-            if (VERSION.SDK_INT >= 15) {
+            if (Build.VERSION.SDK_INT >= 15) {
                 remoteViews.setContentDescription(R.id.action0, action.getTitle());
             }
             return remoteViews;
         }
 
-        public static Token getMediaSession(Notification notification) {
+        public static MediaSessionCompat.Token getMediaSession(Notification notification) {
             Bundle extras = android.support.v4.app.NotificationCompat.getExtras(notification);
-            if (extras != null) {
-                int i = VERSION.SDK_INT;
-                String str = android.support.v4.app.NotificationCompat.EXTRA_MEDIA_SESSION;
-                if (i >= 21) {
-                    Parcelable parcelable = extras.getParcelable(str);
-                    if (parcelable != null) {
-                        return Token.fromToken(parcelable);
-                    }
-                } else {
-                    IBinder binder = BundleCompat.getBinder(extras, str);
-                    if (binder != null) {
-                        Parcel obtain = Parcel.obtain();
-                        obtain.writeStrongBinder(binder);
-                        obtain.setDataPosition(0);
-                        Token token = (Token) Token.CREATOR.createFromParcel(obtain);
-                        obtain.recycle();
-                        return token;
-                    }
-                }
+            if (extras == null) {
+                return null;
             }
-            return null;
+            if (Build.VERSION.SDK_INT >= 21) {
+                Parcelable parcelable = extras.getParcelable(android.support.v4.app.NotificationCompat.EXTRA_MEDIA_SESSION);
+                if (parcelable != null) {
+                    return MediaSessionCompat.Token.fromToken(parcelable);
+                }
+                return null;
+            }
+            IBinder binder = BundleCompat.getBinder(extras, android.support.v4.app.NotificationCompat.EXTRA_MEDIA_SESSION);
+            if (binder == null) {
+                return null;
+            }
+            Parcel obtain = Parcel.obtain();
+            obtain.writeStrongBinder(binder);
+            obtain.setDataPosition(0);
+            MediaSessionCompat.Token createFromParcel = MediaSessionCompat.Token.CREATOR.createFromParcel(obtain);
+            obtain.recycle();
+            return createFromParcel;
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public void apply(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 21) {
-                notificationBuilderWithBuilderAccessor.getBuilder().setStyle(fillInMediaStyle(new android.app.Notification.MediaStyle()));
+            if (Build.VERSION.SDK_INT >= 21) {
+                notificationBuilderWithBuilderAccessor.getBuilder().setStyle(fillInMediaStyle(new Notification.MediaStyle()));
             } else if (this.mShowCancelButton) {
                 notificationBuilderWithBuilderAccessor.getBuilder().setOngoing(true);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @RequiresApi(21)
-        public android.app.Notification.MediaStyle fillInMediaStyle(android.app.Notification.MediaStyle mediaStyle) {
+        public Notification.MediaStyle fillInMediaStyle(Notification.MediaStyle mediaStyle) {
             int[] iArr = this.mActionsToShowInCompact;
             if (iArr != null) {
                 mediaStyle.setShowActionsInCompactView(iArr);
             }
-            Token token = this.mToken;
+            MediaSessionCompat.Token token = this.mToken;
             if (token != null) {
                 mediaStyle.setMediaSession((MediaSession.Token) token.getToken());
             }
             return mediaStyle;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public RemoteViews generateBigContentView() {
             int min = Math.min(this.mBuilder.mActions.size(), 5);
             RemoteViews applyStandardTemplate = applyStandardTemplate(false, getBigContentViewLayoutResource(min), false);
             applyStandardTemplate.removeAllViews(R.id.media_actions);
             if (min > 0) {
                 for (int i = 0; i < min; i++) {
-                    applyStandardTemplate.addView(R.id.media_actions, generateMediaActionButton((Action) this.mBuilder.mActions.get(i)));
+                    applyStandardTemplate.addView(R.id.media_actions, generateMediaActionButton(this.mBuilder.mActions.get(i)));
                 }
             }
             if (this.mShowCancelButton) {
@@ -206,7 +202,7 @@ public class NotificationCompat {
             return applyStandardTemplate;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public RemoteViews generateContentView() {
             RemoteViews applyStandardTemplate = applyStandardTemplate(false, getContentViewLayoutResource(), true);
             int size = this.mBuilder.mActions.size();
@@ -217,7 +213,7 @@ public class NotificationCompat {
                 int i = 0;
                 while (i < min) {
                     if (i < size) {
-                        applyStandardTemplate.addView(R.id.media_actions, generateMediaActionButton((Action) this.mBuilder.mActions.get(this.mActionsToShowInCompact[i])));
+                        applyStandardTemplate.addView(R.id.media_actions, generateMediaActionButton(this.mBuilder.mActions.get(this.mActionsToShowInCompact[i])));
                         i++;
                     } else {
                         throw new IllegalArgumentException(String.format("setShowActionsInCompactView: action %d out of bounds (max %d)", new Object[]{Integer.valueOf(i), Integer.valueOf(size - 1)}));
@@ -236,27 +232,27 @@ public class NotificationCompat {
             return applyStandardTemplate;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getBigContentViewLayoutResource(int i) {
             return i <= 3 ? R.layout.notification_template_big_media_narrow : R.layout.notification_template_big_media;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getContentViewLayoutResource() {
             return R.layout.notification_template_media;
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public RemoteViews makeBigContentView(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 return null;
             }
             return generateBigContentView();
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public RemoteViews makeContentView(NotificationBuilderWithBuilderAccessor notificationBuilderWithBuilderAccessor) {
-            if (VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 return null;
             }
             return generateContentView();
@@ -267,7 +263,7 @@ public class NotificationCompat {
             return this;
         }
 
-        public MediaStyle setMediaSession(Token token) {
+        public MediaStyle setMediaSession(MediaSessionCompat.Token token) {
             this.mToken = token;
             return this;
         }
@@ -278,7 +274,7 @@ public class NotificationCompat {
         }
 
         public MediaStyle setShowCancelButton(boolean z) {
-            if (VERSION.SDK_INT < 21) {
+            if (Build.VERSION.SDK_INT < 21) {
                 this.mShowCancelButton = z;
             }
             return this;

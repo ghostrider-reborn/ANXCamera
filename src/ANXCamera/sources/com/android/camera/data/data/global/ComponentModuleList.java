@@ -23,13 +23,14 @@ public class ComponentModuleList extends ComponentData {
         if (i == 165) {
             return 163;
         }
-        if (i != 169) {
-            if (i == 176) {
-                return 166;
-            }
-            if (i != 179) {
-                return i;
-            }
+        if (i == 169) {
+            return 162;
+        }
+        if (i == 176) {
+            return 166;
+        }
+        if (i != 179) {
+            return i;
         }
         return 162;
     }
@@ -108,14 +109,11 @@ public class ComponentModuleList extends ComponentData {
     }
 
     public String getKey(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DataItemGlobal.DATA_COMMON_CURRENT_MODE);
-        sb.append(this.mIntentType);
-        return sb.toString();
+        return DataItemGlobal.DATA_COMMON_CURRENT_MODE + this.mIntentType;
     }
 
     public int getMode(int i) {
-        return Integer.valueOf(((ComponentDataItem) this.mItems.get(i)).mValue).intValue();
+        return Integer.valueOf(this.mItems.get(i).mValue).intValue();
     }
 
     public boolean needShowLiveRedDot() {

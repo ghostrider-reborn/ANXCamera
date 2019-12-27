@@ -15,11 +15,7 @@ public final class Preconditions {
     public static void checkUiThread() {
         Thread currentThread = Thread.currentThread();
         if (Looper.getMainLooper().getThread() != currentThread) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Method cannot be called off the main application thread (on: ");
-            sb.append(currentThread.getName());
-            sb.append(")");
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Method cannot be called off the main application thread (on: " + currentThread.getName() + ")");
         }
     }
 }

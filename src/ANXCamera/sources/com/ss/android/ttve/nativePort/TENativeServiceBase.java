@@ -2,19 +2,17 @@ package com.ss.android.ttve.nativePort;
 
 import android.support.annotation.Keep;
 import com.ss.android.ttve.common.TECommonCallback;
-import com.ss.android.ttve.nativePort.NativeCallbacks.IEncoderDataCallback;
-import com.ss.android.ttve.nativePort.NativeCallbacks.IGetImageCallback;
-import com.ss.android.ttve.nativePort.NativeCallbacks.IOpenGLCallback;
+import com.ss.android.ttve.nativePort.NativeCallbacks;
 
 @Keep
 public class TENativeServiceBase {
-    protected IEncoderDataCallback mEncoderDataCallback = null;
-    protected IGetImageCallback mGetImageCallback = null;
+    protected NativeCallbacks.IEncoderDataCallback mEncoderDataCallback = null;
+    protected NativeCallbacks.IGetImageCallback mGetImageCallback = null;
     protected TECommonCallback mOnErrorListener = null;
     protected TECommonCallback mOnInfoListener = null;
-    protected IOpenGLCallback mOpenGLCallback = null;
+    protected NativeCallbacks.IOpenGLCallback mOpenGLCallback = null;
 
-    public IEncoderDataCallback getEncoderDataListener() {
+    public NativeCallbacks.IEncoderDataCallback getEncoderDataListener() {
         return this.mEncoderDataCallback;
     }
 
@@ -26,12 +24,12 @@ public class TENativeServiceBase {
         return this.mOnInfoListener;
     }
 
-    public IOpenGLCallback getOpenGLListeners() {
+    public NativeCallbacks.IOpenGLCallback getOpenGLListeners() {
         return this.mOpenGLCallback;
     }
 
     public void nativeCallback_onCompressBuffer(byte[] bArr, int i, int i2, boolean z) {
-        IEncoderDataCallback iEncoderDataCallback = this.mEncoderDataCallback;
+        NativeCallbacks.IEncoderDataCallback iEncoderDataCallback = this.mEncoderDataCallback;
         if (iEncoderDataCallback != null) {
             iEncoderDataCallback.onCompressBuffer(bArr, i, i2, z);
         }
@@ -45,7 +43,7 @@ public class TENativeServiceBase {
     }
 
     public int nativeCallback_onImageData(byte[] bArr, int i, int i2, int i3) {
-        IGetImageCallback iGetImageCallback = this.mGetImageCallback;
+        NativeCallbacks.IGetImageCallback iGetImageCallback = this.mGetImageCallback;
         if (iGetImageCallback != null) {
             return iGetImageCallback.onImageData(bArr, i, i2, i3);
         }
@@ -55,46 +53,46 @@ public class TENativeServiceBase {
     public void nativeCallback_onInfoListener(int i, int i2, float f2) {
         TECommonCallback tECommonCallback = this.mOnInfoListener;
         if (tECommonCallback != null) {
-            tECommonCallback.onCallback(i, i2, f2, null);
+            tECommonCallback.onCallback(i, i2, f2, (String) null);
         }
     }
 
     public void nativeCallback_onOpenGLCreate(int i) {
-        IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
+        NativeCallbacks.IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
         if (iOpenGLCallback != null) {
             iOpenGLCallback.onOpenGLCreate(i);
         }
     }
 
     public void nativeCallback_onOpenGLDestroy(int i) {
-        IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
+        NativeCallbacks.IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
         if (iOpenGLCallback != null) {
             iOpenGLCallback.onOpenGLDestroy(i);
         }
     }
 
     public void nativeCallback_onOpenGLDrawAfter(int i, double d2) {
-        IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
+        NativeCallbacks.IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
         if (iOpenGLCallback != null) {
             iOpenGLCallback.onOpenGLDrawAfter(i, d2);
         }
     }
 
     public void nativeCallback_onOpenGLDrawBefore(int i, double d2) {
-        IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
+        NativeCallbacks.IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
         if (iOpenGLCallback != null) {
             iOpenGLCallback.onOpenGLDrawBefore(i, d2);
         }
     }
 
     public void nativeCallback_onPreviewSurface(int i) {
-        IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
+        NativeCallbacks.IOpenGLCallback iOpenGLCallback = this.mOpenGLCallback;
         if (iOpenGLCallback != null) {
             iOpenGLCallback.onPreviewSurface(i);
         }
     }
 
-    public void setEncoderDataListener(IEncoderDataCallback iEncoderDataCallback) {
+    public void setEncoderDataListener(NativeCallbacks.IEncoderDataCallback iEncoderDataCallback) {
         this.mEncoderDataCallback = iEncoderDataCallback;
     }
 
@@ -102,7 +100,7 @@ public class TENativeServiceBase {
         this.mOnErrorListener = tECommonCallback;
     }
 
-    public void setGetImageCallback(IGetImageCallback iGetImageCallback) {
+    public void setGetImageCallback(NativeCallbacks.IGetImageCallback iGetImageCallback) {
         this.mGetImageCallback = iGetImageCallback;
     }
 
@@ -110,7 +108,7 @@ public class TENativeServiceBase {
         this.mOnInfoListener = tECommonCallback;
     }
 
-    public void setOpenGLListeners(IOpenGLCallback iOpenGLCallback) {
+    public void setOpenGLListeners(NativeCallbacks.IOpenGLCallback iOpenGLCallback) {
         this.mOpenGLCallback = iOpenGLCallback;
     }
 }

@@ -1,7 +1,6 @@
 package io.reactivex.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
@@ -16,7 +15,7 @@ public final class TestScheduler extends Scheduler {
     final Queue<TimedRunnable> queue = new PriorityBlockingQueue(11);
     volatile long time;
 
-    final class TestWorker extends Worker {
+    final class TestWorker extends Scheduler.Worker {
         volatile boolean disposed;
 
         final class QueueRemove implements Runnable {
@@ -100,11 +99,11 @@ public final class TestScheduler extends Scheduler {
 
     private void triggerActions(long j) {
         while (true) {
-            TimedRunnable timedRunnable = (TimedRunnable) this.queue.peek();
-            if (timedRunnable == null) {
+            TimedRunnable peek = this.queue.peek();
+            if (peek == null) {
                 break;
             }
-            long j2 = timedRunnable.time;
+            long j2 = peek.time;
             if (j2 > j) {
                 break;
             }
@@ -112,9 +111,9 @@ public final class TestScheduler extends Scheduler {
                 j2 = this.time;
             }
             this.time = j2;
-            this.queue.remove(timedRunnable);
-            if (!timedRunnable.scheduler.disposed) {
-                timedRunnable.run.run();
+            this.queue.remove(peek);
+            if (!peek.scheduler.disposed) {
+                peek.run.run();
             }
         }
         this.time = j;
@@ -129,7 +128,7 @@ public final class TestScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
+    public Scheduler.Worker createWorker() {
         return new TestWorker();
     }
 

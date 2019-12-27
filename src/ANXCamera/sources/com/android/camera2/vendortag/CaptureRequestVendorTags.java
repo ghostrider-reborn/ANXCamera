@@ -1,120 +1,120 @@
 package com.android.camera2.vendortag;
 
 import android.graphics.Rect;
-import android.hardware.camera2.CaptureRequest.Key;
+import android.hardware.camera2.CaptureRequest;
 import android.util.Log;
-import com.android.camera2.vendortag.struct.MarshalQueryableASDScene.ASDScene;
+import com.android.camera2.vendortag.struct.MarshalQueryableASDScene;
 import com.mi.config.b;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 public class CaptureRequestVendorTags {
-    public static final VendorTag<Key<Boolean>> AI_SCENE = create(C0067qa.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Integer>> AI_SCENE_APPLY = create(K.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> AI_SCENE_PERIOD = create(C0037ga.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> AUTOZOOM_APPLY_IN_PREVIEW = create(Ra.INSTANCE, Integer.class);
-    public static final VendorTag<Key<float[]>> AUTOZOOM_CENTER_OFFSET = create(C0025ca.INSTANCE, float[].class);
-    public static final VendorTag<Key<Integer>> AUTOZOOM_FORCE_LOCK = create(Z.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Float>> AUTOZOOM_MINIMUM_SCALING = create(C0049ka.INSTANCE, Float.class);
-    public static final VendorTag<Key<Integer>> AUTOZOOM_MODE = create(C0035fb.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Float>> AUTOZOOM_SCALE_OFFSET = create(B.INSTANCE, Float.class);
-    public static final VendorTag<Key<Integer>> AUTOZOOM_SELECT = create(Sa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<float[]>> AUTOZOOM_START = create(M.INSTANCE, float[].class);
-    public static final VendorTag<Key<Integer>> AUTOZOOM_STOP = create(C0086x.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> AUTOZOOM_UNSELECT = create(C0019aa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Byte>> BACKWARD_CAPTURE_HINT = create(C0090ya.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Byte>> BACK_SOFT_LIGHT = create(C0087xa.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_BLUSHER = create(C0034fa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_BODY_SLIM = create(Fa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_CHIN = create(Y.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_ENLARGE_EYE = create(X.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_EYEBROW_DYE = create(S.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_HAIRLINE = create(Ma.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_HEAD_SLIM = create(L.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_JELLY_LIPS = create(Xa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_LEG_SLIM = create(Wa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<String>> BEAUTY_LEVEL = create(Ia.INSTANCE, String.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_LIPS = create(C0062ob.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_NECK = create(La.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_NOSE = create(C0028da.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_PUPIL_LINE = create(C0076tb.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_RISORIUS = create(C0083w.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_SHOULDER_SLIM = create(C0068qb.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_SKIN_COLOR = create(G.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_SKIN_SMOOTH = create(C0020ab.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_SLIM_FACE = create(Ja.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_SLIM_NOSE = create(V.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BEAUTY_SMILE = create(Ka.INSTANCE, Integer.class);
-    public static final VendorTag<Key<String>> BOKEH_F_NUMBER = create(C0031ea.INSTANCE, String.class);
-    public static final VendorTag<Key<Integer>> BURST_CAPTURE_HINT = create(C0072sa.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BURST_SHOOT_FPS = create(C0069ra.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> BUTT_SLIM = create(Da.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Byte>> CAMERA_AI_30 = create(Va.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Integer>> CONTRAST_LEVEL = create(C0040ha.INSTANCE, Integer.class);
-    public static VendorTag<Key<Integer>> CONTROL_AI_SCENE_MODE = create(C0078ua.INSTANCE, Integer.class);
-    public static final VendorTag<Key<byte[]>> CONTROL_DISTORTION_FPC_DATA = create(C0043ia.INSTANCE, byte[].class);
-    public static final VendorTag<Key<Boolean>> CONTROL_ENABLE_REMOSAIC = create(Ta.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<int[]>> CONTROL_QUICK_PREVIEW = create(Ca.INSTANCE, int[].class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> AI_SCENE = create(C0067qa.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AI_SCENE_APPLY = create(K.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AI_SCENE_PERIOD = create(C0037ga.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AUTOZOOM_APPLY_IN_PREVIEW = create(Ra.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<float[]>> AUTOZOOM_CENTER_OFFSET = create(C0025ca.INSTANCE, float[].class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AUTOZOOM_FORCE_LOCK = create(Z.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Float>> AUTOZOOM_MINIMUM_SCALING = create(C0049ka.INSTANCE, Float.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AUTOZOOM_MODE = create(C0035fb.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Float>> AUTOZOOM_SCALE_OFFSET = create(B.INSTANCE, Float.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AUTOZOOM_SELECT = create(Sa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<float[]>> AUTOZOOM_START = create(M.INSTANCE, float[].class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AUTOZOOM_STOP = create(C0086x.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> AUTOZOOM_UNSELECT = create(C0019aa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> BACKWARD_CAPTURE_HINT = create(C0090ya.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> BACK_SOFT_LIGHT = create(C0087xa.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_BLUSHER = create(C0034fa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_BODY_SLIM = create(Fa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_CHIN = create(Y.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_ENLARGE_EYE = create(X.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_EYEBROW_DYE = create(S.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_HAIRLINE = create(Ma.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_HEAD_SLIM = create(L.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_JELLY_LIPS = create(Xa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_LEG_SLIM = create(Wa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<String>> BEAUTY_LEVEL = create(Ia.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_LIPS = create(C0062ob.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_NECK = create(La.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_NOSE = create(C0028da.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_PUPIL_LINE = create(C0076tb.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_RISORIUS = create(C0083w.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_SHOULDER_SLIM = create(C0068qb.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_SKIN_COLOR = create(G.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_SKIN_SMOOTH = create(C0020ab.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_SLIM_FACE = create(Ja.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_SLIM_NOSE = create(V.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BEAUTY_SMILE = create(Ka.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<String>> BOKEH_F_NUMBER = create(C0031ea.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BURST_CAPTURE_HINT = create(C0072sa.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BURST_SHOOT_FPS = create(C0069ra.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> BUTT_SLIM = create(Da.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> CAMERA_AI_30 = create(Va.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> CONTRAST_LEVEL = create(C0040ha.INSTANCE, Integer.class);
+    public static VendorTag<CaptureRequest.Key<Integer>> CONTROL_AI_SCENE_MODE = create(C0078ua.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<byte[]>> CONTROL_DISTORTION_FPC_DATA = create(C0043ia.INSTANCE, byte[].class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> CONTROL_ENABLE_REMOSAIC = create(Ta.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<int[]>> CONTROL_QUICK_PREVIEW = create(Ca.INSTANCE, int[].class);
     public static final int[] CONTROL_QUICK_PREVIEW_OFF = {0};
     public static final int[] CONTROL_QUICK_PREVIEW_ON = {1};
-    public static final VendorTag<Key<int[]>> CONTROL_REMOSAIC_HINT = create(C0059nb.INSTANCE, int[].class);
+    public static final VendorTag<CaptureRequest.Key<int[]>> CONTROL_REMOSAIC_HINT = create(C0059nb.INSTANCE, int[].class);
     public static final int[] CONTROL_REMOSAIC_HINT_OFF = {0};
     public static final int[] CONTROL_REMOSAIC_HINT_ON = {1};
-    public static final VendorTag<Key<String>> CUSTOM_WATERMARK_TEXT = create(C0065pb.INSTANCE, String.class);
-    public static final VendorTag<Key<Boolean>> DEFLICKER_ENABLED = create(C0050kb.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> DEPURPLE = create(C0058na.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Integer>> DEVICE_ORIENTATION = create(C0044ib.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> EXPOSURE_METERING = create(C0079ub.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> EYE_LIGHT_STRENGTH = create(C0055ma.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> EYE_LIGHT_TYPE = create(T.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Boolean>> FACE_AGE_ANALYZE_ENABLED = create(Qa.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> FACE_SCORE_ENABLED = create(C0082vb.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> FLAW_DETECT_ENABLE = create(Ga.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> FRONT_MIRROR = create(C0084wa.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> FRONT_SINGLE_CAMERA_BOKEH = create(C0041hb.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> HDR_BRACKET_MODE = create(Ya.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Boolean>> HDR_CHECKER_ENABLE = create(C0029db.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> HDR_ENABLED = create(C0023bb.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Integer>> HFPSVR_MODE = create(Ha.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Boolean>> HHT_ENABLED = create(D.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> HINT_FOR_RAW_REPROCESS = create(C0052la.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Long>> ISO_EXP = create(F.INSTANCE, Long.class);
-    public static final VendorTag<Key<Byte>> IS_HFR_PREVIEW = create(_a.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Boolean>> LENS_DIRTY_DETECT = create(Aa.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> MACRO_MODE = create(C0056mb.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Boolean>> MFNR_ENABLED = create(W.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> MTK_EXPOSURE_METERING_MODE = create(C0093za.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<String>> CUSTOM_WATERMARK_TEXT = create(C0065pb.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> DEFLICKER_ENABLED = create(C0050kb.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> DEPURPLE = create(C0058na.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> DEVICE_ORIENTATION = create(C0044ib.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> EXPOSURE_METERING = create(C0079ub.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> EYE_LIGHT_STRENGTH = create(C0055ma.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> EYE_LIGHT_TYPE = create(T.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> FACE_AGE_ANALYZE_ENABLED = create(Qa.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> FACE_SCORE_ENABLED = create(C0082vb.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> FLAW_DETECT_ENABLE = create(Ga.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> FRONT_MIRROR = create(C0084wa.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> FRONT_SINGLE_CAMERA_BOKEH = create(C0041hb.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> HDR_BRACKET_MODE = create(Ya.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> HDR_CHECKER_ENABLE = create(C0029db.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> HDR_ENABLED = create(C0023bb.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> HFPSVR_MODE = create(Ha.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> HHT_ENABLED = create(D.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> HINT_FOR_RAW_REPROCESS = create(C0052la.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Long>> ISO_EXP = create(F.INSTANCE, Long.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> IS_HFR_PREVIEW = create(_a.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> LENS_DIRTY_DETECT = create(Aa.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> MACRO_MODE = create(C0056mb.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> MFNR_ENABLED = create(W.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> MTK_EXPOSURE_METERING_MODE = create(C0093za.INSTANCE, Byte.class);
     public static final byte MTK_EXPOSURE_METERING_MODE_AVERAGE = 2;
     public static final byte MTK_EXPOSURE_METERING_MODE_CENTER_WEIGHT = 0;
     public static final byte MTK_EXPOSURE_METERING_MODE_SOPT = 1;
-    public static final VendorTag<Key<Integer>> MULTIFRAME_INPUTNUM = create(N.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Byte>> NORMAL_WIDE_LENS_DISTORTION_CORRECTION_LEVEL = create(P.INSTANCE, Byte.class);
-    public static final VendorTag<Key<ASDScene[]>> ON_TRIPOD_MODE = create(I.INSTANCE, ASDScene[].class);
-    public static final VendorTag<Key<Boolean>> PARALLEL_ENABLED = create(Ba.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<byte[]>> PARALLEL_PATH = create(Za.INSTANCE, byte[].class);
-    public static final VendorTag<Key<Integer>> PORTRAIT_LIGHTING = create(E.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Rect>> POST_PROCESS_CROP_REGION = create(C0038gb.INSTANCE, Rect.class);
-    public static final VendorTag<Key<Boolean>> REAR_BOKEH_ENABLE = create(Ea.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> RECORDING_END_STREAM = create(Oa.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Integer>> SANPSHOT_FLIP_MODE = create(C0053lb.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> SATURATION = create(C0092z.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Boolean>> SAT_IS_ZOOMING = create(Pa.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> SCREEN_LIGHT_HINT = create(C0075ta.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Integer>> SELECT_PRIORITY = create(Q.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> SHARPNESS_CONTROL = create(C0070rb.INSTANCE, Integer.class);
-    public static final VendorTag<Key<int[]>> SMVR_MODE = create(C0064pa.INSTANCE, int[].class);
-    public static final VendorTag<Key<Boolean>> SNAP_SHOT_TORCH = create(Na.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> ST_ENABLED = create(C0081va.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> ST_FAST_ZOOM_IN = create(O.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> SUPER_NIGHT_SCENE_ENABLED = create(A.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> SUPER_RESOLUTION_ENABLED = create(U.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Boolean>> SW_MFNR_ENABLED = create(C0032eb.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> MULTIFRAME_INPUTNUM = create(N.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> NORMAL_WIDE_LENS_DISTORTION_CORRECTION_LEVEL = create(P.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<MarshalQueryableASDScene.ASDScene[]>> ON_TRIPOD_MODE = create(I.INSTANCE, MarshalQueryableASDScene.ASDScene[].class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> PARALLEL_ENABLED = create(Ba.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<byte[]>> PARALLEL_PATH = create(Za.INSTANCE, byte[].class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> PORTRAIT_LIGHTING = create(E.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Rect>> POST_PROCESS_CROP_REGION = create(C0038gb.INSTANCE, Rect.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> REAR_BOKEH_ENABLE = create(Ea.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> RECORDING_END_STREAM = create(Oa.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> SANPSHOT_FLIP_MODE = create(C0053lb.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> SATURATION = create(C0092z.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> SAT_IS_ZOOMING = create(Pa.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> SCREEN_LIGHT_HINT = create(C0075ta.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> SELECT_PRIORITY = create(Q.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> SHARPNESS_CONTROL = create(C0070rb.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<int[]>> SMVR_MODE = create(C0064pa.INSTANCE, int[].class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> SNAP_SHOT_TORCH = create(Na.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> ST_ENABLED = create(C0081va.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> ST_FAST_ZOOM_IN = create(O.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> SUPER_NIGHT_SCENE_ENABLED = create(A.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> SUPER_RESOLUTION_ENABLED = create(U.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Boolean>> SW_MFNR_ENABLED = create(C0032eb.INSTANCE, Boolean.class);
     private static final String TAG = "CaptureRequestVendorTags";
-    public static VendorTag<Key<Boolean>> ULTRA_PIXEL_PORTRAIT_ENABLED = create(C0089y.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> ULTRA_WIDE_LENS_DISTORTION_CORRECTION_LEVEL = create(C0047jb.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Integer>> USE_CUSTOM_WB = create(C0022ba.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Integer>> USE_ISO_VALUE = create(C.INSTANCE, Integer.class);
+    public static VendorTag<CaptureRequest.Key<Boolean>> ULTRA_PIXEL_PORTRAIT_ENABLED = create(C0089y.INSTANCE, Boolean.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> ULTRA_WIDE_LENS_DISTORTION_CORRECTION_LEVEL = create(C0047jb.INSTANCE, Byte.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> USE_CUSTOM_WB = create(C0022ba.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> USE_ISO_VALUE = create(C.INSTANCE, Integer.class);
     public static final int VALUE_HFPSVR_MODE_OFF = 0;
     public static final int VALUE_HFPSVR_MODE_ON = 1;
     public static final int VALUE_SANPSHOT_FLIP_MODE_OFF = 0;
@@ -128,14 +128,14 @@ public class CaptureRequestVendorTags {
     public static final int VALUE_VIDEO_RECORD_CONTROL_STOP = 2;
     public static final byte VALUE_ZSL_CAPTURE_MODE_OFF = 0;
     public static final byte VALUE_ZSL_CAPTURE_MODE_ON = 1;
-    public static final VendorTag<Key<Integer>> VIDEO_RECORD_CONTROL = create(H.INSTANCE, Integer.class);
-    public static final VendorTag<Key<String>> WATERMARK_APPLIEDTYPE = create(J.INSTANCE, String.class);
-    public static final VendorTag<Key<String>> WATERMARK_AVAILABLETYPE = create(Ua.INSTANCE, String.class);
-    public static final VendorTag<Key<String>> WATERMARK_FACE = create(C0026cb.INSTANCE, String.class);
-    public static final VendorTag<Key<String>> WATERMARK_TIME = create(C0061oa.INSTANCE, String.class);
-    public static final VendorTag<Key<Integer>> WHOLE_BODY_SLIM = create(C0073sb.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Byte>> ZSL_CAPTURE_MODE = create(C0046ja.INSTANCE, Byte.class);
-    private static Constructor<Key> requestConstructor;
+    public static final VendorTag<CaptureRequest.Key<Integer>> VIDEO_RECORD_CONTROL = create(H.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<String>> WATERMARK_APPLIEDTYPE = create(J.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<String>> WATERMARK_AVAILABLETYPE = create(Ua.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<String>> WATERMARK_FACE = create(C0026cb.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<String>> WATERMARK_TIME = create(C0061oa.INSTANCE, String.class);
+    public static final VendorTag<CaptureRequest.Key<Integer>> WHOLE_BODY_SLIM = create(C0073sb.INSTANCE, Integer.class);
+    public static final VendorTag<CaptureRequest.Key<Byte>> ZSL_CAPTURE_MODE = create(C0046ja.INSTANCE, Byte.class);
+    private static Constructor<CaptureRequest.Key> requestConstructor;
 
     static /* synthetic */ String Ae() {
         return "xiaomi.watermark.typeApplied";
@@ -369,10 +369,10 @@ public class CaptureRequestVendorTags {
         return "org.codeaurora.qcamera3.saturation.use_saturation";
     }
 
-    private static <T> VendorTag<Key<T>> create(final Supplier<String> supplier, final Class<T> cls) {
-        return new VendorTag<Key<T>>() {
+    private static <T> VendorTag<CaptureRequest.Key<T>> create(final Supplier<String> supplier, final Class<T> cls) {
+        return new VendorTag<CaptureRequest.Key<T>>() {
             /* access modifiers changed from: protected */
-            public Key<T> create() {
+            public CaptureRequest.Key<T> create() {
                 return CaptureRequestVendorTags.requestKey(getName(), cls);
             }
 
@@ -426,7 +426,7 @@ public class CaptureRequestVendorTags {
         return "xiaomi.ai.segment.enabled";
     }
 
-    /* renamed from: if reason: not valid java name */
+    /* renamed from: if  reason: not valid java name */
     static /* synthetic */ String m0if() {
         return "xiaomi.ai.asd.period";
     }
@@ -503,18 +503,15 @@ public class CaptureRequestVendorTags {
         return "xiaomi.beauty.noseRatio";
     }
 
-    static <T> Key<T> requestKey(String str, Class<T> cls) {
+    static <T> CaptureRequest.Key<T> requestKey(String str, Class<T> cls) {
         try {
             if (requestConstructor == null) {
-                requestConstructor = Key.class.getConstructor(new Class[]{String.class, cls.getClass()});
+                requestConstructor = CaptureRequest.Key.class.getConstructor(new Class[]{String.class, cls.getClass()});
                 requestConstructor.setAccessible(true);
             }
-            return (Key) requestConstructor.newInstance(new Object[]{str, cls});
+            return requestConstructor.newInstance(new Object[]{str, cls});
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot find/call Key constructor: ");
-            sb.append(e2.getMessage());
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "Cannot find/call Key constructor: " + e2.getMessage());
             return null;
         }
     }

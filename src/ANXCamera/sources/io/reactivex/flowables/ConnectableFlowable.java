@@ -24,7 +24,7 @@ public abstract class ConnectableFlowable<T> extends Flowable<T> {
     @NonNull
     public Flowable<T> autoConnect(int i, @NonNull Consumer<? super Disposable> consumer) {
         if (i > 0) {
-            return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableAutoConnect<T>(this, i, consumer));
+            return RxJavaPlugins.onAssembly(new FlowableAutoConnect(this, i, consumer));
         }
         connect(consumer);
         return RxJavaPlugins.onAssembly(this);
@@ -40,6 +40,6 @@ public abstract class ConnectableFlowable<T> extends Flowable<T> {
 
     @NonNull
     public Flowable<T> refCount() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableRefCount<T>(this));
+        return RxJavaPlugins.onAssembly(new FlowableRefCount(this));
     }
 }

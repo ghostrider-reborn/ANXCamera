@@ -39,7 +39,7 @@ public final class MaybeConcatIterable<T> extends Flowable<T> {
             this.disposables.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 AtomicReference<Object> atomicReference = this.current;
@@ -53,13 +53,13 @@ public final class MaybeConcatIterable<T> extends Flowable<T> {
                             long j = this.produced;
                             if (j != this.requested.get()) {
                                 this.produced = j + 1;
-                                atomicReference.lazySet(null);
+                                atomicReference.lazySet((Object) null);
                                 subscriber.onNext(obj);
                             } else {
                                 z = false;
                             }
                         } else {
-                            atomicReference.lazySet(null);
+                            atomicReference.lazySet((Object) null);
                         }
                         if (z && !sequentialDisposable.isDisposed()) {
                             try {
@@ -87,7 +87,7 @@ public final class MaybeConcatIterable<T> extends Flowable<T> {
                         return;
                     }
                 }
-                atomicReference.lazySet(null);
+                atomicReference.lazySet((Object) null);
             }
         }
 
@@ -124,7 +124,7 @@ public final class MaybeConcatIterable<T> extends Flowable<T> {
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
         try {
-            Iterator it = this.sources.iterator();
+            Iterator<? extends MaybeSource<? extends T>> it = this.sources.iterator();
             ObjectHelper.requireNonNull(it, "The sources Iterable returned a null Iterator");
             ConcatMaybeObserver concatMaybeObserver = new ConcatMaybeObserver(subscriber, it);
             subscriber.onSubscribe(concatMaybeObserver);

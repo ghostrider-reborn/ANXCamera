@@ -40,17 +40,17 @@ public final class ObservableSkipWhile<T> extends AbstractObservableWithUpstream
         public void onNext(T t) {
             if (this.notSkipping) {
                 this.actual.onNext(t);
-            } else {
-                try {
-                    if (!this.predicate.test(t)) {
-                        this.notSkipping = true;
-                        this.actual.onNext(t);
-                    }
-                } catch (Throwable th) {
-                    Exceptions.throwIfFatal(th);
-                    this.s.dispose();
-                    this.actual.onError(th);
+                return;
+            }
+            try {
+                if (!this.predicate.test(t)) {
+                    this.notSkipping = true;
+                    this.actual.onNext(t);
                 }
+            } catch (Throwable th) {
+                Exceptions.throwIfFatal(th);
+                this.s.dispose();
+                this.actual.onError(th);
             }
         }
 

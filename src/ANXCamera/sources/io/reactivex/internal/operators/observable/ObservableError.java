@@ -23,6 +23,6 @@ public final class ObservableError<T> extends Observable<T> {
             th = th;
             Exceptions.throwIfFatal(th);
         }
-        EmptyDisposable.error(th, observer);
+        EmptyDisposable.error(th, (Observer<?>) observer);
     }
 }

@@ -6,7 +6,7 @@ import android.util.Log;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import miui.external.SdkConstants.SdkError;
+import miui.external.SdkConstants;
 
 public class Application extends android.app.Application implements SdkConstants {
     private static final String PACKAGE_NAME = "com.miui.core";
@@ -26,28 +26,22 @@ public class Application extends android.app.Application implements SdkConstants
             }
         }
         Log.e(SdkConstants.LOG_TAG, "MIUI SDK encounter errors, please contact miuisdk@xiaomi.com for support.", th);
-        SdkErrorInstrumentation.handleSdkError(SdkError.GENERIC);
+        SdkErrorInstrumentation.handleSdkError(SdkConstants.SdkError.GENERIC);
     }
 
     private void handleUnknownError(String str, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("MIUI SDK encounter errors, please contact miuisdk@xiaomi.com for support. phase: ");
-        sb.append(str);
-        sb.append(" code: ");
-        sb.append(i);
-        Log.e(SdkConstants.LOG_TAG, sb.toString());
-        SdkErrorInstrumentation.handleSdkError(SdkError.GENERIC);
+        Log.e(SdkConstants.LOG_TAG, "MIUI SDK encounter errors, please contact miuisdk@xiaomi.com for support. phase: " + str + " code: " + i);
+        SdkErrorInstrumentation.handleSdkError(SdkConstants.SdkError.GENERIC);
     }
 
     private boolean initializeSdk() {
-        String str = "initialize";
         try {
             HashMap hashMap = new HashMap();
-            int intValue = ((Integer) SdkEntranceHelper.getSdkEntrance().getMethod(str, new Class[]{android.app.Application.class, Map.class}).invoke(null, new Object[]{this, hashMap})).intValue();
+            int intValue = ((Integer) SdkEntranceHelper.getSdkEntrance().getMethod("initialize", new Class[]{android.app.Application.class, Map.class}).invoke((Object) null, new Object[]{this, hashMap})).intValue();
             if (intValue == 0) {
                 return true;
             }
-            handleUnknownError(str, intValue);
+            handleUnknownError("initialize", intValue);
             return false;
         } catch (Throwable th) {
             handleGenericError(th);
@@ -56,12 +50,11 @@ public class Application extends android.app.Application implements SdkConstants
     }
 
     private boolean loadSdk() {
-        String str = PACKAGE_NAME;
         try {
-            if (SdkHelper.isMiuiSystem() || SdkLoader.load(SdkHelper.getApkPath(null, str, "miui"), null, SdkHelper.getLibPath(null, str), Application.class.getClassLoader())) {
+            if (SdkHelper.isMiuiSystem() || SdkLoader.load(SdkHelper.getApkPath((Context) null, PACKAGE_NAME, "miui"), (String) null, SdkHelper.getLibPath((Context) null, PACKAGE_NAME), Application.class.getClassLoader())) {
                 return true;
             }
-            SdkErrorInstrumentation.handleSdkError(SdkError.NO_SDK);
+            SdkErrorInstrumentation.handleSdkError(SdkConstants.SdkError.NO_SDK);
             return false;
         } catch (Throwable th) {
             handleGenericError(th);
@@ -70,17 +63,16 @@ public class Application extends android.app.Application implements SdkConstants
     }
 
     private boolean startSdk() {
-        String str = "start";
         try {
             HashMap hashMap = new HashMap();
-            int intValue = ((Integer) SdkEntranceHelper.getSdkEntrance().getMethod(str, new Class[]{Map.class}).invoke(null, new Object[]{hashMap})).intValue();
+            int intValue = ((Integer) SdkEntranceHelper.getSdkEntrance().getMethod("start", new Class[]{Map.class}).invoke((Object) null, new Object[]{hashMap})).intValue();
             if (intValue == 1) {
-                SdkErrorInstrumentation.handleSdkError(SdkError.LOW_SDK_VERSION);
+                SdkErrorInstrumentation.handleSdkError(SdkConstants.SdkError.LOW_SDK_VERSION);
                 return false;
             } else if (intValue == 0) {
                 return true;
             } else {
-                handleUnknownError(str, intValue);
+                handleUnknownError("start", intValue);
                 return false;
             }
         } catch (Throwable th) {
@@ -157,27 +149,27 @@ public class Application extends android.app.Application implements SdkConstants
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void superOnConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void superOnCreate() {
         super.onCreate();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void superOnLowMemory() {
         super.onLowMemory();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void superOnTerminate() {
         super.onTerminate();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void superOnTrimMemory(int i) {
         super.onTrimMemory(i);
     }

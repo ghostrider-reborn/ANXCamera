@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /* compiled from: LazyHeaders */
 public final class p implements n {
@@ -35,8 +34,8 @@ public final class p implements n {
 
         private Map<String, List<o>> Bk() {
             HashMap hashMap = new HashMap(this.headers.size());
-            for (Entry entry : this.headers.entrySet()) {
-                hashMap.put(entry.getKey(), new ArrayList((Collection) entry.getValue()));
+            for (Map.Entry next : this.headers.entrySet()) {
+                hashMap.put(next.getKey(), new ArrayList((Collection) next.getValue()));
             }
             return hashMap;
         }
@@ -68,7 +67,7 @@ public final class p implements n {
         }
 
         private List<o> z(String str) {
-            List<o> list = (List) this.headers.get(str);
+            List<o> list = this.headers.get(str);
             if (list != null) {
                 return list;
             }
@@ -95,7 +94,7 @@ public final class p implements n {
             if (oVar == null) {
                 this.headers.remove(str);
             } else {
-                List z = z(str);
+                List<o> z = z(str);
                 z.clear();
                 z.add(oVar);
             }
@@ -124,10 +123,10 @@ public final class p implements n {
         }
 
         public boolean equals(Object obj) {
-            if (!(obj instanceof b)) {
-                return false;
+            if (obj instanceof b) {
+                return this.value.equals(((b) obj).value);
             }
-            return this.value.equals(((b) obj).value);
+            return false;
         }
 
         public int hashCode() {
@@ -139,12 +138,7 @@ public final class p implements n {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("StringHeaderFactory{value='");
-            sb.append(this.value);
-            sb.append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "StringHeaderFactory{value='" + this.value + '\'' + '}';
         }
     }
 
@@ -154,10 +148,10 @@ public final class p implements n {
 
     private Map<String, String> Dk() {
         HashMap hashMap = new HashMap();
-        for (Entry entry : this.headers.entrySet()) {
-            String e2 = e((List) entry.getValue());
+        for (Map.Entry next : this.headers.entrySet()) {
+            String e2 = e((List) next.getValue());
             if (!TextUtils.isEmpty(e2)) {
-                hashMap.put(entry.getKey(), e2);
+                hashMap.put(next.getKey(), e2);
             }
         }
         return hashMap;
@@ -168,7 +162,7 @@ public final class p implements n {
         StringBuilder sb = new StringBuilder();
         int size = list.size();
         for (int i = 0; i < size; i++) {
-            String o = ((o) list.get(i)).o();
+            String o = list.get(i).o();
             if (!TextUtils.isEmpty(o)) {
                 sb.append(o);
                 if (i != list.size() - 1) {
@@ -180,10 +174,10 @@ public final class p implements n {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof p)) {
-            return false;
+        if (obj instanceof p) {
+            return this.headers.equals(((p) obj).headers);
         }
-        return this.headers.equals(((p) obj).headers);
+        return false;
     }
 
     public Map<String, String> getHeaders() {
@@ -202,10 +196,6 @@ public final class p implements n {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("LazyHeaders{headers=");
-        sb.append(this.headers);
-        sb.append('}');
-        return sb.toString();
+        return "LazyHeaders{headers=" + this.headers + '}';
     }
 }

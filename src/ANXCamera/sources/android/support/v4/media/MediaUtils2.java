@@ -5,16 +5,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.mediacompat.Rating2;
-import android.support.v4.media.MediaBrowserCompat.MediaItem;
-import android.support.v4.media.MediaBrowserServiceCompat.BrowserRoot;
-import android.support.v4.media.MediaDescriptionCompat.Builder;
-import android.support.v4.media.MediaSession2.CommandButton;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.MediaItem2;
+import android.support.v4.media.MediaMetadata2;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.MediaSession2;
 import java.util.ArrayList;
 import java.util.List;
 
 class MediaUtils2 {
     static final String TAG = "MediaUtils2";
-    static final BrowserRoot sDefaultBrowserRoot = new BrowserRoot(MediaLibraryService2.SERVICE_INTERFACE, null);
+    static final MediaBrowserServiceCompat.BrowserRoot sDefaultBrowserRoot = new MediaBrowserServiceCompat.BrowserRoot(MediaLibraryService2.SERVICE_INTERFACE, (Bundle) null);
 
     private MediaUtils2() {
     }
@@ -25,7 +28,7 @@ class MediaUtils2 {
         }
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            Bundle bundle = (Bundle) list.get(i);
+            Bundle bundle = list.get(i);
             if (bundle != null) {
                 arrayList.add(MediaItem2.fromBundle(bundle));
             }
@@ -33,10 +36,10 @@ class MediaUtils2 {
         return arrayList;
     }
 
-    static List<Bundle> convertCommandButtonListToBundleList(List<CommandButton> list) {
+    static List<Bundle> convertCommandButtonListToBundleList(List<MediaSession2.CommandButton> list) {
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            Bundle bundle = ((CommandButton) list.get(i)).toBundle();
+            Bundle bundle = list.get(i).toBundle();
             if (bundle != null) {
                 arrayList.add(bundle);
             }
@@ -44,13 +47,13 @@ class MediaUtils2 {
         return arrayList;
     }
 
-    static Parcelable[] convertCommandButtonListToParcelableArray(List<CommandButton> list) {
+    static Parcelable[] convertCommandButtonListToParcelableArray(List<MediaSession2.CommandButton> list) {
         if (list == null) {
             return null;
         }
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            Bundle bundle = ((CommandButton) list.get(i)).toBundle();
+            Bundle bundle = list.get(i).toBundle();
             if (bundle != null) {
                 arrayList.add(bundle);
             }
@@ -64,7 +67,7 @@ class MediaUtils2 {
         }
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            MediaItem2 mediaItem2 = (MediaItem2) list.get(i);
+            MediaItem2 mediaItem2 = list.get(i);
             if (mediaItem2 != null) {
                 Bundle bundle = mediaItem2.toBundle();
                 if (bundle != null) {
@@ -81,7 +84,7 @@ class MediaUtils2 {
         }
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            MediaItem2 mediaItem2 = (MediaItem2) list.get(i);
+            MediaItem2 mediaItem2 = list.get(i);
             if (mediaItem2 != null) {
                 Bundle bundle = mediaItem2.toBundle();
                 if (bundle != null) {
@@ -92,13 +95,13 @@ class MediaUtils2 {
         return (Parcelable[]) arrayList.toArray(new Parcelable[0]);
     }
 
-    static List<MediaItem2> convertMediaItemListToMediaItem2List(List<MediaItem> list) {
+    static List<MediaItem2> convertMediaItemListToMediaItem2List(List<MediaBrowserCompat.MediaItem> list) {
         if (list == null) {
             return null;
         }
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            arrayList.add(convertToMediaItem2((MediaItem) list.get(i)));
+            arrayList.add(convertToMediaItem2(list.get(i)));
         }
         return arrayList;
     }
@@ -108,29 +111,28 @@ class MediaUtils2 {
             return null;
         }
         ArrayList arrayList = new ArrayList();
-        int length = parcelableArr.length;
-        for (int i = 0; i < length; i++) {
-            arrayList.add(parcelableArr[i]);
+        for (Bundle add : parcelableArr) {
+            arrayList.add(add);
         }
         return arrayList;
     }
 
-    static List<CommandButton> convertToCommandButtonList(List<Bundle> list) {
+    static List<MediaSession2.CommandButton> convertToCommandButtonList(List<Bundle> list) {
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            Bundle bundle = (Bundle) list.get(i);
+            Bundle bundle = list.get(i);
             if (bundle != null) {
-                arrayList.add(CommandButton.fromBundle(bundle));
+                arrayList.add(MediaSession2.CommandButton.fromBundle(bundle));
             }
         }
         return arrayList;
     }
 
-    static List<CommandButton> convertToCommandButtonList(Parcelable[] parcelableArr) {
+    static List<MediaSession2.CommandButton> convertToCommandButtonList(Parcelable[] parcelableArr) {
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < parcelableArr.length; i++) {
             if (parcelableArr[i] instanceof Bundle) {
-                CommandButton fromBundle = CommandButton.fromBundle(parcelableArr[i]);
+                MediaSession2.CommandButton fromBundle = MediaSession2.CommandButton.fromBundle(parcelableArr[i]);
                 if (fromBundle != null) {
                     arrayList.add(fromBundle);
                 }
@@ -139,16 +141,16 @@ class MediaUtils2 {
         return arrayList;
     }
 
-    static MediaItem convertToMediaItem(MediaItem2 mediaItem2) {
+    static MediaBrowserCompat.MediaItem convertToMediaItem(MediaItem2 mediaItem2) {
         MediaDescriptionCompat mediaDescriptionCompat;
         if (mediaItem2 == null) {
             return null;
         }
         MediaMetadata2 metadata = mediaItem2.getMetadata();
         if (metadata == null) {
-            mediaDescriptionCompat = new Builder().setMediaId(mediaItem2.getMediaId()).build();
+            mediaDescriptionCompat = new MediaDescriptionCompat.Builder().setMediaId(mediaItem2.getMediaId()).build();
         } else {
-            Builder extras = new Builder().setMediaId(mediaItem2.getMediaId()).setSubtitle(metadata.getText("android.media.metadata.DISPLAY_SUBTITLE")).setDescription(metadata.getText("android.media.metadata.DISPLAY_DESCRIPTION")).setIconBitmap(metadata.getBitmap("android.media.metadata.DISPLAY_ICON")).setExtras(metadata.getExtras());
+            MediaDescriptionCompat.Builder extras = new MediaDescriptionCompat.Builder().setMediaId(mediaItem2.getMediaId()).setSubtitle(metadata.getText("android.media.metadata.DISPLAY_SUBTITLE")).setDescription(metadata.getText("android.media.metadata.DISPLAY_DESCRIPTION")).setIconBitmap(metadata.getBitmap("android.media.metadata.DISPLAY_ICON")).setExtras(metadata.getExtras());
             String string = metadata.getString("android.media.metadata.TITLE");
             if (string != null) {
                 extras.setTitle(string);
@@ -165,10 +167,10 @@ class MediaUtils2 {
             }
             mediaDescriptionCompat = extras.build();
         }
-        return new MediaItem(mediaDescriptionCompat, mediaItem2.getFlags());
+        return new MediaBrowserCompat.MediaItem(mediaDescriptionCompat, mediaItem2.getFlags());
     }
 
-    static MediaItem2 convertToMediaItem2(MediaItem mediaItem) {
+    static MediaItem2 convertToMediaItem2(MediaBrowserCompat.MediaItem mediaItem) {
         if (mediaItem == null || mediaItem.getMediaId() == null) {
             return null;
         }
@@ -190,13 +192,13 @@ class MediaUtils2 {
         return arrayList;
     }
 
-    static List<MediaItem> convertToMediaItemList(List<MediaItem2> list) {
+    static List<MediaBrowserCompat.MediaItem> convertToMediaItemList(List<MediaItem2> list) {
         if (list == null) {
             return null;
         }
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
-            arrayList.add(convertToMediaItem((MediaItem2) list.get(i)));
+            arrayList.add(convertToMediaItem(list.get(i)));
         }
         return arrayList;
     }

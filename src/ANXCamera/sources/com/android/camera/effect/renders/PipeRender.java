@@ -7,6 +7,7 @@ import com.android.camera.effect.draw_mode.DrawIntTexAttribute;
 import com.android.camera.effect.draw_mode.DrawYuvAttribute;
 import com.android.camera.log.Log;
 import com.android.gallery3d.ui.GLCanvas;
+import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -58,7 +59,7 @@ public class PipeRender extends RenderGroup {
                     GLES20.glGenFramebuffers(1, this.mFrameBuffers, i5);
                     GLES20.glGenTextures(1, this.mFrameBufferTextures, i5);
                     GLES20.glBindTexture(3553, this.mFrameBufferTextures[i5]);
-                    GLES20.glTexImage2D(3553, 0, 6408, i2, i3, 0, 6408, 5121, null);
+                    GLES20.glTexImage2D(3553, 0, 6408, i2, i3, 0, 6408, 5121, (Buffer) null);
                     GLES20.glTexParameterf(3553, 10240, 9729.0f);
                     GLES20.glTexParameterf(3553, 10241, 9729.0f);
                     GLES20.glTexParameterf(3553, 10242, 33071.0f);
@@ -100,7 +101,7 @@ public class PipeRender extends RenderGroup {
         int i3;
         int i4;
         int i5;
-        ArrayList arrayList;
+        ArrayList<Render> arrayList;
         char c2;
         int i6;
         int i7;
@@ -127,11 +128,7 @@ public class PipeRender extends RenderGroup {
             z2 = drawBasicTexAttribute.mIsSnapshot;
         } else if (target != 6) {
             if (target != 11) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("unsupported target ");
-                sb.append(target);
-                Log.w(str, sb.toString());
+                Log.w(TAG, "unsupported target " + target);
                 i5 = 0;
                 i4 = 0;
                 i3 = 0;
@@ -160,71 +157,71 @@ public class PipeRender extends RenderGroup {
             }
             int i14 = this.mBufferWidth;
             int i15 = this.mBufferHeight;
-            ArrayList renders = getRenders();
-            if (renders != null) {
-                int size = renders.size();
-                DrawIntTexAttribute drawIntTexAttribute = null;
-                int i16 = 0;
-                while (i16 < size) {
-                    Render render = (Render) renders.get(i16);
-                    boolean z3 = i16 < size + -1;
-                    int i17 = size;
-                    if (z3) {
-                        beginBindFrameBuffer(this.mFrameBuffers[i16], i14, i15);
-                    }
-                    if (i16 == 0) {
-                        if (11 == target || !z3) {
-                            i7 = i16;
-                            c2 = 11;
-                            arrayList = renders;
-                            i10 = i15;
-                            int i18 = i14;
-                            i6 = i17;
-                            render.draw(drawAttribute2);
-                            i14 = i18;
-                        } else {
-                            i7 = i16;
-                            c2 = 11;
-                            i6 = i17;
-                            arrayList = renders;
-                            i10 = i15;
-                            int i19 = i14;
-                            drawIntTexAttribute = new DrawIntTexAttribute(i5, 0, 0, i14, i10, z);
-                            render.draw(drawIntTexAttribute);
-                        }
-                        i15 = i10;
+            ArrayList<Render> renders = getRenders();
+            if (renders == null) {
+                return true;
+            }
+            int size = renders.size();
+            DrawIntTexAttribute drawIntTexAttribute = null;
+            int i16 = 0;
+            while (i16 < size) {
+                Render render = renders.get(i16);
+                boolean z3 = i16 < size + -1;
+                int i17 = size;
+                if (z3) {
+                    beginBindFrameBuffer(this.mFrameBuffers[i16], i14, i15);
+                }
+                if (i16 == 0) {
+                    if (11 == target || !z3) {
+                        i7 = i16;
+                        c2 = 11;
+                        arrayList = renders;
+                        i10 = i15;
+                        i6 = i17;
+                        render.draw(drawAttribute2);
+                        i14 = i14;
                     } else {
                         i7 = i16;
-                        arrayList = renders;
-                        int i20 = i15;
-                        int i21 = i14;
-                        i6 = i17;
                         c2 = 11;
-                        render.setPreviousFrameBufferInfo(this.mFrameBuffers[i7 - 1], i14, i15);
-                        if (!z3) {
-                            drawIntTexAttribute.mX = i4;
-                            drawIntTexAttribute.mY = i3;
-                            drawIntTexAttribute.mWidth = i2;
-                            drawIntTexAttribute.mHeight = i;
-                        }
+                        i6 = i17;
+                        arrayList = renders;
+                        i10 = i15;
+                        int i18 = i14;
+                        drawIntTexAttribute = new DrawIntTexAttribute(i5, 0, 0, i14, i10, z);
                         render.draw(drawIntTexAttribute);
                     }
-                    if (z3) {
-                        i8 = i15;
-                        i9 = i14;
-                        drawIntTexAttribute = new DrawIntTexAttribute(this.mFrameBufferTextures[i7], 0, 0, i14, i8, z);
-                        endBindFrameBuffer();
-                    } else {
-                        i8 = i15;
-                        i9 = i14;
+                    i15 = i10;
+                } else {
+                    i7 = i16;
+                    arrayList = renders;
+                    int i19 = i15;
+                    int i20 = i14;
+                    i6 = i17;
+                    c2 = 11;
+                    render.setPreviousFrameBufferInfo(this.mFrameBuffers[i7 - 1], i14, i15);
+                    if (!z3) {
+                        drawIntTexAttribute.mX = i4;
+                        drawIntTexAttribute.mY = i3;
+                        drawIntTexAttribute.mWidth = i2;
+                        drawIntTexAttribute.mHeight = i;
                     }
-                    i16 = i7 + 1;
-                    i14 = i9;
-                    i15 = i8;
-                    size = i6;
-                    char c3 = c2;
-                    renders = arrayList;
+                    render.draw(drawIntTexAttribute);
                 }
+                if (z3) {
+                    i8 = i15;
+                    i9 = i14;
+                    drawIntTexAttribute = new DrawIntTexAttribute(this.mFrameBufferTextures[i7], 0, 0, i14, i8, z);
+                    endBindFrameBuffer();
+                } else {
+                    i8 = i15;
+                    i9 = i14;
+                }
+                i16 = i7 + 1;
+                i14 = i9;
+                i15 = i8;
+                size = i6;
+                char c3 = c2;
+                renders = arrayList;
             }
             return true;
         } else {
@@ -254,10 +251,7 @@ public class PipeRender extends RenderGroup {
             i2 = drawBasicTexAttribute.mHeight;
         } else if (target != 6) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("unsupported target ");
-            sb.append(target);
-            Log.w(str, sb.toString());
+            Log.w(str, "unsupported target " + target);
             i2 = 0;
             i = 0;
         } else {
@@ -269,11 +263,11 @@ public class PipeRender extends RenderGroup {
             Log.e(TAG, String.format(Locale.ENGLISH, "invalid size: %dx%d", new Object[]{Integer.valueOf(i), Integer.valueOf(i2)}));
             return false;
         }
-        ArrayList renders = getRenders();
+        ArrayList<Render> renders = getRenders();
         if (renders != null) {
             int size = renders.size();
             if (size == 1) {
-                ((Render) renders.get(0)).draw(drawAttribute);
+                renders.get(0).draw(drawAttribute);
             } else {
                 Log.e(TAG, String.format(Locale.ENGLISH, "renders more than 1: %d", new Object[]{Integer.valueOf(size)}));
             }

@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.exceptions.MissingBackpressureException;
@@ -38,9 +37,9 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
         final AtomicLong requested = new AtomicLong();
         Subscription s;
         int sourceMode;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        BaseObserveOnSubscriber(Worker worker2, boolean z, int i) {
+        BaseObserveOnSubscriber(Scheduler.Worker worker2, boolean z, int i) {
             this.worker = worker2;
             this.delayError = z;
             this.prefetch = i;
@@ -58,13 +57,14 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber) {
             if (this.cancelled) {
                 clear();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 if (!this.delayError) {
                     Throwable th = this.error;
                     if (th != null) {
@@ -72,12 +72,16 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
                         subscriber.onError(th);
                         this.worker.dispose();
                         return true;
-                    } else if (z2) {
+                    } else if (!z2) {
+                        return false;
+                    } else {
                         subscriber.onComplete();
                         this.worker.dispose();
                         return true;
                     }
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     Throwable th2 = this.error;
                     if (th2 != null) {
                         subscriber.onError(th2);
@@ -88,7 +92,6 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
                     return true;
                 }
             }
-            return false;
         }
 
         public final void clear() {
@@ -156,16 +159,16 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void runAsync();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void runBackfused();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void runSync();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void trySchedule() {
             if (getAndIncrement() == 0) {
                 this.worker.schedule(this);
@@ -178,7 +181,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
         final ConditionalSubscriber<? super T> actual;
         long consumed;
 
-        ObserveOnConditionalSubscriber(ConditionalSubscriber<? super T> conditionalSubscriber, Worker worker, boolean z, int i) {
+        ObserveOnConditionalSubscriber(ConditionalSubscriber<? super T> conditionalSubscriber, Scheduler.Worker worker, boolean z, int i) {
             super(worker, z, i);
             this.actual = conditionalSubscriber;
         }
@@ -224,7 +227,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             return poll;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runAsync() {
             int i;
             ConditionalSubscriber<? super T> conditionalSubscriber = this.actual;
@@ -241,7 +244,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
                     }
                     boolean z = this.done;
                     try {
-                        Object poll = simpleQueue.poll();
+                        T poll = simpleQueue.poll();
                         boolean z2 = poll == null;
                         if (!checkTerminated(z, z2, conditionalSubscriber)) {
                             if (z2) {
@@ -285,7 +288,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runBackfused() {
             int i = 1;
             while (!this.cancelled) {
@@ -308,7 +311,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runSync() {
             ConditionalSubscriber<? super T> conditionalSubscriber = this.actual;
             SimpleQueue<T> simpleQueue = this.queue;
@@ -318,7 +321,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
                 long j2 = this.requested.get();
                 while (j != j2) {
                     try {
-                        Object poll = simpleQueue.poll();
+                        T poll = simpleQueue.poll();
                         if (!this.cancelled) {
                             if (poll == null) {
                                 conditionalSubscriber.onComplete();
@@ -365,7 +368,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
         private static final long serialVersionUID = -4547113800637756442L;
         final Subscriber<? super T> actual;
 
-        ObserveOnSubscriber(Subscriber<? super T> subscriber, Worker worker, boolean z, int i) {
+        ObserveOnSubscriber(Subscriber<? super T> subscriber, Scheduler.Worker worker, boolean z, int i) {
             super(worker, z, i);
             this.actual = subscriber;
         }
@@ -411,7 +414,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             return poll;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runAsync() {
             int i;
             Subscriber<? super T> subscriber = this.actual;
@@ -427,7 +430,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
                     }
                     boolean z = this.done;
                     try {
-                        Object poll = simpleQueue.poll();
+                        T poll = simpleQueue.poll();
                         boolean z2 = poll == null;
                         if (!checkTerminated(z, z2, subscriber)) {
                             if (z2) {
@@ -471,7 +474,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runBackfused() {
             int i = 1;
             while (!this.cancelled) {
@@ -494,7 +497,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runSync() {
             Subscriber<? super T> subscriber = this.actual;
             SimpleQueue<T> simpleQueue = this.queue;
@@ -504,7 +507,7 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
                 long j2 = this.requested.get();
                 while (j != j2) {
                     try {
-                        Object poll = simpleQueue.poll();
+                        T poll = simpleQueue.poll();
                         if (!this.cancelled) {
                             if (poll == null) {
                                 subscriber.onComplete();
@@ -555,11 +558,11 @@ public final class FlowableObserveOn<T> extends AbstractFlowableWithUpstream<T, 
     }
 
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        Worker createWorker = this.scheduler.createWorker();
+        Scheduler.Worker createWorker = this.scheduler.createWorker();
         if (subscriber instanceof ConditionalSubscriber) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new ObserveOnConditionalSubscriber<Object>((ConditionalSubscriber) subscriber, createWorker, this.delayError, this.prefetch));
+            this.source.subscribe(new ObserveOnConditionalSubscriber((ConditionalSubscriber) subscriber, createWorker, this.delayError, this.prefetch));
         } else {
-            this.source.subscribe((FlowableSubscriber<? super T>) new ObserveOnSubscriber<Object>(subscriber, createWorker, this.delayError, this.prefetch));
+            this.source.subscribe(new ObserveOnSubscriber(subscriber, createWorker, this.delayError, this.prefetch));
         }
     }
 }

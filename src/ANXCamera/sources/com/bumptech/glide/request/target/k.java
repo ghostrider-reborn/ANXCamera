@@ -1,10 +1,10 @@
 package com.bumptech.glide.request.target;
 
-import android.os.Handler.Callback;
+import android.os.Handler;
 import android.os.Message;
 
 /* compiled from: PreloadTarget */
-class k implements Callback {
+class k implements Handler.Callback {
     k() {
     }
 

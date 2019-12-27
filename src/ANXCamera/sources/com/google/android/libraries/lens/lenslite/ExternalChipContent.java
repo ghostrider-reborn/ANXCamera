@@ -11,14 +11,7 @@ public abstract class ExternalChipContent {
     }
 
     public static ExternalChipContent create(String str, Drawable drawable, ExternalChipContentCallback externalChipContentCallback) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onFocusChange: text = ");
-        sb.append(str);
-        sb.append(", icon = ");
-        sb.append(drawable);
-        sb.append(", callback = ");
-        sb.append(externalChipContentCallback);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "onFocusChange: text = " + str + ", icon = " + drawable + ", callback = " + externalChipContentCallback);
         return null;
     }
 }

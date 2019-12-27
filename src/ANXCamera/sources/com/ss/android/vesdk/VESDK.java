@@ -11,7 +11,7 @@ import com.ss.android.ttve.monitor.MonitorUtils;
 import com.ss.android.ttve.monitor.TEMonitor;
 import com.ss.android.ttve.nativePort.TEEffectUtils;
 import com.ss.android.ttve.nativePort.TENativeLibsLoader;
-import com.ss.android.vesdk.VEListener.VEMonitorListener;
+import com.ss.android.vesdk.VEListener;
 import com.ss.android.vesdk.runtime.VECloudCtrlManager;
 import com.ss.android.vesdk.runtime.VEEnv;
 import com.ss.android.vesdk.runtime.VEExternalMonitorListener;
@@ -52,10 +52,7 @@ public class VESDK {
 
     public static String getEffectSDKVer() {
         String effectVersion = TEEffectUtils.getEffectVersion();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Effect Ver is : ");
-        sb.append(effectVersion);
-        Log.d("Steven", sb.toString());
+        Log.d("Steven", "Effect Ver is : " + effectVersion);
         return effectVersion;
     }
 
@@ -65,7 +62,7 @@ public class VESDK {
 
     @Deprecated
     public static void init(@NonNull Context context, @NonNull VEEnv vEEnv) {
-        String str = context.getExternalFilesDir(null).getAbsolutePath().toString();
+        String str = context.getExternalFilesDir((String) null).getAbsolutePath().toString();
         VERuntime.getInstance().init(context, vEEnv);
         VECloudCtrlManager.getInstance().execStoredCommands(str);
     }
@@ -79,7 +76,7 @@ public class VESDK {
         TEMonitor.clear();
     }
 
-    public static void monitorRegister(VEMonitorListener vEMonitorListener) {
+    public static void monitorRegister(VEListener.VEMonitorListener vEMonitorListener) {
         VERuntime.getInstance().registerMonitor(vEMonitorListener);
     }
 
@@ -145,7 +142,7 @@ public class VESDK {
     }
 
     public static void setLogLevel(byte b2) {
-        VELogUtil.setUp(null, b2);
+        VELogUtil.setUp((String) null, b2);
         VideoSdkCore.setLogLevel(LogUtil.getAndroidLogLevel(b2));
     }
 

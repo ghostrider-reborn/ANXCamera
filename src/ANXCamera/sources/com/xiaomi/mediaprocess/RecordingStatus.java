@@ -12,7 +12,6 @@ public enum RecordingStatus {
     }
 
     public static RecordingStatus int2enum(int i) {
-        RecordingStatus[] values;
         RecordingStatus recordingStatus = RecordingStopped;
         for (RecordingStatus recordingStatus2 : values()) {
             if (recordingStatus2.ordinal() == i) {

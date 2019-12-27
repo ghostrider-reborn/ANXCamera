@@ -2,12 +2,10 @@ package io.reactivex.internal.operators.parallel;
 
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.reactivex.internal.fuseable.ConditionalSubscriber;
 import io.reactivex.internal.queue.SpscArrayQueue;
 import io.reactivex.internal.schedulers.SchedulerMultiWorkerSupport;
-import io.reactivex.internal.schedulers.SchedulerMultiWorkerSupport.WorkerCallback;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.internal.util.BackpressureHelper;
 import io.reactivex.parallel.ParallelFlowable;
@@ -33,9 +31,9 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
         final SpscArrayQueue<T> queue;
         final AtomicLong requested = new AtomicLong();
         Subscription s;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        BaseRunOnSubscriber(int i, SpscArrayQueue<T> spscArrayQueue, Worker worker2) {
+        BaseRunOnSubscriber(int i, SpscArrayQueue<T> spscArrayQueue, Scheduler.Worker worker2) {
             this.prefetch = i;
             this.queue = spscArrayQueue;
             this.limit = i - (i >> 2);
@@ -88,7 +86,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void schedule() {
             if (getAndIncrement() == 0) {
                 this.worker.schedule(this);
@@ -96,7 +94,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
         }
     }
 
-    final class MultiWorkerCallback implements WorkerCallback {
+    final class MultiWorkerCallback implements SchedulerMultiWorkerSupport.WorkerCallback {
         final Subscriber<T>[] parents;
         final Subscriber<? super T>[] subscribers;
 
@@ -105,7 +103,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
             this.parents = subscriberArr2;
         }
 
-        public void onWorker(int i, Worker worker) {
+        public void onWorker(int i, Scheduler.Worker worker) {
             ParallelRunOn.this.createSubscriber(i, this.subscribers, this.parents, worker);
         }
     }
@@ -114,7 +112,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
         private static final long serialVersionUID = 1075119423897941642L;
         final ConditionalSubscriber<? super T> actual;
 
-        RunOnConditionalSubscriber(ConditionalSubscriber<? super T> conditionalSubscriber, int i, SpscArrayQueue<T> spscArrayQueue, Worker worker) {
+        RunOnConditionalSubscriber(ConditionalSubscriber<? super T> conditionalSubscriber, int i, SpscArrayQueue<T> spscArrayQueue, Scheduler.Worker worker) {
             super(i, spscArrayQueue, worker);
             this.actual = conditionalSubscriber;
         }
@@ -155,7 +153,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
                                 return;
                             }
                         }
-                        Object poll = spscArrayQueue.poll();
+                        T poll = spscArrayQueue.poll();
                         boolean z2 = poll == null;
                         if (z && z2) {
                             conditionalSubscriber.onComplete();
@@ -214,7 +212,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
         private static final long serialVersionUID = 1075119423897941642L;
         final Subscriber<? super T> actual;
 
-        RunOnSubscriber(Subscriber<? super T> subscriber, int i, SpscArrayQueue<T> spscArrayQueue, Worker worker) {
+        RunOnSubscriber(Subscriber<? super T> subscriber, int i, SpscArrayQueue<T> spscArrayQueue, Scheduler.Worker worker) {
             super(i, spscArrayQueue, worker);
             this.actual = subscriber;
         }
@@ -255,7 +253,7 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
                                 return;
                             }
                         }
-                        Object poll = spscArrayQueue.poll();
+                        T poll = spscArrayQueue.poll();
                         boolean z2 = poll == null;
                         if (z && z2) {
                             subscriber.onComplete();
@@ -315,8 +313,8 @@ public final class ParallelRunOn<T> extends ParallelFlowable<T> {
         this.prefetch = i;
     }
 
-    /* access modifiers changed from: 0000 */
-    public void createSubscriber(int i, Subscriber<? super T>[] subscriberArr, Subscriber<T>[] subscriberArr2, Worker worker) {
+    /* access modifiers changed from: package-private */
+    public void createSubscriber(int i, Subscriber<? super T>[] subscriberArr, Subscriber<T>[] subscriberArr2, Scheduler.Worker worker) {
         ConditionalSubscriber conditionalSubscriber = subscriberArr[i];
         SpscArrayQueue spscArrayQueue = new SpscArrayQueue(this.prefetch);
         if (conditionalSubscriber instanceof ConditionalSubscriber) {

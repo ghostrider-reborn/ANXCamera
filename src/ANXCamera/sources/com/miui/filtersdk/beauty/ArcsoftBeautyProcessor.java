@@ -3,7 +3,6 @@ package com.miui.filtersdk.beauty;
 import android.graphics.Bitmap;
 import com.miui.filtersdk.BeautyArcsoftJni;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
     private static final int BEAUTY_PARAMETER_SIZE = 11;
@@ -22,7 +21,7 @@ public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
     private int mSmoothStrength;
     private int mWhiteStrength;
 
-    /* renamed from: com.miui.filtersdk.beauty.ArcsoftBeautyProcessor$1 reason: invalid class name */
+    /* renamed from: com.miui.filtersdk.beauty.ArcsoftBeautyProcessor$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$beauty$BeautyParameterType = new int[BeautyParameterType.values().length];
 
@@ -197,8 +196,8 @@ public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
     }
 
     public void setBeautyParamsDegree(Map<BeautyParameterType, Float> map) {
-        for (Entry entry : map.entrySet()) {
-            setBeautyParamDegree((BeautyParameterType) entry.getKey(), (Float) entry.getValue());
+        for (Map.Entry next : map.entrySet()) {
+            setBeautyParamDegree((BeautyParameterType) next.getKey(), (Float) next.getValue());
         }
     }
 }

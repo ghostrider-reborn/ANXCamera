@@ -30,11 +30,6 @@ public abstract class ForwardingSource implements Source {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append("(");
-        sb.append(this.delegate.toString());
-        sb.append(")");
-        return sb.toString();
+        return getClass().getSimpleName() + "(" + this.delegate.toString() + ")";
     }
 }

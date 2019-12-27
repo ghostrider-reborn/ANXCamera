@@ -288,7 +288,7 @@ public interface IPerfShielder extends IInterface {
                             }
                             obtain.writeInt(i);
                             try {
-                                if (this.mRemote.transact(2, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                                if (this.mRemote.transact(2, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                                     obtain.recycle();
                                     return;
                                 }
@@ -833,7 +833,7 @@ public interface IPerfShielder extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(i);
                     obtain.writeInt(i2);
-                    if (this.mRemote.transact(4, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(4, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().killUnusedApp(i, i2);
@@ -883,7 +883,7 @@ public interface IPerfShielder extends IInterface {
                         i = 1;
                     }
                     obtain.writeInt(i);
-                    if (this.mRemote.transact(12, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(12, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().removeServicePriority(miuiServicePriority, z);
@@ -939,7 +939,7 @@ public interface IPerfShielder extends IInterface {
                         try {
                             obtain.writeLong(j2);
                             obtain.writeString(str2);
-                            if (this.mRemote.transact(25, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                            if (this.mRemote.transact(25, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                                 obtain.recycle();
                                 return;
                             }
@@ -973,7 +973,7 @@ public interface IPerfShielder extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeTypedList(list);
-                    if (this.mRemote.transact(34, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(34, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().reportExcessiveCpuUsageRecords(list);
@@ -995,7 +995,7 @@ public interface IPerfShielder extends IInterface {
                         obtain.writeInt(0);
                     }
                     obtain.writeLong(j);
-                    if (this.mRemote.transact(35, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(35, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().reportNotificationClick(str, intent, j);
@@ -1018,7 +1018,7 @@ public interface IPerfShielder extends IInterface {
                         obtain.writeLong(j3);
                         obtain.writeInt(i3);
                         obtain.writeLong(j4);
-                        if (this.mRemote.transact(1, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                        if (this.mRemote.transact(1, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                             obtain.recycle();
                             return;
                         }
@@ -1095,7 +1095,7 @@ public interface IPerfShielder extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    if (this.mRemote.transact(39, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(39, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().setHapLinks(map, activityInfo);
@@ -1110,7 +1110,7 @@ public interface IPerfShielder extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(z ? 1 : 0);
-                    if (this.mRemote.transact(15, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(15, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().setMiuiBroadcastDispatchEnable(z);
@@ -1125,7 +1125,7 @@ public interface IPerfShielder extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(z ? 1 : 0);
-                    if (this.mRemote.transact(14, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(14, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().setMiuiContentProviderControl(z);
@@ -1140,7 +1140,7 @@ public interface IPerfShielder extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(i);
-                    if (this.mRemote.transact(3, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(3, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().setSchedFgPid(i);
@@ -1155,7 +1155,7 @@ public interface IPerfShielder extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeTypedList(list);
-                    if (this.mRemote.transact(10, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(10, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().setServicePriority(list);
@@ -1171,7 +1171,7 @@ public interface IPerfShielder extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeTypedList(list);
                     obtain.writeLong(j);
-                    if (this.mRemote.transact(11, obtain, null, 1) || Stub.getDefaultImpl() == null) {
+                    if (this.mRemote.transact(11, obtain, (Parcel) null, 1) || Stub.getDefaultImpl() == null) {
                         obtain.recycle();
                     } else {
                         Stub.getDefaultImpl().setServicePriorityWithNoProc(list, j);
@@ -1343,67 +1343,74 @@ public interface IPerfShielder extends IInterface {
             int i3 = i;
             Parcel parcel3 = parcel;
             Parcel parcel4 = parcel2;
-            String str = DESCRIPTOR;
             if (i3 != 1598968902) {
                 boolean z = false;
                 switch (i3) {
                     case 1:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        int readInt = parcel.readInt();
+                        int readInt2 = parcel.readInt();
+                        String readString = parcel.readString();
+                        long readLong = parcel.readLong();
+                        long readLong2 = parcel.readLong();
+                        long readLong3 = parcel.readLong();
+                        int readInt3 = parcel.readInt();
+                        long readLong4 = parcel.readLong();
                         Parcel parcel5 = parcel4;
-                        String str2 = str;
-                        reportPerceptibleJank(parcel.readInt(), parcel.readInt(), parcel.readString(), parcel.readLong(), parcel.readLong(), parcel.readLong(), parcel.readInt(), parcel.readLong());
+                        Object obj = DESCRIPTOR;
+                        reportPerceptibleJank(readInt, readInt2, readString, readLong, readLong2, readLong3, readInt3, readLong4);
                         return true;
                     case 2:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         addActivityLaunchTime(parcel.readString(), parcel.readString(), parcel.readLong(), parcel.readLong(), parcel.readInt() != 0, parcel.readInt() != 0);
                         return true;
                     case 3:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         setSchedFgPid(parcel.readInt());
                         return true;
                     case 4:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         killUnusedApp(parcel.readInt(), parcel.readInt());
                         return true;
                     case 5:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         String packageNameByPid = getPackageNameByPid(parcel.readInt());
                         parcel2.writeNoException();
                         parcel4.writeString(packageNameByPid);
                         return true;
                     case 6:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         setForkedProcessGroup(parcel.readInt(), parcel.readInt(), parcel.readInt(), parcel.readString());
                         parcel2.writeNoException();
                         return true;
                     case 7:
-                        parcel3.enforceInterface(str);
-                        List allRunningProcessMemInfos = getAllRunningProcessMemInfos();
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        List<Bundle> allRunningProcessMemInfos = getAllRunningProcessMemInfos();
                         parcel2.writeNoException();
                         parcel4.writeTypedList(allRunningProcessMemInfos);
                         return true;
                     case 8:
-                        parcel3.enforceInterface(str);
-                        List updateProcessFullMemInfoByPids = updateProcessFullMemInfoByPids(parcel.createIntArray());
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        List<Bundle> updateProcessFullMemInfoByPids = updateProcessFullMemInfoByPids(parcel.createIntArray());
                         parcel2.writeNoException();
                         parcel4.writeTypedList(updateProcessFullMemInfoByPids);
                         return true;
                     case 9:
-                        parcel3.enforceInterface(str);
-                        List updateProcessPartialMemInfoByPids = updateProcessPartialMemInfoByPids(parcel.createIntArray());
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        List<Bundle> updateProcessPartialMemInfoByPids = updateProcessPartialMemInfoByPids(parcel.createIntArray());
                         parcel2.writeNoException();
                         parcel4.writeTypedList(updateProcessPartialMemInfoByPids);
                         return true;
                     case 10:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         setServicePriority(parcel3.createTypedArrayList(MiuiServicePriority.CREATOR));
                         return true;
                     case 11:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         setServicePriorityWithNoProc(parcel3.createTypedArrayList(MiuiServicePriority.CREATOR), parcel.readLong());
                         return true;
                     case 12:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         MiuiServicePriority miuiServicePriority = parcel.readInt() != 0 ? (MiuiServicePriority) MiuiServicePriority.CREATOR.createFromParcel(parcel3) : null;
                         if (parcel.readInt() != 0) {
                             z = true;
@@ -1411,93 +1418,93 @@ public interface IPerfShielder extends IInterface {
                         removeServicePriority(miuiServicePriority, z);
                         return true;
                     case 13:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         closeCheckPriority();
                         parcel2.writeNoException();
                         return true;
                     case 14:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             z = true;
                         }
                         setMiuiContentProviderControl(z);
                         return true;
                     case 15:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             z = true;
                         }
                         setMiuiBroadcastDispatchEnable(z);
                         return true;
                     case 16:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         addTimeConsumingIntent(parcel.createStringArray());
                         parcel2.writeNoException();
                         return true;
                     case 17:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         removeTimeConsumingIntent(parcel.createStringArray());
                         parcel2.writeNoException();
                         return true;
                     case 18:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         clearTimeConsumingIntent();
                         parcel2.writeNoException();
                         return true;
                     case 19:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         int memoryTrimLevel = getMemoryTrimLevel();
                         parcel2.writeNoException();
                         parcel4.writeInt(memoryTrimLevel);
                         return true;
                     case 20:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean insertRedirectRule = insertRedirectRule(parcel.readString(), parcel.readString(), parcel.readString(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
                         parcel2.writeNoException();
                         parcel4.writeInt(insertRedirectRule ? 1 : 0);
                         return true;
                     case 21:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean deleteRedirectRule = deleteRedirectRule(parcel.readString(), parcel.readString());
                         parcel2.writeNoException();
                         parcel4.writeInt(deleteRedirectRule ? 1 : 0);
                         return true;
                     case 22:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean insertPackageInfo = insertPackageInfo(parcel.readInt() != 0 ? (PackageInfo) PackageInfo.CREATOR.createFromParcel(parcel3) : null);
                         parcel2.writeNoException();
                         parcel4.writeInt(insertPackageInfo ? 1 : 0);
                         return true;
                     case 23:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean deletePackageInfo = deletePackageInfo(parcel.readString());
                         parcel2.writeNoException();
                         parcel4.writeInt(deletePackageInfo ? 1 : 0);
                         return true;
                     case 24:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         long freeMemory = getFreeMemory();
                         parcel2.writeNoException();
                         parcel4.writeLong(freeMemory);
                         return true;
                     case 25:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         reportAnr(parcel.readInt(), parcel.readString(), parcel.readLong(), parcel.readLong(), parcel.readString());
                         return true;
                     case 26:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean addCallingPkgHookRule = addCallingPkgHookRule(parcel.readString(), parcel.readString(), parcel.readString());
                         parcel2.writeNoException();
                         parcel4.writeInt(addCallingPkgHookRule ? 1 : 0);
                         return true;
                     case 27:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean removeCallingPkgHookRule = removeCallingPkgHookRule(parcel.readString(), parcel.readString());
                         parcel2.writeNoException();
                         parcel4.writeInt(removeCallingPkgHookRule ? 1 : 0);
                         return true;
                     case 28:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         ParcelFileDescriptor perfEventSocketFd = getPerfEventSocketFd();
                         parcel2.writeNoException();
                         if (perfEventSocketFd != null) {
@@ -1508,8 +1515,8 @@ public interface IPerfShielder extends IInterface {
                         }
                         return true;
                     case 29:
-                        parcel3.enforceInterface(str);
-                        Bundle beginScenario = beginScenario(parcel.readInt() != 0 ? (E2EScenario) E2EScenario.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? (E2EScenarioSettings) E2EScenarioSettings.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt() != 0 ? (E2EScenarioPayload) E2EScenarioPayload.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong(), parcel.readInt() != 0);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        Bundle beginScenario = beginScenario(parcel.readInt() != 0 ? E2EScenario.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? E2EScenarioSettings.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt() != 0 ? E2EScenarioPayload.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong(), parcel.readInt() != 0);
                         parcel2.writeNoException();
                         if (beginScenario != null) {
                             parcel4.writeInt(1);
@@ -1519,60 +1526,60 @@ public interface IPerfShielder extends IInterface {
                         }
                         return true;
                     case 30:
-                        parcel3.enforceInterface(str);
-                        abortMatchingScenario(parcel.readInt() != 0 ? (E2EScenario) E2EScenario.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt(), parcel.readLong());
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        abortMatchingScenario(parcel.readInt() != 0 ? E2EScenario.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt(), parcel.readLong());
                         parcel2.writeNoException();
                         return true;
                     case 31:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         abortSpecificScenario(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
                         parcel2.writeNoException();
                         return true;
                     case 32:
-                        parcel3.enforceInterface(str);
-                        finishMatchingScenario(parcel.readInt() != 0 ? (E2EScenario) E2EScenario.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt() != 0 ? (E2EScenarioPayload) E2EScenarioPayload.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        finishMatchingScenario(parcel.readInt() != 0 ? E2EScenario.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt() != 0 ? E2EScenarioPayload.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
                         parcel2.writeNoException();
                         return true;
                     case 33:
-                        parcel3.enforceInterface(str);
-                        finishSpecificScenario(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? (E2EScenarioPayload) E2EScenarioPayload.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        finishSpecificScenario(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? E2EScenarioPayload.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
                         parcel2.writeNoException();
                         return true;
                     case 34:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         reportExcessiveCpuUsageRecords(parcel3.createTypedArrayList(Bundle.CREATOR));
                         return true;
                     case 35:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         reportNotificationClick(parcel.readString(), parcel.readInt() != 0 ? (Intent) Intent.CREATOR.createFromParcel(parcel3) : null, parcel.readLong());
                         return true;
                     case 36:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean insertFilterInfo = insertFilterInfo(parcel.readString(), parcel.readString(), parcel.readInt() != 0 ? (Uri) Uri.CREATOR.createFromParcel(parcel3) : null, parcel3.createTypedArrayList(Bundle.CREATOR));
                         parcel2.writeNoException();
                         parcel4.writeInt(insertFilterInfo ? 1 : 0);
                         return true;
                     case 37:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         boolean deleteFilterInfo = deleteFilterInfo(parcel.readString());
                         parcel2.writeNoException();
                         parcel4.writeInt(deleteFilterInfo ? 1 : 0);
                         return true;
                     case 38:
-                        parcel3.enforceInterface(str);
-                        List resolveQuickAppInfos = resolveQuickAppInfos(parcel.readInt() != 0 ? (Intent) Intent.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        List<QuickAppResolveInfo> resolveQuickAppInfos = resolveQuickAppInfos(parcel.readInt() != 0 ? (Intent) Intent.CREATOR.createFromParcel(parcel3) : null);
                         parcel2.writeNoException();
                         parcel4.writeTypedList(resolveQuickAppInfos);
                         return true;
                     case 39:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         setHapLinks(parcel3.readHashMap(getClass().getClassLoader()), parcel.readInt() != 0 ? (ActivityInfo) ActivityInfo.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     default:
                         return super.onTransact(i, parcel, parcel2, i2);
                 }
             } else {
-                parcel4.writeString(str);
+                parcel4.writeString(DESCRIPTOR);
                 return true;
             }
         }

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.os.BuildCompat;
 import android.support.v4.util.PatternsCompat;
 import android.text.Spannable;
@@ -13,8 +12,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
-import android.text.util.Linkify.MatchFilter;
-import android.text.util.Linkify.TransformFilter;
 import android.webkit.WebView;
 import android.widget.TextView;
 import java.lang.annotation.Retention;
@@ -59,7 +56,7 @@ public final class LinkifyCompat {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface LinkifyMask {
     }
@@ -78,11 +75,11 @@ public final class LinkifyCompat {
         if (shouldAddLinksFallbackToFramework()) {
             Linkify.addLinks(textView, pattern, str);
         } else {
-            addLinks(textView, pattern, str, (String[]) null, (MatchFilter) null, (TransformFilter) null);
+            addLinks(textView, pattern, str, (String[]) null, (Linkify.MatchFilter) null, (Linkify.TransformFilter) null);
         }
     }
 
-    public static void addLinks(@NonNull TextView textView, @NonNull Pattern pattern, @Nullable String str, @Nullable MatchFilter matchFilter, @Nullable TransformFilter transformFilter) {
+    public static void addLinks(@NonNull TextView textView, @NonNull Pattern pattern, @Nullable String str, @Nullable Linkify.MatchFilter matchFilter, @Nullable Linkify.TransformFilter transformFilter) {
         if (shouldAddLinksFallbackToFramework()) {
             Linkify.addLinks(textView, pattern, str, matchFilter, transformFilter);
         } else {
@@ -91,7 +88,7 @@ public final class LinkifyCompat {
     }
 
     @SuppressLint({"NewApi"})
-    public static void addLinks(@NonNull TextView textView, @NonNull Pattern pattern, @Nullable String str, @Nullable String[] strArr, @Nullable MatchFilter matchFilter, @Nullable TransformFilter transformFilter) {
+    public static void addLinks(@NonNull TextView textView, @NonNull Pattern pattern, @Nullable String str, @Nullable String[] strArr, @Nullable Linkify.MatchFilter matchFilter, @Nullable Linkify.TransformFilter transformFilter) {
         if (shouldAddLinksFallbackToFramework()) {
             Linkify.addLinks(textView, pattern, str, strArr, matchFilter, transformFilter);
             return;
@@ -119,10 +116,10 @@ public final class LinkifyCompat {
         }
         ArrayList arrayList = new ArrayList();
         if ((i & 1) != 0) {
-            gatherLinks(arrayList, spannable, PatternsCompat.AUTOLINK_WEB_URL, new String[]{"http://", "https://", "rtsp://"}, Linkify.sUrlMatchFilter, null);
+            gatherLinks(arrayList, spannable, PatternsCompat.AUTOLINK_WEB_URL, new String[]{"http://", "https://", "rtsp://"}, Linkify.sUrlMatchFilter, (Linkify.TransformFilter) null);
         }
         if ((i & 2) != 0) {
-            gatherLinks(arrayList, spannable, PatternsCompat.AUTOLINK_EMAIL_ADDRESS, new String[]{"mailto:"}, null, null);
+            gatherLinks(arrayList, spannable, PatternsCompat.AUTOLINK_EMAIL_ADDRESS, new String[]{"mailto:"}, (Linkify.MatchFilter) null, (Linkify.TransformFilter) null);
         }
         if ((i & 8) != 0) {
             gatherMapLinks(arrayList, spannable);
@@ -142,21 +139,20 @@ public final class LinkifyCompat {
     }
 
     public static boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern, @Nullable String str) {
-        return shouldAddLinksFallbackToFramework() ? Linkify.addLinks(spannable, pattern, str) : addLinks(spannable, pattern, str, (String[]) null, (MatchFilter) null, (TransformFilter) null);
+        return shouldAddLinksFallbackToFramework() ? Linkify.addLinks(spannable, pattern, str) : addLinks(spannable, pattern, str, (String[]) null, (Linkify.MatchFilter) null, (Linkify.TransformFilter) null);
     }
 
-    public static boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern, @Nullable String str, @Nullable MatchFilter matchFilter, @Nullable TransformFilter transformFilter) {
+    public static boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern, @Nullable String str, @Nullable Linkify.MatchFilter matchFilter, @Nullable Linkify.TransformFilter transformFilter) {
         return shouldAddLinksFallbackToFramework() ? Linkify.addLinks(spannable, pattern, str, matchFilter, transformFilter) : addLinks(spannable, pattern, str, (String[]) null, matchFilter, transformFilter);
     }
 
     @SuppressLint({"NewApi"})
-    public static boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern, @Nullable String str, @Nullable String[] strArr, @Nullable MatchFilter matchFilter, @Nullable TransformFilter transformFilter) {
+    public static boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern, @Nullable String str, @Nullable String[] strArr, @Nullable Linkify.MatchFilter matchFilter, @Nullable Linkify.TransformFilter transformFilter) {
         if (shouldAddLinksFallbackToFramework()) {
             return Linkify.addLinks(spannable, pattern, str, strArr, matchFilter, transformFilter);
         }
-        String str2 = "";
         if (str == null) {
-            str = str2;
+            str = "";
         }
         if (strArr == null || strArr.length < 1) {
             strArr = EMPTY_STRING;
@@ -165,9 +161,9 @@ public final class LinkifyCompat {
         strArr2[0] = str.toLowerCase(Locale.ROOT);
         int i = 0;
         while (i < strArr.length) {
-            String str3 = strArr[i];
+            String str2 = strArr[i];
             i++;
-            strArr2[i] = str3 == null ? str2 : str3.toLowerCase(Locale.ROOT);
+            strArr2[i] = str2 == null ? "" : str2.toLowerCase(Locale.ROOT);
         }
         Matcher matcher = pattern.matcher(spannable);
         boolean z = false;
@@ -214,7 +210,7 @@ public final class LinkifyCompat {
         return BuildCompat.isAtLeastP() ? WebView.findAddress(str) : FindAddress.findAddress(str);
     }
 
-    private static void gatherLinks(ArrayList<LinkSpec> arrayList, Spannable spannable, Pattern pattern, String[] strArr, MatchFilter matchFilter, TransformFilter transformFilter) {
+    private static void gatherLinks(ArrayList<LinkSpec> arrayList, Spannable spannable, Pattern pattern, String[] strArr, Linkify.MatchFilter matchFilter, Linkify.TransformFilter transformFilter) {
         Matcher matcher = pattern.matcher(spannable);
         while (matcher.find()) {
             int start = matcher.start();
@@ -250,10 +246,7 @@ public final class LinkifyCompat {
                         linkSpec.end = i;
                         obj = obj.substring(length);
                         String encode = URLEncoder.encode(findAddress, "UTF-8");
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("geo:0,0?q=");
-                        sb.append(encode);
-                        linkSpec.url = sb.toString();
+                        linkSpec.url = "geo:0,0?q=" + encode;
                         arrayList.add(linkSpec);
                     } else {
                         return;
@@ -267,7 +260,7 @@ public final class LinkifyCompat {
         }
     }
 
-    private static String makeUrl(@NonNull String str, @NonNull String[] strArr, Matcher matcher, @Nullable TransformFilter transformFilter) {
+    private static String makeUrl(@NonNull String str, @NonNull String[] strArr, Matcher matcher, @Nullable Linkify.TransformFilter transformFilter) {
         boolean z;
         if (transformFilter != null) {
             str = transformFilter.transformUrl(matcher, str);
@@ -281,10 +274,7 @@ public final class LinkifyCompat {
             }
             if (str.regionMatches(true, 0, strArr[i], 0, strArr[i].length())) {
                 if (!str.regionMatches(false, 0, strArr[i], 0, strArr[i].length())) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(strArr[i]);
-                    sb.append(str.substring(strArr[i].length()));
-                    str = sb.toString();
+                    str = strArr[i] + str.substring(strArr[i].length());
                 }
             } else {
                 i++;
@@ -293,10 +283,7 @@ public final class LinkifyCompat {
         if (z || strArr.length <= 0) {
             return str;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(strArr[0]);
-        sb2.append(str);
-        return sb2.toString();
+        return strArr[0] + str;
     }
 
     private static void pruneOverlaps(ArrayList<LinkSpec> arrayList, Spannable spannable) {
@@ -312,9 +299,9 @@ public final class LinkifyCompat {
         Collections.sort(arrayList, COMPARATOR);
         int size = arrayList.size();
         while (i < size - 1) {
-            LinkSpec linkSpec2 = (LinkSpec) arrayList.get(i);
+            LinkSpec linkSpec2 = arrayList.get(i);
             int i3 = i + 1;
-            LinkSpec linkSpec3 = (LinkSpec) arrayList.get(i3);
+            LinkSpec linkSpec3 = arrayList.get(i3);
             int i4 = linkSpec2.start;
             int i5 = linkSpec3.start;
             if (i4 <= i5) {
@@ -323,7 +310,7 @@ public final class LinkifyCompat {
                     int i7 = linkSpec3.end;
                     int i8 = (i7 > i6 && i6 - i4 <= i7 - i5) ? i6 - i4 < i7 - i5 ? i : -1 : i3;
                     if (i8 != -1) {
-                        URLSpan uRLSpan = ((LinkSpec) arrayList.get(i8)).frameworkAddedSpan;
+                        URLSpan uRLSpan = arrayList.get(i8).frameworkAddedSpan;
                         if (uRLSpan != null) {
                             spannable.removeSpan(uRLSpan);
                         }

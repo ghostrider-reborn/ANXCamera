@@ -13,7 +13,6 @@ public enum PlayerWorkingMode {
     }
 
     public static PlayerWorkingMode int2enum(int i) {
-        PlayerWorkingMode[] values;
         PlayerWorkingMode playerWorkingMode = PlayerWorkingLipSyncMode;
         for (PlayerWorkingMode playerWorkingMode2 : values()) {
             if (playerWorkingMode2.ordinal() == i) {

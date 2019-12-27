@@ -7,7 +7,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat.QueueItem;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 import java.util.List;
 
@@ -49,7 +49,7 @@ public interface IMediaControllerCallback extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(z ? 1 : 0);
-                    this.mRemote.transact(11, obtain, null, 1);
+                    this.mRemote.transact(11, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -66,7 +66,7 @@ public interface IMediaControllerCallback extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(1, obtain, null, 1);
+                    this.mRemote.transact(1, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -82,7 +82,7 @@ public interface IMediaControllerCallback extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(7, obtain, null, 1);
+                    this.mRemote.transact(7, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -98,7 +98,7 @@ public interface IMediaControllerCallback extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(4, obtain, null, 1);
+                    this.mRemote.transact(4, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -114,18 +114,18 @@ public interface IMediaControllerCallback extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(3, obtain, null, 1);
+                    this.mRemote.transact(3, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
             }
 
-            public void onQueueChanged(List<QueueItem> list) throws RemoteException {
+            public void onQueueChanged(List<MediaSessionCompat.QueueItem> list) throws RemoteException {
                 Parcel obtain = Parcel.obtain();
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeTypedList(list);
-                    this.mRemote.transact(5, obtain, null, 1);
+                    this.mRemote.transact(5, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -141,7 +141,7 @@ public interface IMediaControllerCallback extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(6, obtain, null, 1);
+                    this.mRemote.transact(6, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -152,7 +152,7 @@ public interface IMediaControllerCallback extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(i);
-                    this.mRemote.transact(9, obtain, null, 1);
+                    this.mRemote.transact(9, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -162,7 +162,7 @@ public interface IMediaControllerCallback extends IInterface {
                 Parcel obtain = Parcel.obtain();
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
-                    this.mRemote.transact(2, obtain, null, 1);
+                    this.mRemote.transact(2, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -172,7 +172,7 @@ public interface IMediaControllerCallback extends IInterface {
                 Parcel obtain = Parcel.obtain();
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
-                    this.mRemote.transact(13, obtain, null, 1);
+                    this.mRemote.transact(13, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -183,7 +183,7 @@ public interface IMediaControllerCallback extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(i);
-                    this.mRemote.transact(12, obtain, null, 1);
+                    this.mRemote.transact(12, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -194,7 +194,7 @@ public interface IMediaControllerCallback extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(z ? 1 : 0);
-                    this.mRemote.transact(10, obtain, null, 1);
+                    this.mRemote.transact(10, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -210,7 +210,7 @@ public interface IMediaControllerCallback extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(8, obtain, null, 1);
+                    this.mRemote.transact(8, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -233,59 +233,27 @@ public interface IMediaControllerCallback extends IInterface {
             return this;
         }
 
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v1, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v4, resolved type: android.support.v4.media.session.PlaybackStateCompat} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v7, resolved type: android.support.v4.media.MediaMetadataCompat} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v13, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v16, resolved type: android.support.v4.media.session.ParcelableVolumeInfo} */
         /* JADX WARNING: type inference failed for: r3v0 */
-        /* JADX WARNING: type inference failed for: r3v1, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r3v3, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r3v4, types: [android.support.v4.media.session.PlaybackStateCompat] */
-        /* JADX WARNING: type inference failed for: r3v6, types: [android.support.v4.media.session.PlaybackStateCompat] */
-        /* JADX WARNING: type inference failed for: r3v7, types: [android.support.v4.media.MediaMetadataCompat] */
-        /* JADX WARNING: type inference failed for: r3v9, types: [android.support.v4.media.MediaMetadataCompat] */
         /* JADX WARNING: type inference failed for: r3v10, types: [java.lang.CharSequence] */
-        /* JADX WARNING: type inference failed for: r3v12, types: [java.lang.CharSequence] */
-        /* JADX WARNING: type inference failed for: r3v13, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r3v15, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r3v16, types: [android.support.v4.media.session.ParcelableVolumeInfo] */
-        /* JADX WARNING: type inference failed for: r3v18, types: [android.support.v4.media.session.ParcelableVolumeInfo] */
         /* JADX WARNING: type inference failed for: r3v19 */
         /* JADX WARNING: type inference failed for: r3v20 */
         /* JADX WARNING: type inference failed for: r3v21 */
         /* JADX WARNING: type inference failed for: r3v22 */
         /* JADX WARNING: type inference failed for: r3v23 */
         /* JADX WARNING: type inference failed for: r3v24 */
-        /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r3v0
-  assigns: [?[int, float, boolean, short, byte, char, OBJECT, ARRAY], android.support.v4.media.session.PlaybackStateCompat, android.os.Bundle, android.support.v4.media.MediaMetadataCompat, java.lang.CharSequence, android.support.v4.media.session.ParcelableVolumeInfo]
-  uses: [android.os.Bundle, android.support.v4.media.session.PlaybackStateCompat, android.support.v4.media.MediaMetadataCompat, java.lang.CharSequence, android.support.v4.media.session.ParcelableVolumeInfo]
-  mth insns count: 101
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$0(DepthTraversal.java:13)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:13)
-        	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-        	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-        	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-        	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-        	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-        	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-         */
-        /* JADX WARNING: Unknown variable types count: 7 */
+        /* JADX WARNING: Multi-variable type inference failed */
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            String str = DESCRIPTOR;
             if (i != 1598968902) {
                 boolean z = false;
                 ? r3 = 0;
                 switch (i) {
                     case 1:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         String readString = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r3 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -293,79 +261,79 @@ public interface IMediaControllerCallback extends IInterface {
                         onEvent(readString, r3);
                         return true;
                     case 2:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         onSessionDestroyed();
                         return true;
                     case 3:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r3 = (PlaybackStateCompat) PlaybackStateCompat.CREATOR.createFromParcel(parcel);
+                            r3 = PlaybackStateCompat.CREATOR.createFromParcel(parcel);
                         }
                         onPlaybackStateChanged(r3);
                         return true;
                     case 4:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r3 = (MediaMetadataCompat) MediaMetadataCompat.CREATOR.createFromParcel(parcel);
+                            r3 = MediaMetadataCompat.CREATOR.createFromParcel(parcel);
                         }
                         onMetadataChanged(r3);
                         return true;
                     case 5:
-                        parcel.enforceInterface(str);
-                        onQueueChanged(parcel.createTypedArrayList(QueueItem.CREATOR));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        onQueueChanged(parcel.createTypedArrayList(MediaSessionCompat.QueueItem.CREATOR));
                         return true;
                     case 6:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             r3 = (CharSequence) TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
                         }
                         onQueueTitleChanged(r3);
                         return true;
                     case 7:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             r3 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                         }
                         onExtrasChanged(r3);
                         return true;
                     case 8:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
-                            r3 = (ParcelableVolumeInfo) ParcelableVolumeInfo.CREATOR.createFromParcel(parcel);
+                            r3 = ParcelableVolumeInfo.CREATOR.createFromParcel(parcel);
                         }
                         onVolumeInfoChanged(r3);
                         return true;
                     case 9:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         onRepeatModeChanged(parcel.readInt());
                         return true;
                     case 10:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             z = true;
                         }
                         onShuffleModeChangedRemoved(z);
                         return true;
                     case 11:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         if (parcel.readInt() != 0) {
                             z = true;
                         }
                         onCaptioningEnabledChanged(z);
                         return true;
                     case 12:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         onShuffleModeChanged(parcel.readInt());
                         return true;
                     case 13:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         onSessionReady();
                         return true;
                     default:
                         return super.onTransact(i, parcel, parcel2, i2);
                 }
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }
@@ -381,7 +349,7 @@ public interface IMediaControllerCallback extends IInterface {
 
     void onPlaybackStateChanged(PlaybackStateCompat playbackStateCompat) throws RemoteException;
 
-    void onQueueChanged(List<QueueItem> list) throws RemoteException;
+    void onQueueChanged(List<MediaSessionCompat.QueueItem> list) throws RemoteException;
 
     void onQueueTitleChanged(CharSequence charSequence) throws RemoteException;
 

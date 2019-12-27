@@ -5,10 +5,7 @@ import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.FieldType;
 import com.google.protobuf.GeneratedMessageLite;
-import com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser;
-import com.google.protobuf.GeneratedMessageLite.MethodToInvoke;
-import com.google.protobuf.Internal.EnumLite;
-import com.google.protobuf.Internal.EnumLiteMap;
+import com.google.protobuf.Internal;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLiteOrBuilder;
 import com.google.protobuf.Parser;
@@ -23,9 +20,9 @@ import java.nio.ByteBuffer;
 
 public final class LensSdkParamsProto {
 
-    /* renamed from: com.google.android.apps.lens.library.base.proto.LensSdkParamsProto$1 reason: invalid class name */
+    /* renamed from: com.google.android.apps.lens.library.base.proto.LensSdkParamsProto$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke = new int[MethodToInvoke.values().length];
+        static final /* synthetic */ int[] $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke = new int[GeneratedMessageLite.MethodToInvoke.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(14:0|1|2|3|4|5|6|7|8|9|10|11|12|(3:13|14|16)) */
         /* JADX WARNING: Can't wrap try/catch for region: R(16:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|16) */
@@ -37,14 +34,14 @@ public final class LensSdkParamsProto {
         /* JADX WARNING: Missing exception handler attribute for start block: B:7:0x002a */
         /* JADX WARNING: Missing exception handler attribute for start block: B:9:0x0035 */
         static {
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.NEW_MUTABLE_INSTANCE.ordinal()] = 1;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.NEW_BUILDER.ordinal()] = 2;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.BUILD_MESSAGE_INFO.ordinal()] = 3;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_DEFAULT_INSTANCE.ordinal()] = 4;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_PARSER.ordinal()] = 5;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_MEMOIZED_IS_INITIALIZED.ordinal()] = 6;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.NEW_MUTABLE_INSTANCE.ordinal()] = 1;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.NEW_BUILDER.ordinal()] = 2;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.BUILD_MESSAGE_INFO.ordinal()] = 3;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_DEFAULT_INSTANCE.ordinal()] = 4;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_PARSER.ordinal()] = 5;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_MEMOIZED_IS_INITIALIZED.ordinal()] = 6;
             try {
-                $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.SET_MEMOIZED_IS_INITIALIZED.ordinal()] = 7;
+                $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.SET_MEMOIZED_IS_INITIALIZED.ordinal()] = 7;
             } catch (NoSuchFieldError unused) {
             }
         }
@@ -61,7 +58,7 @@ public final class LensSdkParamsProto {
         private static volatile Parser<LensSdkParams> PARSER;
         @ProtoField(fieldNumber = 2, isEnforceUtf8 = false, isRequired = false, type = FieldType.STRING)
         @ProtoPresenceCheckedField(mask = 2, presenceBitsId = 0)
-        private String agsaVersionName_;
+        private String agsaVersionName_ = "";
         @ProtoField(fieldNumber = 4, isRequired = false, type = FieldType.ENUM)
         @ProtoPresenceCheckedField(mask = 8, presenceBitsId = 0)
         private int arStickersAvailabilityStatus_ = -1;
@@ -72,9 +69,9 @@ public final class LensSdkParamsProto {
         private int lensAvailabilityStatus_ = -1;
         @ProtoField(fieldNumber = 1, isEnforceUtf8 = false, isRequired = false, type = FieldType.STRING)
         @ProtoPresenceCheckedField(mask = 1, presenceBitsId = 0)
-        private String lensSdkVersion_;
+        private String lensSdkVersion_ = "";
 
-        public static final class Builder extends com.google.protobuf.GeneratedMessageLite.Builder<LensSdkParams, Builder> implements LensSdkParamsOrBuilder {
+        public static final class Builder extends GeneratedMessageLite.Builder<LensSdkParams, Builder> implements LensSdkParamsOrBuilder {
             private Builder() {
                 super(LensSdkParams.DEFAULT_INSTANCE);
             }
@@ -184,7 +181,7 @@ public final class LensSdkParamsProto {
             }
         }
 
-        public enum LensAvailabilityStatus implements EnumLite {
+        public enum LensAvailabilityStatus implements Internal.EnumLite {
             LENS_AVAILABILITY_UNKNOWN(-1),
             LENS_READY(0),
             LENS_UNAVAILABLE(1),
@@ -202,11 +199,11 @@ public final class LensSdkParamsProto {
             public static final int LENS_UNAVAILABLE_LOCALE_NOT_SUPPORTED_VALUE = 2;
             public static final int LENS_UNAVAILABLE_UNKNOWN_ERROR_CODE_VALUE = 6;
             public static final int LENS_UNAVAILABLE_VALUE = 1;
-            private static final EnumLiteMap<LensAvailabilityStatus> internalValueMap = null;
+            private static final Internal.EnumLiteMap<LensAvailabilityStatus> internalValueMap = null;
             private final int value;
 
             static {
-                internalValueMap = new EnumLiteMap<LensAvailabilityStatus>() {
+                internalValueMap = new Internal.EnumLiteMap<LensAvailabilityStatus>() {
                     public LensAvailabilityStatus findValueByNumber(int i) {
                         return LensAvailabilityStatus.forNumber(i);
                     }
@@ -240,7 +237,7 @@ public final class LensSdkParamsProto {
                 }
             }
 
-            public static EnumLiteMap<LensAvailabilityStatus> internalGetValueMap() {
+            public static Internal.EnumLiteMap<LensAvailabilityStatus> internalGetValueMap() {
                 return internalValueMap;
             }
 
@@ -254,9 +251,6 @@ public final class LensSdkParamsProto {
         }
 
         private LensSdkParams() {
-            String str = "";
-            this.lensSdkVersion_ = str;
-            this.agsaVersionName_ = str;
         }
 
         /* access modifiers changed from: private */
@@ -408,30 +402,30 @@ public final class LensSdkParamsProto {
         }
 
         /* access modifiers changed from: protected */
-        public final Object dynamicMethod(MethodToInvoke methodToInvoke, Object obj, Object obj2) {
+        public final Object dynamicMethod(GeneratedMessageLite.MethodToInvoke methodToInvoke, Object obj, Object obj2) {
             switch (AnonymousClass1.$SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[methodToInvoke.ordinal()]) {
                 case 1:
                     return new LensSdkParams();
                 case 2:
-                    return new Builder(null);
+                    return new Builder((AnonymousClass1) null);
                 case 3:
                     return newMessageInfo(DEFAULT_INSTANCE, "\u0001\u0004\u0000\u0001\u0001\u0004\u0004\u0005\u0000\u0000\u0000\u0001\b\u0000\u0002\b\u0001\u0003\f\u0002\u0004\f\u0003", new Object[]{"bitField0_", "lensSdkVersion_", "agsaVersionName_", "lensAvailabilityStatus_", LensAvailabilityStatus.internalGetValueMap(), "arStickersAvailabilityStatus_", LensAvailabilityStatus.internalGetValueMap()});
                 case 4:
                     return DEFAULT_INSTANCE;
                 case 5:
-                    DefaultInstanceBasedParser defaultInstanceBasedParser = PARSER;
+                    GeneratedMessageLite.DefaultInstanceBasedParser defaultInstanceBasedParser = PARSER;
                     if (defaultInstanceBasedParser == null) {
                         synchronized (LensSdkParams.class) {
                             defaultInstanceBasedParser = PARSER;
                             if (defaultInstanceBasedParser == null) {
-                                defaultInstanceBasedParser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                                defaultInstanceBasedParser = new GeneratedMessageLite.DefaultInstanceBasedParser(DEFAULT_INSTANCE);
                                 PARSER = defaultInstanceBasedParser;
                             }
                         }
                     }
                     return defaultInstanceBasedParser;
                 case 6:
-                    return Byte.valueOf(1);
+                    return (byte) 1;
                 case 7:
                     return null;
                 default:
@@ -487,9 +481,9 @@ public final class LensSdkParamsProto {
 
         ByteString getAgsaVersionNameBytes();
 
-        LensAvailabilityStatus getArStickersAvailabilityStatus();
+        LensSdkParams.LensAvailabilityStatus getArStickersAvailabilityStatus();
 
-        LensAvailabilityStatus getLensAvailabilityStatus();
+        LensSdkParams.LensAvailabilityStatus getLensAvailabilityStatus();
 
         String getLensSdkVersion();
 

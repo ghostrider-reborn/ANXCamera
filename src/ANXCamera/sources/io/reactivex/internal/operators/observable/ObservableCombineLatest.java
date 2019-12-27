@@ -80,14 +80,14 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
             this.queue = new SpscLinkedArrayQueue<>(i2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelSources() {
             for (CombinerObserver<T, R> dispose : this.observers) {
                 dispose.dispose();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear(SpscLinkedArrayQueue<?> spscLinkedArrayQueue) {
             synchronized (this) {
                 this.latest = null;
@@ -105,7 +105,7 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 SpscLinkedArrayQueue<Object[]> spscLinkedArrayQueue = this.queue;
@@ -115,17 +115,18 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
                 while (!this.cancelled) {
                     if (z || this.errors.get() == null) {
                         boolean z2 = this.done;
-                        Object[] objArr = (Object[]) spscLinkedArrayQueue.poll();
-                        boolean z3 = objArr == null;
+                        Object[] poll = spscLinkedArrayQueue.poll();
+                        boolean z3 = poll == null;
                         if (z2 && z3) {
                             clear(spscLinkedArrayQueue);
                             Throwable terminate = this.errors.terminate();
                             if (terminate == null) {
                                 observer.onComplete();
+                                return;
                             } else {
                                 observer.onError(terminate);
+                                return;
                             }
-                            return;
                         } else if (z3) {
                             i = addAndGet(-i);
                             if (i == 0) {
@@ -133,7 +134,7 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
                             }
                         } else {
                             try {
-                                Object apply = this.combiner.apply(objArr);
+                                Object apply = this.combiner.apply(poll);
                                 ObjectHelper.requireNonNull(apply, "The combiner returned a null value");
                                 observer.onNext(apply);
                             } catch (Throwable th) {
@@ -156,7 +157,7 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:12:0x0017, code lost:
             if (r2 == r0.length) goto L_0x0019;
          */
@@ -186,7 +187,7 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:16:0x0023, code lost:
             if (r1 == r4.length) goto L_0x0025;
          */
@@ -214,19 +215,22 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
                     cancelSources();
                 }
                 drain();
-            } else {
-                RxJavaPlugins.onError(th);
+                return;
             }
+            RxJavaPlugins.onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:14:0x0023, code lost:
-            if (r4 == false) goto L_0x0028;
+            if (r4 == false) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:15:0x0025, code lost:
             drain();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:16:0x0028, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:23:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:24:?, code lost:
             return;
          */
         public void innerNext(int i, T t) {
@@ -285,19 +289,18 @@ public final class ObservableCombineLatest<T, R> extends Observable<R> {
                     System.arraycopy(observableSourceArr, 0, observableSourceArr2, 0, i);
                     observableSourceArr = observableSourceArr2;
                 }
-                int i2 = i + 1;
                 observableSourceArr[i] = observableSource;
-                i = i2;
+                i++;
             }
         } else {
             i = observableSourceArr.length;
         }
-        int i3 = i;
-        if (i3 == 0) {
-            EmptyDisposable.complete(observer);
+        int i2 = i;
+        if (i2 == 0) {
+            EmptyDisposable.complete((Observer<?>) observer);
             return;
         }
-        LatestCoordinator latestCoordinator = new LatestCoordinator(observer, this.combiner, i3, this.bufferSize, this.delayError);
+        LatestCoordinator latestCoordinator = new LatestCoordinator(observer, this.combiner, i2, this.bufferSize, this.delayError);
         latestCoordinator.subscribe(observableSourceArr);
     }
 }

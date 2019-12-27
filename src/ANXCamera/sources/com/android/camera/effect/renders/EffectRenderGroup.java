@@ -5,7 +5,6 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.runing.ComponentRunningTiltValue;
 import com.android.camera.data.data.runing.DataItemRunning;
 import com.android.camera.effect.EffectController;
-import com.android.camera.effect.EffectController.EffectChangedListener;
 import com.android.camera.effect.FilterInfo;
 import com.android.camera.effect.draw_mode.DrawAttribute;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
@@ -13,7 +12,7 @@ import com.android.camera.effect.draw_mode.FillRectAttribute;
 import com.android.camera.log.Log;
 import com.android.gallery3d.ui.GLCanvas;
 
-public class EffectRenderGroup extends RenderGroup implements EffectChangedListener {
+public class EffectRenderGroup extends RenderGroup implements EffectController.EffectChangedListener {
     private static final String TAG = "EffectRenderGroup";
     private int mEffectId = FilterInfo.FILTER_ID_NONE;
     private boolean mFirstFrameDrawn;
@@ -56,7 +55,7 @@ public class EffectRenderGroup extends RenderGroup implements EffectChangedListe
         DrawExtTexAttribute drawExtTexAttribute = (DrawExtTexAttribute) drawAttribute;
         if (updatePreviewSecondRender()) {
             if (this.mPreviewSecondRender.getRenderSize() == 0) {
-                this.mPreviewPipeRender.setSecondRender(null);
+                this.mPreviewPipeRender.setSecondRender((Render) null);
             } else if (this.mPreviewPipeRender.getRenderSize() == 1) {
                 this.mPreviewPipeRender.setSecondRender(this.mPreviewSecondRender);
             }
@@ -78,13 +77,14 @@ public class EffectRenderGroup extends RenderGroup implements EffectChangedListe
 
     private Render getTiltShitRender() {
         String str = this.mTiltShiftMode;
-        if (str != null) {
-            if (ComponentRunningTiltValue.TILT_CIRCLE.equals(str)) {
-                return fetchRender(FilterInfo.FILTER_ID_GAUSSIAN);
-            }
-            if (ComponentRunningTiltValue.TILT_PARALLEL.equals(this.mTiltShiftMode)) {
-                return fetchRender(FilterInfo.FILTER_ID_TILTSHIFT);
-            }
+        if (str == null) {
+            return null;
+        }
+        if (ComponentRunningTiltValue.TILT_CIRCLE.equals(str)) {
+            return fetchRender(FilterInfo.FILTER_ID_GAUSSIAN);
+        }
+        if (ComponentRunningTiltValue.TILT_PARALLEL.equals(this.mTiltShiftMode)) {
+            return fetchRender(FilterInfo.FILTER_ID_TILTSHIFT);
         }
         return null;
     }
@@ -138,7 +138,7 @@ public class EffectRenderGroup extends RenderGroup implements EffectChangedListe
                 }
             }
             this.mPreviewSecondRender.setFrameBufferSize(this.mPreviewWidth, this.mPreviewHeight);
-            this.mRenderChanged = Boolean.valueOf(false);
+            this.mRenderChanged = false;
         }
         return true;
     }
@@ -161,11 +161,7 @@ public class EffectRenderGroup extends RenderGroup implements EffectChangedListe
                 switch (i) {
                     case 1:
                         this.mEffectId = instance.getEffectForPreview(true);
-                        String str = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("onEffectChanged: EFFECT_CHANGE_FILTER mEffectId = ");
-                        sb.append(this.mEffectId);
-                        Log.d(str, sb.toString());
+                        Log.d(TAG, "onEffectChanged: EFFECT_CHANGE_FILTER mEffectId = " + this.mEffectId);
                         break;
                     case 2:
                         this.mIsStickerEnabled = instance.isStickerEnable();
@@ -189,7 +185,7 @@ public class EffectRenderGroup extends RenderGroup implements EffectChangedListe
                         break;
                 }
             }
-            this.mRenderChanged = Boolean.valueOf(true);
+            this.mRenderChanged = true;
         }
     }
 }

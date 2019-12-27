@@ -55,7 +55,7 @@ public class MiImage {
         this.mHeight = image.getHeight();
         this.mCropRect = image.getCropRect();
         this.mTimeStamp = image.getTimestamp();
-        android.media.Image.Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         int length = planes.length;
         this.mPlanes = new Plane[length];
         for (int i = 0; i < length; i++) {
@@ -66,12 +66,12 @@ public class MiImage {
 
     private void fromImage(Image image) {
         long j;
-        android.media.Image.Plane[] planeArr;
+        Image.Plane[] planeArr;
         Plane[] planeArr2;
         Size size;
         int i;
         long currentTimeMillis = System.currentTimeMillis();
-        android.media.Image.Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         Plane[] planes2 = getPlanes();
         int i2 = 0;
         while (i2 < planes2.length) {
@@ -138,7 +138,7 @@ public class MiImage {
                         planes = planeArr;
                     }
                 }
-                android.media.Image.Plane[] planeArr3 = planes;
+                Image.Plane[] planeArr3 = planes;
                 Plane[] planeArr4 = planes2;
                 buffer.position(position);
                 buffer2.rewind();
@@ -147,22 +147,12 @@ public class MiImage {
                 planes2 = planeArr4;
                 planes = planeArr3;
             } else {
-                android.media.Image.Plane[] planeArr5 = planes;
-                Plane[] planeArr6 = planes2;
-                StringBuilder sb = new StringBuilder();
-                sb.append("source plane image pixel stride ");
-                sb.append(planeArr5[i2].getPixelStride());
-                sb.append(" must be same as destination image pixel stride ");
-                sb.append(planeArr6[i2].getPixelStride());
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("source plane image pixel stride " + planes[i2].getPixelStride() + " must be same as destination image pixel stride " + planes2[i2].getPixelStride());
             }
         }
         long j2 = currentTimeMillis;
         String str = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("fromImage: cost=");
-        sb2.append(System.currentTimeMillis() - j2);
-        Log.d(str, sb2.toString());
+        Log.d(str, "fromImage: cost=" + (System.currentTimeMillis() - j2));
     }
 
     private Size getEffectivePlaneSizeForImage(int i) {
@@ -226,20 +216,18 @@ public class MiImage {
 
     public void toImage(Image image) {
         Plane[] planeArr;
-        android.media.Image.Plane[] planeArr2;
+        Image.Plane[] planeArr2;
         long j;
         boolean z;
         Plane[] planeArr3;
-        android.media.Image.Plane[] planeArr4;
+        Image.Plane[] planeArr4;
         Size size;
         int i;
         if (getFormat() == image.getFormat()) {
-            Size size2 = new Size(getWidth(), getHeight());
-            Size size3 = new Size(image.getWidth(), image.getHeight());
-            if (size2.equals(size3)) {
+            if (new Size(getWidth(), getHeight()).equals(new Size(image.getWidth(), image.getHeight()))) {
                 long currentTimeMillis = System.currentTimeMillis();
                 Plane[] planes = getPlanes();
-                android.media.Image.Plane[] planes2 = image.getPlanes();
+                Image.Plane[] planes2 = image.getPlanes();
                 boolean z2 = true;
                 int length = planes.length - 1;
                 while (length >= 0) {
@@ -321,30 +309,14 @@ public class MiImage {
                         planes2 = planeArr2;
                         planes = planeArr;
                     } else {
-                        Plane[] planeArr5 = planes;
-                        android.media.Image.Plane[] planeArr6 = planes2;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("source plane image pixel stride ");
-                        sb.append(planeArr5[length].getPixelStride());
-                        sb.append(" must be same as destination image pixel stride ");
-                        sb.append(planeArr6[length].getPixelStride());
-                        throw new IllegalArgumentException(sb.toString());
+                        throw new IllegalArgumentException("source plane image pixel stride " + planes[length].getPixelStride() + " must be same as destination image pixel stride " + planes2[length].getPixelStride());
                     }
                 }
                 long j2 = currentTimeMillis;
-                String str = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("toImage: cost=");
-                sb2.append(System.currentTimeMillis() - j2);
-                Log.d(str, sb2.toString());
+                Log.d(TAG, "toImage: cost=" + (System.currentTimeMillis() - j2));
                 return;
             }
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("source image size ");
-            sb3.append(size2);
-            sb3.append(" is different with destination image size ");
-            sb3.append(size3);
-            throw new IllegalArgumentException(sb3.toString());
+            throw new IllegalArgumentException("source image size " + r0 + " is different with destination image size " + r1);
         }
         throw new IllegalArgumentException("src and dst images should have the same format");
     }

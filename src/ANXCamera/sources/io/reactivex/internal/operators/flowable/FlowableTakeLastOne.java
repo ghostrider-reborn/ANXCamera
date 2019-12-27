@@ -55,6 +55,6 @@ public final class FlowableTakeLastOne<T> extends AbstractFlowableWithUpstream<T
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new TakeLastOneSubscriber<Object>(subscriber));
+        this.source.subscribe(new TakeLastOneSubscriber(subscriber));
     }
 }

@@ -4,8 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v7.util.DiffUtil.ItemCallback;
+import android.support.v7.util.DiffUtil;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -13,7 +12,7 @@ public final class AsyncDifferConfig<T> {
     @NonNull
     private final Executor mBackgroundThreadExecutor;
     @NonNull
-    private final ItemCallback<T> mDiffCallback;
+    private final DiffUtil.ItemCallback<T> mDiffCallback;
     @NonNull
     private final Executor mMainThreadExecutor;
 
@@ -22,7 +21,7 @@ public final class AsyncDifferConfig<T> {
         private static final Object sExecutorLock = new Object();
         private static final Executor sMainThreadExecutor = new MainThreadExecutor();
         private Executor mBackgroundThreadExecutor;
-        private final ItemCallback<T> mDiffCallback;
+        private final DiffUtil.ItemCallback<T> mDiffCallback;
         private Executor mMainThreadExecutor;
 
         private static class MainThreadExecutor implements Executor {
@@ -37,7 +36,7 @@ public final class AsyncDifferConfig<T> {
             }
         }
 
-        public Builder(@NonNull ItemCallback<T> itemCallback) {
+        public Builder(@NonNull DiffUtil.ItemCallback<T> itemCallback) {
             this.mDiffCallback = itemCallback;
         }
 
@@ -63,7 +62,7 @@ public final class AsyncDifferConfig<T> {
             return this;
         }
 
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         @NonNull
         public Builder<T> setMainThreadExecutor(Executor executor) {
             this.mMainThreadExecutor = executor;
@@ -71,7 +70,7 @@ public final class AsyncDifferConfig<T> {
         }
     }
 
-    private AsyncDifferConfig(@NonNull Executor executor, @NonNull Executor executor2, @NonNull ItemCallback<T> itemCallback) {
+    private AsyncDifferConfig(@NonNull Executor executor, @NonNull Executor executor2, @NonNull DiffUtil.ItemCallback<T> itemCallback) {
         this.mMainThreadExecutor = executor;
         this.mBackgroundThreadExecutor = executor2;
         this.mDiffCallback = itemCallback;
@@ -83,11 +82,11 @@ public final class AsyncDifferConfig<T> {
     }
 
     @NonNull
-    public ItemCallback<T> getDiffCallback() {
+    public DiffUtil.ItemCallback<T> getDiffCallback() {
         return this.mDiffCallback;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     public Executor getMainThreadExecutor() {
         return this.mMainThreadExecutor;

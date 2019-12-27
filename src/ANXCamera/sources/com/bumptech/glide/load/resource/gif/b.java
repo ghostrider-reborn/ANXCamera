@@ -9,19 +9,18 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Drawable.Callback;
-import android.graphics.drawable.Drawable.ConstantState;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.view.Gravity;
 import com.bumptech.glide.c;
 import com.bumptech.glide.load.engine.bitmap_recycle.d;
 import com.bumptech.glide.load.j;
+import com.bumptech.glide.load.resource.gif.GifFrameLoader;
 import com.bumptech.glide.util.i;
 import java.nio.ByteBuffer;
 
 /* compiled from: GifDrawable */
-public class b extends Drawable implements com.bumptech.glide.load.resource.gif.GifFrameLoader.a, Animatable {
+public class b extends Drawable implements GifFrameLoader.a, Animatable {
     public static final int Ea = -1;
     public static final int Fa = 0;
     private static final int GRAVITY = 119;
@@ -37,7 +36,7 @@ public class b extends Drawable implements com.bumptech.glide.load.resource.gif.
     private boolean za;
 
     /* compiled from: GifDrawable */
-    static final class a extends ConstantState {
+    static final class a extends Drawable.ConstantState {
         @VisibleForTesting
         final GifFrameLoader frameLoader;
 
@@ -65,9 +64,10 @@ public class b extends Drawable implements com.bumptech.glide.load.resource.gif.
         this(context, aVar, jVar, i, i2, bitmap);
     }
 
+    /* JADX WARNING: Illegal instructions before constructor call */
     public b(Context context, com.bumptech.glide.b.a aVar, j<Bitmap> jVar, int i, int i2, Bitmap bitmap) {
+        this(new a(r1));
         GifFrameLoader gifFrameLoader = new GifFrameLoader(c.get(context), aVar, i, i2, jVar, bitmap);
-        this(new a(gifFrameLoader));
     }
 
     @VisibleForTesting
@@ -83,8 +83,8 @@ public class b extends Drawable implements com.bumptech.glide.load.resource.gif.
         this.state = aVar;
     }
 
-    private Callback Qj() {
-        Callback callback = getCallback();
+    private Drawable.Callback Qj() {
+        Drawable.Callback callback = getCallback();
         while (callback instanceof Drawable) {
             callback = ((Drawable) callback).getCallback();
         }
@@ -153,11 +153,11 @@ public class b extends Drawable implements com.bumptech.glide.load.resource.gif.
                 Gravity.apply(119, getIntrinsicWidth(), getIntrinsicHeight(), getBounds(), Rj());
                 this.Ca = false;
             }
-            canvas.drawBitmap(this.state.frameLoader.Gg(), null, Rj(), getPaint());
+            canvas.drawBitmap(this.state.frameLoader.Gg(), (Rect) null, Rj(), getPaint());
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void e(boolean z) {
         this.isRunning = z;
     }
@@ -166,7 +166,7 @@ public class b extends Drawable implements com.bumptech.glide.load.resource.gif.
         return this.state.frameLoader.getBuffer();
     }
 
-    public ConstantState getConstantState() {
+    public Drawable.ConstantState getConstantState() {
         return this.state;
     }
 
@@ -190,7 +190,7 @@ public class b extends Drawable implements com.bumptech.glide.load.resource.gif.
         return this.state.frameLoader.getSize();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isRecycled() {
         return this.za;
     }

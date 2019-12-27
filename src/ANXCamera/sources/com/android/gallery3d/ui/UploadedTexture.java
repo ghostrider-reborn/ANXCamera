@@ -1,11 +1,10 @@
 package com.android.gallery3d.ui;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import java.io.ByteArrayOutputStream;
+import java.nio.Buffer;
 import java.util.HashMap;
 
 public abstract class UploadedTexture extends BasicTexture {
@@ -25,7 +24,7 @@ public abstract class UploadedTexture extends BasicTexture {
     private boolean mThrottled;
 
     private static class BorderKey implements Cloneable {
-        public Config config;
+        public Bitmap.Config config;
         public int length;
         public boolean vertical;
 
@@ -41,15 +40,11 @@ public abstract class UploadedTexture extends BasicTexture {
         }
 
         public boolean equals(Object obj) {
-            boolean z = false;
             if (!(obj instanceof BorderKey)) {
                 return false;
             }
             BorderKey borderKey = (BorderKey) obj;
-            if (this.vertical == borderKey.vertical && this.config == borderKey.config && this.length == borderKey.length) {
-                z = true;
-            }
-            return z;
+            return this.vertical == borderKey.vertical && this.config == borderKey.config && this.length == borderKey.length;
         }
 
         public int hashCode() {
@@ -63,7 +58,7 @@ public abstract class UploadedTexture extends BasicTexture {
     }
 
     protected UploadedTexture(boolean z) {
-        super(null, 0, 0);
+        super((GLCanvas) null, 0, 0);
         this.mContentValid = true;
         this.mIsUploading = false;
         this.mOpaque = true;
@@ -94,12 +89,12 @@ public abstract class UploadedTexture extends BasicTexture {
         return this.mBitmap;
     }
 
-    private static Bitmap getBorderLine(boolean z, Config config, int i) {
+    private static Bitmap getBorderLine(boolean z, Bitmap.Config config, int i) {
         BorderKey borderKey = sBorderKey;
         borderKey.vertical = z;
         borderKey.config = config;
         borderKey.length = i;
-        Bitmap bitmap = (Bitmap) sBorderLines.get(borderKey);
+        Bitmap bitmap = sBorderLines.get(borderKey);
         if (bitmap != null) {
             return bitmap;
         }
@@ -121,7 +116,7 @@ public abstract class UploadedTexture extends BasicTexture {
         char c2;
         boolean z;
         int i;
-        Config config;
+        Bitmap.Config config;
         int i2;
         Bitmap bitmap = getBitmap();
         if (bitmap != null) {
@@ -149,9 +144,9 @@ public abstract class UploadedTexture extends BasicTexture {
                 } else {
                     int internalFormat = GLUtils.getInternalFormat(bitmap);
                     int type = GLUtils.getType(bitmap);
-                    Config config2 = bitmap.getConfig();
-                    GLES20.glTexImage2D(3553, 0, internalFormat, textureWidth, textureHeight, 0, internalFormat, type, null);
-                    Config config3 = config2;
+                    Bitmap.Config config2 = bitmap.getConfig();
+                    GLES20.glTexImage2D(3553, 0, internalFormat, textureWidth, textureHeight, 0, internalFormat, type, (Buffer) null);
+                    Bitmap.Config config3 = config2;
                     c2 = 0;
                     int i3 = textureHeight;
                     int i4 = textureWidth;
@@ -191,7 +186,7 @@ public abstract class UploadedTexture extends BasicTexture {
         }
     }
 
-    public byte[] getBitmapData(CompressFormat compressFormat) {
+    public byte[] getBitmapData(Bitmap.CompressFormat compressFormat) {
         Bitmap bitmap = getBitmap();
         if (bitmap == null) {
             return null;

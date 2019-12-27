@@ -1,9 +1,9 @@
 package com.android.camera.module;
 
-import com.android.camera.fragment.GoogleLensFragment.OnClickListener;
+import com.android.camera.fragment.GoogleLensFragment;
 
 /* compiled from: lambda */
-public final /* synthetic */ class g implements OnClickListener {
+public final /* synthetic */ class g implements GoogleLensFragment.OnClickListener {
     private final /* synthetic */ int Ab;
     private final /* synthetic */ Camera2Module ub;
     private final /* synthetic */ float vb;

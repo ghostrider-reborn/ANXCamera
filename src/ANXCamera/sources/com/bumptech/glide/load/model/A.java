@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import java.io.File;
 import java.io.InputStream;
 
@@ -52,24 +53,21 @@ public class A<Data> implements t<String, Data> {
 
     @Nullable
     private static Uri A(String str) {
-        Uri uri;
         if (TextUtils.isEmpty(str)) {
             return null;
         }
         if (str.charAt(0) == '/') {
-            uri = B(str);
-        } else {
-            Uri parse = Uri.parse(str);
-            uri = parse.getScheme() == null ? B(str) : parse;
+            return B(str);
         }
-        return uri;
+        Uri parse = Uri.parse(str);
+        return parse.getScheme() == null ? B(str) : parse;
     }
 
     private static Uri B(String str) {
         return Uri.fromFile(new File(str));
     }
 
-    public com.bumptech.glide.load.model.t.a<Data> a(@NonNull String str, int i, int i2, @NonNull g gVar) {
+    public t.a<Data> a(@NonNull String str, int i, int i2, @NonNull g gVar) {
         Uri A = A(str);
         if (A == null) {
             return null;

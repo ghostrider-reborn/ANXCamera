@@ -2,7 +2,7 @@ package com.android.camera.data.observeable;
 
 import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.MainThread;
-import com.android.camera.data.observeable.RxData.DataWrap;
+import com.android.camera.data.observeable.RxData;
 import io.reactivex.functions.Consumer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,7 +19,7 @@ public class VMProcessing extends VMBase {
     public static final int RECORDING_INCHOATE = 1;
     public static final int SAVE_COMPLETE = 8;
     public static final int SAVE_ERROR = 9;
-    public RxData<Integer> mRxProcessingState = new RxData<>(Integer.valueOf(1));
+    public RxData<Integer> mRxProcessingState = new RxData<>(1);
     public RxData<String> mRxRecordingState;
     private List<String> mTempVideoList;
 
@@ -29,11 +29,11 @@ public class VMProcessing extends VMBase {
 
     /* access modifiers changed from: protected */
     public boolean achieveEndOfCycle() {
-        return ((Integer) this.mRxProcessingState.get()).intValue() == 8 || ((Integer) this.mRxProcessingState.get()).intValue() == 9;
+        return this.mRxProcessingState.get().intValue() == 8 || this.mRxProcessingState.get().intValue() == 9;
     }
 
     public int getCurrentState() {
-        return ((Integer) this.mRxProcessingState.get()).intValue();
+        return this.mRxProcessingState.get().intValue();
     }
 
     public List<String> getTempVideoList() {
@@ -56,10 +56,10 @@ public class VMProcessing extends VMBase {
 
     /* access modifiers changed from: protected */
     public void rollbackData() {
-        this.mRxProcessingState.setSilently(Integer.valueOf(1));
+        this.mRxProcessingState.setSilently(1);
     }
 
-    public void startObservable(LifecycleOwner lifecycleOwner, Consumer<DataWrap<Integer>> consumer) {
+    public void startObservable(LifecycleOwner lifecycleOwner, Consumer<RxData.DataWrap<Integer>> consumer) {
         this.mRxProcessingState.observable(lifecycleOwner).subscribe(consumer);
     }
 

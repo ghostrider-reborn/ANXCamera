@@ -4,10 +4,10 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.GuardedBy;
-import android.support.v4.media.MediaSessionService2.MediaNotification;
+import android.support.v4.media.MediaSessionService2;
 import android.util.Log;
 
-class MediaSessionService2ImplBase implements SupportLibraryImpl {
+class MediaSessionService2ImplBase implements MediaSessionService2.SupportLibraryImpl {
     private static final boolean DEBUG = true;
     private static final String TAG = "MSS2ImplBase";
     private final Object mLock = new Object();
@@ -30,16 +30,17 @@ class MediaSessionService2ImplBase implements SupportLibraryImpl {
     }
 
     public IBinder onBind(Intent intent) {
-        if (MediaSessionService2.SERVICE_INTERFACE.equals(intent.getAction())) {
-            synchronized (this.mLock) {
-                if (this.mSession != null) {
-                    IBinder sessionBinder = this.mSession.getSessionBinder();
-                    return sessionBinder;
-                }
-                Log.d(TAG, "Session hasn't created");
-            }
+        if (!MediaSessionService2.SERVICE_INTERFACE.equals(intent.getAction())) {
+            return null;
         }
-        return null;
+        synchronized (this.mLock) {
+            if (this.mSession != null) {
+                IBinder sessionBinder = this.mSession.getSessionBinder();
+                return sessionBinder;
+            }
+            Log.d(TAG, "Session hasn't created");
+            return null;
+        }
     }
 
     public void onCreate(MediaSessionService2 mediaSessionService2) {
@@ -50,27 +51,15 @@ class MediaSessionService2ImplBase implements SupportLibraryImpl {
                 this.mSession = onCreateSession;
                 if (this.mSession == null || !sessionToken2.getId().equals(this.mSession.getToken().getId()) || this.mSession.getToken().getType() != getSessionType()) {
                     this.mSession = null;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Expected session with id ");
-                    sb.append(sessionToken2.getId());
-                    sb.append(" and type ");
-                    sb.append(sessionToken2.getType());
-                    sb.append(", but got ");
-                    sb.append(this.mSession);
-                    throw new RuntimeException(sb.toString());
+                    throw new RuntimeException("Expected session with id " + sessionToken2.getId() + " and type " + sessionToken2.getType() + ", but got " + this.mSession);
                 }
             }
             return;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Expected session type ");
-        sb2.append(getSessionType());
-        sb2.append(" but was ");
-        sb2.append(sessionToken2.getType());
-        throw new RuntimeException(sb2.toString());
+        throw new RuntimeException("Expected session type " + getSessionType() + " but was " + sessionToken2.getType());
     }
 
-    public MediaNotification onUpdateNotification() {
+    public MediaSessionService2.MediaNotification onUpdateNotification() {
         return null;
     }
 }

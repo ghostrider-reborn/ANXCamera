@@ -1,14 +1,10 @@
 package c.a.b;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.FontMetrics;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.text.TextPaint;
 import java.util.regex.Pattern;
 
@@ -29,10 +25,7 @@ public class a {
             Math.round(paint.measureText(String.valueOf(charAt)));
             if (charAt > 55296) {
                 i4++;
-                StringBuilder sb = new StringBuilder();
-                sb.append(String.valueOf(charAt));
-                sb.append(str.charAt(i4));
-                String sb2 = sb.toString();
+                String str2 = String.valueOf(charAt) + str.charAt(i4);
                 if (i4 != 1) {
                     paint.getTextBounds(str, i4, i4 + 1, rect);
                     rect.width();
@@ -41,7 +34,7 @@ public class a {
                 f4 += (float) width;
                 i5 += width;
                 if (canvas != null) {
-                    canvas.drawText(sb2, f4, f3, paint);
+                    canvas.drawText(str2, f4, f3, paint);
                 }
             } else {
                 if (charAt == ' ') {
@@ -80,23 +73,23 @@ public class a {
         int i14 = i9;
         String str2 = new String(bArr);
         Rect rect = new Rect(0, 0, i13, i14);
-        Bitmap createBitmap = Bitmap.createBitmap(i13, i14, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(i13, i14, Bitmap.Config.ARGB_8888);
         Paint paint = new Paint();
         paint.setColor(0);
-        paint.setStyle(Style.FILL);
+        paint.setStyle(Paint.Style.FILL);
         Canvas canvas = new Canvas(createBitmap);
         TextPaint textPaint = new TextPaint();
         textPaint.setColor(i2);
         float f7 = (float) i10;
         textPaint.setTextSize(f7);
         textPaint.setAntiAlias(true);
-        textPaint.setStyle(Style.FILL);
+        textPaint.setStyle(Paint.Style.FILL);
         if (i12 == 0) {
-            textPaint.setTextAlign(Align.LEFT);
+            textPaint.setTextAlign(Paint.Align.LEFT);
         } else if (i12 == 1) {
-            textPaint.setTextAlign(Align.CENTER);
+            textPaint.setTextAlign(Paint.Align.CENTER);
         } else {
-            textPaint.setTextAlign(Align.RIGHT);
+            textPaint.setTextAlign(Paint.Align.RIGHT);
         }
         if ((i4 & 16) == 16) {
             textPaint.setUnderlineText(true);
@@ -113,21 +106,21 @@ public class a {
         if ((i4 & 2) == 2) {
             textPaint.setShadowLayer(f4, f5, f6, i6);
         }
-        FontMetrics fontMetrics = textPaint.getFontMetrics();
+        Paint.FontMetrics fontMetrics = textPaint.getFontMetrics();
         int centerY = (int) ((((float) rect.centerY()) - (fontMetrics.top / 2.0f)) - (fontMetrics.bottom / 2.0f));
         if ((i4 & 1) == 1) {
             TextPaint textPaint2 = new TextPaint();
             textPaint2.setColor(i5);
             textPaint2.setTextSize(textPaint.getTextSize());
             textPaint2.setAntiAlias(textPaint.isAntiAlias());
-            textPaint2.setStyle(Style.STROKE);
+            textPaint2.setStyle(Paint.Style.STROKE);
             textPaint2.setStrokeWidth((5.0f * f3) / f7);
             textPaint2.setTextAlign(textPaint.getTextAlign());
             textPaint2.setTextSkewX(textPaint.getTextSkewX());
             textPaint.setFakeBoldText(false);
             textPaint2.setFakeBoldText(true);
             float f8 = ((float) i11) / f7;
-            if (VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= 21) {
                 textPaint2.setLetterSpacing(f8);
                 if (i12 == 0) {
                     canvas.drawText(str2, (float) rect.left, (float) centerY, textPaint2);
@@ -158,7 +151,7 @@ public class a {
             }
         }
         float f9 = ((float) i11) / f7;
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             textPaint.setLetterSpacing(f9);
             if (i12 == 0) {
                 canvas.drawText(str2, (float) rect.left, (float) centerY, textPaint);

@@ -6,10 +6,10 @@ import android.content.ClipData;
 import android.content.res.ColorStateList;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.FloatRange;
 import android.support.annotation.IdRes;
@@ -18,7 +18,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.Px;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.UiThread;
 import android.support.compat.R;
 import android.support.v4.os.BuildCompat;
@@ -31,9 +30,6 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.View;
-import android.view.View.DragShadowBuilder;
-import android.view.View.OnApplyWindowInsetsListener;
-import android.view.View.OnUnhandledKeyEventListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowInsets;
@@ -112,22 +108,22 @@ public class ViewCompat {
     private static WeakHashMap<View, String> sTransitionNameMap;
     private static WeakHashMap<View, ViewPropertyAnimatorCompat> sViewPropertyAnimatorMap = null;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusDirection {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusRealDirection {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusRelativeDirection {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface NestedScrollType {
     }
@@ -137,7 +133,7 @@ public class ViewCompat {
     }
 
     @RequiresApi(28)
-    private static class OnUnhandledKeyEventListenerWrapper implements OnUnhandledKeyEventListener {
+    private static class OnUnhandledKeyEventListenerWrapper implements View.OnUnhandledKeyEventListener {
         private OnUnhandledKeyEventListenerCompat mCompatListener;
 
         OnUnhandledKeyEventListenerWrapper(OnUnhandledKeyEventListenerCompat onUnhandledKeyEventListenerCompat) {
@@ -149,12 +145,12 @@ public class ViewCompat {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScrollAxis {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScrollIndicators {
     }
@@ -217,7 +213,7 @@ public class ViewCompat {
                         this.mViewsContainingListeners = new WeakHashMap<>();
                     }
                     for (int size = sViewsWithListeners.size() - 1; size >= 0; size--) {
-                        View view = (View) ((WeakReference) sViewsWithListeners.get(size)).get();
+                        View view = (View) sViewsWithListeners.get(size).get();
                         if (view == null) {
                             sViewsWithListeners.remove(size);
                         } else {
@@ -233,9 +229,9 @@ public class ViewCompat {
 
         static void registerListeningView(View view) {
             synchronized (sViewsWithListeners) {
-                Iterator it = sViewsWithListeners.iterator();
+                Iterator<WeakReference<View>> it = sViewsWithListeners.iterator();
                 while (it.hasNext()) {
-                    if (((WeakReference) it.next()).get() == view) {
+                    if (it.next().get() == view) {
                         return;
                     }
                 }
@@ -246,7 +242,7 @@ public class ViewCompat {
         static void unregisterListeningView(View view) {
             synchronized (sViewsWithListeners) {
                 for (int i = 0; i < sViewsWithListeners.size(); i++) {
-                    if (((WeakReference) sViewsWithListeners.get(i)).get() == view) {
+                    if (sViewsWithListeners.get(i).get() == view) {
                         sViewsWithListeners.remove(i);
                         return;
                     }
@@ -262,11 +258,10 @@ public class ViewCompat {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean dispatch(View view, KeyEvent keyEvent) {
             updateCaptureState(keyEvent);
             WeakReference<View> weakReference = this.mCurrentReceiver;
-            boolean z = true;
             if (weakReference != null) {
                 View view2 = (View) weakReference.get();
                 if (getCapturedKeys().size() == 0) {
@@ -284,25 +279,23 @@ public class ViewCompat {
             if (dispatchInOrder != null) {
                 this.mCurrentReceiver = new WeakReference<>(dispatchInOrder);
             }
-            if (dispatchInOrder == null) {
-                z = false;
-            }
-            return z;
+            return dispatchInOrder != null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean hasFocus() {
             return this.mCurrentReceiver != null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean onUnhandledKeyEvent(@NonNull View view, @NonNull KeyEvent keyEvent) {
             ArrayList arrayList = (ArrayList) view.getTag(R.id.tag_unhandled_key_listeners);
-            if (arrayList != null) {
-                for (int size = arrayList.size() - 1; size >= 0; size--) {
-                    if (((OnUnhandledKeyEventListenerCompat) arrayList.get(size)).onUnhandledKeyEvent(view, keyEvent)) {
-                        return true;
-                    }
+            if (arrayList == null) {
+                return false;
+            }
+            for (int size = arrayList.size() - 1; size >= 0; size--) {
+                if (((OnUnhandledKeyEventListenerCompat) arrayList.get(size)).onUnhandledKeyEvent(view, keyEvent)) {
+                    return true;
                 }
             }
             return false;
@@ -313,7 +306,7 @@ public class ViewCompat {
     }
 
     public static void addKeyboardNavigationClusters(@NonNull View view, @NonNull Collection<View> collection, int i) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.addKeyboardNavigationClusters(collection, i);
         }
     }
@@ -346,7 +339,7 @@ public class ViewCompat {
         if (sViewPropertyAnimatorMap == null) {
             sViewPropertyAnimatorMap = new WeakHashMap<>();
         }
-        ViewPropertyAnimatorCompat viewPropertyAnimatorCompat = (ViewPropertyAnimatorCompat) sViewPropertyAnimatorMap.get(view);
+        ViewPropertyAnimatorCompat viewPropertyAnimatorCompat = sViewPropertyAnimatorMap.get(view);
         if (viewPropertyAnimatorCompat != null) {
             return viewPropertyAnimatorCompat;
         }
@@ -376,7 +369,7 @@ public class ViewCompat {
     }
 
     public static void cancelDragAndDrop(@NonNull View view) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             view.cancelDragAndDrop();
         }
     }
@@ -409,7 +402,7 @@ public class ViewCompat {
     }
 
     public static WindowInsetsCompat dispatchApplyWindowInsets(@NonNull View view, WindowInsetsCompat windowInsetsCompat) {
-        if (VERSION.SDK_INT < 21) {
+        if (Build.VERSION.SDK_INT < 21) {
             return windowInsetsCompat;
         }
         WindowInsets windowInsets = (WindowInsets) WindowInsetsCompat.unwrap(windowInsetsCompat);
@@ -421,7 +414,7 @@ public class ViewCompat {
     }
 
     public static void dispatchFinishTemporaryDetach(@NonNull View view) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             view.dispatchFinishTemporaryDetach();
             return;
         }
@@ -441,7 +434,7 @@ public class ViewCompat {
     }
 
     public static boolean dispatchNestedFling(@NonNull View view, float f2, float f3, boolean z) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.dispatchNestedFling(f2, f3, z);
         }
         if (view instanceof NestedScrollingChild) {
@@ -451,7 +444,7 @@ public class ViewCompat {
     }
 
     public static boolean dispatchNestedPreFling(@NonNull View view, float f2, float f3) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.dispatchNestedPreFling(f2, f3);
         }
         if (view instanceof NestedScrollingChild) {
@@ -461,7 +454,7 @@ public class ViewCompat {
     }
 
     public static boolean dispatchNestedPreScroll(@NonNull View view, int i, int i2, @Nullable int[] iArr, @Nullable int[] iArr2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.dispatchNestedPreScroll(i, i2, iArr, iArr2);
         }
         if (view instanceof NestedScrollingChild) {
@@ -481,7 +474,7 @@ public class ViewCompat {
     }
 
     public static boolean dispatchNestedScroll(@NonNull View view, int i, int i2, int i3, int i4, @Nullable int[] iArr) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.dispatchNestedScroll(i, i2, i3, i4, iArr);
         }
         if (view instanceof NestedScrollingChild) {
@@ -501,7 +494,7 @@ public class ViewCompat {
     }
 
     public static void dispatchStartTemporaryDetach(@NonNull View view) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             view.dispatchStartTemporaryDetach();
             return;
         }
@@ -530,20 +523,13 @@ public class ViewCompat {
 
     @UiThread
     public static boolean dispatchUnhandledKeyEventPre(View view, KeyEvent keyEvent) {
-        boolean z = false;
-        if (BuildCompat.isAtLeastP()) {
-            return false;
-        }
-        if (UnhandledKeyEventManager.at(view).hasFocus() && UnhandledKeyEventManager.at(view).dispatch(view, keyEvent)) {
-            z = true;
-        }
-        return z;
+        return !BuildCompat.isAtLeastP() && UnhandledKeyEventManager.at(view).hasFocus() && UnhandledKeyEventManager.at(view).dispatch(view, keyEvent);
     }
 
     public static int generateViewId() {
         int i;
         int i2;
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return View.generateViewId();
         }
         do {
@@ -557,18 +543,19 @@ public class ViewCompat {
     }
 
     public static int getAccessibilityLiveRegion(@NonNull View view) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return view.getAccessibilityLiveRegion();
         }
         return 0;
     }
 
     public static AccessibilityNodeProviderCompat getAccessibilityNodeProvider(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
-            AccessibilityNodeProvider accessibilityNodeProvider = view.getAccessibilityNodeProvider();
-            if (accessibilityNodeProvider != null) {
-                return new AccessibilityNodeProviderCompat(accessibilityNodeProvider);
-            }
+        if (Build.VERSION.SDK_INT < 16) {
+            return null;
+        }
+        AccessibilityNodeProvider accessibilityNodeProvider = view.getAccessibilityNodeProvider();
+        if (accessibilityNodeProvider != null) {
+            return new AccessibilityNodeProviderCompat(accessibilityNodeProvider);
         }
         return null;
     }
@@ -579,22 +566,28 @@ public class ViewCompat {
     }
 
     public static ColorStateList getBackgroundTintList(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.getBackgroundTintList();
         }
-        return view instanceof TintableBackgroundView ? ((TintableBackgroundView) view).getSupportBackgroundTintList() : null;
+        if (view instanceof TintableBackgroundView) {
+            return ((TintableBackgroundView) view).getSupportBackgroundTintList();
+        }
+        return null;
     }
 
-    public static Mode getBackgroundTintMode(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+    public static PorterDuff.Mode getBackgroundTintMode(@NonNull View view) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.getBackgroundTintMode();
         }
-        return view instanceof TintableBackgroundView ? ((TintableBackgroundView) view).getSupportBackgroundTintMode() : null;
+        if (view instanceof TintableBackgroundView) {
+            return ((TintableBackgroundView) view).getSupportBackgroundTintMode();
+        }
+        return null;
     }
 
     @Nullable
     public static Rect getClipBounds(@NonNull View view) {
-        if (VERSION.SDK_INT >= 18) {
+        if (Build.VERSION.SDK_INT >= 18) {
             return view.getClipBounds();
         }
         return null;
@@ -602,7 +595,7 @@ public class ViewCompat {
 
     @Nullable
     public static Display getDisplay(@NonNull View view) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return view.getDisplay();
         }
         if (isAttachedToWindow(view)) {
@@ -612,7 +605,7 @@ public class ViewCompat {
     }
 
     public static float getElevation(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.getElevation();
         }
         return 0.0f;
@@ -622,7 +615,7 @@ public class ViewCompat {
         if (sThreadLocalRect == null) {
             sThreadLocalRect = new ThreadLocal<>();
         }
-        Rect rect = (Rect) sThreadLocalRect.get();
+        Rect rect = sThreadLocalRect.get();
         if (rect == null) {
             rect = new Rect();
             sThreadLocalRect.set(rect);
@@ -632,14 +625,14 @@ public class ViewCompat {
     }
 
     public static boolean getFitsSystemWindows(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.getFitsSystemWindows();
         }
         return false;
     }
 
     public static int getImportantForAccessibility(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.getImportantForAccessibility();
         }
         return 0;
@@ -647,14 +640,14 @@ public class ViewCompat {
 
     @SuppressLint({"InlinedApi"})
     public static int getImportantForAutofill(@NonNull View view) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return view.getImportantForAutofill();
         }
         return 0;
     }
 
     public static int getLabelFor(@NonNull View view) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return view.getLabelFor();
         }
         return 0;
@@ -666,7 +659,7 @@ public class ViewCompat {
     }
 
     public static int getLayoutDirection(@NonNull View view) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return view.getLayoutDirection();
         }
         return 0;
@@ -694,7 +687,7 @@ public class ViewCompat {
     }
 
     public static int getMinimumHeight(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.getMinimumHeight();
         }
         if (!sMinHeightFieldFetched) {
@@ -706,17 +699,18 @@ public class ViewCompat {
             sMinHeightFieldFetched = true;
         }
         Field field = sMinHeightField;
-        if (field != null) {
-            try {
-                return ((Integer) field.get(view)).intValue();
-            } catch (Exception unused2) {
-            }
+        if (field == null) {
+            return 0;
         }
-        return 0;
+        try {
+            return ((Integer) field.get(view)).intValue();
+        } catch (Exception unused2) {
+            return 0;
+        }
     }
 
     public static int getMinimumWidth(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.getMinimumWidth();
         }
         if (!sMinWidthFieldFetched) {
@@ -728,17 +722,18 @@ public class ViewCompat {
             sMinWidthFieldFetched = true;
         }
         Field field = sMinWidthField;
-        if (field != null) {
-            try {
-                return ((Integer) field.get(view)).intValue();
-            } catch (Exception unused2) {
-            }
+        if (field == null) {
+            return 0;
         }
-        return 0;
+        try {
+            return ((Integer) field.get(view)).intValue();
+        } catch (Exception unused2) {
+            return 0;
+        }
     }
 
     public static int getNextClusterForwardId(@NonNull View view) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return view.getNextClusterForwardId();
         }
         return -1;
@@ -751,16 +746,16 @@ public class ViewCompat {
 
     @Px
     public static int getPaddingEnd(@NonNull View view) {
-        return VERSION.SDK_INT >= 17 ? view.getPaddingEnd() : view.getPaddingRight();
+        return Build.VERSION.SDK_INT >= 17 ? view.getPaddingEnd() : view.getPaddingRight();
     }
 
     @Px
     public static int getPaddingStart(@NonNull View view) {
-        return VERSION.SDK_INT >= 17 ? view.getPaddingStart() : view.getPaddingLeft();
+        return Build.VERSION.SDK_INT >= 17 ? view.getPaddingStart() : view.getPaddingLeft();
     }
 
     public static ViewParent getParentForAccessibility(@NonNull View view) {
-        return VERSION.SDK_INT >= 16 ? view.getParentForAccessibility() : view.getParent();
+        return Build.VERSION.SDK_INT >= 16 ? view.getParentForAccessibility() : view.getParent();
     }
 
     @Deprecated
@@ -799,7 +794,7 @@ public class ViewCompat {
     }
 
     public static int getScrollIndicators(@NonNull View view) {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             return view.getScrollIndicators();
         }
         return 0;
@@ -807,14 +802,14 @@ public class ViewCompat {
 
     @Nullable
     public static String getTransitionName(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.getTransitionName();
         }
         WeakHashMap<View, String> weakHashMap = sTransitionNameMap;
         if (weakHashMap == null) {
             return null;
         }
-        return (String) weakHashMap.get(view);
+        return weakHashMap.get(view);
     }
 
     @Deprecated
@@ -828,14 +823,14 @@ public class ViewCompat {
     }
 
     public static float getTranslationZ(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.getTranslationZ();
         }
         return 0.0f;
     }
 
     public static int getWindowSystemUiVisibility(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.getWindowSystemUiVisibility();
         }
         return 0;
@@ -852,14 +847,13 @@ public class ViewCompat {
     }
 
     public static float getZ(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.getZ();
         }
         return 0.0f;
     }
 
     public static boolean hasAccessibilityDelegate(@NonNull View view) {
-        boolean z = false;
         if (sAccessibilityDelegateCheckFailed) {
             return false;
         }
@@ -873,10 +867,7 @@ public class ViewCompat {
             }
         }
         try {
-            if (sAccessibilityDelegateField.get(view) != null) {
-                z = true;
-            }
-            return z;
+            return sAccessibilityDelegateField.get(view) != null;
         } catch (Throwable unused2) {
             sAccessibilityDelegateCheckFailed = true;
             return false;
@@ -884,11 +875,11 @@ public class ViewCompat {
     }
 
     public static boolean hasExplicitFocusable(@NonNull View view) {
-        return VERSION.SDK_INT >= 26 ? view.hasExplicitFocusable() : view.hasFocusable();
+        return Build.VERSION.SDK_INT >= 26 ? view.hasExplicitFocusable() : view.hasFocusable();
     }
 
     public static boolean hasNestedScrollingParent(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.hasNestedScrollingParent();
         }
         if (view instanceof NestedScrollingChild) {
@@ -900,91 +891,87 @@ public class ViewCompat {
     public static boolean hasNestedScrollingParent(@NonNull View view, int i) {
         if (view instanceof NestedScrollingChild2) {
             ((NestedScrollingChild2) view).hasNestedScrollingParent(i);
+            return false;
         } else if (i == 0) {
             return hasNestedScrollingParent(view);
+        } else {
+            return false;
         }
-        return false;
     }
 
     public static boolean hasOnClickListeners(@NonNull View view) {
-        if (VERSION.SDK_INT >= 15) {
+        if (Build.VERSION.SDK_INT >= 15) {
             return view.hasOnClickListeners();
         }
         return false;
     }
 
     public static boolean hasOverlappingRendering(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.hasOverlappingRendering();
         }
         return true;
     }
 
     public static boolean hasTransientState(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.hasTransientState();
         }
         return false;
     }
 
     public static boolean isAttachedToWindow(@NonNull View view) {
-        if (VERSION.SDK_INT >= 19) {
-            return view.isAttachedToWindow();
-        }
-        return view.getWindowToken() != null;
+        return Build.VERSION.SDK_INT >= 19 ? view.isAttachedToWindow() : view.getWindowToken() != null;
     }
 
     public static boolean isFocusedByDefault(@NonNull View view) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return view.isFocusedByDefault();
         }
         return false;
     }
 
     public static boolean isImportantForAccessibility(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.isImportantForAccessibility();
         }
         return true;
     }
 
     public static boolean isImportantForAutofill(@NonNull View view) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return view.isImportantForAutofill();
         }
         return true;
     }
 
     public static boolean isInLayout(@NonNull View view) {
-        if (VERSION.SDK_INT >= 18) {
+        if (Build.VERSION.SDK_INT >= 18) {
             return view.isInLayout();
         }
         return false;
     }
 
     public static boolean isKeyboardNavigationCluster(@NonNull View view) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return view.isKeyboardNavigationCluster();
         }
         return false;
     }
 
     public static boolean isLaidOut(@NonNull View view) {
-        if (VERSION.SDK_INT >= 19) {
-            return view.isLaidOut();
-        }
-        return view.getWidth() > 0 && view.getHeight() > 0;
+        return Build.VERSION.SDK_INT >= 19 ? view.isLaidOut() : view.getWidth() > 0 && view.getHeight() > 0;
     }
 
     public static boolean isLayoutDirectionResolved(@NonNull View view) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return view.isLayoutDirectionResolved();
         }
         return false;
     }
 
     public static boolean isNestedScrollingEnabled(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.isNestedScrollingEnabled();
         }
         if (view instanceof NestedScrollingChild) {
@@ -999,7 +986,7 @@ public class ViewCompat {
     }
 
     public static boolean isPaddingRelative(@NonNull View view) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             return view.isPaddingRelative();
         }
         return false;
@@ -1011,14 +998,14 @@ public class ViewCompat {
     }
 
     public static View keyboardNavigationClusterSearch(@NonNull View view, View view2, int i) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return view.keyboardNavigationClusterSearch(view2, i);
         }
         return null;
     }
 
     public static void offsetLeftAndRight(@NonNull View view, int i) {
-        int i2 = VERSION.SDK_INT;
+        int i2 = Build.VERSION.SDK_INT;
         if (i2 >= 23) {
             view.offsetLeftAndRight(i);
         } else if (i2 >= 21) {
@@ -1040,7 +1027,7 @@ public class ViewCompat {
     }
 
     public static void offsetTopAndBottom(@NonNull View view, int i) {
-        int i2 = VERSION.SDK_INT;
+        int i2 = Build.VERSION.SDK_INT;
         if (i2 >= 23) {
             view.offsetTopAndBottom(i);
         } else if (i2 >= 21) {
@@ -1062,7 +1049,7 @@ public class ViewCompat {
     }
 
     public static WindowInsetsCompat onApplyWindowInsets(@NonNull View view, WindowInsetsCompat windowInsetsCompat) {
-        if (VERSION.SDK_INT < 21) {
+        if (Build.VERSION.SDK_INT < 21) {
             return windowInsetsCompat;
         }
         WindowInsets windowInsets = (WindowInsets) WindowInsetsCompat.unwrap(windowInsetsCompat);
@@ -1088,14 +1075,14 @@ public class ViewCompat {
     }
 
     public static boolean performAccessibilityAction(@NonNull View view, int i, Bundle bundle) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return view.performAccessibilityAction(i, bundle);
         }
         return false;
     }
 
     public static void postInvalidateOnAnimation(@NonNull View view) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             view.postInvalidateOnAnimation();
         } else {
             view.postInvalidate();
@@ -1103,7 +1090,7 @@ public class ViewCompat {
     }
 
     public static void postInvalidateOnAnimation(@NonNull View view, int i, int i2, int i3, int i4) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             view.postInvalidateOnAnimation(i, i2, i3, i4);
         } else {
             view.postInvalidate(i, i2, i3, i4);
@@ -1111,7 +1098,7 @@ public class ViewCompat {
     }
 
     public static void postOnAnimation(@NonNull View view, Runnable runnable) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             view.postOnAnimation(runnable);
         } else {
             view.postDelayed(runnable, ValueAnimator.getFrameDelay());
@@ -1119,7 +1106,7 @@ public class ViewCompat {
     }
 
     public static void postOnAnimationDelayed(@NonNull View view, Runnable runnable, long j) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             view.postOnAnimationDelayed(runnable, j);
         } else {
             view.postDelayed(runnable, ValueAnimator.getFrameDelay() + j);
@@ -1130,9 +1117,10 @@ public class ViewCompat {
         if (BuildCompat.isAtLeastP()) {
             Map map = (Map) view.getTag(R.id.tag_unhandled_key_listeners);
             if (map != null) {
-                OnUnhandledKeyEventListener onUnhandledKeyEventListener = (OnUnhandledKeyEventListener) map.get(onUnhandledKeyEventListenerCompat);
+                View.OnUnhandledKeyEventListener onUnhandledKeyEventListener = (View.OnUnhandledKeyEventListener) map.get(onUnhandledKeyEventListenerCompat);
                 if (onUnhandledKeyEventListener != null) {
                     view.removeOnUnhandledKeyEventListener(onUnhandledKeyEventListener);
+                    return;
                 }
                 return;
             }
@@ -1148,7 +1136,7 @@ public class ViewCompat {
     }
 
     public static void requestApplyInsets(@NonNull View view) {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 20) {
             view.requestApplyInsets();
         } else if (i >= 16) {
@@ -1171,7 +1159,7 @@ public class ViewCompat {
     }
 
     public static boolean restoreDefaultFocus(@NonNull View view) {
-        return VERSION.SDK_INT >= 26 ? view.restoreDefaultFocus() : view.requestFocus();
+        return Build.VERSION.SDK_INT >= 26 ? view.restoreDefaultFocus() : view.requestFocus();
     }
 
     public static void setAccessibilityDelegate(@NonNull View view, AccessibilityDelegateCompat accessibilityDelegateCompat) {
@@ -1179,7 +1167,7 @@ public class ViewCompat {
     }
 
     public static void setAccessibilityLiveRegion(@NonNull View view, int i) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             view.setAccessibilityLiveRegion(i);
         }
     }
@@ -1195,13 +1183,13 @@ public class ViewCompat {
     }
 
     public static void setAutofillHints(@NonNull View view, @Nullable String... strArr) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.setAutofillHints(strArr);
         }
     }
 
     public static void setBackground(@NonNull View view, @Nullable Drawable drawable) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             view.setBackground(drawable);
         } else {
             view.setBackgroundDrawable(drawable);
@@ -1209,9 +1197,9 @@ public class ViewCompat {
     }
 
     public static void setBackgroundTintList(@NonNull View view, ColorStateList colorStateList) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setBackgroundTintList(colorStateList);
-            if (VERSION.SDK_INT == 21) {
+            if (Build.VERSION.SDK_INT == 21) {
                 Drawable background = view.getBackground();
                 boolean z = (view.getBackgroundTintList() == null && view.getBackgroundTintMode() == null) ? false : true;
                 if (background != null && z) {
@@ -1226,10 +1214,10 @@ public class ViewCompat {
         }
     }
 
-    public static void setBackgroundTintMode(@NonNull View view, Mode mode) {
-        if (VERSION.SDK_INT >= 21) {
+    public static void setBackgroundTintMode(@NonNull View view, PorterDuff.Mode mode) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setBackgroundTintMode(mode);
-            if (VERSION.SDK_INT == 21) {
+            if (Build.VERSION.SDK_INT == 21) {
                 Drawable background = view.getBackground();
                 boolean z = (view.getBackgroundTintList() == null && view.getBackgroundTintMode() == null) ? false : true;
                 if (background != null && z) {
@@ -1246,36 +1234,33 @@ public class ViewCompat {
 
     @Deprecated
     public static void setChildrenDrawingOrderEnabled(ViewGroup viewGroup, boolean z) {
-        String str = "Unable to invoke childrenDrawingOrderEnabled";
-        Method method = sChildrenDrawingOrderMethod;
-        String str2 = TAG;
-        if (method == null) {
+        if (sChildrenDrawingOrderMethod == null) {
             try {
                 sChildrenDrawingOrderMethod = ViewGroup.class.getDeclaredMethod("setChildrenDrawingOrderEnabled", new Class[]{Boolean.TYPE});
             } catch (NoSuchMethodException e2) {
-                Log.e(str2, "Unable to find childrenDrawingOrderEnabled", e2);
+                Log.e(TAG, "Unable to find childrenDrawingOrderEnabled", e2);
             }
             sChildrenDrawingOrderMethod.setAccessible(true);
         }
         try {
             sChildrenDrawingOrderMethod.invoke(viewGroup, new Object[]{Boolean.valueOf(z)});
         } catch (IllegalAccessException e3) {
-            Log.e(str2, str, e3);
+            Log.e(TAG, "Unable to invoke childrenDrawingOrderEnabled", e3);
         } catch (IllegalArgumentException e4) {
-            Log.e(str2, str, e4);
+            Log.e(TAG, "Unable to invoke childrenDrawingOrderEnabled", e4);
         } catch (InvocationTargetException e5) {
-            Log.e(str2, str, e5);
+            Log.e(TAG, "Unable to invoke childrenDrawingOrderEnabled", e5);
         }
     }
 
     public static void setClipBounds(@NonNull View view, Rect rect) {
-        if (VERSION.SDK_INT >= 18) {
+        if (Build.VERSION.SDK_INT >= 18) {
             view.setClipBounds(rect);
         }
     }
 
     public static void setElevation(@NonNull View view, float f2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setElevation(f2);
         }
     }
@@ -1286,19 +1271,19 @@ public class ViewCompat {
     }
 
     public static void setFocusedByDefault(@NonNull View view, boolean z) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.setFocusedByDefault(z);
         }
     }
 
     public static void setHasTransientState(@NonNull View view, boolean z) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             view.setHasTransientState(z);
         }
     }
 
     public static void setImportantForAccessibility(@NonNull View view, int i) {
-        int i2 = VERSION.SDK_INT;
+        int i2 = Build.VERSION.SDK_INT;
         if (i2 >= 19) {
             view.setImportantForAccessibility(i);
         } else if (i2 >= 16) {
@@ -1310,25 +1295,25 @@ public class ViewCompat {
     }
 
     public static void setImportantForAutofill(@NonNull View view, int i) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.setImportantForAutofill(i);
         }
     }
 
     public static void setKeyboardNavigationCluster(@NonNull View view, boolean z) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.setKeyboardNavigationCluster(z);
         }
     }
 
     public static void setLabelFor(@NonNull View view, @IdRes int i) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             view.setLabelFor(i);
         }
     }
 
     public static void setLayerPaint(@NonNull View view, Paint paint) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             view.setLayerPaint(paint);
             return;
         }
@@ -1342,13 +1327,13 @@ public class ViewCompat {
     }
 
     public static void setLayoutDirection(@NonNull View view, int i) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             view.setLayoutDirection(i);
         }
     }
 
     public static void setNestedScrollingEnabled(@NonNull View view, boolean z) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setNestedScrollingEnabled(z);
         } else if (view instanceof NestedScrollingChild) {
             ((NestedScrollingChild) view).setNestedScrollingEnabled(z);
@@ -1356,18 +1341,19 @@ public class ViewCompat {
     }
 
     public static void setNextClusterForwardId(@NonNull View view, int i) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.setNextClusterForwardId(i);
         }
     }
 
     public static void setOnApplyWindowInsetsListener(@NonNull View view, final OnApplyWindowInsetsListener onApplyWindowInsetsListener) {
-        if (VERSION.SDK_INT >= 21) {
-            if (onApplyWindowInsetsListener == null) {
-                view.setOnApplyWindowInsetsListener(null);
-                return;
-            }
-            view.setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener() {
+        if (Build.VERSION.SDK_INT < 21) {
+            return;
+        }
+        if (onApplyWindowInsetsListener == null) {
+            view.setOnApplyWindowInsetsListener((View.OnApplyWindowInsetsListener) null);
+        } else {
+            view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
                 @RequiresApi(21)
                 public WindowInsets onApplyWindowInsets(View view, WindowInsets windowInsets) {
                     return (WindowInsets) WindowInsetsCompat.unwrap(onApplyWindowInsetsListener.onApplyWindowInsets(view, WindowInsetsCompat.wrap(windowInsets)));
@@ -1382,7 +1368,7 @@ public class ViewCompat {
     }
 
     public static void setPaddingRelative(@NonNull View view, @Px int i, @Px int i2, @Px int i3, @Px int i4) {
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             view.setPaddingRelative(i, i2, i3, i4);
         } else {
             view.setPadding(i, i2, i3, i4);
@@ -1400,7 +1386,7 @@ public class ViewCompat {
     }
 
     public static void setPointerIcon(@NonNull View view, PointerIconCompat pointerIconCompat) {
-        if (VERSION.SDK_INT >= 24) {
+        if (Build.VERSION.SDK_INT >= 24) {
             view.setPointerIcon((PointerIcon) (pointerIconCompat != null ? pointerIconCompat.getPointerIcon() : null));
         }
     }
@@ -1436,25 +1422,25 @@ public class ViewCompat {
     }
 
     public static void setScrollIndicators(@NonNull View view, int i) {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             view.setScrollIndicators(i);
         }
     }
 
     public static void setScrollIndicators(@NonNull View view, int i, int i2) {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             view.setScrollIndicators(i, i2);
         }
     }
 
     public static void setTooltipText(@NonNull View view, @Nullable CharSequence charSequence) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             view.setTooltipText(charSequence);
         }
     }
 
     public static void setTransitionName(@NonNull View view, String str) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setTransitionName(str);
             return;
         }
@@ -1475,7 +1461,7 @@ public class ViewCompat {
     }
 
     public static void setTranslationZ(@NonNull View view, float f2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setTranslationZ(f2);
         }
     }
@@ -1491,17 +1477,17 @@ public class ViewCompat {
     }
 
     public static void setZ(@NonNull View view, float f2) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.setZ(f2);
         }
     }
 
-    public static boolean startDragAndDrop(@NonNull View view, ClipData clipData, DragShadowBuilder dragShadowBuilder, Object obj, int i) {
-        return VERSION.SDK_INT >= 24 ? view.startDragAndDrop(clipData, dragShadowBuilder, obj, i) : view.startDrag(clipData, dragShadowBuilder, obj, i);
+    public static boolean startDragAndDrop(@NonNull View view, ClipData clipData, View.DragShadowBuilder dragShadowBuilder, Object obj, int i) {
+        return Build.VERSION.SDK_INT >= 24 ? view.startDragAndDrop(clipData, dragShadowBuilder, obj, i) : view.startDrag(clipData, dragShadowBuilder, obj, i);
     }
 
     public static boolean startNestedScroll(@NonNull View view, int i) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             return view.startNestedScroll(i);
         }
         if (view instanceof NestedScrollingChild) {
@@ -1521,7 +1507,7 @@ public class ViewCompat {
     }
 
     public static void stopNestedScroll(@NonNull View view) {
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             view.stopNestedScroll();
         } else if (view instanceof NestedScrollingChild) {
             ((NestedScrollingChild) view).stopNestedScroll();
@@ -1542,8 +1528,8 @@ public class ViewCompat {
         view.setTranslationY(translationY);
     }
 
-    public static void updateDragShadow(@NonNull View view, DragShadowBuilder dragShadowBuilder) {
-        if (VERSION.SDK_INT >= 24) {
+    public static void updateDragShadow(@NonNull View view, View.DragShadowBuilder dragShadowBuilder) {
+        if (Build.VERSION.SDK_INT >= 24) {
             view.updateDragShadow(dragShadowBuilder);
         }
     }

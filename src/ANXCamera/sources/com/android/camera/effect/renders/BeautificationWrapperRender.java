@@ -45,10 +45,7 @@ public class BeautificationWrapperRender extends WrapperRender {
         GLES20.glGetIntegerv(2978, iArr2, 0);
         String str2 = TAG;
         Locale locale = Locale.ENGLISH;
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append("cullFace=%b faceMode=0x%x frontFace=0x%x activeTex=0x%x bindTex=%d bindBuf=%d viewport=[%d %d %d %d]");
-        Log.d(str2, String.format(locale, sb.toString(), new Object[]{Boolean.valueOf(glIsEnabled), Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(i3), Integer.valueOf(i4), Integer.valueOf(i5), Integer.valueOf(iArr2[0]), Integer.valueOf(iArr2[1]), Integer.valueOf(iArr2[2]), Integer.valueOf(iArr2[3])}));
+        Log.d(str2, String.format(locale, str + "cullFace=%b faceMode=0x%x frontFace=0x%x activeTex=0x%x bindTex=%d bindBuf=%d viewport=[%d %d %d %d]", new Object[]{Boolean.valueOf(glIsEnabled), Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(i3), Integer.valueOf(i4), Integer.valueOf(i5), Integer.valueOf(iArr2[0]), Integer.valueOf(iArr2[1]), Integer.valueOf(iArr2[2]), Integer.valueOf(iArr2[3])}));
     }
 
     public void adjustSize(boolean z) {
@@ -73,9 +70,8 @@ public class BeautificationWrapperRender extends WrapperRender {
         if (onDrawToTexture == -1) {
             onDrawToTexture = basicTexture.getId();
         }
-        int i = onDrawToTexture;
         GLES20.glDisable(2884);
-        drawToFrameBuffer(i, f2, f3, f4, f5);
+        drawToFrameBuffer(onDrawToTexture, f2, f3, f4, f5);
     }
 
     public void setBuffer(byte[] bArr, int i, int i2) {

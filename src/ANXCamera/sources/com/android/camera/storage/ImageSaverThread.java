@@ -21,9 +21,9 @@ public class ImageSaverThread extends Thread {
     public void run() {
         while (true) {
             try {
-                SaveRequest saveRequest = (SaveRequest) this.mQueue.take();
-                saveRequest.save();
-                saveRequest.onFinish();
+                SaveRequest take = this.mQueue.take();
+                take.save();
+                take.onFinish();
                 if (this.mQuit) {
                     interrupt();
                 }

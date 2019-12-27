@@ -1,6 +1,6 @@
 package com.android.camera.panorama;
 
-import com.android.camera.panorama.MorphoSensorFusion.SensorData;
+import com.android.camera.panorama.MorphoSensorFusion;
 import java.util.ArrayList;
 
 public class SensorInfoManager {
@@ -12,7 +12,7 @@ public class SensorInfoManager {
     public int r_ix = -1;
     public long rollingShutterSkew = 0;
     public int sensitivity = 0;
-    public ArrayList<SensorData>[] sensorData;
+    public ArrayList<MorphoSensorFusion.SensorData>[] sensorData;
     public long sensorTimeStamp = 0;
     public long timeMillis = 0;
 

@@ -1,13 +1,12 @@
 package android.arch.lifecycle;
 
 import android.arch.core.b.c;
-import android.arch.lifecycle.Lifecycle.Event;
-import android.arch.lifecycle.Lifecycle.State;
+import android.arch.lifecycle.Lifecycle;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
 
 public abstract class LiveData<T> {
     /* access modifiers changed from: private */
@@ -20,24 +19,24 @@ public abstract class LiveData<T> {
     public final Object mDataLock = new Object();
     private boolean mDispatchInvalidated;
     private boolean mDispatchingValue;
-    private c<Observer<? super T>, ObserverWrapper> mObservers = new c<>();
+    private c<Observer<? super T>, LiveData<T>.ObserverWrapper> mObservers = new c<>();
     /* access modifiers changed from: private */
     public volatile Object mPendingData;
     private final Runnable mPostValueRunnable;
     private int mVersion;
 
-    private class AlwaysActiveObserver extends ObserverWrapper {
+    private class AlwaysActiveObserver extends LiveData<T>.ObserverWrapper {
         AlwaysActiveObserver(Observer<? super T> observer) {
             super(observer);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean shouldBeActive() {
             return true;
         }
     }
 
-    class LifecycleBoundObserver extends ObserverWrapper implements GenericLifecycleObserver {
+    class LifecycleBoundObserver extends LiveData<T>.ObserverWrapper implements GenericLifecycleObserver {
         @NonNull
         final LifecycleOwner mOwner;
 
@@ -46,27 +45,27 @@ public abstract class LiveData<T> {
             this.mOwner = lifecycleOwner;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void detachObserver() {
             this.mOwner.getLifecycle().removeObserver(this);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isAttachedTo(LifecycleOwner lifecycleOwner) {
             return this.mOwner == lifecycleOwner;
         }
 
-        public void onStateChanged(LifecycleOwner lifecycleOwner, Event event) {
-            if (this.mOwner.getLifecycle().getCurrentState() == State.DESTROYED) {
+        public void onStateChanged(LifecycleOwner lifecycleOwner, Lifecycle.Event event) {
+            if (this.mOwner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED) {
                 LiveData.this.removeObserver(this.mObserver);
             } else {
                 activeStateChanged(shouldBeActive());
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean shouldBeActive() {
-            return this.mOwner.getLifecycle().getCurrentState().isAtLeast(State.STARTED);
+            return this.mOwner.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED);
         }
     }
 
@@ -79,7 +78,7 @@ public abstract class LiveData<T> {
             this.mObserver = observer;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void activeStateChanged(boolean z) {
             if (z != this.mActive) {
                 this.mActive = z;
@@ -90,7 +89,7 @@ public abstract class LiveData<T> {
                 if (!this.mActive) {
                     i = -1;
                 }
-                liveData.mActiveCount = access$300 + i;
+                int unused = liveData.mActiveCount = access$300 + i;
                 if (z2 && this.mActive) {
                     LiveData.this.onActive();
                 }
@@ -103,16 +102,16 @@ public abstract class LiveData<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void detachObserver() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean isAttachedTo(LifecycleOwner lifecycleOwner) {
             return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract boolean shouldBeActive();
     }
 
@@ -126,7 +125,7 @@ public abstract class LiveData<T> {
                 Object access$100;
                 synchronized (LiveData.this.mDataLock) {
                     access$100 = LiveData.this.mPendingData;
-                    LiveData.this.mPendingData = LiveData.NOT_SET;
+                    Object unused = LiveData.this.mPendingData = LiveData.NOT_SET;
                 }
                 LiveData.this.setValue(access$100);
             }
@@ -135,16 +134,11 @@ public abstract class LiveData<T> {
 
     private static void assertMainThread(String str) {
         if (!android.arch.core.a.c.getInstance().isMainThread()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot invoke ");
-            sb.append(str);
-            sb.append(" on a background");
-            sb.append(" thread");
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("Cannot invoke " + str + " on a background" + " thread");
         }
     }
 
-    private void considerNotify(ObserverWrapper observerWrapper) {
+    private void considerNotify(LiveData<T>.ObserverWrapper observerWrapper) {
         if (observerWrapper.mActive) {
             if (!observerWrapper.shouldBeActive()) {
                 observerWrapper.activeStateChanged(false);
@@ -160,7 +154,7 @@ public abstract class LiveData<T> {
     }
 
     /* access modifiers changed from: private */
-    public void dispatchingValue(@Nullable ObserverWrapper observerWrapper) {
+    public void dispatchingValue(@Nullable LiveData<T>.ObserverWrapper observerWrapper) {
         if (this.mDispatchingValue) {
             this.mDispatchInvalidated = true;
             return;
@@ -169,9 +163,9 @@ public abstract class LiveData<T> {
         do {
             this.mDispatchInvalidated = false;
             if (observerWrapper == null) {
-                d T = this.mObservers.T();
+                c<K, V>.d T = this.mObservers.T();
                 while (T.hasNext()) {
-                    considerNotify((ObserverWrapper) ((Entry) T.next()).getValue());
+                    considerNotify((ObserverWrapper) ((Map.Entry) T.next()).getValue());
                     if (this.mDispatchInvalidated) {
                         break;
                     }
@@ -193,7 +187,7 @@ public abstract class LiveData<T> {
         return null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getVersion() {
         return this.mVersion;
     }
@@ -209,12 +203,12 @@ public abstract class LiveData<T> {
     @MainThread
     public void observe(@NonNull LifecycleOwner lifecycleOwner, @NonNull Observer<? super T> observer) {
         assertMainThread("observe");
-        if (lifecycleOwner.getLifecycle().getCurrentState() != State.DESTROYED) {
+        if (lifecycleOwner.getLifecycle().getCurrentState() != Lifecycle.State.DESTROYED) {
             LifecycleBoundObserver lifecycleBoundObserver = new LifecycleBoundObserver(lifecycleOwner, observer);
-            ObserverWrapper observerWrapper = (ObserverWrapper) this.mObservers.putIfAbsent(observer, lifecycleBoundObserver);
-            if (observerWrapper != null && !observerWrapper.isAttachedTo(lifecycleOwner)) {
+            ObserverWrapper putIfAbsent = this.mObservers.putIfAbsent(observer, lifecycleBoundObserver);
+            if (putIfAbsent != null && !putIfAbsent.isAttachedTo(lifecycleOwner)) {
                 throw new IllegalArgumentException("Cannot add the same observer with different lifecycles");
-            } else if (observerWrapper == null) {
+            } else if (putIfAbsent == null) {
                 lifecycleOwner.getLifecycle().addObserver(lifecycleBoundObserver);
             }
         }
@@ -224,10 +218,10 @@ public abstract class LiveData<T> {
     public void observeForever(@NonNull Observer<? super T> observer) {
         assertMainThread("observeForever");
         AlwaysActiveObserver alwaysActiveObserver = new AlwaysActiveObserver(observer);
-        ObserverWrapper observerWrapper = (ObserverWrapper) this.mObservers.putIfAbsent(observer, alwaysActiveObserver);
-        if (observerWrapper != null && (observerWrapper instanceof LifecycleBoundObserver)) {
+        ObserverWrapper putIfAbsent = this.mObservers.putIfAbsent(observer, alwaysActiveObserver);
+        if (putIfAbsent != null && (putIfAbsent instanceof LifecycleBoundObserver)) {
             throw new IllegalArgumentException("Cannot add the same observer with different lifecycles");
-        } else if (observerWrapper == null) {
+        } else if (putIfAbsent == null) {
             alwaysActiveObserver.activeStateChanged(true);
         }
     }
@@ -255,21 +249,21 @@ public abstract class LiveData<T> {
     @MainThread
     public void removeObserver(@NonNull Observer<? super T> observer) {
         assertMainThread("removeObserver");
-        ObserverWrapper observerWrapper = (ObserverWrapper) this.mObservers.remove(observer);
-        if (observerWrapper != null) {
-            observerWrapper.detachObserver();
-            observerWrapper.activeStateChanged(false);
+        ObserverWrapper remove = this.mObservers.remove(observer);
+        if (remove != null) {
+            remove.detachObserver();
+            remove.activeStateChanged(false);
         }
     }
 
     @MainThread
     public void removeObservers(@NonNull LifecycleOwner lifecycleOwner) {
         assertMainThread("removeObservers");
-        Iterator it = this.mObservers.iterator();
+        Iterator<Map.Entry<Observer<? super T>, LiveData<T>.ObserverWrapper>> it = this.mObservers.iterator();
         while (it.hasNext()) {
-            Entry entry = (Entry) it.next();
-            if (((ObserverWrapper) entry.getValue()).isAttachedTo(lifecycleOwner)) {
-                removeObserver((Observer) entry.getKey());
+            Map.Entry next = it.next();
+            if (((ObserverWrapper) next.getValue()).isAttachedTo(lifecycleOwner)) {
+                removeObserver((Observer) next.getKey());
             }
         }
     }
@@ -280,6 +274,6 @@ public abstract class LiveData<T> {
         assertMainThread("setValue");
         this.mVersion++;
         this.mData = t;
-        dispatchingValue(null);
+        dispatchingValue((LiveData<T>.ObserverWrapper) null);
     }
 }

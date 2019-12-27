@@ -1,13 +1,13 @@
 package com.android.camera.ui.autoselectview;
 
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 import com.android.camera.R;
 import com.android.camera.ui.autoselectview.SelectItemBean;
 
-public abstract class AutoSelectViewHolder<T extends SelectItemBean> extends ViewHolder {
+public abstract class AutoSelectViewHolder<T extends SelectItemBean> extends RecyclerView.ViewHolder {
     public AutoSelectViewHolder(@NonNull View view) {
         super(view);
     }

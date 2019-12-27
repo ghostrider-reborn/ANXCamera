@@ -13,6 +13,6 @@ class l implements Runnable {
     }
 
     public void run() {
-        this.this$0.d(this.val$target);
+        this.this$0.d((o<?>) this.val$target);
     }
 }

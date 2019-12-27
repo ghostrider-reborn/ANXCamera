@@ -30,7 +30,7 @@ public final class ObservableRefCount<T> extends AbstractObservableWithUpstream<
             this.resource = disposable;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cleanup() {
             ObservableRefCount.this.lock.lock();
             try {
@@ -131,11 +131,11 @@ public final class ObservableRefCount<T> extends AbstractObservableWithUpstream<
         return new DisposeConsumer(observer, atomicBoolean);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void doSubscribe(Observer<? super T> observer, CompositeDisposable compositeDisposable) {
         ConnectionObserver connectionObserver = new ConnectionObserver(observer, compositeDisposable, disconnect(compositeDisposable));
         observer.onSubscribe(connectionObserver);
-        this.source.subscribe((Observer<? super T>) connectionObserver);
+        this.source.subscribe(connectionObserver);
     }
 
     public void subscribeActual(Observer<? super T> observer) {

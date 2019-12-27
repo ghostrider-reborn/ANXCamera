@@ -7,6 +7,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.disposables.SequentialDisposable;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.flowable.FlowableTimeoutTimed;
 import io.reactivex.internal.subscriptions.SubscriptionArbiter;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -137,7 +138,7 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
                         }
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
-                        ((Subscription) this.upstream.get()).cancel();
+                        this.upstream.get().cancel();
                         this.index.getAndSet(Long.MAX_VALUE);
                         this.actual.onError(th);
                     }
@@ -160,7 +161,7 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
                 if (j2 != 0) {
                     produced(j2);
                 }
-                publisher.subscribe(new FallbackSubscriber(this.actual, this));
+                publisher.subscribe(new FlowableTimeoutTimed.FallbackSubscriber(this.actual, this));
             }
         }
 
@@ -173,7 +174,7 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
             RxJavaPlugins.onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void startFirstTimeout(Publisher<?> publisher) {
             if (publisher != null) {
                 TimeoutConsumer timeoutConsumer = new TimeoutConsumer(0, this);
@@ -184,7 +185,7 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
         }
     }
 
-    interface TimeoutSelectorSupport extends TimeoutSupport {
+    interface TimeoutSelectorSupport extends FlowableTimeoutTimed.TimeoutSupport {
         void onTimeoutError(long j, Throwable th);
     }
 
@@ -242,7 +243,7 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
                         }
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
-                        ((Subscription) this.upstream.get()).cancel();
+                        this.upstream.get().cancel();
                         getAndSet(Long.MAX_VALUE);
                         this.actual.onError(th);
                     }
@@ -274,7 +275,7 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
             SubscriptionHelper.deferredRequest(this.upstream, this.requested, j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void startFirstTimeout(Publisher<?> publisher) {
             if (publisher != null) {
                 TimeoutConsumer timeoutConsumer = new TimeoutConsumer(0, this);
@@ -299,12 +300,12 @@ public final class FlowableTimeout<T, U, V> extends AbstractFlowableWithUpstream
             TimeoutSubscriber timeoutSubscriber = new TimeoutSubscriber(subscriber, this.itemTimeoutIndicator);
             subscriber.onSubscribe(timeoutSubscriber);
             timeoutSubscriber.startFirstTimeout(this.firstTimeoutIndicator);
-            this.source.subscribe((FlowableSubscriber<? super T>) timeoutSubscriber);
+            this.source.subscribe(timeoutSubscriber);
             return;
         }
         TimeoutFallbackSubscriber timeoutFallbackSubscriber = new TimeoutFallbackSubscriber(subscriber, this.itemTimeoutIndicator, publisher);
         subscriber.onSubscribe(timeoutFallbackSubscriber);
         timeoutFallbackSubscriber.startFirstTimeout(this.firstTimeoutIndicator);
-        this.source.subscribe((FlowableSubscriber<? super T>) timeoutFallbackSubscriber);
+        this.source.subscribe(timeoutFallbackSubscriber);
     }
 }

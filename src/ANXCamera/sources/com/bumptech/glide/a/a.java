@@ -21,7 +21,7 @@ class a implements Callable<Void> {
             this.this$0.trimToSize();
             if (this.this$0.journalRebuildRequired()) {
                 this.this$0.rebuildJournal();
-                this.this$0.redundantOpCount = 0;
+                int unused = this.this$0.redundantOpCount = 0;
             }
         }
     }

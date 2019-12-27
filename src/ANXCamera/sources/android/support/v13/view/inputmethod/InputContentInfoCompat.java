@@ -2,7 +2,7 @@ package android.support.v13.view.inputmethod;
 
 import android.content.ClipDescription;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -113,7 +113,7 @@ public final class InputContentInfoCompat {
     }
 
     public InputContentInfoCompat(@NonNull Uri uri, @NonNull ClipDescription clipDescription, @Nullable Uri uri2) {
-        if (VERSION.SDK_INT >= 25) {
+        if (Build.VERSION.SDK_INT >= 25) {
             this.mImpl = new InputContentInfoCompatApi25Impl(uri, clipDescription, uri2);
         } else {
             this.mImpl = new InputContentInfoCompatBaseImpl(uri, clipDescription, uri2);
@@ -126,7 +126,7 @@ public final class InputContentInfoCompat {
 
     @Nullable
     public static InputContentInfoCompat wrap(@Nullable Object obj) {
-        if (obj != null && VERSION.SDK_INT >= 25) {
+        if (obj != null && Build.VERSION.SDK_INT >= 25) {
             return new InputContentInfoCompat(new InputContentInfoCompatApi25Impl(obj));
         }
         return null;

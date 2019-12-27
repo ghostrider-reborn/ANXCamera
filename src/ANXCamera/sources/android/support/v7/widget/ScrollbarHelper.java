@@ -1,14 +1,13 @@
 package android.support.v7.widget;
 
-import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.State;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 class ScrollbarHelper {
     private ScrollbarHelper() {
     }
 
-    static int computeScrollExtent(State state, OrientationHelper orientationHelper, View view, View view2, LayoutManager layoutManager, boolean z) {
+    static int computeScrollExtent(RecyclerView.State state, OrientationHelper orientationHelper, View view, View view2, RecyclerView.LayoutManager layoutManager, boolean z) {
         if (layoutManager.getChildCount() == 0 || state.getItemCount() == 0 || view == null || view2 == null) {
             return 0;
         }
@@ -18,7 +17,7 @@ class ScrollbarHelper {
         return Math.min(orientationHelper.getTotalSpace(), orientationHelper.getDecoratedEnd(view2) - orientationHelper.getDecoratedStart(view));
     }
 
-    static int computeScrollOffset(State state, OrientationHelper orientationHelper, View view, View view2, LayoutManager layoutManager, boolean z, boolean z2) {
+    static int computeScrollOffset(RecyclerView.State state, OrientationHelper orientationHelper, View view, View view2, RecyclerView.LayoutManager layoutManager, boolean z, boolean z2) {
         if (layoutManager.getChildCount() == 0 || state.getItemCount() == 0 || view == null || view2 == null) {
             return 0;
         }
@@ -29,7 +28,7 @@ class ScrollbarHelper {
         return Math.round((((float) max) * (((float) Math.abs(orientationHelper.getDecoratedEnd(view2) - orientationHelper.getDecoratedStart(view))) / ((float) (Math.abs(layoutManager.getPosition(view) - layoutManager.getPosition(view2)) + 1)))) + ((float) (orientationHelper.getStartAfterPadding() - orientationHelper.getDecoratedStart(view))));
     }
 
-    static int computeScrollRange(State state, OrientationHelper orientationHelper, View view, View view2, LayoutManager layoutManager, boolean z) {
+    static int computeScrollRange(RecyclerView.State state, OrientationHelper orientationHelper, View view, View view2, RecyclerView.LayoutManager layoutManager, boolean z) {
         if (layoutManager.getChildCount() == 0 || state.getItemCount() == 0 || view == null || view2 == null) {
             return 0;
         }

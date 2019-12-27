@@ -16,8 +16,8 @@ public class BaseGLCanvas implements GLCanvas {
     private final ArrayList<Integer> mDeletePrograms = new ArrayList<>();
     private final IntArray mDeleteTextures = new IntArray();
     private int mHeight;
-    protected RenderGroup mRenderCaches = new RenderGroup(this);
-    protected RenderGroup mRenderGroup = new RenderGroup(this);
+    protected RenderGroup mRenderCaches;
+    protected RenderGroup mRenderGroup;
     protected GLCanvasState mState = new GLCanvasState();
     private int mWidth;
 
@@ -144,7 +144,7 @@ public class BaseGLCanvas implements GLCanvas {
         }
         synchronized (this.mDeletePrograms) {
             while (this.mDeletePrograms.size() > 0) {
-                GLES20.glDeleteProgram(((Integer) this.mDeletePrograms.remove(0)).intValue());
+                GLES20.glDeleteProgram(this.mDeletePrograms.remove(0).intValue());
             }
         }
     }

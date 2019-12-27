@@ -10,7 +10,7 @@ public class ColorActivateTextView extends TextView {
     private int mNormalCor;
 
     public ColorActivateTextView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public ColorActivateTextView(Context context, @Nullable AttributeSet attributeSet) {

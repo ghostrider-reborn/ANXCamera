@@ -1,16 +1,13 @@
 package com.android.volley.toolbox;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.MainThread;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,7 +109,7 @@ public class ImageLoader {
         }
     }
 
-    public interface ImageListener extends ErrorListener {
+    public interface ImageListener extends Response.ErrorListener {
         void onResponse(ImageContainer imageContainer, boolean z);
     }
 
@@ -130,7 +127,7 @@ public class ImageLoader {
                         for (ImageContainer imageContainer : batchedImageRequest.mContainers) {
                             if (imageContainer.mListener != null) {
                                 if (batchedImageRequest.getError() == null) {
-                                    imageContainer.mBitmap = batchedImageRequest.mResponseBitmap;
+                                    Bitmap unused = imageContainer.mBitmap = batchedImageRequest.mResponseBitmap;
                                     imageContainer.mListener.onResponse(imageContainer, false);
                                 } else {
                                     imageContainer.mListener.onErrorResponse(batchedImageRequest.getError());
@@ -139,14 +136,14 @@ public class ImageLoader {
                         }
                     }
                     ImageLoader.this.mBatchedResponses.clear();
-                    ImageLoader.this.mRunnable = null;
+                    Runnable unused2 = ImageLoader.this.mRunnable = null;
                 }
             };
             this.mHandler.postDelayed(this.mRunnable, (long) this.mBatchResponseDelayMs);
         }
     }
 
-    private static String getCacheKey(String str, int i, int i2, ScaleType scaleType) {
+    private static String getCacheKey(String str, int i, int i2, ImageView.ScaleType scaleType) {
         StringBuilder sb = new StringBuilder(str.length() + 12);
         sb.append("#W");
         sb.append(i);
@@ -185,50 +182,50 @@ public class ImageLoader {
     }
 
     public ImageContainer get(String str, ImageListener imageListener, int i, int i2) {
-        return get(str, imageListener, i, i2, ScaleType.CENTER_INSIDE);
+        return get(str, imageListener, i, i2, ImageView.ScaleType.CENTER_INSIDE);
     }
 
     @MainThread
-    public ImageContainer get(String str, ImageListener imageListener, int i, int i2, ScaleType scaleType) {
+    public ImageContainer get(String str, ImageListener imageListener, int i, int i2, ImageView.ScaleType scaleType) {
         ImageListener imageListener2 = imageListener;
         Threads.throwIfNotOnMainThread();
         String cacheKey = getCacheKey(str, i, i2, scaleType);
         Bitmap bitmap = this.mCache.getBitmap(cacheKey);
         if (bitmap != null) {
-            ImageContainer imageContainer = new ImageContainer(bitmap, str, null, null);
+            ImageContainer imageContainer = new ImageContainer(bitmap, str, (String) null, (ImageListener) null);
             imageListener2.onResponse(imageContainer, true);
             return imageContainer;
         }
-        ImageContainer imageContainer2 = new ImageContainer(null, str, cacheKey, imageListener);
+        ImageContainer imageContainer2 = new ImageContainer((Bitmap) null, str, cacheKey, imageListener);
         imageListener2.onResponse(imageContainer2, true);
-        BatchedImageRequest batchedImageRequest = (BatchedImageRequest) this.mInFlightRequests.get(cacheKey);
+        BatchedImageRequest batchedImageRequest = this.mInFlightRequests.get(cacheKey);
         if (batchedImageRequest != null) {
             batchedImageRequest.addContainer(imageContainer2);
             return imageContainer2;
         }
-        Request makeImageRequest = makeImageRequest(str, i, i2, scaleType, cacheKey);
+        Request<Bitmap> makeImageRequest = makeImageRequest(str, i, i2, scaleType, cacheKey);
         this.mRequestQueue.add(makeImageRequest);
         this.mInFlightRequests.put(cacheKey, new BatchedImageRequest(makeImageRequest, imageContainer2));
         return imageContainer2;
     }
 
     public boolean isCached(String str, int i, int i2) {
-        return isCached(str, i, i2, ScaleType.CENTER_INSIDE);
+        return isCached(str, i, i2, ImageView.ScaleType.CENTER_INSIDE);
     }
 
     @MainThread
-    public boolean isCached(String str, int i, int i2, ScaleType scaleType) {
+    public boolean isCached(String str, int i, int i2, ImageView.ScaleType scaleType) {
         Threads.throwIfNotOnMainThread();
         return this.mCache.getBitmap(getCacheKey(str, i, i2, scaleType)) != null;
     }
 
     /* access modifiers changed from: protected */
-    public Request<Bitmap> makeImageRequest(String str, int i, int i2, ScaleType scaleType, final String str2) {
-        ImageRequest imageRequest = new ImageRequest(str, new Listener<Bitmap>() {
+    public Request<Bitmap> makeImageRequest(String str, int i, int i2, ImageView.ScaleType scaleType, final String str2) {
+        ImageRequest imageRequest = new ImageRequest(str, new Response.Listener<Bitmap>() {
             public void onResponse(Bitmap bitmap) {
                 ImageLoader.this.onGetImageSuccess(str2, bitmap);
             }
-        }, i, i2, scaleType, Config.RGB_565, new ErrorListener() {
+        }, i, i2, scaleType, Bitmap.Config.RGB_565, new Response.ErrorListener() {
             public void onErrorResponse(VolleyError volleyError) {
                 ImageLoader.this.onGetImageError(str2, volleyError);
             }
@@ -238,20 +235,20 @@ public class ImageLoader {
 
     /* access modifiers changed from: protected */
     public void onGetImageError(String str, VolleyError volleyError) {
-        BatchedImageRequest batchedImageRequest = (BatchedImageRequest) this.mInFlightRequests.remove(str);
-        if (batchedImageRequest != null) {
-            batchedImageRequest.setError(volleyError);
-            batchResponse(str, batchedImageRequest);
+        BatchedImageRequest remove = this.mInFlightRequests.remove(str);
+        if (remove != null) {
+            remove.setError(volleyError);
+            batchResponse(str, remove);
         }
     }
 
     /* access modifiers changed from: protected */
     public void onGetImageSuccess(String str, Bitmap bitmap) {
         this.mCache.putBitmap(str, bitmap);
-        BatchedImageRequest batchedImageRequest = (BatchedImageRequest) this.mInFlightRequests.remove(str);
-        if (batchedImageRequest != null) {
-            batchedImageRequest.mResponseBitmap = bitmap;
-            batchResponse(str, batchedImageRequest);
+        BatchedImageRequest remove = this.mInFlightRequests.remove(str);
+        if (remove != null) {
+            Bitmap unused = remove.mResponseBitmap = bitmap;
+            batchResponse(str, remove);
         }
     }
 

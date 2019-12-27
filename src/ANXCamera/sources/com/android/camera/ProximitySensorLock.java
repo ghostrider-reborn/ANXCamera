@@ -8,7 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -59,10 +59,7 @@ public class ProximitySensorLock implements SensorEventListener {
             } else {
                 this.mFromVolumeKey = (8388608 & flags) == 0;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("from volume key ->");
-            sb.append(this.mFromVolumeKey);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "from volume key ->" + this.mFromVolumeKey);
         } else {
             this.mFromVolumeKey = false;
         }
@@ -81,7 +78,7 @@ public class ProximitySensorLock implements SensorEventListener {
                     if (ProximitySensorLock.this.mProximityNear == null) {
                         Log.d(ProximitySensorLock.TAG, "delay check timeout, callback not returned, take it as far");
                         CameraStatUtil.trackPocketModeSensorDelay();
-                        ProximitySensorLock.this.mProximityNear = Boolean.valueOf(false);
+                        Boolean unused = ProximitySensorLock.this.mProximityNear = false;
                         if (!ProximitySensorLock.this.isFromSnap() && ProximitySensorLock.this.mResumeCalled) {
                             ProximitySensorLock.this.judge();
                         }
@@ -175,11 +172,11 @@ public class ProximitySensorLock implements SensorEventListener {
     }
 
     private View inflateHint() {
-        return LayoutInflater.from(this.mContext).inflate(R.layout.screen_on_proximity_sensor_guide, null, false);
+        return LayoutInflater.from(this.mContext).inflate(R.layout.screen_on_proximity_sensor_guide, (ViewGroup) null, false);
     }
 
     private static boolean isEllipticProximity() {
-        return VERSION.SDK_INT >= 28 ? SystemProperties.getBoolean("ro.vendor.audio.us.proximity", false) : SystemProperties.getBoolean("ro.audio.us.proximity", false);
+        return Build.VERSION.SDK_INT >= 28 ? SystemProperties.getBoolean("ro.vendor.audio.us.proximity", false) : SystemProperties.getBoolean("ro.audio.us.proximity", false);
     }
 
     /* access modifiers changed from: private */
@@ -239,10 +236,7 @@ public class ProximitySensorLock implements SensorEventListener {
 
     private void stopWatching() {
         if (this.mProximitySensor != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("stopWatching proximity sensor ");
-            sb.append(this.mContext);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "stopWatching proximity sensor " + this.mContext);
             ((SensorManager) this.mContext.getSystemService("sensor")).unregisterListener(this);
             this.mProximitySensor = null;
             stopWorkerThread();
@@ -252,7 +246,7 @@ public class ProximitySensorLock implements SensorEventListener {
     private void stopWorkerThread() {
         HandlerThread handlerThread = this.mWorkerThread;
         if (handlerThread != null) {
-            if (VERSION.SDK_INT >= 19) {
+            if (Build.VERSION.SDK_INT >= 19) {
                 handlerThread.quitSafely();
             } else {
                 handlerThread.quit();
@@ -313,14 +307,7 @@ public class ProximitySensorLock implements SensorEventListener {
     }
 
     public void onResume() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onResume enabled ");
-        sb.append(enabled());
-        sb.append(", mFromVolumeKey ");
-        sb.append(this.mFromVolumeKey);
-        sb.append(", mProximityNear ");
-        sb.append(this.mProximityNear);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "onResume enabled " + enabled() + ", mFromVolumeKey " + this.mFromVolumeKey + ", mProximityNear " + this.mProximityNear);
         if (enabled()) {
             this.mResumeCalled = true;
             if (this.mProximityNear != null) {
@@ -336,15 +323,8 @@ public class ProximitySensorLock implements SensorEventListener {
         if (fArr[0] <= 3.0f && fArr[0] != sensorEvent.sensor.getMaximumRange()) {
             z = false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("onSensorChanged near ");
-        sb.append(!z);
-        sb.append(", values ");
-        sb.append(sensorEvent.values[0]);
-        sb.append(", max ");
-        sb.append(sensorEvent.sensor.getMaximumRange());
-        Log.d(TAG, sb.toString());
-        this.mProximityNear = Boolean.valueOf(!z);
+        Log.d(TAG, "onSensorChanged near " + (!z) + ", values " + sensorEvent.values[0] + ", max " + sensorEvent.sensor.getMaximumRange());
+        this.mProximityNear = Boolean.valueOf(z ^ true);
         Handler handler = this.mWorkerHandler;
         if (handler != null) {
             boolean hasMessages = handler.hasMessages(2);
@@ -352,31 +332,24 @@ public class ProximitySensorLock implements SensorEventListener {
             if (isFromSnap() || !this.mResumeCalled) {
                 return;
             }
-            if (!z2 || !hasMessages) {
-                if (!this.mFromVolumeKey && this.mJudged) {
-                    if (z) {
-                        CameraStatUtil.trackPocketModeExit(CameraStat.POCKET_MODE_KEYGUARD_EXIT_UNLOCK);
-                        hide();
-                    } else {
-                        CameraStatUtil.trackPocketModeEnter(CameraStat.POCKET_MODE_PSENSOR_ENTER_KEYGUARD);
-                        show();
-                    }
+            if (z2 && hasMessages) {
+                judge();
+            } else if (!this.mFromVolumeKey && this.mJudged) {
+                if (z) {
+                    CameraStatUtil.trackPocketModeExit(CameraStat.POCKET_MODE_KEYGUARD_EXIT_UNLOCK);
+                    hide();
+                    return;
                 }
-                return;
+                CameraStatUtil.trackPocketModeEnter(CameraStat.POCKET_MODE_PSENSOR_ENTER_KEYGUARD);
+                show();
             }
-            judge();
         }
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:9:0x0039  */
     public boolean shouldQuitSnap() {
         boolean z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("shouldQuit fromSnap ");
-        sb.append(isFromSnap());
-        sb.append(", proximity ->");
-        sb.append(this.mProximityNear);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "shouldQuit fromSnap " + isFromSnap() + ", proximity ->" + this.mProximityNear);
         if (isFromSnap()) {
             Boolean bool = this.mProximityNear;
             if (bool == null || bool.booleanValue()) {
@@ -395,10 +368,7 @@ public class ProximitySensorLock implements SensorEventListener {
 
     public void startWatching() {
         if (enabled() && this.mProximitySensor == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("startWatching proximity sensor ");
-            sb.append(this.mContext);
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "startWatching proximity sensor " + this.mContext);
             this.mJudged = false;
             this.mResumeCalled = false;
             SensorManager sensorManager = (SensorManager) this.mContext.getSystemService("sensor");

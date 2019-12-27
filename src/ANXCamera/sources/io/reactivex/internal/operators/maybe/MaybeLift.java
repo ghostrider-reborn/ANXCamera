@@ -18,12 +18,12 @@ public final class MaybeLift<T, R> extends AbstractMaybeWithUpstream<T, R> {
     /* access modifiers changed from: protected */
     public void subscribeActual(MaybeObserver<? super R> maybeObserver) {
         try {
-            MaybeObserver apply = this.operator.apply(maybeObserver);
+            MaybeObserver<? super Object> apply = this.operator.apply(maybeObserver);
             ObjectHelper.requireNonNull(apply, "The operator returned a null MaybeObserver");
             this.source.subscribe(apply);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, maybeObserver);
+            EmptyDisposable.error(th, (MaybeObserver<?>) maybeObserver);
         }
     }
 }

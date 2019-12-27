@@ -1,21 +1,20 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import com.bumptech.glide.b.a.C0004a;
+import com.bumptech.glide.b.a;
 import com.bumptech.glide.load.engine.bitmap_recycle.b;
 import com.bumptech.glide.load.engine.bitmap_recycle.d;
 
 /* compiled from: GifBitmapProvider */
-public final class a implements C0004a {
+public final class a implements a.C0004a {
     private final d Bb;
     @Nullable
     private final b qa;
 
     public a(d dVar) {
-        this(dVar, null);
+        this(dVar, (b) null);
     }
 
     public a(d dVar, @Nullable b bVar) {
@@ -24,7 +23,7 @@ public final class a implements C0004a {
     }
 
     @NonNull
-    public Bitmap a(int i, int i2, @NonNull Config config) {
+    public Bitmap a(int i, int i2, @NonNull Bitmap.Config config) {
         return this.Bb.c(i, i2, config);
     }
 

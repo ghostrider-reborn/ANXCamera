@@ -5,7 +5,6 @@ import android.os.HwBinder;
 import android.os.HwBlob;
 import android.os.HwParcel;
 import android.os.IHwBinder;
-import android.os.IHwBinder.DeathRecipient;
 import android.os.IHwInterface;
 import android.os.NativeHandle;
 import android.os.RemoteException;
@@ -190,7 +189,7 @@ public interface b extends a.a.a.a.b {
             }
         }
 
-        public boolean linkToDeath(DeathRecipient deathRecipient, long j) throws RemoteException {
+        public boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException {
             return this.mRemote.linkToDeath(deathRecipient, j);
         }
 
@@ -233,21 +232,18 @@ public interface b extends a.a.a.a.b {
 
         public String toString() {
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append(interfaceDescriptor());
-                sb.append("@Proxy");
-                return sb.toString();
+                return interfaceDescriptor() + "@Proxy";
             } catch (RemoteException unused) {
                 return "[class or subclass of vendor.xiaomi.hardware.misys@2.0::IMiSys]@Proxy";
             }
         }
 
-        public boolean unlinkToDeath(DeathRecipient deathRecipient) throws RemoteException {
+        public boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException {
             return this.mRemote.unlinkToDeath(deathRecipient);
         }
     }
 
-    /* renamed from: f.a.a.a.b.b$b reason: collision with other inner class name */
+    /* renamed from: f.a.a.a.b.b$b  reason: collision with other inner class name */
     /* compiled from: IMiSys */
     public static abstract class C0017b extends HwBinder implements b {
         public IHwBinder asBinder() {
@@ -277,7 +273,7 @@ public interface b extends a.a.a.a.b {
             return b.kInterfaceName;
         }
 
-        public final boolean linkToDeath(DeathRecipient deathRecipient, long j) {
+        public final boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) {
             return true;
         }
 
@@ -286,7 +282,6 @@ public interface b extends a.a.a.a.b {
         }
 
         public void onTransact(int i, HwParcel hwParcel, HwParcel hwParcel2, int i2) throws RemoteException {
-            String str = b.kInterfaceName;
             int i3 = 0;
             boolean z = true;
             if (i == 1) {
@@ -298,7 +293,7 @@ public interface b extends a.a.a.a.b {
                     hwParcel2.send();
                     return;
                 }
-                hwParcel.enforceInterface(str);
+                hwParcel.enforceInterface(b.kInterfaceName);
                 int h = h(hwParcel.readString(), hwParcel.readString());
                 hwParcel2.writeStatus(0);
                 hwParcel2.writeInt32(h);
@@ -312,7 +307,7 @@ public interface b extends a.a.a.a.b {
                     hwParcel2.send();
                     return;
                 }
-                hwParcel.enforceInterface(str);
+                hwParcel.enforceInterface(b.kInterfaceName);
                 int a2 = a(hwParcel.readString(), hwParcel.readString(), hwParcel.readInt8Vector(), hwParcel.readInt64());
                 hwParcel2.writeStatus(0);
                 hwParcel2.writeInt32(a2);
@@ -326,13 +321,12 @@ public interface b extends a.a.a.a.b {
                     hwParcel2.send();
                     return;
                 }
-                hwParcel.enforceInterface(str);
+                hwParcel.enforceInterface(b.kInterfaceName);
                 a g = g(hwParcel.readString(), hwParcel.readString());
                 hwParcel2.writeStatus(0);
                 g.writeToParcel(hwParcel2);
                 hwParcel2.send();
             } else if (i != 4) {
-                String str2 = a.a.a.a.b.kInterfaceName;
                 switch (i) {
                     case 256067662:
                         if ((i2 & 1) == 0) {
@@ -343,8 +337,8 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
-                        ArrayList interfaceChain = interfaceChain();
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
+                        ArrayList<String> interfaceChain = interfaceChain();
                         hwParcel2.writeStatus(0);
                         hwParcel2.writeStringVector(interfaceChain);
                         hwParcel2.send();
@@ -358,7 +352,7 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
                         debug(hwParcel.readNativeHandle(), hwParcel.readStringVector());
                         hwParcel2.writeStatus(0);
                         hwParcel2.send();
@@ -372,7 +366,7 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
                         String interfaceDescriptor = interfaceDescriptor();
                         hwParcel2.writeStatus(0);
                         hwParcel2.writeString(interfaceDescriptor);
@@ -387,8 +381,8 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
-                        ArrayList hashChain = getHashChain();
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
+                        ArrayList<byte[]> hashChain = getHashChain();
                         hwParcel2.writeStatus(0);
                         HwBlob hwBlob = new HwBlob(16);
                         int size = hashChain.size();
@@ -397,7 +391,7 @@ public interface b extends a.a.a.a.b {
                         HwBlob hwBlob2 = new HwBlob(size * 32);
                         while (i3 < size) {
                             long j = (long) (i3 * 32);
-                            byte[] bArr = (byte[]) hashChain.get(i3);
+                            byte[] bArr = hashChain.get(i3);
                             if (bArr == null || bArr.length != 32) {
                                 throw new IllegalArgumentException("Array element is not of the expected length");
                             }
@@ -417,7 +411,7 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
                         setHALInstrumentation();
                         return;
                     case 256660548:
@@ -439,7 +433,7 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
                         ping();
                         hwParcel2.writeStatus(0);
                         hwParcel2.send();
@@ -453,7 +447,7 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
                         a.a.a.a.a debugInfo = getDebugInfo();
                         hwParcel2.writeStatus(0);
                         debugInfo.writeToParcel(hwParcel2);
@@ -468,7 +462,7 @@ public interface b extends a.a.a.a.b {
                             hwParcel2.send();
                             return;
                         }
-                        hwParcel.enforceInterface(str2);
+                        hwParcel.enforceInterface(a.a.a.a.b.kInterfaceName);
                         notifySyspropsChanged();
                         return;
                     case 257250372:
@@ -493,7 +487,7 @@ public interface b extends a.a.a.a.b {
                     hwParcel2.send();
                     return;
                 }
-                hwParcel.enforceInterface(str);
+                hwParcel.enforceInterface(b.kInterfaceName);
                 boolean j2 = j(hwParcel.readString(), hwParcel.readString());
                 hwParcel2.writeStatus(0);
                 hwParcel2.writeBool(j2);
@@ -519,13 +513,10 @@ public interface b extends a.a.a.a.b {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(interfaceDescriptor());
-            sb.append("@Stub");
-            return sb.toString();
+            return interfaceDescriptor() + "@Stub";
         }
 
-        public final boolean unlinkToDeath(DeathRecipient deathRecipient) {
+        public final boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) {
             return true;
         }
     }
@@ -534,16 +525,15 @@ public interface b extends a.a.a.a.b {
         if (iHwBinder == null) {
             return null;
         }
-        String str = kInterfaceName;
-        b queryLocalInterface = iHwBinder.queryLocalInterface(str);
+        b queryLocalInterface = iHwBinder.queryLocalInterface(kInterfaceName);
         if (queryLocalInterface != null && (queryLocalInterface instanceof b)) {
             return queryLocalInterface;
         }
         a aVar = new a(iHwBinder);
         try {
-            Iterator it = aVar.interfaceChain().iterator();
+            Iterator<String> it = aVar.interfaceChain().iterator();
             while (it.hasNext()) {
-                if (((String) it.next()).equals(str)) {
+                if (it.next().equals(kInterfaceName)) {
                     return aVar;
                 }
             }
@@ -595,7 +585,7 @@ public interface b extends a.a.a.a.b {
 
     boolean j(String str, String str2) throws RemoteException;
 
-    boolean linkToDeath(DeathRecipient deathRecipient, long j) throws RemoteException;
+    boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) throws RemoteException;
 
     void notifySyspropsChanged() throws RemoteException;
 
@@ -603,5 +593,5 @@ public interface b extends a.a.a.a.b {
 
     void setHALInstrumentation() throws RemoteException;
 
-    boolean unlinkToDeath(DeathRecipient deathRecipient) throws RemoteException;
+    boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) throws RemoteException;
 }

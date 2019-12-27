@@ -28,8 +28,8 @@ final class b {
     }
 
     public c remove() {
-        c cVar = (c) this.Dh.get(this.Fh);
-        Integer num = (Integer) this.Ch.get(cVar);
+        c cVar = this.Dh.get(this.Fh);
+        Integer num = this.Ch.get(cVar);
         if (num.intValue() == 1) {
             this.Ch.remove(cVar);
             this.Dh.remove(this.Fh);

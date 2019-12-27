@@ -41,7 +41,7 @@ public final class CompletableMergeDelayErrorArray extends Completable {
             this.set.add(disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void tryTerminate() {
             if (this.wip.decrementAndGet() == 0) {
                 Throwable terminate = this.error.terminate();

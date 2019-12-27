@@ -2,7 +2,7 @@ package android.support.v4.view;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.TypedValue;
@@ -14,7 +14,7 @@ public final class ViewConfigurationCompat {
     private static Method sGetScaledScrollFactorMethod;
 
     static {
-        if (VERSION.SDK_INT == 25) {
+        if (Build.VERSION.SDK_INT == 25) {
             try {
                 sGetScaledScrollFactorMethod = ViewConfiguration.class.getDeclaredMethod("getScaledScrollFactor", new Class[0]);
             } catch (Exception unused) {
@@ -27,7 +27,7 @@ public final class ViewConfigurationCompat {
     }
 
     private static float getLegacyScrollFactor(ViewConfiguration viewConfiguration, Context context) {
-        if (VERSION.SDK_INT >= 25) {
+        if (Build.VERSION.SDK_INT >= 25) {
             Method method = sGetScaledScrollFactorMethod;
             if (method != null) {
                 try {
@@ -45,11 +45,11 @@ public final class ViewConfigurationCompat {
     }
 
     public static float getScaledHorizontalScrollFactor(@NonNull ViewConfiguration viewConfiguration, @NonNull Context context) {
-        return VERSION.SDK_INT >= 26 ? viewConfiguration.getScaledHorizontalScrollFactor() : getLegacyScrollFactor(viewConfiguration, context);
+        return Build.VERSION.SDK_INT >= 26 ? viewConfiguration.getScaledHorizontalScrollFactor() : getLegacyScrollFactor(viewConfiguration, context);
     }
 
     public static int getScaledHoverSlop(ViewConfiguration viewConfiguration) {
-        return VERSION.SDK_INT >= 28 ? viewConfiguration.getScaledHoverSlop() : viewConfiguration.getScaledTouchSlop() / 2;
+        return Build.VERSION.SDK_INT >= 28 ? viewConfiguration.getScaledHoverSlop() : viewConfiguration.getScaledTouchSlop() / 2;
     }
 
     @Deprecated
@@ -58,7 +58,7 @@ public final class ViewConfigurationCompat {
     }
 
     public static float getScaledVerticalScrollFactor(@NonNull ViewConfiguration viewConfiguration, @NonNull Context context) {
-        return VERSION.SDK_INT >= 26 ? viewConfiguration.getScaledVerticalScrollFactor() : getLegacyScrollFactor(viewConfiguration, context);
+        return Build.VERSION.SDK_INT >= 26 ? viewConfiguration.getScaledVerticalScrollFactor() : getLegacyScrollFactor(viewConfiguration, context);
     }
 
     @Deprecated
@@ -67,7 +67,7 @@ public final class ViewConfigurationCompat {
     }
 
     public static boolean shouldShowMenuShortcutsWhenKeyboardPresent(ViewConfiguration viewConfiguration, @NonNull Context context) {
-        if (VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 28) {
             return viewConfiguration.shouldShowMenuShortcutsWhenKeyboardPresent();
         }
         Resources resources = context.getResources();

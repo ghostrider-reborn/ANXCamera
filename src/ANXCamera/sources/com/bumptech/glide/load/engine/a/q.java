@@ -3,7 +3,7 @@ package com.bumptech.glide.load.engine.a;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
@@ -25,7 +25,7 @@ public final class q {
     public static final class a {
         @VisibleForTesting
         static final int MEMORY_CACHE_TARGET_SCREENS = 2;
-        static final int Sg = (VERSION.SDK_INT < 26 ? 4 : 1);
+        static final int Sg = (Build.VERSION.SDK_INT < 26 ? 4 : 1);
         static final float Tg = 0.4f;
         static final float Ug = 0.33f;
         static final int Vg = 4194304;
@@ -42,7 +42,7 @@ public final class q {
             this.context = context2;
             this.Mg = (ActivityManager) context2.getSystemService("activity");
             this.screenDimensions = new b(context2.getResources().getDisplayMetrics());
-            if (VERSION.SDK_INT >= 26 && q.a(this.Mg)) {
+            if (Build.VERSION.SDK_INT >= 26 && q.a(this.Mg)) {
                 this.Og = 0.0f;
             }
         }
@@ -80,14 +80,14 @@ public final class q {
             return this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @VisibleForTesting
         public a setActivityManager(ActivityManager activityManager) {
             this.Mg = activityManager;
             return this;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @VisibleForTesting
         public a setScreenDimensions(c cVar) {
             this.screenDimensions = cVar;
@@ -139,8 +139,7 @@ public final class q {
             this.Yg = Math.round(f4 * f5);
             this.Xg = Math.round(f5 * aVar.Og);
         }
-        String str = TAG;
-        if (Log.isLoggable(str, 3)) {
+        if (Log.isLoggable(TAG, 3)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Calculation complete, Calculated memory cache size: ");
             sb.append(R(this.Yg));
@@ -156,7 +155,7 @@ public final class q {
             sb.append(aVar.Mg.getMemoryClass());
             sb.append(", isLowMemoryDevice: ");
             sb.append(a(aVar.Mg));
-            Log.d(str, sb.toString());
+            Log.d(TAG, sb.toString());
         }
     }
 
@@ -165,8 +164,9 @@ public final class q {
     }
 
     private static int a(ActivityManager activityManager, float f2, float f3) {
+        boolean a2 = a(activityManager);
         float memoryClass = (float) (activityManager.getMemoryClass() * 1024 * 1024);
-        if (a(activityManager)) {
+        if (a2) {
             f2 = f3;
         }
         return Math.round(memoryClass * f2);
@@ -174,7 +174,7 @@ public final class q {
 
     @TargetApi(19)
     static boolean a(ActivityManager activityManager) {
-        if (VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {
             return activityManager.isLowRamDevice();
         }
         return true;

@@ -72,7 +72,7 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAllBut(int i) {
             WithLatestInnerSubscriber[] withLatestInnerSubscriberArr = this.subscribers;
             for (int i2 = 0; i2 < withLatestInnerSubscriberArr.length; i2++) {
@@ -82,25 +82,25 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete(int i, boolean z) {
             if (!z) {
                 this.done = true;
                 SubscriptionHelper.cancel(this.s);
                 cancelAllBut(i);
-                HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+                HalfSerializer.onComplete((Subscriber<?>) this.actual, (AtomicInteger) this, this.error);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(int i, Throwable th) {
             this.done = true;
             SubscriptionHelper.cancel(this.s);
             cancelAllBut(i);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Subscriber<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerNext(int i, Object obj) {
             this.values.set(i, obj);
         }
@@ -109,7 +109,7 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
             if (!this.done) {
                 this.done = true;
                 cancelAllBut(-1);
-                HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+                HalfSerializer.onComplete((Subscriber<?>) this.actual, (AtomicInteger) this, this.error);
             }
         }
 
@@ -120,12 +120,12 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
             }
             this.done = true;
             cancelAllBut(-1);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Subscriber<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
         public void onNext(T t) {
             if (!tryOnNext(t) && !this.done) {
-                ((Subscription) this.s.get()).request(1);
+                this.s.get().request(1);
             }
         }
 
@@ -137,11 +137,11 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
             SubscriptionHelper.deferredRequest(this.s, this.requested, j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(Publisher<?>[] publisherArr, int i) {
             WithLatestInnerSubscriber[] withLatestInnerSubscriberArr = this.subscribers;
             AtomicReference<Subscription> atomicReference = this.s;
-            for (int i2 = 0; i2 < i && !SubscriptionHelper.isCancelled((Subscription) atomicReference.get()); i2++) {
+            for (int i2 = 0; i2 < i && !SubscriptionHelper.isCancelled(atomicReference.get()); i2++) {
                 publisherArr[i2].subscribe(withLatestInnerSubscriberArr[i2]);
             }
         }
@@ -164,7 +164,7 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
                 objArr[i] = obj;
             }
             try {
-                Object apply = this.combiner.apply(objArr);
+                R apply = this.combiner.apply(objArr);
                 ObjectHelper.requireNonNull(apply, "The combiner returned a null value");
                 HalfSerializer.onNext(this.actual, apply, (AtomicInteger) this, this.error);
                 return true;
@@ -188,7 +188,7 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
             this.index = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void dispose() {
             SubscriptionHelper.cancel(this);
         }
@@ -260,6 +260,6 @@ public final class FlowableWithLatestFromMany<T, R> extends AbstractFlowableWith
         WithLatestFromSubscriber withLatestFromSubscriber = new WithLatestFromSubscriber(subscriber, this.combiner, i);
         subscriber.onSubscribe(withLatestFromSubscriber);
         withLatestFromSubscriber.subscribe(publisherArr, i);
-        this.source.subscribe((FlowableSubscriber<? super T>) withLatestFromSubscriber);
+        this.source.subscribe(withLatestFromSubscriber);
     }
 }

@@ -6,6 +6,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,13 +28,12 @@ public class f implements t<File, ByteBuffer> {
             return ByteBuffer.class;
         }
 
-        public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super ByteBuffer> aVar) {
+        public void a(@NonNull Priority priority, @NonNull d.a<? super ByteBuffer> aVar) {
             try {
                 aVar.b(com.bumptech.glide.util.a.fromFile(this.file));
             } catch (IOException e2) {
-                String str = f.TAG;
-                if (Log.isLoggable(str, 3)) {
-                    Log.d(str, "Failed to obtain ByteBuffer for file", e2);
+                if (Log.isLoggable(f.TAG, 3)) {
+                    Log.d(f.TAG, "Failed to obtain ByteBuffer for file", e2);
                 }
                 aVar.b((Exception) e2);
             }
@@ -62,8 +62,8 @@ public class f implements t<File, ByteBuffer> {
         }
     }
 
-    public com.bumptech.glide.load.model.t.a<ByteBuffer> a(@NonNull File file, int i, int i2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(file), new a(file));
+    public t.a<ByteBuffer> a(@NonNull File file, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(file), new a(file));
     }
 
     /* renamed from: f */

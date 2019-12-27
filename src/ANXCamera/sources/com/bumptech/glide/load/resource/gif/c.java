@@ -21,12 +21,11 @@ public class c implements i<b> {
 
     public boolean a(@NonNull A<b> a2, @NonNull File file, @NonNull g gVar) {
         try {
-            a.a(((b) a2.get()).getBuffer(), file);
+            a.a(a2.get().getBuffer(), file);
             return true;
         } catch (IOException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                Log.w(str, "Failed to encode GIF drawable data", e2);
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Failed to encode GIF drawable data", e2);
             }
             return false;
         }

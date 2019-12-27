@@ -39,13 +39,9 @@ public class TESpdLogManager {
         }
         String[] list = file.list();
         ArrayList arrayList = new ArrayList();
-        for (int i = 0; i < list.length; i++) {
-            if (list[i].endsWith(".txt")) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(File.separator);
-                sb.append(list[i]);
-                arrayList.add(sb.toString());
+        for (String endsWith : list) {
+            if (endsWith.endsWith(".txt")) {
+                arrayList.add(str + File.separator + list[r3]);
             }
         }
         return (String[]) arrayList.toArray(new String[0]);
@@ -64,10 +60,7 @@ public class TESpdLogManager {
     }
 
     public int initSpdLog(String str, int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("logDir: ");
-        sb.append(str);
-        Log.e("TESpdLogManager", sb.toString());
+        Log.e("TESpdLogManager", "logDir: " + str);
         int initSpdLog = this.mTESpdLogInvoker.initSpdLog(str, i, i2);
         if (initSpdLog < 0) {
             return initSpdLog;

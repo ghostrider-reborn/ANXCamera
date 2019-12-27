@@ -29,7 +29,7 @@ public class BeautyMenuGroupManager {
     private void updateCurrentMenu(int i) {
         SparseArray<AbBottomMenu> sparseArray = this.mBeautyMenuList;
         if (sparseArray != null) {
-            AbBottomMenu abBottomMenu = (AbBottomMenu) sparseArray.get(i);
+            AbBottomMenu abBottomMenu = sparseArray.get(i);
             if (abBottomMenu != null) {
                 this.mBottomMenu = abBottomMenu;
                 return;
@@ -41,37 +41,37 @@ public class BeautyMenuGroupManager {
                 FrontBeautyMenu frontBeautyMenu = new FrontBeautyMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = frontBeautyMenu;
                 this.mBeautyMenuList.put(i, frontBeautyMenu);
-                break;
+                return;
             case 162:
                 BackBeautyMenu backBeautyMenu = new BackBeautyMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = backBeautyMenu;
                 this.mBeautyMenuList.put(i, backBeautyMenu);
-                break;
+                return;
             case 163:
                 LiveBeautyMenu liveBeautyMenu = new LiveBeautyMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = liveBeautyMenu;
                 this.mBeautyMenuList.put(i, liveBeautyMenu);
-                break;
+                return;
             case 164:
                 LiveStickerMenu liveStickerMenu = new LiveStickerMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = liveStickerMenu;
                 this.mBeautyMenuList.put(i, liveStickerMenu);
-                break;
+                return;
             case 165:
                 LiveSpeedMenu liveSpeedMenu = new LiveSpeedMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = liveSpeedMenu;
                 this.mBeautyMenuList.put(i, liveSpeedMenu);
-                break;
+                return;
             case 166:
                 MimojiMenu mimojiMenu = new MimojiMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = mimojiMenu;
                 this.mBeautyMenuList.put(i, mimojiMenu);
-                break;
+                return;
             default:
                 FrontBeautyMenu frontBeautyMenu2 = new FrontBeautyMenu(this.mContext, this.mContainerView, this.mBeautyMenuAnimator);
                 this.mBottomMenu = frontBeautyMenu2;
                 this.mBeautyMenuList.put(i, frontBeautyMenu2);
-                break;
+                return;
         }
     }
 

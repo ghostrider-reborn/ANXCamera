@@ -2,7 +2,6 @@ package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.reactivex.internal.disposables.DisposableHelper;
@@ -54,11 +53,7 @@ public final class FlowableInterval extends Flowable<Long> {
                 return;
             }
             Subscriber<? super Long> subscriber2 = this.actual;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Can't deliver value ");
-            sb.append(this.count);
-            sb.append(" due to lack of requests");
-            subscriber2.onError(new MissingBackpressureException(sb.toString()));
+            subscriber2.onError(new MissingBackpressureException("Can't deliver value " + this.count + " due to lack of requests"));
             DisposableHelper.dispose(this.resource);
         }
 
@@ -79,7 +74,7 @@ public final class FlowableInterval extends Flowable<Long> {
         subscriber.onSubscribe(intervalSubscriber);
         Scheduler scheduler2 = this.scheduler;
         if (scheduler2 instanceof TrampolineScheduler) {
-            Worker createWorker = scheduler2.createWorker();
+            Scheduler.Worker createWorker = scheduler2.createWorker();
             intervalSubscriber.setResource(createWorker);
             createWorker.schedulePeriodically(intervalSubscriber, this.initialDelay, this.period, this.unit);
             return;

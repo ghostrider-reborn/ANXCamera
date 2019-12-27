@@ -96,10 +96,7 @@ final class RealBufferedSink implements BufferedSink {
             }
 
             public String toString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append(RealBufferedSink.this);
-                sb.append(".outputStream()");
-                return sb.toString();
+                return RealBufferedSink.this + ".outputStream()";
             }
 
             public void write(int i) throws IOException {
@@ -129,11 +126,7 @@ final class RealBufferedSink implements BufferedSink {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("buffer(");
-        sb.append(this.sink);
-        sb.append(")");
-        return sb.toString();
+        return "buffer(" + this.sink + ")";
     }
 
     public BufferedSink write(ByteString byteString) throws IOException {

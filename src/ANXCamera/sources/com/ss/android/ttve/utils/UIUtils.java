@@ -7,7 +7,7 @@ import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Looper;
 import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
@@ -15,15 +15,12 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.TouchDelegate;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.widget.TextView;
 
 public class UIUtils {
-    public static final boolean API_ET_20 = (VERSION.SDK_INT > 19);
+    public static final boolean API_ET_20 = (Build.VERSION.SDK_INT > 19);
     private static int DPI = -1;
     public static final char ELLIPSIS_CHAR = '…';
     public static final int LAYOUT_PARAMS_KEEP_OLD = -3;
@@ -53,7 +50,7 @@ public class UIUtils {
     }
 
     public static void detachFromParent(View view) {
-        if (!(view == null || view.getParent() == null)) {
+        if (view != null && view.getParent() != null) {
             ViewParent parent = view.getParent();
             if (parent instanceof ViewGroup) {
                 try {
@@ -101,9 +98,8 @@ public class UIUtils {
     }
 
     public static void ellipseSingleLineStr(String str, int i, Paint paint, int i2, EllipsisMeasureResult ellipsisMeasureResult) {
-        String str2 = "";
         if (i <= i2 || str.isEmpty()) {
-            ellipsisMeasureResult.ellipsisStr = str2;
+            ellipsisMeasureResult.ellipsisStr = "";
             ellipsisMeasureResult.length = 0;
             return;
         }
@@ -113,11 +109,10 @@ public class UIUtils {
             ellipsisMeasureResult.length = floatToIntBig;
             return;
         }
-        int i3 = i - i2;
         StringBuilder sb = new StringBuilder();
-        int breakText = paint.breakText(str, 0, str.length(), true, (float) i3, null);
+        int breakText = paint.breakText(str, 0, str.length(), true, (float) (i - i2), (float[]) null);
         if (breakText < 1) {
-            ellipsisMeasureResult.ellipsisStr = str2;
+            ellipsisMeasureResult.ellipsisStr = "";
             ellipsisMeasureResult.length = 0;
             return;
         }
@@ -163,17 +158,10 @@ public class UIUtils {
             return String.valueOf(i);
         }
         String format = String.format("%.1f", new Object[]{Double.valueOf((((double) i) * 1.0d) / 10000.0d)});
-        String str = "万";
         if ('0' == format.charAt(format.length() - 1)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(format.substring(0, format.length() - 2));
-            sb.append(str);
-            return sb.toString();
+            return format.substring(0, format.length() - 2) + "万";
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(format);
-        sb2.append(str);
-        return sb2.toString();
+        return format + "万";
     }
 
     public static int getDpi(Context context) {
@@ -253,39 +241,36 @@ public class UIUtils {
     }
 
     public static final int getScreenHeight(Context context) {
-        int i = 0;
         if (context == null) {
             return 0;
         }
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        if (displayMetrics != null) {
-            i = displayMetrics.heightPixels;
+        if (displayMetrics == null) {
+            return 0;
         }
-        return i;
+        return displayMetrics.heightPixels;
     }
 
     public static final int getScreenWidth(Context context) {
-        int i = 0;
         if (context == null) {
             return 0;
         }
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        if (displayMetrics != null) {
-            i = displayMetrics.widthPixels;
+        if (displayMetrics == null) {
+            return 0;
         }
-        return i;
+        return displayMetrics.widthPixels;
     }
 
     public static final int getStatusBarHeight(Context context) {
-        int i = 0;
         if (context == null) {
             return 0;
         }
         int identifier = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (identifier > 0) {
-            i = context.getResources().getDimensionPixelSize(identifier);
+            return context.getResources().getDimensionPixelSize(identifier);
         }
-        return i;
+        return 0;
     }
 
     public static boolean isInUIThread() {
@@ -293,14 +278,7 @@ public class UIUtils {
     }
 
     public static final boolean isViewVisible(View view) {
-        boolean z = false;
-        if (view == null) {
-            return false;
-        }
-        if (view.getVisibility() == 0) {
-            z = true;
-        }
-        return z;
+        return view != null && view.getVisibility() == 0;
     }
 
     public static int px2dip(Context context, float f2) {
@@ -318,15 +296,15 @@ public class UIUtils {
         }
     }
 
-    public static void setClickListener(boolean z, View view, OnClickListener onClickListener) {
+    public static void setClickListener(boolean z, View view, View.OnClickListener onClickListener) {
         if (view != null) {
             if (z) {
                 view.setOnClickListener(onClickListener);
                 view.setClickable(true);
-            } else {
-                view.setOnClickListener(null);
-                view.setClickable(false);
+                return;
             }
+            view.setOnClickListener((View.OnClickListener) null);
+            view.setClickable(false);
         }
     }
 
@@ -340,7 +318,7 @@ public class UIUtils {
     }
 
     public static void setLayoutParams(View view, int i, int i2) {
-        LayoutParams layoutParams = view.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
         if (layoutParams != null) {
             if (i != Integer.MIN_VALUE) {
                 layoutParams.width = i;
@@ -359,13 +337,15 @@ public class UIUtils {
 
     @SuppressLint({"NewApi"})
     public static void setTextViewMaxLines(TextView textView, int i) {
-        if (textView != null && i > 0 && (VERSION.SDK_INT < 16 || textView.getMaxLines() != i)) {
-            boolean z = true;
-            if (i != 1) {
-                z = false;
+        if (textView != null && i > 0) {
+            if (Build.VERSION.SDK_INT < 16 || textView.getMaxLines() != i) {
+                boolean z = true;
+                if (i != 1) {
+                    z = false;
+                }
+                textView.setSingleLine(z);
+                textView.setMaxLines(i);
             }
-            textView.setSingleLine(z);
-            textView.setMaxLines(i);
         }
     }
 
@@ -383,10 +363,10 @@ public class UIUtils {
         if (textView != null) {
             if (TextUtils.isEmpty(charSequence)) {
                 setViewVisibility(textView, 8);
-            } else {
-                setViewVisibility(textView, 0);
-                textView.setText(charSequence);
+                return;
             }
+            setViewVisibility(textView, 0);
+            textView.setText(charSequence);
         }
     }
 
@@ -426,7 +406,7 @@ public class UIUtils {
     @SuppressLint({"NewApi"})
     public static void setViewMinHeight(View view, int i) {
         if (view != null) {
-            if (VERSION.SDK_INT < 16 || view.getMinimumHeight() != i) {
+            if (Build.VERSION.SDK_INT < 16 || view.getMinimumHeight() != i) {
                 view.setMinimumHeight(i);
             }
         }
@@ -444,8 +424,11 @@ public class UIUtils {
 
     public static void updateLayout(View view, int i, int i2) {
         if (view != null) {
-            LayoutParams layoutParams = view.getLayoutParams();
-            if (!(layoutParams == null || (layoutParams.width == i && layoutParams.height == i2))) {
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            if (layoutParams == null) {
+                return;
+            }
+            if (layoutParams.width != i || layoutParams.height != i2) {
                 if (i != -3) {
                     layoutParams.width = i;
                 }
@@ -459,14 +442,14 @@ public class UIUtils {
 
     public static void updateLayoutMargin(View view, int i, int i2, int i3, int i4) {
         if (view != null) {
-            LayoutParams layoutParams = view.getLayoutParams();
-            if (layoutParams != null && (layoutParams instanceof MarginLayoutParams)) {
-                updateMargin(view, (MarginLayoutParams) layoutParams, i, i2, i3, i4);
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            if (layoutParams != null && (layoutParams instanceof ViewGroup.MarginLayoutParams)) {
+                updateMargin(view, (ViewGroup.MarginLayoutParams) layoutParams, i, i2, i3, i4);
             }
         }
     }
 
-    private static void updateMargin(View view, MarginLayoutParams marginLayoutParams, int i, int i2, int i3, int i4) {
+    private static void updateMargin(View view, ViewGroup.MarginLayoutParams marginLayoutParams, int i, int i2, int i3, int i4) {
         if (view != null && marginLayoutParams != null) {
             if (marginLayoutParams.leftMargin != i || marginLayoutParams.topMargin != i2 || marginLayoutParams.rightMargin != i3 || marginLayoutParams.bottomMargin != i4) {
                 if (i != -3) {

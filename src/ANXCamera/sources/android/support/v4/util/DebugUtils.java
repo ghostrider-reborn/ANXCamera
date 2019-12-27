@@ -1,10 +1,9 @@
 package android.support.v4.util;
 
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import com.ss.android.ttve.common.TEDefine;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class DebugUtils {
     private DebugUtils() {
     }

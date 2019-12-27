@@ -4,7 +4,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,17 +14,16 @@ import java.util.Locale;
 
 @Deprecated
 public class VVPreviewAdapter extends PagerAdapter {
-    private OnClickListener mClickListener;
+    private View.OnClickListener mClickListener;
     private VVList mVVList;
 
-    public VVPreviewAdapter(VVList vVList, OnClickListener onClickListener) {
+    public VVPreviewAdapter(VVList vVList, View.OnClickListener onClickListener) {
         this.mVVList = vVList;
         this.mClickListener = onClickListener;
     }
 
     private String getDurationString(long j) {
-        float f2 = ((float) j) / 1000.0f;
-        return String.format(Locale.ENGLISH, "%.1f", new Object[]{Float.valueOf(Math.abs(f2))});
+        return String.format(Locale.ENGLISH, "%.1f", new Object[]{Float.valueOf(Math.abs(((float) j) / 1000.0f))});
     }
 
     public void destroyItem(ViewGroup viewGroup, int i, Object obj) {
@@ -44,11 +42,10 @@ public class VVPreviewAdapter extends PagerAdapter {
         VVItem vVItem = (VVItem) this.mVVList.getItem(i);
         View inflate = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.fragment_vv_preview_item, viewGroup, false);
         ImageView imageView = (ImageView) inflate.findViewById(R.id.vv_preview_item_image);
-        ImageView imageView2 = (ImageView) inflate.findViewById(R.id.vv_preview_item_collapsing);
         TextureVideoView textureVideoView = (TextureVideoView) inflate.findViewById(R.id.vv_preview_texture_video);
         TextView textView = (TextView) inflate.findViewById(R.id.vv_preview_item_hint);
         inflate.setTag(Integer.valueOf(i));
-        imageView2.setOnClickListener(this.mClickListener);
+        ((ImageView) inflate.findViewById(R.id.vv_preview_item_collapsing)).setOnClickListener(this.mClickListener);
         ViewCompat.setTransitionName(imageView, vVItem.name);
         c.i(viewGroup.getContext()).load(vVItem.coverPath).a(imageView);
         textView.setText(textView.getResources().getString(R.string.vv_duartion_hint, new Object[]{vVItem.name, Integer.valueOf(vVItem.getEssentialFragmentSize()), getDurationString(vVItem.getTotalDuration())}));

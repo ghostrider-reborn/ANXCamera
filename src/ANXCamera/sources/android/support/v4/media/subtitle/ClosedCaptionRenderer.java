@@ -3,45 +3,42 @@ package android.support.v4.media.subtitle;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Paint.Join;
-import android.graphics.Paint.Style;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.MediaFormat;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.mediacompat.R;
 import android.support.v4.media.SubtitleData2;
-import android.support.v4.media.subtitle.Cea608CCParser.MutableBackgroundColorSpan;
-import android.support.v4.media.subtitle.SubtitleController.Renderer;
-import android.support.v4.media.subtitle.SubtitleTrack.RenderingWidget;
-import android.support.v4.media.subtitle.SubtitleTrack.RenderingWidget.OnChangedListener;
+import android.support.v4.media.subtitle.Cea608CCParser;
+import android.support.v4.media.subtitle.ClosedCaptionWidget;
+import android.support.v4.media.subtitle.SubtitleController;
+import android.support.v4.media.subtitle.SubtitleTrack;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.view.View.MeasureSpec;
-import android.view.accessibility.CaptioningManager.CaptionStyle;
+import android.view.View;
+import android.view.accessibility.CaptioningManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TextView.BufferType;
 import java.util.ArrayList;
 
 @RequiresApi(28)
-@RestrictTo({Scope.LIBRARY_GROUP})
-public class ClosedCaptionRenderer extends Renderer {
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
+public class ClosedCaptionRenderer extends SubtitleController.Renderer {
     private Cea608CCWidget mCCWidget;
     private final Context mContext;
 
-    class Cea608CCWidget extends ClosedCaptionWidget implements DisplayListener {
+    class Cea608CCWidget extends ClosedCaptionWidget implements Cea608CCParser.DisplayListener {
         private static final String DUMMY_TEXT = "1234567890123456789012345678901234";
         /* access modifiers changed from: private */
         public final Rect mTextBounds;
 
-        private class CCLayout extends LinearLayout implements ClosedCaptionLayout {
+        private class CCLayout extends LinearLayout implements ClosedCaptionWidget.ClosedCaptionLayout {
             private static final int MAX_ROWS = 15;
             private static final float SAFE_AREA_RATIO = 0.9f;
             private final CCLineBox[] mLineBoxes = new CCLineBox[15];
@@ -94,15 +91,14 @@ public class ClosedCaptionRenderer extends Renderer {
                 } else {
                     measuredHeight = i3 / 4;
                 }
-                int i5 = (int) (((float) measuredWidth) * 0.9f);
-                int makeMeasureSpec = MeasureSpec.makeMeasureSpec(((int) (((float) measuredHeight) * 0.9f)) / 15, 1073741824);
-                int makeMeasureSpec2 = MeasureSpec.makeMeasureSpec(i5, 1073741824);
-                for (int i6 = 0; i6 < 15; i6++) {
-                    this.mLineBoxes[i6].measure(makeMeasureSpec2, makeMeasureSpec);
+                int makeMeasureSpec = View.MeasureSpec.makeMeasureSpec(((int) (((float) measuredHeight) * 0.9f)) / 15, 1073741824);
+                int makeMeasureSpec2 = View.MeasureSpec.makeMeasureSpec((int) (((float) measuredWidth) * 0.9f), 1073741824);
+                for (int i5 = 0; i5 < 15; i5++) {
+                    this.mLineBoxes[i5].measure(makeMeasureSpec2, makeMeasureSpec);
                 }
             }
 
-            public void setCaptionStyle(CaptionStyle captionStyle) {
+            public void setCaptionStyle(CaptioningManager.CaptionStyle captionStyle) {
                 for (int i = 0; i < 15; i++) {
                     this.mLineBoxes[i].setCaptionStyle(captionStyle);
                 }
@@ -111,11 +107,11 @@ public class ClosedCaptionRenderer extends Renderer {
             public void setFontScale(float f2) {
             }
 
-            /* access modifiers changed from: 0000 */
+            /* access modifiers changed from: package-private */
             public void update(SpannableStringBuilder[] spannableStringBuilderArr) {
                 for (int i = 0; i < 15; i++) {
                     if (spannableStringBuilderArr[i] != null) {
-                        this.mLineBoxes[i].setText(spannableStringBuilderArr[i], BufferType.SPANNABLE);
+                        this.mLineBoxes[i].setText(spannableStringBuilderArr[i], TextView.BufferType.SPANNABLE);
                         this.mLineBoxes[i].setVisibility(0);
                     } else {
                         this.mLineBoxes[i].setVisibility(4);
@@ -151,12 +147,12 @@ public class ClosedCaptionRenderer extends Renderer {
 
             private void drawEdgeOutline(Canvas canvas) {
                 TextPaint paint = getPaint();
-                Style style = paint.getStyle();
-                Join strokeJoin = paint.getStrokeJoin();
+                Paint.Style style = paint.getStyle();
+                Paint.Join strokeJoin = paint.getStrokeJoin();
                 float strokeWidth = paint.getStrokeWidth();
                 setTextColor(this.mEdgeColor);
-                paint.setStyle(Style.FILL_AND_STROKE);
-                paint.setStrokeJoin(Join.ROUND);
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setStrokeJoin(Paint.Join.ROUND);
                 paint.setStrokeWidth(this.mOutlineWidth);
                 super.onDraw(canvas);
                 setTextColor(this.mTextColor);
@@ -170,8 +166,8 @@ public class ClosedCaptionRenderer extends Renderer {
 
             private void drawEdgeRaisedOrDepressed(Canvas canvas) {
                 TextPaint paint = getPaint();
-                Style style = paint.getStyle();
-                paint.setStyle(Style.FILL);
+                Paint.Style style = paint.getStyle();
+                paint.setStyle(Paint.Style.FILL);
                 boolean z = this.mEdgeType == 3;
                 int i = -1;
                 int i2 = z ? -1 : this.mEdgeColor;
@@ -194,8 +190,8 @@ public class ClosedCaptionRenderer extends Renderer {
                 CharSequence text = getText();
                 if (text instanceof Spannable) {
                     Spannable spannable = (Spannable) text;
-                    MutableBackgroundColorSpan[] mutableBackgroundColorSpanArr = (MutableBackgroundColorSpan[]) spannable.getSpans(0, spannable.length(), MutableBackgroundColorSpan.class);
-                    for (MutableBackgroundColorSpan backgroundColor : mutableBackgroundColorSpanArr) {
+                    Cea608CCParser.MutableBackgroundColorSpan[] mutableBackgroundColorSpanArr = (Cea608CCParser.MutableBackgroundColorSpan[]) spannable.getSpans(0, spannable.length(), Cea608CCParser.MutableBackgroundColorSpan.class);
+                    for (Cea608CCParser.MutableBackgroundColorSpan backgroundColor : mutableBackgroundColorSpanArr) {
                         backgroundColor.setBackgroundColor(i);
                     }
                 }
@@ -206,9 +202,7 @@ public class ClosedCaptionRenderer extends Renderer {
                 int i = this.mEdgeType;
                 if (i == -1 || i == 0 || i == 2) {
                     super.onDraw(canvas);
-                    return;
-                }
-                if (i == 1) {
+                } else if (i == 1) {
                     drawEdgeOutline(canvas);
                 } else {
                     drawEdgeRaisedOrDepressed(canvas);
@@ -217,19 +211,19 @@ public class ClosedCaptionRenderer extends Renderer {
 
             /* access modifiers changed from: protected */
             public void onMeasure(int i, int i2) {
-                float size = ((float) MeasureSpec.getSize(i2)) * FONT_PADDING_RATIO;
+                float size = ((float) View.MeasureSpec.getSize(i2)) * FONT_PADDING_RATIO;
                 setTextSize(0, size);
                 this.mOutlineWidth = (0.1f * size) + 1.0f;
                 this.mShadowRadius = (size * EDGE_SHADOW_RATIO) + 1.0f;
                 this.mShadowOffset = this.mShadowRadius;
                 setScaleX(1.0f);
                 getPaint().getTextBounds(Cea608CCWidget.DUMMY_TEXT, 0, 34, Cea608CCWidget.this.mTextBounds);
-                setScaleX(((float) MeasureSpec.getSize(i)) / ((float) Cea608CCWidget.this.mTextBounds.width()));
+                setScaleX(((float) View.MeasureSpec.getSize(i)) / ((float) Cea608CCWidget.this.mTextBounds.width()));
                 super.onMeasure(i, i2);
             }
 
-            /* access modifiers changed from: 0000 */
-            public void setCaptionStyle(CaptionStyle captionStyle) {
+            /* access modifiers changed from: package-private */
+            public void setCaptionStyle(CaptioningManager.CaptionStyle captionStyle) {
                 this.mTextColor = captionStyle.foregroundColor;
                 this.mBgColor = captionStyle.backgroundColor;
                 this.mEdgeType = captionStyle.edgeType;
@@ -247,7 +241,7 @@ public class ClosedCaptionRenderer extends Renderer {
         }
 
         Cea608CCWidget(ClosedCaptionRenderer closedCaptionRenderer, Context context) {
-            this(closedCaptionRenderer, context, null);
+            this(closedCaptionRenderer, context, (AttributeSet) null);
         }
 
         Cea608CCWidget(ClosedCaptionRenderer closedCaptionRenderer, Context context, AttributeSet attributeSet) {
@@ -263,17 +257,17 @@ public class ClosedCaptionRenderer extends Renderer {
             this.mTextBounds = new Rect();
         }
 
-        public ClosedCaptionLayout createCaptionLayout(Context context) {
+        public ClosedCaptionWidget.ClosedCaptionLayout createCaptionLayout(Context context) {
             return new CCLayout(context);
         }
 
-        public CaptionStyle getCaptionStyle() {
+        public CaptioningManager.CaptionStyle getCaptionStyle() {
             return this.mCaptionStyle;
         }
 
         public void onDisplayChanged(SpannableStringBuilder[] spannableStringBuilderArr) {
             ((CCLayout) this.mClosedCaptionLayout).update(spannableStringBuilderArr);
-            OnChangedListener onChangedListener = this.mListener;
+            SubtitleTrack.RenderingWidget.OnChangedListener onChangedListener = this.mListener;
             if (onChangedListener != null) {
                 onChangedListener.onChanged(this);
             }
@@ -289,7 +283,7 @@ public class ClosedCaptionRenderer extends Renderer {
             this.mRenderingWidget = cea608CCWidget;
         }
 
-        public RenderingWidget getRenderingWidget() {
+        public SubtitleTrack.RenderingWidget getRenderingWidget() {
             return this.mRenderingWidget;
         }
 
@@ -297,7 +291,7 @@ public class ClosedCaptionRenderer extends Renderer {
             this.mCCParser.parse(bArr);
         }
 
-        public void updateView(ArrayList<Cue> arrayList) {
+        public void updateView(ArrayList<SubtitleTrack.Cue> arrayList) {
         }
     }
 
@@ -312,17 +306,13 @@ public class ClosedCaptionRenderer extends Renderer {
             }
             return new Cea608CaptionTrack(this.mCCWidget, mediaFormat);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("No matching format: ");
-        sb.append(mediaFormat.toString());
-        throw new RuntimeException(sb.toString());
+        throw new RuntimeException("No matching format: " + mediaFormat.toString());
     }
 
     public boolean supports(MediaFormat mediaFormat) {
-        String str = "mime";
-        if (!mediaFormat.containsKey(str)) {
-            return false;
+        if (mediaFormat.containsKey("mime")) {
+            return SubtitleData2.MIMETYPE_TEXT_CEA_608.equals(mediaFormat.getString("mime"));
         }
-        return SubtitleData2.MIMETYPE_TEXT_CEA_608.equals(mediaFormat.getString(str));
+        return false;
     }
 }

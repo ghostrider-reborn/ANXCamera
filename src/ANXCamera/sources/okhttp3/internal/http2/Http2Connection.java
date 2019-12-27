@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.Protocol;
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.Util;
+import okhttp3.internal.http2.Http2Reader;
 import okhttp3.internal.platform.Platform;
 import okio.Buffer;
 import okio.BufferedSink;
@@ -103,7 +104,7 @@ public final class Http2Connection implements Closeable {
         public abstract void onStream(Http2Stream http2Stream) throws IOException;
     }
 
-    class ReaderRunnable extends NamedRunnable implements Handler {
+    class ReaderRunnable extends NamedRunnable implements Http2Reader.Handler {
         final Http2Reader reader;
 
         ReaderRunnable(Http2Reader http2Reader) {
@@ -207,12 +208,15 @@ public final class Http2Connection implements Closeable {
             r0.receiveHeaders(r13);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:26:0x0072, code lost:
-            if (r10 == false) goto L_0x0077;
+            if (r10 == false) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:27:0x0074, code lost:
             r0.receiveFin();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:28:0x0077, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:35:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:36:?, code lost:
             return;
          */
         public void headers(boolean z, int i, int i2, List<Header> list) {
@@ -235,10 +239,7 @@ public final class Http2Connection implements Closeable {
                                             Http2Connection.this.listener.onStream(http2Stream);
                                         } catch (IOException e2) {
                                             Platform platform = Platform.get();
-                                            StringBuilder sb = new StringBuilder();
-                                            sb.append("Http2Connection.Listener failure for ");
-                                            sb.append(Http2Connection.this.hostname);
-                                            platform.log(4, sb.toString(), e2);
+                                            platform.log(4, "Http2Connection.Listener failure for " + Http2Connection.this.hostname, e2);
                                             try {
                                                 http2Stream.close(ErrorCode.PROTOCOL_ERROR);
                                             } catch (IOException unused) {
@@ -262,7 +263,7 @@ public final class Http2Connection implements Closeable {
                 }
                 return;
             }
-            Http2Connection.this.writePingLater(true, i, i2, null);
+            Http2Connection.this.writePingLater(true, i, i2, (Ping) null);
         }
 
         public void priority(int i, int i2, int i3, boolean z) {
@@ -283,6 +284,8 @@ public final class Http2Connection implements Closeable {
             }
         }
 
+        /* JADX WARNING: type inference failed for: r1v12, types: [java.lang.Object[]] */
+        /* JADX WARNING: Multi-variable type inference failed */
         public void settings(boolean z, Settings settings) {
             Http2Stream[] http2StreamArr;
             long j;
@@ -305,7 +308,7 @@ public final class Http2Connection implements Closeable {
                         Http2Connection.this.receivedInitialPeerSettings = true;
                     }
                     if (!Http2Connection.this.streams.isEmpty()) {
-                        http2StreamArr = (Http2Stream[]) Http2Connection.this.streams.values().toArray(new Http2Stream[Http2Connection.this.streams.size()]);
+                        http2StreamArr = Http2Connection.this.streams.values().toArray(new Http2Stream[Http2Connection.this.streams.size()]);
                     }
                 }
                 Http2Connection.executor.execute(new NamedRunnable("OkHttp %s settings", Http2Connection.this.hostname) {
@@ -356,10 +359,7 @@ public final class Http2Connection implements Closeable {
         if (builder.client) {
             this.nextStreamId += 2;
         }
-        if (builder.client) {
-            i = 1;
-        }
-        this.nextPingId = i;
+        this.nextPingId = builder.client ? 1 : i;
         if (builder.client) {
             this.okHttpSettings.set(7, 16777216);
         }
@@ -415,7 +415,7 @@ public final class Http2Connection implements Closeable {
         return http2Stream;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addBytesToWriteWindow(long j) {
         this.bytesLeftInWriteWindow += j;
         if (j > 0) {
@@ -427,7 +427,7 @@ public final class Http2Connection implements Closeable {
         close(ErrorCode.NO_ERROR, ErrorCode.CANCEL);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void close(ErrorCode errorCode, ErrorCode errorCode2) throws IOException {
         Http2Stream[] http2StreamArr;
         Ping[] pingArr = null;
@@ -445,23 +445,22 @@ public final class Http2Connection implements Closeable {
                 http2StreamArr = null;
             }
             if (this.pings != null) {
-                Ping[] pingArr2 = (Ping[]) this.pings.values().toArray(new Ping[this.pings.size()]);
                 this.pings = null;
-                pingArr = pingArr2;
+                pingArr = (Ping[]) this.pings.values().toArray(new Ping[this.pings.size()]);
             }
         }
         if (http2StreamArr != null) {
-            Throwable th = e;
+            IOException iOException = e;
             for (Http2Stream close : http2StreamArr) {
                 try {
                     close.close(errorCode2);
                 } catch (IOException e3) {
-                    if (th != null) {
-                        th = e3;
+                    if (iOException != null) {
+                        iOException = e3;
                     }
                 }
             }
-            e = th;
+            e = iOException;
         }
         if (pingArr != null) {
             for (Ping cancel : pingArr) {
@@ -493,9 +492,9 @@ public final class Http2Connection implements Closeable {
         return Protocol.HTTP_2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized Http2Stream getStream(int i) {
-        return (Http2Stream) this.streams.get(Integer.valueOf(i));
+        return this.streams.get(Integer.valueOf(i));
     }
 
     public synchronized boolean isShutdown() {
@@ -533,7 +532,7 @@ public final class Http2Connection implements Closeable {
         return ping;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void pushDataLater(int i, BufferedSource bufferedSource, int i2, boolean z) throws IOException {
         final Buffer buffer = new Buffer();
         long j = (long) i2;
@@ -563,14 +562,10 @@ public final class Http2Connection implements Closeable {
             executorService.execute(r0);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(buffer.size());
-        sb.append(" != ");
-        sb.append(i2);
-        throw new IOException(sb.toString());
+        throw new IOException(buffer.size() + " != " + i2);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void pushHeadersLater(int i, List<Header> list, boolean z) {
         ExecutorService executorService = this.pushExecutor;
         final int i2 = i;
@@ -596,7 +591,7 @@ public final class Http2Connection implements Closeable {
         executorService.execute(r1);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void pushRequestLater(int i, List<Header> list) {
         synchronized (this) {
             if (this.currentPushRequests.contains(Integer.valueOf(i))) {
@@ -624,7 +619,7 @@ public final class Http2Connection implements Closeable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void pushResetLater(int i, ErrorCode errorCode) {
         ExecutorService executorService = this.pushExecutor;
         final int i2 = i;
@@ -647,22 +642,22 @@ public final class Http2Connection implements Closeable {
         throw new IllegalStateException("Client cannot push requests.");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean pushedStream(int i) {
         return i != 0 && (i & 1) == 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized Ping removePing(int i) {
-        return this.pings != null ? (Ping) this.pings.remove(Integer.valueOf(i)) : null;
+        return this.pings != null ? this.pings.remove(Integer.valueOf(i)) : null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized Http2Stream removeStream(int i) {
-        Http2Stream http2Stream;
-        http2Stream = (Http2Stream) this.streams.remove(Integer.valueOf(i));
+        Http2Stream remove;
+        remove = this.streams.remove(Integer.valueOf(i));
         notifyAll();
-        return http2Stream;
+        return remove;
     }
 
     public void setSettings(Settings settings) throws IOException {
@@ -694,7 +689,7 @@ public final class Http2Connection implements Closeable {
         start(true);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void start(boolean z) throws IOException {
         if (z) {
             this.writer.connectionPreface();
@@ -741,7 +736,7 @@ public final class Http2Connection implements Closeable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writePing(boolean z, int i, int i2, Ping ping) throws IOException {
         synchronized (this.writer) {
             if (ping != null) {
@@ -751,7 +746,7 @@ public final class Http2Connection implements Closeable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writePingLater(boolean z, int i, int i2, Ping ping) {
         ExecutorService executorService = executor;
         final boolean z2 = z;
@@ -769,17 +764,17 @@ public final class Http2Connection implements Closeable {
         executorService.execute(r1);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeSynReply(int i, boolean z, List<Header> list) throws IOException {
         this.writer.synReply(z, i, list);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeSynReset(int i, ErrorCode errorCode) throws IOException {
         this.writer.rstStream(i, errorCode);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeSynResetLater(int i, ErrorCode errorCode) {
         ExecutorService executorService = executor;
         final int i2 = i;
@@ -795,7 +790,7 @@ public final class Http2Connection implements Closeable {
         executorService.execute(r1);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeWindowUpdateLater(int i, long j) {
         ExecutorService executorService = executor;
         final int i2 = i;

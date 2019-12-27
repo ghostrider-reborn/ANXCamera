@@ -16,22 +16,11 @@ public class LogUtil {
     };
 
     public static String addTags(Object obj, String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(hashCodeTag(obj));
-        sb.append(mainThreadTag());
-        sb.append(" ");
-        sb.append(str);
-        return sb.toString();
+        return hashCodeTag(obj) + mainThreadTag() + " " + str;
     }
 
     public static String addTags(Object obj, String str, String str2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(hashCodeTag(obj));
-        sb.append(mainThreadTag());
-        sb.append(formatTags(str2));
-        sb.append(" ");
-        sb.append(str);
-        return sb.toString();
+        return hashCodeTag(obj) + mainThreadTag() + formatTags(str2) + " " + str;
     }
 
     private static String formatTags(String str) {
@@ -51,14 +40,11 @@ public class LogUtil {
 
     private static String hashCodeTag(Object obj) {
         String hexString = obj == null ? TEDefine.FACE_BEAUTY_NULL : Integer.toHexString(Objects.hashCode(obj));
-        StringBuilder sb = new StringBuilder();
-        sb.append("@");
-        sb.append(hexString);
-        return String.format("[%-9s]", new Object[]{sb.toString()});
+        return String.format("[%-9s]", new Object[]{"@" + hexString});
     }
 
     public static boolean isMainThread() {
-        return ((Boolean) sIsMainThread.get()).booleanValue();
+        return sIsMainThread.get().booleanValue();
     }
 
     private static String mainThreadTag() {

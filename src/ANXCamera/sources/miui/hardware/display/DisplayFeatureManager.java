@@ -3,7 +3,6 @@ package miui.hardware.display;
 import android.content.res.Resources;
 import android.os.HwBinder;
 import android.os.IBinder;
-import android.os.IBinder.DeathRecipient;
 import android.os.IHwBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -40,7 +39,7 @@ public class DisplayFeatureManager {
     public static final int UPDATE_PCC_LEVEL = 20000;
     public static final int UPDATE_WCG_STATE = 10000;
     private static volatile DisplayFeatureManager sInstance;
-    private DeathRecipient mBinderDeathHandler;
+    private IBinder.DeathRecipient mBinderDeathHandler;
     private IHwBinder.DeathRecipient mHwBinderDeathHandler;
     /* access modifiers changed from: private */
     public Object mLock = new Object();
@@ -70,12 +69,7 @@ public class DisplayFeatureManager {
             if (DeviceFeature.SUPPORT_DISPLAYFEATURE_HIDL) {
                 String string = CONFIG_SERVICENAME_RESOURCEID == 0 ? HIDL_SERVICENAME_DEFAULT : Resources.getSystem().getString(CONFIG_SERVICENAME_RESOURCEID);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("initProxyLoced CONFIG_SERVICENAME_RESOURCEID = ");
-                sb.append(CONFIG_SERVICENAME_RESOURCEID);
-                sb.append(" hidlServiceName = ");
-                sb.append(string);
-                Slog.d(str, sb.toString());
+                Slog.d(str, "initProxyLoced CONFIG_SERVICENAME_RESOURCEID = " + CONFIG_SERVICENAME_RESOURCEID + " hidlServiceName = " + string);
                 IHwBinder service = HwBinder.getService(string, E2EScenario.DEFAULT_CATEGORY);
                 if (service != null) {
                     service.linkToDeath(this.mHwBinderDeathHandler, 10001);
@@ -98,16 +92,16 @@ public class DisplayFeatureManager {
                 public void serviceDied(long j) {
                     synchronized (DisplayFeatureManager.this.mLock) {
                         Slog.v(DisplayFeatureManager.TAG, "hwbinder service binderDied!");
-                        DisplayFeatureManager.this.mProxy = null;
+                        DisplayFeatureServiceProxy unused = DisplayFeatureManager.this.mProxy = null;
                     }
                 }
             };
         } else {
-            this.mBinderDeathHandler = new DeathRecipient() {
+            this.mBinderDeathHandler = new IBinder.DeathRecipient() {
                 public void binderDied() {
                     synchronized (DisplayFeatureManager.this.mLock) {
                         Slog.v(DisplayFeatureManager.TAG, "binder service binderDied!");
-                        DisplayFeatureManager.this.mProxy = null;
+                        DisplayFeatureServiceProxy unused = DisplayFeatureManager.this.mProxy = null;
                     }
                 }
             };
@@ -140,12 +134,7 @@ public class DisplayFeatureManager {
     public void setScreenEffect(int i, int i2) {
         synchronized (this.mLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setScreenEffect mode=");
-            sb.append(i);
-            sb.append(" value=");
-            sb.append(i2);
-            Slog.d(str, sb.toString());
+            Slog.d(str, "setScreenEffect mode=" + i + " value=" + i2);
             if (this.mProxy == null) {
                 initProxyLocked();
             }
@@ -158,14 +147,7 @@ public class DisplayFeatureManager {
     public void setScreenEffect(int i, int i2, int i3) {
         synchronized (this.mLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setScreenEffect mode=");
-            sb.append(i);
-            sb.append(" value=");
-            sb.append(i2);
-            sb.append(" cookie=");
-            sb.append(i3);
-            Slog.d(str, sb.toString());
+            Slog.d(str, "setScreenEffect mode=" + i + " value=" + i2 + " cookie=" + i3);
             if (this.mProxy == null) {
                 initProxyLocked();
             }

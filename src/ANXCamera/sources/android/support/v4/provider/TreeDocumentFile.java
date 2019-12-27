@@ -120,18 +120,14 @@ class TreeDocumentFile extends DocumentFile {
         ArrayList arrayList = new ArrayList();
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(buildChildDocumentsUriUsingTree, new String[]{"document_id"}, null, null, null);
+            cursor = contentResolver.query(buildChildDocumentsUriUsingTree, new String[]{"document_id"}, (String) null, (String[]) null, (String) null);
             while (cursor.moveToNext()) {
                 arrayList.add(DocumentsContract.buildDocumentUriUsingTree(this.mUri, cursor.getString(0)));
             }
         } catch (Exception e2) {
-            String str = "DocumentFile";
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed query: ");
-            sb.append(e2);
-            Log.w(str, sb.toString());
+            Log.w("DocumentFile", "Failed query: " + e2);
         } catch (Throwable th) {
-            closeQuietly(null);
+            closeQuietly((AutoCloseable) null);
             throw th;
         }
         closeQuietly(cursor);

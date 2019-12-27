@@ -20,14 +20,10 @@ public class StickerHelper {
     }
 
     private void copyModelFiles() {
-        Context context = this.mContext;
-        String modelPath = getModelPath();
-        String str = FACE_TRACK_MODEL_NAME;
-        FileUtils.copyFileIfNeed(context, new File(modelPath, str), str);
+        FileUtils.copyFileIfNeed(this.mContext, new File(getModelPath(), FACE_TRACK_MODEL_NAME), FACE_TRACK_MODEL_NAME);
     }
 
     private void copyStickerFiles() {
-        String[] strArr;
         for (String str : sStickLocal) {
             FileUtils.copyFileIfNeed(this.mContext, new File(getStickerPath(), str), str);
         }
@@ -46,7 +42,7 @@ public class StickerHelper {
 
     public List<StickerInfo> getLocalStick() {
         ArrayList arrayList = new ArrayList();
-        StickerInfo stickerInfo = new StickerInfo(null, R.drawable.icon_sticker_none);
+        StickerInfo stickerInfo = new StickerInfo((String) null, R.drawable.icon_sticker_none);
         StickerInfo stickerInfo2 = new StickerInfo(getStickerPath(sStickLocal[0]), R.drawable.icon_sticker1);
         StickerInfo stickerInfo3 = new StickerInfo(getStickerPath(sStickLocal[1]), R.drawable.icon_sticker2);
         arrayList.add(stickerInfo);
@@ -60,11 +56,7 @@ public class StickerHelper {
         if (filesDir == null) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(filesDir.getAbsolutePath());
-        sb.append(File.separator);
-        sb.append(STICKER_MODEL_PATH);
-        return sb.toString();
+        return filesDir.getAbsolutePath() + File.separator + STICKER_MODEL_PATH;
     }
 
     public String getStickerPath() {
@@ -72,27 +64,15 @@ public class StickerHelper {
     }
 
     public String getStickerPath(long j) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getStickerPath());
-        sb.append(File.separator);
-        sb.append(Long.toString(j));
-        return sb.toString();
+        return getStickerPath() + File.separator + Long.toString(j);
     }
 
     public String getStickerPath(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getStickerPath());
-        sb.append(File.separator);
-        sb.append(str);
-        return sb.toString();
+        return getStickerPath() + File.separator + str;
     }
 
     public String getTrackModelPath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getModelPath());
-        sb.append(File.separator);
-        sb.append(FACE_TRACK_MODEL_NAME);
-        return sb.toString();
+        return getModelPath() + File.separator + FACE_TRACK_MODEL_NAME;
     }
 
     public void initStickFiles(Context context) {

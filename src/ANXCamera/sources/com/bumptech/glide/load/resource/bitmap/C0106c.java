@@ -7,7 +7,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.d;
 import com.bumptech.glide.load.engine.v;
 import com.bumptech.glide.util.l;
 
-/* renamed from: com.bumptech.glide.load.resource.bitmap.c reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.resource.bitmap.c  reason: case insensitive filesystem */
 /* compiled from: BitmapDrawableResource */
 public class C0106c extends b<BitmapDrawable> implements v {
     private final d Bb;

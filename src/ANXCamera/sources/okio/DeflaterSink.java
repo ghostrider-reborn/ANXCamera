@@ -86,7 +86,7 @@ public final class DeflaterSink implements Sink {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void finishDeflate() throws IOException {
         this.deflater.finish();
         deflate(false);
@@ -102,11 +102,7 @@ public final class DeflaterSink implements Sink {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("DeflaterSink(");
-        sb.append(this.sink);
-        sb.append(")");
-        return sb.toString();
+        return "DeflaterSink(" + this.sink + ")";
     }
 
     public void write(Buffer buffer, long j) throws IOException {

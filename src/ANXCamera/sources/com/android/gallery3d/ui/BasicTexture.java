@@ -20,14 +20,14 @@ public abstract class BasicTexture implements Texture {
     protected GLCanvas mCanvasRef;
     private boolean mHasBorder;
     protected int mHeight;
-    protected int mId = ExtTexture.sTextureId[0];
+    protected int mId;
     protected int mState;
     private int mTextureHeight;
     private int mTextureWidth;
     protected int mWidth;
 
     protected BasicTexture() {
-        this(null, 0, 0);
+        this((GLCanvas) null, 0, 0);
     }
 
     protected BasicTexture(GLCanvas gLCanvas, int i, int i2) {
@@ -38,7 +38,7 @@ public abstract class BasicTexture implements Texture {
         this.mId = i;
         this.mState = i2;
         synchronized (sAllTextures) {
-            sAllTextures.put(this, null);
+            sAllTextures.put(this, (Object) null);
         }
     }
 
@@ -48,7 +48,7 @@ public abstract class BasicTexture implements Texture {
             gLCanvas.deleteTexture(this);
         }
         this.mState = 0;
-        setAssociatedCanvas(null);
+        setAssociatedCanvas((GLCanvas) null);
     }
 
     public static boolean inFinalizer() {
@@ -57,19 +57,19 @@ public abstract class BasicTexture implements Texture {
 
     public static void invalidateAllTextures() {
         synchronized (sAllTextures) {
-            for (BasicTexture basicTexture : sAllTextures.keySet()) {
-                basicTexture.mState = 0;
-                basicTexture.setAssociatedCanvas(null);
+            for (BasicTexture next : sAllTextures.keySet()) {
+                next.mState = 0;
+                next.setAssociatedCanvas((GLCanvas) null);
             }
         }
     }
 
     public static void invalidateAllTextures(GLCanvas gLCanvas) {
         synchronized (sAllTextures) {
-            for (BasicTexture basicTexture : sAllTextures.keySet()) {
-                if (basicTexture.mCanvasRef == gLCanvas) {
-                    basicTexture.mState = 0;
-                    basicTexture.setAssociatedCanvas(null);
+            for (BasicTexture next : sAllTextures.keySet()) {
+                if (next.mCanvasRef == gLCanvas) {
+                    next.mState = 0;
+                    next.setAssociatedCanvas((GLCanvas) null);
                 }
             }
         }
@@ -107,7 +107,7 @@ public abstract class BasicTexture implements Texture {
     public void finalize() {
         sInFinalizer.set(BasicTexture.class);
         recycle();
-        sInFinalizer.set(null);
+        sInFinalizer.set((Object) null);
     }
 
     public int getHeight() {

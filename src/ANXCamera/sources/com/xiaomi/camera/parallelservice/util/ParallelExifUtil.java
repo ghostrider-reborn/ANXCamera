@@ -12,32 +12,21 @@ public class ParallelExifUtil {
 
     /* JADX WARNING: Removed duplicated region for block: B:27:0x0099 A[SYNTHETIC, Splitter:B:27:0x0099] */
     /* JADX WARNING: Removed duplicated region for block: B:32:0x00a1 A[Catch:{ IOException -> 0x009d }] */
-    /* JADX WARNING: Removed duplicated region for block: B:37:0x00ae A[SYNTHETIC, Splitter:B:37:0x00ae] */
-    /* JADX WARNING: Removed duplicated region for block: B:42:0x00b6 A[Catch:{ IOException -> 0x00b2 }] */
+    /* JADX WARNING: Removed duplicated region for block: B:36:0x00ae A[SYNTHETIC, Splitter:B:36:0x00ae] */
+    /* JADX WARNING: Removed duplicated region for block: B:41:0x00b6 A[Catch:{ IOException -> 0x00b2 }] */
+    /* JADX WARNING: Removed duplicated region for block: B:45:? A[RETURN, SYNTHETIC] */
     public static void updateExif(String str) {
         FileOutputStream fileOutputStream;
         FileInputStream fileInputStream;
         Exception e2;
         FileOutputStream fileOutputStream2;
-        String str2 = "close image file failed!";
-        String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateExif path:");
-        sb.append(str);
-        Log.v(str3, sb.toString());
+        Log.v(TAG, "updateExif path:" + str);
         File file = new File(str);
         if (!file.exists()) {
-            String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("updateExif path not exist. ");
-            sb2.append(str);
-            Log.e(str4, sb2.toString());
+            Log.e(TAG, "updateExif path not exist. " + str);
             return;
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str);
-        sb3.append(".tmp");
-        File file2 = new File(sb3.toString());
+        File file2 = new File(str + ".tmp");
         try {
             file2.createNewFile();
             fileInputStream = new FileInputStream(file);
@@ -59,7 +48,9 @@ public class ParallelExifUtil {
                         }
                         if (fileOutputStream != null) {
                             fileOutputStream.close();
+                            return;
                         }
+                        return;
                     } catch (Throwable th) {
                         th = th;
                         if (fileInputStream != null) {
@@ -92,7 +83,7 @@ public class ParallelExifUtil {
                 fileInputStream.close();
                 fileOutputStream2.close();
             } catch (IOException e5) {
-                Log.e(TAG, str2, e5);
+                Log.e(TAG, "close image file failed!", e5);
             }
         } catch (Exception e6) {
             e = e6;
@@ -113,7 +104,7 @@ public class ParallelExifUtil {
                 try {
                     fileInputStream.close();
                 } catch (IOException e7) {
-                    Log.e(TAG, str2, e7);
+                    Log.e(TAG, "close image file failed!", e7);
                     throw th;
                 }
             }

@@ -1,8 +1,9 @@
 package miui.external;
 
-import android.app.Application.ActivityLifecycleCallbacks;
+import android.app.Application;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 
@@ -10,10 +11,10 @@ public abstract class ApplicationDelegate extends ContextWrapper implements Comp
     private Application mApplication;
 
     public ApplicationDelegate() {
-        super(null);
+        super((Context) null);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void attach(Application application) {
         this.mApplication = application;
         attachBaseContext(application);
@@ -43,7 +44,7 @@ public abstract class ApplicationDelegate extends ContextWrapper implements Comp
         this.mApplication.superOnTrimMemory(i);
     }
 
-    public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks activityLifecycleCallbacks) {
+    public void registerActivityLifecycleCallbacks(Application.ActivityLifecycleCallbacks activityLifecycleCallbacks) {
         this.mApplication.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
@@ -51,7 +52,7 @@ public abstract class ApplicationDelegate extends ContextWrapper implements Comp
         this.mApplication.registerComponentCallbacks(componentCallbacks);
     }
 
-    public void unregisterActivityLifecycleCallbacks(ActivityLifecycleCallbacks activityLifecycleCallbacks) {
+    public void unregisterActivityLifecycleCallbacks(Application.ActivityLifecycleCallbacks activityLifecycleCallbacks) {
         this.mApplication.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 

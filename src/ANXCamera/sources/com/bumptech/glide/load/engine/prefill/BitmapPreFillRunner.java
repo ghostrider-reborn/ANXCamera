@@ -39,7 +39,7 @@ final class BitmapPreFillRunner implements Runnable {
         Clock() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public long now() {
             return SystemClock.currentThreadTimeMillis();
         }
@@ -83,7 +83,7 @@ final class BitmapPreFillRunner implements Runnable {
         return this.Cb.getMaxSize() - this.Cb.J();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public boolean allocate() {
         Bitmap bitmap;
@@ -102,18 +102,8 @@ final class BitmapPreFillRunner implements Runnable {
             } else {
                 this.Bb.a(bitmap);
             }
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("allocated [");
-                sb.append(remove.getWidth());
-                sb.append("x");
-                sb.append(remove.getHeight());
-                sb.append("] ");
-                sb.append(remove.getConfig());
-                sb.append(" size: ");
-                sb.append(j);
-                Log.d(str, sb.toString());
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "allocated [" + remove.getWidth() + "x" + remove.getHeight() + "] " + remove.getConfig() + " size: " + j);
             }
         }
         return !this.Vd && !this.uh.isEmpty();

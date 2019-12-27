@@ -32,7 +32,7 @@ public final class FlowableAny<T> extends AbstractFlowableWithUpstream<T, Boolea
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
-                complete(Boolean.valueOf(false));
+                complete(false);
             }
         }
 
@@ -51,7 +51,7 @@ public final class FlowableAny<T> extends AbstractFlowableWithUpstream<T, Boolea
                     if (this.predicate.test(t)) {
                         this.done = true;
                         this.s.cancel();
-                        complete(Boolean.valueOf(true));
+                        complete(true);
                     }
                 } catch (Throwable th) {
                     Exceptions.throwIfFatal(th);
@@ -77,6 +77,6 @@ public final class FlowableAny<T> extends AbstractFlowableWithUpstream<T, Boolea
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super Boolean> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new AnySubscriber<Object>(subscriber, this.predicate));
+        this.source.subscribe(new AnySubscriber(subscriber, this.predicate));
     }
 }

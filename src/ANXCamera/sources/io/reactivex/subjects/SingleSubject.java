@@ -29,7 +29,7 @@ public final class SingleSubject<T> extends Single<T> implements SingleObserver<
         }
 
         public void dispose() {
-            SingleSubject singleSubject = (SingleSubject) getAndSet(null);
+            SingleSubject singleSubject = (SingleSubject) getAndSet((Object) null);
             if (singleSubject != null) {
                 singleSubject.remove(this);
             }
@@ -49,7 +49,7 @@ public final class SingleSubject<T> extends Single<T> implements SingleObserver<
         return new SingleSubject<>();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(@NonNull SingleDisposable<T> singleDisposable) {
         SingleDisposable[] singleDisposableArr;
         SingleDisposable[] singleDisposableArr2;
@@ -94,7 +94,7 @@ public final class SingleSubject<T> extends Single<T> implements SingleObserver<
         return this.observers.get() == TERMINATED && this.value != null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int observerCount() {
         return ((SingleDisposable[]) this.observers.get()).length;
     }
@@ -127,7 +127,7 @@ public final class SingleSubject<T> extends Single<T> implements SingleObserver<
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(@NonNull SingleDisposable<T> singleDisposable) {
         SingleDisposable<T>[] singleDisposableArr;
         SingleDisposable[] singleDisposableArr2;

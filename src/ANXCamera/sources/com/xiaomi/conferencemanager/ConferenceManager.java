@@ -7,9 +7,8 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Build;
 import android.util.Log;
-import com.ss.android.vesdk.VEEditor.MVConsts;
-import com.xiaomi.conferencemanager.ConferenceEngine.InVideoStat;
-import com.xiaomi.conferencemanager.ConferenceEngine.OutVideoStat;
+import com.ss.android.vesdk.VEEditor;
+import com.xiaomi.conferencemanager.ConferenceEngine;
 import com.xiaomi.conferencemanager.Model.MonitorData;
 import com.xiaomi.conferencemanager.callback.ConferenceCallback;
 import com.xiaomi.utils.Logger;
@@ -25,13 +24,8 @@ public class ConferenceManager {
     final BroadcastReceiver audioStateChangeReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            StringBuilder sb = new StringBuilder();
-            sb.append("audioStateChangeReceiver: get action ");
-            sb.append(action);
-            sb.append(" extra: ");
-            sb.append(intent.getIntExtra("state", 0));
-            Log.i(ConferenceManager.TAG, sb.toString());
-            ConferenceManager.this.getOutPutDevice();
+            Log.i(ConferenceManager.TAG, "audioStateChangeReceiver: get action " + action + " extra: " + intent.getIntExtra("state", 0));
+            int unused = ConferenceManager.this.getOutPutDevice();
         }
     };
     byte[] gslb_test_config = {1};
@@ -111,14 +105,7 @@ public class ConferenceManager {
     }
 
     public long addVideoStream(int i, int i2, VideoContentTypeT videoContentTypeT) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("addVideoStream width:");
-        sb.append(i);
-        sb.append(" height:");
-        sb.append(i2);
-        sb.append(" type:");
-        sb.append(videoContentTypeT.ordinal());
-        Logger.LogI(sb.toString());
+        Logger.LogI("addVideoStream width:" + i + " height:" + i2 + " type:" + videoContentTypeT.ordinal());
         if (this.mContext != null) {
             return ConferenceEngine.getInstance().addVideoStream(i, i2, videoContentTypeT.ordinal());
         }
@@ -136,9 +123,8 @@ public class ConferenceManager {
         try {
             context.unregisterReceiver(this.audioStateChangeReceiver);
         } catch (Exception unused) {
-            String str = "audioStateChangeReceiver is not registered!";
-            Log.e(TAG, str);
-            Logger.LogE(str);
+            Log.e(TAG, "audioStateChangeReceiver is not registered!");
+            Logger.LogE("audioStateChangeReceiver is not registered!");
         }
         ConferenceEngine.getInstance().uninitialize();
         this.mContext = null;
@@ -146,10 +132,7 @@ public class ConferenceManager {
     }
 
     public void enableCameraRotation(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Eanble camera rotate with:");
-        sb.append(z);
-        Logger.LogI(sb.toString());
+        Logger.LogI("Eanble camera rotate with:" + z);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagerenableCameraRotation error, please init the engine first");
             return;
@@ -159,10 +142,7 @@ public class ConferenceManager {
     }
 
     public void enableMonitorTraffic(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setting enableMonitorTraffic ");
-        sb.append(z);
-        Logger.LogI(sb.toString());
+        Logger.LogI("setting enableMonitorTraffic " + z);
         ConferenceEngine.getInstance().enableMonitorTraffic(z);
     }
 
@@ -183,7 +163,7 @@ public class ConferenceManager {
         return null;
     }
 
-    public InVideoStat getInVideoStat() {
+    public ConferenceEngine.InVideoStat getInVideoStat() {
         return ConferenceEngine.getInstance().getInVideoStat();
     }
 
@@ -204,7 +184,7 @@ public class ConferenceManager {
         return null;
     }
 
-    public OutVideoStat getOutVideoStat() {
+    public ConferenceEngine.OutVideoStat getOutVideoStat() {
         return ConferenceEngine.getInstance().getOutVideoStat();
     }
 
@@ -218,11 +198,7 @@ public class ConferenceManager {
     }
 
     public int getUserPlayoutVolume(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager get participants name: ");
-        sb.append(str);
-        sb.append(" volume!");
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager get participants name: " + str + " volume!");
         if (this.mContext != null) {
             return ConferenceEngine.getInstance().getUserPlayoutVolume(str);
         }
@@ -236,7 +212,7 @@ public class ConferenceManager {
             Logger.LogE("ConferenceManagerinit error, please destroy the engine first");
             return false;
         }
-        this.audioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+        this.audioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
         String packageName = context.getPackageName();
         getOutPutDevice();
         context.registerReceiver(this.audioStateChangeReceiver, new IntentFilter("android.intent.action.HEADSET_PLUG"));
@@ -262,18 +238,13 @@ public class ConferenceManager {
     }
 
     public boolean joinRoom(String str, String str2, boolean z, boolean z2, boolean z3, String str3, String str4, String str5, ConferenceManagerRole conferenceManagerRole, String str6, String str7) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("joining room, roomId:");
-        sb.append(str);
-        sb.append(" server:");
-        sb.append(str2);
-        Logger.LogI(sb.toString());
+        Logger.LogI("joining room, roomId:" + str + " server:" + str2);
         Context context = this.mContext;
         if (context == null) {
             Logger.LogE("ConferenceManager joinRoom error, please init the engine first");
             return false;
         }
-        this.audioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+        this.audioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
         Build.MODEL.toLowerCase();
         this.audioManager.setMode(getAudioManagerMode());
         if (this.audioManager == null) {
@@ -281,10 +252,7 @@ public class ConferenceManager {
             return false;
         }
         String networkEnv = ConferenceEngine.getInstance().getNetworkEnv(this.mContext);
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("ConferenceManager Current network environment is ");
-        sb2.append(networkEnv);
-        Logger.LogI(sb2.toString());
+        Logger.LogI("ConferenceManager Current network environment is " + networkEnv);
         ConferenceEngine.getInstance().AutoStartCamera(false);
         if (!ConferenceEngine.getInstance().Join(str2, str, z, z2, z3, str3, str4, str5, conferenceManagerRole.ordinal(), false, str6, str7)) {
             Logger.LogE("ConferenceManagerjoin room failed");
@@ -331,12 +299,7 @@ public class ConferenceManager {
     }
 
     public void muteUserAudio(String str, boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager set user name: ");
-        sb.append(str);
-        sb.append(" mute: ");
-        sb.append(z);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager set user name: " + str + " mute: " + z);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager muteUserAudio error, please init the engine first");
         } else {
@@ -367,10 +330,7 @@ public class ConferenceManager {
     }
 
     public void removeVideoStream(long j) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("removeVideoStream stream id:");
-        sb.append(j);
-        Logger.LogI(sb.toString());
+        Logger.LogI("removeVideoStream stream id:" + j);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagerremoveVideoStream error, please init the engine first");
         } else {
@@ -379,10 +339,7 @@ public class ConferenceManager {
     }
 
     public void setAutoStartDevice(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager setAutoStartDevice ");
-        sb.append(z);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager setAutoStartDevice " + z);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagerset AutoStart Device error, please init the engine first");
             return;
@@ -392,12 +349,7 @@ public class ConferenceManager {
     }
 
     public void setCallResolutionMode(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager setCallResolutionMode to width:");
-        sb.append(i);
-        sb.append(" height:");
-        sb.append(i2);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager setCallResolutionMode to width:" + i + " height:" + i2);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager setCallResolutionMode error, please init the engine first");
         } else {
@@ -406,10 +358,7 @@ public class ConferenceManager {
     }
 
     public int setEncoderMaxBitRate(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setting encoder max bitrate to ");
-        sb.append(i);
-        Logger.LogI(sb.toString());
+        Logger.LogI("setting encoder max bitrate to " + i);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagersetEncoderMaxBitRate error, please init the engine first");
             return -1;
@@ -420,10 +369,7 @@ public class ConferenceManager {
     }
 
     public boolean setGslbConfig(byte[] bArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setGslbConfig, config_str pb pb_config length :");
-        sb.append(bArr.length);
-        Logger.LogI(sb.toString());
+        Logger.LogI("setGslbConfig, config_str pb pb_config length :" + bArr.length);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager setGslbConfig, please init the engine first");
             return false;
@@ -438,12 +384,7 @@ public class ConferenceManager {
     }
 
     public int setLocalNetWork(String str, String str2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setting local netWork to ");
-        sb.append(str);
-        sb.append(" netID: ");
-        sb.append(str2);
-        Logger.LogI(sb.toString());
+        Logger.LogI("setting local netWork to " + str + " netID: " + str2);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagersetLocalNetwork error, please init the engine first");
             return -1;
@@ -454,10 +395,7 @@ public class ConferenceManager {
     }
 
     public void setMirrorCamera(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager setMirrorCamera :");
-        sb.append(z);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager setMirrorCamera :" + z);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager setMirrorCamera error, please init the engine first");
         } else {
@@ -466,10 +404,7 @@ public class ConferenceManager {
     }
 
     public void setPlayoutVolume(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager setPlayoutVolume:");
-        sb.append(i);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager setPlayoutVolume:" + i);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager setVolume error, please init the engine first");
         } else {
@@ -478,12 +413,7 @@ public class ConferenceManager {
     }
 
     public int setPowerStatus(int i, boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setting power status: power left to ");
-        sb.append(i);
-        sb.append(" isCharge: ");
-        sb.append(z);
-        Logger.LogI(sb.toString());
+        Logger.LogI("setting power status: power left to " + i + " isCharge: " + z);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagersetPowerStatus error, please init the engine first");
             return -1;
@@ -494,12 +424,7 @@ public class ConferenceManager {
     }
 
     public int setRemoteNetWork(String str, String str2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setting remotel netWork to ");
-        sb.append(str);
-        sb.append(" netID: ");
-        sb.append(str2);
-        Logger.LogI(sb.toString());
+        Logger.LogI("setting remotel netWork to " + str + " netID: " + str2);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagersetRemoteNetwork error, please init the engine first");
             return -1;
@@ -510,10 +435,7 @@ public class ConferenceManager {
     }
 
     public boolean setScreenFps(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("set Screen fps to:");
-        sb.append(i);
-        Logger.LogI(sb.toString());
+        Logger.LogI("set Screen fps to:" + i);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagersetScreenFps error, please init the engine first");
             return false;
@@ -527,12 +449,7 @@ public class ConferenceManager {
     }
 
     public boolean setScreenResolution(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("set Screen Resotuon to:");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        Logger.LogI(sb.toString());
+        Logger.LogI("set Screen Resotuon to:" + i + "x" + i2);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagersetScreenResolution error, please init the engine first");
             return false;
@@ -546,12 +463,7 @@ public class ConferenceManager {
     }
 
     public void setUserPlayoutVolume(String str, double d2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager set user name: ");
-        sb.append(str);
-        sb.append(" volume: ");
-        sb.append(d2);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager set user name: " + str + " volume: " + d2);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager setVolume error, please init the engine first");
         } else {
@@ -583,10 +495,7 @@ public class ConferenceManager {
     }
 
     public void startVolumeMonitor(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ConferenceManager startVolumeMonitor, monitorInterval: ");
-        sb.append(i);
-        Logger.LogI(sb.toString());
+        Logger.LogI("ConferenceManager startVolumeMonitor, monitorInterval: " + i);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManager startVolumeMonitor error, please init the engine first");
         } else {
@@ -627,10 +536,7 @@ public class ConferenceManager {
     }
 
     public boolean switchVideoContent(VideoContentTypeT videoContentTypeT) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("switch video content type to:");
-        sb.append(videoContentTypeT);
-        Logger.LogI(sb.toString());
+        Logger.LogI("switch video content type to:" + videoContentTypeT);
         if (this.mContext == null) {
             Logger.LogE("ConferenceManagerswitch video content error, please init the engine first");
             return false;

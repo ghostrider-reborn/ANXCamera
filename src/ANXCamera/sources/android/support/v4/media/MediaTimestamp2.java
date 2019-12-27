@@ -3,7 +3,6 @@ package android.support.v4.media;
 import android.annotation.TargetApi;
 import android.media.MediaTimestamp;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
 public final class MediaTimestamp2 {
     public static final MediaTimestamp2 TIMESTAMP_UNKNOWN;
@@ -16,14 +15,14 @@ public final class MediaTimestamp2 {
         TIMESTAMP_UNKNOWN = mediaTimestamp2;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     MediaTimestamp2() {
         this.mMediaTimeUs = 0;
         this.mNanoTime = 0;
         this.mClockRate = 1.0f;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     MediaTimestamp2(long j, long j2, float f2) {
         this.mMediaTimeUs = j;
         this.mNanoTime = j2;
@@ -31,7 +30,7 @@ public final class MediaTimestamp2 {
     }
 
     @TargetApi(23)
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     MediaTimestamp2(MediaTimestamp mediaTimestamp) {
         this.mMediaTimeUs = mediaTimestamp.getAnchorMediaTimeUs();
         this.mNanoTime = mediaTimestamp.getAnchorSytemNanoTime();
@@ -39,7 +38,6 @@ public final class MediaTimestamp2 {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -47,10 +45,7 @@ public final class MediaTimestamp2 {
             return false;
         }
         MediaTimestamp2 mediaTimestamp2 = (MediaTimestamp2) obj;
-        if (!(this.mMediaTimeUs == mediaTimestamp2.mMediaTimeUs && this.mNanoTime == mediaTimestamp2.mNanoTime && this.mClockRate == mediaTimestamp2.mClockRate)) {
-            z = false;
-        }
-        return z;
+        return this.mMediaTimeUs == mediaTimestamp2.mMediaTimeUs && this.mNanoTime == mediaTimestamp2.mNanoTime && this.mClockRate == mediaTimestamp2.mClockRate;
     }
 
     public long getAnchorMediaTimeUs() {
@@ -70,15 +65,6 @@ public final class MediaTimestamp2 {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(MediaTimestamp2.class.getName());
-        sb.append("{AnchorMediaTimeUs=");
-        sb.append(this.mMediaTimeUs);
-        sb.append(" AnchorSystemNanoTime=");
-        sb.append(this.mNanoTime);
-        sb.append(" ClockRate=");
-        sb.append(this.mClockRate);
-        sb.append("}");
-        return sb.toString();
+        return MediaTimestamp2.class.getName() + "{AnchorMediaTimeUs=" + this.mMediaTimeUs + " AnchorSystemNanoTime=" + this.mNanoTime + " ClockRate=" + this.mClockRate + "}";
     }
 }

@@ -22,11 +22,7 @@ public class OpenGLUtils {
     public static void checkGlError(String str) {
         int glGetError = GLES20.glGetError();
         if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": glError ");
-            sb.append(glGetError);
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException(str + ": glError " + glGetError);
         }
     }
 
@@ -38,7 +34,7 @@ public class OpenGLUtils {
         GLES20.glTexParameterf(3553, 10241, 9729.0f);
         GLES20.glTexParameterf(3553, 10242, 33071.0f);
         GLES20.glTexParameterf(3553, 10243, 33071.0f);
-        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         return iArr[0];
     }
 
@@ -79,7 +75,7 @@ public class OpenGLUtils {
         GLES20.glTexParameterf(3553, 10241, 9729.0f);
         GLES20.glTexParameterf(3553, 10242, 33071.0f);
         GLES20.glTexParameterf(3553, 10243, 33071.0f);
-        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         GLES20.glBindTexture(3553, 0);
         return iArr[0];
     }
@@ -87,14 +83,13 @@ public class OpenGLUtils {
     public static int loadProgram(String str, String str2) {
         int[] iArr = new int[1];
         int loadShader = loadShader(str, 35633);
-        String str3 = "Load Program";
         if (loadShader == 0) {
-            Log.d(str3, "Vertex Shader Failed");
+            Log.d("Load Program", "Vertex Shader Failed");
             return 0;
         }
         int loadShader2 = loadShader(str2, 35632);
         if (loadShader2 == 0) {
-            Log.d(str3, "Fragment Shader Failed");
+            Log.d("Load Program", "Fragment Shader Failed");
             return 0;
         }
         int glCreateProgram = GLES20.glCreateProgram();
@@ -103,7 +98,7 @@ public class OpenGLUtils {
         GLES20.glLinkProgram(glCreateProgram);
         GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
         if (iArr[0] <= 0) {
-            Log.d(str3, "Linking Failed");
+            Log.d("Load Program", "Linking Failed");
             return 0;
         }
         GLES20.glDeleteShader(loadShader);
@@ -135,10 +130,7 @@ public class OpenGLUtils {
         if (iArr[0] != 0) {
             return glCreateShader;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Load Shader Failed : Compilation\n");
-        sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
-        Log.e(TAG, sb.toString());
+        Log.e(TAG, "Load Shader Failed : Compilation\n" + GLES20.glGetShaderInfoLog(glCreateShader));
         return 0;
     }
 

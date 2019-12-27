@@ -1,12 +1,11 @@
 package com.bumptech.glide.b;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import com.bumptech.glide.b.a.C0004a;
+import com.bumptech.glide.b.a;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +30,7 @@ public class e implements a {
     @Nullable
     private Boolean Dd;
     @NonNull
-    private Config Ed;
+    private Bitmap.Config Ed;
     private ByteBuffer Xc;
     @ColorInt
     private int[] act;
@@ -45,25 +44,25 @@ public class e implements a {
     private byte[] suffix;
     @ColorInt
     private final int[] ud;
-    private final C0004a vd;
+    private final a.C0004a vd;
     private byte[] wd;
     @ColorInt
     private int[] xd;
     private int yd;
     private Bitmap zd;
 
-    public e(@NonNull C0004a aVar) {
+    public e(@NonNull a.C0004a aVar) {
         this.ud = new int[256];
-        this.Ed = Config.ARGB_8888;
+        this.Ed = Bitmap.Config.ARGB_8888;
         this.vd = aVar;
         this.header = new c();
     }
 
-    public e(@NonNull C0004a aVar, c cVar, ByteBuffer byteBuffer) {
+    public e(@NonNull a.C0004a aVar, c cVar, ByteBuffer byteBuffer) {
         this(aVar, cVar, byteBuffer, 1);
     }
 
-    public e(@NonNull C0004a aVar, c cVar, ByteBuffer byteBuffer, int i) {
+    public e(@NonNull a.C0004a aVar, c cVar, ByteBuffer byteBuffer, int i) {
         this(aVar);
         a(cVar, byteBuffer, i);
     }
@@ -78,7 +77,7 @@ public class e implements a {
 
     private Bitmap _j() {
         Boolean bool = this.Dd;
-        Bitmap a2 = this.vd.a(this.Cd, this.Bd, (bool == null || bool.booleanValue()) ? Config.ARGB_8888 : this.Ed);
+        Bitmap a2 = this.vd.a(this.Cd, this.Bd, (bool == null || bool.booleanValue()) ? Bitmap.Config.ARGB_8888 : this.Ed);
         a2.setHasAlpha(true);
         return a2;
     }
@@ -108,7 +107,7 @@ public class e implements a {
                             i = i3;
                         }
                     } else if (this.yd == 0) {
-                        this.Dd = Boolean.valueOf(true);
+                        this.Dd = true;
                     }
                     int i4 = bVar2.ih;
                     int i5 = this.sampleSize;
@@ -172,91 +171,90 @@ public class e implements a {
         int i9 = bVar2.iy / i7;
         int i10 = bVar2.iw / i7;
         int i11 = bVar2.ix / i7;
-        int i12 = this.yd;
-        Boolean valueOf = Boolean.valueOf(true);
-        boolean z = i12 == 0;
-        int i13 = this.sampleSize;
-        int i14 = this.Cd;
-        int i15 = this.Bd;
+        boolean z = true;
+        boolean z2 = this.yd == 0;
+        int i12 = this.sampleSize;
+        int i13 = this.Cd;
+        int i14 = this.Bd;
         byte[] bArr = this.wd;
         int[] iArr2 = this.act;
-        int i16 = 1;
-        int i17 = 8;
-        int i18 = 0;
+        int i15 = 1;
+        int i16 = 8;
+        int i17 = 0;
         Boolean bool = this.Dd;
-        int i19 = 0;
-        while (i19 < i8) {
-            Boolean bool2 = valueOf;
+        int i18 = 0;
+        while (i18 < i8) {
+            Boolean bool2 = z;
             if (bVar2.interlace) {
-                if (i18 >= i8) {
+                if (i17 >= i8) {
                     i = i8;
-                    i5 = i16 + 1;
+                    i5 = i15 + 1;
                     if (i5 == 2) {
-                        i18 = 4;
-                    } else if (i5 == 3) {
                         i17 = 4;
-                        i18 = 2;
-                    } else if (i5 == 4) {
-                        i18 = 1;
+                    } else if (i5 == 3) {
+                        i16 = 4;
                         i17 = 2;
+                    } else if (i5 == 4) {
+                        i17 = 1;
+                        i16 = 2;
                     }
                 } else {
                     i = i8;
-                    i5 = i16;
+                    i5 = i15;
                 }
-                i2 = i18 + i17;
-                i16 = i5;
+                i2 = i17 + i16;
+                i15 = i5;
             } else {
                 i = i8;
-                i2 = i18;
-                i18 = i19;
+                i2 = i17;
+                i17 = i18;
             }
-            int i20 = i18 + i9;
-            boolean z2 = i13 == 1;
-            if (i20 < i15) {
-                int i21 = i20 * i14;
-                int i22 = i21 + i11;
-                int i23 = i22 + i10;
-                int i24 = i21 + i14;
-                if (i24 < i23) {
-                    i23 = i24;
+            int i19 = i17 + i9;
+            boolean z3 = i12 == 1;
+            if (i19 < i14) {
+                int i20 = i19 * i13;
+                int i21 = i20 + i11;
+                int i22 = i21 + i10;
+                int i23 = i20 + i13;
+                if (i23 < i22) {
+                    i22 = i23;
                 }
                 i3 = i9;
-                int i25 = i19 * i13 * bVar2.iw;
-                if (z2) {
-                    int i26 = i22;
-                    while (i26 < i23) {
-                        int i27 = i10;
-                        int i28 = iArr2[bArr[i25] & 255];
-                        if (i28 != 0) {
-                            iArr[i26] = i28;
-                        } else if (z && bool == null) {
+                int i24 = i18 * i12 * bVar2.iw;
+                if (z3) {
+                    int i25 = i21;
+                    while (i25 < i22) {
+                        int i26 = i10;
+                        int i27 = iArr2[bArr[i24] & 255];
+                        if (i27 != 0) {
+                            iArr[i25] = i27;
+                        } else if (z2 && bool == null) {
                             bool = bool2;
                         }
-                        i25 += i13;
-                        i26++;
-                        i10 = i27;
+                        i24 += i12;
+                        i25++;
+                        i10 = i26;
                     }
                 } else {
                     i4 = i10;
-                    int i29 = ((i23 - i22) * i13) + i25;
-                    int i30 = i22;
-                    while (i30 < i23) {
-                        int i31 = i23;
-                        int b2 = b(i25, i29, bVar2.iw);
+                    int i28 = ((i22 - i21) * i12) + i24;
+                    int i29 = i21;
+                    while (i29 < i22) {
+                        int i30 = i22;
+                        int b2 = b(i24, i28, bVar2.iw);
                         if (b2 != 0) {
-                            iArr[i30] = b2;
-                        } else if (z && bool == null) {
+                            iArr[i29] = b2;
+                        } else if (z2 && bool == null) {
                             bool = bool2;
                         }
-                        i25 += i13;
-                        i30++;
-                        i23 = i31;
+                        i24 += i12;
+                        i29++;
+                        i22 = i30;
                     }
-                    i19++;
-                    i18 = i2;
+                    i18++;
+                    i17 = i2;
                     i10 = i4;
-                    valueOf = bool2;
+                    z = bool2;
                     i8 = i;
                     i9 = i3;
                 }
@@ -264,10 +262,10 @@ public class e implements a {
                 i3 = i9;
             }
             i4 = i10;
-            i19++;
-            i18 = i2;
+            i18++;
+            i17 = i2;
             i10 = i4;
-            valueOf = bool2;
+            z = bool2;
             i8 = i;
             i9 = i3;
         }
@@ -362,57 +360,20 @@ public class e implements a {
         this.Dd = Boolean.valueOf(this.Dd == null && z && b2 != -1);
     }
 
-    /* JADX WARNING: type inference failed for: r3v1, types: [short[]] */
-    /* JADX WARNING: type inference failed for: r22v0 */
-    /* JADX WARNING: type inference failed for: r22v1 */
-    /* JADX WARNING: type inference failed for: r28v0 */
-    /* JADX WARNING: type inference failed for: r28v1 */
-    /* JADX WARNING: type inference failed for: r15v1 */
-    /* JADX WARNING: type inference failed for: r22v2 */
-    /* JADX WARNING: type inference failed for: r22v3 */
-    /* JADX WARNING: type inference failed for: r17v4 */
-    /* JADX WARNING: type inference failed for: r28v2 */
-    /* JADX WARNING: type inference failed for: r22v4 */
-    /* JADX WARNING: type inference failed for: r4v16, types: [short] */
-    /* JADX WARNING: type inference failed for: r4v18, types: [int] */
-    /* JADX WARNING: type inference failed for: r28v4 */
-    /* JADX WARNING: type inference failed for: r28v6 */
-    /* JADX WARNING: type inference failed for: r22v5 */
-    /* JADX WARNING: type inference failed for: r17v6 */
-    /* JADX WARNING: type inference failed for: r28v7 */
-    /* JADX WARNING: type inference failed for: r4v22 */
-    /* JADX WARNING: type inference failed for: r28v8 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r17v0, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r17v1, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v4, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r4v5, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r24v2, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r17v3, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r17v4, resolved type: byte} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r17v5, resolved type: byte} */
     /* JADX WARNING: Incorrect type for immutable var: ssa=short, code=int, for r4v16, types: [short] */
-    /* JADX WARNING: Incorrect type for immutable var: ssa=short[], code=null, for r3v1, types: [short[]] */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r22v3
-  assigns: []
-  uses: []
-  mth insns count: 168
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 10 */
+    /* JADX WARNING: Multi-variable type inference failed */
     private void c(b bVar) {
         int i;
         int i2;
-        ? r22;
         int i3;
-        ? r28;
-        ? r4;
-        int i4;
-        int i5;
-        ? r282;
         e eVar = this;
         b bVar2 = bVar;
         if (bVar2 != null) {
@@ -426,16 +387,16 @@ public class e implements a {
             i = bVar2.iw;
             i2 = bVar2.ih;
         }
-        int i6 = i * i2;
+        int i4 = i * i2;
         byte[] bArr = eVar.wd;
-        if (bArr == null || bArr.length < i6) {
-            eVar.wd = eVar.vd.d(i6);
+        if (bArr == null || bArr.length < i4) {
+            eVar.wd = eVar.vd.d(i4);
         }
         byte[] bArr2 = eVar.wd;
         if (eVar.prefix == null) {
             eVar.prefix = new short[4096];
         }
-        ? r3 = eVar.prefix;
+        short[] sArr = eVar.prefix;
         if (eVar.suffix == null) {
             eVar.suffix = new byte[4096];
         }
@@ -445,140 +406,136 @@ public class e implements a {
         }
         byte[] bArr4 = eVar.pixelStack;
         int readByte = readByte();
-        int i7 = 1 << readByte;
-        int i8 = i7 + 1;
-        int i9 = i7 + 2;
-        int i10 = readByte + 1;
-        int i11 = (1 << i10) - 1;
-        int i12 = 0;
-        for (int i13 = 0; i13 < i7; i13++) {
-            r3[i13] = 0;
-            bArr3[i13] = (byte) i13;
+        int i5 = 1 << readByte;
+        int i6 = i5 + 1;
+        int i7 = i5 + 2;
+        int i8 = readByte + 1;
+        int i9 = (1 << i8) - 1;
+        int i10 = 0;
+        for (int i11 = 0; i11 < i5; i11++) {
+            sArr[i11] = 0;
+            bArr3[i11] = (byte) i11;
         }
         byte[] bArr5 = eVar.block;
-        int i14 = i10;
-        int i15 = i9;
-        int i16 = i11;
+        int i12 = i8;
+        int i13 = i7;
+        int i14 = i9;
+        int i15 = 0;
+        int i16 = 0;
         int i17 = 0;
-        ? r17 = 0;
         int i18 = 0;
         int i19 = 0;
         int i20 = 0;
-        ? r222 = 0;
         int i21 = 0;
         int i22 = -1;
         while (true) {
-            if (i12 >= i6) {
+            if (i10 < i4) {
+                if (i15 == 0) {
+                    i15 = readBlock();
+                    if (i15 <= 0) {
+                        eVar.status = 3;
+                        break;
+                    }
+                    i18 = 0;
+                }
+                i17 += (bArr5[i18] & 255) << i16;
+                i18++;
+                i15--;
+                int i23 = i16 + 8;
+                int i24 = i22;
+                int i25 = i20;
+                int i26 = i13;
+                int i27 = i19;
+                int i28 = i10;
+                int i29 = i12;
+                while (true) {
+                    if (i23 < i29) {
+                        i12 = i29;
+                        i20 = i25;
+                        i10 = i28;
+                        i19 = i27;
+                        i16 = i23;
+                        i13 = i26;
+                        i22 = i24;
+                        eVar = this;
+                        break;
+                    }
+                    int i30 = i17 & i14;
+                    i17 >>= i29;
+                    i23 -= i29;
+                    if (i30 == i5) {
+                        i29 = i8;
+                        i26 = i7;
+                        i14 = i9;
+                        i24 = -1;
+                    } else if (i30 == i6) {
+                        i16 = i23;
+                        i12 = i29;
+                        i10 = i28;
+                        i19 = i27;
+                        i13 = i26;
+                        i20 = i25;
+                        i22 = i24;
+                        break;
+                    } else {
+                        if (i24 == -1) {
+                            bArr2[i27] = bArr3[i30];
+                            i27++;
+                            i28++;
+                            i24 = i30;
+                            i25 = i24;
+                        } else {
+                            int i31 = i26;
+                            int i32 = i23;
+                            if (i30 >= i31) {
+                                bArr4[i21] = (byte) i25;
+                                i21++;
+                                i3 = i24;
+                            } else {
+                                i3 = i30;
+                            }
+                            while (i3 >= i5) {
+                                bArr4[i21] = bArr3[i3];
+                                i21++;
+                                i3 = sArr[i3];
+                            }
+                            int i33 = bArr3[i3] & 255;
+                            int i34 = i8;
+                            byte b2 = (byte) i33;
+                            bArr2[i27] = b2;
+                            while (true) {
+                                i27++;
+                                i28++;
+                                if (i21 <= 0) {
+                                    break;
+                                }
+                                i21--;
+                                bArr2[i27] = bArr4[i21];
+                            }
+                            int i35 = i33;
+                            if (i31 < 4096) {
+                                sArr[i31] = (short) i24;
+                                bArr3[i31] = b2;
+                                i31++;
+                                if ((i31 & i14) == 0 && i31 < 4096) {
+                                    i29++;
+                                    i14 += i31;
+                                }
+                            }
+                            i24 = i30;
+                            i23 = i32;
+                            i8 = i34;
+                            i25 = i35;
+                            i26 = i31;
+                        }
+                        eVar = this;
+                    }
+                }
+            } else {
                 break;
             }
-            if (i17 == 0) {
-                i17 = readBlock();
-                if (i17 <= 0) {
-                    eVar.status = 3;
-                    break;
-                }
-                i19 = 0;
-            }
-            i18 += (bArr5[i19] & 255) << r17;
-            i19++;
-            i17--;
-            int i23 = r17 + 8;
-            int i24 = i22;
-            ? r283 = r222;
-            int i25 = i15;
-            int i26 = i20;
-            int i27 = i12;
-            int i28 = i14;
-            while (true) {
-                if (i23 < i28) {
-                    i14 = i28;
-                    r22 = r283;
-                    i12 = i27;
-                    i20 = i26;
-                    i3 = i23;
-                    i15 = i25;
-                    i22 = i24;
-                    eVar = this;
-                    break;
-                }
-                byte b2 = i18 & i16;
-                i18 >>= i28;
-                i23 -= i28;
-                if (b2 == i7) {
-                    i28 = i10;
-                    i25 = i9;
-                    i16 = i11;
-                    i24 = -1;
-                    r28 = r283;
-                } else if (b2 == i8) {
-                    i3 = i23;
-                    i14 = i28;
-                    i12 = i27;
-                    i20 = i26;
-                    i15 = i25;
-                    r22 = r283;
-                    i22 = i24;
-                    break;
-                } else {
-                    if (i24 == -1) {
-                        bArr2[i26] = bArr3[b2];
-                        i26++;
-                        i27++;
-                        i24 = b2;
-                        i4 = i24;
-                    } else {
-                        int i29 = i25;
-                        int i30 = i23;
-                        if (b2 >= i29) {
-                            bArr4[i21] = (byte) r283;
-                            i21++;
-                            i5 = i24;
-                        } else {
-                            i5 = b2;
-                        }
-                        while (r4 >= i7) {
-                            bArr4[i21] = bArr3[r4];
-                            i21++;
-                            r4 = r3[r4];
-                        }
-                        byte b3 = bArr3[r4] & 255;
-                        int i31 = i10;
-                        byte b4 = (byte) b3;
-                        bArr2[i26] = b4;
-                        while (true) {
-                            i26++;
-                            i27++;
-                            if (i21 <= 0) {
-                                break;
-                            }
-                            i21--;
-                            bArr2[i26] = bArr4[i21];
-                        }
-                        byte b5 = b3;
-                        if (i29 < 4096) {
-                            r3[i29] = (short) i24;
-                            bArr3[i29] = b4;
-                            i29++;
-                            if ((i29 & i16) == 0 && i29 < 4096) {
-                                i28++;
-                                i16 += i29;
-                            }
-                        }
-                        i24 = b2;
-                        i23 = i30;
-                        i10 = i31;
-                        i4 = b5;
-                        i25 = i29;
-                    }
-                    eVar = this;
-                    r28 = r282;
-                }
-                r283 = r28;
-            }
-            r222 = r22;
-            r17 = i3;
         }
-        Arrays.fill(bArr2, i20, i6, 0);
+        Arrays.fill(bArr2, i19, i4, (byte) 0);
     }
 
     private int readBlock() {
@@ -607,32 +564,26 @@ public class e implements a {
     }
 
     public int I() {
-        if (this.header.frameCount > 0) {
-            int i = this.yd;
-            if (i >= 0) {
-                return getDelay(i);
-            }
+        if (this.header.frameCount <= 0) {
+            return 0;
         }
-        return 0;
+        int i = this.yd;
+        if (i < 0) {
+            return 0;
+        }
+        return getDelay(i);
     }
 
     public int N() {
         return this.header.loopCount;
     }
 
-    public void a(@NonNull Config config) {
-        if (config == Config.ARGB_8888 || config == Config.RGB_565) {
+    public void a(@NonNull Bitmap.Config config) {
+        if (config == Bitmap.Config.ARGB_8888 || config == Bitmap.Config.RGB_565) {
             this.Ed = config;
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unsupported format: ");
-        sb.append(config);
-        sb.append(", must be one of ");
-        sb.append(Config.ARGB_8888);
-        sb.append(" or ");
-        sb.append(Config.RGB_565);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Unsupported format: " + config + ", must be one of " + Bitmap.Config.ARGB_8888 + " or " + Bitmap.Config.RGB_565);
     }
 
     public synchronized void a(@NonNull c cVar, @NonNull ByteBuffer byteBuffer) {
@@ -649,10 +600,10 @@ public class e implements a {
             this.Xc.position(0);
             this.Xc.order(ByteOrder.LITTLE_ENDIAN);
             this.Ad = false;
-            Iterator it = cVar.frames.iterator();
+            Iterator<b> it = cVar.frames.iterator();
             while (true) {
                 if (it.hasNext()) {
-                    if (((b) it.next()).dispose == 3) {
+                    if (it.next().dispose == 3) {
                         this.Ad = true;
                         break;
                     }
@@ -666,10 +617,7 @@ public class e implements a {
             this.wd = this.vd.d(cVar.width * cVar.height);
             this.xd = this.vd.f(this.Cd * this.Bd);
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Sample size must be >=0, not: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Sample size must be >=0, not: " + i);
         }
     }
 
@@ -713,7 +661,7 @@ public class e implements a {
         if (i >= 0) {
             c cVar = this.header;
             if (i < cVar.frameCount) {
-                return ((b) cVar.frames.get(i)).delay;
+                return cVar.frames.get(i).delay;
             }
         }
         return -1;
@@ -744,12 +692,7 @@ public class e implements a {
         if (this.header.frameCount <= 0 || this.yd < 0) {
             if (Log.isLoggable(TAG, 3)) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unable to decode frame, frameCount=");
-                sb.append(this.header.frameCount);
-                sb.append(", framePointer=");
-                sb.append(this.yd);
-                Log.d(str, sb.toString());
+                Log.d(str, "Unable to decode frame, frameCount=" + this.header.frameCount + ", framePointer=" + this.yd);
             }
             this.status = 1;
         }
@@ -759,17 +702,14 @@ public class e implements a {
                 if (this.block == null) {
                     this.block = this.vd.d(255);
                 }
-                b bVar = (b) this.header.frames.get(this.yd);
+                b bVar = this.header.frames.get(this.yd);
                 int i = this.yd - 1;
-                b bVar2 = i >= 0 ? (b) this.header.frames.get(i) : null;
+                b bVar2 = i >= 0 ? this.header.frames.get(i) : null;
                 this.act = bVar.lct != null ? bVar.lct : this.header.gct;
                 if (this.act == null) {
                     if (Log.isLoggable(TAG, 3)) {
                         String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("No valid color table found for frame #");
-                        sb2.append(this.yd);
-                        Log.d(str2, sb2.toString());
+                        Log.d(str2, "No valid color table found for frame #" + this.yd);
                     }
                     this.status = 1;
                     return null;
@@ -784,10 +724,7 @@ public class e implements a {
         }
         if (Log.isLoggable(TAG, 3)) {
             String str3 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Unable to decode frame, status=");
-            sb3.append(this.status);
-            Log.d(str3, sb3.toString());
+            Log.d(str3, "Unable to decode frame, status=" + this.status);
         }
     }
 

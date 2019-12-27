@@ -2,7 +2,6 @@ package com.arcsoft.camera.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
@@ -10,7 +9,6 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.camera2.CameraCharacteristics;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.SizeF;
@@ -129,7 +127,7 @@ public class d {
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            bitmap.compress(CompressFormat.PNG, 90, fileOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, fileOutputStream);
             fileOutputStream.flush();
             fileOutputStream.close();
         } catch (FileNotFoundException e2) {
@@ -144,6 +142,10 @@ public class d {
         return format == 17 || format == 35 || format == 842094169;
     }
 
+    /* JADX WARNING: Code restructure failed: missing block: B:16:?, code lost:
+        return false;
+     */
+    /* JADX WARNING: Exception block dominator not found, dom blocks: [] */
     public static boolean a(String str, String str2, byte[] bArr) {
         if (str2 == null || bArr == null) {
             return false;
@@ -156,24 +158,17 @@ public class d {
         int i = 0;
         while (file2.exists()) {
             i++;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(i);
-            file2 = new File(sb.toString());
+            file2 = new File(str2 + i);
         }
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(str2);
-            fileOutputStream.write(bArr);
-            fileOutputStream.close();
-            return true;
-        } catch (FileNotFoundException | IOException unused) {
-            return false;
-        }
+        FileOutputStream fileOutputStream = new FileOutputStream(str2);
+        fileOutputStream.write(bArr);
+        fileOutputStream.close();
+        return true;
     }
 
     public static byte[] a(byte[] bArr, int i, int i2) {
         try {
-            YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, null);
+            YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, (int[]) null);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             yuvImage.compressToJpeg(new Rect(0, 0, i, i2), 100, byteArrayOutputStream);
             byte[] byteArray = byteArrayOutputStream.toByteArray();
@@ -243,7 +238,7 @@ public class d {
     public static Bitmap b(byte[] bArr, int i, int i2) {
         Bitmap bitmap = null;
         try {
-            YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, null);
+            YuvImage yuvImage = new YuvImage(bArr, 17, i, i2, (int[]) null);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             yuvImage.compressToJpeg(new Rect(0, 0, i, i2), 90, byteArrayOutputStream);
             bitmap = BitmapFactory.decodeByteArray(byteArrayOutputStream.toByteArray(), 0, byteArrayOutputStream.size());
@@ -277,7 +272,7 @@ public class d {
             int format = image.getFormat();
             int width = cropRect.width();
             int height = cropRect.height();
-            Plane[] planes = image.getPlanes();
+            Image.Plane[] planes = image.getPlanes();
             int i6 = width * height;
             byte[] bArr = new byte[((ImageFormat.getBitsPerPixel(format) * i6) / 8)];
             int i7 = 0;
@@ -349,10 +344,7 @@ public class d {
             }
             return bArr;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("can't convert Image to byte array, format ");
-            sb.append(image.getFormat());
-            throw new UnsupportedOperationException(sb.toString());
+            throw new UnsupportedOperationException("can't convert Image to byte array, format " + image.getFormat());
         }
     }
 
@@ -365,31 +357,16 @@ public class d {
             file.getParentFile().mkdirs();
             file.mkdirs();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(File.separator);
-        sb.append(str2);
-        String str3 = Storage.JPEG_SUFFIX;
-        sb.append(str3);
-        String sb2 = sb.toString();
+        String str3 = str + File.separator + str2 + Storage.JPEG_SUFFIX;
         int i = 0;
-        File file2 = new File(sb2);
+        File file2 = new File(str3);
         while (file2.exists()) {
             i++;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str2);
-            sb3.append("_");
-            sb3.append(i);
-            str2 = sb3.toString();
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(str);
-            sb4.append(File.separator);
-            sb4.append(str2);
-            sb4.append(str3);
-            sb2 = sb4.toString();
-            file2 = new File(sb2);
+            str2 = str2 + "_" + i;
+            str3 = str + File.separator + str2 + Storage.JPEG_SUFFIX;
+            file2 = new File(str3);
         }
-        return sb2;
+        return str3;
     }
 
     public static String n(String str, String str2) {
@@ -444,10 +421,8 @@ public class d {
         }
         int height = bitmap.getHeight();
         int width = bitmap.getWidth();
-        float f2 = ((float) i) / ((float) width);
-        float f3 = ((float) i2) / ((float) height);
         Matrix matrix = new Matrix();
-        matrix.postScale(f2, f3);
+        matrix.postScale(((float) i) / ((float) width), ((float) i2) / ((float) height));
         Bitmap createBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
         if (!bitmap.isRecycled()) {
             bitmap.recycle();

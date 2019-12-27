@@ -33,7 +33,7 @@ public final class FlowableZipIterable<T, U, V> extends AbstractFlowableWithUpst
             this.s.cancel();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void error(Throwable th) {
             Exceptions.throwIfFatal(th);
             this.done = true;
@@ -60,7 +60,7 @@ public final class FlowableZipIterable<T, U, V> extends AbstractFlowableWithUpst
         public void onNext(T t) {
             if (!this.done) {
                 try {
-                    Object next = this.iterator.next();
+                    U next = this.iterator.next();
                     ObjectHelper.requireNonNull(next, "The iterator returned a null value");
                     try {
                         Object apply = this.zipper.apply(t, next);
@@ -104,14 +104,14 @@ public final class FlowableZipIterable<T, U, V> extends AbstractFlowableWithUpst
 
     public void subscribeActual(Subscriber<? super V> subscriber) {
         try {
-            Iterator it = this.other.iterator();
+            Iterator<U> it = this.other.iterator();
             ObjectHelper.requireNonNull(it, "The iterator returned by other is null");
             Iterator it2 = it;
             try {
                 if (!it2.hasNext()) {
                     EmptySubscription.complete(subscriber);
                 } else {
-                    this.source.subscribe((FlowableSubscriber<? super T>) new ZipIterableSubscriber<Object>(subscriber, it2, this.zipper));
+                    this.source.subscribe(new ZipIterableSubscriber(subscriber, it2, this.zipper));
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);

@@ -25,10 +25,10 @@ public class EditListBox extends FullBox {
     public void doWrite(ByteBuffer byteBuffer) {
         super.doWrite(byteBuffer);
         byteBuffer.putInt(this.edits.size());
-        for (Edit edit : this.edits) {
-            byteBuffer.putInt((int) edit.getDuration());
-            byteBuffer.putInt((int) edit.getMediaTime());
-            byteBuffer.putInt((int) (edit.getRate() * 65536.0f));
+        for (Edit next : this.edits) {
+            byteBuffer.putInt((int) next.getDuration());
+            byteBuffer.putInt((int) next.getMediaTime());
+            byteBuffer.putInt((int) (next.getRate() * 65536.0f));
         }
     }
 

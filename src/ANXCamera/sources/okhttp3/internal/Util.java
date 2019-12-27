@@ -92,11 +92,7 @@ public final class Util {
             if (address.length == 16) {
                 return inet6AddressToAscii(address);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid IPv6 address: '");
-            sb.append(str);
-            sb.append("'");
-            throw new AssertionError(sb.toString());
+            throw new AssertionError("Invalid IPv6 address: '" + str + "'");
         }
         try {
             String lowerCase = IDN.toASCII(str).toLowerCase(Locale.US);
@@ -112,24 +108,15 @@ public final class Util {
     public static int checkDuration(String str, long j, TimeUnit timeUnit) {
         int i = (j > 0 ? 1 : (j == 0 ? 0 : -1));
         if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(" < 0");
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException(str + " < 0");
         } else if (timeUnit != null) {
             long millis = timeUnit.toMillis(j);
             if (millis > 2147483647L) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(" too large.");
-                throw new IllegalArgumentException(sb2.toString());
+                throw new IllegalArgumentException(str + " too large.");
             } else if (millis != 0 || i <= 0) {
                 return (int) millis;
             } else {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str);
-                sb3.append(" too small.");
-                throw new IllegalArgumentException(sb3.toString());
+                throw new IllegalArgumentException(str + " too small.");
             }
         } else {
             throw new NullPointerException("unit == null");
@@ -241,9 +228,8 @@ public final class Util {
             if (i5 - i == 0) {
                 return false;
             }
-            int i7 = i4 + 1;
             bArr[i4] = (byte) i6;
-            i4 = i7;
+            i4++;
             i = i5;
         }
         return i4 == i3 + 4;
@@ -309,7 +295,7 @@ public final class Util {
             }
             int i10 = i5 - i3;
             System.arraycopy(bArr, i3, bArr, bArr.length - i10, i10);
-            Arrays.fill(bArr, i3, (bArr.length - i5) + i3, 0);
+            Arrays.fill(bArr, i3, (bArr.length - i5) + i3, (byte) 0);
         }
         try {
             return InetAddress.getByAddress(bArr);
@@ -356,24 +342,15 @@ public final class Util {
 
     public static String hostHeader(HttpUrl httpUrl, boolean z) {
         String str;
-        String str2 = ":";
-        if (httpUrl.host().contains(str2)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("[");
-            sb.append(httpUrl.host());
-            sb.append("]");
-            str = sb.toString();
+        if (httpUrl.host().contains(":")) {
+            str = "[" + httpUrl.host() + "]";
         } else {
             str = httpUrl.host();
         }
         if (!z && httpUrl.port() == HttpUrl.defaultPort(httpUrl.scheme())) {
             return str;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(str2);
-        sb2.append(httpUrl.port());
-        return sb2.toString();
+        return str + ":" + httpUrl.port();
     }
 
     public static <T> List<T> immutableList(List<T> list) {

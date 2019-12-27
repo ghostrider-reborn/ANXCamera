@@ -6,7 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +14,6 @@ import android.support.annotation.Px;
 import android.support.v7.cardview.R;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
 
 public class CardView extends FrameLayout {
@@ -29,7 +28,7 @@ public class CardView extends FrameLayout {
     int mUserSetMinWidth;
 
     static {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 21) {
             IMPL = new CardViewApi21Impl();
         } else if (i >= 17) {
@@ -41,7 +40,7 @@ public class CardView extends FrameLayout {
     }
 
     public CardView(@NonNull Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public CardView(@NonNull Context context, @Nullable AttributeSet attributeSet) {
@@ -49,8 +48,8 @@ public class CardView extends FrameLayout {
     }
 
     public CardView(@NonNull Context context, @Nullable AttributeSet attributeSet, int i) {
-        ColorStateList valueOf;
         super(context, attributeSet, i);
+        ColorStateList valueOf;
         this.mContentPadding = new Rect();
         this.mShadowBounds = new Rect();
         this.mCardViewDelegate = new CardViewDelegate() {
@@ -172,13 +171,13 @@ public class CardView extends FrameLayout {
     /* access modifiers changed from: protected */
     public void onMeasure(int i, int i2) {
         if (!(IMPL instanceof CardViewApi21Impl)) {
-            int mode = MeasureSpec.getMode(i);
+            int mode = View.MeasureSpec.getMode(i);
             if (mode == Integer.MIN_VALUE || mode == 1073741824) {
-                i = MeasureSpec.makeMeasureSpec(Math.max((int) Math.ceil((double) IMPL.getMinWidth(this.mCardViewDelegate)), MeasureSpec.getSize(i)), mode);
+                i = View.MeasureSpec.makeMeasureSpec(Math.max((int) Math.ceil((double) IMPL.getMinWidth(this.mCardViewDelegate)), View.MeasureSpec.getSize(i)), mode);
             }
-            int mode2 = MeasureSpec.getMode(i2);
+            int mode2 = View.MeasureSpec.getMode(i2);
             if (mode2 == Integer.MIN_VALUE || mode2 == 1073741824) {
-                i2 = MeasureSpec.makeMeasureSpec(Math.max((int) Math.ceil((double) IMPL.getMinHeight(this.mCardViewDelegate)), MeasureSpec.getSize(i2)), mode2);
+                i2 = View.MeasureSpec.makeMeasureSpec(Math.max((int) Math.ceil((double) IMPL.getMinHeight(this.mCardViewDelegate)), View.MeasureSpec.getSize(i2)), mode2);
             }
             super.onMeasure(i, i2);
             return;

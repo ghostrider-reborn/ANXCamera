@@ -2,7 +2,6 @@ package android.os.statistics;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import java.io.Serializable;
@@ -10,7 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public final class E2EScenario implements Parcelable, Serializable {
-    public static final Creator<E2EScenario> CREATOR = new Creator<E2EScenario>() {
+    public static final Parcelable.Creator<E2EScenario> CREATOR = new Parcelable.Creator<E2EScenario>() {
         public E2EScenario createFromParcel(Parcel parcel) {
             return new E2EScenario(parcel);
         }
@@ -26,10 +25,9 @@ public final class E2EScenario implements Parcelable, Serializable {
     public String namespace;
 
     protected E2EScenario() {
-        String str = "";
-        this.namespace = str;
-        this.category = str;
-        this.name = str;
+        this.namespace = "";
+        this.category = "";
+        this.name = "";
     }
 
     public E2EScenario(Parcel parcel) {
@@ -39,20 +37,14 @@ public final class E2EScenario implements Parcelable, Serializable {
         String str = "";
         this.namespace = readString == null ? str : readString;
         this.category = readString2 == null ? str : readString2;
-        if (readString3 != null) {
-            str = readString3;
-        }
-        this.name = str;
+        this.name = readString3 != null ? readString3 : str;
     }
 
     public E2EScenario(String str, String str2, String str3) {
         String str4 = "";
         this.namespace = str == null ? str4 : str;
         this.category = str2 == null ? str4 : str2;
-        if (str3 != null) {
-            str4 = str3;
-        }
-        this.name = str4;
+        this.name = str3 != null ? str3 : str4;
     }
 
     public int describeContents() {
@@ -60,15 +52,11 @@ public final class E2EScenario implements Parcelable, Serializable {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (obj == null || !(obj instanceof E2EScenario)) {
             return false;
         }
         E2EScenario e2EScenario = (E2EScenario) obj;
-        if (this.namespace.equals(e2EScenario.namespace) && this.category.equals(e2EScenario.category) && this.name.equals(e2EScenario.name)) {
-            z = true;
-        }
-        return z;
+        return this.namespace.equals(e2EScenario.namespace) && this.category.equals(e2EScenario.category) && this.name.equals(e2EScenario.name);
     }
 
     public int hashCode() {

@@ -25,35 +25,25 @@ public class TEProgramObject {
 
         public static int loadShader(int i, String str) {
             int glGetError = GLES20.glGetError();
-            String str2 = TEProgramObject.TAG;
             if (glGetError != 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("before glCreateShader, glError: ");
-                sb.append(glGetError);
-                VELogUtil.e(str2, sb.toString());
+                VELogUtil.e(TEProgramObject.TAG, "before glCreateShader, glError: " + glGetError);
             }
             int glCreateShader = GLES20.glCreateShader(i);
             int glGetError2 = GLES20.glGetError();
             if (glGetError2 != 0) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("after glCreateShader, glError: ");
-                sb2.append(glGetError2);
-                VELogUtil.e(str2, sb2.toString());
+                VELogUtil.e(TEProgramObject.TAG, "after glCreateShader, glError: " + glGetError2);
             }
             if (glCreateShader != 0) {
                 GLES20.glShaderSource(glCreateShader, str);
                 GLES20.glCompileShader(glCreateShader);
                 int glGetError3 = GLES20.glGetError();
                 if (glGetError3 != 0) {
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("after glCompileShader, glError: ");
-                    sb3.append(glGetError3);
-                    VELogUtil.e(str2, sb3.toString());
+                    VELogUtil.e(TEProgramObject.TAG, "after glCompileShader, glError: " + glGetError3);
                 }
                 int[] iArr = {0};
                 GLES20.glGetShaderiv(glCreateShader, 35713, iArr, 0);
                 if (iArr[0] != 1) {
-                    VELogUtil.e(str2, GLES20.glGetShaderInfoLog(glCreateShader));
+                    VELogUtil.e(TEProgramObject.TAG, GLES20.glGetShaderInfoLog(glCreateShader));
                     GLES20.glDeleteShader(glCreateShader);
                     return 0;
                 }
@@ -129,9 +119,8 @@ public class TEProgramObject {
         if (i == 0) {
             i = GLES20.glCreateProgram();
         }
-        String str3 = TAG;
         if (i == 0) {
-            Log.e(str3, "Invalid Program ID! Check if the context is binded!");
+            Log.e(TAG, "Invalid Program ID! Check if the context is binded!");
         }
         ShaderObject shaderObject = this.mVertexShader;
         if (shaderObject != null) {
@@ -154,7 +143,7 @@ public class TEProgramObject {
         this.mVertexShader = null;
         this.mFragmentShader = null;
         if (iArr[0] != 1) {
-            Log.e(str3, GLES20.glGetProgramInfoLog(i));
+            Log.e(TAG, GLES20.glGetProgramInfoLog(i));
             return false;
         }
         int i2 = this.mProgramID;

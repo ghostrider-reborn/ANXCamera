@@ -56,27 +56,23 @@ public final class ObservableAmb<T> extends Observable<T> {
 
         public boolean win(int i) {
             int i2 = this.winner.get();
-            boolean z = true;
             int i3 = 0;
             if (i2 != 0) {
-                if (i2 != i) {
-                    z = false;
-                }
-                return z;
-            } else if (!this.winner.compareAndSet(0, i)) {
-                return false;
-            } else {
-                AmbInnerObserver<T>[] ambInnerObserverArr = this.observers;
-                int length = ambInnerObserverArr.length;
-                while (i3 < length) {
-                    int i4 = i3 + 1;
-                    if (i4 != i) {
-                        ambInnerObserverArr[i3].dispose();
-                    }
-                    i3 = i4;
-                }
-                return true;
+                return i2 == i;
             }
+            if (!this.winner.compareAndSet(0, i)) {
+                return false;
+            }
+            AmbInnerObserver<T>[] ambInnerObserverArr = this.observers;
+            int length = ambInnerObserverArr.length;
+            while (i3 < length) {
+                int i4 = i3 + 1;
+                if (i4 != i) {
+                    ambInnerObserverArr[i3].dispose();
+                }
+                i3 = i4;
+            }
+            return true;
         }
     }
 
@@ -147,7 +143,7 @@ public final class ObservableAmb<T> extends Observable<T> {
                 i = 0;
                 for (ObservableSource<? extends T> observableSource : this.sourcesIterable) {
                     if (observableSource == null) {
-                        EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), observer);
+                        EmptyDisposable.error((Throwable) new NullPointerException("One of the sources is null"), (Observer<?>) observer);
                         return;
                     }
                     if (i == observableSourceArr.length) {
@@ -161,14 +157,14 @@ public final class ObservableAmb<T> extends Observable<T> {
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, observer);
+                EmptyDisposable.error(th, (Observer<?>) observer);
                 return;
             }
         } else {
             i = observableSourceArr.length;
         }
         if (i == 0) {
-            EmptyDisposable.complete(observer);
+            EmptyDisposable.complete((Observer<?>) observer);
         } else if (i == 1) {
             observableSourceArr[0].subscribe(observer);
         } else {

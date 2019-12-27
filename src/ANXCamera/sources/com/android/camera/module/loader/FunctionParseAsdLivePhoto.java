@@ -1,20 +1,20 @@
 package com.android.camera.module.loader;
 
 import android.hardware.camera2.CaptureResult;
-import com.android.camera2.Camera2Proxy.LivePhotoResultCallback;
+import com.android.camera2.Camera2Proxy;
 import com.xiaomi.camera.liveshot.LivePhotoResult;
 import io.reactivex.functions.Function;
 import java.lang.ref.WeakReference;
 
 public class FunctionParseAsdLivePhoto implements Function<CaptureResult, CaptureResult> {
-    private WeakReference<LivePhotoResultCallback> mLivePhotoResultCallbackReference;
+    private WeakReference<Camera2Proxy.LivePhotoResultCallback> mLivePhotoResultCallbackReference;
 
-    public FunctionParseAsdLivePhoto(LivePhotoResultCallback livePhotoResultCallback) {
+    public FunctionParseAsdLivePhoto(Camera2Proxy.LivePhotoResultCallback livePhotoResultCallback) {
         this.mLivePhotoResultCallbackReference = new WeakReference<>(livePhotoResultCallback);
     }
 
     public CaptureResult apply(CaptureResult captureResult) throws Exception {
-        LivePhotoResultCallback livePhotoResultCallback = (LivePhotoResultCallback) this.mLivePhotoResultCallbackReference.get();
+        Camera2Proxy.LivePhotoResultCallback livePhotoResultCallback = (Camera2Proxy.LivePhotoResultCallback) this.mLivePhotoResultCallbackReference.get();
         if (livePhotoResultCallback == null || !livePhotoResultCallback.isLivePhotoStarted()) {
             return captureResult;
         }

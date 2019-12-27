@@ -20,7 +20,7 @@ public final class SingleDoFinally<T> extends Single<T> {
         private static final long serialVersionUID = 4109457741734051389L;
         final SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f332d;
         final Action onFinally;
 
@@ -55,7 +55,7 @@ public final class SingleDoFinally<T> extends Single<T> {
             runFinally();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runFinally() {
             if (compareAndSet(0, 1)) {
                 try {

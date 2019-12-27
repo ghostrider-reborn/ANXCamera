@@ -25,10 +25,7 @@ public class d implements j<BitmapDrawable> {
         if (a2.get() instanceof BitmapDrawable) {
             return a2;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Wrapped transformation unexpectedly returned a non BitmapDrawable resource: ");
-        sb.append(a2.get());
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Wrapped transformation unexpectedly returned a non BitmapDrawable resource: " + a2.get());
     }
 
     private static A<Drawable> k(A<BitmapDrawable> a2) {
@@ -36,10 +33,10 @@ public class d implements j<BitmapDrawable> {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof d)) {
-            return false;
+        if (obj instanceof d) {
+            return this.wa.equals(((d) obj).wa);
         }
-        return this.wa.equals(((d) obj).wa);
+        return false;
     }
 
     public int hashCode() {
@@ -48,7 +45,7 @@ public class d implements j<BitmapDrawable> {
 
     @NonNull
     public A<BitmapDrawable> transform(@NonNull Context context, @NonNull A<BitmapDrawable> a2, int i, int i2) {
-        A<BitmapDrawable> transform = this.wa.transform(context, a2, i, i2);
+        A<Drawable> transform = this.wa.transform(context, a2, i, i2);
         j(transform);
         return transform;
     }

@@ -5,20 +5,14 @@ import com.arcsoft.avatar.util.CodecLog;
 
 public class ShaderManager {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f89a = "Arc_ShaderManager";
 
     private static int a(int i, String str) {
         String a2 = a(i);
         int glCreateShader = GLES20.glCreateShader(i);
-        String str2 = f89a;
         if (glCreateShader == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("create shader error, shader type=");
-            sb.append(a2);
-            sb.append(" , error=");
-            sb.append(GLES20.glGetError());
-            CodecLog.e(str2, sb.toString());
+            CodecLog.e(f89a, "create shader error, shader type=" + a2 + " , error=" + GLES20.glGetError());
             return 0;
         }
         GLES20.glShaderSource(glCreateShader, str);
@@ -29,12 +23,7 @@ public class ShaderManager {
             return glCreateShader;
         }
         String glGetShaderInfoLog = GLES20.glGetShaderInfoLog(glCreateShader);
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("createShader shader = ");
-        sb2.append(a2);
-        sb2.append("  error: ");
-        sb2.append(glGetShaderInfoLog);
-        CodecLog.e(str2, sb2.toString());
+        CodecLog.e(f89a, "createShader shader = " + a2 + "  error: " + glGetShaderInfoLog);
         GLES20.glDeleteShader(glCreateShader);
         return 0;
     }
@@ -46,21 +35,14 @@ public class ShaderManager {
             case 35633:
                 return "vertext_shader";
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("invalid shader type = ");
-                sb.append(i);
-                return sb.toString();
+                return "invalid shader type = " + i;
         }
     }
 
     public static int createProgram(String str, String str2) {
         int glCreateProgram = GLES20.glCreateProgram();
-        String str3 = f89a;
         if (glCreateProgram == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("create program error ,error=");
-            sb.append(GLES20.glGetError());
-            CodecLog.e(str3, sb.toString());
+            CodecLog.e(f89a, "create program error ,error=" + GLES20.glGetError());
             return 0;
         }
         int a2 = a(35633, str);
@@ -80,10 +62,7 @@ public class ShaderManager {
             return glCreateProgram;
         }
         String glGetProgramInfoLog = GLES20.glGetProgramInfoLog(glCreateProgram);
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("createProgram error : ");
-        sb2.append(glGetProgramInfoLog);
-        CodecLog.e(str3, sb2.toString());
+        CodecLog.e(f89a, "createProgram error : " + glGetProgramInfoLog);
         GLES20.glDeleteShader(a2);
         GLES20.glDeleteShader(a3);
         GLES20.glDeleteProgram(glCreateProgram);

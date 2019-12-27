@@ -55,7 +55,7 @@ public final class CompletableMergeIterable extends Completable {
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         completableObserver.onSubscribe(compositeDisposable);
         try {
-            Iterator it = this.sources.iterator();
+            Iterator<? extends CompletableSource> it = this.sources.iterator();
             ObjectHelper.requireNonNull(it, "The source iterator returned is null");
             Iterator it2 = it;
             AtomicInteger atomicInteger = new AtomicInteger(1);

@@ -3,13 +3,13 @@ package com.android.camera.db.item;
 import com.android.camera.db.DbContainer;
 import com.android.camera.db.greendao.DaoMaster;
 import com.android.camera.db.greendao.DaoSession;
-import com.android.camera.db.provider.DbProvider.providerDb;
+import com.android.camera.db.provider.DbProvider;
 import java.util.List;
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.Property;
 import org.greenrobot.greendao.query.Query;
 
-public abstract class DbItemBase<T, K> implements providerDb<T, K> {
+public abstract class DbItemBase<T, K> implements DbProvider.providerDb<T, K> {
     protected final Object mLock = new Object();
 
     /* access modifiers changed from: protected */

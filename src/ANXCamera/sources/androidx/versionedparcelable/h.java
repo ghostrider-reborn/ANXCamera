@@ -5,10 +5,9 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcelable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.internal.view.SupportMenu;
 import android.util.SparseArray;
-import androidx.versionedparcelable.VersionedParcel.ParcelException;
+import androidx.versionedparcelable.VersionedParcel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -19,7 +18,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Set;
 
-@RestrictTo({Scope.LIBRARY})
+@RestrictTo({RestrictTo.Scope.LIBRARY})
 /* compiled from: VersionedParcelStream */
 class h extends VersionedParcel {
     private static final int TYPE_BOOLEAN = 5;
@@ -60,7 +59,7 @@ class h extends VersionedParcel {
             this.mTarget = dataOutputStream;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void ta() throws IOException {
             this.sb.flush();
             int size = this.rb.size();
@@ -92,10 +91,7 @@ class h extends VersionedParcel {
     public h(InputStream inputStream, OutputStream outputStream) {
         DataOutputStream dataOutputStream = null;
         this.bb = inputStream != null ? new DataInputStream(inputStream) : null;
-        if (outputStream != null) {
-            dataOutputStream = new DataOutputStream(outputStream);
-        }
-        this.eb = dataOutputStream;
+        this.eb = outputStream != null ? new DataOutputStream(outputStream) : dataOutputStream;
         this.gb = this.bb;
         this.hb = this.eb;
     }
@@ -103,7 +99,7 @@ class h extends VersionedParcel {
     private void a(int i, String str, Bundle bundle) {
         switch (i) {
             case 0:
-                bundle.putParcelable(str, null);
+                bundle.putParcelable(str, (Parcelable) null);
                 return;
             case 1:
                 bundle.putBundle(str, readBundle());
@@ -148,10 +144,7 @@ class h extends VersionedParcel {
                 bundle.putFloatArray(str, oa());
                 return;
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown type ");
-                sb.append(i);
-                throw new RuntimeException(sb.toString());
+                throw new RuntimeException("Unknown type " + i);
         }
     }
 
@@ -198,10 +191,7 @@ class h extends VersionedParcel {
             writeInt(14);
             writeFloatArray((float[]) obj);
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unsupported type ");
-            sb.append(obj.getClass());
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unsupported type " + obj.getClass());
         }
     }
 
@@ -220,7 +210,7 @@ class h extends VersionedParcel {
     }
 
     public boolean g(int i) {
-        b bVar = (b) this.fb.get(i);
+        b bVar = this.fb.get(i);
         if (bVar != null) {
             this.fb.remove(i);
             this.gb = bVar.mInputStream;
@@ -260,7 +250,7 @@ class h extends VersionedParcel {
                 }
                 this.ib = null;
             } catch (IOException e2) {
-                throw new ParcelException(e2);
+                throw new VersionedParcel.ParcelException(e2);
             }
         }
     }
@@ -282,7 +272,7 @@ class h extends VersionedParcel {
         try {
             return this.gb.readBoolean();
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -308,7 +298,7 @@ class h extends VersionedParcel {
             this.gb.readFully(bArr);
             return bArr;
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -316,7 +306,7 @@ class h extends VersionedParcel {
         try {
             return this.gb.readDouble();
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -324,7 +314,7 @@ class h extends VersionedParcel {
         try {
             return this.gb.readFloat();
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -332,7 +322,7 @@ class h extends VersionedParcel {
         try {
             return this.gb.readInt();
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -340,7 +330,7 @@ class h extends VersionedParcel {
         try {
             return this.gb.readLong();
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -354,7 +344,7 @@ class h extends VersionedParcel {
             this.gb.readFully(bArr);
             return new String(bArr, UTF_16);
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -366,7 +356,7 @@ class h extends VersionedParcel {
         try {
             this.hb.writeBoolean(z);
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -380,7 +370,7 @@ class h extends VersionedParcel {
                     writeObject(bundle.get(str));
                 }
             } catch (IOException e2) {
-                throw new ParcelException(e2);
+                throw new VersionedParcel.ParcelException(e2);
             }
         } else {
             this.hb.writeInt(-1);
@@ -393,7 +383,7 @@ class h extends VersionedParcel {
                 this.hb.writeInt(bArr.length);
                 this.hb.write(bArr);
             } catch (IOException e2) {
-                throw new ParcelException(e2);
+                throw new VersionedParcel.ParcelException(e2);
             }
         } else {
             this.hb.writeInt(-1);
@@ -406,7 +396,7 @@ class h extends VersionedParcel {
                 this.hb.writeInt(i2);
                 this.hb.write(bArr, i, i2);
             } catch (IOException e2) {
-                throw new ParcelException(e2);
+                throw new VersionedParcel.ParcelException(e2);
             }
         } else {
             this.hb.writeInt(-1);
@@ -417,7 +407,7 @@ class h extends VersionedParcel {
         try {
             this.hb.writeDouble(d2);
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -425,7 +415,7 @@ class h extends VersionedParcel {
         try {
             this.hb.writeFloat(f2);
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -433,7 +423,7 @@ class h extends VersionedParcel {
         try {
             this.hb.writeInt(i);
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -441,7 +431,7 @@ class h extends VersionedParcel {
         try {
             this.hb.writeLong(j);
         } catch (IOException e2) {
-            throw new ParcelException(e2);
+            throw new VersionedParcel.ParcelException(e2);
         }
     }
 
@@ -452,7 +442,7 @@ class h extends VersionedParcel {
                 this.hb.writeInt(bytes.length);
                 this.hb.write(bytes);
             } catch (IOException e2) {
-                throw new ParcelException(e2);
+                throw new VersionedParcel.ParcelException(e2);
             }
         } else {
             this.hb.writeInt(-1);

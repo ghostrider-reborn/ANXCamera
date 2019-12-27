@@ -4,7 +4,7 @@ import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.data.data.TypeItem;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
+import com.android.camera.protocol.ModeProtocol;
 
 public class MakeupBeautyFragment extends BaseBeautyMakeupFragment {
     private static final String TAG = "MakeupBeautyFragment";
@@ -27,7 +27,7 @@ public class MakeupBeautyFragment extends BaseBeautyMakeupFragment {
 
     /* access modifiers changed from: protected */
     public void onAdapterItemClick(TypeItem typeItem) {
-        MakeupProtocol makeupProtocol = (MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
+        ModeProtocol.MakeupProtocol makeupProtocol = (ModeProtocol.MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
         if (makeupProtocol != null) {
             makeupProtocol.onMakeupItemSelected(typeItem.mKeyOrType, true);
         }

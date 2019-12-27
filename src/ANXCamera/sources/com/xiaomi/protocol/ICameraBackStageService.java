@@ -149,37 +149,36 @@ public interface ICameraBackStageService extends IInterface {
         }
 
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            String str = DESCRIPTOR;
             if (i != 1598968902) {
                 switch (i) {
                     case 1:
-                        parcel.enforceInterface(str);
-                        List configCaptureOutputBuffer = configCaptureOutputBuffer(parcel.createTypedArrayList(IImageReaderParameterSets.CREATOR));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        List<Surface> configCaptureOutputBuffer = configCaptureOutputBuffer(parcel.createTypedArrayList(IImageReaderParameterSets.CREATOR));
                         parcel2.writeNoException();
                         parcel2.writeTypedList(configCaptureOutputBuffer);
                         return true;
                     case 2:
-                        parcel.enforceInterface(str);
-                        configCaptureSession(parcel.readInt() != 0 ? (BufferFormat) BufferFormat.CREATOR.createFromParcel(parcel) : null);
+                        parcel.enforceInterface(DESCRIPTOR);
+                        configCaptureSession(parcel.readInt() != 0 ? BufferFormat.CREATOR.createFromParcel(parcel) : null);
                         parcel2.writeNoException();
                         return true;
                     case 3:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         addCapturePath(parcel.readString());
                         parcel2.writeNoException();
                         return true;
                     case 4:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         onCaptureCompleted(parcel.createTypedArrayList(ICustomCaptureResult.CREATOR), parcel.readString());
                         parcel2.writeNoException();
                         return true;
                     case 5:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         onCaptureFailed(parcel.readString(), parcel.readInt());
                         parcel2.writeNoException();
                         return true;
                     case 6:
-                        parcel.enforceInterface(str);
+                        parcel.enforceInterface(DESCRIPTOR);
                         boolean needWaitProcess = needWaitProcess();
                         parcel2.writeNoException();
                         parcel2.writeInt(needWaitProcess ? 1 : 0);
@@ -188,7 +187,7 @@ public interface ICameraBackStageService extends IInterface {
                         return super.onTransact(i, parcel, parcel2, i2);
                 }
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

@@ -2,7 +2,6 @@ package android.support.v4.app;
 
 import android.app.Service;
 import android.app.job.JobInfo;
-import android.app.job.JobInfo.Builder;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobServiceEngine;
@@ -11,10 +10,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -69,28 +67,22 @@ public abstract class JobIntentService extends Service {
 
     static final class CompatWorkEnqueuer extends WorkEnqueuer {
         private final Context mContext;
-        private final WakeLock mLaunchWakeLock;
+        private final PowerManager.WakeLock mLaunchWakeLock;
         boolean mLaunchingService;
-        private final WakeLock mRunWakeLock;
+        private final PowerManager.WakeLock mRunWakeLock;
         boolean mServiceProcessing;
 
         CompatWorkEnqueuer(Context context, ComponentName componentName) {
             super(context, componentName);
             this.mContext = context.getApplicationContext();
             PowerManager powerManager = (PowerManager) context.getSystemService("power");
-            StringBuilder sb = new StringBuilder();
-            sb.append(componentName.getClassName());
-            sb.append(":launch");
-            this.mLaunchWakeLock = powerManager.newWakeLock(1, sb.toString());
+            this.mLaunchWakeLock = powerManager.newWakeLock(1, componentName.getClassName() + ":launch");
             this.mLaunchWakeLock.setReferenceCounted(false);
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(componentName.getClassName());
-            sb2.append(":run");
-            this.mRunWakeLock = powerManager.newWakeLock(1, sb2.toString());
+            this.mRunWakeLock = powerManager.newWakeLock(1, componentName.getClassName() + ":run");
             this.mRunWakeLock.setReferenceCounted(false);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void enqueueWork(Intent intent) {
             Intent intent2 = new Intent(intent);
             intent2.setComponent(this.mComponentName);
@@ -240,11 +232,11 @@ public abstract class JobIntentService extends Service {
         JobWorkEnqueuer(Context context, ComponentName componentName, int i) {
             super(context, componentName);
             ensureJobId(i);
-            this.mJobInfo = new Builder(i, this.mComponentName).setOverrideDeadline(0).build();
+            this.mJobInfo = new JobInfo.Builder(i, this.mComponentName).setOverrideDeadline(0).build();
             this.mJobScheduler = (JobScheduler) context.getApplicationContext().getSystemService("jobscheduler");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void enqueueWork(Intent intent) {
             this.mJobScheduler.enqueue(this.mJobInfo, new JobWorkItem(intent));
         }
@@ -259,21 +251,16 @@ public abstract class JobIntentService extends Service {
             this.mComponentName = componentName;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void enqueueWork(Intent intent);
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void ensureJobId(int i) {
             if (!this.mHasJobId) {
                 this.mHasJobId = true;
                 this.mJobId = i;
             } else if (this.mJobId != i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Given job ID ");
-                sb.append(i);
-                sb.append(" is different than previous ");
-                sb.append(this.mJobId);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("Given job ID " + i + " is different than previous " + this.mJobId);
             }
         }
 
@@ -288,7 +275,7 @@ public abstract class JobIntentService extends Service {
     }
 
     public JobIntentService() {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             this.mCompatQueue = null;
         } else {
             this.mCompatQueue = new ArrayList<>();
@@ -313,11 +300,11 @@ public abstract class JobIntentService extends Service {
 
     static WorkEnqueuer getWorkEnqueuer(Context context, ComponentName componentName, boolean z, int i) {
         WorkEnqueuer workEnqueuer;
-        WorkEnqueuer workEnqueuer2 = (WorkEnqueuer) sClassWorkEnqueuer.get(componentName);
+        WorkEnqueuer workEnqueuer2 = sClassWorkEnqueuer.get(componentName);
         if (workEnqueuer2 != null) {
             return workEnqueuer2;
         }
-        if (VERSION.SDK_INT < 26) {
+        if (Build.VERSION.SDK_INT < 26) {
             workEnqueuer = new CompatWorkEnqueuer(context, componentName);
         } else if (z) {
             workEnqueuer = new JobWorkEnqueuer(context, componentName, i);
@@ -329,7 +316,7 @@ public abstract class JobIntentService extends Service {
         return workEnqueuer3;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public GenericWorkItem dequeueWork() {
         CompatJobEngine compatJobEngine = this.mJobImpl;
         if (compatJobEngine != null) {
@@ -339,12 +326,12 @@ public abstract class JobIntentService extends Service {
             if (this.mCompatQueue.size() <= 0) {
                 return null;
             }
-            GenericWorkItem genericWorkItem = (GenericWorkItem) this.mCompatQueue.remove(0);
-            return genericWorkItem;
+            GenericWorkItem remove = this.mCompatQueue.remove(0);
+            return remove;
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean doStopCurrentWork() {
         CommandProcessor commandProcessor = this.mCurProcessor;
         if (commandProcessor != null) {
@@ -354,7 +341,7 @@ public abstract class JobIntentService extends Service {
         return onStopCurrentWork();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void ensureProcessorRunningLocked(boolean z) {
         if (this.mCurProcessor == null) {
             this.mCurProcessor = new CommandProcessor();
@@ -380,7 +367,7 @@ public abstract class JobIntentService extends Service {
 
     public void onCreate() {
         super.onCreate();
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             this.mJobImpl = new JobServiceEngineImpl(this);
             this.mCompatWorkEnqueuer = null;
             return;
@@ -423,7 +410,7 @@ public abstract class JobIntentService extends Service {
         return true;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void processorFinished() {
         ArrayList<CompatWorkItem> arrayList = this.mCompatQueue;
         if (arrayList != null) {

@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
@@ -49,6 +48,6 @@ public final class FlowableOnErrorReturn<T> extends AbstractFlowableWithUpstream
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new OnErrorReturnSubscriber<Object>(subscriber, this.valueSupplier));
+        this.source.subscribe(new OnErrorReturnSubscriber(subscriber, this.valueSupplier));
     }
 }

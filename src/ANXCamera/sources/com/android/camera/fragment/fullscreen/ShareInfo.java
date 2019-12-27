@@ -2,10 +2,9 @@ package com.android.camera.fragment.fullscreen;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public class ShareInfo implements Parcelable {
-    public static final Creator<ShareInfo> CREATOR = new Creator<ShareInfo>() {
+    public static final Parcelable.Creator<ShareInfo> CREATOR = new Parcelable.Creator<ShareInfo>() {
         public ShareInfo createFromParcel(Parcel parcel) {
             return new ShareInfo(parcel);
         }

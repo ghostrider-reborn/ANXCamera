@@ -126,7 +126,7 @@ public final class ObservableWindow<T> extends AbstractObservableWithUpstream<T,
         public void onComplete() {
             ArrayDeque<UnicastSubject<T>> arrayDeque = this.windows;
             while (!arrayDeque.isEmpty()) {
-                ((UnicastSubject) arrayDeque.poll()).onComplete();
+                arrayDeque.poll().onComplete();
             }
             this.actual.onComplete();
         }
@@ -134,7 +134,7 @@ public final class ObservableWindow<T> extends AbstractObservableWithUpstream<T,
         public void onError(Throwable th) {
             ArrayDeque<UnicastSubject<T>> arrayDeque = this.windows;
             while (!arrayDeque.isEmpty()) {
-                ((UnicastSubject) arrayDeque.poll()).onError(th);
+                arrayDeque.poll().onError(th);
             }
             this.actual.onError(th);
         }
@@ -150,12 +150,12 @@ public final class ObservableWindow<T> extends AbstractObservableWithUpstream<T,
                 this.actual.onNext(create);
             }
             long j3 = this.firstEmission + 1;
-            Iterator it = arrayDeque.iterator();
+            Iterator<UnicastSubject<T>> it = arrayDeque.iterator();
             while (it.hasNext()) {
-                ((UnicastSubject) it.next()).onNext(t);
+                it.next().onNext(t);
             }
             if (j3 >= this.count) {
-                ((UnicastSubject) arrayDeque.poll()).onComplete();
+                arrayDeque.poll().onComplete();
                 if (!arrayDeque.isEmpty() || !this.cancelled) {
                     this.firstEmission = j3 - j2;
                 } else {

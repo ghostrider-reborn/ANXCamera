@@ -2,48 +2,27 @@ package android.support.v4.media;
 
 import android.os.Bundle;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class MediaBrowserCompatUtils {
     private MediaBrowserCompatUtils() {
     }
 
     public static boolean areSameOptions(Bundle bundle, Bundle bundle2) {
-        boolean z = true;
         if (bundle == bundle2) {
             return true;
         }
-        String str = MediaBrowserCompat.EXTRA_PAGE_SIZE;
-        String str2 = MediaBrowserCompat.EXTRA_PAGE;
-        if (bundle == null) {
-            if (!(bundle2.getInt(str2, -1) == -1 && bundle2.getInt(str, -1) == -1)) {
-                z = false;
-            }
-            return z;
-        } else if (bundle2 == null) {
-            if (!(bundle.getInt(str2, -1) == -1 && bundle.getInt(str, -1) == -1)) {
-                z = false;
-            }
-            return z;
-        } else {
-            if (!(bundle.getInt(str2, -1) == bundle2.getInt(str2, -1) && bundle.getInt(str, -1) == bundle2.getInt(str, -1))) {
-                z = false;
-            }
-            return z;
-        }
+        return bundle == null ? bundle2.getInt(MediaBrowserCompat.EXTRA_PAGE, -1) == -1 && bundle2.getInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, -1) == -1 : bundle2 == null ? bundle.getInt(MediaBrowserCompat.EXTRA_PAGE, -1) == -1 && bundle.getInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, -1) == -1 : bundle.getInt(MediaBrowserCompat.EXTRA_PAGE, -1) == bundle2.getInt(MediaBrowserCompat.EXTRA_PAGE, -1) && bundle.getInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, -1) == bundle2.getInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, -1);
     }
 
     public static boolean hasDuplicatedItems(Bundle bundle, Bundle bundle2) {
         int i;
         int i2;
         int i3;
-        String str = MediaBrowserCompat.EXTRA_PAGE;
-        int i4 = bundle == null ? -1 : bundle.getInt(str, -1);
-        int i5 = bundle2 == null ? -1 : bundle2.getInt(str, -1);
-        String str2 = MediaBrowserCompat.EXTRA_PAGE_SIZE;
-        int i6 = bundle == null ? -1 : bundle.getInt(str2, -1);
-        int i7 = bundle2 == null ? -1 : bundle2.getInt(str2, -1);
+        int i4 = bundle == null ? -1 : bundle.getInt(MediaBrowserCompat.EXTRA_PAGE, -1);
+        int i5 = bundle2 == null ? -1 : bundle2.getInt(MediaBrowserCompat.EXTRA_PAGE, -1);
+        int i6 = bundle == null ? -1 : bundle.getInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, -1);
+        int i7 = bundle2 == null ? -1 : bundle2.getInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, -1);
         int i8 = Integer.MAX_VALUE;
         if (i4 == -1 || i6 == -1) {
             i = Integer.MAX_VALUE;

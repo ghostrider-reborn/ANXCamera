@@ -2,11 +2,10 @@ package android.support.v4.graphics;
 
 import android.graphics.Path;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import java.util.ArrayList;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class PathParser {
     private static final String LOGTAG = "PathParser";
 
@@ -19,9 +18,9 @@ public class PathParser {
     }
 
     public static class PathDataNode {
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public float[] mParams;
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public char mType;
 
         PathDataNode(char c2, float[] fArr) {
@@ -91,8 +90,7 @@ public class PathParser {
             r7 = r22 + 3;
             r8 = r22 + 4;
             r11 = r22 + 5;
-            r0 = r24;
-            r0.cubicTo(r12[r22 + 0], r12[r22 + 1], r12[r9], r12[r7], r12[r8], r12[r11]);
+            r24.cubicTo(r12[r22 + 0], r12[r22 + 1], r12[r9], r12[r7], r12[r8], r12[r11]);
             r8 = r12[r8];
             r0 = r12[r11];
             r1 = r12[r9];
@@ -147,12 +145,11 @@ public class PathParser {
             r9 = r22 + r19;
             r0 = r27;
             r11 = r0;
-            r13 = 0;
+            r13 = false;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:121:0x0308, code lost:
-            r11 = r7;
             r25[r13] = r8;
-            r25[1] = r11;
+            r25[1] = r7;
             r25[2] = r2;
             r25[3] = r3;
             r25[4] = r20;
@@ -235,7 +232,7 @@ public class PathParser {
          */
         /* JADX WARNING: Code restructure failed: missing block: B:54:0x009c, code lost:
             r0 = 0.0f;
-            r4 = 0.0f;
+            r4 = 0;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:55:0x009f, code lost:
             r4 = r8 - r2;
@@ -462,7 +459,7 @@ public class PathParser {
             Path path2 = path;
             char c4 = c3;
             float[] fArr3 = fArr2;
-            char c5 = 0;
+            boolean z = false;
             float f2 = fArr[0];
             float f3 = fArr[1];
             float f4 = fArr[2];
@@ -534,24 +531,15 @@ public class PathParser {
                 double d30 = d25 - d24;
                 double tan = Math.tan(d30 / 2.0d);
                 double sin4 = (Math.sin(d30) * (Math.sqrt(((tan * 3.0d) * tan) + 4.0d) - 1.0d)) / 3.0d;
-                int i2 = ceil;
                 double d31 = cos;
-                double d32 = d23 + (d22 * sin4);
-                double d33 = sin;
-                double d34 = d20 + (d21 * sin4);
-                double d35 = d19;
-                double d36 = d26 - (sin4 * d28);
-                int i3 = i2;
-                double d37 = d16;
-                double d38 = d27 - (sin4 * d29);
                 path.rLineTo(0.0f, 0.0f);
-                path.cubicTo((float) d32, (float) d34, (float) d36, (float) d38, (float) d26, (float) d27);
+                path.cubicTo((float) (d23 + (d22 * sin4)), (float) (d20 + (d21 * sin4)), (float) (d26 - (sin4 * d28)), (float) (d27 - (sin4 * d29)), (float) d26, (float) d27);
                 i++;
-                d19 = d35;
-                ceil = i3;
-                sin = d33;
+                d19 = d19;
+                ceil = ceil;
+                sin = sin;
                 d20 = d27;
-                d16 = d37;
+                d16 = d16;
                 d24 = d25;
                 d21 = d29;
                 d22 = d28;
@@ -567,7 +555,6 @@ public class PathParser {
             float f9 = f2;
             float f10 = f4;
             float f11 = f6;
-            float f12 = f7;
             boolean z3 = z2;
             double radians = Math.toRadians((double) f8);
             double cos = Math.cos(radians);
@@ -580,7 +567,7 @@ public class PathParser {
             double d9 = (d5 + (d7 * sin)) / d8;
             double d10 = (((double) (-f9)) * sin) + (d7 * cos);
             double d11 = d7;
-            double d12 = (double) f12;
+            double d12 = (double) f7;
             double d13 = d10 / d12;
             double d14 = (double) f5;
             double d15 = ((((double) f10) * cos) + (d14 * sin)) / d8;
@@ -592,18 +579,13 @@ public class PathParser {
             double d21 = (d13 + d17) / 2.0d;
             double d22 = sin;
             double d23 = (d18 * d18) + (d19 * d19);
-            int i = (d23 > 0.0d ? 1 : (d23 == 0.0d ? 0 : -1));
-            String str = PathParser.LOGTAG;
-            if (i == 0) {
-                Log.w(str, " Points are coincident");
+            if (d23 == 0.0d) {
+                Log.w(PathParser.LOGTAG, " Points are coincident");
                 return;
             }
             double d24 = (1.0d / d23) - 0.25d;
             if (d24 < 0.0d) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Points are too far apart ");
-                sb.append(d23);
-                Log.w(str, sb.toString());
+                Log.w(PathParser.LOGTAG, "Points are too far apart " + d23);
                 float sqrt = (float) (Math.sqrt(d23) / 1.99999d);
                 drawArc(path, f2, f3, f4, f5, f11 * sqrt, f7 * sqrt, f8, z, z2);
                 return;
@@ -621,9 +603,9 @@ public class PathParser {
             }
             double atan2 = Math.atan2(d13 - d2, d9 - d3);
             double atan22 = Math.atan2(d17 - d2, d15 - d3) - atan2;
-            int i2 = (atan22 > 0.0d ? 1 : (atan22 == 0.0d ? 0 : -1));
-            if (z4 != (i2 >= 0)) {
-                atan22 = i2 > 0 ? atan22 - 6.283185307179586d : atan22 + 6.283185307179586d;
+            int i = (atan22 > 0.0d ? 1 : (atan22 == 0.0d ? 0 : -1));
+            if (z4 != (i >= 0)) {
+                atan22 = i > 0 ? atan22 - 6.283185307179586d : atan22 + 6.283185307179586d;
             }
             double d27 = d3 * d16;
             double d28 = d2 * d12;
@@ -719,10 +701,7 @@ public class PathParser {
             PathDataNode.nodesToPath(createNodesFromPathData, path);
             return path;
         } catch (RuntimeException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Error in parsing ");
-            sb.append(str);
-            throw new RuntimeException(sb.toString(), e2);
+            throw new RuntimeException("Error in parsing " + str, e2);
         }
     }
 
@@ -737,6 +716,7 @@ public class PathParser {
         return pathDataNodeArr2;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Code restructure failed: missing block: B:16:0x0031, code lost:
         r2 = false;
      */
@@ -798,19 +778,14 @@ public class PathParser {
                 extract(str, i, extractFloatResult);
                 int i3 = extractFloatResult.mEndPosition;
                 if (i < i3) {
-                    int i4 = i2 + 1;
                     fArr[i2] = Float.parseFloat(str.substring(i, i3));
-                    i2 = i4;
+                    i2++;
                 }
                 i = extractFloatResult.mEndWithNegOrDot ? i3 : i3 + 1;
             }
             return copyOfRange(fArr, 0, i2);
         } catch (NumberFormatException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("error in parsing \"");
-            sb.append(str);
-            sb.append("\"");
-            throw new RuntimeException(sb.toString(), e2);
+            throw new RuntimeException("error in parsing \"" + str + "\"", e2);
         }
     }
 

@@ -2,36 +2,28 @@ package com.ss.android.vesdk;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.opengl.GLES20;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.WindowManager;
 import com.ss.android.medialib.FaceBeautyInvoker;
-import com.ss.android.medialib.FaceBeautyInvoker.OnPictureCallback;
-import com.ss.android.medialib.FaceBeautyInvoker.OnPictureCallbackV2;
-import com.ss.android.medialib.audio.AudioDataProcessThread.OnProcessDataListener;
+import com.ss.android.medialib.audio.AudioDataProcessThread;
 import com.ss.android.medialib.camera.ImageFrame;
 import com.ss.android.medialib.common.Common;
-import com.ss.android.medialib.common.Common.IOnOpenGLCallback;
-import com.ss.android.medialib.common.Common.IShotScreenCallback;
 import com.ss.android.medialib.common.ImageUtils;
 import com.ss.android.medialib.listener.NativeInitListener;
 import com.ss.android.medialib.listener.SlamDetectListener;
 import com.ss.android.ttve.monitor.MonitorUtils;
-import com.ss.android.vesdk.VECameraSettings.CAMERA_FACING_ID;
-import com.ss.android.vesdk.VEListener.VERecorderNativeInitListener;
-import com.ss.android.vesdk.VEVideoEncodeSettings.ENCODE_PROFILE;
+import com.ss.android.vesdk.VECameraSettings;
+import com.ss.android.vesdk.VEListener;
+import com.ss.android.vesdk.VEVideoEncodeSettings;
 import com.ss.android.vesdk.keyvaluepair.VEKeyValue;
 import com.ss.android.vesdk.runtime.VERecorderResManager;
 import com.ss.android.vesdk.runtime.VERuntime;
@@ -44,7 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TERecorder implements a, OnProcessDataListener {
+public class TERecorder implements a, AudioDataProcessThread.OnProcessDataListener {
     public static final int PIC_STATUS_OUTPUT = 2;
     public static final int PIC_STATUS_RENDER = 1;
     public static final int STATE_IDLE = 0;
@@ -71,13 +63,13 @@ public class TERecorder implements a, OnProcessDataListener {
     /* access modifiers changed from: private */
     public Handler mExternalListenerInvokerHandler;
     /* access modifiers changed from: private */
-    public VERecorderNativeInitListener mExternalNativeInitListener;
+    public VEListener.VERecorderNativeInitListener mExternalNativeInitListener;
     private OnPictureRenderListener mExternalPictureRenderListener;
     /* access modifiers changed from: private */
     public IRenderCallback mExternalRenderCallback;
     /* access modifiers changed from: private */
     public List<OnSlamDetectListener> mExternalSlamDetectListeners;
-    private IOnOpenGLCallback mGLCreateCallback;
+    private Common.IOnOpenGLCallback mGLCreateCallback;
     /* access modifiers changed from: private */
     public Texture mInputTexture;
     /* access modifiers changed from: private */
@@ -120,10 +112,10 @@ public class TERecorder implements a, OnProcessDataListener {
     }
 
     private static class NativeHardEncoderInitListenerInvoker implements Runnable {
-        private VERecorderNativeInitListener mListener;
+        private VEListener.VERecorderNativeInitListener mListener;
         private boolean mRet;
 
-        NativeHardEncoderInitListenerInvoker(@NonNull VERecorderNativeInitListener vERecorderNativeInitListener, boolean z) {
+        NativeHardEncoderInitListenerInvoker(@NonNull VEListener.VERecorderNativeInitListener vERecorderNativeInitListener, boolean z) {
             this.mListener = vERecorderNativeInitListener;
             this.mRet = z;
         }
@@ -134,10 +126,10 @@ public class TERecorder implements a, OnProcessDataListener {
     }
 
     private static class NativeInitListenerInvoker implements Runnable {
-        private VERecorderNativeInitListener mListener;
+        private VEListener.VERecorderNativeInitListener mListener;
         private int mRet;
 
-        NativeInitListenerInvoker(@NonNull VERecorderNativeInitListener vERecorderNativeInitListener, int i) {
+        NativeInitListenerInvoker(@NonNull VEListener.VERecorderNativeInitListener vERecorderNativeInitListener, int i) {
             this.mListener = vERecorderNativeInitListener;
             this.mRet = i;
         }
@@ -239,7 +231,7 @@ public class TERecorder implements a, OnProcessDataListener {
     }
 
     public TERecorder(@NonNull String str, @NonNull Context context) {
-        this(str, context, null);
+        this(str, context, (Handler) null);
     }
 
     public TERecorder(@NonNull String str, @NonNull Context context, @Nullable Handler handler) {
@@ -257,7 +249,7 @@ public class TERecorder implements a, OnProcessDataListener {
         this.mExternalSlamDetectListeners = new ArrayList();
         this.mState = 0;
         this.mIsTextureCreatedBySelf = false;
-        this.mGLCreateCallback = new IOnOpenGLCallback() {
+        this.mGLCreateCallback = new Common.IOnOpenGLCallback() {
             /* access modifiers changed from: private */
             public float[] fetchTransformMatrixFromTexture(SurfaceTexture surfaceTexture) {
                 float[] fArr = new float[16];
@@ -267,7 +259,7 @@ public class TERecorder implements a, OnProcessDataListener {
 
             private double getDrawFrameTime(long j) {
                 long nanoTime = System.nanoTime();
-                return ((double) (nanoTime - Math.min(Math.min(Math.abs(nanoTime - j), VERSION.SDK_INT >= 17 ? Math.abs(SystemClock.elapsedRealtimeNanos() - j) : Long.MAX_VALUE), Math.abs((SystemClock.uptimeMillis() * 1000000) - j)))) / 1000000.0d;
+                return ((double) (nanoTime - Math.min(Math.min(Math.abs(nanoTime - j), Build.VERSION.SDK_INT >= 17 ? Math.abs(SystemClock.elapsedRealtimeNanos() - j) : Long.MAX_VALUE), Math.abs((SystemClock.uptimeMillis() * 1000000) - j)))) / 1000000.0d;
             }
 
             private boolean verifyTexture(int i) {
@@ -287,7 +279,7 @@ public class TERecorder implements a, OnProcessDataListener {
                 if (onCreateTexture == null) {
                     int genSurfaceTextureID = Common.genSurfaceTextureID();
                     Texture texture = new Texture(genSurfaceTextureID, new SurfaceTexture(genSurfaceTextureID));
-                    TERecorder.this.mIsTextureCreatedBySelf = true;
+                    boolean unused = TERecorder.this.mIsTextureCreatedBySelf = true;
                     onCreateTexture = texture;
                 }
                 if (!verifyTexture(onCreateTexture.getTextureID())) {
@@ -297,8 +289,8 @@ public class TERecorder implements a, OnProcessDataListener {
                 if (TERecorder.this.mInputTexture != null) {
                     TERecorder.this.mInputTexture.getSurfaceTexture().release();
                 }
-                TERecorder.this.mInputTexture = onCreateTexture;
-                TERecorder.this.mInputTexture.getSurfaceTexture().setOnFrameAvailableListener(new OnFrameAvailableListener() {
+                Texture unused2 = TERecorder.this.mInputTexture = onCreateTexture;
+                TERecorder.this.mInputTexture.getSurfaceTexture().setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
                     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                         if (TERecorder.this.mNativeInvoker == null) {
                             VELogUtil.d(TERecorder.TAG, "OnFrameAvailable encounter mNativeInvoker == null");
@@ -331,7 +323,7 @@ public class TERecorder implements a, OnProcessDataListener {
                 if (TERecorder.this.mIsCameraSettings.get() && TERecorder.this.mCameraSettings != null) {
                     FaceBeautyInvoker access$200 = TERecorder.this.mNativeInvoker;
                     TERecorder tERecorder = TERecorder.this;
-                    access$200.updateRotation(tERecorder.getRotation(tERecorder.mCameraSettings.getFacingID()), TERecorder.this.mCameraSettings.getFacingID() == CAMERA_FACING_ID.FACING_FRONT);
+                    access$200.updateRotation(tERecorder.getRotation(tERecorder.mCameraSettings.getFacingID()), TERecorder.this.mCameraSettings.getFacingID() == VECameraSettings.CAMERA_FACING_ID.FACING_FRONT);
                     VESize size = TERecorder.this.mCameraSettings.getSize();
                     TERecorder.this.mNativeInvoker.setPreviewSizeRatio(((float) size.height) / ((float) size.width));
                     TERecorder.this.mIsCameraSettings.set(false);
@@ -352,13 +344,13 @@ public class TERecorder implements a, OnProcessDataListener {
                 boolean z = true;
                 if (TERecorder.this.mExternalListenerInvokerHandler != null) {
                     Handler access$100 = TERecorder.this.mExternalListenerInvokerHandler;
-                    VERecorderNativeInitListener access$1000 = TERecorder.this.mExternalNativeInitListener;
+                    VEListener.VERecorderNativeInitListener access$1000 = TERecorder.this.mExternalNativeInitListener;
                     if (i == 0) {
                         z = false;
                     }
                     access$100.post(new NativeHardEncoderInitListenerInvoker(access$1000, z));
                 } else if (TERecorder.this.mExternalNativeInitListener != null) {
-                    VERecorderNativeInitListener access$10002 = TERecorder.this.mExternalNativeInitListener;
+                    VEListener.VERecorderNativeInitListener access$10002 = TERecorder.this.mExternalNativeInitListener;
                     if (i == 0) {
                         z = false;
                     }
@@ -406,8 +398,8 @@ public class TERecorder implements a, OnProcessDataListener {
     }
 
     private void detachNavieInvoer() {
-        this.mNativeInvoker.setOnOpenGLCallback(null);
-        this.mNativeInvoker.setNativeInitListener2(null);
+        this.mNativeInvoker.setOnOpenGLCallback((Common.IOnOpenGLCallback) null);
+        this.mNativeInvoker.setNativeInitListener2((NativeInitListener) null);
         FaceBeautyInvoker.removeSlamDetectListener(this.mSlamDetectListener);
     }
 
@@ -419,7 +411,7 @@ public class TERecorder implements a, OnProcessDataListener {
     }
 
     /* access modifiers changed from: private */
-    public int getRotation(CAMERA_FACING_ID camera_facing_id) {
+    public int getRotation(VECameraSettings.CAMERA_FACING_ID camera_facing_id) {
         int rotation = ((WindowManager) this.mContext.getSystemService("window")).getDefaultDisplay().getRotation();
         int i = 0;
         if (rotation != 0) {
@@ -431,7 +423,7 @@ public class TERecorder implements a, OnProcessDataListener {
                 i = 270;
             }
         }
-        return camera_facing_id == CAMERA_FACING_ID.FACING_FRONT ? (540 - ((this.mCameraSettings.getOrientation() + i) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT)) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : ((this.mCameraSettings.getOrientation() - i) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        return camera_facing_id == VECameraSettings.CAMERA_FACING_ID.FACING_FRONT ? (540 - ((this.mCameraSettings.getOrientation() + i) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT)) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : ((this.mCameraSettings.getOrientation() - i) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
     }
 
     private void initAudioPlayerIfNeed(int i) {
@@ -467,10 +459,7 @@ public class TERecorder implements a, OnProcessDataListener {
             return 0;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("NativeInvoker init Failed. ret = ");
-        sb.append(initFaceBeautyPlay);
-        VELogUtil.e(str, sb.toString());
+        VELogUtil.e(str, "NativeInvoker init Failed. ret = " + initFaceBeautyPlay);
         return initFaceBeautyPlay;
     }
 
@@ -519,10 +508,7 @@ public class TERecorder implements a, OnProcessDataListener {
         clearFragFile = this.mNativeInvoker.clearFragFile();
         if (clearFragFile != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker clearFragFile() failed. ret = ");
-            sb.append(clearFragFile);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker clearFragFile() failed. ret = " + clearFragFile);
         } else {
             this.mRecordCount = 0;
         }
@@ -540,28 +526,18 @@ public class TERecorder implements a, OnProcessDataListener {
     public synchronized void concatAsync(@NonNull final String str, @NonNull final String str2, @NonNull final OnConcatFinishedListener onConcatFinishedListener) {
         if (!(this.mState == 1 || this.mState == 2)) {
             String str3 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("concat() can only be called in error state when current state code is ");
-            sb.append(this.mState);
-            VELogUtil.e(str3, sb.toString());
+            VELogUtil.e(str3, "concat() can only be called in error state when current state code is " + this.mState);
         }
         if (this.mRecordCount <= 0) {
             String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Can't invoke concat() when current recorded segment count = ");
-            sb2.append(this.mRecordCount);
-            VELogUtil.e(str4, sb2.toString());
+            VELogUtil.e(str4, "Can't invoke concat() when current recorded segment count = " + this.mRecordCount);
         }
         this.mThreadPool.execute(new Runnable() {
             public void run() {
-                String str = "";
-                int concat = TERecorder.this.mNativeInvoker.concat(str, str2, str, str);
+                int concat = TERecorder.this.mNativeInvoker.concat(str, str2, "", "");
                 if (concat < 0) {
                     String access$000 = TERecorder.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("NativeInvoker concat failed. ret = ");
-                    sb.append(concat);
-                    VELogUtil.e(access$000, sb.toString());
+                    VELogUtil.e(access$000, "NativeInvoker concat failed. ret = " + concat);
                 }
                 if (TERecorder.this.mExternalListenerInvokerHandler != null) {
                     TERecorder.this.mExternalListenerInvokerHandler.post(new ConcatResultListenerInvoker(onConcatFinishedListener, concat));
@@ -581,19 +557,11 @@ public class TERecorder implements a, OnProcessDataListener {
             VELogUtil.e(TAG, "deleteLastFrag() can only be invoked when state : 1,or2");
         }
         if (this.mRecordCount <= 0) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("About to invoke deleteLastFrag when recordCount = ");
-            sb.append(this.mRecordCount);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(TAG, "About to invoke deleteLastFrag when recordCount = " + this.mRecordCount);
         }
         deleteLastFrag = this.mNativeInvoker.deleteLastFrag();
         if (deleteLastFrag != 0) {
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("NativeInvoker deleteLastFrag() failed. ret = ");
-            sb2.append(deleteLastFrag);
-            VELogUtil.e(str2, sb2.toString());
+            VELogUtil.e(TAG, "NativeInvoker deleteLastFrag() failed. ret = " + deleteLastFrag);
         } else {
             this.mRecordCount--;
         }
@@ -605,10 +573,7 @@ public class TERecorder implements a, OnProcessDataListener {
         int uninitFaceBeautyPlay = this.mNativeInvoker.uninitFaceBeautyPlay();
         if (uninitFaceBeautyPlay != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker uninitFaceBeautyPlay() failed. ret = ");
-            sb.append(uninitFaceBeautyPlay);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker uninitFaceBeautyPlay() failed. ret = " + uninitFaceBeautyPlay);
         }
         detachNavieInvoer();
         this.mExternalNativeInitListener = null;
@@ -623,10 +588,7 @@ public class TERecorder implements a, OnProcessDataListener {
     public synchronized long getEndFrameTime() {
         if (this.mState != 3) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("getEndFrameTime() when current state is ");
-            sb.append(this.mState);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "getEndFrameTime() when current state is " + this.mState);
         }
         return this.mNativeInvoker.getEndFrameTime();
     }
@@ -636,10 +598,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamFaceCount = this.mNativeInvoker.getSlamFaceCount();
         if (slamFaceCount != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker getSlamFaceCount failed. ret = ");
-            sb.append(slamFaceCount);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker getSlamFaceCount failed. ret = " + slamFaceCount);
         }
         return slamFaceCount;
     }
@@ -658,10 +617,7 @@ public class TERecorder implements a, OnProcessDataListener {
         int initNativeInvokerWithSettings = initNativeInvokerWithSettings(vEVideoEncodeSettings, vEPreviewSettings);
         if (initNativeInvokerWithSettings != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("init failed ret: ");
-            sb.append(initNativeInvokerWithSettings);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "init failed ret: " + initNativeInvokerWithSettings);
         } else {
             this.mState = 1;
         }
@@ -692,20 +648,14 @@ public class TERecorder implements a, OnProcessDataListener {
         processTouchEvent = this.mNativeInvoker.processTouchEvent(f2, f3);
         if (processTouchEvent != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker processTouchEvent failed. ret = ");
-            sb.append(processTouchEvent);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker processTouchEvent failed. ret = " + processTouchEvent);
         }
         return processTouchEvent;
     }
 
     public void recordStatus(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("Failed. AudioRecorder record error. isRecording = ");
-        sb.append(z);
-        VELogUtil.e(str, sb.toString());
+        VELogUtil.e(str, "Failed. AudioRecorder record error. isRecording = " + z);
     }
 
     public synchronized void removeSlamDetectListener(@NonNull OnSlamDetectListener onSlamDetectListener) {
@@ -718,7 +668,7 @@ public class TERecorder implements a, OnProcessDataListener {
             return VEResult.TER_INVALID_STAT;
         }
         ImageFrame imageFrame = new ImageFrame(bArr, i, i2, i3);
-        return this.mNativeInvoker.renderPicture(imageFrame, imageFrame.getWidth(), imageFrame.getHeight(), new OnPictureCallbackV2() {
+        return this.mNativeInvoker.renderPicture(imageFrame, imageFrame.getWidth(), imageFrame.getHeight(), new FaceBeautyInvoker.OnPictureCallbackV2() {
             public void onImage(int[] iArr, int i, int i2) {
                 Bitmap bitmap;
                 if (iArr == null || iArr.length <= 0 || i <= 0 || i2 <= 0) {
@@ -735,10 +685,10 @@ public class TERecorder implements a, OnProcessDataListener {
                     VELogUtil.e(access$000, sb.toString());
                     bitmap = null;
                 } else {
-                    bitmap = Bitmap.createBitmap(iArr, i, i2, Config.ARGB_8888);
+                    bitmap = Bitmap.createBitmap(iArr, i, i2, Bitmap.Config.ARGB_8888);
                 }
                 if (TERecorder.this.mExternalListenerInvokerHandler != null) {
-                    TERecorder.this.mExternalListenerInvokerHandler.post(new RenderPictureOnImageListenerInvoker(onPictureRenderListener, null));
+                    TERecorder.this.mExternalListenerInvokerHandler.post(new RenderPictureOnImageListenerInvoker(onPictureRenderListener, (Bitmap) null));
                     return;
                 }
                 OnPictureRenderListener onPictureRenderListener = onPictureRenderListener;
@@ -768,10 +718,7 @@ public class TERecorder implements a, OnProcessDataListener {
         beautyFace = this.mNativeInvoker.setBeautyFace(i, str);
         if (beautyFace != 0) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setBeautyFace failed. ret = ");
-            sb.append(beautyFace);
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(str2, "NativeInvoker setBeautyFace failed. ret = " + beautyFace);
         }
         return beautyFace;
     }
@@ -784,10 +731,7 @@ public class TERecorder implements a, OnProcessDataListener {
         beautyFaceIntensity = this.mNativeInvoker.setBeautyFaceIntensity(f2, f3);
         if (beautyFaceIntensity != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setBeautyFaceIntensity failed. ret = ");
-            sb.append(beautyFaceIntensity);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker setBeautyFaceIntensity failed. ret = " + beautyFaceIntensity);
         }
         return beautyFaceIntensity;
     }
@@ -811,10 +755,7 @@ public class TERecorder implements a, OnProcessDataListener {
         reshape = this.mNativeInvoker.setReshape(str, f2, f3);
         if (reshape != 0) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setFaceReshape failed. ret = ");
-            sb.append(reshape);
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(str2, "NativeInvoker setFaceReshape failed. ret = " + reshape);
         }
         return reshape;
     }
@@ -827,10 +768,7 @@ public class TERecorder implements a, OnProcessDataListener {
         filter = this.mNativeInvoker.setFilter(str);
         if (filter != 0) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setFilter failed ret = ");
-            sb.append(filter);
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(str2, "NativeInvoker setFilter failed ret = " + filter);
         }
         return filter;
     }
@@ -851,10 +789,7 @@ public class TERecorder implements a, OnProcessDataListener {
         filter = this.mNativeInvoker.setFilter(str, str2, f2);
         if (filter != 0) {
             String str3 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setFilter with position failed. ret = ");
-            sb.append(filter);
-            VELogUtil.e(str3, sb.toString());
+            VELogUtil.e(str3, "NativeInvoker setFilter with position failed. ret = " + filter);
         }
         return filter;
     }
@@ -864,15 +799,12 @@ public class TERecorder implements a, OnProcessDataListener {
         filterIntensity = this.mNativeInvoker.setFilterIntensity(f2);
         if (filterIntensity != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setFilterIntensity failed. ret = ");
-            sb.append(filterIntensity);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker setFilterIntensity failed. ret = " + filterIntensity);
         }
         return filterIntensity;
     }
 
-    public synchronized void setNativeInitListener(VERecorderNativeInitListener vERecorderNativeInitListener) {
+    public synchronized void setNativeInitListener(VEListener.VERecorderNativeInitListener vERecorderNativeInitListener) {
         this.mExternalNativeInitListener = vERecorderNativeInitListener;
     }
 
@@ -888,18 +820,12 @@ public class TERecorder implements a, OnProcessDataListener {
         int changeMusicPath = this.mNativeInvoker.changeMusicPath(str);
         if (changeMusicPath != 0) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker changeMusicPath() failed. ret = ");
-            sb.append(changeMusicPath);
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(str2, "NativeInvoker changeMusicPath() failed. ret = " + changeMusicPath);
         }
         int musicTime = this.mNativeInvoker.setMusicTime((long) i, (long) i2);
         if (musicTime != 0) {
             String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("NativeInvoker setMusicTime() failed. ret = ");
-            sb2.append(musicTime);
-            VELogUtil.e(str3, sb2.toString());
+            VELogUtil.e(str3, "NativeInvoker setMusicTime() failed. ret = " + musicTime);
         }
         this.mBGMTrimIn = i;
         this.mBGMIsLoop = z;
@@ -915,10 +841,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamFace = this.mNativeInvoker.setSlamFace(bitmap);
         if (slamFace != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker setSlamFace failed. ret = ");
-            sb.append(slamFace);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker setSlamFace failed. ret = " + slamFace);
         }
         return slamFace;
     }
@@ -927,17 +850,17 @@ public class TERecorder implements a, OnProcessDataListener {
         this.mNativeInvoker.useLargeMattingModel(z);
     }
 
-    public synchronized int shotScreen(@NonNull final String str, @NonNull int[] iArr, boolean z, final CompressFormat compressFormat, IShotScreenCallback iShotScreenCallback) {
+    public synchronized int shotScreen(@NonNull final String str, @NonNull int[] iArr, boolean z, final Bitmap.CompressFormat compressFormat, Common.IShotScreenCallback iShotScreenCallback) {
         int i = -1;
-        if (compressFormat == CompressFormat.JPEG) {
+        if (compressFormat == Bitmap.CompressFormat.JPEG) {
             i = 1;
-        } else if (compressFormat == CompressFormat.PNG) {
+        } else if (compressFormat == Bitmap.CompressFormat.PNG) {
             i = 0;
         }
         int i2 = i;
-        AnonymousClass1 r6 = new OnPictureCallback() {
+        AnonymousClass1 r6 = new FaceBeautyInvoker.OnPictureCallback() {
             public void onResult(int[] iArr, int i, int i2) {
-                Bitmap createBitmap = Bitmap.createBitmap(iArr, i, i2, Config.ARGB_8888);
+                Bitmap createBitmap = Bitmap.createBitmap(iArr, i, i2, Bitmap.Config.ARGB_8888);
                 ImageUtils.saveBitmapWithPath(createBitmap, str, compressFormat);
                 if (createBitmap != null) {
                     createBitmap.recycle();
@@ -958,10 +881,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamDeviceConfig = this.mNativeInvoker.slamDeviceConfig(z, z2, z3, z4);
         if (slamDeviceConfig != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamDeviceConfig failed. ret = ");
-            sb.append(slamDeviceConfig);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamDeviceConfig failed. ret = " + slamDeviceConfig);
         }
         return slamDeviceConfig;
     }
@@ -972,10 +892,7 @@ public class TERecorder implements a, OnProcessDataListener {
             slamProcessIngestAcc = this.mNativeInvoker.slamProcessIngestAcc(d2, d3, d4, d5);
             if (slamProcessIngestAcc != 0) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("NativeInvoker slamProcessIngestAcc failed. ret = ");
-                sb.append(slamProcessIngestAcc);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(str, "NativeInvoker slamProcessIngestAcc failed. ret = " + slamProcessIngestAcc);
             }
         }
         return slamProcessIngestAcc;
@@ -987,10 +904,7 @@ public class TERecorder implements a, OnProcessDataListener {
             slamProcessIngestGra = this.mNativeInvoker.slamProcessIngestGra(d2, d3, d4, d5);
             if (slamProcessIngestGra != 0) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("NativeInvoker slamProcessIngestGra failed. ret = ");
-                sb.append(slamProcessIngestGra);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(str, "NativeInvoker slamProcessIngestGra failed. ret = " + slamProcessIngestGra);
             }
         }
         return slamProcessIngestGra;
@@ -1002,10 +916,7 @@ public class TERecorder implements a, OnProcessDataListener {
             slamProcessIngestGyr = this.mNativeInvoker.slamProcessIngestGyr(d2, d3, d4, d5);
             if (slamProcessIngestGyr != 0) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("NativeInvoker slamProcessIngestGyr failed. ret = ");
-                sb.append(slamProcessIngestGyr);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(str, "NativeInvoker slamProcessIngestGyr failed. ret = " + slamProcessIngestGyr);
             }
         }
         return slamProcessIngestGyr;
@@ -1016,10 +927,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamProcessIngestOri = this.mNativeInvoker.slamProcessIngestOri(dArr, d2);
         if (slamProcessIngestOri != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamProcessIngestOri failed. ret = ");
-            sb.append(slamProcessIngestOri);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamProcessIngestOri failed. ret = " + slamProcessIngestOri);
         }
         return slamProcessIngestOri;
     }
@@ -1029,10 +937,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamProcessPanEvent = this.mNativeInvoker.slamProcessPanEvent(f2, f3, f4, f5, f6);
         if (slamProcessPanEvent != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamProcessPanEvent failed. ret = ");
-            sb.append(slamProcessPanEvent);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamProcessPanEvent failed. ret = " + slamProcessPanEvent);
         }
         return slamProcessPanEvent;
     }
@@ -1042,10 +947,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamProcessRotationEvent = this.mNativeInvoker.slamProcessRotationEvent(f2, f3);
         if (slamProcessRotationEvent != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamProcessRotationEvent failed. ret = ");
-            sb.append(slamProcessRotationEvent);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamProcessRotationEvent failed. ret = " + slamProcessRotationEvent);
         }
         return slamProcessRotationEvent;
     }
@@ -1055,10 +957,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamProcessScaleEvent = this.mNativeInvoker.slamProcessScaleEvent(f2, f3);
         if (slamProcessScaleEvent != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamProcessScaleEvent failed. ret = ");
-            sb.append(slamProcessScaleEvent);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamProcessScaleEvent failed. ret = " + slamProcessScaleEvent);
         }
         return slamProcessScaleEvent;
     }
@@ -1068,10 +967,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamProcessTouchEvent = this.mNativeInvoker.slamProcessTouchEvent(f2, f3);
         if (slamProcessTouchEvent != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamProcessTouchEvent failed. ret = ");
-            sb.append(slamProcessTouchEvent);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamProcessTouchEvent failed. ret = " + slamProcessTouchEvent);
         }
         return slamProcessTouchEvent;
     }
@@ -1081,10 +977,7 @@ public class TERecorder implements a, OnProcessDataListener {
         slamProcessTouchEventByType = this.mNativeInvoker.slamProcessTouchEventByType(i, f2, f3, i2);
         if (slamProcessTouchEventByType != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker slamProcessTouchEventByType failed. ret = ");
-            sb.append(slamProcessTouchEventByType);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker slamProcessTouchEventByType failed. ret = " + slamProcessTouchEventByType);
         }
         return slamProcessTouchEventByType;
     }
@@ -1096,16 +989,12 @@ public class TERecorder implements a, OnProcessDataListener {
         }
         int i = 0;
         int rotation = this.mCameraSettings != null ? getRotation(this.mCameraSettings.getFacingID()) : 0;
-        if (this.mCameraSettings != null && this.mCameraSettings.getFacingID() == CAMERA_FACING_ID.FACING_FRONT) {
+        if (this.mCameraSettings != null && this.mCameraSettings.getFacingID() == VECameraSettings.CAMERA_FACING_ID.FACING_FRONT) {
             i = 1;
         }
         startPlay = this.mNativeInvoker.startPlay(surface, Build.DEVICE, rotation, i);
         if (startPlay != 0) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker startPlay() failed. ret = ");
-            sb.append(startPlay);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(TAG, "NativeInvoker startPlay() failed. ret = " + startPlay);
         } else {
             this.mState = 2;
         }
@@ -1128,19 +1017,15 @@ public class TERecorder implements a, OnProcessDataListener {
         this.mResManager.addSegmentAudioPath(this.mResManager.genSegmentAudioPath(this.mRecordCount));
         this.mResManager.addSegmentVideoPath(genSegmentVideoPath);
         float bps = (((float) this.mVideoEncodeSettings.getBps()) * 1.0f) / 4194304.0f;
-        if (this.mVideoEncodeSettings.getEncodeProfile() != ENCODE_PROFILE.ENCODE_PROFILE_MAIN.ordinal()) {
-            if (this.mVideoEncodeSettings.getEncodeProfile() == ENCODE_PROFILE.ENCODE_PROFILE_HIGH.ordinal()) {
+        if (this.mVideoEncodeSettings.getEncodeProfile() != VEVideoEncodeSettings.ENCODE_PROFILE.ENCODE_PROFILE_MAIN.ordinal()) {
+            if (this.mVideoEncodeSettings.getEncodeProfile() == VEVideoEncodeSettings.ENCODE_PROFILE.ENCODE_PROFILE_HIGH.ordinal()) {
                 i2 = 8;
             } else {
                 i = 1;
                 updateAudioComponentIfNeedWithStartRecord(j, f2);
                 startRecord = this.mNativeInvoker.startRecord((double) f2, this.mVideoEncodeSettings.isHwEnc(), bps, 1, i);
                 if (startRecord == 0) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("NativeInvoker startRecord() failed. ret = ");
-                    sb.append(startRecord);
-                    VELogUtil.e(str, sb.toString());
+                    VELogUtil.e(TAG, "NativeInvoker startRecord() failed. ret = " + startRecord);
                 } else {
                     this.mState = 3;
                 }
@@ -1165,10 +1050,7 @@ public class TERecorder implements a, OnProcessDataListener {
         stopPlay = this.mNativeInvoker.stopPlay();
         if (stopPlay != 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker stopPlay() failed. ret = ");
-            sb.append(stopPlay);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "NativeInvoker stopPlay() failed. ret = " + stopPlay);
         }
         return stopPlay;
     }
@@ -1183,11 +1065,7 @@ public class TERecorder implements a, OnProcessDataListener {
             this.mAudioRecorder.stopFeeding();
         }
         if (stopRecord < 0) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("NativeInvoker stopRecord failed. ret = ");
-            sb.append(stopRecord);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(TAG, "NativeInvoker stopRecord failed. ret = " + stopRecord);
         } else {
             this.mRecordCount++;
             this.mState = 2;
@@ -1199,11 +1077,10 @@ public class TERecorder implements a, OnProcessDataListener {
         int stickerPath;
         VEKeyValue vEKeyValue = new VEKeyValue();
         String parsePathSimpleName = VETextUtils.parsePathSimpleName(str);
-        String str2 = "iesve_verecorder_set_sticker_id";
         if (TextUtils.isEmpty(parsePathSimpleName)) {
             parsePathSimpleName = "0";
         }
-        vEKeyValue.add(str2, parsePathSimpleName).add("old", 0);
+        vEKeyValue.add("iesve_verecorder_set_sticker_id", parsePathSimpleName).add("old", 0);
         MonitorUtils.monitorStatistics("iesve_verecorder_set_sticker", 1, vEKeyValue);
         stickerPath = this.mNativeInvoker.setStickerPath(str, 0, 0, false);
         if (stickerPath != 0) {
@@ -1216,24 +1093,15 @@ public class TERecorder implements a, OnProcessDataListener {
         int tryRestore;
         if (this.mState != 1) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Can only invoke tryRestore() in idle state but current state code is ");
-            sb.append(this.mState);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "Can only invoke tryRestore() in idle state but current state code is " + this.mState);
         }
         this.mRecordCount = i;
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("About to invoke tryRestore(), record count has been overwrite with ");
-        sb2.append(i);
-        VELogUtil.w(str2, sb2.toString());
+        VELogUtil.w(str2, "About to invoke tryRestore(), record count has been overwrite with " + i);
         tryRestore = this.mNativeInvoker.tryRestore(this.mRecordCount, this.mResManager.getTempSegmentDirPath());
         if (tryRestore != 0) {
             String str3 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("NativeInvoker tryStore() failed. ret = ");
-            sb3.append(tryRestore);
-            VELogUtil.e(str3, sb3.toString());
+            VELogUtil.e(str3, "NativeInvoker tryStore() failed. ret = " + tryRestore);
         }
         return tryRestore;
     }

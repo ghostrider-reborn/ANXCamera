@@ -55,7 +55,7 @@ public final class ObservableWithLatestFrom<T, U, R> extends AbstractObservableW
         }
 
         public boolean isDisposed() {
-            return DisposableHelper.isDisposed((Disposable) this.s.get());
+            return DisposableHelper.isDisposed(this.s.get());
         }
 
         public void onComplete() {

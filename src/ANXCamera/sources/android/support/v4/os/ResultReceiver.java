@@ -4,15 +4,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.os.RemoteException;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.os.IResultReceiver.Stub;
+import android.support.v4.os.IResultReceiver;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class ResultReceiver implements Parcelable {
-    public static final Creator<ResultReceiver> CREATOR = new Creator<ResultReceiver>() {
+    public static final Parcelable.Creator<ResultReceiver> CREATOR = new Parcelable.Creator<ResultReceiver>() {
         public ResultReceiver createFromParcel(Parcel parcel) {
             return new ResultReceiver(parcel);
         }
@@ -25,7 +23,7 @@ public class ResultReceiver implements Parcelable {
     final boolean mLocal;
     IResultReceiver mReceiver;
 
-    class MyResultReceiver extends Stub {
+    class MyResultReceiver extends IResultReceiver.Stub {
         MyResultReceiver() {
         }
 
@@ -62,7 +60,7 @@ public class ResultReceiver implements Parcelable {
     ResultReceiver(Parcel parcel) {
         this.mLocal = false;
         this.mHandler = null;
-        this.mReceiver = Stub.asInterface(parcel.readStrongBinder());
+        this.mReceiver = IResultReceiver.Stub.asInterface(parcel.readStrongBinder());
     }
 
     public int describeContents() {
@@ -81,13 +79,13 @@ public class ResultReceiver implements Parcelable {
             } else {
                 onReceiveResult(i, bundle);
             }
-            return;
-        }
-        IResultReceiver iResultReceiver = this.mReceiver;
-        if (iResultReceiver != null) {
-            try {
-                iResultReceiver.send(i, bundle);
-            } catch (RemoteException unused) {
+        } else {
+            IResultReceiver iResultReceiver = this.mReceiver;
+            if (iResultReceiver != null) {
+                try {
+                    iResultReceiver.send(i, bundle);
+                } catch (RemoteException unused) {
+                }
             }
         }
     }

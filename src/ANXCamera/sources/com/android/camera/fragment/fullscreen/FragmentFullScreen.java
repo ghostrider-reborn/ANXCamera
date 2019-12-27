@@ -1,11 +1,8 @@
 package com.android.camera.fragment.fullscreen;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -23,14 +20,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
 import android.view.TextureView;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewStub;
 import android.view.animation.Animation;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -53,16 +47,11 @@ import com.android.camera.fragment.mimoji.FragmentMimojiEdit;
 import com.android.camera.log.Log;
 import com.android.camera.module.LiveModule;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.FullScreenProtocol;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
-import com.android.camera.protocol.ModeProtocol.LiveVideoEditor;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.CameraSnapView;
-import com.ss.android.vesdk.TERecorder.OnConcatFinishedListener;
+import com.ss.android.vesdk.TERecorder;
 import com.ss.android.vesdk.VECommonCallback;
 import io.reactivex.Completable;
 import io.reactivex.disposables.Disposable;
@@ -75,7 +64,7 @@ import miui.view.animation.CubicEaseInInterpolator;
 import miui.view.animation.QuarticEaseInInterpolator;
 import miui.view.animation.QuarticEaseOutInterpolator;
 
-public class FragmentFullScreen extends BaseFragment implements FullScreenProtocol, HandleBackTrace, OnClickListener {
+public class FragmentFullScreen extends BaseFragment implements ModeProtocol.FullScreenProtocol, ModeProtocol.HandleBackTrace, View.OnClickListener {
     public static final int FRAGMENT_INFO = 4086;
     private static final String TAG = "FullScreen";
     private ViewGroup mBottomActionView;
@@ -86,7 +75,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     public ProgressBar mCombineProgress;
     private boolean mCombineReady;
     private Disposable mConcatDisposable;
-    private OnConcatFinishedListener mConcatListener;
+    private TERecorder.OnConcatFinishedListener mConcatListener;
     private ProgressBar mConcatProgress;
     private boolean mConcatReady;
     private VECommonCallback mErrorListener;
@@ -142,55 +131,44 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
             String str2 = (String) pair.second;
             if (!str.isEmpty() || !str2.isEmpty()) {
                 this.mConcatReady = true;
-                StringBuilder sb = new StringBuilder();
-                sb.append("concat: ");
-                sb.append(str);
-                sb.append(" | ");
-                sb.append(str2);
-                String sb2 = sb.toString();
-                String str3 = TAG;
-                Log.d(str3, sb2);
-                LiveVideoEditor liveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+                Log.d(TAG, "concat: " + str + " | " + str2);
                 initCombineListener();
                 this.mPreviewTextureView = new TextureView(getContext());
-                LayoutParams layoutParams = new LayoutParams(-1, -1);
+                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(-1, -1);
                 Rect displayRect = Util.getDisplayRect(getActivity());
                 layoutParams.topMargin = displayRect.top;
                 layoutParams.height = displayRect.height();
                 this.mPreviewLayout.addView(this.mPreviewTextureView, layoutParams);
-                if (!liveVideoEditor.init(this.mPreviewTextureView, str, str2, this.mCombineListener, this.mErrorListener)) {
+                if (!((ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209)).init(this.mPreviewTextureView, str, str2, this.mCombineListener, this.mErrorListener)) {
                     onCombineError();
-                    return;
-                }
-                if (this.mConcatProgress.getVisibility() == 0) {
-                    Log.d(str3, "concat finish and start preview");
+                } else if (this.mConcatProgress.getVisibility() == 0) {
+                    Log.d(TAG, "concat finish and start preview");
                     this.mConcatProgress.setVisibility(8);
                     startPlay();
                 } else if (this.mCombineProgress.getVisibility() == 0) {
-                    Log.d(str3, "concat finish and start save");
+                    Log.d(TAG, "concat finish and start save");
                     this.mPreviewCombine.setVisibility(8);
                     setProgressBarVisible(0);
                     startCombine();
                 } else if (this.mShareProgress.getVisibility() == 0) {
-                    Log.d(str3, "concat finish and pending share");
+                    Log.d(TAG, "concat finish and pending share");
                     startCombine();
                 }
-                return;
+            } else {
+                onCombineError();
             }
-            onCombineError();
         }
     }
 
     private FragmentMimojiEdit getFragmentMiMoji() {
         FragmentMimojiEdit fragmentMimojiEdit = this.mFragmentMimojiEdit;
-        String str = TAG;
         if (fragmentMimojiEdit == null) {
-            Log.d(str, "getFragmentMiMoji(): fragment is null");
+            Log.d(TAG, "getFragmentMiMoji(): fragment is null");
             return null;
         } else if (fragmentMimojiEdit.isAdded()) {
             return this.mFragmentMimojiEdit;
         } else {
-            Log.d(str, "getFragmentMiMoji(): fragment is not added yet");
+            Log.d(TAG, "getFragmentMiMoji(): fragment is not added yet");
             return null;
         }
     }
@@ -212,9 +190,8 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     private void initCombineListener() {
         this.mCombineListener = new VECommonCallback() {
             public void onCallback(int i, int i2, float f2, String str) {
-                String str2 = FragmentFullScreen.TAG;
                 if (i == 4098) {
-                    Log.d(str2, "play finished and loop");
+                    Log.d(FragmentFullScreen.TAG, "play finished and loop");
                 } else if (i == 4101) {
                 } else {
                     if (i == 4103) {
@@ -222,43 +199,27 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
                     } else if (i == 4105) {
                     } else {
                         if (i != 4112) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("CombineCallback: ");
-                            sb.append(i);
-                            Log.d(str2, sb.toString());
+                            Log.d(FragmentFullScreen.TAG, "CombineCallback: " + i);
                             return;
                         }
-                        Log.d(str2, "CombineStart");
+                        Log.d(FragmentFullScreen.TAG, "CombineStart");
                     }
                 }
             }
         };
         this.mErrorListener = new VECommonCallback() {
             public void onCallback(int i, int i2, float f2, String str) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("CombineError: ");
-                sb.append(i);
-                String str2 = " | ";
-                sb.append(str2);
-                sb.append(i2);
-                sb.append(str2);
-                sb.append(f2);
-                sb.append(str2);
-                sb.append(str);
-                Log.e(FragmentFullScreen.TAG, sb.toString());
+                Log.e(FragmentFullScreen.TAG, "CombineError: " + i + " | " + i2 + " | " + f2 + " | " + str);
                 FragmentFullScreen.this.onCombineError();
             }
         };
     }
 
     private void initConcatListener() {
-        this.mConcatListener = new OnConcatFinishedListener() {
+        this.mConcatListener = new TERecorder.OnConcatFinishedListener() {
             public void onConcatFinished(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onConcatFinished ");
-                sb.append(i);
-                Log.d(FragmentFullScreen.TAG, sb.toString());
-                LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+                Log.d(FragmentFullScreen.TAG, "onConcatFinished " + i);
+                ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
                 if (liveConfigChanges != null) {
                     FragmentFullScreen.this.concatResult(liveConfigChanges.getConcatResult());
                 }
@@ -278,7 +239,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
 
     private void initLiveView(View view) {
         this.mTopLayout = (ViewGroup) view.findViewById(R.id.live_preview_top);
-        ((MarginLayoutParams) this.mTopLayout.getLayoutParams()).topMargin = Util.isNotchDevice ? Util.sStatusBarHeight : getResources().getDimensionPixelSize(R.dimen.top_control_panel_extra_margin_top);
+        ((ViewGroup.MarginLayoutParams) this.mTopLayout.getLayoutParams()).topMargin = Util.isNotchDevice ? Util.sStatusBarHeight : getResources().getDimensionPixelSize(R.dimen.top_control_panel_extra_margin_top);
         this.mPreviewLayout = (FrameLayout) view.findViewById(R.id.live_preview_layout);
         this.mConcatProgress = (ProgressBar) view.findViewById(R.id.live_concat_progress);
         this.mCombineProgress = (ProgressBar) view.findViewById(R.id.live_save_progress);
@@ -303,10 +264,10 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         this.mPreviewShare.setOnClickListener(this);
         this.mPreviewStart.setOnClickListener(this);
         this.mBottomActionView = (FrameLayout) view.findViewById(R.id.live_preview_bottom_action);
-        ((MarginLayoutParams) this.mBottomActionView.getLayoutParams()).height = Util.getBottomHeight(getResources());
+        ((ViewGroup.MarginLayoutParams) this.mBottomActionView.getLayoutParams()).height = Util.getBottomHeight(getResources());
         this.mBottomActionView.setOnClickListener(this);
         this.mBottomLayout = (RelativeLayout) view.findViewById(R.id.live_preview_bottom_parent);
-        ((MarginLayoutParams) this.mBottomLayout.getLayoutParams()).bottomMargin = getResources().getDimensionPixelSize(R.dimen.bottom_margin_bottom) + Util.sNavigationBarHeight;
+        ((ViewGroup.MarginLayoutParams) this.mBottomLayout.getLayoutParams()).bottomMargin = getResources().getDimensionPixelSize(R.dimen.bottom_margin_bottom) + Util.sNavigationBarHeight;
         this.mBottomActionView.setBackgroundResource(R.color.fullscreen_background);
     }
 
@@ -321,16 +282,15 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
 
     /* access modifiers changed from: private */
     public void onCombineSuccess() {
-        String str = TAG;
-        Log.d(str, "combineSuccess");
+        Log.d(TAG, "combineSuccess");
         this.mCombineReady = true;
         if (!this.mPaused) {
             if (this.mPendingShare) {
-                Log.d(str, "combineSuccess and share");
+                Log.d(TAG, "combineSuccess and share");
                 ((LiveModule) ((ActivityBase) getContext()).getCurrentModule()).startSaveToLocal();
                 return;
             }
-            Log.d(str, "combineSuccess and finish");
+            Log.d(TAG, "combineSuccess and finish");
             this.mHandler.post(new Runnable() {
                 public void run() {
                     FragmentFullScreen.this.quitLiveRecordPreview(true);
@@ -342,7 +302,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     private void onPlayCompleted() {
         this.mHandler.post(new Runnable() {
             public void run() {
-                FragmentFullScreen.this.mIsPlaying = false;
+                boolean unused = FragmentFullScreen.this.mIsPlaying = false;
                 FragmentFullScreen.this.mPreviewStart.setVisibility(0);
             }
         });
@@ -358,7 +318,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         if (this.mIsPlaying) {
             this.mIsPlaying = false;
             this.mPreviewStart.setVisibility(0);
-            LiveVideoEditor liveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+            ModeProtocol.LiveVideoEditor liveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
             if (liveVideoEditor != null) {
                 liveVideoEditor.pausePlay();
             }
@@ -369,7 +329,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         if (!this.mIsPlaying) {
             this.mIsPlaying = true;
             this.mPreviewStart.setVisibility(8);
-            LiveVideoEditor liveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+            ModeProtocol.LiveVideoEditor liveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
             if (liveVideoEditor != null) {
                 liveVideoEditor.resumePlay();
             }
@@ -385,7 +345,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
                 ofFloat.setDuration(300);
                 ofFloat.setStartDelay(160);
                 ofFloat.setInterpolator(new PathInterpolator(0.25f, 0.1f, 0.25f, 1.0f));
-                ofFloat.addUpdateListener(new AnimatorUpdateListener() {
+                ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
                         Float f2 = (Float) valueAnimator.getAnimatedValue();
                         FragmentFullScreen.this.mCombineProgress.setAlpha(f2.floatValue());
@@ -394,31 +354,31 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
                     }
                 });
                 ofFloat.start();
-            } else {
-                ValueAnimator ofFloat2 = ValueAnimator.ofFloat(new float[]{1.0f, 0.0f});
-                ofFloat2.setDuration(300);
-                ofFloat2.setInterpolator(new CubicEaseInInterpolator());
-                ofFloat2.addUpdateListener(new AnimatorUpdateListener() {
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        FragmentFullScreen.this.mCombineProgress.setAlpha(((Float) valueAnimator.getAnimatedValue()).floatValue());
-                    }
-                });
-                ofFloat2.addListener(new AnimatorListener() {
-                    public void onAnimationCancel(Animator animator) {
-                    }
-
-                    public void onAnimationEnd(Animator animator) {
-                        FragmentFullScreen.this.mCombineProgress.setVisibility(8);
-                    }
-
-                    public void onAnimationRepeat(Animator animator) {
-                    }
-
-                    public void onAnimationStart(Animator animator) {
-                    }
-                });
-                ofFloat2.start();
+                return;
             }
+            ValueAnimator ofFloat2 = ValueAnimator.ofFloat(new float[]{1.0f, 0.0f});
+            ofFloat2.setDuration(300);
+            ofFloat2.setInterpolator(new CubicEaseInInterpolator());
+            ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    FragmentFullScreen.this.mCombineProgress.setAlpha(((Float) valueAnimator.getAnimatedValue()).floatValue());
+                }
+            });
+            ofFloat2.addListener(new Animator.AnimatorListener() {
+                public void onAnimationCancel(Animator animator) {
+                }
+
+                public void onAnimationEnd(Animator animator) {
+                    FragmentFullScreen.this.mCombineProgress.setVisibility(8);
+                }
+
+                public void onAnimationRepeat(Animator animator) {
+                }
+
+                public void onAnimationStart(Animator animator) {
+                }
+            });
+            ofFloat2.start();
         }
     }
 
@@ -426,28 +386,25 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         try {
             getContext().startActivity(Intent.createChooser(getShareIntent(), getString(R.string.live_edit_share_title)));
         } catch (ActivityNotFoundException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("failed to share video ");
-            sb.append(this.mSavedUri);
-            Log.e(TAG, sb.toString(), e2);
+            Log.e(TAG, "failed to share video " + this.mSavedUri, e2);
         }
     }
 
     private void showExitConfirm() {
         CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_EXIT);
-        Builder builder = new Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage(R.string.live_edit_exit_message);
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.live_edit_exit_confirm, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int i) {
                 CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_EXIT_CONFIRM);
-                FragmentFullScreen.this.mExitDialog = null;
+                AlertDialog unused = FragmentFullScreen.this.mExitDialog = null;
                 FragmentFullScreen.this.quitLiveRecordPreview(false);
             }
         });
         builder.setNegativeButton(R.string.snap_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int i) {
-                FragmentFullScreen.this.mExitDialog = null;
+                AlertDialog unused = FragmentFullScreen.this.mExitDialog = null;
             }
         });
         this.mExitDialog = builder.show();
@@ -458,14 +415,13 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     private void showShareSheet() {
         boolean z;
         List<ResolveInfo> queryIntentActivities = getContext().getPackageManager().queryIntentActivities(getShareIntent(), 65536);
-        String str = TAG;
         if (queryIntentActivities == null || queryIntentActivities.isEmpty()) {
-            Log.d(str, "no IntentActivities");
+            Log.d(TAG, "no IntentActivities");
             return;
         }
         ArrayList arrayList = new ArrayList();
         int length = ShareConstant.DEFAULT_SHARE_LIST.length;
-        for (ResolveInfo resolveInfo : queryIntentActivities) {
+        for (ResolveInfo next : queryIntentActivities) {
             if (arrayList.size() == length) {
                 break;
             }
@@ -473,8 +429,8 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
             while (true) {
                 if (i >= length) {
                     break;
-                } else if (ShareConstant.DEFAULT_SHARE_LIST[i].equals(resolveInfo.activityInfo.name)) {
-                    ShareInfo shareInfo = new ShareInfo(i, resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name, ShareConstant.DEFAULT_SHARE_LIST_ICON[i], ShareConstant.DEFAULT_SHARE_LIST_NAME[i]);
+                } else if (ShareConstant.DEFAULT_SHARE_LIST[i].equals(next.activityInfo.name)) {
+                    ShareInfo shareInfo = new ShareInfo(i, next.activityInfo.packageName, next.activityInfo.name, ShareConstant.DEFAULT_SHARE_LIST_ICON[i], ShareConstant.DEFAULT_SHARE_LIST_NAME[i]);
                     arrayList.add(shareInfo);
                     break;
                 } else {
@@ -483,7 +439,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
             }
         }
         if (arrayList.isEmpty()) {
-            Log.d(str, "no default share entry");
+            Log.d(TAG, "no default share entry");
         } else if (((ShareInfo) arrayList.get(0)).index <= 1 || arrayList.size() >= 2) {
             z = false;
             if (!z) {
@@ -508,7 +464,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
             ShareAdapter shareAdapter = this.mShareAdapter;
             if (shareAdapter == null || shareAdapter.getItemCount() != arrayList.size()) {
                 this.mShareAdapter = new ShareAdapter(arrayList, this, max);
-                LinearLayoutManagerWrapper linearLayoutManagerWrapper = new LinearLayoutManagerWrapper(getContext(), str);
+                LinearLayoutManagerWrapper linearLayoutManagerWrapper = new LinearLayoutManagerWrapper(getContext(), TAG);
                 linearLayoutManagerWrapper.setOrientation(0);
                 this.mShareRecyclerView.setLayoutManager(linearLayoutManagerWrapper);
                 RecyclerAdapterWrapper recyclerAdapterWrapper = new RecyclerAdapterWrapper(this.mShareAdapter);
@@ -524,12 +480,12 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
                 this.mShareAdapter.notifyDataSetChanged();
             }
             if (Util.sNavigationBarHeight > 0) {
-                ((MarginLayoutParams) this.mShareLayout.getLayoutParams()).bottomMargin = Util.sNavigationBarHeight;
+                ((ViewGroup.MarginLayoutParams) this.mShareLayout.getLayoutParams()).bottomMargin = Util.sNavigationBarHeight;
             }
             Completable.create(new SlideInOnSubscribe(this.mShareLayout, 80).setInterpolator(new QuarticEaseOutInterpolator()).setDurationTime(200)).subscribe();
             return;
         } else {
-            Log.d(str, "not match default share strategy");
+            Log.d(TAG, "not match default share strategy");
         }
         z = true;
         if (!z) {
@@ -539,7 +495,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     private void startCombine() {
         this.mCombineReady = false;
         String asString = this.mSaveContentValues.getAsString("_data");
-        LiveVideoEditor liveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+        ModeProtocol.LiveVideoEditor liveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
         if (liveVideoEditor != null) {
             liveVideoEditor.combineVideoAudio(asString, this.mCombineListener, this.mErrorListener);
         }
@@ -548,27 +504,25 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     private void startConcatVideoIfNeed() {
         Disposable disposable = this.mConcatDisposable;
         if (disposable == null || disposable.isDisposed()) {
-            String str = TAG;
-            Log.d(str, "startConcatVideo");
+            Log.d(TAG, "startConcatVideo");
             boolean z = false;
             this.mConcatReady = false;
             this.mIsPlaying = false;
             initConcatListener();
-            LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+            ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
             if (liveConfigChanges != null && liveConfigChanges.onRecordConcat(this.mConcatListener)) {
                 z = true;
             }
             if (!z) {
-                Log.d(str, "concat failed");
-                String str2 = "";
-                concatResult(new Pair(str2, str2));
+                Log.d(TAG, "concat failed");
+                concatResult(new Pair("", ""));
             }
         }
     }
 
     private void startPlay() {
         if (!this.mPaused && !this.mIsPlaying) {
-            LiveVideoEditor liveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+            ModeProtocol.LiveVideoEditor liveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
             if (liveVideoEditor != null) {
                 this.mIsPlaying = true;
                 this.mPreviewStart.setVisibility(8);
@@ -593,10 +547,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         try {
             getContext().startActivity(Intent.createChooser(intent, getString(R.string.live_edit_share_title)));
         } catch (ActivityNotFoundException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("failed to share video ");
-            sb.append(this.mSavedUri);
-            Log.e(TAG, sb.toString(), e2);
+            Log.e(TAG, "failed to share video " + this.mSavedUri, e2);
         }
     }
 
@@ -689,89 +640,81 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     }
 
     public void onClick(View view) {
-        if (!(!this.mReady || this.mConcatProgress.getVisibility() == 0 || this.mCombineProgress.getVisibility() == 0 || this.mShareProgress.getVisibility() == 0)) {
-            int id = view.getId();
-            String str = TAG;
-            switch (id) {
-                case R.id.live_preview_back /*2131296391*/:
+        if (this.mReady && this.mConcatProgress.getVisibility() != 0 && this.mCombineProgress.getVisibility() != 0 && this.mShareProgress.getVisibility() != 0) {
+            switch (view.getId()) {
+                case R.id.live_preview_back:
                     showExitConfirm();
-                    break;
-                case R.id.live_preview_layout /*2131296394*/:
+                    return;
+                case R.id.live_preview_layout:
                     pausePlay();
-                    break;
-                case R.id.live_preview_play /*2131296395*/:
-                    if (this.mConcatReady) {
-                        hideShareSheet();
-                        startPlay();
-                        break;
-                    } else {
-                        Log.d(str, "concat not finished, show play progress");
+                    return;
+                case R.id.live_preview_play:
+                    if (!this.mConcatReady) {
+                        Log.d(TAG, "concat not finished, show play progress");
                         this.mPreviewStart.setVisibility(8);
                         this.mConcatProgress.setVisibility(0);
                         startConcatVideoIfNeed();
-                        break;
+                        return;
                     }
-                case R.id.live_preview_save /*2131296397*/:
-                case R.id.live_preview_save_circle /*2131296398*/:
+                    hideShareSheet();
+                    startPlay();
+                    return;
+                case R.id.live_preview_save:
+                case R.id.live_preview_save_circle:
                     CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_SAVE);
-                    if (this.mSavedUri == null) {
-                        if (this.mConcatReady) {
-                            if (!this.mCombineReady) {
-                                pausePlay();
-                                this.mPreviewStart.setVisibility(8);
-                                this.mPreviewCombine.setVisibility(8);
-                                setProgressBarVisible(0);
-                                this.mPendingSaveFinish = true;
-                                startCombine();
-                                break;
-                            }
-                        } else {
-                            Log.d(str, "concat not finished, show save progress and wait to save");
-                            this.mPendingSaveFinish = true;
-                            this.mPreviewCombine.setVisibility(8);
-                            setProgressBarVisible(0);
-                            startConcatVideoIfNeed();
-                            break;
-                        }
-                    } else {
+                    if (this.mSavedUri != null) {
                         onCombineSuccess();
-                        break;
+                        return;
+                    } else if (!this.mConcatReady) {
+                        Log.d(TAG, "concat not finished, show save progress and wait to save");
+                        this.mPendingSaveFinish = true;
+                        this.mPreviewCombine.setVisibility(8);
+                        setProgressBarVisible(0);
+                        startConcatVideoIfNeed();
+                        return;
+                    } else if (!this.mCombineReady) {
+                        pausePlay();
+                        this.mPreviewStart.setVisibility(8);
+                        this.mPreviewCombine.setVisibility(8);
+                        setProgressBarVisible(0);
+                        this.mPendingSaveFinish = true;
+                        startCombine();
+                        return;
+                    } else {
+                        return;
                     }
-                    break;
-                case R.id.live_preview_share /*2131296399*/:
+                case R.id.live_preview_share:
                     CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_SHARE);
                     if (!checkAndShare()) {
                         this.mPendingShare = true;
                         this.mPreviewShare.setVisibility(8);
                         this.mShareProgress.setVisibility(0);
-                        if (this.mConcatReady) {
-                            pausePlay();
-                            startCombine();
-                            break;
-                        } else {
-                            Log.d(str, "concat not finished, show share progress and wait to share");
+                        if (!this.mConcatReady) {
+                            Log.d(TAG, "concat not finished, show share progress and wait to share");
                             startConcatVideoIfNeed();
-                            break;
+                            return;
                         }
+                        pausePlay();
+                        startCombine();
+                        return;
                     }
-                    break;
-                case R.id.live_share_cancel /*2131296403*/:
+                    return;
+                case R.id.live_share_cancel:
                     hideShareSheet();
-                    break;
-                case R.id.live_share_item /*2131296405*/:
+                    return;
+                case R.id.live_share_item:
                     ShareInfo shareInfo = (ShareInfo) view.getTag();
                     hideShareSheet();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(CameraStat.PARAM_LIVE_CLICK_PLAY_SHARE_SHEET);
-                    sb.append(shareInfo.index);
-                    CameraStatUtil.trackLiveClick(sb.toString());
-                    if (!shareInfo.className.equals("more")) {
-                        startShare(shareInfo.packageName, shareInfo.className);
-                        break;
-                    } else {
+                    CameraStatUtil.trackLiveClick(CameraStat.PARAM_LIVE_CLICK_PLAY_SHARE_SHEET + shareInfo.index);
+                    if (shareInfo.className.equals("more")) {
                         shareMore();
-                        break;
+                        return;
+                    } else {
+                        startShare(shareInfo.packageName, shareInfo.className);
+                        return;
                     }
+                default:
+                    return;
             }
         }
     }
@@ -850,7 +793,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         if (this.mShareProgress.getVisibility() == 0) {
             this.mShareProgress.setVisibility(8);
         }
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null) {
             Log.d(TAG, "concat error, action null");
             return;
@@ -862,7 +805,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         } else {
             cameraAction.onReviewCancelClicked();
         }
-        LiveVideoEditor liveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+        ModeProtocol.LiveVideoEditor liveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
         if (liveVideoEditor != null) {
             liveVideoEditor.onDestory();
         }
@@ -871,7 +814,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(196, this);
         registerBackStack(modeCoordinator, this);
@@ -919,7 +862,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
         } else {
             Completable.create(new AlphaInOnSubscribe(this.mPreviewShare)).subscribe();
         }
-        this.mTimeView.setText(((LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201)).getTimeValue());
+        this.mTimeView.setText(((ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201)).getTimeValue());
         this.mTimeView.setVisibility(0);
         this.mPreviewStart.setVisibility(8);
         this.mConcatProgress.setVisibility(0);
@@ -937,7 +880,7 @@ public class FragmentFullScreen extends BaseFragment implements FullScreenProtoc
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(196, this);
         unRegisterBackStack(modeCoordinator, this);

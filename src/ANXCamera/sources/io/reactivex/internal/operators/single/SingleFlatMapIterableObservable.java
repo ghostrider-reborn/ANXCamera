@@ -22,7 +22,7 @@ public final class SingleFlatMapIterableObservable<T, R> extends Observable<R> {
         final Observer<? super R> actual;
         volatile boolean cancelled;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f335d;
         volatile Iterator<? extends R> it;
         final Function<? super T, ? extends Iterable<? extends R>> mapper;

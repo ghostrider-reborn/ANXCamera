@@ -24,7 +24,7 @@ public final class CompletablePeek extends Completable {
     final class CompletableObserverImplementation implements CompletableObserver, Disposable {
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f275d;
 
         CompletableObserverImplementation(CompletableObserver completableObserver) {
@@ -41,7 +41,7 @@ public final class CompletablePeek extends Completable {
             this.f275d.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void doAfter() {
             try {
                 CompletablePeek.this.onAfterTerminate.run();

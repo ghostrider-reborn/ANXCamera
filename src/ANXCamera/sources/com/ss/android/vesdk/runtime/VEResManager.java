@@ -22,10 +22,7 @@ public class VEResManager {
         if (file.exists() || file.mkdirs()) {
             return file.getAbsolutePath();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("mkdirs failed, workspace path: ");
-        sb.append(this.mWorkspace);
-        throw new VEException(-100, sb.toString());
+        throw new VEException(-100, "mkdirs failed, workspace path: " + this.mWorkspace);
     }
 
     public static String getFolder(String str, String str2) throws VEException {
@@ -33,31 +30,14 @@ public class VEResManager {
         if (file.exists() || file.mkdirs()) {
             return file.getAbsolutePath();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("mkdirs failed, workspace path: ");
-        sb.append(str);
-        throw new VEException(-100, sb.toString());
+        throw new VEException(-100, "mkdirs failed, workspace path: " + str);
     }
 
     public String genRecordAacPath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getFolder("audio"));
-        sb.append(File.separator);
-        sb.append(System.currentTimeMillis());
-        sb.append(UNDERLINE_CONCAT);
-        sb.append("record");
-        sb.append(AAC_SURFIX);
-        return sb.toString();
+        return getFolder("audio") + File.separator + System.currentTimeMillis() + UNDERLINE_CONCAT + "record" + AAC_SURFIX;
     }
 
     public String genRecordWavPath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getFolder("audio"));
-        sb.append(File.separator);
-        sb.append(System.currentTimeMillis());
-        sb.append(UNDERLINE_CONCAT);
-        sb.append("record");
-        sb.append(RECORD_AUDIO_SURFIX);
-        return sb.toString();
+        return getFolder("audio") + File.separator + System.currentTimeMillis() + UNDERLINE_CONCAT + "record" + RECORD_AUDIO_SURFIX;
     }
 }

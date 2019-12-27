@@ -50,6 +50,6 @@ public final class FlowableCount<T> extends AbstractFlowableWithUpstream<T, Long
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super Long> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new CountSubscriber<Object>(subscriber));
+        this.source.subscribe(new CountSubscriber(subscriber));
     }
 }

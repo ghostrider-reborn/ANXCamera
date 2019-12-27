@@ -82,7 +82,7 @@ public final class ObservableCollectSingle<T, U> extends Single<U> implements Fu
     }
 
     public Observable<U> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableCollect<T>(this.source, this.initialSupplier, this.collector));
+        return RxJavaPlugins.onAssembly(new ObservableCollect(this.source, this.initialSupplier, this.collector));
     }
 
     /* access modifiers changed from: protected */
@@ -92,7 +92,7 @@ public final class ObservableCollectSingle<T, U> extends Single<U> implements Fu
             ObjectHelper.requireNonNull(call, "The initialSupplier returned a null value");
             this.source.subscribe(new CollectObserver(singleObserver, call, this.collector));
         } catch (Throwable th) {
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

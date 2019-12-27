@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.Notification;
 import io.reactivex.internal.subscribers.SinglePostCompleteSubscriber;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -43,6 +42,6 @@ public final class FlowableMaterialize<T> extends AbstractFlowableWithUpstream<T
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super Notification<T>> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new MaterializeSubscriber<Object>(subscriber));
+        this.source.subscribe(new MaterializeSubscriber(subscriber));
     }
 }

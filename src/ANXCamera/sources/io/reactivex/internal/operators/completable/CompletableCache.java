@@ -40,12 +40,12 @@ public final class CompletableCache extends Completable implements CompletableOb
         this.source = completableSource;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(InnerCompletableCache innerCompletableCache) {
         InnerCompletableCache[] innerCompletableCacheArr;
         InnerCompletableCache[] innerCompletableCacheArr2;
         do {
-            innerCompletableCacheArr = (InnerCompletableCache[]) this.observers.get();
+            innerCompletableCacheArr = this.observers.get();
             if (innerCompletableCacheArr == TERMINATED) {
                 return false;
             }
@@ -58,8 +58,7 @@ public final class CompletableCache extends Completable implements CompletableOb
     }
 
     public void onComplete() {
-        InnerCompletableCache[] innerCompletableCacheArr;
-        for (InnerCompletableCache innerCompletableCache : (InnerCompletableCache[]) this.observers.getAndSet(TERMINATED)) {
+        for (InnerCompletableCache innerCompletableCache : this.observers.getAndSet(TERMINATED)) {
             if (!innerCompletableCache.get()) {
                 innerCompletableCache.actual.onComplete();
             }
@@ -67,9 +66,8 @@ public final class CompletableCache extends Completable implements CompletableOb
     }
 
     public void onError(Throwable th) {
-        InnerCompletableCache[] innerCompletableCacheArr;
         this.error = th;
-        for (InnerCompletableCache innerCompletableCache : (InnerCompletableCache[]) this.observers.getAndSet(TERMINATED)) {
+        for (InnerCompletableCache innerCompletableCache : this.observers.getAndSet(TERMINATED)) {
             if (!innerCompletableCache.get()) {
                 innerCompletableCache.actual.onError(th);
             }
@@ -79,12 +77,12 @@ public final class CompletableCache extends Completable implements CompletableOb
     public void onSubscribe(Disposable disposable) {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(InnerCompletableCache innerCompletableCache) {
         InnerCompletableCache[] innerCompletableCacheArr;
         InnerCompletableCache[] innerCompletableCacheArr2;
         do {
-            innerCompletableCacheArr = (InnerCompletableCache[]) this.observers.get();
+            innerCompletableCacheArr = this.observers.get();
             int length = innerCompletableCacheArr.length;
             if (length != 0) {
                 int i = -1;

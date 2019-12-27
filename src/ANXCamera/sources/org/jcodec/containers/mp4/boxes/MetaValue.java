@@ -1,6 +1,6 @@
 package org.jcodec.containers.mp4.boxes;
 
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import org.jcodec.platform.Platform;
@@ -85,7 +85,7 @@ public class MetaValue {
     private int toInt24(byte[] bArr) {
         ByteBuffer wrap = ByteBuffer.wrap(bArr);
         wrap.order(ByteOrder.BIG_ENDIAN);
-        return (wrap.get() & 255) | ((wrap.getShort() & ColorSpace.UNCALIBRATED) << 8);
+        return (wrap.get() & 255) | ((wrap.getShort() & ExifInterface.ColorSpace.UNCALIBRATED) << 8);
     }
 
     private int toInt32(byte[] bArr) {

@@ -2,6 +2,7 @@ package com.miui.extravideo.watermark.gles;
 
 import android.opengl.GLES20;
 import android.util.Log;
+import java.nio.Buffer;
 
 public class GLFrameBuffer {
     private static final String TAG = "GLFrameBuffer";
@@ -43,7 +44,7 @@ public class GLFrameBuffer {
         GLES20.glTexParameterf(3553, 10240, 9729.0f);
         GLES20.glTexParameteri(3553, 10242, 33071);
         GLES20.glTexParameteri(3553, 10243, 33071);
-        GLES20.glTexImage2D(3553, 0, 6408, i3, i4, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, i3, i4, 0, 6408, 5121, (Buffer) null);
         this.mTex = iArr[0];
         int[] iArr2 = new int[1];
         GLES20.glGenFramebuffers(1, iArr2, 0);
@@ -54,11 +55,7 @@ public class GLFrameBuffer {
         int glCheckFramebufferStatus = GLES20.glCheckFramebufferStatus(36160);
         if (glCheckFramebufferStatus != 36053) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("framebuffer is not ready(");
-            sb.append(glCheckFramebufferStatus);
-            sb.append(")");
-            Log.e(str, sb.toString());
+            Log.e(str, "framebuffer is not ready(" + glCheckFramebufferStatus + ")");
         }
     }
 

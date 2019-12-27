@@ -13,19 +13,16 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.log.Log;
 import com.android.camera.statistic.CameraStatUtil;
 import com.google.android.libraries.lens.lenslite.LensliteApi;
 import com.google.android.libraries.lens.lenslite.LensliteUiContainer;
 import com.google.android.libraries.lens.lenslite.LensliteUiController;
-import com.google.android.libraries.lens.lenslite.LensliteUiController.FocusType;
 import com.google.android.libraries.lens.lenslite.api.LinkImage;
 
 public class LensAgent {
@@ -54,7 +51,7 @@ public class LensAgent {
         uiController.setOobeLocation(1, ((float) Util.sNavigationBarHeight) / Util.sPixelDensity);
         TextView textView = (TextView) viewGroup.findViewById(R.id.smarts_chip_text);
         if (textView != null) {
-            LayoutParams layoutParams = new LayoutParams(textView.getLayoutParams());
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(textView.getLayoutParams());
             layoutParams.gravity = 17;
             layoutParams.width = -2;
             layoutParams.height = -2;
@@ -65,25 +62,18 @@ public class LensAgent {
             textView.setTextSize(0, resources.getDimension(R.dimen.chips_text_size));
         }
         ImageView imageView = (ImageView) viewGroup.findViewById(R.id.smarts_chip_close_button);
-        String str = ", marginRight = ";
-        String str2 = TAG;
         if (imageView != null) {
             imageView.setImageResource(R.drawable.chips_close);
             imageView.setImageTintList(ColorStateList.valueOf(-1));
             int dimensionPixelOffset = resources.getDimensionPixelOffset(R.dimen.chips_close_padding);
             imageView.setPadding(dimensionPixelOffset, dimensionPixelOffset, dimensionPixelOffset, dimensionPixelOffset);
-            LayoutParams layoutParams2 = new LayoutParams(imageView.getLayoutParams());
+            LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(imageView.getLayoutParams());
             layoutParams2.gravity = 16;
             layoutParams2.width = -2;
             layoutParams2.height = -2;
             int i = SystemProperties.getInt("cancel_margin_left", resources.getDimensionPixelOffset(R.dimen.chips_close_margin_left));
             int i2 = SystemProperties.getInt("cancel_margin_right", resources.getDimensionPixelOffset(R.dimen.chips_close_margin_right));
-            StringBuilder sb = new StringBuilder();
-            sb.append("applyCustomStyle: cancel button marginLeft = ");
-            sb.append(i);
-            sb.append(str);
-            sb.append(i2);
-            Log.d(str2, sb.toString());
+            Log.d(TAG, "applyCustomStyle: cancel button marginLeft = " + i + ", marginRight = " + i2);
             layoutParams2.setMargins(i, 0, i2, 0);
             imageView.setLayoutParams(layoutParams2);
         }
@@ -93,16 +83,11 @@ public class LensAgent {
         }
         FrameLayout frameLayout = (FrameLayout) viewGroup.findViewById(R.id.chip_animation_container);
         if (frameLayout != null) {
-            LayoutParams layoutParams3 = new LayoutParams(frameLayout.getLayoutParams());
+            LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(frameLayout.getLayoutParams());
             layoutParams3.gravity = 16;
             int i3 = SystemProperties.getInt("icon_margin_left", resources.getDimensionPixelOffset(R.dimen.chips_icon_margin_left));
             int i4 = SystemProperties.getInt("icon_margin_right", resources.getDimensionPixelOffset(R.dimen.chips_icon_margin_right));
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("applyCustomStyle: icon marginLeft = ");
-            sb2.append(i3);
-            sb2.append(str);
-            sb2.append(i4);
-            Log.d(str2, sb2.toString());
+            Log.d(TAG, "applyCustomStyle: icon marginLeft = " + i3 + ", marginRight = " + i4);
             layoutParams3.setMargins(i3, 0, i4, 0);
             frameLayout.setLayoutParams(layoutParams3);
         }
@@ -126,27 +111,17 @@ public class LensAgent {
     }
 
     public static boolean isConflictAiScene(int i) {
-        if (!(i == -1 || i == 19 || i == 25)) {
-            if (i == 31) {
-                return DataRepository.dataItemFeature().Pc();
-            }
-            if (!(i == 34 || i == 37)) {
-                return false;
-            }
+        if (i == -1 || i == 19 || i == 25) {
+            return true;
         }
-        return true;
+        return i != 31 ? i == 34 || i == 37 : DataRepository.dataItemFeature().Pc();
     }
 
     static /* synthetic */ void j(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onOobeStatusUpdated: ");
-        sb.append(i);
-        Log.d(TAG, sb.toString());
-        DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
-        String str = CameraSettings.KEY_GOOGLE_LENS_OOBE;
-        if (dataItemGlobal.getBoolean(str, false)) {
+        Log.d(TAG, "onOobeStatusUpdated: " + i);
+        if (DataRepository.dataItemGlobal().getBoolean(CameraSettings.KEY_GOOGLE_LENS_OOBE, false)) {
             CameraStatUtil.trackGoogleLensOobeContinue(i == 3);
-            DataRepository.dataItemGlobal().editor().putBoolean(str, false).apply();
+            DataRepository.dataItemGlobal().editor().putBoolean(CameraSettings.KEY_GOOGLE_LENS_OOBE, false).apply();
             if (i != 3) {
                 DataRepository.dataItemGlobal().editor().remove(CameraSettings.KEY_LONG_PRESS_VIEWFINDER).apply();
             }
@@ -157,31 +132,18 @@ public class LensAgent {
         this.mLensliteApi = LensliteApi.create(activity.getApplicationContext(), 3);
         long currentTimeMillis = System.currentTimeMillis();
         this.mLensliteApi.onStart(new LensliteUiContainer(view, viewGroup), activity, a.INSTANCE);
-        StringBuilder sb = new StringBuilder();
-        sb.append("LensliteApi init cost ");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        sb.append("ms");
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "LensliteApi init cost " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
         applyCustomStyle(activity.getApplicationContext(), viewGroup);
         this.mInitialized = true;
     }
 
-    public void onFocusChange(@FocusType int i, float f2, float f3) {
+    public void onFocusChange(@LensliteUiController.FocusType int i, float f2, float f3) {
         if (this.mInitialized) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onFocusChange: type = ");
-            sb.append(i);
-            sb.append(", ");
-            sb.append(f2);
-            sb.append("x");
-            sb.append(f3);
-            String sb2 = sb.toString();
-            String str = TAG;
-            Log.d(str, sb2);
+            Log.d(TAG, "onFocusChange: type = " + i + ", " + f2 + "x" + f3);
             try {
                 this.mLensliteApi.getUiController().onFocusChange(i, new PointF(f2, f3));
             } catch (Exception e2) {
-                Log.e(str, "onFocusChange: ", e2);
+                Log.e(TAG, "onFocusChange: ", e2);
             }
         }
     }
@@ -203,11 +165,7 @@ public class LensAgent {
                 this.mIsResumed = false;
                 this.mLensliteApi.onPause();
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("LensliteApi onPause cost ");
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            sb.append("ms");
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "LensliteApi onPause cost " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
         }
     }
 
@@ -218,11 +176,7 @@ public class LensAgent {
                 this.mLensliteApi.onResume();
                 this.mIsResumed = true;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("LensliteApi onResume cost ");
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            sb.append("ms");
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "LensliteApi onResume cost " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
         }
     }
 
@@ -230,11 +184,7 @@ public class LensAgent {
         if (this.mInitialized) {
             long currentTimeMillis = System.currentTimeMillis();
             this.mLensliteApi.onStop();
-            StringBuilder sb = new StringBuilder();
-            sb.append("LensliteApi release cost ");
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            sb.append("ms");
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "LensliteApi release cost " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
             this.mInitialized = false;
         }
     }

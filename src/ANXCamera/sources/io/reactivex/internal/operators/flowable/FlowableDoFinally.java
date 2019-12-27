@@ -97,7 +97,7 @@ public final class FlowableDoFinally<T> extends AbstractFlowableWithUpstream<T, 
             return requestFusion;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runFinally() {
             if (compareAndSet(0, 1)) {
                 try {
@@ -193,7 +193,7 @@ public final class FlowableDoFinally<T> extends AbstractFlowableWithUpstream<T, 
             return requestFusion;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runFinally() {
             if (compareAndSet(0, 1)) {
                 try {
@@ -214,9 +214,9 @@ public final class FlowableDoFinally<T> extends AbstractFlowableWithUpstream<T, 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
         if (subscriber instanceof ConditionalSubscriber) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new DoFinallyConditionalSubscriber<Object>((ConditionalSubscriber) subscriber, this.onFinally));
+            this.source.subscribe(new DoFinallyConditionalSubscriber((ConditionalSubscriber) subscriber, this.onFinally));
         } else {
-            this.source.subscribe((FlowableSubscriber<? super T>) new DoFinallySubscriber<Object>(subscriber, this.onFinally));
+            this.source.subscribe(new DoFinallySubscriber(subscriber, this.onFinally));
         }
     }
 }

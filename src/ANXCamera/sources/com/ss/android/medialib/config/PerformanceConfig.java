@@ -2,7 +2,6 @@ package com.ss.android.medialib.config;
 
 import android.content.Context;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import com.ss.android.medialib.VideoSdkCore;
 import com.ss.android.medialib.util.SharedPrefUtil;
 import java.util.Map;
@@ -24,22 +23,21 @@ public class PerformanceConfig {
     }
 
     private static int getConfig(Map<String, Integer> map, String str) {
-        int i = 0;
         if (map == null) {
             return 0;
         }
-        Integer num = (Integer) map.get(str);
-        if (num != null) {
-            i = num.intValue();
+        Integer num = map.get(str);
+        if (num == null) {
+            return 0;
         }
-        return i;
+        return num.intValue();
     }
 
     public static boolean isUseOpenSL() {
         return useOpenSL == 1;
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public static void restoreFromCache() {
         Context context = VideoSdkCore.APPLICATION_CONTEXT;
         if (context != null) {

@@ -1,7 +1,6 @@
 package com.ss.android.ttve.common;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import com.android.camera.storage.Storage;
 import com.ss.android.vesdk.VELogUtil;
 import java.io.BufferedOutputStream;
@@ -12,35 +11,25 @@ public class TEImageUtils {
     private static final String TAG = "TEImageUtils";
 
     public static void saveBitmap(Bitmap bitmap) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(System.currentTimeMillis());
-        sb.append(Storage.JPEG_SUFFIX);
-        saveBitmap(bitmap, sb.toString());
+        saveBitmap(bitmap, System.currentTimeMillis() + Storage.JPEG_SUFFIX);
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:29:0x0088 A[SYNTHETIC, Splitter:B:29:0x0088] */
     /* JADX WARNING: Removed duplicated region for block: B:34:0x0092 A[SYNTHETIC, Splitter:B:34:0x0092] */
-    /* JADX WARNING: Removed duplicated region for block: B:41:0x009e A[SYNTHETIC, Splitter:B:41:0x009e] */
-    /* JADX WARNING: Removed duplicated region for block: B:46:0x00a8 A[SYNTHETIC, Splitter:B:46:0x00a8] */
+    /* JADX WARNING: Removed duplicated region for block: B:40:0x009e A[SYNTHETIC, Splitter:B:40:0x009e] */
+    /* JADX WARNING: Removed duplicated region for block: B:45:0x00a8 A[SYNTHETIC, Splitter:B:45:0x00a8] */
+    /* JADX WARNING: Removed duplicated region for block: B:51:? A[RETURN, SYNTHETIC] */
     public static void saveBitmap(Bitmap bitmap, String str) {
         FileOutputStream fileOutputStream;
-        StringBuilder sb = new StringBuilder();
-        sb.append(TEFileUtils.getPath());
-        sb.append("/");
-        sb.append(str);
-        String sb2 = sb.toString();
-        String str2 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("saving Bitmap : ");
-        sb3.append(str);
-        VELogUtil.i(str2, sb3.toString());
+        String str2 = TEFileUtils.getPath() + "/" + str;
+        VELogUtil.i(TAG, "saving Bitmap : " + str);
         BufferedOutputStream bufferedOutputStream = null;
         try {
-            fileOutputStream = new FileOutputStream(sb2);
+            fileOutputStream = new FileOutputStream(str2);
             try {
                 BufferedOutputStream bufferedOutputStream2 = new BufferedOutputStream(fileOutputStream);
                 try {
-                    bitmap.compress(CompressFormat.JPEG, 100, bufferedOutputStream2);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bufferedOutputStream2);
                     bufferedOutputStream2.flush();
                     try {
                         bufferedOutputStream2.close();
@@ -52,12 +41,7 @@ public class TEImageUtils {
                     } catch (IOException e3) {
                         e3.printStackTrace();
                     }
-                    String str3 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("Bitmap ");
-                    sb4.append(str);
-                    sb4.append(" saved!");
-                    VELogUtil.i(str3, sb4.toString());
+                    VELogUtil.i(TAG, "Bitmap " + str + " saved!");
                 } catch (IOException e4) {
                     e = e4;
                     bufferedOutputStream = bufferedOutputStream2;

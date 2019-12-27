@@ -1,7 +1,6 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -23,7 +22,7 @@ public final class SingleScheduler extends Scheduler {
     final AtomicReference<ScheduledExecutorService> executor;
     final ThreadFactory threadFactory;
 
-    static final class ScheduledWorker extends Worker {
+    static final class ScheduledWorker extends Scheduler.Worker {
         volatile boolean disposed;
         final ScheduledExecutorService executor;
         final CompositeDisposable tasks = new CompositeDisposable();
@@ -86,8 +85,8 @@ public final class SingleScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
-        return new ScheduledWorker((ScheduledExecutorService) this.executor.get());
+    public Scheduler.Worker createWorker() {
+        return new ScheduledWorker(this.executor.get());
     }
 
     @NonNull
@@ -96,13 +95,13 @@ public final class SingleScheduler extends Scheduler {
         ScheduledDirectTask scheduledDirectTask = new ScheduledDirectTask(RxJavaPlugins.onSchedule(runnable));
         if (j <= 0) {
             try {
-                future = ((ScheduledExecutorService) this.executor.get()).submit(scheduledDirectTask);
+                future = this.executor.get().submit(scheduledDirectTask);
             } catch (RejectedExecutionException e2) {
                 RxJavaPlugins.onError(e2);
                 return EmptyDisposable.INSTANCE;
             }
         } else {
-            future = ((ScheduledExecutorService) this.executor.get()).schedule(scheduledDirectTask, j, timeUnit);
+            future = this.executor.get().schedule(scheduledDirectTask, j, timeUnit);
         }
         scheduledDirectTask.setFuture(future);
         return scheduledDirectTask;
@@ -113,7 +112,7 @@ public final class SingleScheduler extends Scheduler {
         Future future;
         Runnable onSchedule = RxJavaPlugins.onSchedule(runnable);
         if (j2 <= 0) {
-            ScheduledExecutorService scheduledExecutorService = (ScheduledExecutorService) this.executor.get();
+            ScheduledExecutorService scheduledExecutorService = this.executor.get();
             InstantPeriodicTask instantPeriodicTask = new InstantPeriodicTask(onSchedule, scheduledExecutorService);
             if (j <= 0) {
                 try {
@@ -130,7 +129,7 @@ public final class SingleScheduler extends Scheduler {
         }
         ScheduledDirectPeriodicTask scheduledDirectPeriodicTask = new ScheduledDirectPeriodicTask(onSchedule);
         try {
-            scheduledDirectPeriodicTask.setFuture(((ScheduledExecutorService) this.executor.get()).scheduleAtFixedRate(scheduledDirectPeriodicTask, j, j2, timeUnit));
+            scheduledDirectPeriodicTask.setFuture(this.executor.get().scheduleAtFixedRate(scheduledDirectPeriodicTask, j, j2, timeUnit));
             return scheduledDirectPeriodicTask;
         } catch (RejectedExecutionException e3) {
             RxJavaPlugins.onError(e3);
@@ -139,12 +138,12 @@ public final class SingleScheduler extends Scheduler {
     }
 
     public void shutdown() {
-        ScheduledExecutorService scheduledExecutorService = (ScheduledExecutorService) this.executor.get();
+        ScheduledExecutorService scheduledExecutorService = this.executor.get();
         ScheduledExecutorService scheduledExecutorService2 = SHUTDOWN;
         if (scheduledExecutorService != scheduledExecutorService2) {
-            ScheduledExecutorService scheduledExecutorService3 = (ScheduledExecutorService) this.executor.getAndSet(scheduledExecutorService2);
-            if (scheduledExecutorService3 != SHUTDOWN) {
-                scheduledExecutorService3.shutdownNow();
+            ScheduledExecutorService andSet = this.executor.getAndSet(scheduledExecutorService2);
+            if (andSet != SHUTDOWN) {
+                andSet.shutdownNow();
             }
         }
     }
@@ -153,10 +152,11 @@ public final class SingleScheduler extends Scheduler {
         ScheduledExecutorService scheduledExecutorService;
         ScheduledExecutorService scheduledExecutorService2 = null;
         do {
-            scheduledExecutorService = (ScheduledExecutorService) this.executor.get();
+            scheduledExecutorService = this.executor.get();
             if (scheduledExecutorService != SHUTDOWN) {
                 if (scheduledExecutorService2 != null) {
                     scheduledExecutorService2.shutdown();
+                    return;
                 }
                 return;
             } else if (scheduledExecutorService2 == null) {

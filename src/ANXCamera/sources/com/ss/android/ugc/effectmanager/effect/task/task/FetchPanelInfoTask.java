@@ -104,11 +104,7 @@ public class FetchPanelInfoTask extends NormalTask {
             hashMap.put(EffectConfiguration.KEY_COUNT, String.valueOf(this.count));
         }
         this.mSelectedHost = this.mEffectContext.getLinkSelector().getBestHostUrl();
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mSelectedHost);
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_PANEL_INFO);
-        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, sb.toString());
+        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, this.mSelectedHost + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_PANEL_INFO);
         this.mRequestedUrl = buildRequestUrl;
         try {
             this.mRemoteIp = InetAddress.getByName(new URL(buildRequestUrl).getHost()).getHostAddress();
@@ -141,30 +137,30 @@ public class FetchPanelInfoTask extends NormalTask {
                     if (isCanceled()) {
                         ExceptionResult exceptionResult = new ExceptionResult((int) ErrorConstants.CODE_CANCEL_DOWNLOAD);
                         exceptionResult.setTrackParams(this.mRequestedUrl, this.mSelectedHost, this.mRemoteIp);
-                        sendMessage(22, new FetchPanelInfoTaskResult(null, exceptionResult));
+                        sendMessage(22, new FetchPanelInfoTaskResult((PanelInfoModel) null, exceptionResult));
                         return;
                     }
                     PanelInfoResponse panelInfoResponse = (PanelInfoResponse) this.mConfiguration.getEffectNetWorker().execute(buildEffectListRequest, this.mJsonConverter, PanelInfoResponse.class);
                     if (panelInfoResponse.checkValue()) {
                         PanelInfoModel data = panelInfoResponse.getData();
                         saveEffectList(panelInfoResponse);
-                        sendMessage(22, new FetchPanelInfoTaskResult(data, null));
+                        sendMessage(22, new FetchPanelInfoTaskResult(data, (ExceptionResult) null));
                         return;
                     } else if (this.mCurCnt == 0) {
                         ExceptionResult exceptionResult2 = new ExceptionResult((int) ErrorConstants.CODE_DOWNLOAD_ERROR);
                         exceptionResult2.setTrackParams(this.mRequestedUrl, this.mSelectedHost, this.mRemoteIp);
-                        sendMessage(22, new FetchPanelInfoTaskResult(null, exceptionResult2));
+                        sendMessage(22, new FetchPanelInfoTaskResult((PanelInfoModel) null, exceptionResult2));
                         return;
                     }
                 } catch (Exception e2) {
                     if (this.mCurCnt == 0 || (e2 instanceof StatusCodeException)) {
-                        sendMessage(22, new FetchPanelInfoTaskResult(null, new ExceptionResult(e2)));
+                        sendMessage(22, new FetchPanelInfoTaskResult((PanelInfoModel) null, new ExceptionResult(e2)));
                     }
                 }
             } else {
                 return;
             }
         }
-        sendMessage(22, new FetchPanelInfoTaskResult(null, new ExceptionResult(e2)));
+        sendMessage(22, new FetchPanelInfoTaskResult((PanelInfoModel) null, new ExceptionResult(e2)));
     }
 }

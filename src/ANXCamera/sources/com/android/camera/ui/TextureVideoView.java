@@ -6,34 +6,27 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaExtractor;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnBufferingUpdateListener;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnErrorListener;
-import android.media.MediaPlayer.OnInfoListener;
-import android.media.MediaPlayer.OnPreparedListener;
-import android.media.MediaPlayer.OnVideoSizeChangedListener;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.TextureView.SurfaceTextureListener;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
-public class TextureVideoView extends TextureView implements SurfaceTextureListener, Callback, OnPreparedListener, OnVideoSizeChangedListener, OnCompletionListener, OnErrorListener, OnInfoListener, OnBufferingUpdateListener {
+public class TextureVideoView extends TextureView implements TextureView.SurfaceTextureListener, Handler.Callback, MediaPlayer.OnPreparedListener, MediaPlayer.OnVideoSizeChangedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener {
     public static final int CENTER = 2;
     public static final int CENTER_CROP = 1;
     public static final int FIT_CENTER = 4;
@@ -220,7 +213,7 @@ public class TextureVideoView extends TextureView implements SurfaceTextureListe
         if (this.mSurface != null) {
             EGL10 egl10 = (EGL10) EGLContext.getEGL();
             EGLDisplay eglGetDisplay = egl10.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-            egl10.eglInitialize(eglGetDisplay, null);
+            egl10.eglInitialize(eglGetDisplay, (int[]) null);
             EGLConfig[] eGLConfigArr = new EGLConfig[1];
             EGL10 egl102 = egl10;
             EGLDisplay eGLDisplay = eglGetDisplay;
@@ -257,20 +250,11 @@ public class TextureVideoView extends TextureView implements SurfaceTextureListe
     private void openVideo() {
         if (this.mUri == null || this.mSurface == null || this.mTargetState != 3) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("openVideo error ");
-            sb.append(this.mUri);
-            String str2 = " ";
-            sb.append(str2);
-            sb.append(this.mSurface);
-            sb.append(str2);
-            sb.append(this.mTargetState);
-            Log.e(str, sb.toString());
+            Log.e(str, "openVideo error " + this.mUri + " " + this.mSurface + " " + this.mTargetState);
             return;
         }
-        this.mAudioManager = (AudioManager) this.mContext.getSystemService(MVConsts.TYPE_AUDIO);
-        this.mAudioManager.requestAudioFocus(null, 3, 1);
-        int i = 0;
+        this.mAudioManager = (AudioManager) this.mContext.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
+        this.mAudioManager.requestAudioFocus((AudioManager.OnAudioFocusChangeListener) null, 3, 1);
         release(false);
         try {
             this.mMediaPlayer = new MediaPlayer();
@@ -288,16 +272,12 @@ public class TextureVideoView extends TextureView implements SurfaceTextureListe
             this.mCurrentState = 1;
             this.mTargetState = 1;
             MediaExtractor mediaExtractor = new MediaExtractor();
-            mediaExtractor.setDataSource(this.mContext, this.mUri, null);
+            mediaExtractor.setDataSource(this.mContext, this.mUri, (Map) null);
             this.mHasAudio = false;
-            while (true) {
-                if (i >= mediaExtractor.getTrackCount()) {
-                    break;
-                } else if (mediaExtractor.getTrackFormat(i).getString("mime").startsWith("audio/")) {
+            for (int i = 0; i < mediaExtractor.getTrackCount(); i++) {
+                if (mediaExtractor.getTrackFormat(i).getString("mime").startsWith("audio/")) {
                     this.mHasAudio = true;
-                    break;
-                } else {
-                    i++;
+                    return;
                 }
             }
         } catch (IOException unused) {
@@ -332,7 +312,7 @@ public class TextureVideoView extends TextureView implements SurfaceTextureListe
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             this.mMediaPlayer.reset();
-            this.mMediaPlayer.setSurface(null);
+            this.mMediaPlayer.setSurface((Surface) null);
             this.mMediaPlayer.release();
             this.mMediaPlayer = null;
             this.mCurrentState = 0;
@@ -418,28 +398,30 @@ public class TextureVideoView extends TextureView implements SurfaceTextureListe
     public boolean onError(final MediaPlayer mediaPlayer, final int i, final int i2) {
         this.mCurrentState = -1;
         this.mTargetState = -1;
-        if (this.mMediaPlayerCallback != null) {
-            this.mHandler.post(new Runnable() {
-                public void run() {
-                    if (TextureVideoView.this.mMediaPlayerCallback != null) {
-                        TextureVideoView.this.mMediaPlayerCallback.onError(mediaPlayer, i, i2);
-                    }
-                }
-            });
+        if (this.mMediaPlayerCallback == null) {
+            return true;
         }
+        this.mHandler.post(new Runnable() {
+            public void run() {
+                if (TextureVideoView.this.mMediaPlayerCallback != null) {
+                    TextureVideoView.this.mMediaPlayerCallback.onError(mediaPlayer, i, i2);
+                }
+            }
+        });
         return true;
     }
 
     public boolean onInfo(final MediaPlayer mediaPlayer, final int i, final int i2) {
-        if (this.mMediaPlayerCallback != null) {
-            this.mHandler.post(new Runnable() {
-                public void run() {
-                    if (TextureVideoView.this.mMediaPlayerCallback != null) {
-                        TextureVideoView.this.mMediaPlayerCallback.onInfo(mediaPlayer, i, i2);
-                    }
-                }
-            });
+        if (this.mMediaPlayerCallback == null) {
+            return true;
         }
+        this.mHandler.post(new Runnable() {
+            public void run() {
+                if (TextureVideoView.this.mMediaPlayerCallback != null) {
+                    TextureVideoView.this.mMediaPlayerCallback.onInfo(mediaPlayer, i, i2);
+                }
+            }
+        });
         return true;
     }
 
@@ -530,7 +512,7 @@ public class TextureVideoView extends TextureView implements SurfaceTextureListe
     public void setMediaPlayerCallback(MediaPlayerCallback mediaPlayerCallback) {
         this.mMediaPlayerCallback = mediaPlayerCallback;
         if (mediaPlayerCallback == null) {
-            this.mHandler.removeCallbacksAndMessages(null);
+            this.mHandler.removeCallbacksAndMessages((Object) null);
         }
     }
 

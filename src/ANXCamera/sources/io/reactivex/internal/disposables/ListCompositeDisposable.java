@@ -89,7 +89,7 @@ public final class ListCompositeDisposable implements Disposable, DisposableCont
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:18:0x0021, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:17:0x0021, code lost:
         return false;
      */
     public boolean delete(Disposable disposable) {
@@ -123,7 +123,7 @@ public final class ListCompositeDisposable implements Disposable, DisposableCont
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void dispose(List<Disposable> list) {
         if (list != null) {
             ArrayList arrayList = null;

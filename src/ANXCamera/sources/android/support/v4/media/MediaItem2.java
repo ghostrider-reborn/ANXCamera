@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.text.TextUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -62,7 +61,7 @@ public class MediaItem2 {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {
     }
@@ -79,10 +78,7 @@ public class MediaItem2 {
             this.mDataSourceDesc = dataSourceDesc;
             this.mMetadata = mediaMetadata2;
             this.mFlags = i;
-            if (uuid == null) {
-                uuid = UUID.randomUUID();
-            }
-            this.mUUID = uuid;
+            this.mUUID = uuid == null ? UUID.randomUUID() : uuid;
         } else {
             throw new IllegalArgumentException("metadata's id should be matched with the mediaid");
         }
@@ -167,12 +163,6 @@ public class MediaItem2 {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder("MediaItem2{");
-        sb.append("mFlags=");
-        sb.append(this.mFlags);
-        sb.append(", mMetadata=");
-        sb.append(this.mMetadata);
-        sb.append('}');
-        return sb.toString();
+        return "MediaItem2{" + "mFlags=" + this.mFlags + ", mMetadata=" + this.mMetadata + '}';
     }
 }

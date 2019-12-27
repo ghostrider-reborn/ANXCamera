@@ -6,7 +6,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import com.android.camera.R;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
+import com.android.camera.protocol.ModeProtocol;
 
 public class HorizontalFNumberSlideView extends HorizontalSlideView {
     private int mLineColorSelected;
@@ -30,7 +30,7 @@ public class HorizontalFNumberSlideView extends HorizontalSlideView {
     }
 
     public boolean canPositionScroll() {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         return cameraAction == null || !cameraAction.isDoingAction();
     }
 
@@ -49,12 +49,10 @@ public class HorizontalFNumberSlideView extends HorizontalSlideView {
     /* access modifiers changed from: protected */
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float f2 = this.mOriginX;
-        float height = ((float) getHeight()) / 2.0f;
         canvas.save();
-        canvas.translate(f2, height);
-        float f3 = this.mLineSelectedHalfHeight;
-        canvas.drawLine(0.0f, -f3, 0.0f, f3, this.mPaint);
+        canvas.translate(this.mOriginX, ((float) getHeight()) / 2.0f);
+        float f2 = this.mLineSelectedHalfHeight;
+        canvas.drawLine(0.0f, -f2, 0.0f, f2, this.mPaint);
         canvas.restore();
     }
 }

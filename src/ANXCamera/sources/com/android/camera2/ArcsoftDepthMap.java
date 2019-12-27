@@ -53,22 +53,14 @@ public class ArcsoftDepthMap {
                 this.mDepthMapHeader = getDepthMapHeader();
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Illegal depth format! 0x80 != ");
-            sb.append(headerTag);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Illegal depth format! 0x80 != " + headerTag);
         }
         throw new IllegalArgumentException("Null depth data!");
     }
 
     private static byte[] getBytes(byte[] bArr, int i, int i2) {
         if (i2 <= 0 || i < 0 || i2 > bArr.length - i) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("WRONG ARGUMENT: from =");
-            sb.append(i);
-            sb.append(", length = ");
-            sb.append(i2);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("WRONG ARGUMENT: from =" + i + ", length = " + i2);
         }
         byte[] bArr2 = new byte[i2];
         System.arraycopy(bArr, i, bArr2, 0, i2);
@@ -146,7 +138,6 @@ public class ArcsoftDepthMap {
         byte[] bArr12 = bArr4;
         int[] iArr4 = iArr3;
         int i6 = i2;
-        String str2 = "depthmap";
         Point focusPoint = getFocusPoint();
         int blurLevel = getBlurLevel();
         boolean isFrontCamera = pictureInfo.isFrontCamera();
@@ -157,31 +148,11 @@ public class ArcsoftDepthMap {
         } else {
             i8 = -1;
         }
-        String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("writePortraitExif: focusPoint: ");
-        sb.append(focusPoint);
-        Log.d(str3, sb.toString());
-        String str4 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("writePortraitExif: blurLevel: ");
-        sb2.append(blurLevel);
-        Log.d(str4, sb2.toString());
-        String str5 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("writePortraitExif: shineThreshold: ");
-        sb3.append(i8);
-        Log.d(str5, sb3.toString());
-        String str6 = TAG;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("writePortraitExif: shineLevel: ");
-        sb4.append(i7);
-        Log.d(str6, sb4.toString());
-        String str7 = TAG;
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append("writePortraitExif: lightingPattern: ");
-        sb5.append(i6);
-        Log.d(str7, sb5.toString());
+        Log.d(TAG, "writePortraitExif: focusPoint: " + focusPoint);
+        Log.d(TAG, "writePortraitExif: blurLevel: " + blurLevel);
+        Log.d(TAG, "writePortraitExif: shineThreshold: " + i8);
+        Log.d(TAG, "writePortraitExif: shineLevel: " + i7);
+        Log.d(TAG, "writePortraitExif: lightingPattern: " + i6);
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             try {
@@ -196,7 +167,7 @@ public class ArcsoftDepthMap {
                 exifInterface.writeExif(bArr9, (OutputStream) byteArrayOutputStream);
                 bArr5 = byteArrayOutputStream.toByteArray();
                 try {
-                    $closeResource(null, byteArrayOutputStream);
+                    $closeResource((Throwable) null, byteArrayOutputStream);
                 } catch (IOException unused) {
                 }
             } catch (Throwable th3) {
@@ -222,57 +193,47 @@ public class ArcsoftDepthMap {
             XmlSerializer newSerializer = Xml.newSerializer();
             StringWriter stringWriter = new StringWriter();
             newSerializer.setOutput(stringWriter);
-            newSerializer.startDocument("UTF-8", Boolean.valueOf(true));
-            newSerializer.startTag(null, str2);
-            newSerializer.attribute(null, "version", String.valueOf(i));
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append(focusPoint.x);
-            sb6.append(",");
-            sb6.append(focusPoint.y);
-            newSerializer.attribute(null, "focuspoint", sb6.toString());
-            newSerializer.attribute(null, "blurlevel", String.valueOf(blurLevel));
-            newSerializer.attribute(null, "shinethreshold", String.valueOf(i8));
-            newSerializer.attribute(null, "shinelevel", String.valueOf(i7));
-            newSerializer.attribute(null, "rawlength", String.valueOf(i3));
-            newSerializer.attribute(null, "depthlength", String.valueOf(i4));
-            newSerializer.endTag(null, str2);
-            String str8 = "paddingy";
-            String str9 = "paddingx";
-            String str10 = "height";
-            String str11 = "width";
-            String str12 = "length";
-            String str13 = "offset";
+            newSerializer.startDocument("UTF-8", true);
+            newSerializer.startTag((String) null, "depthmap");
+            newSerializer.attribute((String) null, "version", String.valueOf(i));
+            newSerializer.attribute((String) null, "focuspoint", focusPoint.x + "," + focusPoint.y);
+            newSerializer.attribute((String) null, "blurlevel", String.valueOf(blurLevel));
+            newSerializer.attribute((String) null, "shinethreshold", String.valueOf(i8));
+            newSerializer.attribute((String) null, "shinelevel", String.valueOf(i7));
+            newSerializer.attribute((String) null, "rawlength", String.valueOf(i3));
+            newSerializer.attribute((String) null, "depthlength", String.valueOf(i4));
+            newSerializer.endTag((String) null, "depthmap");
             if (bArr12 != null) {
                 if (bArr12.length > 0 && iArr4 != null && iArr4.length >= 4) {
-                    newSerializer.startTag(null, "subimage");
-                    newSerializer.attribute(null, str13, String.valueOf(bArr12.length + (bArr10 != null ? bArr10.length : 0) + (bArr11 != null ? bArr11.length : 0) + i3 + i4));
-                    newSerializer.attribute(null, str12, String.valueOf(bArr12.length));
-                    newSerializer.attribute(null, str9, String.valueOf(iArr4[0]));
-                    newSerializer.attribute(null, str8, String.valueOf(iArr4[1]));
-                    newSerializer.attribute(null, str11, String.valueOf(iArr4[2]));
-                    newSerializer.attribute(null, str10, String.valueOf(iArr4[3]));
-                    newSerializer.endTag(null, "subimage");
+                    newSerializer.startTag((String) null, "subimage");
+                    newSerializer.attribute((String) null, "offset", String.valueOf(bArr12.length + (bArr10 != null ? bArr10.length : 0) + (bArr11 != null ? bArr11.length : 0) + i3 + i4));
+                    newSerializer.attribute((String) null, "length", String.valueOf(bArr12.length));
+                    newSerializer.attribute((String) null, "paddingx", String.valueOf(iArr4[0]));
+                    newSerializer.attribute((String) null, "paddingy", String.valueOf(iArr4[1]));
+                    newSerializer.attribute((String) null, "width", String.valueOf(iArr4[2]));
+                    newSerializer.attribute((String) null, "height", String.valueOf(iArr4[3]));
+                    newSerializer.endTag((String) null, "subimage");
                 }
             }
             if (bArr10 != null && bArr10.length > 0) {
-                newSerializer.startTag(null, "lenswatermark");
-                newSerializer.attribute(null, str13, String.valueOf(bArr10.length + (bArr11 != null ? bArr11.length : 0) + i3 + i4));
-                newSerializer.attribute(null, str12, String.valueOf(bArr10.length));
-                newSerializer.attribute(null, str11, String.valueOf(iArr[0]));
-                newSerializer.attribute(null, str10, String.valueOf(iArr[1]));
-                newSerializer.attribute(null, str9, String.valueOf(iArr[2]));
-                newSerializer.attribute(null, str8, String.valueOf(iArr[3]));
-                newSerializer.endTag(null, "lenswatermark");
+                newSerializer.startTag((String) null, "lenswatermark");
+                newSerializer.attribute((String) null, "offset", String.valueOf(bArr10.length + (bArr11 != null ? bArr11.length : 0) + i3 + i4));
+                newSerializer.attribute((String) null, "length", String.valueOf(bArr10.length));
+                newSerializer.attribute((String) null, "width", String.valueOf(iArr[0]));
+                newSerializer.attribute((String) null, "height", String.valueOf(iArr[1]));
+                newSerializer.attribute((String) null, "paddingx", String.valueOf(iArr[2]));
+                newSerializer.attribute((String) null, "paddingy", String.valueOf(iArr[3]));
+                newSerializer.endTag((String) null, "lenswatermark");
             }
             if (bArr11 != null && bArr11.length > 0) {
-                newSerializer.startTag(null, "timewatermark");
-                newSerializer.attribute(null, str13, String.valueOf(bArr11.length + i3 + i4));
-                newSerializer.attribute(null, str12, String.valueOf(bArr11.length));
-                newSerializer.attribute(null, str11, String.valueOf(iArr2[0]));
-                newSerializer.attribute(null, str10, String.valueOf(iArr2[1]));
-                newSerializer.attribute(null, str9, String.valueOf(iArr2[2]));
-                newSerializer.attribute(null, str8, String.valueOf(iArr2[3]));
-                newSerializer.endTag(null, "timewatermark");
+                newSerializer.startTag((String) null, "timewatermark");
+                newSerializer.attribute((String) null, "offset", String.valueOf(bArr11.length + i3 + i4));
+                newSerializer.attribute((String) null, "length", String.valueOf(bArr11.length));
+                newSerializer.attribute((String) null, "width", String.valueOf(iArr2[0]));
+                newSerializer.attribute((String) null, "height", String.valueOf(iArr2[1]));
+                newSerializer.attribute((String) null, "paddingx", String.valueOf(iArr2[2]));
+                newSerializer.attribute((String) null, "paddingy", String.valueOf(iArr2[3]));
+                newSerializer.endTag((String) null, "timewatermark");
             }
             newSerializer.endDocument();
             str = stringWriter.toString();
@@ -319,8 +280,8 @@ public class ArcsoftDepthMap {
                     byteArrayOutputStream2.flush();
                     bArr7 = byteArrayOutputStream2.toByteArray();
                     try {
-                        $closeResource(null, byteArrayOutputStream2);
-                        $closeResource(null, byteArrayInputStream);
+                        $closeResource((Throwable) null, byteArrayOutputStream2);
+                        $closeResource((Throwable) null, byteArrayInputStream);
                     } catch (Throwable th8) {
                         th = th8;
                         Throwable th72 = th;

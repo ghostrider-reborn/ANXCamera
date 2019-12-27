@@ -80,14 +80,14 @@ public final class MaybeTakeUntilMaybe<T, U> extends AbstractMaybeWithUpstream<T
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void otherComplete() {
             if (DisposableHelper.dispose(this)) {
                 this.actual.onComplete();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void otherError(Throwable th) {
             if (DisposableHelper.dispose(this)) {
                 this.actual.onError(th);

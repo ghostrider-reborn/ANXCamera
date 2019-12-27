@@ -9,6 +9,8 @@ public class SnapshotCanvas extends BaseGLCanvas {
     private final int EFFECT_GROUP_INDEX = 0;
 
     public SnapshotCanvas() {
+        this.mRenderCaches = new RenderGroup(this);
+        this.mRenderGroup = new RenderGroup(this);
         this.mRenderGroup.addRender(this.mRenderCaches);
         this.mRenderGroup.addRender(new BasicRender(this));
         initialize();

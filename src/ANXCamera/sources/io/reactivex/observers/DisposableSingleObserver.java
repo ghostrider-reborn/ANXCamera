@@ -23,7 +23,7 @@ public abstract class DisposableSingleObserver<T> implements SingleObserver<T>, 
     }
 
     public final void onSubscribe(@NonNull Disposable disposable) {
-        if (EndConsumerHelper.setOnce(this.s, disposable, DisposableSingleObserver.class)) {
+        if (EndConsumerHelper.setOnce(this.s, disposable, (Class<?>) DisposableSingleObserver.class)) {
             onStart();
         }
     }

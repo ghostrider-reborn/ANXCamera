@@ -32,10 +32,10 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
     final Function<? super TRight, ? extends Publisher<TRightEnd>> rightEnd;
 
     static final class GroupJoinSubscription<TLeft, TRight, TLeftEnd, TRightEnd, R> extends AtomicInteger implements Subscription, JoinSupport {
-        static final Integer LEFT_CLOSE = Integer.valueOf(3);
-        static final Integer LEFT_VALUE = Integer.valueOf(1);
-        static final Integer RIGHT_CLOSE = Integer.valueOf(4);
-        static final Integer RIGHT_VALUE = Integer.valueOf(2);
+        static final Integer LEFT_CLOSE = 3;
+        static final Integer LEFT_VALUE = 1;
+        static final Integer RIGHT_CLOSE = 4;
+        static final Integer RIGHT_VALUE = 2;
         private static final long serialVersionUID = -6071216598687999801L;
         final AtomicInteger active;
         final Subscriber<? super R> actual;
@@ -70,19 +70,19 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             this.disposables.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 SpscLinkedArrayQueue<Object> spscLinkedArrayQueue = this.queue;
                 Subscriber<? super R> subscriber = this.actual;
                 int i = 1;
                 while (!this.cancelled) {
-                    if (((Throwable) this.error.get()) != null) {
+                    if (this.error.get() != null) {
                         spscLinkedArrayQueue.clear();
                         cancelAll();
                         errorAll(subscriber);
@@ -92,7 +92,7 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
                     Integer num = (Integer) spscLinkedArrayQueue.poll();
                     boolean z2 = num == null;
                     if (z && z2) {
-                        for (UnicastProcessor onComplete : this.lefts.values()) {
+                        for (UnicastProcessor<TRight> onComplete : this.lefts.values()) {
                             onComplete.onComplete();
                         }
                         this.lefts.clear();
@@ -119,7 +119,7 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
                                 LeftRightEndSubscriber leftRightEndSubscriber = new LeftRightEndSubscriber(this, true, i2);
                                 this.disposables.add(leftRightEndSubscriber);
                                 publisher.subscribe(leftRightEndSubscriber);
-                                if (((Throwable) this.error.get()) != null) {
+                                if (this.error.get() != null) {
                                     spscLinkedArrayQueue.clear();
                                     cancelAll();
                                     errorAll(subscriber);
@@ -131,7 +131,7 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
                                     if (this.requested.get() != 0) {
                                         subscriber.onNext(apply2);
                                         BackpressureHelper.produced(this.requested, 1);
-                                        for (Object onNext : this.rights.values()) {
+                                        for (TRight onNext : this.rights.values()) {
                                             create.onNext(onNext);
                                         }
                                     } else {
@@ -157,13 +157,13 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
                                 LeftRightEndSubscriber leftRightEndSubscriber2 = new LeftRightEndSubscriber(this, false, i3);
                                 this.disposables.add(leftRightEndSubscriber2);
                                 publisher2.subscribe(leftRightEndSubscriber2);
-                                if (((Throwable) this.error.get()) != null) {
+                                if (this.error.get() != null) {
                                     spscLinkedArrayQueue.clear();
                                     cancelAll();
                                     errorAll(subscriber);
                                     return;
                                 }
-                                for (UnicastProcessor onNext2 : this.lefts.values()) {
+                                for (UnicastProcessor<TRight> onNext2 : this.lefts.values()) {
                                     onNext2.onNext(poll);
                                 }
                             } catch (Throwable th3) {
@@ -172,10 +172,10 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
                             }
                         } else if (num == LEFT_CLOSE) {
                             LeftRightEndSubscriber leftRightEndSubscriber3 = (LeftRightEndSubscriber) poll;
-                            UnicastProcessor unicastProcessor = (UnicastProcessor) this.lefts.remove(Integer.valueOf(leftRightEndSubscriber3.index));
+                            UnicastProcessor remove = this.lefts.remove(Integer.valueOf(leftRightEndSubscriber3.index));
                             this.disposables.remove(leftRightEndSubscriber3);
-                            if (unicastProcessor != null) {
-                                unicastProcessor.onComplete();
+                            if (remove != null) {
+                                remove.onComplete();
                             }
                         } else if (num == RIGHT_CLOSE) {
                             LeftRightEndSubscriber leftRightEndSubscriber4 = (LeftRightEndSubscriber) poll;
@@ -188,10 +188,10 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void errorAll(Subscriber<?> subscriber) {
             Throwable terminate = ExceptionHelper.terminate(this.error);
-            for (UnicastProcessor onError : this.lefts.values()) {
+            for (UnicastProcessor<TRight> onError : this.lefts.values()) {
                 onError.onError(terminate);
             }
             this.lefts.clear();
@@ -199,7 +199,7 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
             subscriber.onError(terminate);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fail(Throwable th, Subscriber<?> subscriber, SimpleQueue<?> simpleQueue) {
             Exceptions.throwIfFatal(th);
             ExceptionHelper.addThrowable(this.error, th);
@@ -358,7 +358,7 @@ public final class FlowableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> exte
         groupJoinSubscription.disposables.add(leftRightSubscriber);
         LeftRightSubscriber leftRightSubscriber2 = new LeftRightSubscriber(groupJoinSubscription, false);
         groupJoinSubscription.disposables.add(leftRightSubscriber2);
-        this.source.subscribe((FlowableSubscriber<? super T>) leftRightSubscriber);
+        this.source.subscribe(leftRightSubscriber);
         this.other.subscribe(leftRightSubscriber2);
     }
 }

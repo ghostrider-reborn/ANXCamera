@@ -3,25 +3,20 @@ package com.android.camera.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.Cap;
-import android.graphics.Paint.FontMetricsInt;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.view.View.MeasureSpec;
+import android.view.View;
 import android.widget.Checkable;
 import android.widget.CompoundButton;
 import com.android.camera.R;
 import com.android.camera.constant.ColorConstant;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
+import com.android.camera.protocol.ModeProtocol;
 import miui.view.animation.QuarticEaseInOutInterpolator;
 
 public class ToggleSwitch extends CompoundButton implements Checkable {
@@ -69,7 +64,7 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
     private ValueAnimator mValueAnimator;
     private State state;
 
-    /* renamed from: com.android.camera.ui.ToggleSwitch$3 reason: invalid class name */
+    /* renamed from: com.android.camera.ui.ToggleSwitch$3  reason: invalid class name */
     static /* synthetic */ class AnonymousClass3 {
         static final /* synthetic */ int[] $SwitchMap$com$android$camera$ui$ToggleSwitch$State = new int[State.values().length];
 
@@ -150,21 +145,21 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
         this.mValueAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         this.mValueAnimator.setDuration((long) this.mAnimDuration);
         this.mValueAnimator.setInterpolator(new QuarticEaseInOutInterpolator());
-        this.mValueAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                ToggleSwitch.this.mCurrentPos = ((Float) valueAnimator.getAnimatedValue()).floatValue();
+                float unused = ToggleSwitch.this.mCurrentPos = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 ToggleSwitch.this.invalidate();
             }
         });
         this.mValueAnimator.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animator) {
                 super.onAnimationEnd(animator);
-                ToggleSwitch.this.isMoving = false;
+                boolean unused = ToggleSwitch.this.isMoving = false;
             }
 
             public void onAnimationStart(Animator animator) {
                 super.onAnimationStart(animator);
-                ToggleSwitch.this.isMoving = true;
+                boolean unused = ToggleSwitch.this.isMoving = true;
             }
         });
         if (!this.mValueAnimator.isRunning()) {
@@ -194,27 +189,27 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
     }
 
     private float[] compBackgroundRoundRectAttr() {
+        int width = getWidth();
         float height = ((float) getHeight()) - 0.0f;
-        return new float[]{0.0f, 0.0f, ((float) getWidth()) - 0.0f, height, (height - 0.0f) * 0.5f};
+        return new float[]{0.0f, 0.0f, ((float) width) - 0.0f, height, (height - 0.0f) * 0.5f};
     }
 
     private float[] compThumbRoundRectAttr(float f2) {
         int width = getWidth();
         int height = getHeight();
         int i = this.mThumbPadding;
-        int i2 = height - (i * 2);
-        int i3 = this.mStrokeWidth;
+        int i2 = this.mStrokeWidth;
         float f3 = ((float) width) / 2.0f;
-        float f4 = (((float) (i + i3)) * (1.0f - f2)) + (((((float) i) / 2.0f) + f3) * f2);
-        float f5 = (float) (i + i3);
-        float f6 = (((float) i2) + f5) - ((float) (i3 * 2));
-        return new float[]{f4, f5, ((f3 - ((float) i3)) - ((((float) i) * 3.0f) / 2.0f)) + f4, f6, (f6 - f5) * 0.5f};
+        float f4 = (((float) (i + i2)) * (1.0f - f2)) + (((((float) i) / 2.0f) + f3) * f2);
+        float f5 = (float) (i + i2);
+        float f6 = (((float) (height - (i * 2))) + f5) - ((float) (i2 * 2));
+        return new float[]{f4, f5, ((f3 - ((float) i2)) - ((((float) i) * 3.0f) / 2.0f)) + f4, f6, (f6 - f5) * 0.5f};
     }
 
     private void drawRoundRect(Canvas canvas, int i, float[] fArr, boolean z) {
         Paint paint = new Paint(1);
-        paint.setStyle(Style.FILL);
-        paint.setStrokeCap(Cap.SQUARE);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setStrokeCap(Paint.Cap.SQUARE);
         RectF rectF = new RectF();
         paint.setColor(i);
         if (z) {
@@ -230,17 +225,16 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
             int height = getHeight();
             int i2 = this.mStrokeWidth;
             float f2 = ((float) i2) / 2.0f;
-            float f3 = ((float) width) - f2;
-            float f4 = ((float) i2) / 2.0f;
-            float f5 = ((float) height) - f4;
-            float f6 = (f5 - f4) * 0.5f;
+            float f3 = ((float) i2) / 2.0f;
+            float f4 = ((float) height) - f3;
+            float f5 = (f4 - f3) * 0.5f;
             Paint paint = new Paint(1);
-            paint.setStyle(Style.STROKE);
+            paint.setStyle(Paint.Style.STROKE);
             paint.setColor(i);
             paint.setStrokeWidth((float) this.mStrokeWidth);
             RectF rectF = new RectF();
-            rectF.set(f2, f4, f3, f5);
-            canvas.drawRoundRect(rectF, f6, f6, paint);
+            rectF.set(f2, f3, ((float) width) - f2, f4);
+            canvas.drawRoundRect(rectF, f5, f5, paint);
         }
     }
 
@@ -279,35 +273,33 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
     private void drawText(Canvas canvas, float[] fArr) {
         if (this.mTextOff != null) {
             Paint paint = new Paint(1);
-            paint.setTextAlign(Align.LEFT);
+            paint.setTextAlign(Paint.Align.LEFT);
             paint.setTextSize((float) this.mTextSize);
-            FontMetricsInt fontMetricsInt = paint.getFontMetricsInt();
-            int measuredHeight = getMeasuredHeight() - fontMetricsInt.bottom;
+            Paint.FontMetricsInt fontMetricsInt = paint.getFontMetricsInt();
             int i = fontMetricsInt.top;
-            int i2 = ((measuredHeight + i) / 2) - i;
+            int measuredHeight = (((getMeasuredHeight() - fontMetricsInt.bottom) + i) / 2) - i;
             if (this.mChecked) {
                 paint.setColor(this.mTextOffColor);
                 paint.setShadowLayer(this.mTextOffShadowRadius, 0.0f, 0.0f, this.mTextOffShadowColor);
             } else {
                 paint.setColor(this.mTextOnColor);
             }
-            canvas.drawText(this.mTextOff, ((((((float) getWidth()) * 0.5f) + (((float) this.mThumbPadding) / 2.0f)) + ((float) this.mStrokeWidth)) - ((float) this.mTextOffWidth)) * 0.5f, (float) i2, paint);
+            canvas.drawText(this.mTextOff, ((((((float) getWidth()) * 0.5f) + (((float) this.mThumbPadding) / 2.0f)) + ((float) this.mStrokeWidth)) - ((float) this.mTextOffWidth)) * 0.5f, (float) measuredHeight, paint);
         }
         if (this.mTextOn != null) {
             Paint paint2 = new Paint(1);
-            paint2.setTextAlign(Align.LEFT);
+            paint2.setTextAlign(Paint.Align.LEFT);
             paint2.setTextSize((float) this.mTextSize);
-            FontMetricsInt fontMetricsInt2 = paint2.getFontMetricsInt();
-            int measuredHeight2 = getMeasuredHeight() - fontMetricsInt2.bottom;
-            int i3 = fontMetricsInt2.top;
-            int i4 = ((measuredHeight2 + i3) / 2) - i3;
+            Paint.FontMetricsInt fontMetricsInt2 = paint2.getFontMetricsInt();
+            int i2 = fontMetricsInt2.top;
+            int measuredHeight2 = (((getMeasuredHeight() - fontMetricsInt2.bottom) + i2) / 2) - i2;
             if (this.mChecked) {
                 paint2.setColor(this.mTextOnColor);
             } else {
                 paint2.setColor(this.mTextOffColor);
                 paint2.setShadowLayer(this.mTextOffShadowRadius, 0.0f, 0.0f, this.mTextOffShadowColor);
             }
-            canvas.drawText(this.mTextOn, (((((((float) getWidth()) * 3.0f) / 2.0f) - (((float) this.mThumbPadding) / 2.0f)) - ((float) this.mStrokeWidth)) - ((float) this.mTextOnWidth)) * 0.5f, (float) i4, paint2);
+            canvas.drawText(this.mTextOn, (((((((float) getWidth()) * 3.0f) / 2.0f) - (((float) this.mThumbPadding) / 2.0f)) - ((float) this.mStrokeWidth)) - ((float) this.mTextOnWidth)) * 0.5f, (float) measuredHeight2, paint2);
         }
     }
 
@@ -326,13 +318,13 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
     /* access modifiers changed from: protected */
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        setLayerType(1, null);
+        setLayerType(1, (Paint) null);
         int width = getWidth();
         int height = getHeight();
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
-        int paddingBottom = (height - paddingTop) - getPaddingBottom();
-        canvas.translate((float) (paddingLeft + ((((width - paddingLeft) - getPaddingRight()) - getWidth()) / 2)), (float) (paddingTop + ((paddingBottom - getHeight()) / 2)));
+        int width2 = getWidth();
+        canvas.translate((float) (paddingLeft + ((((width - paddingLeft) - getPaddingRight()) - width2) / 2)), (float) (paddingTop + ((((height - paddingTop) - getPaddingBottom()) - getHeight()) / 2)));
         int i = AnonymousClass3.$SwitchMap$com$android$camera$ui$ToggleSwitch$State[this.state.ordinal()];
         if (i == 1) {
             drawSwitchOn(canvas);
@@ -346,10 +338,10 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
     }
 
     public void onMeasure(int i, int i2) {
-        int size = MeasureSpec.getSize(i);
-        int size2 = MeasureSpec.getSize(i2);
-        int mode = MeasureSpec.getMode(i);
-        int mode2 = MeasureSpec.getMode(i2);
+        int size = View.MeasureSpec.getSize(i);
+        int size2 = View.MeasureSpec.getSize(i2);
+        int mode = View.MeasureSpec.getMode(i);
+        int mode2 = View.MeasureSpec.getMode(i2);
         int dp2px = dp2px(54.0f) + this.mTextOnWidth + this.mTextOffWidth + getPaddingLeft() + getPaddingRight();
         int dp2px2 = dp2px(28.0f) + getPaddingTop() + getPaddingBottom();
         if (mode != Integer.MIN_VALUE) {
@@ -407,7 +399,7 @@ public class ToggleSwitch extends CompoundButton implements Checkable {
     }
 
     public void toggle() {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if (cameraAction == null || !cameraAction.isDoingAction()) {
             setChecked(!this.mChecked);
         }

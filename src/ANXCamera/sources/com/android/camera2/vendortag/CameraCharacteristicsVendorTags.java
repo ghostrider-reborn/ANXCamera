@@ -1,7 +1,7 @@
 package com.android.camera2.vendortag;
 
 import android.graphics.Rect;
-import android.hardware.camera2.CameraCharacteristics.Key;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.util.Log;
 import com.android.camera2.vendortag.struct.SlowMotionVideoConfiguration;
@@ -11,30 +11,30 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 public class CameraCharacteristicsVendorTags {
-    public static final VendorTag<Key<Boolean>> ADAPTIVE_SNAPSHOT_SIZE_IN_SAT_MODE_SUPPORTED = create(C0074t.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<int[]>> AI_SCENE_AVAILABLE_MODES = create(C0036g.INSTANCE, int[].class);
-    public static final VendorTag<Key<Boolean>> BEAUTY_MAKEUP = create(C0030e.INSTANCE, Boolean.class);
-    public static final VendorTag<Key<Byte>> BEAUTY_VERSION = create(C0054m.INSTANCE, Byte.class);
-    public static final VendorTag<Key<byte[]>> CAM_CALIBRATION_DATA = create(C0080v.INSTANCE, byte[].class);
-    public static final VendorTag<Key<int[]>> CUSTOM_HFR_FPS_TABLE = create(C0039h.INSTANCE, int[].class);
-    public static final VendorTag<Key<Byte>> EIS_PREVIEW_SUPPORTED = create(C0057n.INSTANCE, Byte.class);
-    public static final VendorTag<Key<int[]>> EXTRA_HIGH_SPEED_VIDEO_CONFIGURATIONS = create(C0021b.INSTANCE, int[].class);
-    public static final VendorTag<Key<Integer>> EXTRA_HIGH_SPEED_VIDEO_NUMBER = create(C0018a.INSTANCE, Integer.class);
-    public static final VendorTag<Key<Byte>> FOVC_SUPPORTED = create(C0066q.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Byte>> IS_QCFA_SENSOR = create(C0060o.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Byte>> MFNR_BOKEH_SUPPORTED = create(C0042i.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Float>> MI_ALGO_ASD_VERSION = create(C0024c.INSTANCE, Float.class);
-    public static final VendorTag<Key<Rect>> QCFA_ACTIVE_ARRAY_SIZE = create(C0027d.INSTANCE, Rect.class);
-    public static final VendorTag<Key<StreamConfiguration[]>> QCFA_STREAM_CONFIGURATIONS = create(C0063p.INSTANCE, StreamConfiguration[].class);
-    public static final VendorTag<Key<StreamConfiguration[]>> SCALER_AVAILABLE_LIMIT_STREAM_CONFIGURATIONS = create(C0045j.INSTANCE, StreamConfiguration[].class);
-    public static final VendorTag<Key<StreamConfiguration[]>> SCALER_AVAILABLE_SR_STREAM_CONFIGURATIONS = create(r.INSTANCE, StreamConfiguration[].class);
-    public static final VendorTag<Key<StreamConfiguration[]>> SCALER_AVAILABLE_STREAM_CONFIGURATIONS = create(C0033f.INSTANCE, StreamConfiguration[].class);
-    public static final VendorTag<Key<Integer>> SCREEN_LIGHT_BRIGHTNESS = create(C0077u.INSTANCE, Integer.class);
-    public static final VendorTag<Key<SlowMotionVideoConfiguration[]>> SLOW_MOTION_VIDEO_CONFIGURATIONS = create(C0071s.INSTANCE, SlowMotionVideoConfiguration[].class);
+    public static final VendorTag<CameraCharacteristics.Key<Boolean>> ADAPTIVE_SNAPSHOT_SIZE_IN_SAT_MODE_SUPPORTED = create(C0074t.INSTANCE, Boolean.class);
+    public static final VendorTag<CameraCharacteristics.Key<int[]>> AI_SCENE_AVAILABLE_MODES = create(C0036g.INSTANCE, int[].class);
+    public static final VendorTag<CameraCharacteristics.Key<Boolean>> BEAUTY_MAKEUP = create(C0030e.INSTANCE, Boolean.class);
+    public static final VendorTag<CameraCharacteristics.Key<Byte>> BEAUTY_VERSION = create(C0054m.INSTANCE, Byte.class);
+    public static final VendorTag<CameraCharacteristics.Key<byte[]>> CAM_CALIBRATION_DATA = create(C0080v.INSTANCE, byte[].class);
+    public static final VendorTag<CameraCharacteristics.Key<int[]>> CUSTOM_HFR_FPS_TABLE = create(C0039h.INSTANCE, int[].class);
+    public static final VendorTag<CameraCharacteristics.Key<Byte>> EIS_PREVIEW_SUPPORTED = create(C0057n.INSTANCE, Byte.class);
+    public static final VendorTag<CameraCharacteristics.Key<int[]>> EXTRA_HIGH_SPEED_VIDEO_CONFIGURATIONS = create(C0021b.INSTANCE, int[].class);
+    public static final VendorTag<CameraCharacteristics.Key<Integer>> EXTRA_HIGH_SPEED_VIDEO_NUMBER = create(C0018a.INSTANCE, Integer.class);
+    public static final VendorTag<CameraCharacteristics.Key<Byte>> FOVC_SUPPORTED = create(C0066q.INSTANCE, Byte.class);
+    public static final VendorTag<CameraCharacteristics.Key<Byte>> IS_QCFA_SENSOR = create(C0060o.INSTANCE, Byte.class);
+    public static final VendorTag<CameraCharacteristics.Key<Byte>> MFNR_BOKEH_SUPPORTED = create(C0042i.INSTANCE, Byte.class);
+    public static final VendorTag<CameraCharacteristics.Key<Float>> MI_ALGO_ASD_VERSION = create(C0024c.INSTANCE, Float.class);
+    public static final VendorTag<CameraCharacteristics.Key<Rect>> QCFA_ACTIVE_ARRAY_SIZE = create(C0027d.INSTANCE, Rect.class);
+    public static final VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>> QCFA_STREAM_CONFIGURATIONS = create(C0063p.INSTANCE, StreamConfiguration[].class);
+    public static final VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>> SCALER_AVAILABLE_LIMIT_STREAM_CONFIGURATIONS = create(C0045j.INSTANCE, StreamConfiguration[].class);
+    public static final VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>> SCALER_AVAILABLE_SR_STREAM_CONFIGURATIONS = create(r.INSTANCE, StreamConfiguration[].class);
+    public static final VendorTag<CameraCharacteristics.Key<StreamConfiguration[]>> SCALER_AVAILABLE_STREAM_CONFIGURATIONS = create(C0033f.INSTANCE, StreamConfiguration[].class);
+    public static final VendorTag<CameraCharacteristics.Key<Integer>> SCREEN_LIGHT_BRIGHTNESS = create(C0077u.INSTANCE, Integer.class);
+    public static final VendorTag<CameraCharacteristics.Key<SlowMotionVideoConfiguration[]>> SLOW_MOTION_VIDEO_CONFIGURATIONS = create(C0071s.INSTANCE, SlowMotionVideoConfiguration[].class);
     private static final String TAG = "CameraCharacteristicsVendorTags";
-    public static final VendorTag<Key<Byte>> TELE_OIS_SUPPORTED = create(C0048k.INSTANCE, Byte.class);
-    public static final VendorTag<Key<Boolean>> VIDEO_BEAUTY = create(C0051l.INSTANCE, Boolean.class);
-    private static Constructor<Key> characteristicsConstructor;
+    public static final VendorTag<CameraCharacteristics.Key<Byte>> TELE_OIS_SUPPORTED = create(C0048k.INSTANCE, Byte.class);
+    public static final VendorTag<CameraCharacteristics.Key<Boolean>> VIDEO_BEAUTY = create(C0051l.INSTANCE, Boolean.class);
+    private static Constructor<CameraCharacteristics.Key> characteristicsConstructor;
 
     static /* synthetic */ String Dd() {
         return b.isMTKPlatform() ? "com.xiaomi.ai.asd.availableSceneMode" : "xiaomi.ai.asd.availableSceneMode";
@@ -125,26 +125,23 @@ public class CameraCharacteristicsVendorTags {
     }
 
     /* access modifiers changed from: private */
-    public static <T> Key<T> characteristicsKey(String str, Class<T> cls) {
+    public static <T> CameraCharacteristics.Key<T> characteristicsKey(String str, Class<T> cls) {
         try {
             if (characteristicsConstructor == null) {
-                characteristicsConstructor = Key.class.getConstructor(new Class[]{String.class, cls.getClass()});
+                characteristicsConstructor = CameraCharacteristics.Key.class.getConstructor(new Class[]{String.class, cls.getClass()});
                 characteristicsConstructor.setAccessible(true);
             }
-            return (Key) characteristicsConstructor.newInstance(new Object[]{str, cls});
+            return characteristicsConstructor.newInstance(new Object[]{str, cls});
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cannot find/call Key constructor: ");
-            sb.append(e2.getMessage());
-            Log.d(TAG, sb.toString());
+            Log.d(TAG, "Cannot find/call Key constructor: " + e2.getMessage());
             return null;
         }
     }
 
-    private static <T> VendorTag<Key<T>> create(final Supplier<String> supplier, final Class<T> cls) {
-        return new VendorTag<Key<T>>() {
+    private static <T> VendorTag<CameraCharacteristics.Key<T>> create(final Supplier<String> supplier, final Class<T> cls) {
+        return new VendorTag<CameraCharacteristics.Key<T>>() {
             /* access modifiers changed from: protected */
-            public Key<T> create() {
+            public CameraCharacteristics.Key<T> create() {
                 return CameraCharacteristicsVendorTags.characteristicsKey(getName(), cls);
             }
 

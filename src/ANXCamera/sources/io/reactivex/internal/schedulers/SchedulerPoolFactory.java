@@ -44,14 +44,10 @@ public final class SchedulerPoolFactory {
 
     static {
         Properties properties = System.getProperties();
-        String str = PURGE_ENABLED_KEY;
         int i = 1;
-        boolean z = properties.containsKey(str) ? Boolean.getBoolean(str) : true;
-        if (z) {
-            String str2 = PURGE_PERIOD_SECONDS_KEY;
-            if (properties.containsKey(str2)) {
-                i = Integer.getInteger(str2, 1).intValue();
-            }
+        boolean z = properties.containsKey(PURGE_ENABLED_KEY) ? Boolean.getBoolean(PURGE_ENABLED_KEY) : true;
+        if (z && properties.containsKey(PURGE_PERIOD_SECONDS_KEY)) {
+            i = Integer.getInteger(PURGE_PERIOD_SECONDS_KEY, 1).intValue();
         }
         PURGE_ENABLED = z;
         PURGE_PERIOD_SECONDS = i;
@@ -71,7 +67,7 @@ public final class SchedulerPoolFactory {
     }
 
     public static void shutdown() {
-        ScheduledExecutorService scheduledExecutorService = (ScheduledExecutorService) PURGE_THREAD.get();
+        ScheduledExecutorService scheduledExecutorService = PURGE_THREAD.get();
         if (scheduledExecutorService != null) {
             scheduledExecutorService.shutdownNow();
         }
@@ -81,7 +77,7 @@ public final class SchedulerPoolFactory {
     public static void start() {
         if (PURGE_ENABLED) {
             while (true) {
-                ScheduledExecutorService scheduledExecutorService = (ScheduledExecutorService) PURGE_THREAD.get();
+                ScheduledExecutorService scheduledExecutorService = PURGE_THREAD.get();
                 if (scheduledExecutorService == null || scheduledExecutorService.isShutdown()) {
                     ScheduledExecutorService newScheduledThreadPool = Executors.newScheduledThreadPool(1, new RxThreadFactory("RxSchedulerPurge"));
                     if (PURGE_THREAD.compareAndSet(scheduledExecutorService, newScheduledThreadPool)) {

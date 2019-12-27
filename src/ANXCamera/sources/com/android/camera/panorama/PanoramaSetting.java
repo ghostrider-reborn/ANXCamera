@@ -49,12 +49,7 @@ public class PanoramaSetting {
         jsonReader.beginObject();
         while (jsonReader.hasNext()) {
             String nextName = jsonReader.nextName();
-            StringBuilder sb = new StringBuilder();
-            sb.append("read key ");
-            sb.append(nextName);
-            String sb2 = sb.toString();
-            String str = TAG;
-            Log.d(str, sb2);
+            Log.d(TAG, "read key " + nextName);
             char c2 = 65535;
             try {
                 switch (nextName.hashCode()) {
@@ -200,10 +195,7 @@ public class PanoramaSetting {
                         break;
                 }
             } catch (Exception unused) {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("parse error, name = ");
-                sb3.append(nextName);
-                Log.d(str, sb3.toString());
+                Log.d(TAG, "parse error, name = " + nextName);
             }
         }
         jsonReader.endObject();
@@ -278,38 +270,6 @@ public class PanoramaSetting {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("PanoramaSetting{aovx=");
-        sb.append(this.aovx);
-        sb.append(", aovy=");
-        sb.append(this.aovy);
-        sb.append(", shrink_ratio=");
-        sb.append(this.shrink_ratio);
-        sb.append(", calcseam_pixnum=");
-        sb.append(this.calcseam_pixnum);
-        sb.append(", use_deform=");
-        sb.append(this.use_deform);
-        sb.append(", use_luminance_correction=");
-        sb.append(this.use_luminance_correction);
-        sb.append(", seamsearch_ratio=");
-        sb.append(this.seamsearch_ratio);
-        sb.append(", zrotation_coeff=");
-        sb.append(this.zrotation_coeff);
-        sb.append(", draw_threshold=");
-        sb.append(this.draw_threshold);
-        sb.append(", aov_gain=");
-        sb.append(this.aov_gain);
-        sb.append(", distortion_k1=");
-        sb.append(this.distortion_k1);
-        sb.append(", distortion_k2=");
-        sb.append(this.distortion_k2);
-        sb.append(", distortion_k3=");
-        sb.append(this.distortion_k3);
-        sb.append(", distortion_k4=");
-        sb.append(this.distortion_k4);
-        sb.append(", rotation_ratio=");
-        sb.append(this.rotation_ratio);
-        sb.append('}');
-        return sb.toString();
+        return "PanoramaSetting{aovx=" + this.aovx + ", aovy=" + this.aovy + ", shrink_ratio=" + this.shrink_ratio + ", calcseam_pixnum=" + this.calcseam_pixnum + ", use_deform=" + this.use_deform + ", use_luminance_correction=" + this.use_luminance_correction + ", seamsearch_ratio=" + this.seamsearch_ratio + ", zrotation_coeff=" + this.zrotation_coeff + ", draw_threshold=" + this.draw_threshold + ", aov_gain=" + this.aov_gain + ", distortion_k1=" + this.distortion_k1 + ", distortion_k2=" + this.distortion_k2 + ", distortion_k3=" + this.distortion_k3 + ", distortion_k4=" + this.distortion_k4 + ", rotation_ratio=" + this.rotation_ratio + '}';
     }
 }

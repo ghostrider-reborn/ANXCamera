@@ -113,39 +113,34 @@ public class ByteBuffer {
     public String getEncoding() {
         if (this.encoding == null) {
             int i = this.length;
-            String str = "UTF-8";
             if (i < 2) {
-                this.encoding = str;
+                this.encoding = "UTF-8";
             } else {
                 byte[] bArr = this.buffer;
-                String str2 = "UTF-32";
                 if (bArr[0] == 0) {
                     if (i < 4 || bArr[1] != 0) {
                         this.encoding = Platform.UTF_16BE;
                     } else if ((bArr[2] & 255) == 254 && (bArr[3] & 255) == 255) {
                         this.encoding = "UTF-32BE";
                     } else {
-                        this.encoding = str2;
+                        this.encoding = "UTF-32";
                     }
                 } else if ((bArr[0] & 255) < 128) {
                     if (bArr[1] != 0) {
-                        this.encoding = str;
+                        this.encoding = "UTF-8";
                     } else if (i < 4 || bArr[2] != 0) {
                         this.encoding = "UTF-16LE";
                     } else {
                         this.encoding = "UTF-32LE";
                     }
                 } else if ((bArr[0] & 255) == 239) {
-                    this.encoding = str;
+                    this.encoding = "UTF-8";
+                } else if ((bArr[0] & 255) == 254) {
+                    this.encoding = "UTF-16";
+                } else if (i < 4 || bArr[2] != 0) {
+                    this.encoding = "UTF-16";
                 } else {
-                    String str3 = "UTF-16";
-                    if ((bArr[0] & 255) == 254) {
-                        this.encoding = str3;
-                    } else if (i < 4 || bArr[2] != 0) {
-                        this.encoding = str3;
-                    } else {
-                        this.encoding = str2;
-                    }
+                    this.encoding = "UTF-32";
                 }
             }
         }

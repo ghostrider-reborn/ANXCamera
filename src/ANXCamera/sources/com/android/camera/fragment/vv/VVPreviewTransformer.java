@@ -1,10 +1,10 @@
 package com.android.camera.fragment.vv;
 
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPager.PageTransformer;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 
-public class VVPreviewTransformer implements PageTransformer {
+public class VVPreviewTransformer implements ViewPager.PageTransformer {
     private static final float MAX_ALPHA = 1.0f;
     private static final float MAX_SCALE = 1.0f;
     private static final float MIN_ALPHA = 1.0f;

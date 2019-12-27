@@ -30,26 +30,26 @@ class a implements i {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onDestroy() {
         this.fk = true;
-        for (j onDestroy : l.b(this.ek)) {
+        for (T onDestroy : l.b(this.ek)) {
             onDestroy.onDestroy();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onStart() {
         this.ya = true;
-        for (j onStart : l.b(this.ek)) {
+        for (T onStart : l.b(this.ek)) {
             onStart.onStart();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onStop() {
         this.ya = false;
-        for (j onStop : l.b(this.ek)) {
+        for (T onStop : l.b(this.ek)) {
             onStop.onStop();
         }
     }

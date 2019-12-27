@@ -78,10 +78,7 @@ final class WebSocketWriter {
             this.random = random2;
             byte[] bArr = null;
             this.maskKey = z ? new byte[4] : null;
-            if (z) {
-                bArr = new byte[8192];
-            }
-            this.maskBuffer = bArr;
+            this.maskBuffer = z ? new byte[8192] : bArr;
         } else {
             throw new NullPointerException("random == null");
         }
@@ -111,7 +108,7 @@ final class WebSocketWriter {
         throw new IOException("closed");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Sink newMessageSink(int i, long j) {
         if (!this.activeWriter) {
             this.activeWriter = true;
@@ -125,7 +122,7 @@ final class WebSocketWriter {
         throw new IllegalStateException("Another message writer is active. Did you call close()?");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeClose(int i, ByteString byteString) throws IOException {
         ByteString byteString2 = ByteString.EMPTY;
         if (!(i == 0 && byteString == null)) {
@@ -146,7 +143,7 @@ final class WebSocketWriter {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeMessageFrame(int i, long j, boolean z, boolean z2) throws IOException {
         if (!this.writerClosed) {
             if (!z) {
@@ -190,12 +187,12 @@ final class WebSocketWriter {
         throw new IOException("closed");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writePing(ByteString byteString) throws IOException {
         writeControlFrame(9, byteString);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writePong(ByteString byteString) throws IOException {
         writeControlFrame(10, byteString);
     }

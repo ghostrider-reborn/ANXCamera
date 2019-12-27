@@ -30,11 +30,8 @@ public class Util {
     public static String md5(long j, long j2) {
         byte[] generate = generate(j, j2);
         String str = "";
-        for (byte b2 : generate) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(Integer.toHexString((b2 & 255) | -256).substring(6));
-            str = sb.toString();
+        for (int i = 0; i < generate.length; i++) {
+            str = str + Integer.toHexString((generate[i] & 255) | -256).substring(6);
         }
         return str;
     }

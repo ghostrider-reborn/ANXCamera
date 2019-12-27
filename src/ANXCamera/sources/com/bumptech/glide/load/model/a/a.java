@@ -22,7 +22,7 @@ public abstract class a<Model> implements t<Model, InputStream> {
     private final ModelCache<Model, l> ni;
 
     protected a(t<l, InputStream> tVar) {
-        this(tVar, null);
+        this(tVar, (ModelCache) null);
     }
 
     protected a(t<l, InputStream> tVar, @Nullable ModelCache<Model, l> modelCache) {
@@ -39,10 +39,10 @@ public abstract class a<Model> implements t<Model, InputStream> {
     }
 
     @Nullable
-    public com.bumptech.glide.load.model.t.a<InputStream> a(@NonNull Model model, int i, int i2, @NonNull g gVar) {
+    public t.a<InputStream> a(@NonNull Model model, int i, int i2, @NonNull g gVar) {
         ModelCache<Model, l> modelCache = this.ni;
-        Object obj = modelCache != null ? (l) modelCache.b(model, i, i2) : null;
-        if (obj == null) {
+        l b2 = modelCache != null ? modelCache.b(model, i, i2) : null;
+        if (b2 == null) {
             String e2 = e(model, i, i2, gVar);
             if (TextUtils.isEmpty(e2)) {
                 return null;
@@ -52,11 +52,11 @@ public abstract class a<Model> implements t<Model, InputStream> {
             if (modelCache2 != null) {
                 modelCache2.a(model, i, i2, lVar);
             }
-            obj = lVar;
+            b2 = lVar;
         }
-        List c2 = c(model, i, i2, gVar);
-        com.bumptech.glide.load.model.t.a<InputStream> a2 = this.mi.a(obj, i, i2, gVar);
-        return (a2 == null || c2.isEmpty()) ? a2 : new com.bumptech.glide.load.model.t.a<>(a2.we, c(c2), a2.bi);
+        List<String> c2 = c(model, i, i2, gVar);
+        t.a<InputStream> a2 = this.mi.a(b2, i, i2, gVar);
+        return (a2 == null || c2.isEmpty()) ? a2 : new t.a<>(a2.we, c(c2), a2.bi);
     }
 
     /* access modifiers changed from: protected */

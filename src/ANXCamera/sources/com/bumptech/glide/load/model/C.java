@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import com.bumptech.glide.load.a.j;
 import com.bumptech.glide.load.a.o;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -91,8 +92,8 @@ public class C<Data> implements t<Uri, Data> {
         this.factory = cVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<Data> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
-        return new com.bumptech.glide.load.model.t.a<>(new com.bumptech.glide.e.d(uri), this.factory.a(uri));
+    public t.a<Data> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(uri), this.factory.a(uri));
     }
 
     /* renamed from: i */

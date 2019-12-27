@@ -2,8 +2,7 @@ package com.android.camera.fragment.beauty;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView.Recycler;
-import android.support.v7.widget.RecyclerView.State;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import com.android.camera.log.Log;
 
@@ -25,14 +24,11 @@ public class LinearLayoutManagerWrapper extends LinearLayoutManager {
         this.mRecycleViewFrom = str;
     }
 
-    public void onLayoutChildren(Recycler recycler, State state) {
+    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         try {
             super.onLayoutChildren(recycler, state);
         } catch (IndexOutOfBoundsException unused) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("IndexOutOfBoundsException from bussiness:");
-            sb.append(this.mRecycleViewFrom);
-            Log.i("LinearLayoutManagerWrapper", sb.toString());
+            Log.i("LinearLayoutManagerWrapper", "IndexOutOfBoundsException from bussiness:" + this.mRecycleViewFrom);
         }
     }
 }

@@ -50,21 +50,7 @@ public class ProviderEffect {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("StickerBean{url='");
-            sb.append(this.url);
-            sb.append('\'');
-            sb.append(", width='");
-            sb.append(this.width);
-            sb.append('\'');
-            sb.append(", height='");
-            sb.append(this.height);
-            sb.append('\'');
-            sb.append(", size='");
-            sb.append(this.size);
-            sb.append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "StickerBean{url='" + this.url + '\'' + ", width='" + this.width + '\'' + ", height='" + this.height + '\'' + ", size='" + this.size + '\'' + '}';
         }
     }
 
@@ -117,21 +103,6 @@ public class ProviderEffect {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("StickerListBean{id='");
-        sb.append(this.id);
-        sb.append('\'');
-        sb.append(", title='");
-        sb.append(this.title);
-        sb.append('\'');
-        sb.append(", thumbnail_sticker=");
-        sb.append(this.thumbnail_sticker);
-        sb.append(", sticker=");
-        sb.append(this.sticker);
-        sb.append(", path='");
-        sb.append(this.path);
-        sb.append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "StickerListBean{id='" + this.id + '\'' + ", title='" + this.title + '\'' + ", thumbnail_sticker=" + this.thumbnail_sticker + ", sticker=" + this.sticker + ", path='" + this.path + '\'' + '}';
     }
 }

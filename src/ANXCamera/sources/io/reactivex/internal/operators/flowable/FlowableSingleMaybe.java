@@ -83,11 +83,11 @@ public final class FlowableSingleMaybe<T> extends Maybe<T> implements FuseToFlow
     }
 
     public Flowable<T> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableSingle<T>(this.source, null));
+        return RxJavaPlugins.onAssembly(new FlowableSingle(this.source, null));
     }
 
     /* access modifiers changed from: protected */
     public void subscribeActual(MaybeObserver<? super T> maybeObserver) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new SingleElementSubscriber<Object>(maybeObserver));
+        this.source.subscribe(new SingleElementSubscriber(maybeObserver));
     }
 }

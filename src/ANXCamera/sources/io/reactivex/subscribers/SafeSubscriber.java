@@ -43,7 +43,7 @@ public final class SafeSubscriber<T> implements FlowableSubscriber<T>, Subscript
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onCompleteNoSubscription() {
         NullPointerException nullPointerException = new NullPointerException("Subscription not set!");
         try {
@@ -117,7 +117,7 @@ public final class SafeSubscriber<T> implements FlowableSubscriber<T>, Subscript
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onNextNoSubscription() {
         this.done = true;
         NullPointerException nullPointerException = new NullPointerException("Subscription not set!");

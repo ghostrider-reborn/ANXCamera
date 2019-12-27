@@ -6,7 +6,6 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.app.AppOpsManagerCompat;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,7 +15,7 @@ public final class PermissionChecker {
     public static final int PERMISSION_DENIED_APP_OP = -2;
     public static final int PERMISSION_GRANTED = 0;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionResult {
     }

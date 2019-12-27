@@ -2,14 +2,13 @@ package android.arch.core.b;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.WeakHashMap;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 /* compiled from: SafeIterableMap */
-public class c<K, V> implements Iterable<Entry<K, V>> {
+public class c<K, V> implements Iterable<Map.Entry<K, V>> {
     private C0002c<K, V> mEnd;
     private int mSize = 0;
     /* access modifiers changed from: private */
@@ -22,12 +21,12 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
             super(cVar, cVar2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public C0002c<K, V> b(C0002c<K, V> cVar) {
             return cVar.ka;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public C0002c<K, V> c(C0002c<K, V> cVar) {
             return cVar.mNext;
         }
@@ -39,20 +38,20 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
             super(cVar, cVar2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public C0002c<K, V> b(C0002c<K, V> cVar) {
             return cVar.mNext;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public C0002c<K, V> c(C0002c<K, V> cVar) {
             return cVar.ka;
         }
     }
 
-    /* renamed from: android.arch.core.b.c$c reason: collision with other inner class name */
+    /* renamed from: android.arch.core.b.c$c  reason: collision with other inner class name */
     /* compiled from: SafeIterableMap */
-    static class C0002c<K, V> implements Entry<K, V> {
+    static class C0002c<K, V> implements Map.Entry<K, V> {
         C0002c<K, V> ka;
         @NonNull
         final K mKey;
@@ -66,7 +65,6 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         }
 
         public boolean equals(Object obj) {
-            boolean z = true;
             if (obj == this) {
                 return true;
             }
@@ -74,10 +72,7 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
                 return false;
             }
             C0002c cVar = (C0002c) obj;
-            if (!this.mKey.equals(cVar.mKey) || !this.mValue.equals(cVar.mValue)) {
-                z = false;
-            }
-            return z;
+            return this.mKey.equals(cVar.mKey) && this.mValue.equals(cVar.mValue);
         }
 
         @NonNull
@@ -99,16 +94,12 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.mKey);
-            sb.append("=");
-            sb.append(this.mValue);
-            return sb.toString();
+            return this.mKey + "=" + this.mValue;
         }
     }
 
     /* compiled from: SafeIterableMap */
-    private class d implements Iterator<Entry<K, V>>, f<K, V> {
+    private class d implements Iterator<Map.Entry<K, V>>, f<K, V> {
         private boolean la;
         private C0002c<K, V> mCurrent;
 
@@ -125,21 +116,14 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         }
 
         public boolean hasNext() {
-            boolean z = true;
             if (this.la) {
-                if (c.this.mStart == null) {
-                    z = false;
-                }
-                return z;
+                return c.this.mStart != null;
             }
             C0002c<K, V> cVar = this.mCurrent;
-            if (cVar == null || cVar.mNext == null) {
-                z = false;
-            }
-            return z;
+            return (cVar == null || cVar.mNext == null) ? false : true;
         }
 
-        public Entry<K, V> next() {
+        public Map.Entry<K, V> next() {
             if (this.la) {
                 this.la = false;
                 this.mCurrent = c.this.mStart;
@@ -152,7 +136,7 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
     }
 
     /* compiled from: SafeIterableMap */
-    private static abstract class e<K, V> implements Iterator<Entry<K, V>>, f<K, V> {
+    private static abstract class e<K, V> implements Iterator<Map.Entry<K, V>>, f<K, V> {
         C0002c<K, V> mNext;
         C0002c<K, V> ma;
 
@@ -184,17 +168,17 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract C0002c<K, V> b(C0002c<K, V> cVar);
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract C0002c<K, V> c(C0002c<K, V> cVar);
 
         public boolean hasNext() {
             return this.mNext != null;
         }
 
-        public Entry<K, V> next() {
+        public Map.Entry<K, V> next() {
             C0002c<K, V> cVar = this.mNext;
             this.mNext = nextNode();
             return cVar;
@@ -206,28 +190,27 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         void a(@NonNull C0002c<K, V> cVar);
     }
 
-    public d T() {
-        d dVar = new d<>();
-        this.na.put(dVar, Boolean.valueOf(false));
+    public c<K, V>.d T() {
+        c<K, V>.d dVar = new d();
+        this.na.put(dVar, false);
         return dVar;
     }
 
-    public Entry<K, V> U() {
+    public Map.Entry<K, V> U() {
         return this.mEnd;
     }
 
-    public Iterator<Entry<K, V>> descendingIterator() {
+    public Iterator<Map.Entry<K, V>> descendingIterator() {
         b bVar = new b(this.mEnd, this.mStart);
-        this.na.put(bVar, Boolean.valueOf(false));
+        this.na.put(bVar, false);
         return bVar;
     }
 
-    public Entry<K, V> eldest() {
+    public Map.Entry<K, V> eldest() {
         return this.mStart;
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
@@ -241,16 +224,13 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         Iterator it = iterator();
         Iterator it2 = cVar.iterator();
         while (it.hasNext() && it2.hasNext()) {
-            Entry entry = (Entry) it.next();
+            Map.Entry entry = (Map.Entry) it.next();
             Object next = it2.next();
             if ((entry == null && next != null) || (entry != null && !entry.equals(next))) {
                 return false;
             }
         }
-        if (it.hasNext() || it2.hasNext()) {
-            z = false;
-        }
-        return z;
+        return !it.hasNext() && !it2.hasNext();
     }
 
     /* access modifiers changed from: protected */
@@ -266,15 +246,15 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         Iterator it = iterator();
         int i = 0;
         while (it.hasNext()) {
-            i += ((Entry) it.next()).hashCode();
+            i += ((Map.Entry) it.next()).hashCode();
         }
         return i;
     }
 
     @NonNull
-    public Iterator<Entry<K, V>> iterator() {
+    public Iterator<Map.Entry<K, V>> iterator() {
         a aVar = new a(this.mStart, this.mEnd);
-        this.na.put(aVar, Boolean.valueOf(false));
+        this.na.put(aVar, false);
         return aVar;
     }
 
@@ -310,7 +290,7 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         }
         this.mSize--;
         if (!this.na.isEmpty()) {
-            for (f a2 : this.na.keySet()) {
+            for (f<K, V> a2 : this.na.keySet()) {
                 a2.a(cVar);
             }
         }
@@ -340,7 +320,7 @@ public class c<K, V> implements Iterable<Entry<K, V>> {
         sb.append("[");
         Iterator it = iterator();
         while (it.hasNext()) {
-            sb.append(((Entry) it.next()).toString());
+            sb.append(((Map.Entry) it.next()).toString());
             if (it.hasNext()) {
                 sb.append(", ");
             }

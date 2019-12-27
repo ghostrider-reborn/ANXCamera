@@ -2,10 +2,8 @@ package com.android.camera.fragment.mimoji;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -40,7 +38,7 @@ public class CircleImageView extends ImageView {
     }
 
     private Bitmap getCircleBitmap(Bitmap bitmap) {
-        Bitmap createBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(createBitmap);
         Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
         canvas.drawCircle((float) (bitmap.getWidth() / 2), (float) (bitmap.getHeight() / 2), (float) (bitmap.getHeight() / 2), this.mPaintInner);
@@ -52,10 +50,10 @@ public class CircleImageView extends ImageView {
         this.mPaintInner = new Paint();
         this.mPaintOutter = new Paint();
         this.mPaintInner.setAntiAlias(true);
-        this.mPaintInner.setStyle(Style.FILL);
+        this.mPaintInner.setStyle(Paint.Style.FILL);
         this.mPaintOutter.setAntiAlias(true);
         this.mPaintOutter.setStrokeWidth(6.0f);
-        this.mPaintOutter.setStyle(Style.STROKE);
+        this.mPaintOutter.setStyle(Paint.Style.STROKE);
     }
 
     public void draw(Canvas canvas) {

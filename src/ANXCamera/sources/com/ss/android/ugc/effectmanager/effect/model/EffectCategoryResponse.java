@@ -140,20 +140,6 @@ public class EffectCategoryResponse {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("EffectCategoryResponse{id='");
-        sb.append(this.id);
-        sb.append('\'');
-        sb.append(", name='");
-        sb.append(this.name);
-        sb.append('\'');
-        sb.append(", key='");
-        sb.append(this.key);
-        sb.append('\'');
-        sb.append(", collection='");
-        sb.append(this.collectionEffect);
-        sb.append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "EffectCategoryResponse{id='" + this.id + '\'' + ", name='" + this.name + '\'' + ", key='" + this.key + '\'' + ", collection='" + this.collectionEffect + '\'' + '}';
     }
 }

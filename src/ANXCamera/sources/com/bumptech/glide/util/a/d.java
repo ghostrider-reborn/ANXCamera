@@ -1,9 +1,7 @@
 package com.bumptech.glide.util.a;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pools.Pool;
-import android.support.v4.util.Pools.SimplePool;
-import android.support.v4.util.Pools.SynchronizedPool;
+import android.support.v4.util.Pools;
 import android.util.Log;
 import java.util.List;
 
@@ -19,12 +17,12 @@ public final class d {
     }
 
     /* compiled from: FactoryPools */
-    private static final class b<T> implements Pool<T> {
+    private static final class b<T> implements Pools.Pool<T> {
         private final a<T> factory;
         private final C0014d<T> fm;
-        private final Pool<T> pool;
+        private final Pools.Pool<T> pool;
 
-        b(@NonNull Pool<T> pool2, @NonNull a<T> aVar, @NonNull C0014d<T> dVar) {
+        b(@NonNull Pools.Pool<T> pool2, @NonNull a<T> aVar, @NonNull C0014d<T> dVar) {
             this.pool = pool2;
             this.factory = aVar;
             this.fm = dVar;
@@ -34,12 +32,8 @@ public final class d {
             T acquire = this.pool.acquire();
             if (acquire == null) {
                 acquire = this.factory.create();
-                String str = d.TAG;
-                if (Log.isLoggable(str, 2)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Created new ");
-                    sb.append(acquire.getClass());
-                    Log.v(str, sb.toString());
+                if (Log.isLoggable(d.TAG, 2)) {
+                    Log.v(d.TAG, "Created new " + acquire.getClass());
                 }
             }
             if (acquire instanceof c) {
@@ -63,7 +57,7 @@ public final class d {
         g getVerifier();
     }
 
-    /* renamed from: com.bumptech.glide.util.a.d$d reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.util.a.d$d  reason: collision with other inner class name */
     /* compiled from: FactoryPools */
     public interface C0014d<T> {
         void reset(@NonNull T t);
@@ -73,33 +67,33 @@ public final class d {
     }
 
     @NonNull
-    public static <T> Pool<List<T>> I(int i) {
-        return a(new SynchronizedPool(i), new b(), new c());
+    public static <T> Pools.Pool<List<T>> I(int i) {
+        return a(new Pools.SynchronizedPool(i), new b(), new c());
     }
 
     @NonNull
-    public static <T> Pool<List<T>> Lh() {
+    public static <T> Pools.Pool<List<T>> Lh() {
         return I(20);
     }
 
     @NonNull
-    public static <T extends c> Pool<T> a(int i, @NonNull a<T> aVar) {
-        return a((Pool<T>) new SimplePool<T>(i), aVar);
+    public static <T extends c> Pools.Pool<T> a(int i, @NonNull a<T> aVar) {
+        return a(new Pools.SimplePool(i), aVar);
     }
 
     @NonNull
-    private static <T extends c> Pool<T> a(@NonNull Pool<T> pool, @NonNull a<T> aVar) {
+    private static <T extends c> Pools.Pool<T> a(@NonNull Pools.Pool<T> pool, @NonNull a<T> aVar) {
         return a(pool, aVar, el());
     }
 
     @NonNull
-    private static <T> Pool<T> a(@NonNull Pool<T> pool, @NonNull a<T> aVar, @NonNull C0014d<T> dVar) {
+    private static <T> Pools.Pool<T> a(@NonNull Pools.Pool<T> pool, @NonNull a<T> aVar, @NonNull C0014d<T> dVar) {
         return new b(pool, aVar, dVar);
     }
 
     @NonNull
-    public static <T extends c> Pool<T> b(int i, @NonNull a<T> aVar) {
-        return a((Pool<T>) new SynchronizedPool<T>(i), aVar);
+    public static <T extends c> Pools.Pool<T> b(int i, @NonNull a<T> aVar) {
+        return a(new Pools.SynchronizedPool(i), aVar);
     }
 
     @NonNull

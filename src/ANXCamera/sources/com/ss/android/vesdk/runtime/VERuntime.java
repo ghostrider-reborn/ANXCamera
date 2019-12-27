@@ -12,12 +12,11 @@ import com.ss.android.ttve.common.TEDefine;
 import com.ss.android.ttve.monitor.DeviceInfoDetector;
 import com.ss.android.ttve.monitor.IMonitor;
 import com.ss.android.ttve.monitor.MonitorUtils;
-import com.ss.android.ttve.monitor.MonitorUtils.IMonitorStatisticsListener;
 import com.ss.android.ttve.monitor.TEMonitor;
 import com.ss.android.ttve.nativePort.TENativeLibsLoader;
 import com.ss.android.vesdk.TEEffectCallback;
 import com.ss.android.vesdk.VEAB;
-import com.ss.android.vesdk.VEListener.VEMonitorListener;
+import com.ss.android.vesdk.VEListener;
 import com.ss.android.vesdk.VELogUtil;
 import com.ss.android.vesdk.VEResult;
 import com.ss.android.vesdk.VEVideoEncodeSettings;
@@ -46,7 +45,7 @@ public class VERuntime {
     public boolean mUseCloudConfig;
     private boolean mUseResourceFinder;
     /* access modifiers changed from: private */
-    public WeakReference<VEMonitorListener> mVEMonitorListener;
+    public WeakReference<VEListener.VEMonitorListener> mVEMonitorListener;
 
     private enum VERuntimeSingleton {
         INSTANCE;
@@ -67,11 +66,11 @@ public class VERuntime {
         this.mMoniter = new IMonitor() {
             public void monitorLog(String str, JSONObject jSONObject) {
                 if (VERuntime.this.mVEMonitorListener != null && VERuntime.this.mVEMonitorListener.get() != null) {
-                    ((VEMonitorListener) VERuntime.this.mVEMonitorListener.get()).monitorLog(str, jSONObject);
+                    ((VEListener.VEMonitorListener) VERuntime.this.mVEMonitorListener.get()).monitorLog(str, jSONObject);
                 }
             }
         };
-        MonitorUtils.setExternalMonitorListener(new IMonitorStatisticsListener() {
+        MonitorUtils.setExternalMonitorListener(new MonitorUtils.IMonitorStatisticsListener() {
             public void onMonitorStatistics(String str, int i, String str2) {
                 if (VERuntime.this.mExternalMonitorListenerRef != null) {
                     VEExternalMonitorListener vEExternalMonitorListener = (VEExternalMonitorListener) VERuntime.this.mExternalMonitorListenerRef.get();
@@ -99,22 +98,20 @@ public class VERuntime {
     private void initConfig() {
         new Thread() {
             public void run() {
-                String str = VESP.KEY_SENSOR_REPORTED;
-                String str2 = VERuntime.TAG;
                 try {
                     DeviceInfoDetector.init(VERuntime.this.mContext);
-                    if (!((Boolean) VESP.getInstance().get(str, Boolean.valueOf(false))).booleanValue()) {
+                    if (!((Boolean) VESP.getInstance().get(VESP.KEY_SENSOR_REPORTED, false)).booleanValue()) {
                         MonitorUtils.sensorReport(VERuntime.this.mContext);
-                        VESP.getInstance().put(str, Boolean.valueOf(true));
+                        VESP.getInstance().put(VESP.KEY_SENSOR_REPORTED, true);
                     }
                 } catch (Exception e2) {
-                    Log.e(str2, "DeviceInfoDetector init failed", e2);
+                    Log.e(VERuntime.TAG, "DeviceInfoDetector init failed", e2);
                 }
                 if (VERuntime.this.mUseCloudConfig) {
                     try {
                         PerformanceConfig.restoreFromCache();
                     } catch (Exception e3) {
-                        Log.e(str2, "PerformanceConfig restoreFromCache failed", e3);
+                        Log.e(VERuntime.TAG, "PerformanceConfig restoreFromCache failed", e3);
                     }
                     PerformanceConfig.fetch();
                 }
@@ -124,10 +121,7 @@ public class VERuntime {
 
     public static boolean isValidAuthorization() {
         boolean isPermitted = TEOAuth.isPermitted();
-        StringBuilder sb = new StringBuilder();
-        sb.append("FAILED. TEOAuth isPermitted = ");
-        sb.append(isPermitted);
-        VELogUtil.e(TEOAuth.class, sb.toString());
+        VELogUtil.e((Class<?>) TEOAuth.class, "FAILED. TEOAuth isPermitted = " + isPermitted);
         return isPermitted;
     }
 
@@ -170,16 +164,14 @@ public class VERuntime {
     }
 
     public AssetManager getAssetManager() {
-        boolean z = this.mUseAssetManager;
-        String str = TAG;
-        if (!z) {
-            VELogUtil.e(str, "disable use AssetManager!");
+        if (!this.mUseAssetManager) {
+            VELogUtil.e(TAG, "disable use AssetManager!");
         }
         Context context = this.mContext;
         if (context != null) {
             return context.getAssets();
         }
-        VELogUtil.e(str, "context is null!");
+        VELogUtil.e(TAG, "context is null!");
         return null;
     }
 
@@ -247,13 +239,11 @@ public class VERuntime {
         if (vEEnv == null || TextUtils.isEmpty(vEEnv.getWorkspace())) {
             return VEResult.TER_INVALID_ENV;
         }
-        boolean z = this.mUseResourceFinder;
-        String str = TAG;
-        if (z) {
-            VELogUtil.w(str, "Use resource finder. Do not need update effect model files!");
+        if (this.mUseResourceFinder) {
+            VELogUtil.w(TAG, "Use resource finder. Do not need update effect model files!");
             return -1;
         } else if (this.mUseAssetManager) {
-            VELogUtil.w(str, "Enable assetManager. Do not need update effect model files!");
+            VELogUtil.w(TAG, "Enable assetManager. Do not need update effect model files!");
             return -1;
         } else if (EffectSDKUtils.needUpdate(this.mContext, this.mEnv.getEffectModelResourceDirPath())) {
             return 0;
@@ -263,7 +253,7 @@ public class VERuntime {
         }
     }
 
-    public void registerMonitor(VEMonitorListener vEMonitorListener) {
+    public void registerMonitor(VEListener.VEMonitorListener vEMonitorListener) {
         this.mVEMonitorListener = new WeakReference<>(vEMonitorListener);
         TEMonitor.register(this.mMoniter);
     }
@@ -275,17 +265,17 @@ public class VERuntime {
     public boolean setAssetManagerEnable(boolean z) {
         this.mUseAssetManager = z;
         VideoSdkCore.setEnableAssetManager(z);
-        if (this.mUseAssetManager) {
-            Context context = this.mContext;
-            if (context != null) {
-                VEEffectConfig.enableAssetManager(context.getAssets());
-                VEEffectConfig.configEffect(null, "nexus");
-            } else {
-                VELogUtil.d(TAG, "mContext is null!!! need init");
-                return false;
-            }
+        if (!this.mUseAssetManager) {
+            return true;
         }
-        return true;
+        Context context = this.mContext;
+        if (context != null) {
+            VEEffectConfig.enableAssetManager(context.getAssets());
+            VEEffectConfig.configEffect((String) null, "nexus");
+            return true;
+        }
+        VELogUtil.d(TAG, "mContext is null!!! need init");
+        return false;
     }
 
     public void setCloudConfigEnable(boolean z) {
@@ -339,16 +329,15 @@ public class VERuntime {
         if (!file.exists()) {
             file.mkdirs();
         }
-        int i = 0;
         try {
             String absolutePath = file.getAbsolutePath();
             EffectSDKUtils.flushAlgorithmModelFiles(this.mContext, absolutePath);
             this.mEnv.setDetectModelsDir(absolutePath);
             VEEffectConfig.configEffect(absolutePath, "nexus");
+            return 0;
         } catch (Throwable unused) {
-            i = -1;
+            return -1;
         }
-        return i;
     }
 
     public void updateVideoEncodeSettings(VEVideoEncodeSettings vEVideoEncodeSettings) {

@@ -23,7 +23,7 @@ public abstract class DisposableCompletableObserver implements CompletableObserv
     }
 
     public final void onSubscribe(@NonNull Disposable disposable) {
-        if (EndConsumerHelper.setOnce(this.s, disposable, DisposableCompletableObserver.class)) {
+        if (EndConsumerHelper.setOnce(this.s, disposable, (Class<?>) DisposableCompletableObserver.class)) {
             onStart();
         }
     }

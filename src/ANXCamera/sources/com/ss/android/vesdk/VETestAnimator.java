@@ -2,10 +2,7 @@ package com.ss.android.vesdk;
 
 public class VETestAnimator implements VEStickerAnimator {
     public float getDegree(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("timestamp: ");
-        sb.append(i);
-        VELogUtil.d("VETestAnimator", sb.toString());
+        VELogUtil.d("VETestAnimator", "timestamp: " + i);
         return (((float) i) / 1000.0f) * 36.0f;
     }
 

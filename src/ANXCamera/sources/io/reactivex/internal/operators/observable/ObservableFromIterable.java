@@ -65,7 +65,7 @@ public final class ObservableFromIterable<T> extends Observable<T> {
             return 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             while (!isDisposed()) {
                 try {
@@ -77,6 +77,7 @@ public final class ObservableFromIterable<T> extends Observable<T> {
                             if (!this.it.hasNext()) {
                                 if (!isDisposed()) {
                                     this.actual.onComplete();
+                                    return;
                                 }
                                 return;
                             }
@@ -103,10 +104,10 @@ public final class ObservableFromIterable<T> extends Observable<T> {
 
     public void subscribeActual(Observer<? super T> observer) {
         try {
-            Iterator it = this.source.iterator();
+            Iterator<? extends T> it = this.source.iterator();
             try {
                 if (!it.hasNext()) {
-                    EmptyDisposable.complete(observer);
+                    EmptyDisposable.complete((Observer<?>) observer);
                     return;
                 }
                 FromIterableDisposable fromIterableDisposable = new FromIterableDisposable(observer, it);
@@ -116,11 +117,11 @@ public final class ObservableFromIterable<T> extends Observable<T> {
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, observer);
+                EmptyDisposable.error(th, (Observer<?>) observer);
             }
         } catch (Throwable th2) {
             Exceptions.throwIfFatal(th2);
-            EmptyDisposable.error(th2, observer);
+            EmptyDisposable.error(th2, (Observer<?>) observer);
         }
     }
 }

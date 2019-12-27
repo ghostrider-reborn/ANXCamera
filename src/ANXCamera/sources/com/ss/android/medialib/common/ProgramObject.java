@@ -103,9 +103,8 @@ public class ProgramObject {
         if (i == 0) {
             i = GLES20.glCreateProgram();
         }
-        String str3 = TAG;
         if (i == 0) {
-            VELogUtil.e(str3, "Invalid Program ID! Check if the context is binded!");
+            VELogUtil.e(TAG, "Invalid Program ID! Check if the context is binded!");
         }
         ShaderObject shaderObject = this.mVertexShader;
         if (shaderObject != null) {
@@ -128,7 +127,7 @@ public class ProgramObject {
         this.mVertexShader = null;
         this.mFragmentShader = null;
         if (iArr[0] != 1) {
-            VELogUtil.e(str3, GLES20.glGetProgramInfoLog(i));
+            VELogUtil.e(TAG, GLES20.glGetProgramInfoLog(i));
             return false;
         }
         int i2 = this.mProgramID;

@@ -1,10 +1,7 @@
 package com.arcsoft.avatar.util;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.support.annotation.NonNull;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,7 +11,7 @@ import java.nio.ByteOrder;
 
 public class AsvloffscreenUtil {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     static String f128a = "AsvloffscreenUtil";
 
     public static ASVLOFFSCREEN buildNV21(Image image) {
@@ -23,13 +20,13 @@ public class AsvloffscreenUtil {
         }
         int width = image.getWidth();
         int height = image.getHeight();
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         if (planes.length < 3) {
             return null;
         }
-        Plane plane = planes[0];
-        Plane plane2 = planes[1];
-        Plane plane3 = planes[2];
+        Image.Plane plane = planes[0];
+        Image.Plane plane2 = planes[1];
+        Image.Plane plane3 = planes[2];
         int rowStride = plane.getRowStride();
         int height2 = image.getHeight();
         ByteBuffer buffer = planes[0].getBuffer();
@@ -57,13 +54,13 @@ public class AsvloffscreenUtil {
         }
         int width = image.getWidth();
         int height = image.getHeight();
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         if (planes.length < 3) {
             return null;
         }
-        Plane plane = planes[0];
-        Plane plane2 = planes[1];
-        Plane plane3 = planes[2];
+        Image.Plane plane = planes[0];
+        Image.Plane plane2 = planes[1];
+        Image.Plane plane3 = planes[2];
         int rowStride = plane.getRowStride();
         int height2 = image.getHeight();
         ByteBuffer buffer = planes[0].getBuffer();
@@ -95,19 +92,20 @@ public class AsvloffscreenUtil {
             return 2;
         }
         ByteBuffer wrap = ByteBuffer.wrap(asvloffscreen.getRGBA8888());
-        Bitmap createBitmap = Bitmap.createBitmap(asvloffscreen.getWidth(), asvloffscreen.getHeight(), Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(asvloffscreen.getWidth(), asvloffscreen.getHeight(), Bitmap.Config.ARGB_8888);
         createBitmap.copyPixelsFromBuffer(wrap);
         FileOutputStream fileOutputStream = null;
         try {
             FileOutputStream fileOutputStream2 = new FileOutputStream(file);
             try {
-                createBitmap.compress(CompressFormat.JPEG, 90, fileOutputStream2);
+                createBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fileOutputStream2);
                 try {
                     fileOutputStream2.close();
+                    return 0;
                 } catch (IOException e2) {
                     e2.printStackTrace();
+                    return 0;
                 }
-                return 0;
             } catch (IOException e3) {
                 e = e3;
                 fileOutputStream = fileOutputStream2;

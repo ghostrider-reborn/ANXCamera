@@ -1,12 +1,12 @@
 package com.bumptech.glide.util.a;
 
 import android.support.annotation.NonNull;
-import com.bumptech.glide.util.a.d.a;
+import com.bumptech.glide.util.a.d;
 import java.util.ArrayList;
 import java.util.List;
 
 /* compiled from: FactoryPools */
-class b implements a<List<T>> {
+class b implements d.a<List<T>> {
     b() {
     }
 

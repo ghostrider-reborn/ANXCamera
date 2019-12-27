@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.g;
+import com.bumptech.glide.load.model.t;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,7 +30,7 @@ public class D<Data> implements t<Uri, Data> {
         this.li = tVar;
     }
 
-    public com.bumptech.glide.load.model.t.a<Data> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
+    public t.a<Data> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
         return this.li.a(new l(uri.toString()), i, i2, gVar);
     }
 

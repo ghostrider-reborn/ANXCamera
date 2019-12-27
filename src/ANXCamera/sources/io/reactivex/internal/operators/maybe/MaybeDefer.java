@@ -23,7 +23,7 @@ public final class MaybeDefer<T> extends Maybe<T> {
             ((MaybeSource) call).subscribe(maybeObserver);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, maybeObserver);
+            EmptyDisposable.error(th, (MaybeObserver<?>) maybeObserver);
         }
     }
 }

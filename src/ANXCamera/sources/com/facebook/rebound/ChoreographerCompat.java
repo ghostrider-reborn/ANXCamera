@@ -1,29 +1,29 @@
 package com.facebook.rebound;
 
 import android.annotation.TargetApi;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Choreographer;
 
 public class ChoreographerCompat {
-    private static final boolean IS_JELLYBEAN_OR_HIGHER = (VERSION.SDK_INT >= 16);
+    private static final boolean IS_JELLYBEAN_OR_HIGHER = (Build.VERSION.SDK_INT >= 16);
     private static final long ONE_FRAME_MILLIS = 17;
     private static ChoreographerCompat __instance = new ChoreographerCompat();
     private Choreographer mChoreographer;
     private Handler mHandler;
 
     public static abstract class FrameCallback {
-        private android.view.Choreographer.FrameCallback mFrameCallback;
+        private Choreographer.FrameCallback mFrameCallback;
         private Runnable mRunnable;
 
         public abstract void doFrame(long j);
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @TargetApi(16)
-        public android.view.Choreographer.FrameCallback getFrameCallback() {
+        public Choreographer.FrameCallback getFrameCallback() {
             if (this.mFrameCallback == null) {
-                this.mFrameCallback = new android.view.Choreographer.FrameCallback() {
+                this.mFrameCallback = new Choreographer.FrameCallback() {
                     public void doFrame(long j) {
                         FrameCallback.this.doFrame(j);
                     }
@@ -32,7 +32,7 @@ public class ChoreographerCompat {
             return this.mFrameCallback;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Runnable getRunnable() {
             if (this.mRunnable == null) {
                 this.mRunnable = new Runnable() {
@@ -54,17 +54,17 @@ public class ChoreographerCompat {
     }
 
     @TargetApi(16)
-    private void choreographerPostFrameCallback(android.view.Choreographer.FrameCallback frameCallback) {
+    private void choreographerPostFrameCallback(Choreographer.FrameCallback frameCallback) {
         this.mChoreographer.postFrameCallback(frameCallback);
     }
 
     @TargetApi(16)
-    private void choreographerPostFrameCallbackDelayed(android.view.Choreographer.FrameCallback frameCallback, long j) {
+    private void choreographerPostFrameCallbackDelayed(Choreographer.FrameCallback frameCallback, long j) {
         this.mChoreographer.postFrameCallbackDelayed(frameCallback, j);
     }
 
     @TargetApi(16)
-    private void choreographerRemoveFrameCallback(android.view.Choreographer.FrameCallback frameCallback) {
+    private void choreographerRemoveFrameCallback(Choreographer.FrameCallback frameCallback) {
         this.mChoreographer.removeFrameCallback(frameCallback);
     }
 

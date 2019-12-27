@@ -5,7 +5,6 @@ import android.graphics.YuvImage;
 import com.android.camera.log.Log;
 import com.android.camera.storage.Storage;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -23,18 +22,14 @@ public class ImageHelper {
         try {
             byteArrayOutputStream = new ByteArrayOutputStream();
             try {
-                compressYuv(bArr, i, i2, null, i3, byteArrayOutputStream);
+                compressYuv(bArr, i, i2, (int[]) null, i3, byteArrayOutputStream);
                 byte[] byteArray = byteArrayOutputStream.toByteArray();
                 Util.closeSafely(byteArrayOutputStream);
                 return byteArray;
             } catch (Exception e2) {
                 e = e2;
-                String str = TAG;
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("encodeNv21 error, ");
-                    sb.append(e.getMessage());
-                    Log.w(str, sb.toString());
+                    Log.w(TAG, "encodeNv21 error, " + e.getMessage());
                     Util.closeSafely(byteArrayOutputStream);
                     return null;
                 } catch (Throwable th) {
@@ -46,11 +41,7 @@ public class ImageHelper {
         } catch (Exception e3) {
             e = e3;
             byteArrayOutputStream = null;
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("encodeNv21 error, ");
-            sb2.append(e.getMessage());
-            Log.w(str2, sb2.toString());
+            Log.w(TAG, "encodeNv21 error, " + e.getMessage());
             Util.closeSafely(byteArrayOutputStream);
             return null;
         } catch (Throwable th2) {
@@ -62,47 +53,39 @@ public class ImageHelper {
     }
 
     public static void saveYuvToJpg(byte[] bArr, int i, int i2, int[] iArr, long j) {
-        String str = TAG;
         if (bArr == null) {
-            Log.w(str, "saveYuvToJpg: null data");
+            Log.w(TAG, "saveYuvToJpg: null data");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("sdcard/DCIM/Camera/dump_");
-        sb.append(j);
-        sb.append(Storage.JPEG_SUFFIX);
-        String sb2 = sb.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("saveYuvToJpg: ");
-        sb3.append(sb2);
-        Log.v(str, sb3.toString());
-        Closeable closeable = null;
+        String str = "sdcard/DCIM/Camera/dump_" + j + Storage.JPEG_SUFFIX;
+        Log.v(TAG, "saveYuvToJpg: " + str);
+        FileOutputStream fileOutputStream = null;
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(sb2);
+            FileOutputStream fileOutputStream2 = new FileOutputStream(str);
             try {
-                compressYuv(bArr, i, i2, iArr, 100, new FileOutputStream(sb2));
-                Util.closeSafely(fileOutputStream);
+                compressYuv(bArr, i, i2, iArr, 100, new FileOutputStream(str));
+                Util.closeSafely(fileOutputStream2);
             } catch (FileNotFoundException e2) {
                 e = e2;
-                closeable = fileOutputStream;
+                fileOutputStream = fileOutputStream2;
                 try {
-                    Log.e(str, e.getMessage(), e);
-                    Util.closeSafely(closeable);
+                    Log.e(TAG, e.getMessage(), e);
+                    Util.closeSafely(fileOutputStream);
                 } catch (Throwable th) {
                     th = th;
-                    Util.closeSafely(closeable);
+                    Util.closeSafely(fileOutputStream);
                     throw th;
                 }
             } catch (Throwable th2) {
                 th = th2;
-                closeable = fileOutputStream;
-                Util.closeSafely(closeable);
+                fileOutputStream = fileOutputStream2;
+                Util.closeSafely(fileOutputStream);
                 throw th;
             }
         } catch (FileNotFoundException e3) {
             e = e3;
-            Log.e(str, e.getMessage(), e);
-            Util.closeSafely(closeable);
+            Log.e(TAG, e.getMessage(), e);
+            Util.closeSafely(fileOutputStream);
         }
     }
 }

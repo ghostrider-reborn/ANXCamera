@@ -4,6 +4,7 @@ import android.opengl.GLES20;
 import com.android.camera.log.Log;
 import com.android.gallery3d.ui.GLCanvas;
 import com.android.gallery3d.ui.RawTexture;
+import java.nio.Buffer;
 
 public class RGBTexture extends RawTexture {
     private static final String TAG = "RGBTexture";
@@ -32,15 +33,8 @@ public class RGBTexture extends RawTexture {
         GLES20.glTexParameteri(3553, 10243, 33071);
         GLES20.glTexParameterf(3553, 10241, 9729.0f);
         GLES20.glTexParameterf(3553, 10240, 9729.0f);
-        GLES20.glTexImage2D(3553, 0, 6407, getTextureWidth(), getTextureHeight(), 0, 6407, 5121, null);
-        StringBuilder sb = new StringBuilder();
-        sb.append("prepare textureSize=");
-        sb.append(getTextureWidth());
-        sb.append("x");
-        sb.append(getTextureHeight());
-        sb.append(" id=");
-        sb.append(sTextureId[0]);
-        Log.v(TAG, sb.toString());
+        GLES20.glTexImage2D(3553, 0, 6407, getTextureWidth(), getTextureHeight(), 0, 6407, 5121, (Buffer) null);
+        Log.v(TAG, "prepare textureSize=" + getTextureWidth() + "x" + getTextureHeight() + " id=" + sTextureId[0]);
         this.mId = sTextureId[0];
         this.mState = 1;
         setAssociatedCanvas(gLCanvas);

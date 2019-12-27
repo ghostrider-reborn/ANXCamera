@@ -2,11 +2,11 @@ package com.android.camera.effect.renders;
 
 import android.opengl.GLES20;
 import android.util.SparseArray;
-import com.android.camera.effect.EffectController.EffectRectAttribute;
+import com.android.camera.effect.EffectController;
 import com.android.camera.effect.FilterInfo;
 import com.android.camera.effect.FrameBuffer;
 import com.android.camera.effect.draw_mode.DrawAttribute;
-import com.android.camera.effect.renders.Render.FrameBufferCallback;
+import com.android.camera.effect.renders.Render;
 import com.android.camera.log.Log;
 import com.android.gallery3d.ui.GLCanvas;
 import java.util.ArrayList;
@@ -42,10 +42,7 @@ public class RenderGroup extends Render {
             return true;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("already added render with id ");
-        sb.append(Integer.toHexString(id));
-        Log.e(str, sb.toString(), new RuntimeException());
+        Log.e(str, "already added render with id " + Integer.toHexString(id), new RuntimeException());
         return false;
     }
 
@@ -108,32 +105,32 @@ public class RenderGroup extends Render {
     public void deleteBuffer() {
         super.deleteBuffer();
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.deleteBuffer();
+                Render next = it.next();
+                if (next != null) {
+                    next.deleteBuffer();
                 }
             }
         }
     }
 
     public void destroy() {
-        Iterator it = this.mRenders.iterator();
+        Iterator<Render> it = this.mRenders.iterator();
         while (it.hasNext()) {
-            Render render = (Render) it.next();
-            if (render != null) {
-                render.destroy();
+            Render next = it.next();
+            if (next != null) {
+                next.destroy();
             }
         }
         clearRenders();
     }
 
     public boolean draw(DrawAttribute drawAttribute) {
-        Iterator it = this.mRenders.iterator();
+        Iterator<Render> it = this.mRenders.iterator();
         while (it.hasNext()) {
-            Render render = (Render) it.next();
-            if (render != null && render.draw(drawAttribute)) {
+            Render next = it.next();
+            if (next != null && next.draw(drawAttribute)) {
                 return true;
             }
         }
@@ -151,31 +148,23 @@ public class RenderGroup extends Render {
         if (i < 0 || i >= this.mPartRenders.size()) {
             return null;
         }
-        return (Render) this.mPartRenders.get(i);
+        return this.mPartRenders.get(i);
     }
 
     public Render getRender(int i) {
         if (i < 0) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("invalid render id ");
-            sb.append(Integer.toHexString(i));
-            Log.e(str, sb.toString(), new RuntimeException());
+            Log.e(str, "invalid render id " + Integer.toHexString(i), new RuntimeException());
         }
-        return (Render) this.mRendersMap.get(i);
+        return this.mRendersMap.get(i);
     }
 
     public Render getRenderByIndex(int i) {
         if (i >= 0 && i <= this.mRenders.size() - 1) {
-            return (Render) this.mRenders.get(i);
+            return this.mRenders.get(i);
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("invalid render index: ");
-        sb.append(i);
-        sb.append(" size: ");
-        sb.append(this.mRenders.size());
-        Log.e(str, sb.toString());
+        Log.e(str, "invalid render index: " + i + " size: " + this.mRenders.size());
         return null;
     }
 
@@ -207,25 +196,25 @@ public class RenderGroup extends Render {
         }
     }
 
-    public void setEffectRangeAttribute(EffectRectAttribute effectRectAttribute) {
+    public void setEffectRangeAttribute(EffectController.EffectRectAttribute effectRectAttribute) {
         super.setEffectRangeAttribute(effectRectAttribute);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setEffectRangeAttribute(effectRectAttribute);
+                Render next = it.next();
+                if (next != null) {
+                    next.setEffectRangeAttribute(effectRectAttribute);
                 }
             }
         }
     }
 
-    public void setFrameBufferCallback(FrameBufferCallback frameBufferCallback, int i) {
-        Iterator it = this.mRenders.iterator();
+    public void setFrameBufferCallback(Render.FrameBufferCallback frameBufferCallback, int i) {
+        Iterator<Render> it = this.mRenders.iterator();
         while (it.hasNext()) {
-            Render render = (Render) it.next();
-            if (render != null) {
-                render.setFrameBufferCallback(frameBufferCallback, i);
+            Render next = it.next();
+            if (next != null) {
+                next.setFrameBufferCallback(frameBufferCallback, i);
             }
         }
     }
@@ -234,11 +223,11 @@ public class RenderGroup extends Render {
         if (this.mJpegOrientation != i) {
             super.setJpegOrientation(i);
             if (!this.mRenders.isEmpty()) {
-                Iterator it = this.mRenders.iterator();
+                Iterator<Render> it = this.mRenders.iterator();
                 while (it.hasNext()) {
-                    Render render = (Render) it.next();
-                    if (render != null) {
-                        render.setJpegOrientation(i);
+                    Render next = it.next();
+                    if (next != null) {
+                        next.setJpegOrientation(i);
                     }
                 }
             }
@@ -248,11 +237,11 @@ public class RenderGroup extends Render {
     public void setMirror(boolean z) {
         super.setMirror(z);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setMirror(z);
+                Render next = it.next();
+                if (next != null) {
+                    next.setMirror(z);
                 }
             }
         }
@@ -262,11 +251,11 @@ public class RenderGroup extends Render {
         if (this.mOrientation != i) {
             super.setOrientation(i);
             if (!this.mRenders.isEmpty()) {
-                Iterator it = this.mRenders.iterator();
+                Iterator<Render> it = this.mRenders.iterator();
                 while (it.hasNext()) {
-                    Render render = (Render) it.next();
-                    if (render != null) {
-                        render.setOrientation(i);
+                    Render next = it.next();
+                    if (next != null) {
+                        next.setOrientation(i);
                     }
                 }
             }
@@ -277,11 +266,11 @@ public class RenderGroup extends Render {
     public void setParentFrameBufferId(int i) {
         super.setParentFrameBufferId(i);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setParentFrameBufferId(i);
+                Render next = it.next();
+                if (next != null) {
+                    next.setParentFrameBufferId(i);
                 }
             }
         }
@@ -290,22 +279,22 @@ public class RenderGroup extends Render {
     public void setPreviewSize(int i, int i2) {
         super.setPreviewSize(i, i2);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setPreviewSize(i, i2);
+                Render next = it.next();
+                if (next != null) {
+                    next.setPreviewSize(i, i2);
                 }
             }
         }
     }
 
     public void setPreviousFrameBufferInfo(int i, int i2, int i3) {
-        Iterator it = this.mRenders.iterator();
+        Iterator<Render> it = this.mRenders.iterator();
         while (it.hasNext()) {
-            Render render = (Render) it.next();
-            if (render != null) {
-                render.setPreviousFrameBufferInfo(i, i2, i3);
+            Render next = it.next();
+            if (next != null) {
+                next.setPreviousFrameBufferInfo(i, i2, i3);
             }
         }
     }
@@ -313,11 +302,11 @@ public class RenderGroup extends Render {
     public void setShootRotation(float f2) {
         super.setShootRotation(f2);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setShootRotation(f2);
+                Render next = it.next();
+                if (next != null) {
+                    next.setShootRotation(f2);
                 }
             }
         }
@@ -326,22 +315,22 @@ public class RenderGroup extends Render {
     public void setSnapshotSize(int i, int i2) {
         super.setSnapshotSize(i, i2);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setSnapshotSize(i, i2);
+                Render next = it.next();
+                if (next != null) {
+                    next.setSnapshotSize(i, i2);
                 }
             }
         }
     }
 
     public void setSticker(String str) {
-        Iterator it = this.mRenders.iterator();
+        Iterator<Render> it = this.mRenders.iterator();
         while (it.hasNext()) {
-            Render render = (Render) it.next();
-            if (render != null) {
-                render.setSticker(str);
+            Render next = it.next();
+            if (next != null) {
+                next.setSticker(str);
             }
         }
     }
@@ -349,11 +338,11 @@ public class RenderGroup extends Render {
     public void setViewportSize(int i, int i2) {
         super.setViewportSize(i, i2);
         if (!this.mRenders.isEmpty()) {
-            Iterator it = this.mRenders.iterator();
+            Iterator<Render> it = this.mRenders.iterator();
             while (it.hasNext()) {
-                Render render = (Render) it.next();
-                if (render != null) {
-                    render.setViewportSize(i, i2);
+                Render next = it.next();
+                if (next != null) {
+                    next.setViewportSize(i, i2);
                 }
             }
         }

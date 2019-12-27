@@ -50,6 +50,6 @@ public final class FlowableHide<T> extends AbstractFlowableWithUpstream<T, T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new HideSubscriber<Object>(subscriber));
+        this.source.subscribe(new HideSubscriber(subscriber));
     }
 }

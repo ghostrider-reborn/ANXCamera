@@ -7,7 +7,7 @@ import com.android.camera.R;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.data.data.ComponentDataItem;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera2.CameraCapabilities;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,21 +40,19 @@ public class ComponentConfigUltraWide extends ComponentData {
     }
 
     public String getKey(int i) {
-        if (i != 160) {
-            if (i != 165) {
-                if (i == 169 || i == 162) {
-                    return "pref_ultra_wide_status162";
-                }
-                if (i != 163) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(CameraSettings.KEY_CAPTURE_ULTRA_WIDE_MODE);
-                    sb.append(i);
-                    return sb.toString();
-                }
-            }
+        if (i == 160) {
+            throw new RuntimeException("unspecified ultra wide");
+        } else if (i == 165) {
             return "pref_ultra_wide_status163";
+        } else {
+            if (i == 169 || i == 162) {
+                return "pref_ultra_wide_status162";
+            }
+            if (i == 163) {
+                return "pref_ultra_wide_status163";
+            }
+            return CameraSettings.KEY_CAPTURE_ULTRA_WIDE_MODE + i;
         }
-        throw new RuntimeException("unspecified ultra wide");
     }
 
     public int getValueSelectedDrawableIgnoreClose(int i) {
@@ -106,28 +104,27 @@ public class ComponentConfigUltraWide extends ComponentData {
         return this.mItems;
     }
 
-    public void resetUltraWide(ProviderEditor providerEditor) {
-        String str = "OFF";
-        if (!str.equals(getComponentValue(163))) {
-            providerEditor.putString(getKey(163), str);
+    public void resetUltraWide(DataProvider.ProviderEditor providerEditor) {
+        if (!"OFF".equals(getComponentValue(163))) {
+            providerEditor.putString(getKey(163), "OFF");
         }
-        if (!str.equals(getComponentValue(161))) {
-            providerEditor.putString(getKey(161), str);
+        if (!"OFF".equals(getComponentValue(161))) {
+            providerEditor.putString(getKey(161), "OFF");
         }
-        if (!str.equals(getComponentValue(172))) {
-            providerEditor.putString(getKey(172), str);
+        if (!"OFF".equals(getComponentValue(172))) {
+            providerEditor.putString(getKey(172), "OFF");
         }
-        if (!str.equals(getComponentValue(162))) {
-            providerEditor.putString(getKey(162), str);
+        if (!"OFF".equals(getComponentValue(162))) {
+            providerEditor.putString(getKey(162), "OFF");
         }
-        if (!str.equals(getComponentValue(173))) {
-            providerEditor.putString(getKey(173), str);
+        if (!"OFF".equals(getComponentValue(173))) {
+            providerEditor.putString(getKey(173), "OFF");
         }
-        if (!str.equals(getComponentValue(165))) {
-            providerEditor.putString(getKey(165), str);
+        if (!"OFF".equals(getComponentValue(165))) {
+            providerEditor.putString(getKey(165), "OFF");
         }
-        if (!str.equals(getComponentValue(175))) {
-            providerEditor.putString(getKey(175), str);
+        if (!"OFF".equals(getComponentValue(175))) {
+            providerEditor.putString(getKey(175), "OFF");
         }
     }
 

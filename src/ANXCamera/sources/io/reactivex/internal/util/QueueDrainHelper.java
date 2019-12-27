@@ -27,8 +27,9 @@ public final class QueueDrainHelper {
             simpleQueue.clear();
             disposable.dispose();
             return true;
-        }
-        if (z) {
+        } else if (!z) {
+            return false;
+        } else {
             if (!z3) {
                 Throwable error = observableQueueDrain.error();
                 if (error != null) {
@@ -38,14 +39,18 @@ public final class QueueDrainHelper {
                     }
                     observer.onError(error);
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     if (disposable != null) {
                         disposable.dispose();
                     }
                     observer.onComplete();
                     return true;
                 }
-            } else if (z2) {
+            } else if (!z2) {
+                return false;
+            } else {
                 if (disposable != null) {
                     disposable.dispose();
                 }
@@ -58,26 +63,30 @@ public final class QueueDrainHelper {
                 return true;
             }
         }
-        return false;
     }
 
     public static <T, U> boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber, boolean z3, SimpleQueue<?> simpleQueue, QueueDrain<T, U> queueDrain) {
         if (queueDrain.cancelled()) {
             simpleQueue.clear();
             return true;
-        }
-        if (z) {
+        } else if (!z) {
+            return false;
+        } else {
             if (!z3) {
                 Throwable error = queueDrain.error();
                 if (error != null) {
                     simpleQueue.clear();
                     subscriber.onError(error);
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     subscriber.onComplete();
                     return true;
                 }
-            } else if (z2) {
+            } else if (!z2) {
+                return false;
+            } else {
                 Throwable error2 = queueDrain.error();
                 if (error2 != null) {
                     subscriber.onError(error2);
@@ -87,7 +96,6 @@ public final class QueueDrainHelper {
                 return true;
             }
         }
-        return false;
     }
 
     public static <T> SimpleQueue<T> createQueue(int i) {
@@ -99,7 +107,7 @@ public final class QueueDrainHelper {
         while (!checkTerminated(observableQueueDrain.done(), simplePlainQueue.isEmpty(), observer, z, simplePlainQueue, disposable, observableQueueDrain)) {
             while (true) {
                 boolean done = observableQueueDrain.done();
-                Object poll = simplePlainQueue.poll();
+                T poll = simplePlainQueue.poll();
                 boolean z2 = poll == null;
                 if (!checkTerminated(done, z2, observer, z, simplePlainQueue, disposable, observableQueueDrain)) {
                     if (z2) {
@@ -121,11 +129,12 @@ public final class QueueDrainHelper {
         int i = 1;
         while (true) {
             boolean done = queueDrain.done();
-            Object poll = simplePlainQueue.poll();
+            T poll = simplePlainQueue.poll();
             boolean z2 = poll == null;
             if (checkTerminated(done, z2, subscriber, z, simplePlainQueue, queueDrain)) {
                 if (disposable != null) {
                     disposable.dispose();
+                    return;
                 }
                 return;
             } else if (z2) {
@@ -185,7 +194,7 @@ public final class QueueDrainHelper {
                 if (isCancelled(booleanSupplier)) {
                     return true;
                 }
-                Object poll = queue.poll();
+                T poll = queue.poll();
                 if (poll == null) {
                     subscriber.onComplete();
                     return true;
@@ -216,14 +225,16 @@ public final class QueueDrainHelper {
 
     public static <T> boolean postCompleteRequest(long j, Subscriber<? super T> subscriber, Queue<T> queue, AtomicLong atomicLong, BooleanSupplier booleanSupplier) {
         long j2;
-        long j3 = j;
+        long j3;
+        long j4 = j;
         do {
             j2 = atomicLong.get();
-        } while (!atomicLong.compareAndSet(j2, BackpressureHelper.addCap(REQUESTED_MASK & j2, j) | (j2 & COMPLETED_MASK)));
+            j3 = REQUESTED_MASK & j2;
+        } while (!atomicLong.compareAndSet(j2, BackpressureHelper.addCap(j3, j) | (j2 & COMPLETED_MASK)));
         if (j2 != COMPLETED_MASK) {
             return false;
         }
-        postCompleteDrain(j3 | COMPLETED_MASK, subscriber, queue, atomicLong, booleanSupplier);
+        postCompleteDrain(j4 | COMPLETED_MASK, subscriber, queue, atomicLong, booleanSupplier);
         return true;
     }
 

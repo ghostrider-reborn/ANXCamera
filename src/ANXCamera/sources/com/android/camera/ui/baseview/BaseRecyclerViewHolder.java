@@ -1,17 +1,16 @@
 package com.android.camera.ui.baseview;
 
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.View.OnClickListener;
 
-public abstract class BaseRecyclerViewHolder<T> extends ViewHolder {
+public abstract class BaseRecyclerViewHolder<T> extends RecyclerView.ViewHolder {
     public BaseRecyclerViewHolder(@NonNull View view) {
         super(view);
     }
 
     public void setClickListener(final OnRecyclerItemClickListener<T> onRecyclerItemClickListener, final T t, final int i) {
-        this.itemView.setOnClickListener(new OnClickListener() {
+        this.itemView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 onRecyclerItemClickListener.OnRecyclerItemClickListener(t, i);
             }

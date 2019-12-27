@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import com.android.camera.LocalParallelService;
-import com.android.camera.LocalParallelService.LocalBinder;
-import com.android.camera.LocalParallelService.ServiceStatusListener;
 import com.android.camera.log.Log;
 
 public class AlgoConnector {
@@ -16,16 +14,13 @@ public class AlgoConnector {
     /* access modifiers changed from: private */
     public static final AlgoConnector ourInstance = new AlgoConnector();
     /* access modifiers changed from: private */
-    public LocalBinder mLocalBinder;
+    public LocalParallelService.LocalBinder mLocalBinder;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             String access$000 = AlgoConnector.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onServiceConnected: ");
-            sb.append(componentName);
-            Log.d(access$000, sb.toString());
+            Log.d(access$000, "onServiceConnected: " + componentName);
             synchronized (AlgoConnector.ourInstance) {
-                AlgoConnector.this.mLocalBinder = (LocalBinder) iBinder;
+                LocalParallelService.LocalBinder unused = AlgoConnector.this.mLocalBinder = (LocalParallelService.LocalBinder) iBinder;
                 AlgoConnector.ourInstance.notify();
             }
         }
@@ -33,7 +28,7 @@ public class AlgoConnector {
         public void onServiceDisconnected(ComponentName componentName) {
             Log.d(AlgoConnector.TAG, "onServiceDisconnected");
             synchronized (AlgoConnector.ourInstance) {
-                AlgoConnector.this.mLocalBinder = null;
+                LocalParallelService.LocalBinder unused = AlgoConnector.this.mLocalBinder = null;
                 AlgoConnector.ourInstance.notify();
             }
         }
@@ -46,11 +41,11 @@ public class AlgoConnector {
         return ourInstance;
     }
 
-    public LocalBinder getLocalBinder() {
+    public LocalParallelService.LocalBinder getLocalBinder() {
         return getLocalBinder(false);
     }
 
-    public LocalBinder getLocalBinder(boolean z) {
+    public LocalParallelService.LocalBinder getLocalBinder(boolean z) {
         if (z) {
             int i = 0;
             synchronized (ourInstance) {
@@ -59,10 +54,7 @@ public class AlgoConnector {
                         ourInstance.wait(100);
                         i++;
                         String str = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("waiting service...");
-                        sb.append(i);
-                        Log.w(str, sb.toString());
+                        Log.w(str, "waiting service..." + i);
                     } catch (InterruptedException e2) {
                         Log.e(TAG, e2.getMessage(), e2);
                     }
@@ -72,9 +64,9 @@ public class AlgoConnector {
         return this.mLocalBinder;
     }
 
-    public void setServiceStatusListener(ServiceStatusListener serviceStatusListener) {
+    public void setServiceStatusListener(LocalParallelService.ServiceStatusListener serviceStatusListener) {
         if (serviceStatusListener != null) {
-            LocalBinder localBinder = this.mLocalBinder;
+            LocalParallelService.LocalBinder localBinder = this.mLocalBinder;
             if (localBinder != null) {
                 localBinder.setOnPictureTakenListener(serviceStatusListener);
             }

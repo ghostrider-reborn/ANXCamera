@@ -39,7 +39,7 @@ public interface IResultReceiver extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(1, obtain, null, 1);
+                    this.mRemote.transact(1, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -63,15 +63,14 @@ public interface IResultReceiver extends IInterface {
         }
 
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            String str = DESCRIPTOR;
             if (i == 1) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 send(parcel.readInt(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel) : null);
                 return true;
             } else if (i != 1598968902) {
                 return super.onTransact(i, parcel, parcel2, i2);
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

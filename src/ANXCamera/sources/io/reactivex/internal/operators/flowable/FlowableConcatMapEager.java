@@ -59,20 +59,20 @@ public final class FlowableConcatMapEager<T, R> extends AbstractFlowableWithUpst
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             while (true) {
-                InnerQueuedSubscriber innerQueuedSubscriber = (InnerQueuedSubscriber) this.subscribers.poll();
-                if (innerQueuedSubscriber != null) {
-                    innerQueuedSubscriber.cancel();
+                InnerQueuedSubscriber poll = this.subscribers.poll();
+                if (poll != null) {
+                    poll.cancel();
                 } else {
                     return;
                 }
             }
         }
 
-        /* JADX WARNING: Removed duplicated region for block: B:78:0x0133  */
-        /* JADX WARNING: Removed duplicated region for block: B:79:0x0137  */
+        /* JADX WARNING: Removed duplicated region for block: B:77:0x0133  */
+        /* JADX WARNING: Removed duplicated region for block: B:78:0x0137  */
         public void drain() {
             InnerQueuedSubscriber<R> innerQueuedSubscriber;
             boolean z;
@@ -90,15 +90,17 @@ public final class FlowableConcatMapEager<T, R> extends AbstractFlowableWithUpst
                     if (innerQueuedSubscriber2 != null) {
                         innerQueuedSubscriber = innerQueuedSubscriber2;
                     } else if (errorMode2 == ErrorMode.END || ((Throwable) this.errors.get()) == null) {
-                        innerQueuedSubscriber = (InnerQueuedSubscriber) this.subscribers.poll();
-                        if (this.done && innerQueuedSubscriber == null) {
+                        boolean z2 = this.done;
+                        innerQueuedSubscriber = this.subscribers.poll();
+                        if (z2 && innerQueuedSubscriber == null) {
                             Throwable terminate = this.errors.terminate();
                             if (terminate != null) {
                                 subscriber.onError(terminate);
+                                return;
                             } else {
                                 subscriber.onComplete();
+                                return;
                             }
-                            return;
                         } else if (innerQueuedSubscriber != null) {
                             this.current = innerQueuedSubscriber;
                         }
@@ -108,7 +110,7 @@ public final class FlowableConcatMapEager<T, R> extends AbstractFlowableWithUpst
                         return;
                     }
                     if (innerQueuedSubscriber != null) {
-                        SimpleQueue queue = innerQueuedSubscriber.queue();
+                        SimpleQueue<R> queue = innerQueuedSubscriber.queue();
                         if (queue != null) {
                             j = 0;
                             while (true) {
@@ -122,15 +124,15 @@ public final class FlowableConcatMapEager<T, R> extends AbstractFlowableWithUpst
                                 } else if (errorMode2 != ErrorMode.IMMEDIATE || ((Throwable) this.errors.get()) == null) {
                                     boolean isDone = innerQueuedSubscriber.isDone();
                                     try {
-                                        Object poll = queue.poll();
-                                        boolean z2 = poll == null;
-                                        if (isDone && z2) {
+                                        R poll = queue.poll();
+                                        boolean z3 = poll == null;
+                                        if (isDone && z3) {
                                             this.current = null;
                                             this.s.request(1);
                                             innerQueuedSubscriber = null;
                                             z = true;
                                             break;
-                                        } else if (z2) {
+                                        } else if (z3) {
                                             break;
                                         } else {
                                             subscriber.onNext(poll);
@@ -208,7 +210,7 @@ public final class FlowableConcatMapEager<T, R> extends AbstractFlowableWithUpst
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainAndCancel() {
             if (getAndIncrement() == 0) {
                 do {

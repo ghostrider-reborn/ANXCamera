@@ -6,44 +6,40 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.hardware.Camera.Area;
-import android.hardware.Camera.CameraInfo;
-import android.hardware.Camera.Parameters;
-import android.hardware.Camera.PreviewCallback;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
 import android.view.WindowManager;
 import com.android.camera.constant.AutoFocus;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Exchanger;
 
-public class VideoCaptureAndroid implements PreviewCallback, Callback {
+public class VideoCaptureAndroid implements Camera.PreviewCallback, SurfaceHolder.Callback {
     private static final String TAG = "WEBRTC-JC-VideoCaptureAndroid";
     private static SurfaceHolder localPreview;
-    private boolean bLandScapeMode;
+    private boolean bLandScapeMode = false;
     private Camera camera;
     /* access modifiers changed from: private */
     public CameraThread cameraThread;
     private Handler cameraThreadHandler;
     /* access modifiers changed from: private */
-    public Integer deviceRotation;
+    public Integer deviceRotation = 0;
     private OrientationEventListener deviceRotationNotifier;
     private SurfaceTexture dummySurfaceTexture;
-    private boolean firstFrame;
-    private int frameRotation;
+    private boolean firstFrame = true;
+    private int frameRotation = 0;
     private final int id;
-    private final CameraInfo info;
+    private final Camera.CameraInfo info;
     private final long native_capturer;
     private final int numCaptureBuffers = 3;
-    private int rotation;
+    private int rotation = 0;
 
     private class CameraThread extends Thread {
         private Exchanger<Handler> handlerExchanger;
@@ -58,32 +54,26 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
 
         public void run() {
             Looper.prepare();
-            VideoCaptureAndroid.exchange(this.handlerExchanger, new Handler());
+            Object unused = VideoCaptureAndroid.exchange(this.handlerExchanger, new Handler());
             Looper.loop();
         }
     }
 
     public VideoCaptureAndroid(Context context, int i, long j) {
-        Integer valueOf = Integer.valueOf(0);
-        this.bLandScapeMode = false;
-        this.deviceRotation = valueOf;
-        this.rotation = 0;
-        this.frameRotation = 0;
-        this.firstFrame = true;
         this.id = i;
         this.native_capturer = j;
-        this.info = new CameraInfo();
+        this.info = new Camera.CameraInfo();
         this.firstFrame = true;
         Camera.getCameraInfo(i, this.info);
         int rotation2 = ((WindowManager) context.getApplicationContext().getSystemService("window")).getDefaultDisplay().getRotation();
         if (rotation2 == 0) {
-            this.deviceRotation = valueOf;
+            this.deviceRotation = 0;
         } else if (rotation2 == 1) {
-            this.deviceRotation = Integer.valueOf(270);
+            this.deviceRotation = 270;
         } else if (rotation2 == 2) {
-            this.deviceRotation = Integer.valueOf(180);
+            this.deviceRotation = 180;
         } else if (rotation2 == 3) {
-            this.deviceRotation = Integer.valueOf(90);
+            this.deviceRotation = 90;
         }
         this.deviceRotationNotifier = new OrientationEventListener(context, 3) {
             public void onOrientationChanged(int i) {
@@ -93,7 +83,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 }
                 synchronized (VideoCaptureAndroid.this.deviceRotation) {
                     if (VideoCaptureAndroid.this.deviceRotation.intValue() != i) {
-                        VideoCaptureAndroid.this.deviceRotation = Integer.valueOf(i);
+                        Integer unused = VideoCaptureAndroid.this.deviceRotation = Integer.valueOf(i);
                     }
                 }
             }
@@ -101,7 +91,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
         Exchanger exchanger = new Exchanger();
         this.cameraThread = new CameraThread(exchanger);
         this.cameraThread.start();
-        this.cameraThreadHandler = (Handler) exchange(exchanger, null);
+        this.cameraThreadHandler = (Handler) exchange(exchanger, (Object) null);
     }
 
     private native void ProvideCameraFrame(byte[] bArr, int i, long j, int i2);
@@ -132,62 +122,51 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     /* access modifiers changed from: private */
     public void getCurrentVideoZoomFactorOnCameraThread(Exchanger<Integer> exchanger) {
         Camera camera2 = this.camera;
-        Integer valueOf = Integer.valueOf(0);
-        String str = TAG;
         if (camera2 == null) {
-            Log.d(str, "Camera is null.");
-            exchange(exchanger, valueOf);
+            Log.d(TAG, "Camera is null.");
+            exchange(exchanger, 0);
             return;
         }
-        Parameters parameters = camera2.getParameters();
+        Camera.Parameters parameters = camera2.getParameters();
         if (!parameters.isZoomSupported()) {
-            Log.d(str, "setVideoZoomFactor is not suppored.");
-            exchange(exchanger, valueOf);
+            Log.d(TAG, "setVideoZoomFactor is not suppored.");
+            exchange(exchanger, 0);
             return;
         }
         int zoom = parameters.getZoom();
-        StringBuilder sb = new StringBuilder();
-        sb.append("The current zoom value is: ");
-        sb.append(zoom);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "The current zoom value is: " + zoom);
         exchange(exchanger, Integer.valueOf(zoom));
     }
 
     /* access modifiers changed from: private */
     public void getSupportedVideoZoomMaxFactorOnCameraThread(Exchanger<Integer> exchanger) {
         Camera camera2 = this.camera;
-        Integer valueOf = Integer.valueOf(0);
-        String str = TAG;
         if (camera2 == null) {
-            Log.d(str, "Camera is null.");
-            exchange(exchanger, valueOf);
+            Log.d(TAG, "Camera is null.");
+            exchange(exchanger, 0);
             return;
         }
-        Parameters parameters = camera2.getParameters();
+        Camera.Parameters parameters = camera2.getParameters();
         if (!parameters.isZoomSupported()) {
-            Log.d(str, "setVideoZoomFactor is not supported.");
-            exchange(exchanger, valueOf);
+            Log.d(TAG, "setVideoZoomFactor is not supported.");
+            exchange(exchanger, 0);
             return;
         }
         int maxZoom = parameters.getMaxZoom();
-        StringBuilder sb = new StringBuilder();
-        sb.append("The max zoom value is: ");
-        sb.append(maxZoom);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "The max zoom value is: " + maxZoom);
         exchange(exchanger, Integer.valueOf(maxZoom));
     }
 
     /* access modifiers changed from: private */
     public void isVideoZoomSupportedOnCameraThread(Exchanger<Boolean> exchanger) {
         Camera camera2 = this.camera;
-        Boolean valueOf = Boolean.valueOf(false);
         if (camera2 == null) {
             Log.d(TAG, "Camera is null.");
-            exchange(exchanger, valueOf);
+            exchange(exchanger, false);
         } else if (camera2.getParameters().isZoomSupported()) {
-            exchange(exchanger, Boolean.valueOf(true));
+            exchange(exchanger, true);
         } else {
-            exchange(exchanger, valueOf);
+            exchange(exchanger, false);
         }
     }
 
@@ -202,37 +181,27 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     /* access modifiers changed from: private */
     public void setExposurePointOfInterestOnCameraThread(float f2, float f3) {
         Camera camera2 = this.camera;
-        String str = TAG;
         if (camera2 == null) {
-            Log.d(str, "Camera is null.");
+            Log.d(TAG, "Camera is null.");
             return;
         }
-        Parameters parameters = camera2.getParameters();
+        Camera.Parameters parameters = camera2.getParameters();
         if (parameters.getMaxNumMeteringAreas() == 0) {
-            Log.d(str, "SettingMeteringArea is not supported.");
+            Log.d(TAG, "SettingMeteringArea is not supported.");
             return;
         }
         int clamp = clamp(Float.valueOf((f2 * 2000.0f) - 1000.0f).intValue(), 300);
         int clamp2 = clamp(Float.valueOf((2000.0f * f3) - 1000.0f).intValue(), 300);
-        StringBuilder sb = new StringBuilder();
-        sb.append("setExposurePointOfInterest: left: ");
-        sb.append(clamp);
-        sb.append(" top: ");
-        sb.append(clamp2);
-        sb.append(" before convert X:");
-        sb.append(f2);
-        sb.append(" Y:");
-        sb.append(f3);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "setExposurePointOfInterest: left: " + clamp + " top: " + clamp2 + " before convert X:" + f2 + " Y:" + f3);
         Rect rect = new Rect(clamp, clamp2, clamp + 300, clamp2 + 300);
         ArrayList arrayList = new ArrayList();
-        arrayList.add(new Area(rect, 1000));
+        arrayList.add(new Camera.Area(rect, 1000));
         try {
             parameters.setMeteringAreas(arrayList);
             this.camera.setParameters(parameters);
         } catch (Exception e2) {
             e2.printStackTrace();
-            Log.d(str, "Unable to setExposurePointOfInterest.");
+            Log.d(TAG, "Unable to setExposurePointOfInterest.");
         }
     }
 
@@ -247,14 +216,13 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     /* access modifiers changed from: private */
     public void setFlashStateOnCameraThread(boolean z) {
         Camera camera2 = this.camera;
-        String str = TAG;
         if (camera2 == null) {
-            Log.d(str, "Camera is null.");
+            Log.d(TAG, "Camera is null.");
             return;
         }
-        Parameters parameters = camera2.getParameters();
+        Camera.Parameters parameters = camera2.getParameters();
         if (parameters.getFlashMode() == null) {
-            Log.d(str, "Flash mode setting is not supported.");
+            Log.d(TAG, "Flash mode setting is not supported.");
             return;
         }
         try {
@@ -262,7 +230,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
             this.camera.setParameters(parameters);
         } catch (Exception e2) {
             e2.printStackTrace();
-            Log.d(str, "Failed to turn the flash on!");
+            Log.d(TAG, "Failed to turn the flash on!");
         }
     }
 
@@ -277,49 +245,37 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     /* access modifiers changed from: private */
     public void setFocusPointOfInterestOnCameraThread(float f2, float f3) {
         Camera camera2 = this.camera;
-        String str = TAG;
         if (camera2 == null) {
-            Log.d(str, "Camera is null.");
+            Log.d(TAG, "Camera is null.");
             return;
         }
-        Parameters parameters = camera2.getParameters();
+        Camera.Parameters parameters = camera2.getParameters();
         this.camera.cancelAutoFocus();
         parameters.setFocusMode("auto");
         if (parameters.getMaxNumFocusAreas() == 0) {
-            Log.d(str, "SetFocusArea is not supported");
+            Log.d(TAG, "SetFocusArea is not supported");
             return;
         }
         int clamp = clamp(Float.valueOf((f2 * 2000.0f) - 1000.0f).intValue(), 200);
         int clamp2 = clamp(Float.valueOf((2000.0f * f3) - 1000.0f).intValue(), 200);
-        StringBuilder sb = new StringBuilder();
-        sb.append("SetFocusArea: left: ");
-        sb.append(clamp);
-        sb.append(" top: ");
-        sb.append(clamp2);
-        sb.append(" before convert X:");
-        sb.append(f2);
-        sb.append(" Y:");
-        sb.append(f3);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "SetFocusArea: left: " + clamp + " top: " + clamp2 + " before convert X:" + f2 + " Y:" + f3);
         Rect rect = new Rect(clamp, clamp2, clamp + 200, clamp2 + 200);
         ArrayList arrayList = new ArrayList();
-        arrayList.add(new Area(rect, 1000));
+        arrayList.add(new Camera.Area(rect, 1000));
         try {
             parameters.setFocusAreas(arrayList);
             this.camera.setParameters(parameters);
             this.camera.cancelAutoFocus();
-            String focusMode = parameters.getFocusMode();
-            String str2 = AutoFocus.LEGACY_CONTINUOUS_VIDEO;
-            if (focusMode != str2) {
-                parameters.setFocusMode(str2);
+            if (parameters.getFocusMode() != AutoFocus.LEGACY_CONTINUOUS_VIDEO) {
+                parameters.setFocusMode(AutoFocus.LEGACY_CONTINUOUS_VIDEO);
             }
             if (parameters.getMaxNumFocusAreas() > 0) {
-                parameters.setFocusAreas(null);
+                parameters.setFocusAreas((List) null);
             }
             this.camera.setParameters(parameters);
         } catch (Exception e2) {
             e2.printStackTrace();
-            Log.d(str, "Unable to setFocusPointOfInterest.");
+            Log.d(TAG, "Unable to setFocusPointOfInterest.");
         }
     }
 
@@ -331,7 +287,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     public void setPreviewDisplayOnCameraThread(SurfaceHolder surfaceHolder, Exchanger<IOException> exchanger) {
         try {
             this.camera.setPreviewDisplay(surfaceHolder);
-            exchange(exchanger, null);
+            exchange(exchanger, (Object) null);
         } catch (IOException e2) {
             exchange(exchanger, e2);
         }
@@ -356,13 +312,10 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
 
     /* access modifiers changed from: private */
     public void setPreviewRotationOnCameraThread(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setPreviewRotation:");
-        sb.append(i);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "setPreviewRotation:" + i);
         if (this.camera != null) {
-            CameraInfo cameraInfo = this.info;
-            int i2 = cameraInfo.facing == 1 ? (360 - cameraInfo.orientation) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : cameraInfo.orientation;
+            Camera.CameraInfo cameraInfo = this.info;
+            int i2 = cameraInfo.facing == 1 ? (360 - cameraInfo.orientation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT : cameraInfo.orientation;
             if (!this.bLandScapeMode) {
                 this.camera.setDisplayOrientation(i2);
             }
@@ -380,30 +333,24 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     /* access modifiers changed from: private */
     public void setVideoZoomFactorOnCameraThread(int i) {
         Camera camera2 = this.camera;
-        String str = TAG;
         if (camera2 == null) {
-            Log.d(str, "Camera is null.");
+            Log.d(TAG, "Camera is null.");
             return;
         }
-        Parameters parameters = camera2.getParameters();
+        Camera.Parameters parameters = camera2.getParameters();
         if (!parameters.isZoomSupported()) {
-            Log.d(str, "setVideoZoomFactor is not supported.");
+            Log.d(TAG, "setVideoZoomFactor is not supported.");
             return;
         }
         int maxZoom = parameters.getMaxZoom();
         int max = Math.max(0, Math.min(i, maxZoom));
-        StringBuilder sb = new StringBuilder();
-        sb.append("The max zoom value is: ");
-        sb.append(maxZoom);
-        sb.append(", and the set zoom value is: ");
-        sb.append(max);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "The max zoom value is: " + maxZoom + ", and the set zoom value is: " + max);
         try {
             parameters.setZoom(max);
             this.camera.setParameters(parameters);
         } catch (Exception e2) {
             e2.printStackTrace();
-            Log.d(str, "setVideoZoomFacor failed.");
+            Log.d(TAG, "setVideoZoomFacor failed.");
         }
     }
 
@@ -421,7 +368,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
             }
         };
         handler.post(r0);
-        return ((Boolean) exchange(exchanger, Boolean.valueOf(false))).booleanValue();
+        return ((Boolean) exchange(exchanger, false)).booleanValue();
     }
 
     /* access modifiers changed from: private */
@@ -434,24 +381,13 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
     /* JADX WARNING: Code restructure failed: missing block: B:33:0x0100, code lost:
         r6 = new java.util.concurrent.Exchanger();
         stopCaptureOnCameraThread(r6);
-        exchange(r6, java.lang.Boolean.valueOf(false));
+        exchange(r6, false);
      */
     /* JADX WARNING: Removed duplicated region for block: B:27:0x00ea A[ExcHandler: RuntimeException (e java.lang.RuntimeException), Splitter:B:1:0x002f] */
     /* JADX WARNING: Removed duplicated region for block: B:33:0x0100  */
     @SuppressLint({"NewApi"})
     public void startCaptureOnCameraThread(int i, int i2, int i3, int i4, Exchanger<Boolean> exchanger) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("startCapture: ");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        sb.append("@");
-        sb.append(i3);
-        sb.append(":");
-        sb.append(i4);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "startCapture: " + i + "x" + i2 + "@" + i3 + ":" + i4);
         try {
             this.camera = Camera.open(this.id);
             if (localPreview != null) {
@@ -463,11 +399,8 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 this.dummySurfaceTexture = new SurfaceTexture(42);
                 this.camera.setPreviewTexture(this.dummySurfaceTexture);
             }
-            Parameters parameters = this.camera.getParameters();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("isVideoStabilizationSupported: ");
-            sb3.append(parameters.isVideoStabilizationSupported());
-            Log.d(str, sb3.toString());
+            Camera.Parameters parameters = this.camera.getParameters();
+            Log.d(TAG, "isVideoStabilizationSupported: " + parameters.isVideoStabilizationSupported());
             if (parameters.isVideoStabilizationSupported()) {
                 parameters.setVideoStabilization(true);
             }
@@ -487,49 +420,48 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
             this.camera.startPreview();
             this.deviceRotationNotifier.enable();
             setFocusPointOfInterest(0.5f, 0.5f);
-            exchange(exchanger, Boolean.valueOf(true));
+            exchange(exchanger, true);
         } catch (IOException e2) {
             throw new RuntimeException(e2);
         } catch (RuntimeException e3) {
         } catch (IOException e4) {
             e = e4;
             this.deviceRotationNotifier.disable();
-            Log.e(str, "startCapture failed", e);
+            Log.e(TAG, "startCapture failed", e);
             if (this.camera != null) {
             }
-            exchange(exchanger, Boolean.valueOf(false));
+            exchange(exchanger, false);
         }
     }
 
     /* access modifiers changed from: private */
     public void stopCaptureOnCameraThread(Exchanger<Boolean> exchanger) {
-        String str = TAG;
-        Log.d(str, "stopCapture");
+        Log.d(TAG, "stopCapture");
         Camera camera2 = this.camera;
         if (camera2 != null) {
             try {
                 camera2.stopPreview();
-                this.camera.setPreviewCallbackWithBuffer(null);
+                this.camera.setPreviewCallbackWithBuffer((Camera.PreviewCallback) null);
                 if (localPreview != null) {
                     localPreview.removeCallback(this);
-                    this.camera.setPreviewDisplay(null);
+                    this.camera.setPreviewDisplay((SurfaceHolder) null);
                 } else {
-                    this.camera.setPreviewTexture(null);
+                    this.camera.setPreviewTexture((SurfaceTexture) null);
                 }
                 this.camera.release();
                 this.camera = null;
                 this.deviceRotationNotifier.disable();
-                exchange(exchanger, Boolean.valueOf(true));
+                exchange(exchanger, true);
             } catch (IOException e2) {
                 e = e2;
                 this.deviceRotationNotifier.disable();
-                Log.e(str, "Failed to stop camera", e);
-                exchange(exchanger, Boolean.valueOf(false));
+                Log.e(TAG, "Failed to stop camera", e);
+                exchange(exchanger, false);
             } catch (RuntimeException e3) {
                 e = e3;
                 this.deviceRotationNotifier.disable();
-                Log.e(str, "Failed to stop camera", e);
-                exchange(exchanger, Boolean.valueOf(false));
+                Log.e(TAG, "Failed to stop camera", e);
+                exchange(exchanger, false);
             }
         } else {
             throw new RuntimeException("Camera is already stopped!");
@@ -543,7 +475,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 VideoCaptureAndroid.this.getCurrentVideoZoomFactorOnCameraThread(exchanger);
             }
         });
-        return ((Integer) exchange(exchanger, Integer.valueOf(0))).intValue();
+        return ((Integer) exchange(exchanger, 0)).intValue();
     }
 
     public int getSupportedVideoZoomMaxFactor() {
@@ -553,7 +485,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 VideoCaptureAndroid.this.getSupportedVideoZoomMaxFactorOnCameraThread(exchanger);
             }
         });
-        return ((Integer) exchange(exchanger, Integer.valueOf(0))).intValue();
+        return ((Integer) exchange(exchanger, 0)).intValue();
     }
 
     public boolean isVideoZoomSupported() {
@@ -563,7 +495,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 VideoCaptureAndroid.this.isVideoZoomSupportedOnCameraThread(exchanger);
             }
         });
-        return ((Boolean) exchange(exchanger, Boolean.valueOf(false))).booleanValue();
+        return ((Boolean) exchange(exchanger, false)).booleanValue();
     }
 
     public synchronized void onPreviewFrame(byte[] bArr, Camera camera2) {
@@ -604,9 +536,9 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 this.rotation = 0;
             }
             if (this.info.facing == 1) {
-                this.frameRotation = ((this.info.orientation - this.rotation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                this.frameRotation = ((this.info.orientation - this.rotation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             } else if (this.info.facing == 0) {
-                this.frameRotation = (this.info.orientation + this.rotation) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+                this.frameRotation = (this.info.orientation + this.rotation) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
             }
             ProvideCameraFrame(bArr, bArr.length, this.native_capturer, this.frameRotation);
             this.camera.addCallbackBuffer(bArr);
@@ -622,19 +554,11 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                 VideoCaptureAndroid.this.stopCaptureOnCameraThread(exchanger);
             }
         });
-        return ((Boolean) exchange(exchanger, Boolean.valueOf(true))).booleanValue();
+        return ((Boolean) exchange(exchanger, true)).booleanValue();
     }
 
     public synchronized void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoCaptureAndroid::surfaceChanged ignored: ");
-        sb.append(i);
-        sb.append(": ");
-        sb.append(i2);
-        sb.append("x");
-        sb.append(i3);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "VideoCaptureAndroid::surfaceChanged ignored: " + i + ": " + i2 + "x" + i3);
     }
 
     public synchronized void surfaceCreated(final SurfaceHolder surfaceHolder) {
@@ -646,7 +570,7 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
                     VideoCaptureAndroid.this.setPreviewDisplayOnCameraThread(surfaceHolder, exchanger);
                 }
             });
-            IOException iOException = (IOException) exchange(exchanger, null);
+            IOException iOException = (IOException) exchange(exchanger, (Object) null);
             if (iOException != null) {
                 throw new RuntimeException(iOException);
             }
@@ -659,10 +583,10 @@ public class VideoCaptureAndroid implements PreviewCallback, Callback {
             final Exchanger exchanger = new Exchanger();
             this.cameraThreadHandler.post(new Runnable() {
                 public void run() {
-                    VideoCaptureAndroid.this.setPreviewDisplayOnCameraThread(null, exchanger);
+                    VideoCaptureAndroid.this.setPreviewDisplayOnCameraThread((SurfaceHolder) null, exchanger);
                 }
             });
-            IOException iOException = (IOException) exchange(exchanger, null);
+            IOException iOException = (IOException) exchange(exchanger, (Object) null);
             if (iOException != null) {
                 throw new RuntimeException(iOException);
             }

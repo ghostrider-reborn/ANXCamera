@@ -27,10 +27,10 @@ public class v implements h<Uri, Bitmap> {
 
     @Nullable
     public A<Bitmap> b(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
-        A b2 = this.qj.b(uri, i, i2, gVar);
+        A<Drawable> b2 = this.qj.b(uri, i, i2, gVar);
         if (b2 == null) {
             return null;
         }
-        return q.a(this.Bb, (Drawable) b2.get(), i, i2);
+        return q.a(this.Bb, b2.get(), i, i2);
     }
 }

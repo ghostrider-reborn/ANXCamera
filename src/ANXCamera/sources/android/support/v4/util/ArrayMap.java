@@ -2,7 +2,6 @@ package android.support.v4.util;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V> {
@@ -75,7 +74,7 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V> {
         return MapCollections.containsAllHelper(this, collection);
     }
 
-    public Set<Entry<K, V>> entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         return getCollection().getEntrySet();
     }
 
@@ -85,8 +84,8 @@ public class ArrayMap<K, V> extends SimpleArrayMap<K, V> implements Map<K, V> {
 
     public void putAll(Map<? extends K, ? extends V> map) {
         ensureCapacity(this.mSize + map.size());
-        for (Entry entry : map.entrySet()) {
-            put(entry.getKey(), entry.getValue());
+        for (Map.Entry next : map.entrySet()) {
+            put(next.getKey(), next.getValue());
         }
     }
 

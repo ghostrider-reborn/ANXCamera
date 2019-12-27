@@ -1,23 +1,21 @@
 package com.android.camera.fragment.sticker;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import com.android.camera.R;
 import java.util.List;
 
-public abstract class BaseSelectAdapter<T> extends Adapter<BaseSelectHolder> implements OnClickListener {
+public abstract class BaseSelectAdapter<T> extends RecyclerView.Adapter<BaseSelectHolder> implements View.OnClickListener {
     protected Context mContext;
     private ItemSelectChangeListener mItemSelectChangeListener;
     protected int mLastSelectedItemPosition = -1;
     protected List<T> mList;
     protected int mSelectedItemPosition = 0;
 
-    public static abstract class BaseSelectHolder extends ViewHolder {
+    public static abstract class BaseSelectHolder extends RecyclerView.ViewHolder {
         protected View mIVSelected;
 
         public BaseSelectHolder(View view) {
@@ -118,9 +116,7 @@ public abstract class BaseSelectAdapter<T> extends Adapter<BaseSelectHolder> imp
     public void setSelectedItemPosition(int i) {
         this.mLastSelectedItemPosition = this.mSelectedItemPosition;
         this.mSelectedItemPosition = i;
-        int i2 = this.mLastSelectedItemPosition;
-        Boolean valueOf = Boolean.valueOf(true);
-        notifyItemChanged(i2, valueOf);
-        notifyItemChanged(this.mSelectedItemPosition, valueOf);
+        notifyItemChanged(this.mLastSelectedItemPosition, true);
+        notifyItemChanged(this.mSelectedItemPosition, true);
     }
 }

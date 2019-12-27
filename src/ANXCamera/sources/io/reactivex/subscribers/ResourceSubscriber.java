@@ -27,7 +27,7 @@ public abstract class ResourceSubscriber<T> implements FlowableSubscriber<T>, Di
     }
 
     public final boolean isDisposed() {
-        return SubscriptionHelper.isCancelled((Subscription) this.s.get());
+        return SubscriptionHelper.isCancelled(this.s.get());
     }
 
     /* access modifiers changed from: protected */
@@ -36,7 +36,7 @@ public abstract class ResourceSubscriber<T> implements FlowableSubscriber<T>, Di
     }
 
     public final void onSubscribe(Subscription subscription) {
-        if (EndConsumerHelper.setOnce(this.s, subscription, ResourceSubscriber.class)) {
+        if (EndConsumerHelper.setOnce(this.s, subscription, (Class<?>) ResourceSubscriber.class)) {
             long andSet = this.missedRequested.getAndSet(0);
             if (andSet != 0) {
                 subscription.request(andSet);

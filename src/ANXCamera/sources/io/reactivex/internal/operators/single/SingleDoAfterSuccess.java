@@ -18,7 +18,7 @@ public final class SingleDoAfterSuccess<T> extends Single<T> {
     static final class DoAfterObserver<T> implements SingleObserver<T>, Disposable {
         final SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f330d;
         final Consumer<? super T> onAfterSuccess;
 

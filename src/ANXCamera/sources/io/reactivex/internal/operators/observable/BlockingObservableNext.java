@@ -2,7 +2,6 @@ package io.reactivex.internal.operators.observable;
 
 import io.reactivex.Notification;
 import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.internal.util.BlockingHelper;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.observers.DisposableObserver;
@@ -34,10 +33,10 @@ public final class BlockingObservableNext<T> implements Iterable<T> {
             if (!this.started) {
                 this.started = true;
                 this.observer.setWaiting();
-                new ObservableMaterialize(this.items).subscribe((Observer<? super T>) this.observer);
+                new ObservableMaterialize(this.items).subscribe(this.observer);
             }
             try {
-                Notification takeNext = this.observer.takeNext();
+                Notification<T> takeNext = this.observer.takeNext();
                 if (takeNext.isOnNext()) {
                     this.isNextConsumed = false;
                     this.next = takeNext.getValue();
@@ -58,17 +57,13 @@ public final class BlockingObservableNext<T> implements Iterable<T> {
 
         public boolean hasNext() {
             Throwable th = this.error;
-            if (th == null) {
-                boolean z = false;
-                if (!this.hasNext) {
-                    return false;
-                }
-                if (!this.isNextConsumed || moveToNext()) {
-                    z = true;
-                }
-                return z;
+            if (th != null) {
+                throw ExceptionHelper.wrapOrThrow(th);
+            } else if (!this.hasNext) {
+                return false;
+            } else {
+                return !this.isNextConsumed || moveToNext();
             }
-            throw ExceptionHelper.wrapOrThrow(th);
         }
 
         public T next() {
@@ -113,7 +108,7 @@ public final class BlockingObservableNext<T> implements Iterable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void setWaiting() {
             this.waiting.set(1);
         }
@@ -121,7 +116,7 @@ public final class BlockingObservableNext<T> implements Iterable<T> {
         public Notification<T> takeNext() throws InterruptedException {
             setWaiting();
             BlockingHelper.verifyNonBlocking();
-            return (Notification) this.buf.take();
+            return this.buf.take();
         }
     }
 

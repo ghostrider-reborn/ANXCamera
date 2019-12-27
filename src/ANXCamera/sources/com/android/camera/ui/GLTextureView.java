@@ -4,11 +4,10 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.opengl.GLDebugHelper;
-import android.opengl.GLSurfaceView.Renderer;
+import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.TextureView;
-import android.view.TextureView.SurfaceTextureListener;
 import com.android.camera.log.Log;
 import java.io.Writer;
 import java.lang.ref.WeakReference;
@@ -21,7 +20,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
-public class GLTextureView extends TextureView implements SurfaceTextureListener {
+public class GLTextureView extends TextureView implements TextureView.SurfaceTextureListener {
     public static final int DEBUG_CHECK_GL_ERROR = 1;
     public static final int DEBUG_LOG_GL_CALLS = 2;
     private static final boolean LOG_ATTACH_DETACH = false;
@@ -55,7 +54,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
     private int mPreservedHeight;
     private int mPreservedWidth;
     /* access modifiers changed from: private */
-    public Renderer mRenderer;
+    public GLSurfaceView.Renderer mRenderer;
     /* access modifiers changed from: private */
     public EGLShareContextGetter mShareContextGetter;
     private final WeakReference<GLTextureView> mThisWeakRef = new WeakReference<>(this);
@@ -83,7 +82,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
 
         public EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay) {
             int[] iArr = new int[1];
-            if (egl10.eglChooseConfig(eGLDisplay, this.mConfigSpec, null, 0, iArr)) {
+            if (egl10.eglChooseConfig(eGLDisplay, this.mConfigSpec, (EGLConfig[]) null, 0, iArr)) {
                 int i = iArr[0];
                 if (i > 0) {
                     EGLConfig[] eGLConfigArr = new EGLConfig[i];
@@ -101,7 +100,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
             throw new IllegalArgumentException("eglChooseConfig failed");
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract EGLConfig chooseConfig(EGL10 egl10, EGLDisplay eGLDisplay, EGLConfig[] eGLConfigArr);
     }
 
@@ -173,12 +172,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
 
         public void destroyContext(EGL10 egl10, EGLDisplay eGLDisplay, EGLContext eGLContext) {
             if (!egl10.eglDestroyContext(eGLDisplay, eGLContext)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("display:");
-                sb.append(eGLDisplay);
-                sb.append(" context: ");
-                sb.append(eGLContext);
-                Log.e(TAG, sb.toString());
+                Log.e(TAG, "display:" + eGLDisplay + " context: " + eGLContext);
                 EglHelper.throwEglException("eglDestroyContex", egl10.eglGetError());
                 throw null;
             }
@@ -191,7 +185,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
 
         public EGLSurface createWindowSurface(EGL10 egl10, EGLDisplay eGLDisplay, EGLConfig eGLConfig, Object obj) {
             try {
-                return egl10.eglCreateWindowSurface(eGLDisplay, eGLConfig, obj, null);
+                return egl10.eglCreateWindowSurface(eGLDisplay, eGLConfig, obj, (int[]) null);
             } catch (IllegalArgumentException e2) {
                 Log.e(GLTextureView.TAG, "eglCreateWindowSurface", e2);
                 return null;
@@ -252,10 +246,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
         }
 
         public static String formatEglError(String str, int i) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(" failed");
-            return sb.toString();
+            return str + " failed";
         }
 
         public static void logEglErrorAsWarning(String str, String str2, int i) {
@@ -271,7 +262,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
             throw new RuntimeException(formatEglError(str, i));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public GL createGL() {
             GL gl = this.mEglContext.getGL();
             GLTextureView gLTextureView = (GLTextureView) this.mGLTextureViewWeakRef.get();
@@ -309,16 +300,15 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
                     this.mEglSurface = null;
                 }
                 EGLSurface eGLSurface = this.mEglSurface;
-                String str = TAG;
                 if (eGLSurface == null || eGLSurface == EGL10.EGL_NO_SURFACE) {
                     if (this.mEgl.eglGetError() == 12299) {
-                        Log.e(str, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
+                        Log.e(TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
                     }
                     return false;
                 } else if (this.mEgl.eglMakeCurrent(this.mEglDisplay, eGLSurface, eGLSurface, this.mEglContext)) {
                     return true;
                 } else {
-                    logEglErrorAsWarning(str, "eglMakeCurrent", this.mEgl.eglGetError());
+                    logEglErrorAsWarning(TAG, "eglMakeCurrent", this.mEgl.eglGetError());
                     return false;
                 }
             } else {
@@ -580,7 +570,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
                         synchronized (GLTextureView.sGLThreadManager) {
                             while (!this.mShouldExit) {
                                 if (!this.mEventQueue.isEmpty()) {
-                                    runnable = (Runnable) this.mEventQueue.remove(0);
+                                    runnable = this.mEventQueue.remove(0);
                                     z = false;
                                 } else {
                                     if (this.mPaused != this.mRequestPaused) {
@@ -830,10 +820,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
         }
 
         public void run() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("GLThread ");
-            sb.append(getId());
-            setName(sb.toString());
+            setName("GLThread " + getId());
             try {
                 guardedRun();
             } catch (InterruptedException unused) {
@@ -943,7 +930,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
         }
 
         public synchronized void threadExiting(GLThread gLThread) {
-            gLThread.mExited = true;
+            boolean unused = gLThread.mExited = true;
             if (this.mEglOwner == gLThread) {
                 this.mEglOwner = null;
             }
@@ -962,9 +949,10 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
                 return true;
             }
             GLThread gLThread3 = this.mEglOwner;
-            if (gLThread3 != null) {
-                gLThread3.requestReleaseEglContextLocked();
+            if (gLThread3 == null) {
+                return false;
             }
+            gLThread3.requestReleaseEglContextLocked();
             return false;
         }
     }
@@ -1008,6 +996,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
     }
 
     private class SimpleEGLConfigChooser extends ComponentSizeChooser {
+        /* JADX INFO: super call moved to the top of the method (can break code semantics) */
         public SimpleEGLConfigChooser(boolean z) {
             super(8, 8, 8, 0, z ? 16 : 0, 0);
         }
@@ -1056,7 +1045,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
         return this.mGLThread.getRenderMode();
     }
 
-    public Renderer getRenderer() {
+    public GLSurfaceView.Renderer getRenderer() {
         return this.mRenderer;
     }
 
@@ -1183,7 +1172,7 @@ public class GLTextureView extends TextureView implements SurfaceTextureListener
         this.mGLThread.setRenderMode(i);
     }
 
-    public void setRenderer(Renderer renderer) {
+    public void setRenderer(GLSurfaceView.Renderer renderer) {
         checkRenderThreadState();
         if (this.mEGLConfigChooser == null) {
             this.mEGLConfigChooser = new SimpleEGLConfigChooser(true);

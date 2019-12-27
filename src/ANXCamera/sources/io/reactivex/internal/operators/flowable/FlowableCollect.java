@@ -83,7 +83,7 @@ public final class FlowableCollect<T, U> extends AbstractFlowableWithUpstream<T,
         try {
             Object call = this.initialSupplier.call();
             ObjectHelper.requireNonNull(call, "The initial value supplied is null");
-            this.source.subscribe((FlowableSubscriber<? super T>) new CollectSubscriber<Object>(subscriber, call, this.collector));
+            this.source.subscribe(new CollectSubscriber(subscriber, call, this.collector));
         } catch (Throwable th) {
             EmptySubscription.error(th, subscriber);
         }

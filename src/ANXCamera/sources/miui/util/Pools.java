@@ -41,7 +41,7 @@ public final class Pools {
             }
             this.mManager = manager;
             this.mSize = i;
-            Object createInstance = this.mManager.createInstance();
+            T createInstance = this.mManager.createInstance();
             if (createInstance != null) {
                 this.mInstanceHolder = createInstanceHolder(createInstance.getClass(), i);
                 doRelease(createInstance);
@@ -62,10 +62,10 @@ public final class Pools {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract IInstanceHolder<T> createInstanceHolder(Class<T> cls, int i);
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void destroyInstanceHolder(IInstanceHolder<T> iInstanceHolder, int i);
 
         /* access modifiers changed from: protected */
@@ -205,12 +205,12 @@ public final class Pools {
             super.close();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final IInstanceHolder<T> createInstanceHolder(Class<T> cls, int i) {
             return Pools.onPoolCreate(cls, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void destroyInstanceHolder(IInstanceHolder<T> iInstanceHolder, int i) {
             Pools.onPoolClose((InstanceHolder) iInstanceHolder, i);
         }
@@ -322,12 +322,12 @@ public final class Pools {
             super.close();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final IInstanceHolder<T> createInstanceHolder(Class<T> cls, int i) {
             return Pools.onSoftReferencePoolCreate(cls, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public final void destroyInstanceHolder(IInstanceHolder<T> iInstanceHolder, int i) {
             Pools.onSoftReferencePoolClose((SoftReferenceInstanceHolder) iInstanceHolder, i);
         }
@@ -362,7 +362,7 @@ public final class Pools {
     static <T> InstanceHolder<T> onPoolCreate(Class<T> cls, int i) {
         InstanceHolder<T> instanceHolder;
         synchronized (mInstanceHolderMap) {
-            instanceHolder = (InstanceHolder) mInstanceHolderMap.get(cls);
+            instanceHolder = mInstanceHolderMap.get(cls);
             if (instanceHolder == null) {
                 instanceHolder = new InstanceHolder<>(cls, i);
                 mInstanceHolderMap.put(cls, instanceHolder);
@@ -382,7 +382,7 @@ public final class Pools {
     static <T> SoftReferenceInstanceHolder<T> onSoftReferencePoolCreate(Class<T> cls, int i) {
         SoftReferenceInstanceHolder<T> softReferenceInstanceHolder;
         synchronized (mSoftReferenceInstanceHolderMap) {
-            softReferenceInstanceHolder = (SoftReferenceInstanceHolder) mSoftReferenceInstanceHolderMap.get(cls);
+            softReferenceInstanceHolder = mSoftReferenceInstanceHolderMap.get(cls);
             if (softReferenceInstanceHolder == null) {
                 softReferenceInstanceHolder = new SoftReferenceInstanceHolder<>(cls, i);
                 mSoftReferenceInstanceHolderMap.put(cls, softReferenceInstanceHolder);

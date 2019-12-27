@@ -31,7 +31,7 @@ public final class FlowableRangeLong extends Flowable<Long> {
             this.index = this.end;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void fastPath();
 
         public final boolean isEmpty() {
@@ -62,7 +62,7 @@ public final class FlowableRangeLong extends Flowable<Long> {
             return i & 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void slowPath(long j);
     }
 
@@ -75,7 +75,7 @@ public final class FlowableRangeLong extends Flowable<Long> {
             this.actual = conditionalSubscriber;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fastPath() {
             long j = this.end;
             ConditionalSubscriber<? super Long> conditionalSubscriber = this.actual;
@@ -93,7 +93,7 @@ public final class FlowableRangeLong extends Flowable<Long> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(long j) {
             long j2 = this.end;
             long j3 = this.index;
@@ -104,16 +104,17 @@ public final class FlowableRangeLong extends Flowable<Long> {
                 long j6 = 0;
                 while (true) {
                     if (j6 == j5 || j4 == j2) {
-                        if (j4 == j2) {
-                            if (!this.cancelled) {
-                                conditionalSubscriber.onComplete();
+                        if (j4 != j2) {
+                            j5 = get();
+                            if (j6 == j5) {
+                                this.index = j4;
+                                j5 = addAndGet(-j6);
                             }
+                        } else if (!this.cancelled) {
+                            conditionalSubscriber.onComplete();
                             return;
-                        }
-                        j5 = get();
-                        if (j6 == j5) {
-                            this.index = j4;
-                            j5 = addAndGet(-j6);
+                        } else {
+                            return;
                         }
                     } else if (!this.cancelled) {
                         if (conditionalSubscriber.tryOnNext(Long.valueOf(j4))) {
@@ -137,7 +138,7 @@ public final class FlowableRangeLong extends Flowable<Long> {
             this.actual = subscriber;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fastPath() {
             long j = this.end;
             Subscriber<? super Long> subscriber = this.actual;
@@ -155,7 +156,7 @@ public final class FlowableRangeLong extends Flowable<Long> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(long j) {
             long j2 = this.end;
             long j3 = this.index;
@@ -166,16 +167,17 @@ public final class FlowableRangeLong extends Flowable<Long> {
                 long j6 = 0;
                 while (true) {
                     if (j6 == j5 || j4 == j2) {
-                        if (j4 == j2) {
-                            if (!this.cancelled) {
-                                subscriber.onComplete();
+                        if (j4 != j2) {
+                            j5 = get();
+                            if (j6 == j5) {
+                                this.index = j4;
+                                j5 = addAndGet(-j6);
                             }
+                        } else if (!this.cancelled) {
+                            subscriber.onComplete();
                             return;
-                        }
-                        j5 = get();
-                        if (j6 == j5) {
-                            this.index = j4;
-                            j5 = addAndGet(-j6);
+                        } else {
+                            return;
                         }
                     } else if (!this.cancelled) {
                         subscriber.onNext(Long.valueOf(j4));

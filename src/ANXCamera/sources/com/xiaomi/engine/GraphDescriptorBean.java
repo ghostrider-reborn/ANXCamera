@@ -2,12 +2,11 @@ package com.xiaomi.engine;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.util.Locale;
 import java.util.Objects;
 
 public final class GraphDescriptorBean implements Parcelable {
-    public static final Creator<GraphDescriptorBean> CREATOR = new Creator<GraphDescriptorBean>() {
+    public static final Parcelable.Creator<GraphDescriptorBean> CREATOR = new Parcelable.Creator<GraphDescriptorBean>() {
         public GraphDescriptorBean createFromParcel(Parcel parcel) {
             return new GraphDescriptorBean(parcel);
         }
@@ -47,7 +46,6 @@ public final class GraphDescriptorBean implements Parcelable {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -55,10 +53,7 @@ public final class GraphDescriptorBean implements Parcelable {
             return false;
         }
         GraphDescriptorBean graphDescriptorBean = (GraphDescriptorBean) obj;
-        if (!(this.mOperationModeID == graphDescriptorBean.mOperationModeID && this.mStreamNumber == graphDescriptorBean.mStreamNumber && this.mIsSnapshot == graphDescriptorBean.mIsSnapshot && this.mCameraCombinationMode == graphDescriptorBean.mCameraCombinationMode)) {
-            z = false;
-        }
-        return z;
+        return this.mOperationModeID == graphDescriptorBean.mOperationModeID && this.mStreamNumber == graphDescriptorBean.mStreamNumber && this.mIsSnapshot == graphDescriptorBean.mIsSnapshot && this.mCameraCombinationMode == graphDescriptorBean.mCameraCombinationMode;
     }
 
     public int getCameraCombinationMode() {

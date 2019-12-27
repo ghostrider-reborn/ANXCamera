@@ -14,6 +14,7 @@ public class DrawIntTexAttribute extends DrawAttribute {
         this.mWidth = i4;
         this.mHeight = i5;
         this.mTexId = i;
+        this.mTarget = 6;
         this.mIsSnapshot = z;
     }
 }

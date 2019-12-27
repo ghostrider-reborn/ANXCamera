@@ -3,10 +3,10 @@ package com.bumptech.glide.manager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.c;
-import com.bumptech.glide.manager.n.a;
+import com.bumptech.glide.manager.n;
 
 /* compiled from: RequestManagerRetriever */
-class m implements a {
+class m implements n.a {
     m() {
     }
 

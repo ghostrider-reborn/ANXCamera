@@ -20,7 +20,6 @@ public final class FlowableToList<T, U extends Collection<? super T>> extends Ab
         Subscription s;
 
         /* JADX WARNING: type inference failed for: r2v0, types: [T, U] */
-        /* JADX WARNING: Incorrect type for immutable var: ssa=U, code=null, for r2v0, types: [T, U] */
         /* JADX WARNING: Unknown variable types count: 1 */
         ToListSubscriber(Subscriber<? super U> subscriber, U r2) {
             super(subscriber);
@@ -65,9 +64,9 @@ public final class FlowableToList<T, U extends Collection<? super T>> extends Ab
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super U> subscriber) {
         try {
-            Object call = this.collectionSupplier.call();
+            U call = this.collectionSupplier.call();
             ObjectHelper.requireNonNull(call, "The collectionSupplier returned a null collection. Null values are generally not allowed in 2.x operators and sources.");
-            this.source.subscribe((FlowableSubscriber<? super T>) new ToListSubscriber<Object>(subscriber, (Collection) call));
+            this.source.subscribe(new ToListSubscriber(subscriber, (Collection) call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
             EmptySubscription.error(th, subscriber);

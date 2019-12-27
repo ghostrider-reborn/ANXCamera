@@ -23,7 +23,7 @@ public class ReflectionUtils {
 
     public static <T> T callStaticMethod(Class<?> cls, String str, Class<T> cls2, Object... objArr) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         try {
-            return checkMethodReturnValue(findMethodBestMatch(cls, str, objArr).invoke(null, objArr), cls2);
+            return checkMethodReturnValue(findMethodBestMatch(cls, str, objArr).invoke((Object) null, objArr), cls2);
         } catch (NullPointerException e2) {
             Log.w(TAG, "", e2);
             throw new IllegalArgumentException(e2);
@@ -31,16 +31,15 @@ public class ReflectionUtils {
     }
 
     private static Object checkFieldValue(Object obj, Class<?> cls) throws IllegalArgumentException {
-        String str = "fieldClazz";
         if (cls == Void.class) {
-            throw new IllegalArgumentException(str);
+            throw new IllegalArgumentException("fieldClazz");
         } else if (obj == null) {
             return null;
         } else {
             if (cls == null || ClassUtils.isAssignable(obj.getClass(), cls, true)) {
                 return obj;
             }
-            throw new IllegalArgumentException(str);
+            throw new IllegalArgumentException("fieldClazz");
         }
     }
 
@@ -68,28 +67,24 @@ public class ReflectionUtils {
     }
 
     public static Constructor<?> findConstructorBestMatch(Class<?> cls, Class<?>... clsArr) throws NoSuchMethodException {
-        Constructor[] declaredConstructors;
-        StringBuilder sb = new StringBuilder(cls.getName());
-        sb.append(getParametersString(clsArr));
-        sb.append("#bestmatch");
-        String sb2 = sb.toString();
+        String str = cls.getName() + getParametersString(clsArr) + "#bestmatch";
         synchronized (constructorCache) {
-            if (constructorCache.containsKey(sb2)) {
-                Constructor<?> constructor = (Constructor) constructorCache.get(sb2);
+            if (constructorCache.containsKey(str)) {
+                Constructor<?> constructor = constructorCache.get(str);
                 if (constructor != null) {
                     return constructor;
                 }
-                throw new NoSuchMethodException(sb2);
+                throw new NoSuchMethodException(str);
             }
             try {
                 Constructor<?> findConstructorExact = findConstructorExact(cls, clsArr);
                 synchronized (constructorCache) {
-                    constructorCache.put(sb2, findConstructorExact);
+                    constructorCache.put(str, findConstructorExact);
                 }
                 return findConstructorExact;
             } catch (NoSuchMethodException e2) {
-                Constructor constructor2 = null;
-                for (Constructor constructor3 : cls.getDeclaredConstructors()) {
+                Constructor<?> constructor2 = null;
+                for (Constructor<?> constructor3 : cls.getDeclaredConstructors()) {
                     if (ClassUtils.isAssignable(clsArr, constructor3.getParameterTypes(), true) && (constructor2 == null || MemberUtils.compareParameterTypes(constructor3.getParameterTypes(), constructor2.getParameterTypes(), clsArr) < 0)) {
                         constructor2 = constructor3;
                     }
@@ -97,13 +92,13 @@ public class ReflectionUtils {
                 if (constructor2 != null) {
                     constructor2.setAccessible(true);
                     synchronized (constructorCache) {
-                        constructorCache.put(sb2, constructor2);
+                        constructorCache.put(str, constructor2);
                         return constructor2;
                     }
                 }
-                NoSuchMethodException noSuchMethodException = new NoSuchMethodException(sb2);
+                NoSuchMethodException noSuchMethodException = new NoSuchMethodException(str);
                 synchronized (constructorCache) {
-                    constructorCache.put(sb2, null);
+                    constructorCache.put(str, (Object) null);
                     throw noSuchMethodException;
                 }
             }
@@ -115,29 +110,26 @@ public class ReflectionUtils {
     }
 
     public static Constructor<?> findConstructorExact(Class<?> cls, Class<?>... clsArr) throws NoSuchMethodException {
-        StringBuilder sb = new StringBuilder(cls.getName());
-        sb.append(getParametersString(clsArr));
-        sb.append("#exact");
-        String sb2 = sb.toString();
+        String str = cls.getName() + getParametersString(clsArr) + "#exact";
         synchronized (constructorCache) {
-            if (constructorCache.containsKey(sb2)) {
-                Constructor<?> constructor = (Constructor) constructorCache.get(sb2);
+            if (constructorCache.containsKey(str)) {
+                Constructor<?> constructor = constructorCache.get(str);
                 if (constructor != null) {
                     return constructor;
                 }
-                throw new NoSuchMethodException(sb2);
+                throw new NoSuchMethodException(str);
             }
             try {
                 Constructor<?> declaredConstructor = cls.getDeclaredConstructor(clsArr);
                 declaredConstructor.setAccessible(true);
                 synchronized (constructorCache) {
-                    constructorCache.put(sb2, declaredConstructor);
+                    constructorCache.put(str, declaredConstructor);
                 }
                 return declaredConstructor;
             } catch (NoSuchMethodException e2) {
                 NoSuchMethodException noSuchMethodException = e2;
                 synchronized (constructorCache) {
-                    constructorCache.put(sb2, null);
+                    constructorCache.put(str, (Object) null);
                     throw noSuchMethodException;
                 }
             }
@@ -145,29 +137,26 @@ public class ReflectionUtils {
     }
 
     public static Field findField(Class<?> cls, String str) throws NoSuchFieldException {
-        StringBuilder sb = new StringBuilder(cls.getName());
-        sb.append('#');
-        sb.append(str);
-        String sb2 = sb.toString();
+        String str2 = cls.getName() + '#' + str;
         synchronized (fieldCache) {
-            if (fieldCache.containsKey(sb2)) {
-                Field field = (Field) fieldCache.get(sb2);
+            if (fieldCache.containsKey(str2)) {
+                Field field = fieldCache.get(str2);
                 if (field != null) {
                     return field;
                 }
-                throw new NoSuchFieldException(sb2);
+                throw new NoSuchFieldException(str2);
             }
             try {
                 Field findFieldRecursiveImpl = findFieldRecursiveImpl(cls, str);
                 findFieldRecursiveImpl.setAccessible(true);
                 synchronized (fieldCache) {
-                    fieldCache.put(sb2, findFieldRecursiveImpl);
+                    fieldCache.put(str2, findFieldRecursiveImpl);
                 }
                 return findFieldRecursiveImpl;
             } catch (NoSuchFieldException e2) {
                 NoSuchFieldException noSuchFieldException = e2;
                 synchronized (fieldCache) {
-                    fieldCache.put(sb2, null);
+                    fieldCache.put(str2, (Object) null);
                     throw noSuchFieldException;
                 }
             }
@@ -178,14 +167,16 @@ public class ReflectionUtils {
         try {
             return cls.getDeclaredField(str);
         } catch (NoSuchFieldException e2) {
+            Class<? super Object> cls2 = cls;
             while (true) {
-                cls = cls.getSuperclass();
-                if (cls == null || cls.equals(Object.class)) {
+                Class<? super Object> superclass = cls2.getSuperclass();
+                if (superclass == null || superclass.equals(Object.class)) {
                     throw e2;
                 }
                 try {
-                    return cls.getDeclaredField(str);
+                    return superclass.getDeclaredField(str);
                 } catch (NoSuchFieldException e3) {
+                    cls2 = superclass;
                 }
             }
             throw e2;
@@ -193,25 +184,19 @@ public class ReflectionUtils {
     }
 
     public static Method findMethodBestMatch(Class<?> cls, String str, Class<?>... clsArr) throws NoSuchMethodException {
-        Method[] declaredMethods;
-        StringBuilder sb = new StringBuilder(cls.getName());
-        sb.append('#');
-        sb.append(str);
-        sb.append(getParametersString(clsArr));
-        sb.append("#bestmatch");
-        String sb2 = sb.toString();
+        String str2 = cls.getName() + '#' + str + getParametersString(clsArr) + "#bestmatch";
         synchronized (methodCache) {
-            if (methodCache.containsKey(sb2)) {
-                Method method = (Method) methodCache.get(sb2);
+            if (methodCache.containsKey(str2)) {
+                Method method = methodCache.get(str2);
                 if (method != null) {
                     return method;
                 }
-                throw new NoSuchMethodException(sb2);
+                throw new NoSuchMethodException(str2);
             }
             try {
                 Method findMethodExact = findMethodExact(cls, str, clsArr);
                 synchronized (methodCache) {
-                    methodCache.put(sb2, findMethodExact);
+                    methodCache.put(str2, findMethodExact);
                 }
                 return findMethodExact;
             } catch (NoSuchMethodException e2) {
@@ -224,13 +209,13 @@ public class ReflectionUtils {
                 if (method2 != null) {
                     method2.setAccessible(true);
                     synchronized (methodCache) {
-                        methodCache.put(sb2, method2);
+                        methodCache.put(str2, method2);
                         return method2;
                     }
                 }
-                NoSuchMethodException noSuchMethodException = new NoSuchMethodException(sb2);
+                NoSuchMethodException noSuchMethodException = new NoSuchMethodException(str2);
                 synchronized (methodCache) {
-                    methodCache.put(sb2, null);
+                    methodCache.put(str2, (Object) null);
                     throw noSuchMethodException;
                 }
             }
@@ -242,31 +227,26 @@ public class ReflectionUtils {
     }
 
     public static Method findMethodExact(Class<?> cls, String str, Class<?>... clsArr) throws NoSuchMethodException {
-        StringBuilder sb = new StringBuilder(cls.getName());
-        sb.append('#');
-        sb.append(str);
-        sb.append(getParametersString(clsArr));
-        sb.append("#exact");
-        String sb2 = sb.toString();
+        String str2 = cls.getName() + '#' + str + getParametersString(clsArr) + "#exact";
         synchronized (methodCache) {
-            if (methodCache.containsKey(sb2)) {
-                Method method = (Method) methodCache.get(sb2);
+            if (methodCache.containsKey(str2)) {
+                Method method = methodCache.get(str2);
                 if (method != null) {
                     return method;
                 }
-                throw new NoSuchMethodException(sb2);
+                throw new NoSuchMethodException(str2);
             }
             try {
                 Method declaredMethod = cls.getDeclaredMethod(str, clsArr);
                 declaredMethod.setAccessible(true);
                 synchronized (methodCache) {
-                    methodCache.put(sb2, declaredMethod);
+                    methodCache.put(str2, declaredMethod);
                 }
                 return declaredMethod;
             } catch (NoSuchMethodException e2) {
                 NoSuchMethodException noSuchMethodException = e2;
                 synchronized (methodCache) {
-                    methodCache.put(sb2, null);
+                    methodCache.put(str2, (Object) null);
                     throw noSuchMethodException;
                 }
             }
@@ -277,17 +257,17 @@ public class ReflectionUtils {
         Class[] clsArr = null;
         int length = objArr.length - 1;
         while (length >= 0) {
-            Object obj = objArr[length];
-            if (obj != null) {
+            String str2 = objArr[length];
+            if (str2 != null) {
                 if (clsArr == null) {
                     clsArr = new Class[(length + 1)];
                 }
-                if (obj instanceof Class) {
-                    clsArr[length] = (Class) obj;
-                } else if (obj instanceof String) {
-                    clsArr[length] = findClass((String) obj, cls.getClassLoader());
+                if (str2 instanceof Class) {
+                    clsArr[length] = (Class) str2;
+                } else if (str2 instanceof String) {
+                    clsArr[length] = findClass(str2, cls.getClassLoader());
                 } else {
-                    throw new IllegalArgumentException("parameter type must either be specified as Class or String", null);
+                    throw new IllegalArgumentException("parameter type must either be specified as Class or String", (Throwable) null);
                 }
                 length--;
             } else {
@@ -337,7 +317,7 @@ public class ReflectionUtils {
 
     public static <T> T getStaticObjectField(Class<?> cls, String str, Class<T> cls2) throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
         try {
-            return checkFieldValue(findField(cls, str).get(null), cls2);
+            return checkFieldValue(findField(cls, str).get((Object) null), cls2);
         } catch (NullPointerException e2) {
             Log.w(TAG, "", e2);
             throw new IllegalArgumentException(e2);
@@ -358,7 +338,7 @@ public class ReflectionUtils {
 
     public static void setStaticObjectField(Class<?> cls, String str, Object obj) throws NoSuchFieldException, IllegalAccessException, IllegalArgumentException {
         try {
-            findField(cls, str).set(null, obj);
+            findField(cls, str).set((Object) null, obj);
         } catch (NullPointerException e2) {
             Log.w(TAG, "", e2);
             throw new IllegalArgumentException(e2);
@@ -366,41 +346,37 @@ public class ReflectionUtils {
     }
 
     public static <T> ObjectReference<T> tryCallMethod(Object obj, String str, Class<T> cls, Object... objArr) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             return new ObjectReference<>(callMethod(obj, str, cls, objArr));
         } catch (NoSuchMethodException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (IllegalAccessException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
             return null;
         } catch (IllegalArgumentException e4) {
-            Log.w(str3, str2, e4);
+            Log.w(TAG, "", e4);
             return null;
         } catch (InvocationTargetException e5) {
-            Log.w(str3, str2, e5);
+            Log.w(TAG, "", e5);
             return null;
         }
     }
 
     public static <T> ObjectReference<T> tryCallStaticMethod(Class<?> cls, String str, Class<T> cls2, Object... objArr) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             return new ObjectReference<>(callStaticMethod(cls, str, cls2, objArr));
         } catch (NoSuchMethodException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (IllegalAccessException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
             return null;
         } catch (IllegalArgumentException e4) {
-            Log.w(str3, str2, e4);
+            Log.w(TAG, "", e4);
             return null;
         } catch (InvocationTargetException e5) {
-            Log.w(str3, str2, e5);
+            Log.w(TAG, "", e5);
             return null;
         }
     }
@@ -478,118 +454,104 @@ public class ReflectionUtils {
     }
 
     public static Method tryFindMethodExact(Class<?> cls, String str, Object... objArr) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             return findMethodExact(cls, str, objArr);
         } catch (ClassNotFoundException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (NoSuchMethodException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
             return null;
         }
     }
 
     public static <T> ObjectReference<T> tryGetObjectField(Object obj, String str, Class<T> cls) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             return new ObjectReference<>(getObjectField(obj, str, cls));
         } catch (NoSuchFieldException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (IllegalAccessException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
             return null;
         } catch (IllegalArgumentException e4) {
-            Log.w(str3, str2, e4);
+            Log.w(TAG, "", e4);
             return null;
         }
     }
 
     public static <T> ObjectReference<T> tryGetStaticObjectField(Class<?> cls, String str, Class<T> cls2) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             return new ObjectReference<>(getStaticObjectField(cls, str, cls2));
         } catch (NoSuchFieldException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (IllegalAccessException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
             return null;
         } catch (IllegalArgumentException e4) {
-            Log.w(str3, str2, e4);
+            Log.w(TAG, "", e4);
             return null;
         }
     }
 
     public static <T> ObjectReference<T> tryGetSurroundingThis(Object obj, Class<T> cls) {
-        String str = "";
-        String str2 = TAG;
         try {
             return new ObjectReference<>(getSurroundingThis(obj, cls));
         } catch (NoSuchFieldException e2) {
-            Log.w(str2, str, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (IllegalAccessException e3) {
-            Log.w(str2, str, e3);
+            Log.w(TAG, "", e3);
             return null;
         } catch (IllegalArgumentException e4) {
-            Log.w(str2, str, e4);
+            Log.w(TAG, "", e4);
             return null;
         }
     }
 
     public static Object tryNewInstance(Class<?> cls, Object... objArr) {
-        String str = "";
-        String str2 = TAG;
         try {
             return newInstance(cls, objArr);
         } catch (NoSuchMethodException e2) {
-            Log.w(str2, str, e2);
+            Log.w(TAG, "", e2);
             return null;
         } catch (InstantiationException e3) {
-            Log.w(str2, str, e3);
+            Log.w(TAG, "", e3);
             return null;
         } catch (IllegalAccessException e4) {
-            Log.w(str2, str, e4);
+            Log.w(TAG, "", e4);
             return null;
         } catch (IllegalArgumentException e5) {
-            Log.w(str2, str, e5);
+            Log.w(TAG, "", e5);
             return null;
         } catch (InvocationTargetException e6) {
-            Log.w(str2, str, e6);
+            Log.w(TAG, "", e6);
             return null;
         }
     }
 
     public static void trySetObjectField(Object obj, String str, Object obj2) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             setObjectField(obj, str, obj2);
         } catch (NoSuchFieldException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
         } catch (IllegalAccessException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
         } catch (IllegalArgumentException e4) {
-            Log.w(str3, str2, e4);
+            Log.w(TAG, "", e4);
         }
     }
 
     public static void trySetStaticObjectField(Class<?> cls, String str, Object obj) {
-        String str2 = "";
-        String str3 = TAG;
         try {
             setStaticObjectField(cls, str, obj);
         } catch (NoSuchFieldException e2) {
-            Log.w(str3, str2, e2);
+            Log.w(TAG, "", e2);
         } catch (IllegalAccessException e3) {
-            Log.w(str3, str2, e3);
+            Log.w(TAG, "", e3);
         } catch (IllegalArgumentException e4) {
-            Log.w(str3, str2, e4);
+            Log.w(TAG, "", e4);
         }
     }
 }

@@ -31,7 +31,7 @@ public final class ObservableConcatMapEager<T, R> extends AbstractObservableWith
         volatile boolean cancelled;
         InnerQueuedObserver<R> current;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f309d;
         volatile boolean done;
         final AtomicThrowable error = new AtomicThrowable();
@@ -59,16 +59,16 @@ public final class ObservableConcatMapEager<T, R> extends AbstractObservableWith
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeAll() {
             InnerQueuedObserver<R> innerQueuedObserver = this.current;
             if (innerQueuedObserver != null) {
                 innerQueuedObserver.dispose();
             }
             while (true) {
-                InnerQueuedObserver innerQueuedObserver2 = (InnerQueuedObserver) this.observers.poll();
-                if (innerQueuedObserver2 != null) {
-                    innerQueuedObserver2.dispose();
+                InnerQueuedObserver poll = this.observers.poll();
+                if (poll != null) {
+                    poll.dispose();
                 } else {
                     return;
                 }
@@ -93,7 +93,7 @@ public final class ObservableConcatMapEager<T, R> extends AbstractObservableWith
                             return;
                         } else if (errorMode2 != ErrorMode.IMMEDIATE || ((Throwable) this.error.get()) == null) {
                             try {
-                                Object poll = simpleQueue.poll();
+                                T poll = simpleQueue.poll();
                                 if (poll == null) {
                                     break;
                                 }
@@ -130,21 +130,20 @@ public final class ObservableConcatMapEager<T, R> extends AbstractObservableWith
                         if (innerQueuedObserver2 == null) {
                             if (errorMode2 != ErrorMode.BOUNDARY || ((Throwable) this.error.get()) == null) {
                                 boolean z = this.done;
-                                InnerQueuedObserver<R> innerQueuedObserver3 = (InnerQueuedObserver) arrayDeque.poll();
-                                boolean z2 = innerQueuedObserver3 == null;
+                                InnerQueuedObserver<R> poll2 = arrayDeque.poll();
+                                boolean z2 = poll2 == null;
                                 if (!z || !z2) {
                                     if (!z2) {
-                                        this.current = innerQueuedObserver3;
+                                        this.current = poll2;
                                     }
-                                    innerQueuedObserver2 = innerQueuedObserver3;
+                                    innerQueuedObserver2 = poll2;
+                                } else if (((Throwable) this.error.get()) != null) {
+                                    simpleQueue.clear();
+                                    disposeAll();
+                                    observer.onError(this.error.terminate());
+                                    return;
                                 } else {
-                                    if (((Throwable) this.error.get()) != null) {
-                                        simpleQueue.clear();
-                                        disposeAll();
-                                        observer.onError(this.error.terminate());
-                                    } else {
-                                        observer.onComplete();
-                                    }
+                                    observer.onComplete();
                                     return;
                                 }
                             } else {
@@ -155,18 +154,18 @@ public final class ObservableConcatMapEager<T, R> extends AbstractObservableWith
                             }
                         }
                         if (innerQueuedObserver2 != null) {
-                            SimpleQueue queue2 = innerQueuedObserver2.queue();
+                            SimpleQueue<R> queue2 = innerQueuedObserver2.queue();
                             while (!this.cancelled) {
                                 boolean isDone = innerQueuedObserver2.isDone();
                                 if (errorMode2 != ErrorMode.IMMEDIATE || ((Throwable) this.error.get()) == null) {
                                     try {
-                                        Object poll2 = queue2.poll();
-                                        boolean z3 = poll2 == null;
+                                        R poll3 = queue2.poll();
+                                        boolean z3 = poll3 == null;
                                         if (isDone && z3) {
                                             this.current = null;
                                             this.activeCount--;
                                         } else if (!z3) {
-                                            observer.onNext(poll2);
+                                            observer.onNext(poll3);
                                         }
                                     } catch (Throwable th2) {
                                         Exceptions.throwIfFatal(th2);

@@ -29,52 +29,36 @@ public abstract class MiCamera2ShotParallel<T> extends MiCamera2Shot<T> {
         return this.mMiCamera.getId() == Camera2DataContainer.getInstance().getSATFrontCameraId() || this.mMiCamera.getId() == Camera2DataContainer.getInstance().getBokehFrontCameraId() || this.mMiCamera.getId() == Camera2DataContainer.getInstance().getSATCameraId() || this.mMiCamera.getId() == Camera2DataContainer.getInstance().getBokehCameraId() || this.mMiCamera.getId() == Camera2DataContainer.getInstance().getUltraWideBokehCameraId();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void configParallelSession(Size size) {
         GraphDescriptorBean graphDescriptorBean;
-        boolean isPortraitModule = ModuleManager.isPortraitModule();
-        String str = TAG;
-        if (isPortraitModule) {
+        if (ModuleManager.isPortraitModule()) {
             int i = hasDualCamera() ? 2 : 1;
-            StringBuilder sb = new StringBuilder();
-            sb.append("configParallelSession: inputStreamNum = ");
-            sb.append(i);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "configParallelSession: inputStreamNum = " + i);
             graphDescriptorBean = new GraphDescriptorBean(32770, i, true, CameraDeviceUtil.getCameraCombinationMode(this.mMiCamera.getId()));
         } else {
             graphDescriptorBean = ModuleManager.isManualModule() ? new GraphDescriptorBean(32771, 1, true, CameraDeviceUtil.getCameraCombinationMode(this.mMiCamera.getId())) : ModuleManager.isUltraPixel() ? new GraphDescriptorBean(33011, 1, true, CameraDeviceUtil.getCameraCombinationMode(this.mMiCamera.getId())) : new GraphDescriptorBean(0, 1, true, CameraDeviceUtil.getCameraCombinationMode(this.mMiCamera.getId()));
         }
         int width = size.getWidth();
         int height = size.getHeight();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("configParallelSession: pictureSize = ");
-        sb2.append(size);
-        Log.d(str, sb2.toString());
+        Log.d(TAG, "configParallelSession: pictureSize = " + size);
         AlgoConnector.getInstance().getLocalBinder().configCaptureSession(new BufferFormat(width, height, 35, graphDescriptorBean));
         this.mCapturedImageSize = new CameraSize(size);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void configParallelSession(Size size, int i) {
         GraphDescriptorBean graphDescriptorBean;
-        boolean isPortraitModule = ModuleManager.isPortraitModule();
-        String str = TAG;
-        if (isPortraitModule) {
+        if (ModuleManager.isPortraitModule()) {
             int i2 = hasDualCamera() ? 2 : 1;
-            StringBuilder sb = new StringBuilder();
-            sb.append("configParallelSession: inputStreamNum = ");
-            sb.append(i2);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "configParallelSession: inputStreamNum = " + i2);
             graphDescriptorBean = new GraphDescriptorBean(32770, i2, true, i);
         } else {
             graphDescriptorBean = new GraphDescriptorBean(0, 1, true, i);
         }
         int width = size.getWidth();
         int height = size.getHeight();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("configParallelSession: pictureSize = ");
-        sb2.append(size);
-        Log.d(str, sb2.toString());
+        Log.d(TAG, "configParallelSession: pictureSize = " + size);
         AlgoConnector.getInstance().getLocalBinder().configCaptureSession(new BufferFormat(width, height, 35, graphDescriptorBean));
         this.mCapturedImageSize = new CameraSize(size);
     }

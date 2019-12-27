@@ -3,14 +3,13 @@ package com.bumptech.glide.util;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
-import com.bumptech.glide.f.b;
-import com.bumptech.glide.request.a.f;
+import com.bumptech.glide.f;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.target.n;
 import java.util.Arrays;
 
 /* compiled from: ViewPreloadSizeProvider */
-public class m<T> implements b<T>, n {
+public class m<T> implements f.b<T>, n {
     private a em;
     private int[] size;
 
@@ -21,7 +20,7 @@ public class m<T> implements b<T>, n {
             b(nVar);
         }
 
-        public void a(@NonNull Object obj, @Nullable f<? super Object> fVar) {
+        public void a(@NonNull Object obj, @Nullable com.bumptech.glide.request.a.f<? super Object> fVar) {
         }
     }
 

@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.reactivex.internal.disposables.DisposableHelper;
@@ -41,7 +40,7 @@ public final class FlowableDebounceTimed<T> extends AbstractFlowableWithUpstream
             DisposableHelper.dispose(this);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit() {
             if (this.once.compareAndSet(false, true)) {
                 this.parent.emit(this.idx, this.value, this);
@@ -70,9 +69,9 @@ public final class FlowableDebounceTimed<T> extends AbstractFlowableWithUpstream
         final long timeout;
         final SequentialDisposable timer = new SequentialDisposable();
         final TimeUnit unit;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        DebounceTimedSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Worker worker2) {
+        DebounceTimedSubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Scheduler.Worker worker2) {
             this.actual = subscriber;
             this.timeout = j;
             this.unit = timeUnit;
@@ -84,7 +83,7 @@ public final class FlowableDebounceTimed<T> extends AbstractFlowableWithUpstream
             this.worker.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit(long j, T t, DebounceEmitter<T> debounceEmitter) {
             if (j != this.index) {
                 return;

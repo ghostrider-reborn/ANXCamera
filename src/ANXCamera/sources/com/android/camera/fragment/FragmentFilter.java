@@ -2,27 +2,21 @@ package com.android.camera.fragment;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Xfermode;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.OnScrollListener;
-import android.support.v7.widget.RecyclerView.State;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,15 +32,14 @@ import com.android.camera.fragment.beauty.BaseBeautyFragment;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import io.reactivex.Completable;
 import java.util.ArrayList;
 import java.util.List;
 import miui.view.animation.CubicEaseOutInterpolator;
 
-public class FragmentFilter extends BaseBeautyFragment implements OnClickListener {
+public class FragmentFilter extends BaseBeautyFragment implements View.OnClickListener {
     public static final int FRAGMENT_INFO = 250;
     private static final String TAG = "FragmentFilter";
     /* access modifiers changed from: private */
@@ -68,7 +61,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
     private RecyclerView mRecyclerView;
     private int mTotalWidth;
 
-    protected class EffectItemAdapter extends Adapter {
+    protected class EffectItemAdapter extends RecyclerView.Adapter {
         protected ComponentConfigFilter mFilters;
         protected LayoutInflater mLayoutInflater;
 
@@ -81,14 +74,13 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
             return this.mFilters.getItems().size();
         }
 
-        public void onBindViewHolder(ViewHolder viewHolder, int i) {
-            ComponentDataItem componentDataItem = (ComponentDataItem) this.mFilters.getItems().get(i);
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
             EffectItemHolder effectItemHolder = (EffectItemHolder) viewHolder;
             effectItemHolder.itemView.setTag(Integer.valueOf(i));
-            effectItemHolder.bindEffectIndex(i, componentDataItem);
+            effectItemHolder.bindEffectIndex(i, this.mFilters.getItems().get(i));
         }
 
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View inflate = this.mLayoutInflater.inflate(R.layout.effect_still_item, viewGroup, false);
             EffectStillItemHolder effectStillItemHolder = new EffectStillItemHolder(inflate);
             inflate.setOnClickListener(FragmentFilter.this);
@@ -101,7 +93,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
         }
     }
 
-    private static abstract class EffectItemHolder extends ViewHolder {
+    private static abstract class EffectItemHolder extends RecyclerView.ViewHolder {
         protected int mEffectIndex;
         protected TextView mTextView;
 
@@ -121,7 +113,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
         }
     }
 
-    private static class EffectItemPadding extends ItemDecoration {
+    private static class EffectItemPadding extends RecyclerView.ItemDecoration {
         protected int mEffectListLeft;
         protected int mHorizontalPadding;
         protected int mVerticalPadding;
@@ -132,7 +124,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
             this.mEffectListLeft = context.getResources().getDimensionPixelSize(R.dimen.effect_list_padding_left);
         }
 
-        public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+        public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
             int i = recyclerView.getChildPosition(view) == 0 ? this.mEffectListLeft : 0;
             int i2 = this.mVerticalPadding;
             rect.set(i, i2, this.mHorizontalPadding, i2);
@@ -158,10 +150,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
                 FragmentFilter.this.showSelected(this.mImageView, componentDataItem.mIconRes);
                 if (Util.isAccessible() || Util.isSetContentDesc()) {
                     View view = this.itemView;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(FragmentFilter.this.getContext().getString(componentDataItem.mDisplayNameRes));
-                    sb.append(FragmentFilter.this.getString(R.string.accessibility_selected));
-                    view.setContentDescription(sb.toString());
+                    view.setContentDescription(FragmentFilter.this.getContext().getString(componentDataItem.mDisplayNameRes) + FragmentFilter.this.getString(R.string.accessibility_selected));
                     this.itemView.postDelayed(new Runnable() {
                         public void run() {
                             if (FragmentFilter.this.isAdded()) {
@@ -223,7 +212,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
 
     private void initView(View view) {
         this.mRecyclerView = (RecyclerView) view.findViewById(R.id.effect_list);
-        ArrayList filterInfo = getFilterInfo();
+        ArrayList<FilterInfo> filterInfo = getFilterInfo();
         this.mComponentConfigFilter = DataRepository.dataItemRunning().getComponentConfigFilter();
         this.mComponentConfigFilter.mapToItems(filterInfo);
         Context context = getContext();
@@ -239,10 +228,10 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
             this.mRecyclerView.addItemDecoration(this.mEffectItemPadding);
         }
         this.mRecyclerView.setAdapter(this.mEffectItemAdapter);
-        this.mRecyclerView.addOnScrollListener(new OnScrollListener() {
+        this.mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             public void onScrollStateChanged(RecyclerView recyclerView, int i) {
                 super.onScrollStateChanged(recyclerView, i);
-                FragmentFilter.this.isAnimation = false;
+                boolean unused = FragmentFilter.this.isAnimation = false;
             }
         });
         DefaultItemAnimator defaultItemAnimator = new DefaultItemAnimator();
@@ -264,23 +253,14 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
 
     private void onItemSelected(int i, boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onItemSelected: index = ");
-        sb.append(i);
-        sb.append(", fromClick = ");
-        sb.append(z);
-        sb.append(", mCurrentMode = ");
-        sb.append(this.mCurrentMode);
-        sb.append(", DataRepository.dataItemGlobal().getCurrentMode() = ");
-        sb.append(DataRepository.dataItemGlobal().getCurrentMode());
-        Log.d(str, sb.toString());
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        Log.d(str, "onItemSelected: index = " + i + ", fromClick = " + z + ", mCurrentMode = " + this.mCurrentMode + ", DataRepository.dataItemGlobal().getCurrentMode() = " + DataRepository.dataItemGlobal().getCurrentMode());
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
         if (configChanges == null) {
             Log.e(TAG, "onItemSelected: configChanges = null");
             return;
         }
         try {
-            String str2 = ((ComponentDataItem) this.mComponentConfigFilter.getItems().get(i)).mValue;
+            String str2 = this.mComponentConfigFilter.getItems().get(i).mValue;
             this.mComponentConfigFilter.setClosed(false, DataRepository.dataItemGlobal().getCurrentMode());
             int intValue = Integer.valueOf(str2).intValue();
             CameraStatUtil.trackFilterChanged(DataRepository.dataItemGlobal().getCurrentMode(), intValue, z);
@@ -289,19 +269,13 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
             configChanges.setFilter(intValue);
         } catch (NumberFormatException e2) {
             String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("invalid filter id: ");
-            sb2.append(e2.getMessage());
-            Log.e(str3, sb2.toString());
+            Log.e(str3, "invalid filter id: " + e2.getMessage());
         }
     }
 
     private void persistFilter(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("persistFilter: filterId = ");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "persistFilter: filterId = " + i);
         CameraSettings.setShaderEffect(i);
     }
 
@@ -335,14 +309,14 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
         Canvas canvas = new Canvas();
         Bitmap decodeResource = BitmapFactory.decodeResource(getResources(), R.drawable.filter_item_selected_view);
         Bitmap decodeResource2 = BitmapFactory.decodeResource(getResources(), i);
-        Bitmap createBitmap = Bitmap.createBitmap(decodeResource.getWidth(), decodeResource.getHeight(), Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(decodeResource.getWidth(), decodeResource.getHeight(), Bitmap.Config.ARGB_8888);
         canvas.setBitmap(createBitmap);
         Paint paint = new Paint();
         paint.setFilterBitmap(false);
         canvas.drawBitmap(decodeResource, 0.0f, 0.0f, paint);
-        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(decodeResource2, 0.0f, 0.0f, paint);
-        paint.setXfermode(null);
+        paint.setXfermode((Xfermode) null);
         imageView.setImageBitmap(createBitmap);
     }
 
@@ -351,10 +325,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
         int findIndexOfValue = this.mComponentConfigFilter.findIndexOfValue(componentValue);
         if (findIndexOfValue == -1) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("invalid filter ");
-            sb.append(componentValue);
-            Log.w(str, sb.toString());
+            Log.w(str, "invalid filter " + componentValue);
             findIndexOfValue = 0;
         }
         setItemInCenter(findIndexOfValue);
@@ -376,7 +347,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
     public void onClick(View view) {
         Log.d(TAG, "onClick: ");
         if (this.mRecyclerView.isEnabled()) {
-            CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+            ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
             if (cameraAction == null || !cameraAction.isDoingAction()) {
                 int intValue = ((Integer) view.getTag()).intValue();
                 if (this.mCurrentIndex != intValue || !this.mIgnoreSameItemClick) {
@@ -416,11 +387,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
                 }
             }
         } else if (i != 5) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("unexpected gravity ");
-            sb.append(i);
-            Log.e(str, sb.toString());
+            Log.e(TAG, "unexpected gravity " + i);
         } else if (this.mCurrentIndex < this.mComponentConfigFilter.getItems().size() - 1) {
             i2 = this.mCurrentIndex + 1;
             if (i2 > -1) {
@@ -435,7 +402,7 @@ public class FragmentFilter extends BaseBeautyFragment implements OnClickListene
     }
 
     public void updateFilterData() {
-        ArrayList filterInfo = getFilterInfo();
+        ArrayList<FilterInfo> filterInfo = getFilterInfo();
         this.mComponentConfigFilter = DataRepository.dataItemRunning().getComponentConfigFilter();
         this.mComponentConfigFilter.mapToItems(filterInfo);
         this.mEffectItemAdapter.updateData(this.mComponentConfigFilter);

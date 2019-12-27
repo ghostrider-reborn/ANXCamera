@@ -20,7 +20,7 @@ class g<K extends l, V> {
         private List<V> values;
 
         a() {
-            this(null);
+            this((Object) null);
         }
 
         a(K k) {
@@ -85,7 +85,7 @@ class g<K extends l, V> {
     }
 
     public void a(K k, V v) {
-        a aVar = (a) this.eg.get(k);
+        a aVar = this.eg.get(k);
         if (aVar == null) {
             aVar = new a(k);
             b(aVar);
@@ -98,7 +98,7 @@ class g<K extends l, V> {
 
     @Nullable
     public V b(K k) {
-        a aVar = (a) this.eg.get(k);
+        a aVar = this.eg.get(k);
         if (aVar == null) {
             aVar = new a(k);
             this.eg.put(k, aVar);

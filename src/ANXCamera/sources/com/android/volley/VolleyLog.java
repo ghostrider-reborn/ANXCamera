@@ -36,9 +36,9 @@ public class VolleyLog {
             if (this.mMarkers.size() == 0) {
                 return 0;
             }
-            long j = ((Marker) this.mMarkers.get(0)).time;
+            long j = this.mMarkers.get(0).time;
             List<Marker> list = this.mMarkers;
-            return ((Marker) list.get(list.size() - 1)).time - j;
+            return list.get(list.size() - 1).time - j;
         }
 
         public synchronized void add(String str, long j) {
@@ -63,11 +63,11 @@ public class VolleyLog {
             this.mFinished = true;
             long totalDuration = getTotalDuration();
             if (totalDuration > 0) {
-                long j = ((Marker) this.mMarkers.get(0)).time;
+                long j = this.mMarkers.get(0).time;
                 VolleyLog.d("(%-4d ms) %s", Long.valueOf(totalDuration), str);
-                for (Marker marker : this.mMarkers) {
-                    long j2 = marker.time;
-                    VolleyLog.d("(+%-4d) [%2d] %s", Long.valueOf(j2 - j), Long.valueOf(marker.thread), marker.name);
+                for (Marker next : this.mMarkers) {
+                    long j2 = next.time;
+                    VolleyLog.d("(+%-4d) [%2d] %s", Long.valueOf(j2 - j), Long.valueOf(next.thread), next.name);
                     j = j2;
                 }
             }
@@ -89,11 +89,7 @@ public class VolleyLog {
                 String className = stackTrace[i].getClassName();
                 String substring = className.substring(className.lastIndexOf(46) + 1);
                 String substring2 = substring.substring(substring.lastIndexOf(36) + 1);
-                StringBuilder sb = new StringBuilder();
-                sb.append(substring2);
-                sb.append(".");
-                sb.append(stackTrace[i].getMethodName());
-                str2 = sb.toString();
+                str2 = substring2 + "." + stackTrace[i].getMethodName();
                 break;
             } else {
                 i++;

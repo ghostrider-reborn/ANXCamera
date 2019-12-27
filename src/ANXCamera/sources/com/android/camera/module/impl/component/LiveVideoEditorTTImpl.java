@@ -7,17 +7,12 @@ import com.android.camera.ActivityBase;
 import com.android.camera.constant.DurationConstant;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.LiveVideoEditor;
+import com.android.camera.protocol.ModeProtocol;
 import com.ss.android.vesdk.VECommonCallback;
 import com.ss.android.vesdk.VEEditor;
-import com.ss.android.vesdk.VEEditor.SCALE_MODE;
-import com.ss.android.vesdk.VEEditor.SEEK_MODE;
-import com.ss.android.vesdk.VEEditor.VIDEO_RATIO;
-import com.ss.android.vesdk.VEVideoEncodeSettings.Builder;
-import com.ss.android.vesdk.VEVideoEncodeSettings.COMPILE_TYPE;
-import com.ss.android.vesdk.VEVideoEncodeSettings.ENCODE_BITRATE_MODE;
+import com.ss.android.vesdk.VEVideoEncodeSettings;
 
-public class LiveVideoEditorTTImpl implements LiveVideoEditor {
+public class LiveVideoEditorTTImpl implements ModeProtocol.LiveVideoEditor {
     private static final String TAG = "LiveVideoEditorTTImpl";
     private Context mContext;
     private VEEditor mEditor;
@@ -43,27 +38,17 @@ public class LiveVideoEditorTTImpl implements LiveVideoEditor {
         }
         this.mNeedPrepare = true;
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("combine video, width = ");
-        sb.append(this.mEncodeWidth);
-        sb.append(", height = ");
-        sb.append(this.mEncodeHeight);
-        sb.append("orientation = ");
-        sb.append(this.mOrientation);
-        Log.d(str2, sb.toString());
-        this.mEditor.compile(str, null, new Builder(2).setCompileType(COMPILE_TYPE.COMPILE_TYPE_MP4).setVideoRes(this.mEncodeWidth, this.mEncodeHeight).setRotate(this.mOrientation).setHwEnc(true).setGopSize(30).setVideoBitrate(ENCODE_BITRATE_MODE.ENCODE_BITRATE_ABR, 4194304).setFps(30).build());
+        Log.d(str2, "combine video, width = " + this.mEncodeWidth + ", height = " + this.mEncodeHeight + "orientation = " + this.mOrientation);
+        this.mEditor.compile(str, (String) null, new VEVideoEncodeSettings.Builder(2).setCompileType(VEVideoEncodeSettings.COMPILE_TYPE.COMPILE_TYPE_MP4).setVideoRes(this.mEncodeWidth, this.mEncodeHeight).setRotate(this.mOrientation).setHwEnc(true).setGopSize(30).setVideoBitrate(VEVideoEncodeSettings.ENCODE_BITRATE_MODE.ENCODE_BITRATE_ABR, 4194304).setFps(30).build());
     }
 
     public boolean init(TextureView textureView, String str, String str2, VECommonCallback vECommonCallback, VECommonCallback vECommonCallback2) {
         Log.v(TAG, "VEEditor init");
         this.mEditor = new VEEditor(FileUtils.ROOT_DIR, textureView);
-        int init = this.mEditor.init(new String[]{str}, null, str2.equals("") ^ true ? new String[]{str2} : null, VIDEO_RATIO.VIDEO_OUT_RATIO_ORIGINAL);
+        int init = this.mEditor.init(new String[]{str}, (String[]) null, str2.equals("") ^ true ? new String[]{str2} : null, VEEditor.VIDEO_RATIO.VIDEO_OUT_RATIO_ORIGINAL);
         if (init != 0) {
             String str3 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Video editor init failed, ret = ");
-            sb.append(init);
-            Log.e(str3, sb.toString());
+            Log.e(str3, "Video editor init failed, ret = " + init);
             VEEditor vEEditor = this.mEditor;
             if (vEEditor != null) {
                 vEEditor.destroy();
@@ -74,11 +59,11 @@ public class LiveVideoEditorTTImpl implements LiveVideoEditor {
         this.mEditor.setOnInfoListener(vECommonCallback);
         this.mEditor.setOnErrorListener(vECommonCallback2);
         this.mEditor.setLoopPlay(false);
-        this.mEditor.setScaleMode(SCALE_MODE.SCALE_MODE_CENTER_CROP);
+        this.mEditor.setScaleMode(VEEditor.SCALE_MODE.SCALE_MODE_CENTER_CROP);
         this.mEditor.prepare();
         this.mNeedPrepare = false;
         this.mEditor.addAudioTrack(str2, 0, DurationConstant.DURATION_VIDEO_RECORDING_FUN, true);
-        this.mEditor.seek(0, SEEK_MODE.EDITOR_SEEK_FLAG_LastSeek);
+        this.mEditor.seek(0, VEEditor.SEEK_MODE.EDITOR_SEEK_FLAG_LastSeek);
         return true;
     }
 
@@ -86,8 +71,8 @@ public class LiveVideoEditorTTImpl implements LiveVideoEditor {
         Log.v(TAG, "VEEditor onDestory");
         VEEditor vEEditor = this.mEditor;
         if (vEEditor != null) {
-            vEEditor.setOnErrorListener(null);
-            this.mEditor.setOnInfoListener(null);
+            vEEditor.setOnErrorListener((VECommonCallback) null);
+            this.mEditor.setOnInfoListener((VECommonCallback) null);
             this.mEditor.destroy();
             this.mEditor = null;
         }
@@ -107,22 +92,14 @@ public class LiveVideoEditorTTImpl implements LiveVideoEditor {
     public void resumePlay() {
         VEEditor vEEditor = this.mEditor;
         if (vEEditor != null) {
-            vEEditor.seek(0, SEEK_MODE.EDITOR_SEEK_FLAG_LastSeek);
+            vEEditor.seek(0, VEEditor.SEEK_MODE.EDITOR_SEEK_FLAG_LastSeek);
             this.mEditor.play();
         }
     }
 
     public void setRecordParameter(int i, int i2, int i3) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setRecordParameter:  ");
-        sb.append(i);
-        String str2 = " | ";
-        sb.append(str2);
-        sb.append(i2);
-        sb.append(str2);
-        sb.append(i3);
-        Log.d(str, sb.toString());
+        Log.d(str, "setRecordParameter:  " + i + " | " + i2 + " | " + i3);
         this.mOrientation = Math.max(0, i3);
         int i4 = this.mOrientation;
         if (i4 == 90 || i4 == 270) {

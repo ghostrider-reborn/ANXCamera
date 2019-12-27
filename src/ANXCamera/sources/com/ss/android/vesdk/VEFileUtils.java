@@ -19,34 +19,20 @@ public class VEFileUtils {
         if (file == null || !file.exists()) {
             return false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(".");
-        sb.append(System.currentTimeMillis());
-        File file2 = new File(file, sb.toString());
+        File file2 = new File(file, "." + System.currentTimeMillis());
         boolean mkdir = file2.mkdir();
-        if (mkdir) {
-            mkdir = file2.delete();
-        }
-        return mkdir;
+        return mkdir ? file2.delete() : mkdir;
     }
 
     public static void clearPath(String str) {
-        String[] list;
         String str2;
         File file = new File(str);
         if (file.exists() && file.isDirectory()) {
             for (String str3 : file.list()) {
                 if (str.endsWith(File.separator)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(str3);
-                    str2 = sb.toString();
+                    str2 = str + str3;
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str);
-                    sb2.append(File.separator);
-                    sb2.append(str3);
-                    str2 = sb2.toString();
+                    str2 = str + File.separator + str3;
                 }
                 File file2 = new File(str2);
                 if (file2.isFile()) {
@@ -77,75 +63,31 @@ public class VEFileUtils {
         }
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v3, resolved type: java.io.BufferedInputStream} */
     /* JADX WARNING: type inference failed for: r2v0 */
-    /* JADX WARNING: type inference failed for: r3v0, types: [java.io.BufferedInputStream] */
     /* JADX WARNING: type inference failed for: r2v1, types: [java.io.BufferedOutputStream] */
-    /* JADX WARNING: type inference failed for: r5v3 */
-    /* JADX WARNING: type inference failed for: r3v1 */
     /* JADX WARNING: type inference failed for: r2v2 */
-    /* JADX WARNING: type inference failed for: r5v4, types: [java.io.BufferedOutputStream] */
-    /* JADX WARNING: type inference failed for: r2v3, types: [java.io.BufferedInputStream] */
-    /* JADX WARNING: type inference failed for: r3v2 */
-    /* JADX WARNING: type inference failed for: r5v6 */
-    /* JADX WARNING: type inference failed for: r3v3 */
-    /* JADX WARNING: type inference failed for: r3v4, types: [java.io.BufferedInputStream] */
-    /* JADX WARNING: type inference failed for: r5v7 */
     /* JADX WARNING: type inference failed for: r2v4 */
-    /* JADX WARNING: type inference failed for: r5v8 */
-    /* JADX WARNING: type inference failed for: r5v9, types: [java.io.BufferedOutputStream] */
-    /* JADX WARNING: type inference failed for: r2v5 */
-    /* JADX WARNING: type inference failed for: r2v6 */
-    /* JADX WARNING: type inference failed for: r2v7 */
-    /* JADX WARNING: type inference failed for: r3v5 */
-    /* JADX WARNING: type inference failed for: r5v11 */
-    /* JADX WARNING: type inference failed for: r3v6 */
-    /* JADX WARNING: type inference failed for: r3v7 */
-    /* JADX WARNING: type inference failed for: r5v12 */
-    /* JADX WARNING: type inference failed for: r5v13 */
-    /* JADX WARNING: type inference failed for: r5v14 */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r3v1
-  assigns: []
-  uses: []
-  mth insns count: 69
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
+    /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:44:0x006a A[SYNTHETIC, Splitter:B:44:0x006a] */
     /* JADX WARNING: Removed duplicated region for block: B:49:0x0074 A[SYNTHETIC, Splitter:B:49:0x0074] */
     /* JADX WARNING: Removed duplicated region for block: B:57:0x0082 A[SYNTHETIC, Splitter:B:57:0x0082] */
     /* JADX WARNING: Removed duplicated region for block: B:62:0x008c A[SYNTHETIC, Splitter:B:62:0x008c] */
-    /* JADX WARNING: Unknown variable types count: 10 */
     public static boolean copyFile(File file, File file2) {
-        ? r3;
-        ? r2;
-        ? r5;
-        ? r32;
-        ? r52;
-        ? r22;
-        ? r53;
+        BufferedInputStream bufferedInputStream;
+        BufferedOutputStream bufferedOutputStream;
         if (!file.exists() || !file.isFile() || file2.isDirectory()) {
             return false;
         }
         if (file2.exists()) {
             file2.delete();
         }
-        ? r23 = 0;
+        ? r2 = 0;
         try {
             byte[] bArr = new byte[2048];
-            ? bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
             try {
-                ? bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file2));
+                bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file2));
                 while (true) {
                     try {
                         int read = bufferedInputStream.read(bArr);
@@ -155,14 +97,10 @@ public class VEFileUtils {
                         bufferedOutputStream.write(bArr, 0, read);
                     } catch (IOException e2) {
                         e = e2;
-                        r53 = bufferedOutputStream;
                     } catch (Throwable th) {
                         th = th;
-                        r32 = bufferedInputStream;
-                        r5 = bufferedOutputStream;
-                        r2 = r5;
-                        r3 = r32;
-                        if (r3 != 0) {
+                        r2 = bufferedOutputStream;
+                        if (bufferedInputStream != null) {
                         }
                         if (r2 != 0) {
                         }
@@ -183,21 +121,20 @@ public class VEFileUtils {
                 return true;
             } catch (IOException e5) {
                 e = e5;
-                r53 = 0;
-                r22 = bufferedInputStream;
-                r52 = r53;
+                bufferedOutputStream = null;
+                r2 = bufferedInputStream;
                 try {
                     e.printStackTrace();
-                    if (r22 != 0) {
+                    if (r2 != 0) {
                         try {
-                            r22.close();
+                            r2.close();
                         } catch (IOException e6) {
                             e6.printStackTrace();
                         }
                     }
-                    if (r52 != 0) {
+                    if (bufferedOutputStream != null) {
                         try {
-                            r52.close();
+                            bufferedOutputStream.close();
                         } catch (IOException e7) {
                             e7.printStackTrace();
                         }
@@ -205,11 +142,9 @@ public class VEFileUtils {
                     return false;
                 } catch (Throwable th2) {
                     th = th2;
-                    r32 = r22;
-                    r5 = r52;
-                    r2 = r5;
-                    r3 = r32;
-                    if (r3 != 0) {
+                    bufferedInputStream = r2;
+                    r2 = bufferedOutputStream;
+                    if (bufferedInputStream != null) {
                     }
                     if (r2 != 0) {
                     }
@@ -217,11 +152,9 @@ public class VEFileUtils {
                 }
             } catch (Throwable th3) {
                 th = th3;
-                r2 = r23;
-                r3 = bufferedInputStream;
-                if (r3 != 0) {
+                if (bufferedInputStream != null) {
                     try {
-                        r3.close();
+                        bufferedInputStream.close();
                     } catch (IOException e8) {
                         e8.printStackTrace();
                     }
@@ -237,19 +170,17 @@ public class VEFileUtils {
             }
         } catch (IOException e10) {
             e = e10;
-            r52 = 0;
-            r22 = r23;
+            bufferedOutputStream = null;
             e.printStackTrace();
-            if (r22 != 0) {
+            if (r2 != 0) {
             }
-            if (r52 != 0) {
+            if (bufferedOutputStream != null) {
             }
             return false;
         } catch (Throwable th4) {
             th = th4;
-            r3 = 0;
-            r2 = r23;
-            if (r3 != 0) {
+            bufferedInputStream = null;
+            if (bufferedInputStream != null) {
             }
             if (r2 != 0) {
             }
@@ -283,16 +214,9 @@ public class VEFileUtils {
                 for (String str3 : list) {
                     if (str3 != null) {
                         if (str.endsWith(File.separator)) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(str);
-                            sb.append(str3);
-                            str2 = sb.toString();
+                            str2 = str + str3;
                         } else {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append(str);
-                            sb2.append(File.separator);
-                            sb2.append(str3);
-                            str2 = sb2.toString();
+                            str2 = str + File.separator + str3;
                         }
                         File file2 = new File(str2);
                         if (file2.isFile()) {
@@ -332,14 +256,15 @@ public class VEFileUtils {
 
     public static long getAvailableBytes(String str) {
         try {
-            if (!TextUtils.isEmpty(str) && new File(str).exists()) {
-                StatFs statFs = new StatFs(str);
-                return ((long) statFs.getBlockSize()) * ((long) statFs.getAvailableBlocks());
+            if (TextUtils.isEmpty(str) || !new File(str).exists()) {
+                return 0;
             }
+            StatFs statFs = new StatFs(str);
+            return ((long) statFs.getBlockSize()) * ((long) statFs.getAvailableBlocks());
         } catch (Exception e2) {
             e2.printStackTrace();
+            return 0;
         }
-        return 0;
     }
 
     public static String getFileExtension(String str) {
@@ -348,11 +273,10 @@ public class VEFileUtils {
     }
 
     public static String getFileName(String str) {
-        String str2 = "/";
-        if (str.endsWith(str2)) {
+        if (str.endsWith("/")) {
             str = str.substring(0, str.length() - 1);
         }
-        int lastIndexOf = str.lastIndexOf(str2);
+        int lastIndexOf = str.lastIndexOf("/");
         return (lastIndexOf <= 0 || lastIndexOf >= str.length() + -1) ? str : str.substring(lastIndexOf + 1);
     }
 
@@ -377,8 +301,9 @@ public class VEFileUtils {
         if (file.isDirectory()) {
             File[] listFiles = file.listFiles();
             if (listFiles != null) {
+                int length2 = listFiles.length;
                 int i = 0;
-                while (i < listFiles.length) {
+                while (i < length2) {
                     try {
                         length += getFileSize(listFiles[i].getAbsolutePath());
                         i++;
@@ -396,11 +321,10 @@ public class VEFileUtils {
     }
 
     public static String getParentFilePath(String str) {
-        String str2 = "/";
-        if (str.endsWith(str2)) {
+        if (str.endsWith("/")) {
             str = str.substring(0, str.length() - 1);
         }
-        int lastIndexOf = str.lastIndexOf(str2);
+        int lastIndexOf = str.lastIndexOf("/");
         if (lastIndexOf >= 0) {
             return str.substring(0, lastIndexOf);
         }
@@ -427,10 +351,9 @@ public class VEFileUtils {
                 return readLine;
             } catch (Exception unused) {
                 bufferedReader = bufferedReader2;
-                String str2 = "";
                 if (bufferedReader != null) {
                 }
-                return str2;
+                return "";
             } catch (Throwable th) {
                 BufferedReader bufferedReader3 = bufferedReader2;
                 if (bufferedReader3 != null) {
@@ -443,7 +366,6 @@ public class VEFileUtils {
                 throw th;
             }
         } catch (Exception unused2) {
-            String str22 = "";
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
@@ -451,7 +373,7 @@ public class VEFileUtils {
                     e4.printStackTrace();
                 }
             }
-            return str22;
+            return "";
         }
     }
 
@@ -465,8 +387,7 @@ public class VEFileUtils {
     }
 
     public static void setPermissions(String str, int i) {
-        Integer valueOf = Integer.valueOf(-1);
-        VEJavaCalls.callStaticMethod("android.os.FileUtils", "setPermissions", str, Integer.valueOf(i), valueOf, valueOf);
+        VEJavaCalls.callStaticMethod("android.os.FileUtils", "setPermissions", str, Integer.valueOf(i), -1, -1);
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:32:? A[RETURN, SYNTHETIC] */
@@ -493,13 +414,11 @@ public class VEFileUtils {
                 e.printStackTrace();
                 if (fileWriter == null) {
                 }
-                fileWriter.close();
             } catch (Throwable th) {
                 th = th;
                 fileWriter = fileWriter2;
                 try {
                     th.printStackTrace();
-                    fileWriter.close();
                 } finally {
                     if (fileWriter != null) {
                         try {
@@ -513,16 +432,10 @@ public class VEFileUtils {
             e = e3;
             e.printStackTrace();
             if (fileWriter == null) {
-                return;
             }
-            fileWriter.close();
         } catch (Throwable th2) {
             th = th2;
             th.printStackTrace();
-            if (fileWriter == null) {
-                return;
-            }
-            fileWriter.close();
         }
     }
 }

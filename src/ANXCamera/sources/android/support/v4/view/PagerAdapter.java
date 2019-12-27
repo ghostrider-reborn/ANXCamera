@@ -88,7 +88,7 @@ public abstract class PagerAdapter {
         setPrimaryItem((View) viewGroup, i, obj);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setViewPagerObserver(DataSetObserver dataSetObserver) {
         synchronized (this) {
             this.mViewPagerObserver = dataSetObserver;

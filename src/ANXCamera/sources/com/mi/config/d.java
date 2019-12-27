@@ -73,7 +73,7 @@ public class d {
     public static final String bp = "support_camera_square_mode";
     public static final String cp = "is_camera_use_still_effect_image";
 
-    /* renamed from: do reason: not valid java name */
+    /* renamed from: do  reason: not valid java name */
     public static final String f2do = "camera_continuous_shot_callback_setter";
     public static final String dp = "support_front_flash";
     public static final String eo = "fp_nav_event_name_list";
@@ -85,7 +85,7 @@ public class d {
     public static final String ho = "support_camera_burst_shoot_denoise";
     public static final String hp = "support_hfr_video_pause";
 
-    /* renamed from: io reason: collision with root package name */
+    /* renamed from: io  reason: collision with root package name */
     public static final String f245io = "burst_shoot_count";
     public static final String jo = "support_camera_movie_solid";
     public static final String jp = "is_front_remosic_sensor";
@@ -116,7 +116,7 @@ public class d {
     public static final String zp = "is_new_hdr_param_key_used";
 
     private static String H(String str) {
-        return (String) Zp.get(str);
+        return Zp.get(str);
     }
 
     public static boolean getBoolean(String str, boolean z) {

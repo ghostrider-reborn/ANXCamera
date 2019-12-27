@@ -100,10 +100,7 @@ public class EffectMediaPlayer {
     public boolean ResumePreView() {
         boolean ResumePreViewJni = ResumePreViewJni();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("resume preview ");
-        sb.append(ResumePreViewJni);
-        Log.d(str, sb.toString());
+        Log.d(str, "resume preview " + ResumePreViewJni);
         return ResumePreViewJni;
     }
 
@@ -126,10 +123,7 @@ public class EffectMediaPlayer {
 
     public void SetPlayerNotify(EffectNotifier effectNotifier) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("SetPlayerNotify ");
-        sb.append(effectNotifier);
-        Log.d(str, sb.toString());
+        Log.d(str, "SetPlayerNotify " + effectNotifier);
         SetPlayerNotifyJni(effectNotifier);
     }
 
@@ -145,10 +139,7 @@ public class EffectMediaPlayer {
 
     public void StartPreView(long j) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("start preview ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "start preview " + j);
         StartPreViewSourceidJni(j);
     }
 

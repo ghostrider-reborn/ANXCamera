@@ -16,7 +16,7 @@ public class FunctionCameraLegacySetup extends Func1Base<BaseModule, BaseModule>
         if (!nullHolder.isPresent()) {
             return nullHolder;
         }
-        BaseModule baseModule = (BaseModule) nullHolder.get();
+        BaseModule baseModule = nullHolder.get();
         return baseModule.isDeparted() ? NullHolder.ofNullable(baseModule, 225) : nullHolder;
     }
 

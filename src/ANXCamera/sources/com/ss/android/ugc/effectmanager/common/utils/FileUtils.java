@@ -25,13 +25,12 @@ public class FileUtils {
 
     public static String combineFilePath(String str, String str2) {
         StringBuilder sb = new StringBuilder();
-        String str3 = "";
         if (TextUtils.isEmpty(str)) {
-            str = str3;
+            str = "";
         }
         sb.append(str);
         if (TextUtils.isEmpty(str2)) {
-            str2 = str3;
+            str2 = "";
         }
         sb.append(str2);
         return sb.toString();
@@ -86,12 +85,8 @@ public class FileUtils {
                 bufferedReader = new BufferedReader(fileReader);
                 while (true) {
                     try {
-                        String readLine = bufferedReader.readLine();
-                        if (readLine != null) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(str2);
-                            sb.append(readLine);
-                            str2 = sb.toString();
+                        if (bufferedReader.readLine() != null) {
+                            str2 = str2 + r5;
                         } else {
                             try {
                                 break;
@@ -184,18 +179,16 @@ public class FileUtils {
     }
 
     public static InputStream getFileStream(String str) {
-        InputStream inputStream;
         File file = new File(str);
         if (!checkFileExists(file.getPath())) {
             return null;
         }
         try {
-            inputStream = new FileInputStream(file);
+            return new FileInputStream(file);
         } catch (Exception e2) {
             e2.printStackTrace();
-            inputStream = null;
+            return null;
         }
-        return inputStream;
     }
 
     public static boolean isSdcardAvailable() {
@@ -239,101 +232,48 @@ public class FileUtils {
         return file.exists() && file.canWrite() && file.delete();
     }
 
-    /* JADX WARNING: type inference failed for: r0v0 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v0, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v1, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v1, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v2, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v3, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v2, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v4, resolved type: java.util.zip.ZipInputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v4, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v5, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v6, resolved type: java.io.BufferedOutputStream} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v7, resolved type: java.io.BufferedOutputStream} */
     /* JADX WARNING: type inference failed for: r1v0, types: [java.util.zip.ZipInputStream] */
-    /* JADX WARNING: type inference failed for: r0v1, types: [java.io.BufferedOutputStream] */
-    /* JADX WARNING: type inference failed for: r2v0 */
-    /* JADX WARNING: type inference failed for: r1v1 */
-    /* JADX WARNING: type inference failed for: r0v2 */
-    /* JADX WARNING: type inference failed for: r2v1 */
-    /* JADX WARNING: type inference failed for: r0v3 */
-    /* JADX WARNING: type inference failed for: r1v2 */
-    /* JADX WARNING: type inference failed for: r2v2 */
     /* JADX WARNING: type inference failed for: r1v3 */
-    /* JADX WARNING: type inference failed for: r1v4, types: [java.util.zip.ZipInputStream] */
-    /* JADX WARNING: type inference failed for: r0v4, types: [java.io.BufferedOutputStream] */
-    /* JADX WARNING: type inference failed for: r2v4 */
-    /* JADX WARNING: type inference failed for: r0v5 */
-    /* JADX WARNING: type inference failed for: r2v5 */
-    /* JADX WARNING: type inference failed for: r0v6 */
-    /* JADX WARNING: type inference failed for: r2v9, types: [java.io.BufferedOutputStream] */
-    /* JADX WARNING: type inference failed for: r0v8 */
-    /* JADX WARNING: type inference failed for: r0v9 */
-    /* JADX WARNING: type inference failed for: r0v10 */
-    /* JADX WARNING: type inference failed for: r0v11 */
     /* JADX WARNING: type inference failed for: r1v5 */
-    /* JADX WARNING: type inference failed for: r2v12 */
     /* JADX WARNING: type inference failed for: r1v6 */
-    /* JADX WARNING: type inference failed for: r1v7 */
-    /* JADX WARNING: type inference failed for: r0v12 */
-    /* JADX WARNING: type inference failed for: r0v13 */
-    /* JADX WARNING: type inference failed for: r2v13 */
-    /* JADX WARNING: type inference failed for: r0v14 */
-    /* JADX WARNING: type inference failed for: r2v14 */
-    /* JADX WARNING: type inference failed for: r2v15 */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r1v1
-  assigns: []
-  uses: []
-  mth insns count: 88
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
+    /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:45:0x00b8 A[SYNTHETIC, Splitter:B:45:0x00b8] */
     /* JADX WARNING: Removed duplicated region for block: B:50:0x00c0 A[Catch:{ IOException -> 0x00bc }] */
-    /* JADX WARNING: Unknown variable types count: 12 */
+    /* JADX WARNING: Unknown variable types count: 1 */
     public static void unZip(String str, String str2) throws UnzipException {
         ? r1;
-        ? r0;
-        ? r2;
-        ? r12;
-        ? r22;
-        ? r02;
-        ? r23;
-        ? r03;
-        ? r04 = 0;
+        BufferedOutputStream bufferedOutputStream;
+        BufferedOutputStream bufferedOutputStream2;
+        BufferedOutputStream bufferedOutputStream3 = null;
         try {
-            ? zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(str)));
-            ? r05 = r04;
+            ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(str)));
             while (true) {
                 try {
                     ZipEntry nextEntry = zipInputStream.getNextEntry();
                     if (nextEntry != null) {
                         String name = nextEntry.getName();
                         if (nextEntry.isDirectory()) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(str2);
-                            sb.append(File.separator);
-                            sb.append(name);
-                            new File(sb.toString()).mkdirs();
-                            r03 = r05;
+                            new File(str2 + File.separator + name).mkdirs();
                         } else {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append(str2);
-                            sb2.append(File.separator);
-                            sb2.append(name);
-                            File file = new File(sb2.toString());
+                            File file = new File(str2 + File.separator + name);
                             if (file.exists()) {
                                 file.delete();
                             } else {
                                 file.getParentFile().mkdirs();
                             }
                             file.createNewFile();
-                            ? bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
+                            bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
                             try {
                                 byte[] bArr = new byte[2048];
                                 while (true) {
@@ -345,20 +285,17 @@ public class FileUtils {
                                 }
                                 bufferedOutputStream.flush();
                                 bufferedOutputStream.close();
-                                r03 = bufferedOutputStream;
+                                bufferedOutputStream3 = bufferedOutputStream;
                             } catch (IOException e2) {
                                 e = e2;
-                                r23 = bufferedOutputStream;
-                                r02 = zipInputStream;
-                                r22 = r23;
+                                bufferedOutputStream3 = zipInputStream;
                                 try {
                                     throw new UnzipException(e.getMessage());
                                 } catch (Throwable th) {
                                     th = th;
-                                    r12 = r02;
-                                    r2 = r22;
-                                    r0 = r2;
-                                    r1 = r12;
+                                    bufferedOutputStream2 = bufferedOutputStream3;
+                                    bufferedOutputStream3 = bufferedOutputStream;
+                                    r1 = bufferedOutputStream2;
                                     if (r1 != 0) {
                                         try {
                                             r1.close();
@@ -367,25 +304,23 @@ public class FileUtils {
                                             throw th;
                                         }
                                     }
-                                    if (r0 != 0) {
-                                        r0.close();
+                                    if (bufferedOutputStream3 != null) {
+                                        bufferedOutputStream3.close();
                                     }
                                     throw th;
                                 }
                             } catch (Throwable th2) {
                                 th = th2;
-                                r12 = zipInputStream;
-                                r2 = bufferedOutputStream;
-                                r0 = r2;
-                                r1 = r12;
+                                bufferedOutputStream2 = zipInputStream;
+                                bufferedOutputStream3 = bufferedOutputStream;
+                                r1 = bufferedOutputStream2;
                                 if (r1 != 0) {
                                 }
-                                if (r0 != 0) {
+                                if (bufferedOutputStream3 != null) {
                                 }
                                 throw th;
                             }
                         }
-                        r05 = r03;
                     } else {
                         try {
                             break;
@@ -396,37 +331,33 @@ public class FileUtils {
                     }
                 } catch (IOException e5) {
                     e = e5;
-                    r23 = r05;
-                    r02 = zipInputStream;
-                    r22 = r23;
+                    bufferedOutputStream = bufferedOutputStream3;
+                    bufferedOutputStream3 = zipInputStream;
                     throw new UnzipException(e.getMessage());
                 } catch (Throwable th3) {
                     th = th3;
                     r1 = zipInputStream;
-                    r0 = r05;
                     if (r1 != 0) {
                     }
-                    if (r0 != 0) {
+                    if (bufferedOutputStream3 != null) {
                     }
                     throw th;
                 }
             }
             zipInputStream.close();
-            if (r05 != 0) {
-                r05.close();
+            if (bufferedOutputStream3 != null) {
+                bufferedOutputStream3.close();
             }
         } catch (IOException e6) {
             e = e6;
-            r22 = 0;
-            r02 = r04;
+            bufferedOutputStream = null;
             throw new UnzipException(e.getMessage());
         } catch (Throwable th4) {
             th = th4;
             r1 = 0;
-            r0 = r04;
             if (r1 != 0) {
             }
-            if (r0 != 0) {
+            if (bufferedOutputStream3 != null) {
             }
             throw th;
         }

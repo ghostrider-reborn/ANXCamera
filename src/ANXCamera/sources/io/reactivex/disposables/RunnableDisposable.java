@@ -15,12 +15,6 @@ final class RunnableDisposable extends ReferenceDisposable<Runnable> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RunnableDisposable(disposed=");
-        sb.append(isDisposed());
-        sb.append(", ");
-        sb.append(get());
-        sb.append(")");
-        return sb.toString();
+        return "RunnableDisposable(disposed=" + isDisposed() + ", " + get() + ")";
     }
 }

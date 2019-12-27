@@ -1,7 +1,7 @@
 package miui.external;
 
 import android.content.Context;
-import android.os.Build.VERSION;
+import android.os.Build;
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
@@ -14,7 +14,7 @@ class SdkLoader {
     private static final String DEX_ELEMENT_TYPE_NAME = "dalvik.system.DexPathList$Element";
     private static final String DEX_PATH_LIST_CLASS_NAME = "dalvik.system.DexPathList";
     private static final String LIB_ELEMENTS_FIELD_NAME = "nativeLibraryPathElements";
-    private static final String LIB_ELEMENT_TYPE_NAME = (VERSION.SDK_INT < 26 ? DEX_ELEMENT_TYPE_NAME : "dalvik.system.DexPathList$NativeLibraryElement");
+    private static final String LIB_ELEMENT_TYPE_NAME = (Build.VERSION.SDK_INT < 26 ? DEX_ELEMENT_TYPE_NAME : "dalvik.system.DexPathList$NativeLibraryElement");
 
     SdkLoader() {
     }
@@ -41,20 +41,16 @@ class SdkLoader {
     }
 
     private static Field getElementsField(Object obj, String str, String str2) throws NoSuchFieldException {
-        Field[] declaredFields;
         for (Field field : obj.getClass().getDeclaredFields()) {
             if (field.getName().equals(str)) {
-                Class type = field.getType();
+                Class<?> type = field.getType();
                 if (type.isArray() && str2.equals(type.getComponentType().getName())) {
                     field.setAccessible(true);
                     return field;
                 }
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" field not found.");
-        throw new NoSuchFieldException(sb.toString());
+        throw new NoSuchFieldException(str + " field not found.");
     }
 
     private static Field getNativeLibraryDirectoriesField(Object obj) throws NoSuchFieldException {
@@ -63,7 +59,7 @@ class SdkLoader {
         int i = 0;
         while (i < length) {
             Field field = declaredFields[i];
-            Class type = field.getType();
+            Class<?> type = field.getType();
             if (!type.isArray() || type.getComponentType() != File.class) {
                 i++;
             } else {
@@ -75,7 +71,7 @@ class SdkLoader {
     }
 
     public static boolean load(String str, String str2, String str3, ClassLoader classLoader) {
-        return load(str, str2, str3, classLoader, null);
+        return load(str, str2, str3, classLoader, (Context) null);
     }
 
     static boolean load(String str, String str2, String str3, ClassLoader classLoader, Context context) {
@@ -87,7 +83,7 @@ class SdkLoader {
             Object dexPathListVariable = getDexPathListVariable(classLoader);
             if (str != null) {
                 str4 = str;
-            } else if (VERSION.SDK_INT < 23) {
+            } else if (Build.VERSION.SDK_INT < 23) {
                 loadLibBeforeAndroidM(dexPathListVariable, str3);
                 return true;
             } else {
@@ -121,20 +117,19 @@ class SdkLoader {
     }
 
     private static void loadLibrary(Object obj, Object obj2, String str) throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             replaceElement(obj, obj2, LIB_ELEMENTS_FIELD_NAME, LIB_ELEMENT_TYPE_NAME);
-            return;
+        } else {
+            loadLibBeforeAndroidM(obj, str);
         }
-        loadLibBeforeAndroidM(obj, str);
     }
 
     private static void replaceElement(Object obj, Object obj2, String str, String str2) throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
-        Object[] objArr = (Object[]) getElementsField(obj2, str, str2).get(obj2);
         Field elementsField = getElementsField(obj, str, str2);
-        Object[] objArr2 = (Object[]) elementsField.get(obj);
-        Object[] objArr3 = (Object[]) Array.newInstance(Class.forName(str2), objArr2.length + 1);
-        objArr3[0] = objArr[0];
-        System.arraycopy(objArr2, 0, objArr3, 1, objArr2.length);
-        elementsField.set(obj, objArr3);
+        Object[] objArr = (Object[]) elementsField.get(obj);
+        Object[] objArr2 = (Object[]) Array.newInstance(Class.forName(str2), objArr.length + 1);
+        objArr2[0] = ((Object[]) getElementsField(obj2, str, str2).get(obj2))[0];
+        System.arraycopy(objArr, 0, objArr2, 1, objArr.length);
+        elementsField.set(obj, objArr2);
     }
 }

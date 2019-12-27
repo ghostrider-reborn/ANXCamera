@@ -73,10 +73,7 @@ public class CameraSnapPaintItemBeauty {
         this.mDownSpring.addListener(new SimpleSpringListener() {
             public void onSpringUpdate(Spring spring) {
                 float mapValueFromRangeToRange = (float) SpringUtil.mapValueFromRangeToRange((double) ((float) spring.getCurrentValue()), 0.0d, 1.0d, 1.0d, 0.8d);
-                StringBuilder sb = new StringBuilder();
-                sb.append("scaleValue = ");
-                sb.append(mapValueFromRangeToRange);
-                Log.e(CameraSnapPaintItemBeauty.TAG, sb.toString());
+                Log.e(CameraSnapPaintItemBeauty.TAG, "scaleValue = " + mapValueFromRangeToRange);
                 CameraSnapPaintItemBeauty cameraSnapPaintItemBeauty = CameraSnapPaintItemBeauty.this;
                 cameraSnapPaintItemBeauty.mCurrentWidth = mapValueFromRangeToRange * 1.0f;
                 cameraSnapPaintItemBeauty.mCameraSnapAnimateDrawable.invalidateSelf();
@@ -103,9 +100,8 @@ public class CameraSnapPaintItemBeauty {
         this.mRecordSpring.setCurrentValue(1.0d);
         this.mRecordSpring.addListener(new SimpleSpringListener() {
             public void onSpringUpdate(Spring spring) {
-                float currentValue = (float) spring.getCurrentValue();
                 CameraSnapPaintItemBeauty cameraSnapPaintItemBeauty = CameraSnapPaintItemBeauty.this;
-                cameraSnapPaintItemBeauty.mCurrentWidth = currentValue * 0.9f;
+                cameraSnapPaintItemBeauty.mCurrentWidth = ((float) spring.getCurrentValue()) * 0.9f;
                 cameraSnapPaintItemBeauty.mCameraSnapAnimateDrawable.invalidateSelf();
             }
         });

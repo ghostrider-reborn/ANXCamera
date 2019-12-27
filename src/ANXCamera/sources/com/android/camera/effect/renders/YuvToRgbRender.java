@@ -1,6 +1,6 @@
 package com.android.camera.effect.renders;
 
-import android.media.Image.Plane;
+import android.media.Image;
 import android.opengl.GLES20;
 import com.android.camera.effect.MiYuvImage;
 import com.android.camera.effect.ShaderUtil;
@@ -50,21 +50,14 @@ public class YuvToRgbRender extends ShaderRender {
     }
 
     public boolean draw(DrawAttribute drawAttribute) {
-        String str = "unsupported target ";
         if (!isAttriSupported(drawAttribute.getTarget())) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(drawAttribute.getTarget());
-            Log.w(str2, sb.toString());
+            String str = TAG;
+            Log.w(str, "unsupported target " + drawAttribute.getTarget());
             return false;
         }
         if (drawAttribute.getTarget() != 11) {
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(drawAttribute.getTarget());
-            Log.w(str3, sb2.toString());
+            String str2 = TAG;
+            Log.w(str2, "unsupported target " + drawAttribute.getTarget());
         } else {
             long currentTimeMillis = System.currentTimeMillis();
             DrawYuvAttribute drawYuvAttribute = (DrawYuvAttribute) drawAttribute;
@@ -106,9 +99,9 @@ public class YuvToRgbRender extends ShaderRender {
     public void genYUVTextures(DrawYuvAttribute drawYuvAttribute) {
         int width = drawYuvAttribute.mImage.getWidth();
         int height = drawYuvAttribute.mImage.getHeight();
-        Plane[] planes = drawYuvAttribute.mImage.getPlanes();
-        Plane plane = planes[0];
-        Plane plane2 = planes[2];
+        Image.Plane[] planes = drawYuvAttribute.mImage.getPlanes();
+        Image.Plane plane = planes[0];
+        Image.Plane plane2 = planes[2];
         ShaderUtil.loadYuvToTextures(plane.getRowStride() == width ? plane.getBuffer() : ImageUtil.removePadding(plane, width, height), plane2.getRowStride() == width ? plane2.getBuffer() : ImageUtil.removePadding(plane2, width / 2, height / 2), width, height, this.mYuvTextureIds);
     }
 
@@ -134,10 +127,7 @@ public class YuvToRgbRender extends ShaderRender {
             Log.d(TAG, String.format(Locale.ENGLISH, "genTexture: %d %d", new Object[]{Integer.valueOf(this.mYuvTextureIds[0]), Integer.valueOf(this.mYuvTextureIds[1])}));
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(YuvToRgbRender.class);
-        sb.append(": mProgram = 0");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(YuvToRgbRender.class + ": mProgram = 0");
     }
 
     /* access modifiers changed from: protected */
@@ -157,7 +147,7 @@ public class YuvToRgbRender extends ShaderRender {
 
     /* access modifiers changed from: protected */
     public void initSupportAttriList() {
-        this.mAttriSupportedList.add(Integer.valueOf(11));
+        this.mAttriSupportedList.add(11);
     }
 
     /* access modifiers changed from: protected */

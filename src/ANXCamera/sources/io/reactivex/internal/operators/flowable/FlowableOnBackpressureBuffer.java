@@ -52,24 +52,29 @@ public final class FlowableOnBackpressureBuffer<T> extends AbstractFlowableWithU
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<? super T> subscriber) {
             if (this.cancelled) {
                 this.queue.clear();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 if (!this.delayError) {
                     Throwable th = this.error;
                     if (th != null) {
                         this.queue.clear();
                         subscriber.onError(th);
                         return true;
-                    } else if (z2) {
+                    } else if (!z2) {
+                        return false;
+                    } else {
                         subscriber.onComplete();
                         return true;
                     }
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     Throwable th2 = this.error;
                     if (th2 != null) {
                         subscriber.onError(th2);
@@ -79,14 +84,13 @@ public final class FlowableOnBackpressureBuffer<T> extends AbstractFlowableWithU
                     return true;
                 }
             }
-            return false;
         }
 
         public void clear() {
             this.queue.clear();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (getAndIncrement() == 0) {
@@ -102,7 +106,7 @@ public final class FlowableOnBackpressureBuffer<T> extends AbstractFlowableWithU
                             break;
                         }
                         boolean z = this.done;
-                        Object poll = simplePlainQueue.poll();
+                        T poll = simplePlainQueue.poll();
                         boolean z2 = poll == null;
                         if (!checkTerminated(z, z2, subscriber)) {
                             if (z2) {
@@ -120,6 +124,7 @@ public final class FlowableOnBackpressureBuffer<T> extends AbstractFlowableWithU
                         }
                         i2 = addAndGet(-i2);
                         if (i2 == 0) {
+                            return;
                         }
                     } else {
                         return;
@@ -162,9 +167,7 @@ public final class FlowableOnBackpressureBuffer<T> extends AbstractFlowableWithU
                     missingBackpressureException.initCause(th);
                 }
                 onError(missingBackpressureException);
-                return;
-            }
-            if (this.outputFused) {
+            } else if (this.outputFused) {
                 this.actual.onNext(null);
             } else {
                 drain();

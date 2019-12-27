@@ -1,7 +1,6 @@
 package org.greenrobot.greendao.async;
 
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import java.util.ArrayList;
@@ -14,11 +13,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.DaoLog;
-import org.greenrobot.greendao.async.AsyncOperation.OperationType;
+import org.greenrobot.greendao.async.AsyncOperation;
 import org.greenrobot.greendao.database.Database;
 import org.greenrobot.greendao.query.Query;
 
-class AsyncOperationExecutor implements Runnable, Callback {
+class AsyncOperationExecutor implements Runnable, Handler.Callback {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
     private int countOperationsCompleted;
     private int countOperationsEnqueued;
@@ -31,9 +30,9 @@ class AsyncOperationExecutor implements Runnable, Callback {
     private final BlockingQueue<AsyncOperation> queue = new LinkedBlockingQueue();
     private volatile int waitForMergeMillis = 50;
 
-    /* renamed from: org.greenrobot.greendao.async.AsyncOperationExecutor$1 reason: invalid class name */
+    /* renamed from: org.greenrobot.greendao.async.AsyncOperationExecutor$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType = new int[OperationType.values().length];
+        static final /* synthetic */ int[] $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType = new int[AsyncOperation.OperationType.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(46:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|46) */
         /* JADX WARNING: Code restructure failed: missing block: B:47:?, code lost:
@@ -62,28 +61,28 @@ class AsyncOperationExecutor implements Runnable, Callback {
         /* JADX WARNING: Missing exception handler attribute for start block: B:7:0x002a */
         /* JADX WARNING: Missing exception handler attribute for start block: B:9:0x0035 */
         static {
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.Delete.ordinal()] = 1;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.DeleteInTxIterable.ordinal()] = 2;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.DeleteInTxArray.ordinal()] = 3;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.Insert.ordinal()] = 4;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.InsertInTxIterable.ordinal()] = 5;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.InsertInTxArray.ordinal()] = 6;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.InsertOrReplace.ordinal()] = 7;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.InsertOrReplaceInTxIterable.ordinal()] = 8;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.InsertOrReplaceInTxArray.ordinal()] = 9;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.Update.ordinal()] = 10;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.UpdateInTxIterable.ordinal()] = 11;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.UpdateInTxArray.ordinal()] = 12;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.TransactionRunnable.ordinal()] = 13;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.TransactionCallable.ordinal()] = 14;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.QueryList.ordinal()] = 15;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.QueryUnique.ordinal()] = 16;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.DeleteByKey.ordinal()] = 17;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.DeleteAll.ordinal()] = 18;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.Load.ordinal()] = 19;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.LoadAll.ordinal()] = 20;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.Count.ordinal()] = 21;
-            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[OperationType.Refresh.ordinal()] = 22;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.Delete.ordinal()] = 1;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.DeleteInTxIterable.ordinal()] = 2;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.DeleteInTxArray.ordinal()] = 3;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.Insert.ordinal()] = 4;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.InsertInTxIterable.ordinal()] = 5;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.InsertInTxArray.ordinal()] = 6;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.InsertOrReplace.ordinal()] = 7;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.InsertOrReplaceInTxIterable.ordinal()] = 8;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.InsertOrReplaceInTxArray.ordinal()] = 9;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.Update.ordinal()] = 10;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.UpdateInTxIterable.ordinal()] = 11;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.UpdateInTxArray.ordinal()] = 12;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.TransactionRunnable.ordinal()] = 13;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.TransactionCallable.ordinal()] = 14;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.QueryList.ordinal()] = 15;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.QueryUnique.ordinal()] = 16;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.DeleteByKey.ordinal()] = 17;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.DeleteAll.ordinal()] = 18;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.Load.ordinal()] = 19;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.LoadAll.ordinal()] = 20;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.Count.ordinal()] = 21;
+            $SwitchMap$org$greenrobot$greendao$async$AsyncOperation$OperationType[AsyncOperation.OperationType.Refresh.ordinal()] = 22;
         }
     }
 
@@ -161,10 +160,7 @@ class AsyncOperationExecutor implements Runnable, Callback {
                     asyncOperation.dao.refresh(asyncOperation.parameter);
                     break;
                 default:
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unsupported operation: ");
-                    sb.append(asyncOperation.type);
-                    throw new DaoException(sb.toString());
+                    throw new DaoException("Unsupported operation: " + asyncOperation.type);
             }
         } catch (Throwable th) {
             asyncOperation.throwable = th;
@@ -224,7 +220,6 @@ class AsyncOperationExecutor implements Runnable, Callback {
      */
     private void mergeTxAndExecute(AsyncOperation asyncOperation, AsyncOperation asyncOperation2) {
         boolean z;
-        String str = "Async transaction could not be ended, success so far was: ";
         ArrayList arrayList = new ArrayList();
         arrayList.add(asyncOperation);
         arrayList.add(asyncOperation2);
@@ -257,25 +252,21 @@ class AsyncOperationExecutor implements Runnable, Callback {
                     }
                 }
                 i++;
-            } finally {
+            } catch (Throwable th) {
                 try {
                     database.endTransaction();
                 } catch (RuntimeException e2) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(false);
-                    DaoLog.i(sb.toString(), e2);
+                    DaoLog.i("Async transaction could not be ended, success so far was: " + false, e2);
                 }
+                throw th;
             }
         }
         database.setTransactionSuccessful();
         try {
+            database.endTransaction();
             z2 = z;
         } catch (RuntimeException e3) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(z);
-            DaoLog.i(sb2.toString(), e3);
+            DaoLog.i("Async transaction could not be ended, success so far was: " + z, e3);
         }
         if (z2) {
             int size = arrayList.size();
@@ -328,9 +319,10 @@ class AsyncOperationExecutor implements Runnable, Callback {
 
     public boolean handleMessage(Message message) {
         AsyncOperationListener asyncOperationListener = this.listenerMainThread;
-        if (asyncOperationListener != null) {
-            asyncOperationListener.onAsyncOperationCompleted((AsyncOperation) message.obj);
+        if (asyncOperationListener == null) {
+            return false;
         }
+        asyncOperationListener.onAsyncOperationCompleted((AsyncOperation) message.obj);
         return false;
     }
 
@@ -341,35 +333,32 @@ class AsyncOperationExecutor implements Runnable, Callback {
     public void run() {
         while (true) {
             try {
-                AsyncOperation asyncOperation = (AsyncOperation) this.queue.poll(1, TimeUnit.SECONDS);
-                if (asyncOperation == null) {
+                AsyncOperation poll = this.queue.poll(1, TimeUnit.SECONDS);
+                if (poll == null) {
                     synchronized (this) {
-                        asyncOperation = (AsyncOperation) this.queue.poll();
-                        if (asyncOperation == null) {
+                        poll = (AsyncOperation) this.queue.poll();
+                        if (poll == null) {
                             this.executorRunning = false;
                             this.executorRunning = false;
                             return;
                         }
                     }
                 }
-                if (asyncOperation.isMergeTx()) {
-                    AsyncOperation asyncOperation2 = (AsyncOperation) this.queue.poll((long) this.waitForMergeMillis, TimeUnit.MILLISECONDS);
-                    if (asyncOperation2 != null) {
-                        if (asyncOperation.isMergeableWith(asyncOperation2)) {
-                            mergeTxAndExecute(asyncOperation, asyncOperation2);
+                if (poll.isMergeTx()) {
+                    AsyncOperation poll2 = this.queue.poll((long) this.waitForMergeMillis, TimeUnit.MILLISECONDS);
+                    if (poll2 != null) {
+                        if (poll.isMergeableWith(poll2)) {
+                            mergeTxAndExecute(poll, poll2);
                         } else {
-                            executeOperationAndPostCompleted(asyncOperation);
-                            executeOperationAndPostCompleted(asyncOperation2);
+                            executeOperationAndPostCompleted(poll);
+                            executeOperationAndPostCompleted(poll2);
                         }
                     }
                 }
-                executeOperationAndPostCompleted(asyncOperation);
+                executeOperationAndPostCompleted(poll);
             } catch (InterruptedException e2) {
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(Thread.currentThread().getName());
-                    sb.append(" was interruppted");
-                    DaoLog.w(sb.toString(), e2);
+                    DaoLog.w(Thread.currentThread().getName() + " was interruppted", e2);
                     return;
                 } finally {
                     this.executorRunning = false;

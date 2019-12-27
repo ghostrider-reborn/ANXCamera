@@ -14,13 +14,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javax.annotation.Nullable;
-import okhttp3.Headers.Builder;
+import okhttp3.Headers;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.internal.Util;
 import okhttp3.internal.cache.CacheRequest;
 import okhttp3.internal.cache.CacheStrategy;
 import okhttp3.internal.cache.DiskLruCache;
-import okhttp3.internal.cache.DiskLruCache.Editor;
-import okhttp3.internal.cache.DiskLruCache.Snapshot;
 import okhttp3.internal.cache.InternalCache;
 import okhttp3.internal.http.HttpHeaders;
 import okhttp3.internal.http.HttpMethod;
@@ -54,9 +54,9 @@ public final class Cache implements Closeable, Flushable {
         private Sink body;
         private Sink cacheOut;
         boolean done;
-        private final Editor editor;
+        private final DiskLruCache.Editor editor;
 
-        CacheRequestImpl(final Editor editor2) {
+        CacheRequestImpl(final DiskLruCache.Editor editor2) {
             this.editor = editor2;
             this.cacheOut = editor2.newSink(1);
             this.body = new ForwardingSink(this.cacheOut, Cache.this) {
@@ -73,18 +73,16 @@ public final class Cache implements Closeable, Flushable {
             };
         }
 
-        /* JADX INFO: used method not loaded: okhttp3.internal.Util.closeQuietly(java.io.Closeable):null, types can be incorrect */
-        /* JADX WARNING: Code restructure failed: missing block: B:11:?, code lost:
-            r4.editor.abort();
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:9:0x0014, code lost:
-            okhttp3.internal.Util.closeQuietly((java.io.Closeable) r4.cacheOut);
-         */
         public void abort() {
             synchronized (Cache.this) {
                 if (!this.done) {
                     this.done = true;
                     Cache.this.writeAbortCount++;
+                    Util.closeQuietly((Closeable) this.cacheOut);
+                    try {
+                        this.editor.abort();
+                    } catch (IOException unused) {
+                    }
                 }
             }
         }
@@ -100,9 +98,9 @@ public final class Cache implements Closeable, Flushable {
         private final String contentLength;
         @Nullable
         private final String contentType;
-        final Snapshot snapshot;
+        final DiskLruCache.Snapshot snapshot;
 
-        CacheResponseBody(final Snapshot snapshot2, String str, String str2) {
+        CacheResponseBody(final DiskLruCache.Snapshot snapshot2, String str, String str2) {
             this.snapshot = snapshot2;
             this.contentType = str;
             this.contentLength = str2;
@@ -139,8 +137,8 @@ public final class Cache implements Closeable, Flushable {
     }
 
     private static final class Entry {
-        private static final String RECEIVED_MILLIS;
-        private static final String SENT_MILLIS;
+        private static final String RECEIVED_MILLIS = (Platform.get().getPrefix() + "-Received-Millis");
+        private static final String SENT_MILLIS = (Platform.get().getPrefix() + "-Sent-Millis");
         private final int code;
         @Nullable
         private final Handshake handshake;
@@ -152,17 +150,6 @@ public final class Cache implements Closeable, Flushable {
         private final long sentRequestMillis;
         private final String url;
         private final Headers varyHeaders;
-
-        static {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Platform.get().getPrefix());
-            sb.append("-Sent-Millis");
-            SENT_MILLIS = sb.toString();
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(Platform.get().getPrefix());
-            sb2.append("-Received-Millis");
-            RECEIVED_MILLIS = sb2.toString();
-        }
 
         Entry(Response response) {
             this.url = response.request().url().toString();
@@ -182,7 +169,7 @@ public final class Cache implements Closeable, Flushable {
                 BufferedSource buffer = Okio.buffer(source);
                 this.url = buffer.readUtf8LineStrict();
                 this.requestMethod = buffer.readUtf8LineStrict();
-                Builder builder = new Builder();
+                Headers.Builder builder = new Headers.Builder();
                 int readInt = Cache.readInt(buffer);
                 for (int i = 0; i < readInt; i++) {
                     builder.addLenient(buffer.readUtf8LineStrict());
@@ -192,7 +179,7 @@ public final class Cache implements Closeable, Flushable {
                 this.protocol = parse.protocol;
                 this.code = parse.code;
                 this.message = parse.message;
-                Builder builder2 = new Builder();
+                Headers.Builder builder2 = new Headers.Builder();
                 int readInt2 = Cache.readInt(buffer);
                 for (int i2 = 0; i2 < readInt2; i2++) {
                     builder2.addLenient(buffer.readUtf8LineStrict());
@@ -203,21 +190,13 @@ public final class Cache implements Closeable, Flushable {
                 builder2.removeAll(RECEIVED_MILLIS);
                 long j = 0;
                 this.sentRequestMillis = str != null ? Long.parseLong(str) : 0;
-                if (str2 != null) {
-                    j = Long.parseLong(str2);
-                }
-                this.receivedResponseMillis = j;
+                this.receivedResponseMillis = str2 != null ? Long.parseLong(str2) : j;
                 this.responseHeaders = builder2.build();
                 if (isHttps()) {
-                    String readUtf8LineStrict = buffer.readUtf8LineStrict();
-                    if (readUtf8LineStrict.length() <= 0) {
+                    if (buffer.readUtf8LineStrict().length() <= 0) {
                         this.handshake = Handshake.get(!buffer.exhausted() ? TlsVersion.forJavaName(buffer.readUtf8LineStrict()) : TlsVersion.SSL_3_0, CipherSuite.forJavaName(buffer.readUtf8LineStrict()), readCertificateList(buffer), readCertificateList(buffer));
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("expected \"\" but was \"");
-                        sb.append(readUtf8LineStrict);
-                        sb.append("\"");
-                        throw new IOException(sb.toString());
+                        throw new IOException("expected \"\" but was \"" + r1 + "\"");
                     }
                 } else {
                     this.handshake = null;
@@ -256,7 +235,7 @@ public final class Cache implements Closeable, Flushable {
                 bufferedSink.writeDecimalLong((long) list.size()).writeByte(10);
                 int size = list.size();
                 for (int i = 0; i < size; i++) {
-                    bufferedSink.writeUtf8(ByteString.of(((Certificate) list.get(i)).getEncoded()).base64()).writeByte(10);
+                    bufferedSink.writeUtf8(ByteString.of(list.get(i).getEncoded()).base64()).writeByte(10);
                 }
             } catch (CertificateEncodingException e2) {
                 throw new IOException(e2.getMessage());
@@ -267,36 +246,29 @@ public final class Cache implements Closeable, Flushable {
             return this.url.equals(request.url().toString()) && this.requestMethod.equals(request.method()) && HttpHeaders.varyMatches(response, this.varyHeaders, request);
         }
 
-        public Response response(Snapshot snapshot) {
+        public Response response(DiskLruCache.Snapshot snapshot) {
             String str = this.responseHeaders.get("Content-Type");
             String str2 = this.responseHeaders.get("Content-Length");
-            return new Response.Builder().request(new Request.Builder().url(this.url).method(this.requestMethod, null).headers(this.varyHeaders).build()).protocol(this.protocol).code(this.code).message(this.message).headers(this.responseHeaders).body(new CacheResponseBody(snapshot, str, str2)).handshake(this.handshake).sentRequestAtMillis(this.sentRequestMillis).receivedResponseAtMillis(this.receivedResponseMillis).build();
+            return new Response.Builder().request(new Request.Builder().url(this.url).method(this.requestMethod, (RequestBody) null).headers(this.varyHeaders).build()).protocol(this.protocol).code(this.code).message(this.message).headers(this.responseHeaders).body(new CacheResponseBody(snapshot, str, str2)).handshake(this.handshake).sentRequestAtMillis(this.sentRequestMillis).receivedResponseAtMillis(this.receivedResponseMillis).build();
         }
 
-        public void writeTo(Editor editor) throws IOException {
-            String str;
+        public void writeTo(DiskLruCache.Editor editor) throws IOException {
             BufferedSink buffer = Okio.buffer(editor.newSink(0));
             buffer.writeUtf8(this.url).writeByte(10);
             buffer.writeUtf8(this.requestMethod).writeByte(10);
             buffer.writeDecimalLong((long) this.varyHeaders.size()).writeByte(10);
             int size = this.varyHeaders.size();
-            int i = 0;
-            while (true) {
-                str = ": ";
-                if (i >= size) {
-                    break;
-                }
-                buffer.writeUtf8(this.varyHeaders.name(i)).writeUtf8(str).writeUtf8(this.varyHeaders.value(i)).writeByte(10);
-                i++;
+            for (int i = 0; i < size; i++) {
+                buffer.writeUtf8(this.varyHeaders.name(i)).writeUtf8(": ").writeUtf8(this.varyHeaders.value(i)).writeByte(10);
             }
             buffer.writeUtf8(new StatusLine(this.protocol, this.code, this.message).toString()).writeByte(10);
             buffer.writeDecimalLong((long) (this.responseHeaders.size() + 2)).writeByte(10);
             int size2 = this.responseHeaders.size();
             for (int i2 = 0; i2 < size2; i2++) {
-                buffer.writeUtf8(this.responseHeaders.name(i2)).writeUtf8(str).writeUtf8(this.responseHeaders.value(i2)).writeByte(10);
+                buffer.writeUtf8(this.responseHeaders.name(i2)).writeUtf8(": ").writeUtf8(this.responseHeaders.value(i2)).writeByte(10);
             }
-            buffer.writeUtf8(SENT_MILLIS).writeUtf8(str).writeDecimalLong(this.sentRequestMillis).writeByte(10);
-            buffer.writeUtf8(RECEIVED_MILLIS).writeUtf8(str).writeDecimalLong(this.receivedResponseMillis).writeByte(10);
+            buffer.writeUtf8(SENT_MILLIS).writeUtf8(": ").writeDecimalLong(this.sentRequestMillis).writeByte(10);
+            buffer.writeUtf8(RECEIVED_MILLIS).writeUtf8(": ").writeDecimalLong(this.receivedResponseMillis).writeByte(10);
             if (isHttps()) {
                 buffer.writeByte(10);
                 buffer.writeUtf8(this.handshake.cipherSuite().javaName()).writeByte(10);
@@ -341,7 +313,7 @@ public final class Cache implements Closeable, Flushable {
         this.cache = DiskLruCache.create(fileSystem, file, VERSION, 2, j);
     }
 
-    private void abortQuietly(@Nullable Editor editor) {
+    private void abortQuietly(@Nullable DiskLruCache.Editor editor) {
         if (editor != null) {
             try {
                 editor.abort();
@@ -361,12 +333,7 @@ public final class Cache implements Closeable, Flushable {
             if (readDecimalLong >= 0 && readDecimalLong <= 2147483647L && readUtf8LineStrict.isEmpty()) {
                 return (int) readDecimalLong;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("expected an int but was \"");
-            sb.append(readDecimalLong);
-            sb.append(readUtf8LineStrict);
-            sb.append("\"");
-            throw new IOException(sb.toString());
+            throw new IOException("expected an int but was \"" + readDecimalLong + readUtf8LineStrict + "\"");
         } catch (NumberFormatException e2) {
             throw new IOException(e2.getMessage());
         }
@@ -392,11 +359,11 @@ public final class Cache implements Closeable, Flushable {
         this.cache.flush();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
     public Response get(Request request) {
         try {
-            Snapshot snapshot = this.cache.get(key(request.url()));
+            DiskLruCache.Snapshot snapshot = this.cache.get(key(request.url()));
             if (snapshot == null) {
                 return null;
             }
@@ -437,10 +404,10 @@ public final class Cache implements Closeable, Flushable {
         return this.networkCount;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
     public CacheRequest put(Response response) {
-        Editor editor;
+        DiskLruCache.Editor editor;
         String method = response.request().method();
         if (HttpMethod.invalidatesCache(response.request().method())) {
             try {
@@ -472,7 +439,7 @@ public final class Cache implements Closeable, Flushable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(Request request) throws IOException {
         this.cache.remove(key(request.url()));
     }
@@ -485,12 +452,12 @@ public final class Cache implements Closeable, Flushable {
         return this.cache.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void trackConditionalCacheHit() {
         this.hitCount++;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized void trackResponse(CacheStrategy cacheStrategy) {
         this.requestCount++;
         if (cacheStrategy.networkRequest != null) {
@@ -500,9 +467,9 @@ public final class Cache implements Closeable, Flushable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void update(Response response, Response response2) {
-        Editor editor;
+        DiskLruCache.Editor editor;
         Entry entry = new Entry(response2);
         try {
             editor = ((CacheResponseBody) response.body()).snapshot.edit();
@@ -522,7 +489,7 @@ public final class Cache implements Closeable, Flushable {
     public Iterator<String> urls() throws IOException {
         return new Iterator<String>() {
             boolean canRemove;
-            final Iterator<Snapshot> delegate = Cache.this.cache.snapshots();
+            final Iterator<DiskLruCache.Snapshot> delegate = Cache.this.cache.snapshots();
             @Nullable
             String nextUrl;
 
@@ -532,13 +499,13 @@ public final class Cache implements Closeable, Flushable {
                 }
                 this.canRemove = false;
                 while (this.delegate.hasNext()) {
-                    Snapshot snapshot = (Snapshot) this.delegate.next();
+                    DiskLruCache.Snapshot next = this.delegate.next();
                     try {
-                        this.nextUrl = Okio.buffer(snapshot.getSource(0)).readUtf8LineStrict();
+                        this.nextUrl = Okio.buffer(next.getSource(0)).readUtf8LineStrict();
                         return true;
                     } catch (IOException unused) {
                     } finally {
-                        snapshot.close();
+                        next.close();
                     }
                 }
                 return false;

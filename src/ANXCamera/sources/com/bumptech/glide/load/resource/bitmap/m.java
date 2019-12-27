@@ -5,7 +5,6 @@ import android.support.v4.internal.view.SupportMenu;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
-import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.util.i;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,17 +91,17 @@ public final class m implements ImageHeaderParser {
             return this.data.remaining() - i >= i2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int length() {
             return this.data.remaining();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void order(ByteOrder byteOrder) {
             this.data.order(byteOrder);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public short t(int i) {
             if (isAvailable(i, 2)) {
                 return this.data.getShort(i);
@@ -110,7 +109,7 @@ public final class m implements ImageHeaderParser {
             return -1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int u(int i) {
             if (isAvailable(i, 4)) {
                 return this.data.getInt(i);
@@ -190,15 +189,11 @@ public final class m implements ImageHeaderParser {
     private static int a(b bVar) {
         ByteOrder byteOrder;
         short t = bVar.t(6);
-        String str = TAG;
         if (t == Ci) {
             byteOrder = ByteOrder.LITTLE_ENDIAN;
         } else if (t != Bi) {
-            if (Log.isLoggable(str, 3)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown endianness = ");
-                sb.append(t);
-                Log.d(str, sb.toString());
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Unknown endianness = " + t);
             }
             byteOrder = ByteOrder.BIG_ENDIAN;
         } else {
@@ -215,55 +210,31 @@ public final class m implements ImageHeaderParser {
                 if (t4 >= 1 && t4 <= 12) {
                     int u2 = bVar.u(p + 4);
                     if (u2 >= 0) {
-                        String str2 = " tagType=";
-                        if (Log.isLoggable(str, 3)) {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Got tagIndex=");
-                            sb2.append(i);
-                            sb2.append(str2);
-                            sb2.append(t3);
-                            sb2.append(" formatCode=");
-                            sb2.append(t4);
-                            sb2.append(" componentCount=");
-                            sb2.append(u2);
-                            Log.d(str, sb2.toString());
+                        if (Log.isLoggable(TAG, 3)) {
+                            Log.d(TAG, "Got tagIndex=" + i + " tagType=" + t3 + " formatCode=" + t4 + " componentCount=" + u2);
                         }
                         int i2 = u2 + Ki[t4];
                         if (i2 <= 4) {
                             int i3 = p + 8;
                             if (i3 < 0 || i3 > bVar.length()) {
-                                if (Log.isLoggable(str, 3)) {
-                                    StringBuilder sb3 = new StringBuilder();
-                                    sb3.append("Illegal tagValueOffset=");
-                                    sb3.append(i3);
-                                    sb3.append(str2);
-                                    sb3.append(t3);
-                                    Log.d(str, sb3.toString());
+                                if (Log.isLoggable(TAG, 3)) {
+                                    Log.d(TAG, "Illegal tagValueOffset=" + i3 + " tagType=" + t3);
                                 }
                             } else if (i2 >= 0 && i2 + i3 <= bVar.length()) {
                                 return bVar.t(i3);
                             } else {
-                                if (Log.isLoggable(str, 3)) {
-                                    StringBuilder sb4 = new StringBuilder();
-                                    sb4.append("Illegal number of bytes for TI tag data tagType=");
-                                    sb4.append(t3);
-                                    Log.d(str, sb4.toString());
+                                if (Log.isLoggable(TAG, 3)) {
+                                    Log.d(TAG, "Illegal number of bytes for TI tag data tagType=" + t3);
                                 }
                             }
-                        } else if (Log.isLoggable(str, 3)) {
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append("Got byte count > 4, not orientation, continuing, formatCode=");
-                            sb5.append(t4);
-                            Log.d(str, sb5.toString());
+                        } else if (Log.isLoggable(TAG, 3)) {
+                            Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + t4);
                         }
-                    } else if (Log.isLoggable(str, 3)) {
-                        Log.d(str, "Negative tiff component count");
+                    } else if (Log.isLoggable(TAG, 3)) {
+                        Log.d(TAG, "Negative tiff component count");
                     }
-                } else if (Log.isLoggable(str, 3)) {
-                    StringBuilder sb6 = new StringBuilder();
-                    sb6.append("Got invalid format code = ");
-                    sb6.append(t4);
-                    Log.d(str, sb6.toString());
+                } else if (Log.isLoggable(TAG, 3)) {
+                    Log.d(TAG, "Got invalid format code = " + t4);
                 }
             }
         }
@@ -272,21 +243,16 @@ public final class m implements ImageHeaderParser {
 
     private int a(c cVar, com.bumptech.glide.load.engine.bitmap_recycle.b bVar) throws IOException {
         int B = cVar.B();
-        boolean S = S(B);
-        String str = TAG;
-        if (!S) {
-            if (Log.isLoggable(str, 3)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Parser doesn't handle magic number: ");
-                sb.append(B);
-                Log.d(str, sb.toString());
+        if (!S(B)) {
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Parser doesn't handle magic number: " + B);
             }
             return -1;
         }
         int b2 = b(cVar);
         if (b2 == -1) {
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Failed to parse exif segment length, or exif segment not found");
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to parse exif segment length, or exif segment not found");
             }
             return -1;
         }
@@ -300,79 +266,66 @@ public final class m implements ImageHeaderParser {
 
     private int a(c cVar, byte[] bArr, int i) throws IOException {
         int read = cVar.read(bArr, i);
-        String str = TAG;
         if (read != i) {
-            if (Log.isLoggable(str, 3)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unable to read exif segment data, length: ");
-                sb.append(i);
-                sb.append(", actually read: ");
-                sb.append(read);
-                Log.d(str, sb.toString());
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Unable to read exif segment data, length: " + i + ", actually read: " + read);
             }
             return -1;
         } else if (c(bArr, i)) {
             return a(new b(bArr, i));
         } else {
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Missing jpeg exif preamble");
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Missing jpeg exif preamble");
             }
             return -1;
         }
     }
 
     @NonNull
-    private ImageType a(c cVar) throws IOException {
+    private ImageHeaderParser.ImageType a(c cVar) throws IOException {
         int B = cVar.B();
         if (B == Ai) {
-            return ImageType.JPEG;
+            return ImageHeaderParser.ImageType.JPEG;
         }
         int B2 = ((B << 16) & SupportMenu.CATEGORY_MASK) | (cVar.B() & SupportMenu.USER_MASK);
         if (B2 == zi) {
             cVar.skip(21);
-            return cVar.getByte() >= 3 ? ImageType.PNG_A : ImageType.PNG;
+            return cVar.getByte() >= 3 ? ImageHeaderParser.ImageType.PNG_A : ImageHeaderParser.ImageType.PNG;
         } else if ((B2 >> 8) == yi) {
-            return ImageType.GIF;
+            return ImageHeaderParser.ImageType.GIF;
         } else {
             if (B2 != Li) {
-                return ImageType.UNKNOWN;
+                return ImageHeaderParser.ImageType.UNKNOWN;
             }
             cVar.skip(4);
             if ((((cVar.B() << 16) & SupportMenu.CATEGORY_MASK) | (cVar.B() & SupportMenu.USER_MASK)) != Mi) {
-                return ImageType.UNKNOWN;
+                return ImageHeaderParser.ImageType.UNKNOWN;
             }
             int B3 = ((cVar.B() << 16) & SupportMenu.CATEGORY_MASK) | (cVar.B() & SupportMenu.USER_MASK);
             if ((B3 & -256) != Ni) {
-                return ImageType.UNKNOWN;
+                return ImageHeaderParser.ImageType.UNKNOWN;
             }
             int i = B3 & 255;
             if (i == 88) {
                 cVar.skip(4);
-                return (cVar.getByte() & 16) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+                return (cVar.getByte() & 16) != 0 ? ImageHeaderParser.ImageType.WEBP_A : ImageHeaderParser.ImageType.WEBP;
             } else if (i != 76) {
-                return ImageType.WEBP;
+                return ImageHeaderParser.ImageType.WEBP;
             } else {
                 cVar.skip(4);
-                return (cVar.getByte() & 8) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+                return (cVar.getByte() & 8) != 0 ? ImageHeaderParser.ImageType.WEBP_A : ImageHeaderParser.ImageType.WEBP;
             }
         }
     }
 
     private int b(c cVar) throws IOException {
-        String str;
         short L;
         int B;
         long j;
-        long skip;
         do {
-            short L2 = cVar.L();
-            str = TAG;
-            if (L2 != 255) {
-                if (Log.isLoggable(str, 3)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unknown segmentId=");
-                    sb.append(L2);
-                    Log.d(str, sb.toString());
+            if (cVar.L() != 255) {
+                if (Log.isLoggable(TAG, 3)) {
+                    Log.d(TAG, "Unknown segmentId=" + r8);
                 }
                 return -1;
             }
@@ -381,8 +334,8 @@ public final class m implements ImageHeaderParser {
                 return -1;
             }
             if (L == 217) {
-                if (Log.isLoggable(str, 3)) {
-                    Log.d(str, "Found MARKER_EOI in exif segment");
+                if (Log.isLoggable(TAG, 3)) {
+                    Log.d(TAG, "Found MARKER_EOI in exif segment");
                 }
                 return -1;
             }
@@ -391,17 +344,9 @@ public final class m implements ImageHeaderParser {
                 return B;
             }
             j = (long) B;
-            skip = cVar.skip(j);
-        } while (skip == j);
-        if (Log.isLoggable(str, 3)) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Unable to skip enough data, type: ");
-            sb2.append(L);
-            sb2.append(", wanted to skip: ");
-            sb2.append(B);
-            sb2.append(", but actually skipped: ");
-            sb2.append(skip);
-            Log.d(str, sb2.toString());
+        } while (cVar.skip(j) == j);
+        if (Log.isLoggable(TAG, 3)) {
+            Log.d(TAG, "Unable to skip enough data, type: " + L + ", wanted to skip: " + B + ", but actually skipped: " + r6);
         }
         return -1;
     }
@@ -443,13 +388,13 @@ public final class m implements ImageHeaderParser {
     }
 
     @NonNull
-    public ImageType a(@NonNull InputStream inputStream) throws IOException {
+    public ImageHeaderParser.ImageType a(@NonNull InputStream inputStream) throws IOException {
         i.checkNotNull(inputStream);
         return a((c) new d(inputStream));
     }
 
     @NonNull
-    public ImageType a(@NonNull ByteBuffer byteBuffer) throws IOException {
+    public ImageHeaderParser.ImageType a(@NonNull ByteBuffer byteBuffer) throws IOException {
         i.checkNotNull(byteBuffer);
         return a((c) new a(byteBuffer));
     }

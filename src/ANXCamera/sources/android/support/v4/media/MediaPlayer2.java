@@ -2,7 +2,7 @@ package android.support.v4.media;
 
 import android.annotation.TargetApi;
 import android.media.DeniedByServerException;
-import android.media.MediaDrm.KeyRequest;
+import android.media.MediaDrm;
 import android.media.MediaDrmException;
 import android.media.MediaFormat;
 import android.media.ResourceBusyException;
@@ -12,7 +12,6 @@ import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.view.Surface;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,7 +25,7 @@ public abstract class MediaPlayer2 {
     public static final int CALL_COMPLETED_ATTACH_AUX_EFFECT = 1;
     public static final int CALL_COMPLETED_DESELECT_TRACK = 2;
     public static final int CALL_COMPLETED_LOOP_CURRENT = 3;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final int CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED = 1003;
     public static final int CALL_COMPLETED_PAUSE = 4;
     public static final int CALL_COMPLETED_PLAY = 5;
@@ -57,7 +56,7 @@ public abstract class MediaPlayer2 {
     public static final int MEDIA_ERROR_IO = -1004;
     public static final int MEDIA_ERROR_MALFORMED = -1007;
     public static final int MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK = 200;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final int MEDIA_ERROR_SYSTEM = Integer.MIN_VALUE;
     public static final int MEDIA_ERROR_TIMED_OUT = -110;
     public static final int MEDIA_ERROR_UNKNOWN = 1;
@@ -68,19 +67,19 @@ public abstract class MediaPlayer2 {
     public static final int MEDIA_INFO_BUFFERING_END = 702;
     public static final int MEDIA_INFO_BUFFERING_START = 701;
     public static final int MEDIA_INFO_BUFFERING_UPDATE = 704;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final int MEDIA_INFO_EXTERNAL_METADATA_UPDATE = 803;
     public static final int MEDIA_INFO_METADATA_UPDATE = 802;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final int MEDIA_INFO_NETWORK_BANDWIDTH = 703;
     public static final int MEDIA_INFO_NOT_SEEKABLE = 801;
     public static final int MEDIA_INFO_PLAYBACK_COMPLETE = 5;
     public static final int MEDIA_INFO_PLAYLIST_END = 6;
     public static final int MEDIA_INFO_PREPARED = 100;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
     public static final int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static final int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
     public static final int MEDIA_INFO_UNKNOWN = 1;
     public static final int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;
@@ -97,12 +96,12 @@ public abstract class MediaPlayer2 {
     public static final int SEEK_PREVIOUS_SYNC = 0;
     public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallCompleted {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallStatus {
     }
@@ -147,17 +146,17 @@ public abstract class MediaPlayer2 {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaError {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaInfo {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaPlayer2State {
     }
@@ -190,7 +189,7 @@ public abstract class MediaPlayer2 {
         void onDrmConfig(MediaPlayer2 mediaPlayer2, DataSourceDesc dataSourceDesc);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PrepareDrmStatusCode {
     }
@@ -207,7 +206,7 @@ public abstract class MediaPlayer2 {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SeekMode {
     }
@@ -216,7 +215,7 @@ public abstract class MediaPlayer2 {
         public static final int MEDIA_TRACK_TYPE_AUDIO = 2;
         public static final int MEDIA_TRACK_TYPE_METADATA = 5;
         public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
-        @RestrictTo({Scope.LIBRARY_GROUP})
+        @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
         public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3;
         public static final int MEDIA_TRACK_TYPE_UNKNOWN = 0;
         public static final int MEDIA_TRACK_TYPE_VIDEO = 1;
@@ -263,7 +262,7 @@ public abstract class MediaPlayer2 {
     public abstract DrmInfo getDrmInfo();
 
     @NonNull
-    public abstract KeyRequest getDrmKeyRequest(@Nullable byte[] bArr, @Nullable byte[] bArr2, @Nullable String str, int i, @Nullable Map<String, String> map) throws NoDrmSchemeException;
+    public abstract MediaDrm.KeyRequest getDrmKeyRequest(@Nullable byte[] bArr, @Nullable byte[] bArr2, @Nullable String str, int i, @Nullable Map<String, String> map) throws NoDrmSchemeException;
 
     @NonNull
     public abstract String getDrmPropertyString(@NonNull String str) throws NoDrmSchemeException;

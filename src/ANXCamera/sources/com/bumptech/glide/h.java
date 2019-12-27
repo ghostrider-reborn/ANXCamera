@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
 import com.bumptech.glide.request.RequestFutureTarget;
-import com.bumptech.glide.request.e;
 
 /* compiled from: RequestBuilder */
 class h implements Runnable {
@@ -17,7 +16,7 @@ class h implements Runnable {
         if (!this.val$target.isCancelled()) {
             j jVar = this.this$0;
             RequestFutureTarget requestFutureTarget = this.val$target;
-            jVar.a(requestFutureTarget, (e<TranscodeType>) requestFutureTarget);
+            jVar.a(requestFutureTarget, requestFutureTarget);
         }
     }
 }

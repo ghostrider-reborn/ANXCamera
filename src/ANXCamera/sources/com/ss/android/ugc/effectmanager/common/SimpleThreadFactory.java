@@ -20,11 +20,7 @@ public class SimpleThreadFactory implements ThreadFactory {
 
     public Thread newThread(Runnable runnable) {
         int incrementAndGet = this.threadSeq.incrementAndGet();
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.threadName);
-        sb.append("-");
-        sb.append(incrementAndGet);
-        Thread thread = new Thread(runnable, sb.toString());
+        Thread thread = new Thread(runnable, this.threadName + "-" + incrementAndGet);
         if (!this.ignoreStatusCheck) {
             if (thread.isDaemon()) {
                 thread.setDaemon(false);

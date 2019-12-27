@@ -13,7 +13,6 @@ import com.bumptech.glide.request.f;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.target.i;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /* compiled from: GlideContext */
 public class e extends ContextWrapper {
@@ -60,11 +59,11 @@ public class e extends ContextWrapper {
 
     @NonNull
     public <T> n<?, T> a(@NonNull Class<T> cls) {
-        n<?, T> nVar = (n) this.ua.get(cls);
+        n<?, T> nVar = this.ua.get(cls);
         if (nVar == null) {
-            for (Entry entry : this.ua.entrySet()) {
-                if (((Class) entry.getKey()).isAssignableFrom(cls)) {
-                    nVar = (n) entry.getValue();
+            for (Map.Entry next : this.ua.entrySet()) {
+                if (((Class) next.getKey()).isAssignableFrom(cls)) {
+                    nVar = (n) next.getValue();
                 }
             }
         }

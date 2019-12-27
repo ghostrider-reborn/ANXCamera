@@ -2,10 +2,10 @@ package com.android.camera.module.loader;
 
 import android.hardware.camera2.CaptureResult;
 import com.android.camera.log.Log;
-import com.android.camera2.Camera2Proxy.SuperNightCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.vendortag.CaptureResultVendorTags;
 import com.android.camera2.vendortag.VendorTagHelper;
-import com.android.camera2.vendortag.struct.MarshalQueryableASDScene.ASDScene;
+import com.android.camera2.vendortag.struct.MarshalQueryableASDScene;
 import io.reactivex.functions.Function;
 import java.lang.ref.WeakReference;
 
@@ -13,13 +13,13 @@ public class FunctionParseSuperNight implements Function<CaptureResult, CaptureR
     public static final int SUPER_NIGHT = 3;
     public static final String TAG = "FunctionParseSuperNight";
     private boolean mIsSuperNight;
-    private WeakReference<SuperNightCallback> mSuperNightCallback;
+    private WeakReference<Camera2Proxy.SuperNightCallback> mSuperNightCallback;
 
-    public FunctionParseSuperNight(SuperNightCallback superNightCallback) {
+    public FunctionParseSuperNight(Camera2Proxy.SuperNightCallback superNightCallback) {
         this.mSuperNightCallback = new WeakReference<>(superNightCallback);
     }
 
-    private void updateASDScene(SuperNightCallback superNightCallback, ASDScene aSDScene) {
+    private void updateASDScene(Camera2Proxy.SuperNightCallback superNightCallback, MarshalQueryableASDScene.ASDScene aSDScene) {
         int i = aSDScene.type;
         boolean z = (aSDScene.value & 256) != 0;
         if (i == 3 && z != this.mIsSuperNight) {
@@ -29,7 +29,7 @@ public class FunctionParseSuperNight implements Function<CaptureResult, CaptureR
     }
 
     public CaptureResult apply(CaptureResult captureResult) throws Exception {
-        SuperNightCallback superNightCallback = (SuperNightCallback) this.mSuperNightCallback.get();
+        Camera2Proxy.SuperNightCallback superNightCallback = (Camera2Proxy.SuperNightCallback) this.mSuperNightCallback.get();
         if (superNightCallback == null) {
             return captureResult;
         }
@@ -38,22 +38,14 @@ public class FunctionParseSuperNight implements Function<CaptureResult, CaptureR
             superNightCallback.onSuperNightChanged(false);
             return captureResult;
         }
-        ASDScene[] aSDSceneArr = (ASDScene[]) VendorTagHelper.getValueQuietly(captureResult, CaptureResultVendorTags.NON_SEMANTIC_SCENE);
-        String str = TAG;
+        MarshalQueryableASDScene.ASDScene[] aSDSceneArr = (MarshalQueryableASDScene.ASDScene[]) VendorTagHelper.getValueQuietly(captureResult, CaptureResultVendorTags.NON_SEMANTIC_SCENE);
         if (aSDSceneArr == null || aSDSceneArr.length <= 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("(");
-            sb.append(CaptureResultVendorTags.NON_SEMANTIC_SCENE.getName());
-            sb.append(") asd scene result null!!!");
-            Log.d(str, sb.toString());
+            Log.d(TAG, "(" + CaptureResultVendorTags.NON_SEMANTIC_SCENE.getName() + ") asd scene result null!!!");
             return captureResult;
         }
-        for (ASDScene aSDScene : aSDSceneArr) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("(NoneSemantics)-->");
-            sb2.append(aSDScene.toString());
-            Log.d(str, sb2.toString());
-            updateASDScene(superNightCallback, aSDScene);
+        for (MarshalQueryableASDScene.ASDScene aSDScene : aSDSceneArr) {
+            Log.d(TAG, "(NoneSemantics)-->" + aSDScene.toString());
+            updateASDScene(superNightCallback, aSDSceneArr[r2]);
         }
         return captureResult;
     }

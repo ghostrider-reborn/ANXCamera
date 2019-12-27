@@ -39,7 +39,7 @@ public final class FlowableRefCount<T> extends AbstractFlowableWithUpstream<T, T
             this.resource.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cleanup() {
             FlowableRefCount.this.lock.lock();
             try {
@@ -135,11 +135,11 @@ public final class FlowableRefCount<T> extends AbstractFlowableWithUpstream<T, T
         return new DisposeConsumer(subscriber, atomicBoolean);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void doSubscribe(Subscriber<? super T> subscriber, CompositeDisposable compositeDisposable) {
         ConnectionSubscriber connectionSubscriber = new ConnectionSubscriber(subscriber, compositeDisposable, disconnect(compositeDisposable));
         subscriber.onSubscribe(connectionSubscriber);
-        this.source.subscribe((FlowableSubscriber<? super T>) connectionSubscriber);
+        this.source.subscribe(connectionSubscriber);
     }
 
     public void subscribeActual(Subscriber<? super T> subscriber) {

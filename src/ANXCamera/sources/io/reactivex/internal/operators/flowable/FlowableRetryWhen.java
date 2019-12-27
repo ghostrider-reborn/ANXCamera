@@ -4,6 +4,7 @@ import io.reactivex.Flowable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.flowable.FlowableRepeatWhen;
 import io.reactivex.internal.subscriptions.EmptySubscription;
 import io.reactivex.processors.FlowableProcessor;
 import io.reactivex.processors.UnicastProcessor;
@@ -15,7 +16,7 @@ import org.reactivestreams.Subscription;
 public final class FlowableRetryWhen<T> extends AbstractFlowableWithUpstream<T, T> {
     final Function<? super Flowable<Throwable>, ? extends Publisher<?>> handler;
 
-    static final class RetryWhenSubscriber<T> extends WhenSourceSubscriber<T, Throwable> {
+    static final class RetryWhenSubscriber<T> extends FlowableRepeatWhen.WhenSourceSubscriber<T, Throwable> {
         private static final long serialVersionUID = -2680129890138081029L;
 
         RetryWhenSubscriber(Subscriber<? super T> subscriber, FlowableProcessor<Throwable> flowableProcessor, Subscription subscription) {
@@ -44,12 +45,12 @@ public final class FlowableRetryWhen<T> extends AbstractFlowableWithUpstream<T, 
             Object apply = this.handler.apply(serialized);
             ObjectHelper.requireNonNull(apply, "handler returned a null Publisher");
             Publisher publisher = (Publisher) apply;
-            WhenReceiver whenReceiver = new WhenReceiver(this.source);
+            FlowableRepeatWhen.WhenReceiver whenReceiver = new FlowableRepeatWhen.WhenReceiver(this.source);
             RetryWhenSubscriber retryWhenSubscriber = new RetryWhenSubscriber(serializedSubscriber, serialized, whenReceiver);
             whenReceiver.subscriber = retryWhenSubscriber;
             subscriber.onSubscribe(retryWhenSubscriber);
             publisher.subscribe(whenReceiver);
-            whenReceiver.onNext(Integer.valueOf(0));
+            whenReceiver.onNext(0);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
             EmptySubscription.error(th, subscriber);

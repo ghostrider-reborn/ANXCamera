@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.internal.util.BackpressureHelper;
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,7 +22,7 @@ public final class FlowableSubscribeOn<T> extends AbstractFlowableWithUpstream<T
         final AtomicLong requested = new AtomicLong();
         final AtomicReference<Subscription> s = new AtomicReference<>();
         Publisher<T> source;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         static final class Request implements Runnable {
             private final long n;
@@ -39,7 +38,7 @@ public final class FlowableSubscribeOn<T> extends AbstractFlowableWithUpstream<T
             }
         }
 
-        SubscribeOnSubscriber(Subscriber<? super T> subscriber, Worker worker2, Publisher<T> publisher, boolean z) {
+        SubscribeOnSubscriber(Subscriber<? super T> subscriber, Scheduler.Worker worker2, Publisher<T> publisher, boolean z) {
             this.actual = subscriber;
             this.worker = worker2;
             this.source = publisher;
@@ -76,13 +75,13 @@ public final class FlowableSubscribeOn<T> extends AbstractFlowableWithUpstream<T
 
         public void request(long j) {
             if (SubscriptionHelper.validate(j)) {
-                Subscription subscription = (Subscription) this.s.get();
+                Subscription subscription = this.s.get();
                 if (subscription != null) {
                     requestUpstream(j, subscription);
                     return;
                 }
                 BackpressureHelper.add(this.requested, j);
-                Subscription subscription2 = (Subscription) this.s.get();
+                Subscription subscription2 = this.s.get();
                 if (subscription2 != null) {
                     long andSet = this.requested.getAndSet(0);
                     if (andSet != 0) {
@@ -92,7 +91,7 @@ public final class FlowableSubscribeOn<T> extends AbstractFlowableWithUpstream<T
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void requestUpstream(long j, Subscription subscription) {
             if (this.nonScheduledRequests || Thread.currentThread() == get()) {
                 subscription.request(j);
@@ -116,7 +115,7 @@ public final class FlowableSubscribeOn<T> extends AbstractFlowableWithUpstream<T
     }
 
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        Worker createWorker = this.scheduler.createWorker();
+        Scheduler.Worker createWorker = this.scheduler.createWorker();
         SubscribeOnSubscriber subscribeOnSubscriber = new SubscribeOnSubscriber(subscriber, createWorker, this.source, this.nonScheduledRequests);
         subscriber.onSubscribe(subscribeOnSubscriber);
         createWorker.schedule(subscribeOnSubscriber);

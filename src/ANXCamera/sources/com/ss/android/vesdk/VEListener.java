@@ -1,6 +1,6 @@
 package com.ss.android.vesdk;
 
-import android.graphics.Bitmap.Config;
+import android.graphics.Bitmap;
 import org.json.JSONObject;
 
 public class VEListener {
@@ -66,7 +66,7 @@ public class VEListener {
     }
 
     public interface VEImageListener {
-        void onImage(int[] iArr, int i, int i2, Config config);
+        void onImage(int[] iArr, int i, int i2, Bitmap.Config config);
     }
 
     public interface VEMonitorListener {

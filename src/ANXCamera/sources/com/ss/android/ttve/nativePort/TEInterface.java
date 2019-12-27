@@ -16,7 +16,6 @@ import com.ss.android.vesdk.VEStickerAnimator;
 import com.ss.android.vesdk.VETimelineParams;
 import com.ss.android.vesdk.VEWaterMarkPosition;
 import com.ss.android.vesdk.VEWatermarkParam;
-import com.ss.android.vesdk.VEWatermarkParam.VEWatermarkMask;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -209,7 +208,7 @@ public final class TEInterface extends TENativeServiceBase {
 
     private native void nativeSetViewPort(long j, int i, int i2, int i3, int i4);
 
-    private native void nativeSetWaterMark(long j, ArrayList<String[]> arrayList, int i, int i2, int i3, int i4, int i5, long j2, int i6, VEWatermarkMask vEWatermarkMask);
+    private native void nativeSetWaterMark(long j, ArrayList<String[]> arrayList, int i, int i2, int i3, int i4, int i5, long j2, int i6, VEWatermarkParam.VEWatermarkMask vEWatermarkMask);
 
     private native int nativeStart(long j);
 
@@ -265,18 +264,10 @@ public final class TEInterface extends TENativeServiceBase {
 
     public int addExternalTrack(String[] strArr, String[] strArr2, int[] iArr, int[] iArr2, int[] iArr3, int[] iArr4, double d2, double d3, double d4, double d5, int i) {
         String[] strArr3 = strArr;
-        String[] strArr4 = strArr2;
-        int[] iArr5 = iArr;
-        int[] iArr6 = iArr;
-        int[] iArr7 = iArr2;
-        int[] iArr8 = iArr2;
-        double d6 = d2;
-        double d7 = d3;
-        double d8 = d4;
-        double d9 = d5;
+        int[] iArr5 = iArr2;
         long j = this.mNative;
         int i2 = this.mHostTrackIndex;
-        return nativeAddExternalTrack(j, strArr, strArr4, iArr5, iArr8, iArr6, iArr7, d6, d7, d8, d9, 5, i2);
+        return nativeAddExternalTrack(j, strArr, strArr2, iArr, iArr5, iArr, iArr2, d2, d3, d4, d5, 5, i2);
     }
 
     public int[] addFilters(int[] iArr, String[] strArr, int[] iArr2, int[] iArr3, int[] iArr4, int[] iArr5) {
@@ -405,7 +396,7 @@ public final class TEInterface extends TENativeServiceBase {
     }
 
     public int createScene2(String[] strArr, int[] iArr, int[] iArr2, String[] strArr2, int[] iArr3, int[] iArr4, String[] strArr3, String[][] strArr4, float[] fArr, int i) {
-        return createScene2(strArr, iArr, iArr2, strArr2, iArr3, iArr4, strArr3, strArr4, fArr, null, i);
+        return createScene2(strArr, iArr, iArr2, strArr2, iArr3, iArr4, strArr3, strArr4, fArr, (int[]) null, i);
     }
 
     public int createScene2(String[] strArr, int[] iArr, int[] iArr2, String[] strArr2, int[] iArr3, int[] iArr4, String[] strArr3, String[][] strArr4, float[] fArr, int[] iArr5, int i) {
@@ -532,9 +523,8 @@ public final class TEInterface extends TENativeServiceBase {
 
     public float[] getInfoStickerBoundingBox(int i) throws VEException {
         long j = this.mNative;
-        String str = "";
         if (j == 0) {
-            throw new VEException(VEResult.TER_INVALID_HANDLER, str);
+            throw new VEException(VEResult.TER_INVALID_HANDLER, "");
         } else if (this.mHostTrackIndex >= 0) {
             float[] nativeGetInfoStickerBoundingBox = nativeGetInfoStickerBoundingBox(j, i);
             if (nativeGetInfoStickerBoundingBox[0] == 0.0f) {
@@ -542,12 +532,9 @@ public final class TEInterface extends TENativeServiceBase {
                 System.arraycopy(nativeGetInfoStickerBoundingBox, 1, fArr, 0, 4);
                 return fArr;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("native getInfoStickerBoundingBox failed: ");
-            sb.append(nativeGetInfoStickerBoundingBox[0]);
-            throw new VEException(-1, sb.toString());
+            throw new VEException(-1, "native getInfoStickerBoundingBox failed: " + nativeGetInfoStickerBoundingBox[0]);
         } else {
-            throw new VEException(-100, str);
+            throw new VEException(-100, "");
         }
     }
 
@@ -690,7 +677,7 @@ public final class TEInterface extends TENativeServiceBase {
         }
         String nativeSave = nativeSave(j);
         if (TextUtils.isEmpty(nativeSave)) {
-            nativeSave = null;
+            return null;
         }
         return nativeSave;
     }
@@ -960,17 +947,16 @@ public final class TEInterface extends TENativeServiceBase {
     }
 
     public void setUsrRotate(int i) {
-        String str = "usr rotate";
         if (i == 0) {
-            setOption(0, str, 0);
+            setOption(0, "usr rotate", 0);
         } else if (i == 90) {
-            setOption(0, str, 1);
+            setOption(0, "usr rotate", 1);
         } else if (i == 180) {
-            setOption(0, str, 2);
+            setOption(0, "usr rotate", 2);
         } else if (i != 270) {
-            setOption(0, str, 0);
+            setOption(0, "usr rotate", 0);
         } else {
-            setOption(0, str, 3);
+            setOption(0, "usr rotate", 3);
         }
     }
 
@@ -986,7 +972,7 @@ public final class TEInterface extends TENativeServiceBase {
         }
     }
 
-    public void setWaterMark(ArrayList<String[]> arrayList, int i, int i2, int i3, int i4, int i5, long j, VEWaterMarkPosition vEWaterMarkPosition, VEWatermarkMask vEWatermarkMask) {
+    public void setWaterMark(ArrayList<String[]> arrayList, int i, int i2, int i3, int i4, int i5, long j, VEWaterMarkPosition vEWaterMarkPosition, VEWatermarkParam.VEWatermarkMask vEWatermarkMask) {
         long j2 = this.mNative;
         if (j2 != 0) {
             nativeSetWaterMark(j2, arrayList, i, i2, i3, i4, i5, j, vEWaterMarkPosition.ordinal(), vEWatermarkMask);

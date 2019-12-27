@@ -39,10 +39,10 @@ public class FetchExistEffectListTask extends NormalTask {
 
     private List<Effect> getCategoryAllEffects(List<String> list) {
         ArrayList arrayList = new ArrayList();
-        for (String str : list) {
-            for (Effect effect : this.allDownloadedCategoryEffects) {
-                if (TextUtils.equals(str, effect.getEffectId())) {
-                    arrayList.add(effect);
+        for (String next : list) {
+            for (Effect next2 : this.allDownloadedCategoryEffects) {
+                if (TextUtils.equals(next, next2.getEffectId())) {
+                    arrayList.add(next2);
                 }
             }
         }
@@ -52,9 +52,9 @@ public class FetchExistEffectListTask extends NormalTask {
     private List<EffectCategoryResponse> getCategoryEffectResponse(EffectChannelModel effectChannelModel) {
         List<EffectCategoryModel> category = effectChannelModel.getCategory();
         ArrayList arrayList = new ArrayList();
-        for (EffectCategoryModel effectCategoryModel : category) {
-            if (effectCategoryModel.checkValued()) {
-                EffectCategoryResponse effectCategoryResponse = new EffectCategoryResponse(effectCategoryModel.getId(), effectCategoryModel.getName(), effectCategoryModel.getKey(), getCategoryAllEffects(effectCategoryModel.getEffects()), effectCategoryModel.getTags(), effectCategoryModel.getTagsUpdateTime());
+        for (EffectCategoryModel next : category) {
+            if (next.checkValued()) {
+                EffectCategoryResponse effectCategoryResponse = new EffectCategoryResponse(next.getId(), next.getName(), next.getKey(), getCategoryAllEffects(next.getEffects()), next.getTags(), next.getTagsUpdateTime());
                 effectCategoryResponse.setCollectionEffect(effectChannelModel.getCollection());
                 arrayList.add(effectCategoryResponse);
             }
@@ -64,9 +64,9 @@ public class FetchExistEffectListTask extends NormalTask {
 
     private List<Effect> getDownloadedEffectList(List<Effect> list) {
         ArrayList arrayList = new ArrayList();
-        for (Effect effect : list) {
-            if (this.mCache.has(effect.getId())) {
-                arrayList.add(effect);
+        for (Effect next : list) {
+            if (this.mCache.has(next.getId())) {
+                arrayList.add(next);
             }
         }
         return arrayList;
@@ -82,18 +82,18 @@ public class FetchExistEffectListTask extends NormalTask {
         if (cachedChannelModel == null) {
             sendMessage(14, new EffectChannelTaskResult(new EffectChannelResponse(this.panel), new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_CACHE)));
         } else if (!cachedChannelModel.checkValued()) {
-            sendMessage(14, new EffectChannelTaskResult(new EffectChannelResponse(this.panel), null));
+            sendMessage(14, new EffectChannelTaskResult(new EffectChannelResponse(this.panel), (ExceptionResult) null));
         } else {
             this.allDownloadedCategoryEffects = getDownloadedEffectList(cachedChannelModel.getEffects());
             if (this.allDownloadedCategoryEffects.isEmpty()) {
-                sendMessage(14, new EffectChannelTaskResult(new EffectChannelResponse(this.panel), null));
+                sendMessage(14, new EffectChannelTaskResult(new EffectChannelResponse(this.panel), (ExceptionResult) null));
                 return;
             }
             effectChannelResponse.setAllCategoryEffects(this.allDownloadedCategoryEffects);
             effectChannelResponse.setCategoryResponseList(getCategoryEffectResponse(cachedChannelModel));
             effectChannelResponse.setPanel(this.panel);
             effectChannelResponse.setPanelModel(cachedChannelModel.getPanel());
-            sendMessage(14, new EffectChannelTaskResult(effectChannelResponse, null));
+            sendMessage(14, new EffectChannelTaskResult(effectChannelResponse, (ExceptionResult) null));
         }
     }
 }

@@ -59,10 +59,7 @@ public final class BackpressureHelper {
             }
             j3 = j2 - j;
             if (j3 < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("More produced than requested: ");
-                sb.append(j3);
-                RxJavaPlugins.onError(new IllegalStateException(sb.toString()));
+                RxJavaPlugins.onError(new IllegalStateException("More produced than requested: " + j3));
                 j3 = 0;
             }
         } while (!atomicLong.compareAndSet(j2, j3));
@@ -82,10 +79,7 @@ public final class BackpressureHelper {
             }
             j3 = j2 - j;
             if (j3 < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("More produced than requested: ");
-                sb.append(j3);
-                RxJavaPlugins.onError(new IllegalStateException(sb.toString()));
+                RxJavaPlugins.onError(new IllegalStateException("More produced than requested: " + j3));
                 j3 = 0;
             }
         } while (!atomicLong.compareAndSet(j2, j3));

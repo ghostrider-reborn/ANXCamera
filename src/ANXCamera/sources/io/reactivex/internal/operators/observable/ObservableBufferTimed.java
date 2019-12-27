@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.internal.disposables.DisposableHelper;
@@ -41,9 +40,9 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
         Disposable timer;
         final long timespan;
         final TimeUnit unit;
-        final Worker w;
+        final Scheduler.Worker w;
 
-        BufferExactBoundedObserver(Observer<? super U> observer, Callable<U> callable, long j, TimeUnit timeUnit, int i, boolean z, Worker worker) {
+        BufferExactBoundedObserver(Observer<? super U> observer, Callable<U> callable, long j, TimeUnit timeUnit, int i, boolean z, Scheduler.Worker worker) {
             super(observer, new MpscLinkedQueue());
             this.bufferSupplier = callable;
             this.timespan = j;
@@ -119,25 +118,28 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
             monitor-exit(r7);
          */
         /* JADX WARNING: Code restructure failed: missing block: B:23:0x0044, code lost:
-            if (r7.restartTimerOnMaxSize == false) goto L_0x0054;
+            if (r7.restartTimerOnMaxSize == false) goto L_?;
          */
         /* JADX WARNING: Code restructure failed: missing block: B:24:0x0046, code lost:
             r0 = r7.w;
             r4 = r7.timespan;
             r7.timer = r0.schedulePeriodically(r7, r4, r4, r7.unit);
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:25:0x0054, code lost:
-            return;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:30:0x0058, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:29:0x0058, code lost:
             r8 = move-exception;
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:31:0x0059, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:30:0x0059, code lost:
             io.reactivex.exceptions.Exceptions.throwIfFatal(r8);
             r7.actual.onError(r8);
             dispose();
          */
-        /* JADX WARNING: Code restructure failed: missing block: B:32:0x0064, code lost:
+        /* JADX WARNING: Code restructure failed: missing block: B:31:0x0064, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:42:?, code lost:
+            return;
+         */
+        /* JADX WARNING: Code restructure failed: missing block: B:43:?, code lost:
             return;
          */
         public void onNext(T t) {
@@ -161,13 +163,13 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
                     ObjectHelper.requireNonNull(call, "The buffer supplied is null");
                     this.buffer = (Collection) call;
                     this.actual.onSubscribe(this);
-                    Worker worker = this.w;
+                    Scheduler.Worker worker = this.w;
                     long j = this.timespan;
                     this.timer = worker.schedulePeriodically(this, j, j, this.unit);
                 } catch (Throwable th) {
                     Exceptions.throwIfFatal(th);
                     disposable.dispose();
-                    EmptyDisposable.error(th, this.actual);
+                    EmptyDisposable.error(th, (Observer<?>) this.actual);
                     this.w.dispose();
                 }
             }
@@ -235,7 +237,7 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
                 this.queue.offer(u);
                 this.done = true;
                 if (enter()) {
-                    QueueDrainHelper.drainLoop(this.queue, this.actual, false, null, this);
+                    QueueDrainHelper.drainLoop(this.queue, this.actual, false, (Disposable) null, this);
                 }
             }
             DisposableHelper.dispose(this.timer);
@@ -270,14 +272,14 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
                         Scheduler scheduler2 = this.scheduler;
                         long j = this.timespan;
                         Disposable schedulePeriodicallyDirect = scheduler2.schedulePeriodicallyDirect(this, j, j, this.unit);
-                        if (!this.timer.compareAndSet(null, schedulePeriodicallyDirect)) {
+                        if (!this.timer.compareAndSet((Object) null, schedulePeriodicallyDirect)) {
                             schedulePeriodicallyDirect.dispose();
                         }
                     }
                 } catch (Throwable th) {
                     Exceptions.throwIfFatal(th);
                     dispose();
-                    EmptyDisposable.error(th, this.actual);
+                    EmptyDisposable.error(th, (Observer<?>) this.actual);
                 }
             }
         }
@@ -314,11 +316,11 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
         final long timeskip;
         final long timespan;
         final TimeUnit unit;
-        final Worker w;
+        final Scheduler.Worker w;
 
         final class RemoveFromBuffer implements Runnable {
 
-            /* renamed from: b reason: collision with root package name */
+            /* renamed from: b  reason: collision with root package name */
             private final U f307b;
 
             RemoveFromBuffer(U u) {
@@ -350,7 +352,7 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
             }
         }
 
-        BufferSkipBoundedObserver(Observer<? super U> observer, Callable<U> callable, long j, long j2, TimeUnit timeUnit, Worker worker) {
+        BufferSkipBoundedObserver(Observer<? super U> observer, Callable<U> callable, long j, long j2, TimeUnit timeUnit, Scheduler.Worker worker) {
             super(observer, new MpscLinkedQueue());
             this.bufferSupplier = callable;
             this.timespan = j;
@@ -363,7 +365,7 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
             observer.onNext(u);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
             synchronized (this) {
                 this.buffers.clear();
@@ -417,19 +419,19 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
             if (DisposableHelper.validate(this.s, disposable)) {
                 this.s = disposable;
                 try {
-                    Object call = this.bufferSupplier.call();
+                    U call = this.bufferSupplier.call();
                     ObjectHelper.requireNonNull(call, "The buffer supplied is null");
                     Collection collection = (Collection) call;
                     this.buffers.add(collection);
                     this.actual.onSubscribe(this);
-                    Worker worker = this.w;
+                    Scheduler.Worker worker = this.w;
                     long j = this.timeskip;
                     worker.schedulePeriodically(this, j, j, this.unit);
                     this.w.schedule(new RemoveFromBufferEmit(collection), this.timespan, this.unit);
                 } catch (Throwable th) {
                     Exceptions.throwIfFatal(th);
                     disposable.dispose();
-                    EmptyDisposable.error(th, this.actual);
+                    EmptyDisposable.error(th, (Observer<?>) this.actual);
                     this.w.dispose();
                 }
             }
@@ -438,7 +440,7 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
         public void run() {
             if (!this.cancelled) {
                 try {
-                    Object call = this.bufferSupplier.call();
+                    U call = this.bufferSupplier.call();
                     ObjectHelper.requireNonNull(call, "The bufferSupplier returned a null buffer");
                     Collection collection = (Collection) call;
                     synchronized (this) {
@@ -475,7 +477,7 @@ public final class ObservableBufferTimed<T, U extends Collection<? super T>> ext
             observableSource.subscribe(bufferExactUnboundedObserver);
             return;
         }
-        Worker createWorker = this.scheduler.createWorker();
+        Scheduler.Worker createWorker = this.scheduler.createWorker();
         if (this.timespan == this.timeskip) {
             ObservableSource<T> observableSource2 = this.source;
             BufferExactBoundedObserver bufferExactBoundedObserver = new BufferExactBoundedObserver(new SerializedObserver(observer), this.bufferSupplier, this.timespan, this.unit, this.maxSize, this.restartTimerOnMaxSize, createWorker);

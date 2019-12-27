@@ -117,7 +117,7 @@ public final class ReplaySubject<T> extends Subject<T> {
             this.done = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public TimedNode<Object> getHead() {
             TimedNode<Object> timedNode;
             TimedNode<Object> timedNode2 = this.head;
@@ -157,7 +157,7 @@ public final class ReplaySubject<T> extends Subject<T> {
         }
 
         public T[] getValues(T[] tArr) {
-            TimedNode head2 = getHead();
+            TimedNode<Object> head2 = getHead();
             int size2 = size(head2);
             if (size2 != 0) {
                 if (tArr.length < size2) {
@@ -179,14 +179,14 @@ public final class ReplaySubject<T> extends Subject<T> {
         public void replay(ReplayDisposable<T> replayDisposable) {
             if (replayDisposable.getAndIncrement() == 0) {
                 Observer<? super T> observer = replayDisposable.actual;
-                TimedNode timedNode = (TimedNode) replayDisposable.index;
+                TimedNode<Object> timedNode = (TimedNode) replayDisposable.index;
                 if (timedNode == null) {
                     timedNode = getHead();
                 }
                 int i = 1;
                 while (!replayDisposable.cancelled) {
                     while (!replayDisposable.cancelled) {
-                        TimedNode timedNode2 = (TimedNode) timedNode.get();
+                        TimedNode<Object> timedNode2 = (TimedNode) timedNode.get();
                         if (timedNode2 != null) {
                             T t = timedNode2.value;
                             if (!this.done || timedNode2.get() != null) {
@@ -221,7 +221,7 @@ public final class ReplaySubject<T> extends Subject<T> {
             return size(getHead());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int size(TimedNode<Object> timedNode) {
             int i = 0;
             while (i != Integer.MAX_VALUE) {
@@ -236,7 +236,7 @@ public final class ReplaySubject<T> extends Subject<T> {
             return i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trim() {
             int i = this.size;
             if (i > this.maxSize) {
@@ -259,7 +259,7 @@ public final class ReplaySubject<T> extends Subject<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trimFinal() {
             long now = this.scheduler.now(this.unit) - this.maxAge;
             TimedNode<Object> timedNode = this.head;
@@ -404,7 +404,7 @@ public final class ReplaySubject<T> extends Subject<T> {
             return i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trim() {
             int i = this.size;
             if (i > this.maxSize) {
@@ -471,7 +471,7 @@ public final class ReplaySubject<T> extends Subject<T> {
                 }
                 return tArr;
             }
-            List<Object> list = this.buffer;
+            List list = this.buffer;
             Object obj = list.get(i - 1);
             if (NotificationLite.isComplete(obj) || NotificationLite.isError(obj)) {
                 i--;
@@ -503,7 +503,7 @@ public final class ReplaySubject<T> extends Subject<T> {
                 if (num != null) {
                     i = num.intValue();
                 } else {
-                    replayDisposable.index = Integer.valueOf(0);
+                    replayDisposable.index = 0;
                 }
                 int i2 = 1;
                 while (!replayDisposable.cancelled) {
@@ -593,7 +593,7 @@ public final class ReplaySubject<T> extends Subject<T> {
         return new ReplaySubject<>(sizeAndTimeBoundReplayBuffer);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(ReplayDisposable<T> replayDisposable) {
         ReplayDisposable[] replayDisposableArr;
         ReplayDisposable[] replayDisposableArr2;
@@ -647,7 +647,7 @@ public final class ReplaySubject<T> extends Subject<T> {
         return this.buffer.size() != 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int observerCount() {
         return ((ReplayDisposable[]) this.observers.get()).length;
     }
@@ -696,7 +696,7 @@ public final class ReplaySubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(ReplayDisposable<T> replayDisposable) {
         ReplayDisposable<T>[] replayDisposableArr;
         ReplayDisposable[] replayDisposableArr2;
@@ -728,11 +728,13 @@ public final class ReplaySubject<T> extends Subject<T> {
                 } else {
                     return;
                 }
+            } else {
+                return;
             }
         } while (!this.observers.compareAndSet(replayDisposableArr, replayDisposableArr2));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int size() {
         return this.buffer.size();
     }
@@ -741,17 +743,18 @@ public final class ReplaySubject<T> extends Subject<T> {
     public void subscribeActual(Observer<? super T> observer) {
         ReplayDisposable replayDisposable = new ReplayDisposable(observer, this);
         observer.onSubscribe(replayDisposable);
-        if (!replayDisposable.cancelled) {
-            if (!add(replayDisposable) || !replayDisposable.cancelled) {
-                this.buffer.replay(replayDisposable);
-            } else {
-                remove(replayDisposable);
-            }
+        if (replayDisposable.cancelled) {
+            return;
+        }
+        if (!add(replayDisposable) || !replayDisposable.cancelled) {
+            this.buffer.replay(replayDisposable);
+        } else {
+            remove(replayDisposable);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public ReplayDisposable<T>[] terminate(Object obj) {
-        return this.buffer.compareAndSet(null, obj) ? (ReplayDisposable[]) this.observers.getAndSet(TERMINATED) : TERMINATED;
+        return this.buffer.compareAndSet((Object) null, obj) ? (ReplayDisposable[]) this.observers.getAndSet(TERMINATED) : TERMINATED;
     }
 }

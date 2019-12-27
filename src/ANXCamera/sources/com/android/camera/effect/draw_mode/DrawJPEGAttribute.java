@@ -2,7 +2,7 @@ package com.android.camera.effect.draw_mode;
 
 import android.location.Location;
 import android.net.Uri;
-import com.android.camera.effect.EffectController.EffectRectAttribute;
+import com.android.camera.effect.EffectController;
 import com.android.camera.watermark.WaterMarkData;
 import com.android.gallery3d.exif.ExifInterface;
 import com.xiaomi.camera.core.PictureInfo;
@@ -11,7 +11,7 @@ import java.util.List;
 public class DrawJPEGAttribute extends DrawAttribute {
     public String mAlgorithmName;
     public boolean mApplyWaterMark = true;
-    public EffectRectAttribute mAttribute;
+    public EffectController.EffectRectAttribute mAttribute;
     public int[] mCoordinatesOfTheRegionUnderWatermarks;
     public byte[] mData;
     public byte[] mDataOfTheRegionUnderWatermarks;
@@ -40,7 +40,7 @@ public class DrawJPEGAttribute extends DrawAttribute {
     public List<WaterMarkData> mWaterInfos;
     public int mWidth;
 
-    public DrawJPEGAttribute(byte[] bArr, boolean z, int i, int i2, int i3, int i4, int i5, EffectRectAttribute effectRectAttribute, Location location, String str, long j, int i6, int i7, float f2, boolean z2, String str2, boolean z3, PictureInfo pictureInfo, List<WaterMarkData> list, boolean z4, boolean z5, String str3, boolean z6, int i8, int i9) {
+    public DrawJPEGAttribute(byte[] bArr, boolean z, int i, int i2, int i3, int i4, int i5, EffectController.EffectRectAttribute effectRectAttribute, Location location, String str, long j, int i6, int i7, float f2, boolean z2, String str2, boolean z3, PictureInfo pictureInfo, List<WaterMarkData> list, boolean z4, boolean z5, String str3, boolean z6, int i8, int i9) {
         this.mPreviewWidth = i;
         this.mPreviewHeight = i2;
         this.mWidth = i3;

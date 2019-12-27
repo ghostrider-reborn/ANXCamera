@@ -1,12 +1,10 @@
 package android.support.v4.view;
 
 import android.content.Context;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
@@ -21,7 +19,7 @@ public final class GestureDetectorCompat {
 
         void setIsLongpressEnabled(boolean z);
 
-        void setOnDoubleTapListener(OnDoubleTapListener onDoubleTapListener);
+        void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener onDoubleTapListener);
     }
 
     static class GestureDetectorCompatImplBase implements GestureDetectorCompatImpl {
@@ -35,7 +33,7 @@ public final class GestureDetectorCompat {
         private boolean mAlwaysInTapRegion;
         MotionEvent mCurrentDownEvent;
         boolean mDeferConfirmSingleTap;
-        OnDoubleTapListener mDoubleTapListener;
+        GestureDetector.OnDoubleTapListener mDoubleTapListener;
         private int mDoubleTapSlopSquare;
         private float mDownFocusX;
         private float mDownFocusY;
@@ -45,7 +43,7 @@ public final class GestureDetectorCompat {
         private boolean mIsLongpressEnabled;
         private float mLastFocusX;
         private float mLastFocusY;
-        final OnGestureListener mListener;
+        final GestureDetector.OnGestureListener mListener;
         private int mMaximumFlingVelocity;
         private int mMinimumFlingVelocity;
         private MotionEvent mPreviousUpEvent;
@@ -70,7 +68,7 @@ public final class GestureDetectorCompat {
                     GestureDetectorCompatImplBase.this.dispatchLongPress();
                 } else if (i == 3) {
                     GestureDetectorCompatImplBase gestureDetectorCompatImplBase2 = GestureDetectorCompatImplBase.this;
-                    OnDoubleTapListener onDoubleTapListener = gestureDetectorCompatImplBase2.mDoubleTapListener;
+                    GestureDetector.OnDoubleTapListener onDoubleTapListener = gestureDetectorCompatImplBase2.mDoubleTapListener;
                     if (onDoubleTapListener == null) {
                         return;
                     }
@@ -80,23 +78,20 @@ public final class GestureDetectorCompat {
                         gestureDetectorCompatImplBase2.mDeferConfirmSingleTap = true;
                     }
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Unknown message ");
-                    sb.append(message);
-                    throw new RuntimeException(sb.toString());
+                    throw new RuntimeException("Unknown message " + message);
                 }
             }
         }
 
-        GestureDetectorCompatImplBase(Context context, OnGestureListener onGestureListener, Handler handler) {
+        GestureDetectorCompatImplBase(Context context, GestureDetector.OnGestureListener onGestureListener, Handler handler) {
             if (handler != null) {
                 this.mHandler = new GestureHandler(handler);
             } else {
                 this.mHandler = new GestureHandler();
             }
             this.mListener = onGestureListener;
-            if (onGestureListener instanceof OnDoubleTapListener) {
-                setOnDoubleTapListener((OnDoubleTapListener) onGestureListener);
+            if (onGestureListener instanceof GestureDetector.OnDoubleTapListener) {
+                setOnDoubleTapListener((GestureDetector.OnDoubleTapListener) onGestureListener);
             }
             init(context);
         }
@@ -148,19 +143,15 @@ public final class GestureDetectorCompat {
         }
 
         private boolean isConsideredDoubleTap(MotionEvent motionEvent, MotionEvent motionEvent2, MotionEvent motionEvent3) {
-            boolean z = false;
             if (!this.mAlwaysInBiggerTapRegion || motionEvent3.getEventTime() - motionEvent2.getEventTime() > ((long) DOUBLE_TAP_TIMEOUT)) {
                 return false;
             }
             int x = ((int) motionEvent.getX()) - ((int) motionEvent3.getX());
             int y = ((int) motionEvent.getY()) - ((int) motionEvent3.getY());
-            if ((x * x) + (y * y) < this.mDoubleTapSlopSquare) {
-                z = true;
-            }
-            return z;
+            return (x * x) + (y * y) < this.mDoubleTapSlopSquare;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void dispatchLongPress() {
             this.mHandler.removeMessages(3);
             this.mDeferConfirmSingleTap = false;
@@ -212,7 +203,7 @@ public final class GestureDetectorCompat {
                         } else if (this.mAlwaysInTapRegion) {
                             boolean onSingleTapUp = this.mListener.onSingleTapUp(motionEvent);
                             if (this.mDeferConfirmSingleTap) {
-                                OnDoubleTapListener onDoubleTapListener = this.mDoubleTapListener;
+                                GestureDetector.OnDoubleTapListener onDoubleTapListener = this.mDoubleTapListener;
                                 if (onDoubleTapListener != null) {
                                     onDoubleTapListener.onSingleTapConfirmed(motionEvent);
                                 }
@@ -374,7 +365,7 @@ public final class GestureDetectorCompat {
             this.mIsLongpressEnabled = z;
         }
 
-        public void setOnDoubleTapListener(OnDoubleTapListener onDoubleTapListener) {
+        public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener onDoubleTapListener) {
             this.mDoubleTapListener = onDoubleTapListener;
         }
     }
@@ -382,7 +373,7 @@ public final class GestureDetectorCompat {
     static class GestureDetectorCompatImplJellybeanMr2 implements GestureDetectorCompatImpl {
         private final GestureDetector mDetector;
 
-        GestureDetectorCompatImplJellybeanMr2(Context context, OnGestureListener onGestureListener, Handler handler) {
+        GestureDetectorCompatImplJellybeanMr2(Context context, GestureDetector.OnGestureListener onGestureListener, Handler handler) {
             this.mDetector = new GestureDetector(context, onGestureListener, handler);
         }
 
@@ -398,17 +389,17 @@ public final class GestureDetectorCompat {
             this.mDetector.setIsLongpressEnabled(z);
         }
 
-        public void setOnDoubleTapListener(OnDoubleTapListener onDoubleTapListener) {
+        public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener onDoubleTapListener) {
             this.mDetector.setOnDoubleTapListener(onDoubleTapListener);
         }
     }
 
-    public GestureDetectorCompat(Context context, OnGestureListener onGestureListener) {
-        this(context, onGestureListener, null);
+    public GestureDetectorCompat(Context context, GestureDetector.OnGestureListener onGestureListener) {
+        this(context, onGestureListener, (Handler) null);
     }
 
-    public GestureDetectorCompat(Context context, OnGestureListener onGestureListener, Handler handler) {
-        if (VERSION.SDK_INT > 17) {
+    public GestureDetectorCompat(Context context, GestureDetector.OnGestureListener onGestureListener, Handler handler) {
+        if (Build.VERSION.SDK_INT > 17) {
             this.mImpl = new GestureDetectorCompatImplJellybeanMr2(context, onGestureListener, handler);
         } else {
             this.mImpl = new GestureDetectorCompatImplBase(context, onGestureListener, handler);
@@ -427,7 +418,7 @@ public final class GestureDetectorCompat {
         this.mImpl.setIsLongpressEnabled(z);
     }
 
-    public void setOnDoubleTapListener(OnDoubleTapListener onDoubleTapListener) {
+    public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener onDoubleTapListener) {
         this.mImpl.setOnDoubleTapListener(onDoubleTapListener);
     }
 }

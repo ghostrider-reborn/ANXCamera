@@ -1,25 +1,26 @@
 package com.arcsoft.avatar.gl;
 
 import android.opengl.GLES20;
+import java.nio.Buffer;
 
 public class GLFramebuffer {
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private static final String f71f = "GLFramebuffer";
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     int[] f72a = new int[1];
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     int[] f73b = new int[1];
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     int[] f74c = new int[1];
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     int[] f75d = new int[1];
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     boolean f76e;
     private int g;
     private int h;
@@ -75,7 +76,7 @@ public class GLFramebuffer {
         GLES20.glTexParameteri(3553, 10240, 9728);
         GLES20.glTexParameteri(3553, 10242, 33071);
         GLES20.glTexParameteri(3553, 10243, 33071);
-        GLES20.glTexImage2D(3553, 0, 6408, this.g, this.h, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, this.g, this.h, 0, 6408, 5121, (Buffer) null);
         GLES20.glFramebufferTexture2D(36160, 36064, 3553, this.f74c[0], 0);
         if (this.f76e) {
             GLES20.glGenRenderbuffers(1, this.f75d, 0);

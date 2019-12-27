@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.camera2.params.MeteringRectangle;
@@ -48,7 +47,7 @@ public class AfRegionsView extends View implements Rotatable {
         this.mPaint = new Paint();
         this.mPaint.setAntiAlias(true);
         this.mPaint.setColor(-16711936);
-        this.mPaint.setStyle(Style.STROKE);
+        this.mPaint.setStyle(Paint.Style.STROKE);
         this.mPaint.setStrokeWidth((float) Util.dpToPixel(1.0f));
         this.mCameraScreenNail = ((ActivityBase) context).getCameraScreenNail();
     }

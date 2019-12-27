@@ -13,14 +13,7 @@ public final class Credentials {
     }
 
     public static String basic(String str, String str2, Charset charset) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(":");
-        sb.append(str2);
-        String base64 = ByteString.encodeString(sb.toString(), charset).base64();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Basic ");
-        sb2.append(base64);
-        return sb2.toString();
+        String base64 = ByteString.encodeString(str + ":" + str2, charset).base64();
+        return "Basic " + base64;
     }
 }

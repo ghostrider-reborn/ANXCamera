@@ -4,11 +4,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.c;
 import com.bumptech.glide.load.engine.A;
-import com.bumptech.glide.load.engine.a.o.a;
+import com.bumptech.glide.load.engine.a.o;
 
 /* compiled from: MemoryCacheAdapter */
 public class p implements o {
-    private a listener;
+    private o.a listener;
 
     public void G() {
     }
@@ -24,16 +24,17 @@ public class p implements o {
 
     @Nullable
     public A<?> a(@NonNull c cVar, @Nullable A<?> a2) {
-        if (a2 != null) {
-            this.listener.b(a2);
+        if (a2 == null) {
+            return null;
         }
+        this.listener.b(a2);
         return null;
     }
 
     public void a(float f2) {
     }
 
-    public void a(@NonNull a aVar) {
+    public void a(@NonNull o.a aVar) {
         this.listener = aVar;
     }
 

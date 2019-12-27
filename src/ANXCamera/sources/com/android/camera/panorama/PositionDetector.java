@@ -2,11 +2,11 @@ package com.android.camera.panorama;
 
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.view.ViewGroup;
 import com.android.camera.Util;
 import com.android.camera.log.Log;
-import com.android.camera.panorama.MorphoPanoramaGP3.InitParam;
+import com.android.camera.panorama.MorphoPanoramaGP3;
 
 public class PositionDetector {
     public static final int COMPLETED = 1;
@@ -36,7 +36,7 @@ public class PositionDetector {
     private double idle_thres;
     private int mCameraOrientation;
     private final DiffManager mDiffManager = new DiffManager();
-    private InitParam mInitParam;
+    private MorphoPanoramaGP3.InitParam mInitParam;
     private boolean mIsFrontCamera;
     private ViewGroup mPreviewFrame;
     private int mPreviewHeight;
@@ -108,7 +108,7 @@ public class PositionDetector {
         }
     }
 
-    public PositionDetector(InitParam initParam, ViewGroup viewGroup, boolean z, int i, int i2, int i3, int i4, int i5, int i6) {
+    public PositionDetector(MorphoPanoramaGP3.InitParam initParam, ViewGroup viewGroup, boolean z, int i, int i2, int i3, int i4, int i5, int i6) {
         this.mInitParam = initParam;
         this.mPreviewFrame = viewGroup;
         this.mIsFrontCamera = z;
@@ -130,7 +130,7 @@ public class PositionDetector {
         if (i7 == 0) {
             int i8 = this.mInitParam.output_rotation;
             int i9 = this.mCameraOrientation;
-            if ((i8 + i9) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i8 + i9) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
+            if ((i8 + i9) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i8 + i9) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
                 this.peak = (double) i5;
             } else {
                 this.peak = 0.0d;
@@ -145,7 +145,7 @@ public class PositionDetector {
         } else if (i7 == 1) {
             int i10 = this.mInitParam.output_rotation;
             int i11 = this.mCameraOrientation;
-            if ((i10 + i11) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i10 + i11) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
+            if ((i10 + i11) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i10 + i11) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
                 this.peak = 0.0d;
             } else {
                 this.peak = (double) i5;
@@ -160,7 +160,7 @@ public class PositionDetector {
         } else if (i7 == 2) {
             int i12 = this.mInitParam.output_rotation;
             int i13 = this.mCameraOrientation;
-            if ((i12 + i13) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i12 + i13) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
+            if ((i12 + i13) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i12 + i13) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
                 this.peak = (double) i6;
             } else {
                 this.peak = 0.0d;
@@ -175,7 +175,7 @@ public class PositionDetector {
         } else if (i7 == 3) {
             int i14 = this.mInitParam.output_rotation;
             int i15 = this.mCameraOrientation;
-            if ((i14 + i15) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i14 + i15) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
+            if ((i14 + i15) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i14 + i15) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
                 this.peak = 0.0d;
             } else {
                 this.peak = (double) i6;
@@ -242,31 +242,12 @@ public class PositionDetector {
             i = this.mPreviewWidth / 2;
         }
         int i4 = this.direction;
-        boolean z = false;
         if (i4 == 1 || i4 == 3) {
             int i5 = this.mInitParam.output_rotation;
-            if (i5 == 90 || i5 == 0) {
-                if (d2 > ((double) (i2 - (i / 2)))) {
-                    z = true;
-                }
-                return z;
-            }
-            if (d2 < ((double) (i / 2))) {
-                z = true;
-            }
-            return z;
+            return (i5 == 90 || i5 == 0) ? d2 > ((double) (i2 - (i / 2))) : d2 < ((double) (i / 2));
         }
         int i6 = this.mInitParam.output_rotation;
-        if (i6 == 90 || i6 == 0) {
-            if (d2 < ((double) (i / 2))) {
-                z = true;
-            }
-            return z;
-        }
-        if (d2 > ((double) (i2 - (i / 2)))) {
-            z = true;
-        }
-        return z;
+        return (i6 == 90 || i6 == 0) ? d2 < ((double) (i / 2)) : d2 > ((double) (i2 - (i / 2)));
     }
 
     private boolean isIdle() {
@@ -309,12 +290,7 @@ public class PositionDetector {
         double d3;
         int i;
         boolean z;
-        StringBuilder sb = new StringBuilder();
-        sb.append("cur_x = ");
-        sb.append(this.cur_x);
-        sb.append(", cur_y = ");
-        sb.append(this.cur_y);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "cur_x = " + this.cur_x + ", cur_y = " + this.cur_y);
         int i2 = this.direction;
         if (i2 == 2 || i2 == 3) {
             d3 = this.cur_y;
@@ -330,12 +306,12 @@ public class PositionDetector {
         if (i3 == 1 || i3 == 3) {
             int i4 = this.mInitParam.output_rotation;
             int i5 = this.mCameraOrientation;
-            if ((i4 + i5) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT != 90) {
+            if ((i4 + i5) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT != 90) {
             }
         } else {
             int i6 = this.mInitParam.output_rotation;
             int i7 = this.mCameraOrientation;
-            if ((i6 + i7) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT != 0) {
+            if ((i6 + i7) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT != 0) {
             }
         }
         boolean z3 = false;
@@ -345,7 +321,7 @@ public class PositionDetector {
             }
             int i8 = this.mInitParam.output_rotation;
             int i9 = this.mCameraOrientation;
-            if ((i8 + i9) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i8 + i9) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
+            if ((i8 + i9) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 90 || (i8 + i9) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT == 180) {
                 int i10 = this.direction;
                 if (i10 != 0) {
                     if (i10 != 1) {
@@ -386,19 +362,11 @@ public class PositionDetector {
     }
 
     private boolean isYOutOfRange() {
-        boolean z = true;
-        if (this.cur_x >= 0.0d && this.cur_y >= 0.0d) {
-            int min = Math.min(this.output_width, this.output_height);
-            if (this.mInitParam.output_rotation % 180 == 90) {
-                if (this.cur_y <= ((double) min)) {
-                    z = false;
-                }
-                return z;
-            } else if (this.cur_x <= ((double) min)) {
-                z = false;
-            }
+        if (this.cur_x < 0.0d || this.cur_y < 0.0d) {
+            return true;
         }
-        return z;
+        int min = Math.min(this.output_width, this.output_height);
+        return this.mInitParam.output_rotation % 180 == 90 ? this.cur_y > ((double) min) : this.cur_x > ((double) min);
     }
 
     private void updateFrame() {
@@ -424,9 +392,8 @@ public class PositionDetector {
                 f3 = (((float) this.mInitParam.input_height) / 2.0f) * width;
                 height2 = rect.height();
             } else if (i == 270) {
-                float width2 = (float) this.mPreviewFrame.getWidth();
                 int i2 = this.output_width;
-                width = width2 / ((float) i2);
+                width = ((float) this.mPreviewFrame.getWidth()) / ((float) i2);
                 f2 = (float) (((double) i2) - this.cur_x);
                 height = (float) ((this.cur_y / ((double) this.output_height)) * ((double) rect.height()));
                 f3 = (((float) this.mInitParam.input_height) / 2.0f) * width;
@@ -460,16 +427,14 @@ public class PositionDetector {
             this.prev_y = d3;
             this.cur_y = d3;
         }
-        boolean isYOutOfRange = isYOutOfRange();
-        String str = TAG;
-        if (isYOutOfRange) {
-            Log.d(str, "isYOutOfRange");
+        if (isYOutOfRange()) {
+            Log.d(TAG, "isYOutOfRange");
             return 1;
         } else if (isReverse()) {
-            Log.d(str, "isReverse");
+            Log.d(TAG, "isReverse");
             return -2;
         } else if (isComplete()) {
-            Log.d(str, "isComplete");
+            Log.d(TAG, "isComplete");
             return 1;
         } else {
             int checkSpeed = checkSpeed();

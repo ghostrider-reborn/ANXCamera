@@ -1,6 +1,5 @@
 package com.android.camera.storage;
 
-import android.hardware.camera2.impl.CameraMetadataNative;
 import android.location.Location;
 import android.net.Uri;
 import com.android.camera.CameraSettings;
@@ -13,7 +12,7 @@ import com.android.camera.log.Log;
 import com.android.camera.watermark.WaterMarkData;
 import com.android.camera2.ArcsoftDepthMap;
 import com.android.gallery3d.exif.ExifInterface;
-import com.xiaomi.camera.base.Constants.ShotType;
+import com.xiaomi.camera.base.Constants;
 import com.xiaomi.camera.base.PerformanceTracker;
 import com.xiaomi.camera.core.ParallelTaskData;
 import com.xiaomi.camera.core.ParallelTaskDataParameter;
@@ -86,7 +85,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         } else {
             parallelTaskDataParameter = dataParameter;
         }
-        reFillSaveRequest(jpegImageData, parallelTaskData.isNeedThumbnail(), createJpegName, null, System.currentTimeMillis(), null, parallelTaskDataParameter.getLocation(), width2, height2, null, jpegRotation, false, false, true, false, false, Util.ALGORITHM_NAME_MIMOJI_CAPTURE, parallelTaskDataParameter.getPictureInfo(), parallelTaskData.getPreviewThumbnailHash());
+        reFillSaveRequest(jpegImageData, parallelTaskData.isNeedThumbnail(), createJpegName, (String) null, System.currentTimeMillis(), (Uri) null, parallelTaskDataParameter.getLocation(), width2, height2, (ExifInterface) null, jpegRotation, false, false, true, false, false, Util.ALGORITHM_NAME_MIMOJI_CAPTURE, parallelTaskDataParameter.getPictureInfo(), parallelTaskData.getPreviewThumbnailHash());
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:15:0x0072  */
@@ -129,21 +128,29 @@ public abstract class AbstractSaveRequest implements SaveRequest {
             if (!parallelTaskData.isShot2Gallery()) {
                 str = Util.getFileTitleFromPath(parallelTaskData.getSavePath());
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append(Util.createJpegName(System.currentTimeMillis()));
-                sb.append(dataParameter.getSuffix());
-                str = sb.toString();
+                str = Util.createJpegName(System.currentTimeMillis()) + dataParameter.getSuffix();
             }
             String str4 = str;
-            String str5 = TAG;
             DrawJPEGAttribute drawJPEGAttribute = null;
             if (!z) {
                 SaverCallback saverCallback = getSaverCallback();
                 if (saverCallback != null) {
+                    int width3 = dataParameter.getPreviewSize().getWidth();
+                    int height3 = dataParameter.getPreviewSize().getHeight();
+                    boolean isNeedThumbnail = parallelTaskData.isNeedThumbnail();
+                    Location location = dataParameter.getLocation();
+                    int shootOrientation = dataParameter.getShootOrientation();
+                    float shootRotation = dataParameter.getShootRotation();
+                    String algorithmName = dataParameter.getAlgorithmName();
+                    boolean isHasWaterMark = dataParameter.isHasWaterMark();
+                    String timeWaterMarkString = dataParameter.getTimeWaterMarkString();
+                    List<WaterMarkData> faceWaterMarkList = dataParameter.getFaceWaterMarkList();
+                    PictureInfo pictureInfo = dataParameter.getPictureInfo();
+                    int currentModuleIndex = parallelTaskData.getCurrentModuleIndex();
                     SaverCallback saverCallback2 = saverCallback;
-                    String str6 = str5;
+                    String str5 = TAG;
                     int i3 = filterId;
-                    DrawJPEGAttribute drawJPEGAttribute2 = getDrawJPEGAttribute(jpegImageData, dataParameter.getPreviewSize().getWidth(), dataParameter.getPreviewSize().getHeight(), filterId, parallelTaskData.isNeedThumbnail(), i2, i, dataParameter.getLocation(), str4, dataParameter.getShootOrientation(), orientation2, dataParameter.getShootRotation(), dataParameter.getAlgorithmName(), dataParameter.isHasWaterMark(), false, dataParameter.getTimeWaterMarkString(), dataParameter.getFaceWaterMarkList(), false, dataParameter.getPictureInfo(), parallelTaskData.getCurrentModuleIndex(), -1);
+                    DrawJPEGAttribute drawJPEGAttribute2 = getDrawJPEGAttribute(jpegImageData, width3, height3, filterId, isNeedThumbnail, i2, i, location, str4, shootOrientation, orientation2, shootRotation, algorithmName, isHasWaterMark, false, timeWaterMarkString, faceWaterMarkList, false, pictureInfo, currentModuleIndex, -1);
                     if (isDepthMapData) {
                         drawJPEGAttribute = getDrawJPEGAttribute(portraitRawData, dataParameter.getPreviewSize().getWidth(), dataParameter.getPreviewSize().getHeight(), i3, parallelTaskData.isNeedThumbnail(), i2, i, dataParameter.getLocation(), str4, dataParameter.getShootOrientation(), orientation2, dataParameter.getShootRotation(), dataParameter.getAlgorithmName(), false, false, dataParameter.getTimeWaterMarkString(), dataParameter.getFaceWaterMarkList(), true, dataParameter.getPictureInfo(), parallelTaskData.getCurrentModuleIndex(), -1);
                     }
@@ -158,7 +165,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                     iArr = iArr2;
                     bArr = bArr5;
                     bArr2 = portraitRawData;
-                    str2 = str6;
+                    str2 = str5;
                     if (isDepthMapData) {
                         str3 = str2;
                         bArr4 = Util.composeDepthMapPicture(bArr3, portraitDepthData, bArr2, bArr, iArr, dataParameter.isHasDualWaterMark(), dataParameter.isHasFrontWaterMark(), dataParameter.getLightingPattern(), dataParameter.getTimeWaterMarkString(), dataParameter.getOutputSize().getWidth(), dataParameter.getOutputSize().getHeight(), dataParameter.isMirror(), dataParameter.isBokehFrontCamera(), dataParameter.getPictureInfo());
@@ -166,23 +173,20 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                         str3 = str2;
                         bArr4 = Util.composeMainSubPicture(bArr3, bArr, iArr);
                     }
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("insertNormalDualTask: isShot2Gallery = ");
-                    sb2.append(parallelTaskData.isShot2Gallery());
-                    Log.d(str3, sb2.toString());
+                    Log.d(str3, "insertNormalDualTask: isShot2Gallery = " + parallelTaskData.isShot2Gallery());
                     if (parallelTaskData.isShot2Gallery()) {
                         parallelTaskData.refillJpegData(bArr4);
                         parserParallelDualTask(parallelTaskData);
                         return;
                     }
                     ParallelTaskData parallelTaskData2 = parallelTaskData;
-                    reFillSaveRequest(bArr4, parallelTaskData.isNeedThumbnail(), str4, null, System.currentTimeMillis(), null, dataParameter.getLocation(), i2, i, null, orientation2, false, false, true, false, false, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), -1);
+                    reFillSaveRequest(bArr4, parallelTaskData.isNeedThumbnail(), str4, (String) null, System.currentTimeMillis(), (Uri) null, dataParameter.getLocation(), i2, i, (ExifInterface) null, orientation2, false, false, true, false, false, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), -1);
                     return;
                 }
-                str2 = str5;
+                str2 = TAG;
                 Log.d(str2, "parserNormalDualTask(): saverCallback is null");
             } else {
-                str2 = str5;
+                str2 = TAG;
             }
             bArr3 = jpegImageData;
             bArr = null;
@@ -190,10 +194,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
             bArr2 = portraitRawData;
             if (isDepthMapData) {
             }
-            StringBuilder sb22 = new StringBuilder();
-            sb22.append("insertNormalDualTask: isShot2Gallery = ");
-            sb22.append(parallelTaskData.isShot2Gallery());
-            Log.d(str3, sb22.toString());
+            Log.d(str3, "insertNormalDualTask: isShot2Gallery = " + parallelTaskData.isShot2Gallery());
             if (parallelTaskData.isShot2Gallery()) {
             }
         }
@@ -202,7 +203,6 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         if (!parallelTaskData.isShot2Gallery()) {
         }
         String str42 = str;
-        String str52 = TAG;
         DrawJPEGAttribute drawJPEGAttribute4 = null;
         if (!z) {
         }
@@ -212,22 +212,14 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         bArr2 = portraitRawData;
         if (isDepthMapData) {
         }
-        StringBuilder sb222 = new StringBuilder();
-        sb222.append("insertNormalDualTask: isShot2Gallery = ");
-        sb222.append(parallelTaskData.isShot2Gallery());
-        Log.d(str3, sb222.toString());
+        Log.d(str3, "insertNormalDualTask: isShot2Gallery = " + parallelTaskData.isShot2Gallery());
         if (parallelTaskData.isShot2Gallery()) {
         }
     }
 
     private void parserParallelBurstTask(ParallelTaskData parallelTaskData) {
         ParallelTaskDataParameter dataParameter = parallelTaskData.getDataParameter();
-        StringBuilder sb = new StringBuilder();
-        sb.append("insertParallelBurstTask: path=");
-        sb.append(parallelTaskData.getSavePath());
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "insertParallelBurstTask: path=" + parallelTaskData.getSavePath());
         byte[] populateExif = populateExif(parallelTaskData.getJpegImageData(), parallelTaskData);
         byte[] dataOfTheRegionUnderWatermarks = parallelTaskData.getDataOfTheRegionUnderWatermarks();
         int[] coordinatesOfTheRegionUnderWatermarks = parallelTaskData.getCoordinatesOfTheRegionUnderWatermarks();
@@ -235,27 +227,21 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         int height2 = dataParameter.getPictureSize().getHeight();
         int orientation2 = Exif.getOrientation(populateExif);
         int jpegRotation = dataParameter.getJpegRotation();
-        Log.d(str, String.format(Locale.ENGLISH, "insertParallelBurstTask: %d x %d, %d : %d", new Object[]{Integer.valueOf(width2), Integer.valueOf(height2), Integer.valueOf(jpegRotation), Integer.valueOf(orientation2)}));
+        Log.d(TAG, String.format(Locale.ENGLISH, "insertParallelBurstTask: %d x %d, %d : %d", new Object[]{Integer.valueOf(width2), Integer.valueOf(height2), Integer.valueOf(jpegRotation), Integer.valueOf(orientation2)}));
         if ((jpegRotation + orientation2) % 180 != 0) {
             int i = height2;
             height2 = width2;
             width2 = i;
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("insertParallelBurstTask: result = ");
-        sb3.append(width2);
-        sb3.append("x");
-        sb3.append(height2);
-        Log.d(str, sb3.toString());
+        Log.d(TAG, "insertParallelBurstTask: result = " + width2 + "x" + height2);
         String fileTitleFromPath = Util.getFileTitleFromPath(parallelTaskData.getSavePath());
-        String str2 = fileTitleFromPath;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("insertParallelBurstTask: ");
-        sb4.append(fileTitleFromPath);
-        Log.d(str, sb4.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append("insertParallelBurstTask: ");
+        sb.append(fileTitleFromPath);
+        Log.d(TAG, sb.toString());
         int i2 = width2;
         int i3 = height2;
-        reFillSaveRequest(Util.composeMainSubPicture(populateExif, dataOfTheRegionUnderWatermarks, coordinatesOfTheRegionUnderWatermarks), parallelTaskData.isNeedThumbnail(), str2, null, System.currentTimeMillis(), null, dataParameter.getLocation(), i2, i3, null, orientation2, false, false, parallelTaskData.isNeedThumbnail(), false, true, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), -1);
+        reFillSaveRequest(Util.composeMainSubPicture(populateExif, dataOfTheRegionUnderWatermarks, coordinatesOfTheRegionUnderWatermarks), parallelTaskData.isNeedThumbnail(), fileTitleFromPath, (String) null, System.currentTimeMillis(), (Uri) null, dataParameter.getLocation(), i2, i3, (ExifInterface) null, orientation2, false, false, parallelTaskData.isNeedThumbnail(), false, true, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), -1);
     }
 
     private void parserParallelDualTask(ParallelTaskData parallelTaskData) {
@@ -263,10 +249,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         int i;
         ParallelTaskData parallelTaskData2 = parallelTaskData;
         ParallelTaskDataParameter dataParameter = parallelTaskData.getDataParameter();
-        StringBuilder sb = new StringBuilder();
-        sb.append("addParallel: path=");
-        sb.append(parallelTaskData.getSavePath());
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "addParallel: path=" + parallelTaskData.getSavePath());
         byte[] populateExif = populateExif(parallelTaskData.getJpegImageData(), parallelTaskData2);
         byte[] dataOfTheRegionUnderWatermarks = parallelTaskData.getDataOfTheRegionUnderWatermarks();
         int[] coordinatesOfTheRegionUnderWatermarks = parallelTaskData.getCoordinatesOfTheRegionUnderWatermarks();
@@ -369,22 +352,25 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         if (parallelTaskData.isShot2Gallery()) {
             str = Util.getFileTitleFromPath(parallelTaskData.getSavePath());
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Util.createJpegName(System.currentTimeMillis()));
-            sb.append(dataParameter.getSuffix());
-            str = sb.toString();
+            str = Util.createJpegName(System.currentTimeMillis()) + dataParameter.getSuffix();
         }
         String str5 = str;
         byte[] bArr = null;
-        String str6 = TAG;
         if (z) {
             SaverCallback saverCallback = getSaverCallback();
             if (saverCallback != null) {
-                String str7 = str6;
+                int width3 = dataParameter.getPreviewSize().getWidth();
+                int height3 = dataParameter.getPreviewSize().getHeight();
+                boolean isNeedThumbnail = parallelTaskData.isNeedThumbnail();
+                Location location = dataParameter.getLocation();
+                int shootOrientation = dataParameter.getShootOrientation();
+                float shootRotation = dataParameter.getShootRotation();
+                String algorithmName = dataParameter.getAlgorithmName();
+                String str6 = TAG;
                 str2 = str5;
                 i3 = orientation2;
                 SaverCallback saverCallback2 = saverCallback;
-                DrawJPEGAttribute drawJPEGAttribute = getDrawJPEGAttribute(jpegImageData, dataParameter.getPreviewSize().getWidth(), dataParameter.getPreviewSize().getHeight(), filterId, parallelTaskData.isNeedThumbnail(), i2, i, dataParameter.getLocation(), str2, dataParameter.getShootOrientation(), i3, dataParameter.getShootRotation(), dataParameter.getAlgorithmName(), dataParameter.isHasWaterMark(), dataParameter.isUtralPixelWaterMark(), dataParameter.getTimeWaterMarkString(), dataParameter.getFaceWaterMarkList(), false, dataParameter.getPictureInfo(), parallelTaskData.getCurrentModuleIndex(), parallelTaskData.getPreviewThumbnailHash());
+                DrawJPEGAttribute drawJPEGAttribute = getDrawJPEGAttribute(jpegImageData, width3, height3, filterId, isNeedThumbnail, i2, i, location, str2, shootOrientation, i3, shootRotation, algorithmName, dataParameter.isHasWaterMark(), dataParameter.isUtralPixelWaterMark(), dataParameter.getTimeWaterMarkString(), dataParameter.getFaceWaterMarkList(), false, dataParameter.getPictureInfo(), parallelTaskData.getCurrentModuleIndex(), parallelTaskData.getPreviewThumbnailHash());
                 saverCallback2.processorJpegSync(false, drawJPEGAttribute);
                 jpegImageData = drawJPEGAttribute.mData;
                 int i8 = drawJPEGAttribute.mWidth;
@@ -394,15 +380,15 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                 i5 = i8;
                 i4 = i9;
                 bArr = bArr2;
-                str3 = str7;
+                str3 = str6;
                 if (parallelTaskData.isLiveShotTask()) {
                     composeLiveShotPicture = Util.composeMainSubPicture(jpegImageData, bArr, iArr);
                     if (composeLiveShotPicture == null || composeLiveShotPicture.length < jpegImageData.length) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Failed to compose main sub photos: ");
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Failed to compose main sub photos: ");
                         str4 = str2;
-                        sb2.append(str4);
-                        Log.e(str3, sb2.toString());
+                        sb.append(str4);
+                        Log.e(str3, sb.toString());
                         str2 = str4;
                         if (parallelTaskData.getParallelType() != -2) {
                             parallelTaskData2 = parallelTaskData;
@@ -415,10 +401,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                             i7 = i5;
                             i6 = i4;
                         } else {
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("insertSingleTask: isShot2Gallery = ");
-                            sb3.append(parallelTaskData.isShot2Gallery());
-                            Log.d(str3, sb3.toString());
+                            Log.d(str3, "insertSingleTask: isShot2Gallery = " + parallelTaskData.isShot2Gallery());
                             if (parallelTaskData.isShot2Gallery()) {
                                 parallelTaskData.refillJpegData(jpegImageData);
                                 parallelTaskData.getDataParameter().updateOutputSize(i5, i4);
@@ -426,7 +409,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                                 return;
                             }
                             ParallelTaskData parallelTaskData4 = parallelTaskData;
-                            reFillSaveRequest(jpegImageData, parallelTaskData.isNeedThumbnail(), str2, null, System.currentTimeMillis(), null, dataParameter.getLocation(), i5, i4, null, i3, false, false, true, false, false, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), parallelTaskData.getPreviewThumbnailHash());
+                            reFillSaveRequest(jpegImageData, parallelTaskData.isNeedThumbnail(), str2, (String) null, System.currentTimeMillis(), (Uri) null, dataParameter.getLocation(), i5, i4, (ExifInterface) null, i3, false, false, true, false, false, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), parallelTaskData.getPreviewThumbnailHash());
                             return;
                         }
                         abstractSaveRequest.width = i7;
@@ -438,10 +421,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                     str4 = str2;
                     composeLiveShotPicture = Util.composeLiveShotPicture(jpegImageData, width2, height2, parallelTaskData.getMicroVideoData(), parallelTaskData.getCoverFrameTimestamp(), dataParameter.isHasDualWaterMark(), dataParameter.isHasFrontWaterMark(), dataParameter.getTimeWaterMarkString(), bArr, iArr);
                     if (composeLiveShotPicture == null || composeLiveShotPicture.length < jpegImageData.length) {
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("Failed to compose LiveShot photo: ");
-                        sb4.append(str4);
-                        Log.e(str3, sb4.toString());
+                        Log.e(str3, "Failed to compose LiveShot photo: " + str4);
                         str2 = str4;
                         if (parallelTaskData.getParallelType() != -2) {
                         }
@@ -450,10 +430,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
                         abstractSaveRequest.orientation = i3;
                         parallelTaskData2.refillJpegData(jpegImageData);
                     }
-                    StringBuilder sb5 = new StringBuilder();
-                    sb5.append(dataParameter.getPrefix());
-                    sb5.append(str4);
-                    str2 = sb5.toString();
+                    str2 = dataParameter.getPrefix() + str4;
                 }
                 jpegImageData = composeLiveShotPicture;
                 if (parallelTaskData.getParallelType() != -2) {
@@ -465,10 +442,10 @@ public abstract class AbstractSaveRequest implements SaveRequest {
             }
             str2 = str5;
             i3 = orientation2;
-            str3 = str6;
+            str3 = TAG;
             Log.d(str3, "parserSingleTask(): saverCallback is null");
         } else {
-            str3 = str6;
+            str3 = TAG;
             str2 = str5;
             i3 = orientation2;
         }
@@ -490,7 +467,7 @@ public abstract class AbstractSaveRequest implements SaveRequest {
         if (parallelTaskData == null || parallelTaskData.getCaptureResult() == null) {
             return bArr;
         }
-        return Util.appendCaptureResultToExif(bArr, parallelTaskData.getDataParameter().getPictureSize().getWidth(), parallelTaskData.getDataParameter().getPictureSize().getHeight(), parallelTaskData.getDataParameter().getJpegRotation(), System.currentTimeMillis(), parallelTaskData.getDataParameter().getLocation(), (CameraMetadataNative) parallelTaskData.getCaptureResult().getResults());
+        return Util.appendCaptureResultToExif(bArr, parallelTaskData.getDataParameter().getPictureSize().getWidth(), parallelTaskData.getDataParameter().getPictureSize().getHeight(), parallelTaskData.getDataParameter().getJpegRotation(), System.currentTimeMillis(), parallelTaskData.getDataParameter().getLocation(), parallelTaskData.getCaptureResult().getResults());
     }
 
     /* access modifiers changed from: protected */
@@ -518,39 +495,36 @@ public abstract class AbstractSaveRequest implements SaveRequest {
             return;
         }
         switch (parallelTaskData.getParallelType()) {
-            case ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
-            case ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
-            case ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
+            case Constants.ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
+            case Constants.ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
+            case Constants.ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
             case 5:
             case 6:
             case 7:
             case 8:
                 parserParallelDualTask(this.mParallelTaskData);
-                break;
+                return;
             case -4:
                 parserMimojiCaptureTask(this.mParallelTaskData);
-                break;
+                return;
             case -3:
             case -2:
             case 0:
             case 1:
             case 10:
                 parserSingleTask(this.mParallelTaskData);
-                break;
+                return;
             case -1:
                 parserPreviewShotTask(this.mParallelTaskData);
-                break;
+                return;
             case 2:
                 parserNormalDualTask(this.mParallelTaskData);
-                break;
+                return;
             case 9:
                 parserParallelBurstTask(this.mParallelTaskData);
-                break;
+                return;
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown shot type: ");
-                sb.append(this.mParallelTaskData.getParallelType());
-                throw new RuntimeException(sb.toString());
+                throw new RuntimeException("Unknown shot type: " + this.mParallelTaskData.getParallelType());
         }
     }
 

@@ -2,31 +2,27 @@ package com.android.camera.fragment.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnKeyListener;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import com.android.camera.Camera;
 import com.android.camera.R;
 import com.android.camera.data.DataRepository;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
+import com.android.camera.protocol.ModeProtocol;
 
-public class HibernationFragment extends DialogFragment implements OnKeyListener, OnClickListener, HandleBackTrace {
+public class HibernationFragment extends DialogFragment implements DialogInterface.OnKeyListener, View.OnClickListener, ModeProtocol.HandleBackTrace {
     public static final String TAG = "Hibernation";
 
     private void adjustViewSize(View view) {
         int i = getResources().getDisplayMetrics().widthPixels;
         int i2 = getResources().getDisplayMetrics().heightPixels;
-        LayoutParams layoutParams = view.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
         if (layoutParams.width != i || layoutParams.height != i2) {
             layoutParams.width = i;
             layoutParams.height = i2;
@@ -34,7 +30,7 @@ public class HibernationFragment extends DialogFragment implements OnKeyListener
     }
 
     private void resumeMode() {
-        ((BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).removeBackStack(this);
+        ((ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).removeBackStack(this);
         if (isAdded()) {
             Camera camera = (Camera) getActivity();
             if (!camera.isActivityPaused() && !camera.isSwitchingModule()) {
@@ -88,7 +84,7 @@ public class HibernationFragment extends DialogFragment implements OnKeyListener
     }
 
     public void onDestroyView() {
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.removeBackStack(this);
         }
@@ -110,7 +106,7 @@ public class HibernationFragment extends DialogFragment implements OnKeyListener
 
     public void onViewCreated(View view, @Nullable Bundle bundle) {
         super.onViewCreated(view, bundle);
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.addInBackStack(this);
         }

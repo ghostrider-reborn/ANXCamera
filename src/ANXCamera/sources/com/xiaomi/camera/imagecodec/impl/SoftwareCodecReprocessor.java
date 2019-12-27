@@ -3,10 +3,9 @@ package com.xiaomi.camera.imagecodec.impl;
 import android.content.Context;
 import com.xiaomi.camera.imagecodec.ReprocessData;
 import com.xiaomi.camera.imagecodec.Reprocessor;
-import com.xiaomi.camera.imagecodec.Reprocessor.Singleton;
 
 public class SoftwareCodecReprocessor implements Reprocessor {
-    public static final Singleton<SoftwareCodecReprocessor> sInstance = new Singleton<SoftwareCodecReprocessor>() {
+    public static final Reprocessor.Singleton<SoftwareCodecReprocessor> sInstance = new Reprocessor.Singleton<SoftwareCodecReprocessor>() {
         /* access modifiers changed from: protected */
         public SoftwareCodecReprocessor create() {
             return new SoftwareCodecReprocessor();

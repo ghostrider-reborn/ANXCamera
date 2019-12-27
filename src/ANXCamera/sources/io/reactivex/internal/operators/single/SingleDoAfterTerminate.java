@@ -16,7 +16,7 @@ public final class SingleDoAfterTerminate<T> extends Single<T> {
     static final class DoAfterTerminateObserver<T> implements SingleObserver<T>, Disposable {
         final SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f331d;
         final Action onAfterTerminate;
 

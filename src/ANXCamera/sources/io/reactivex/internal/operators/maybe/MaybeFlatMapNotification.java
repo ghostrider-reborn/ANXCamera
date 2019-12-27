@@ -20,7 +20,7 @@ public final class MaybeFlatMapNotification<T, R> extends AbstractMaybeWithUpstr
         private static final long serialVersionUID = 4375739915521278546L;
         final MaybeObserver<? super R> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f289d;
         final Callable<? extends MaybeSource<? extends R>> onCompleteSupplier;
         final Function<? super Throwable, ? extends MaybeSource<? extends R>> onErrorMapper;

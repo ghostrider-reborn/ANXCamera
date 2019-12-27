@@ -1,13 +1,13 @@
 package com.android.gallery3d.exif;
 
 import com.android.camera.log.Log;
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Locale;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.TreeMap;
 
 class ExifParser {
@@ -114,14 +114,13 @@ class ExifParser {
                         if (readUnsignedInt != 8) {
                             this.mDataAboveIfd0 = new byte[(i2 - 8)];
                             read(this.mDataAboveIfd0);
+                            return;
                         }
+                        return;
                     }
                     return;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Invalid offset ");
-                sb.append(readUnsignedInt);
-                throw new ExifInvalidFormatException(sb.toString());
+                throw new ExifInvalidFormatException("Invalid offset " + readUnsignedInt);
             }
             return;
         }
@@ -149,7 +148,8 @@ class ExifParser {
                                     if (tagId == TAG_STRIP_BYTE_COUNTS && checkAllowed(ifd, ExifInterface.TAG_STRIP_BYTE_COUNTS) && isThumbnailRequested() && exifTag.hasValue()) {
                                         this.mStripSizeTag = exifTag;
                                     }
-                                } else if (isThumbnailRequested()) {
+                                } else if (!isThumbnailRequested()) {
+                                } else {
                                     if (exifTag.hasValue()) {
                                         for (int i = 0; i < exifTag.getComponentCount(); i++) {
                                             if (exifTag.getDataType() == 3) {
@@ -158,9 +158,9 @@ class ExifParser {
                                                 registerUncompressedStrip(i, exifTag.getValueAt(i));
                                             }
                                         }
-                                    } else {
-                                        this.mCorrespondingEvent.put(Integer.valueOf(exifTag.getOffset()), new ExifTagEvent(exifTag, false));
+                                        return;
                                     }
+                                    this.mCorrespondingEvent.put(Integer.valueOf(exifTag.getOffset()), new ExifTagEvent(exifTag, false));
                                 }
                             } else if (isThumbnailRequested()) {
                                 this.mJpegSizeTag = exifTag;
@@ -181,35 +181,7 @@ class ExifParser {
     }
 
     private boolean isIfdRequested(int i) {
-        boolean z = false;
-        if (i == 0) {
-            if ((this.mOptions & 1) != 0) {
-                z = true;
-            }
-            return z;
-        } else if (i == 1) {
-            if ((this.mOptions & 2) != 0) {
-                z = true;
-            }
-            return z;
-        } else if (i == 2) {
-            if ((this.mOptions & 4) != 0) {
-                z = true;
-            }
-            return z;
-        } else if (i == 3) {
-            if ((this.mOptions & 16) != 0) {
-                z = true;
-            }
-            return z;
-        } else if (i != 4) {
-            return false;
-        } else {
-            if ((this.mOptions & 8) != 0) {
-                z = true;
-            }
-            return z;
-        }
+        return i != 0 ? i != 1 ? i != 2 ? i != 3 ? i == 4 && (this.mOptions & 8) != 0 : (this.mOptions & 16) != 0 : (this.mOptions & 4) != 0 : (this.mOptions & 2) != 0 : (this.mOptions & 1) != 0;
     }
 
     private boolean isThumbnailRequested() {
@@ -218,20 +190,16 @@ class ExifParser {
 
     private boolean needToParseOffsetsInCurrentIfd() {
         int i = this.mIfdType;
-        boolean z = false;
         if (i == 0) {
-            if (isIfdRequested(2) || isIfdRequested(4) || isIfdRequested(3) || isIfdRequested(1)) {
-                z = true;
-            }
-            return z;
-        } else if (i == 1) {
-            return isThumbnailRequested();
-        } else {
-            if (i != 2) {
-                return false;
-            }
-            return isIfdRequested(3);
+            return isIfdRequested(2) || isIfdRequested(4) || isIfdRequested(3) || isIfdRequested(1);
         }
+        if (i == 1) {
+            return isThumbnailRequested();
+        }
+        if (i != 2) {
+            return false;
+        }
+        return isIfdRequested(3);
     }
 
     protected static ExifParser parse(InputStream inputStream, int i, ExifInterface exifInterface) throws IOException, ExifInvalidFormatException {
@@ -244,16 +212,15 @@ class ExifParser {
 
     private void parseTiffHeader() throws IOException, ExifInvalidFormatException {
         short readShort = this.mTiffStream.readShort();
-        String str = "Invalid TIFF header";
         if (18761 == readShort) {
             this.mTiffStream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
         } else if (19789 == readShort) {
             this.mTiffStream.setByteOrder(ByteOrder.BIG_ENDIAN);
         } else {
-            throw new ExifInvalidFormatException(str);
+            throw new ExifInvalidFormatException("Invalid TIFF header");
         }
         if (this.mTiffStream.readShort() != 42) {
-            throw new ExifInvalidFormatException(str);
+            throw new ExifInvalidFormatException("Invalid TIFF header");
         }
     }
 
@@ -345,7 +312,7 @@ class ExifParser {
 
     private void skipTo(int i) throws IOException {
         this.mTiffStream.skipTo((long) i);
-        while (!this.mCorrespondingEvent.isEmpty() && ((Integer) this.mCorrespondingEvent.firstKey()).intValue() < i) {
+        while (!this.mCorrespondingEvent.isEmpty() && this.mCorrespondingEvent.firstKey().intValue() < i) {
             this.mCorrespondingEvent.pollFirstEntry();
         }
     }
@@ -426,7 +393,6 @@ class ExifParser {
             }
             return 1;
         }
-        String str = TAG;
         if (readByteCount == i) {
             if (this.mIfdType == 0) {
                 long readUnsignedLong = readUnsignedLong();
@@ -434,38 +400,29 @@ class ExifParser {
                     registerIfd(1, readUnsignedLong);
                 }
             } else {
-                int intValue = this.mCorrespondingEvent.size() > 0 ? ((Integer) this.mCorrespondingEvent.firstEntry().getKey()).intValue() - this.mTiffStream.getReadByteCount() : 4;
+                int intValue = this.mCorrespondingEvent.size() > 0 ? this.mCorrespondingEvent.firstEntry().getKey().intValue() - this.mTiffStream.getReadByteCount() : 4;
                 if (intValue < 4) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Invalid size of link to next IFD: ");
-                    sb.append(intValue);
-                    Log.w(str, sb.toString());
+                    Log.w(TAG, "Invalid size of link to next IFD: " + intValue);
                 } else {
                     long readUnsignedLong2 = readUnsignedLong();
                     if (readUnsignedLong2 != 0) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Invalid link to next IFD: ");
-                        sb2.append(readUnsignedLong2);
-                        Log.w(str, sb2.toString());
+                        Log.w(TAG, "Invalid link to next IFD: " + readUnsignedLong2);
                     }
                 }
             }
         }
         while (this.mCorrespondingEvent.size() != 0) {
-            Entry pollFirstEntry = this.mCorrespondingEvent.pollFirstEntry();
+            Map.Entry<Integer, Object> pollFirstEntry = this.mCorrespondingEvent.pollFirstEntry();
             Object value = pollFirstEntry.getValue();
             try {
-                skipTo(((Integer) pollFirstEntry.getKey()).intValue());
+                skipTo(pollFirstEntry.getKey().intValue());
                 if (value instanceof IfdEvent) {
                     IfdEvent ifdEvent = (IfdEvent) value;
                     this.mIfdType = ifdEvent.ifd;
                     this.mNumOfTagInIfd = this.mTiffStream.readUnsignedShort();
-                    this.mIfdStartOffset = ((Integer) pollFirstEntry.getKey()).intValue();
+                    this.mIfdStartOffset = pollFirstEntry.getKey().intValue();
                     if ((this.mNumOfTagInIfd * 12) + this.mIfdStartOffset + 2 > this.mApp1End) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Invalid size of IFD ");
-                        sb3.append(this.mIfdType);
-                        Log.w(str, sb3.toString());
+                        Log.w(TAG, "Invalid size of IFD " + this.mIfdType);
                         return 5;
                     }
                     this.mNeedToParseOffsetsInCurrentIfd = needToParseOffsetsInCurrentIfd();
@@ -488,13 +445,7 @@ class ExifParser {
                     }
                 }
             } catch (IOException unused) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("Failed to skip to data at: ");
-                sb4.append(pollFirstEntry.getKey());
-                sb4.append(" for ");
-                sb4.append(value.getClass().getName());
-                sb4.append(", the file may be broken.");
-                Log.w(str, sb4.toString());
+                Log.w(TAG, "Failed to skip to data at: " + pollFirstEntry.getKey() + " for " + value.getClass().getName() + ", the file may be broken.");
             }
         }
         return 5;
@@ -515,44 +466,20 @@ class ExifParser {
         short dataType = exifTag.getDataType();
         if (dataType == 2 || dataType == 7 || dataType == 1) {
             int componentCount = exifTag.getComponentCount();
-            if (this.mCorrespondingEvent.size() > 0 && ((Integer) this.mCorrespondingEvent.firstEntry().getKey()).intValue() < this.mTiffStream.getReadByteCount() + componentCount) {
+            if (this.mCorrespondingEvent.size() > 0 && this.mCorrespondingEvent.firstEntry().getKey().intValue() < this.mTiffStream.getReadByteCount() + componentCount) {
                 Object value = this.mCorrespondingEvent.firstEntry().getValue();
-                boolean z = value instanceof ImageEvent;
-                String str = TAG;
-                if (z) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Thumbnail overlaps value for tag: \n");
-                    sb.append(exifTag.toString());
-                    Log.w(str, sb.toString());
-                    Entry pollFirstEntry = this.mCorrespondingEvent.pollFirstEntry();
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Invalid thumbnail offset: ");
-                    sb2.append(pollFirstEntry.getKey());
-                    Log.w(str, sb2.toString());
+                if (value instanceof ImageEvent) {
+                    Log.w(TAG, "Thumbnail overlaps value for tag: \n" + exifTag.toString());
+                    Map.Entry<Integer, Object> pollFirstEntry = this.mCorrespondingEvent.pollFirstEntry();
+                    Log.w(TAG, "Invalid thumbnail offset: " + pollFirstEntry.getKey());
                 } else {
-                    String str2 = " overlaps value for tag: \n";
                     if (value instanceof IfdEvent) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Ifd ");
-                        sb3.append(((IfdEvent) value).ifd);
-                        sb3.append(str2);
-                        sb3.append(exifTag.toString());
-                        Log.w(str, sb3.toString());
+                        Log.w(TAG, "Ifd " + ((IfdEvent) value).ifd + " overlaps value for tag: \n" + exifTag.toString());
                     } else if (value instanceof ExifTagEvent) {
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("Tag value for tag: \n");
-                        sb4.append(((ExifTagEvent) value).tag.toString());
-                        sb4.append(str2);
-                        sb4.append(exifTag.toString());
-                        Log.w(str, sb4.toString());
+                        Log.w(TAG, "Tag value for tag: \n" + ((ExifTagEvent) value).tag.toString() + " overlaps value for tag: \n" + exifTag.toString());
                     }
-                    int intValue = ((Integer) this.mCorrespondingEvent.firstEntry().getKey()).intValue() - this.mTiffStream.getReadByteCount();
-                    StringBuilder sb5 = new StringBuilder();
-                    sb5.append("Invalid size of tag: \n");
-                    sb5.append(exifTag.toString());
-                    sb5.append(" setting count to: ");
-                    sb5.append(intValue);
-                    Log.w(str, sb5.toString());
+                    int intValue = this.mCorrespondingEvent.firstEntry().getKey().intValue() - this.mTiffStream.getReadByteCount();
+                    Log.w(TAG, "Invalid size of tag: \n" + exifTag.toString() + " setting count to: " + intValue);
                     exifTag.forceSetComponentCount(intValue);
                 }
             }
@@ -650,7 +577,7 @@ class ExifParser {
 
     /* access modifiers changed from: protected */
     public int readUnsignedShort() throws IOException {
-        return this.mTiffStream.readShort() & ColorSpace.UNCALIBRATED;
+        return this.mTiffStream.readShort() & ExifInterface.ColorSpace.UNCALIBRATED;
     }
 
     /* access modifiers changed from: protected */
@@ -678,7 +605,10 @@ class ExifParser {
                 skipTo(i);
             }
             long readUnsignedLong = readUnsignedLong();
-            if (this.mIfdType == 0 && ((isIfdRequested(1) || isThumbnailRequested()) && readUnsignedLong > 0)) {
+            if (this.mIfdType != 0) {
+                return;
+            }
+            if ((isIfdRequested(1) || isThumbnailRequested()) && readUnsignedLong > 0) {
                 registerIfd(1, readUnsignedLong);
             }
         }

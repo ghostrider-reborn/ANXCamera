@@ -1,10 +1,11 @@
 package android.support.v4.app;
 
+import android.app.RemoteInput;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,7 +14,6 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public final class RemoteInput {
@@ -102,7 +102,7 @@ public final class RemoteInput {
     }
 
     public static void addDataResultToIntent(RemoteInput remoteInput, Intent intent, Map<String, Uri> map) {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 26) {
             android.app.RemoteInput.addDataResultToIntent(fromCompat(remoteInput), intent, map);
         } else if (i >= 16) {
@@ -110,9 +110,9 @@ public final class RemoteInput {
             if (clipDataIntentFromIntent == null) {
                 clipDataIntentFromIntent = new Intent();
             }
-            for (Entry entry : map.entrySet()) {
-                String str = (String) entry.getKey();
-                Uri uri = (Uri) entry.getValue();
+            for (Map.Entry next : map.entrySet()) {
+                String str = (String) next.getKey();
+                Uri uri = (Uri) next.getValue();
                 if (str != null) {
                     Bundle bundleExtra = clipDataIntentFromIntent.getBundleExtra(getExtraResultsKeyForData(str));
                     if (bundleExtra == null) {
@@ -129,7 +129,7 @@ public final class RemoteInput {
     }
 
     public static void addResultsToIntent(RemoteInput[] remoteInputArr, Intent intent, Bundle bundle) {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 26) {
             android.app.RemoteInput.addResultsToIntent(fromCompat(remoteInputArr), intent, bundle);
             return;
@@ -141,7 +141,7 @@ public final class RemoteInput {
                 bundle = resultsFromIntent;
             }
             for (RemoteInput remoteInput : remoteInputArr) {
-                Map dataResultsFromIntent = getDataResultsFromIntent(intent, remoteInput.getResultKey());
+                Map<String, Uri> dataResultsFromIntent = getDataResultsFromIntent(intent, remoteInput.getResultKey());
                 android.app.RemoteInput.addResultsToIntent(fromCompat(new RemoteInput[]{remoteInput}), intent, bundle);
                 if (dataResultsFromIntent != null) {
                     addDataResultToIntent(remoteInput, intent, dataResultsFromIntent);
@@ -152,8 +152,7 @@ public final class RemoteInput {
             if (clipDataIntentFromIntent == null) {
                 clipDataIntentFromIntent = new Intent();
             }
-            String str = EXTRA_RESULTS_DATA;
-            Bundle bundleExtra = clipDataIntentFromIntent.getBundleExtra(str);
+            Bundle bundleExtra = clipDataIntentFromIntent.getBundleExtra(EXTRA_RESULTS_DATA);
             if (bundleExtra == null) {
                 bundleExtra = new Bundle();
             }
@@ -163,7 +162,7 @@ public final class RemoteInput {
                     bundleExtra.putCharSequence(remoteInput2.getResultKey(), (CharSequence) obj);
                 }
             }
-            clipDataIntentFromIntent.putExtra(str, bundleExtra);
+            clipDataIntentFromIntent.putExtra(EXTRA_RESULTS_DATA, bundleExtra);
             intent.setClipData(ClipData.newIntent(RESULTS_CLIP_LABEL, clipDataIntentFromIntent));
         } else {
             Log.w(TAG, "RemoteInput is only supported from API Level 16");
@@ -172,7 +171,7 @@ public final class RemoteInput {
 
     @RequiresApi(20)
     static android.app.RemoteInput fromCompat(RemoteInput remoteInput) {
-        return new android.app.RemoteInput.Builder(remoteInput.getResultKey()).setLabel(remoteInput.getLabel()).setChoices(remoteInput.getChoices()).setAllowFreeFormInput(remoteInput.getAllowFreeFormInput()).addExtras(remoteInput.getExtras()).build();
+        return new RemoteInput.Builder(remoteInput.getResultKey()).setLabel(remoteInput.getLabel()).setChoices(remoteInput.getChoices()).setAllowFreeFormInput(remoteInput.getAllowFreeFormInput()).addExtras(remoteInput.getExtras()).build();
     }
 
     @RequiresApi(20)
@@ -201,7 +200,7 @@ public final class RemoteInput {
     }
 
     public static Map<String, Uri> getDataResultsFromIntent(Intent intent, String str) {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 26) {
             return android.app.RemoteInput.getDataResultsFromIntent(intent, str);
         }
@@ -223,7 +222,7 @@ public final class RemoteInput {
                 }
             }
             if (hashMap.isEmpty()) {
-                hashMap = null;
+                return null;
             }
             return hashMap;
         }
@@ -232,14 +231,11 @@ public final class RemoteInput {
     }
 
     private static String getExtraResultsKeyForData(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(EXTRA_DATA_TYPE_RESULTS_DATA);
-        sb.append(str);
-        return sb.toString();
+        return EXTRA_DATA_TYPE_RESULTS_DATA + str;
     }
 
     public static Bundle getResultsFromIntent(Intent intent) {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 20) {
             return android.app.RemoteInput.getResultsFromIntent(intent);
         }

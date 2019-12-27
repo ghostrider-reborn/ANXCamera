@@ -47,25 +47,23 @@ final class Base64 {
                 bArr[i3] = (byte) (b2 >> 16);
                 int i6 = i5 + 1;
                 bArr[i5] = (byte) (b2 >> 8);
-                int i7 = i6 + 1;
                 bArr[i6] = (byte) b2;
-                i3 = i7;
+                i3 = i6 + 1;
             }
         }
-        int i8 = i2 % 4;
-        if (i8 == 1) {
+        int i7 = i2 % 4;
+        if (i7 == 1) {
             return null;
         }
-        if (i8 == 2) {
-            int i9 = i3 + 1;
+        if (i7 == 2) {
             bArr[i3] = (byte) ((b2 << 12) >> 16);
-            i3 = i9;
-        } else if (i8 == 3) {
-            int i10 = b2 << 6;
-            int i11 = i3 + 1;
-            bArr[i3] = (byte) (i10 >> 16);
-            i3 = i11 + 1;
-            bArr[i11] = (byte) (i10 >> 8);
+            i3++;
+        } else if (i7 == 3) {
+            int i8 = b2 << 6;
+            int i9 = i3 + 1;
+            bArr[i3] = (byte) (i8 >> 16);
+            i3 = i9 + 1;
+            bArr[i9] = (byte) (i8 >> 8);
         }
         if (i3 == bArr.length) {
             return bArr;
@@ -101,19 +99,16 @@ final class Base64 {
             bArr3[i] = bArr2[(bArr[length] & 255) >> 2];
             int i9 = i8 + 1;
             bArr3[i8] = bArr2[(bArr[length] & 3) << 4];
-            int i10 = i9 + 1;
             bArr3[i9] = 61;
-            bArr3[i10] = 61;
+            bArr3[i9 + 1] = 61;
         } else if (length2 == 2) {
-            int i11 = i + 1;
+            int i10 = i + 1;
             bArr3[i] = bArr2[(bArr[length] & 255) >> 2];
-            int i12 = i11 + 1;
-            int i13 = (bArr[length] & 3) << 4;
-            int i14 = length + 1;
-            bArr3[i11] = bArr2[((bArr[i14] & 255) >> 4) | i13];
-            int i15 = i12 + 1;
-            bArr3[i12] = bArr2[(bArr[i14] & 15) << 2];
-            bArr3[i15] = 61;
+            int i11 = i10 + 1;
+            int i12 = length + 1;
+            bArr3[i10] = bArr2[((bArr[i12] & 255) >> 4) | ((bArr[length] & 3) << 4)];
+            bArr3[i11] = bArr2[(bArr[i12] & 15) << 2];
+            bArr3[i11 + 1] = 61;
         }
         try {
             return new String(bArr3, "US-ASCII");

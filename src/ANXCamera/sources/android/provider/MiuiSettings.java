@@ -1,32 +1,30 @@
 package android.provider;
 
 import android.app.Activity;
-import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
 import android.app.ExtraNotificationManager;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.MiuiConfiguration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.provider.Settings.SettingNotFoundException;
+import android.provider.Settings;
+import android.provider.SystemSettings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Base64;
@@ -41,12 +39,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import miui.hareware.display.DisplayFeatureManager;
 import miui.mqsas.sdk.MQSEventManagerDelegate;
 import miui.os.Build;
+import miui.provider.ExtraSettings;
 import miui.security.SecurityManager;
 import miui.securityspace.XSpaceUserHandle;
 import miui.telephony.SubscriptionManager;
@@ -125,25 +124,25 @@ public class MiuiSettings {
     private static final String SYNC_SETTING_WIFI_0 = "sync_for_sim_com.xiaomi-wifi-0";
     private static final String SYNC_SETTING_WIFI_1 = "sync_for_sim_com.xiaomi-wifi-1";
 
-    /* renamed from: android.provider.MiuiSettings$1 reason: invalid class name */
+    /* renamed from: android.provider.MiuiSettings$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType = new int[SmallWindowType.values().length];
+        static final /* synthetic */ int[] $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType = new int[System.SmallWindowType.values().length];
 
         static {
             try {
-                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[SmallWindowType.X7_STYLE.ordinal()] = 1;
+                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[System.SmallWindowType.X7_STYLE.ordinal()] = 1;
             } catch (NoSuchFieldError e2) {
             }
             try {
-                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[SmallWindowType.A1_STYLE.ordinal()] = 2;
+                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[System.SmallWindowType.A1_STYLE.ordinal()] = 2;
             } catch (NoSuchFieldError e3) {
             }
             try {
-                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[SmallWindowType.A7_LATTICE.ordinal()] = 3;
+                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[System.SmallWindowType.A7_LATTICE.ordinal()] = 3;
             } catch (NoSuchFieldError e4) {
             }
             try {
-                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[SmallWindowType.B7_FULL.ordinal()] = 4;
+                $SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[System.SmallWindowType.B7_FULL.ordinal()] = 4;
             } catch (NoSuchFieldError e5) {
             }
         }
@@ -161,37 +160,28 @@ public class MiuiSettings {
         private static final String TAG = "Ad";
 
         public static String getAaid(ContentResolver contentResolver) {
-            return android.provider.Settings.Global.getString(contentResolver, AAID);
+            return Settings.Global.getString(contentResolver, AAID);
         }
 
         public static long getPersonalizedAdEnableTime(ContentResolver contentResolver) throws SecurityException {
-            long j = android.provider.Settings.Global.getLong(contentResolver, PERSONALIZED_AD_TIME, 0);
-            StringBuilder sb = new StringBuilder();
-            sb.append("getPersonalizedAdEnableTime: ");
-            sb.append(j);
-            Slog.i(TAG, sb.toString());
+            long j = Settings.Global.getLong(contentResolver, PERSONALIZED_AD_TIME, 0);
+            Slog.i(TAG, "getPersonalizedAdEnableTime: " + j);
             return j;
         }
 
         private static int getPersonizedAdSettings(ContentResolver contentResolver) {
-            return android.provider.Settings.Global.getInt(contentResolver, PERSONALIZED_AD_SETTINGS, 1);
+            return Settings.Global.getInt(contentResolver, PERSONALIZED_AD_SETTINGS, 1);
         }
 
         public static boolean isPersonalizedAdDialogPromoted(ContentResolver contentResolver) {
             int personizedAdSettings = getPersonizedAdSettings(contentResolver);
-            StringBuilder sb = new StringBuilder();
-            sb.append("isPersonalizedAdDialogPromoted getAdSettings: ");
-            sb.append(personizedAdSettings);
-            Slog.i(TAG, sb.toString());
+            Slog.i(TAG, "isPersonalizedAdDialogPromoted getAdSettings: " + personizedAdSettings);
             return (personizedAdSettings & 2) != 0;
         }
 
         public static boolean isPersonalizedAdEnabled(ContentResolver contentResolver) {
             int personizedAdSettings = getPersonizedAdSettings(contentResolver);
-            StringBuilder sb = new StringBuilder();
-            sb.append("isPersonalizedAdEnabled getAdSettings: ");
-            sb.append(personizedAdSettings);
-            Slog.i(TAG, sb.toString());
+            Slog.i(TAG, "isPersonalizedAdEnabled getAdSettings: " + personizedAdSettings);
             return (personizedAdSettings & 1) != 0;
         }
 
@@ -201,7 +191,7 @@ public class MiuiSettings {
                 aaid = "";
             }
             String uuid = UUID.randomUUID().toString();
-            android.provider.Settings.Global.putString(context.getContentResolver(), AAID, uuid);
+            Settings.Global.putString(context.getContentResolver(), AAID, uuid);
             Intent intent = new Intent(ACTION_AAID_RESET);
             intent.putExtra(EXTRA_KEY_OLD_AAID, aaid);
             intent.putExtra(EXTRA_KEY_NEW_AAID, uuid);
@@ -211,41 +201,24 @@ public class MiuiSettings {
         public static void setPersonalizedAdDialogPromoted(ContentResolver contentResolver, boolean z) throws SecurityException {
             int personizedAdSettings = getPersonizedAdSettings(contentResolver);
             int i = z ? personizedAdSettings | 2 : personizedAdSettings & -3;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setPersonalizedAdDialogPromoted: ");
-            sb.append(z);
-            sb.append(", oldAdSettings: ");
-            sb.append(personizedAdSettings);
-            sb.append(", newAdSettings: ");
-            sb.append(i);
-            Slog.i(TAG, sb.toString());
+            Slog.i(TAG, "setPersonalizedAdDialogPromoted: " + z + ", oldAdSettings: " + personizedAdSettings + ", newAdSettings: " + i);
             setPersonizedAdSettings(contentResolver, i);
         }
 
         public static void setPersonalizedAdEnable(ContentResolver contentResolver, boolean z) throws SecurityException {
             int personizedAdSettings = getPersonizedAdSettings(contentResolver);
             int i = z ? personizedAdSettings | 1 : personizedAdSettings & -2;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setPersonalizedAdEnable: ");
-            sb.append(z);
-            sb.append(", oldAdSettings: ");
-            sb.append(personizedAdSettings);
-            sb.append(", newAdSettigns: ");
-            sb.append(i);
-            Slog.i(TAG, sb.toString());
+            Slog.i(TAG, "setPersonalizedAdEnable: " + z + ", oldAdSettings: " + personizedAdSettings + ", newAdSettigns: " + i);
             setPersonizedAdSettings(contentResolver, i);
         }
 
         public static void setPersonalizedAdEnableTime(ContentResolver contentResolver, long j) throws SecurityException {
-            StringBuilder sb = new StringBuilder();
-            sb.append("setPersonalizedAdEnableTime: ");
-            sb.append(j);
-            Slog.i(TAG, sb.toString());
-            android.provider.Settings.Global.putLong(contentResolver, PERSONALIZED_AD_TIME, j);
+            Slog.i(TAG, "setPersonalizedAdEnableTime: " + j);
+            Settings.Global.putLong(contentResolver, PERSONALIZED_AD_TIME, j);
         }
 
         private static void setPersonizedAdSettings(ContentResolver contentResolver, int i) {
-            android.provider.Settings.Global.putInt(contentResolver, PERSONALIZED_AD_SETTINGS, i);
+            Settings.Global.putInt(contentResolver, PERSONALIZED_AD_SETTINGS, i);
         }
     }
 
@@ -335,149 +308,124 @@ public class MiuiSettings {
         public static final int VIP_STAR_CONTACTS = 1;
         public static final HashMap<Integer, Integer> mapIdToBlockType = new HashMap<Integer, Integer>() {
             {
-                put(Integer.valueOf(1), Integer.valueOf(8));
-                Integer valueOf = Integer.valueOf(2);
-                Integer valueOf2 = Integer.valueOf(10);
-                put(valueOf, valueOf2);
-                put(Integer.valueOf(3), Integer.valueOf(12));
-                put(valueOf2, Integer.valueOf(14));
+                put(1, 8);
+                put(2, 10);
+                put(3, 12);
+                put(10, 14);
             }
         };
         public static final HashMap<Integer, HashMap<Integer, String>> mapIdToMarkTime = new HashMap<Integer, HashMap<Integer, String>>() {
             {
-                Integer valueOf = Integer.valueOf(1);
-                put(valueOf, new HashMap());
-                Integer valueOf2 = Integer.valueOf(2);
-                put(valueOf2, new HashMap());
-                ((HashMap) get(valueOf)).put(valueOf, AntiSpam.MARK_TIME_FRAUD);
-                ((HashMap) get(valueOf)).put(valueOf2, AntiSpam.MARK_TIME_AGENT);
-                HashMap hashMap = (HashMap) get(valueOf);
-                Integer valueOf3 = Integer.valueOf(3);
-                hashMap.put(valueOf3, AntiSpam.MARK_TIME_SELL);
-                HashMap hashMap2 = (HashMap) get(valueOf);
-                Integer valueOf4 = Integer.valueOf(10);
-                hashMap2.put(valueOf4, AntiSpam.MARK_TIME_HARASS);
-                ((HashMap) get(valueOf2)).put(valueOf, AntiSpam.MARK_TIME_FRAUD_SIM_2);
-                ((HashMap) get(valueOf2)).put(valueOf2, AntiSpam.MARK_TIME_AGENT_SIM_2);
-                ((HashMap) get(valueOf2)).put(valueOf3, AntiSpam.MARK_TIME_SELL_SIM_2);
-                ((HashMap) get(valueOf2)).put(valueOf4, AntiSpam.MARK_TIME_HARASS_SIM_2);
+                put(1, new HashMap());
+                put(2, new HashMap());
+                ((HashMap) get(1)).put(1, AntiSpam.MARK_TIME_FRAUD);
+                ((HashMap) get(1)).put(2, AntiSpam.MARK_TIME_AGENT);
+                ((HashMap) get(1)).put(3, AntiSpam.MARK_TIME_SELL);
+                ((HashMap) get(1)).put(10, AntiSpam.MARK_TIME_HARASS);
+                ((HashMap) get(2)).put(1, AntiSpam.MARK_TIME_FRAUD_SIM_2);
+                ((HashMap) get(2)).put(2, AntiSpam.MARK_TIME_AGENT_SIM_2);
+                ((HashMap) get(2)).put(3, AntiSpam.MARK_TIME_SELL_SIM_2);
+                ((HashMap) get(2)).put(10, AntiSpam.MARK_TIME_HARASS_SIM_2);
             }
         };
         public static final HashMap<Integer, HashMap<Integer, String>> mapIdToState = new HashMap<Integer, HashMap<Integer, String>>() {
             {
-                Integer valueOf = Integer.valueOf(1);
-                put(valueOf, new HashMap());
-                Integer valueOf2 = Integer.valueOf(2);
-                put(valueOf2, new HashMap());
-                ((HashMap) get(valueOf)).put(valueOf, AntiSpam.FRAUD_NUM_STATE);
-                ((HashMap) get(valueOf)).put(valueOf2, AntiSpam.AGENT_NUM_STATE);
-                HashMap hashMap = (HashMap) get(valueOf);
-                Integer valueOf3 = Integer.valueOf(3);
-                hashMap.put(valueOf3, AntiSpam.SELL_NUM_STATE);
-                HashMap hashMap2 = (HashMap) get(valueOf);
-                Integer valueOf4 = Integer.valueOf(10);
-                hashMap2.put(valueOf4, AntiSpam.HARASS_NUM_STATE);
-                ((HashMap) get(valueOf2)).put(valueOf, AntiSpam.FRAUD_NUM_STATE_SIM_2);
-                ((HashMap) get(valueOf2)).put(valueOf2, AntiSpam.AGENT_NUM_STATE_SIM_2);
-                ((HashMap) get(valueOf2)).put(valueOf3, AntiSpam.SELL_NUM_STATE_SIM_2);
-                ((HashMap) get(valueOf2)).put(valueOf4, AntiSpam.HARASS_NUM_STATE_SIM_2);
+                put(1, new HashMap());
+                put(2, new HashMap());
+                ((HashMap) get(1)).put(1, AntiSpam.FRAUD_NUM_STATE);
+                ((HashMap) get(1)).put(2, AntiSpam.AGENT_NUM_STATE);
+                ((HashMap) get(1)).put(3, AntiSpam.SELL_NUM_STATE);
+                ((HashMap) get(1)).put(10, AntiSpam.HARASS_NUM_STATE);
+                ((HashMap) get(2)).put(1, AntiSpam.FRAUD_NUM_STATE_SIM_2);
+                ((HashMap) get(2)).put(2, AntiSpam.AGENT_NUM_STATE_SIM_2);
+                ((HashMap) get(2)).put(3, AntiSpam.SELL_NUM_STATE_SIM_2);
+                ((HashMap) get(2)).put(10, AntiSpam.HARASS_NUM_STATE_SIM_2);
             }
         };
 
         public static int getEndTimeForQuietMode(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), END_TIME_OF_QM, 420);
+            return Settings.Secure.getInt(context.getContentResolver(), END_TIME_OF_QM, 420);
         }
 
         public static int getMarkedNumberBlockType(int i) {
-            return ((Integer) mapIdToBlockType.get(Integer.valueOf(i))).intValue();
+            return mapIdToBlockType.get(Integer.valueOf(i)).intValue();
         }
 
         public static int getMode(Context context, String str, int i) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), str, i);
+            return Settings.Secure.getInt(context.getContentResolver(), str, i);
         }
 
         public static long getNextAutoEndTime(Context context) {
-            return android.provider.Settings.Secure.getLong(context.getContentResolver(), NEXT_AUTO_END_TIME_OF_QM, 0);
+            return Settings.Secure.getLong(context.getContentResolver(), NEXT_AUTO_END_TIME_OF_QM, 0);
         }
 
         public static long getNextAutoStartTime(Context context) {
-            return android.provider.Settings.Secure.getLong(context.getContentResolver(), NEXT_AUTO_START_TIME_OF_QM, 0);
+            return Settings.Secure.getLong(context.getContentResolver(), NEXT_AUTO_START_TIME_OF_QM, 0);
         }
 
         public static int getNotificationType(Context context, int i) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), i == 1 ? SHOW_NOTIFICATION_TYPE : SHOW_NOTIFICATION_TYPE_SIM_2, 0);
+            return Settings.Secure.getInt(context.getContentResolver(), i == 1 ? SHOW_NOTIFICATION_TYPE : SHOW_NOTIFICATION_TYPE_SIM_2, 0);
         }
 
         public static int getQuietRepeatType(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), QUIET_REPEAT_TYPE, 127);
+            return Settings.Secure.getInt(context.getContentResolver(), QUIET_REPEAT_TYPE, 127);
         }
 
         public static long getSMSClassifierUpdateTime(Context context) {
-            return android.provider.Settings.Secure.getLong(context.getContentResolver(), SMS_CLASSIFIER_UPDATE_TIME, 0);
+            return Settings.Secure.getLong(context.getContentResolver(), SMS_CLASSIFIER_UPDATE_TIME, 0);
         }
 
         public static int getStartTimeForQuietMode(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), START_TIME_OF_QM, 1380);
+            return Settings.Secure.getInt(context.getContentResolver(), START_TIME_OF_QM, 1380);
         }
 
         public static boolean getState(Context context, String str, boolean z) {
-            return miui.provider.ExtraSettings.Secure.getBoolean(context.getContentResolver(), str, z);
+            return ExtraSettings.Secure.getBoolean(context.getContentResolver(), str, z);
         }
 
         public static int getVipListForQuietMode(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), VIP_LIST_FOR_QM, 0);
+            return Settings.Secure.getInt(context.getContentResolver(), VIP_LIST_FOR_QM, 0);
         }
 
         public static boolean hasNewAntispam(Context context) {
-            return miui.provider.ExtraSettings.Secure.getBoolean(context.getContentResolver(), HAS_NEW_ANTISPAM, false);
+            return ExtraSettings.Secure.getBoolean(context.getContentResolver(), HAS_NEW_ANTISPAM, false);
         }
 
         public static boolean isAntiSpam(Context context) {
-            boolean z = true;
             if (isAntiSpamSettingsSharedForSims(context)) {
                 return isAntiSpamEnableForSim(context, 1);
             }
-            boolean z2 = SubscriptionManager.getDefault().getSubscriptionInfoForSlot(0) != null;
-            boolean z3 = SubscriptionManager.getDefault().getSubscriptionInfoForSlot(1) != null;
-            if (z2 || z3) {
-                if ((!isAntiSpamEnableForSim(context, 1) || !z2) && (!isAntiSpamEnableForSim(context, 2) || !z3)) {
-                    z = false;
-                }
-                return z;
+            boolean z = SubscriptionManager.getDefault().getSubscriptionInfoForSlot(0) != null;
+            boolean z2 = SubscriptionManager.getDefault().getSubscriptionInfoForSlot(1) != null;
+            if (!z && !z2) {
+                return isAntiSpamEnableForSim(context, 1) || isAntiSpamEnableForSim(context, 2);
             }
-            if (!isAntiSpamEnableForSim(context, 1) && !isAntiSpamEnableForSim(context, 2)) {
-                z = false;
+            if (!isAntiSpamEnableForSim(context, 1) || !z) {
+                return isAntiSpamEnableForSim(context, 2) && z2;
             }
-            return z;
+            return true;
         }
 
         public static boolean isAntiSpamEnableForSim(Context context, int i) {
-            return miui.provider.ExtraSettings.Secure.getBoolean(context.getContentResolver(), i == 1 ? ANTISPAM_ENABLE_FOR_SIM_1 : ANTISPAM_ENABLE_FOR_SIM_2, true);
+            return ExtraSettings.Secure.getBoolean(context.getContentResolver(), i == 1 ? ANTISPAM_ENABLE_FOR_SIM_1 : ANTISPAM_ENABLE_FOR_SIM_2, true);
         }
 
         public static boolean isAntiSpamSettingsSharedForSims(Context context) {
-            return miui.provider.ExtraSettings.Secure.getBoolean(context.getContentResolver(), ANTISPAM_SETTINGS_SHARED_FOR_SIMS, true);
+            return ExtraSettings.Secure.getBoolean(context.getContentResolver(), ANTISPAM_SETTINGS_SHARED_FOR_SIMS, true);
         }
 
         public static boolean isAutoTimerOfQuietModeEnable(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), AUTO_TIMER_OF_QM_ENABLE, 0) == 1;
+            return Settings.Secure.getInt(context.getContentResolver(), AUTO_TIMER_OF_QM_ENABLE, 0) == 1;
         }
 
         public static boolean isMarkNumBlockOpen(Context context, int i) {
-            boolean z = false;
             if (i == 1) {
-                if (getMode(context, FRAUD_NUM_STATE, 1) == 0 || getMode(context, AGENT_NUM_STATE, 1) == 0 || getMode(context, SELL_NUM_STATE, 1) == 0 || getMode(context, HARASS_NUM_STATE, 1) == 0) {
-                    z = true;
-                }
-                return z;
-            } else if (i != 2) {
-                return false;
-            } else {
-                if (getMode(context, FRAUD_NUM_STATE_SIM_2, 1) == 0 || getMode(context, AGENT_NUM_STATE_SIM_2, 1) == 0 || getMode(context, SELL_NUM_STATE_SIM_2, 1) == 0 || getMode(context, HARASS_NUM_STATE_SIM_2, 1) == 0) {
-                    z = true;
-                }
-                return z;
+                return getMode(context, FRAUD_NUM_STATE, 1) == 0 || getMode(context, AGENT_NUM_STATE, 1) == 0 || getMode(context, SELL_NUM_STATE, 1) == 0 || getMode(context, HARASS_NUM_STATE, 1) == 0;
             }
+            if (i == 2) {
+                return getMode(context, FRAUD_NUM_STATE_SIM_2, 1) == 0 || getMode(context, AGENT_NUM_STATE_SIM_2, 1) == 0 || getMode(context, SELL_NUM_STATE_SIM_2, 1) == 0 || getMode(context, HARASS_NUM_STATE_SIM_2, 1) == 0;
+            }
+            return false;
         }
 
         private static boolean isMarkNumBlockSet(Context context) {
@@ -496,28 +444,24 @@ public class MiuiSettings {
             return ExtraNotificationManager.isQuietModeEnable(context, i);
         }
 
-        /* JADX WARNING: Code restructure failed: missing block: B:13:0x002e, code lost:
-            if (r0 == null) goto L_0x0031;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:15:0x0032, code lost:
-            return false;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:7:0x0022, code lost:
-            if (r0 != null) goto L_0x0024;
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:8:0x0024, code lost:
-            r0.close();
-         */
         public static boolean isQuietModeEnableForCurrentUser(Context context) {
             Cursor cursor = null;
             try {
-                cursor = context.getContentResolver().query(Uri.withAppendedPath(Uri.parse("content://antispamCommon/zenmode"), "1"), null, null, null, null);
+                cursor = context.getContentResolver().query(Uri.withAppendedPath(Uri.parse("content://antispamCommon/zenmode"), "1"), (String[]) null, (String) null, (String[]) null, (String) null);
                 if (cursor != null) {
                     cursor.close();
                     return true;
                 }
+                if (cursor == null) {
+                    return false;
+                }
+                cursor.close();
+                return false;
             } catch (Exception e2) {
                 e2.printStackTrace();
+                if (cursor == null) {
+                    return false;
+                }
             } catch (Throwable th) {
                 if (cursor != null) {
                     cursor.close();
@@ -527,7 +471,7 @@ public class MiuiSettings {
         }
 
         public static boolean isQuietWristband(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), QUIET_WRISTBAND, 0) == 1;
+            return Settings.Secure.getInt(context.getContentResolver(), QUIET_WRISTBAND, 0) == 1;
         }
 
         public static boolean isRepeatedCallActionEnable(Context context) {
@@ -535,11 +479,11 @@ public class MiuiSettings {
         }
 
         public static boolean isSMSClassifierAutoUpdate(Context context) {
-            return miui.provider.ExtraSettings.Secure.getBoolean(context.getContentResolver(), SMS_CLASSIFIER_AUTO_UPDATE, true);
+            return ExtraSettings.Secure.getBoolean(context.getContentResolver(), SMS_CLASSIFIER_AUTO_UPDATE, true);
         }
 
         public static boolean isVipCallActionEnable(Context context) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), CALL_ACT_OF_VIP, 0) == 1;
+            return Settings.Secure.getInt(context.getContentResolver(), CALL_ACT_OF_VIP, 0) == 1;
         }
 
         public static String mapIdToString(int i) {
@@ -558,23 +502,23 @@ public class MiuiSettings {
         }
 
         public static void setAntiSpamEnableForSim(Context context, int i, boolean z) {
-            miui.provider.ExtraSettings.Secure.putBoolean(context.getContentResolver(), i == 1 ? ANTISPAM_ENABLE_FOR_SIM_1 : ANTISPAM_ENABLE_FOR_SIM_2, z);
+            ExtraSettings.Secure.putBoolean(context.getContentResolver(), i == 1 ? ANTISPAM_ENABLE_FOR_SIM_1 : ANTISPAM_ENABLE_FOR_SIM_2, z);
         }
 
         public static void setAntiSpamSettingsSharedForSims(Context context, boolean z) {
-            miui.provider.ExtraSettings.Secure.putBoolean(context.getContentResolver(), ANTISPAM_SETTINGS_SHARED_FOR_SIMS, z);
+            ExtraSettings.Secure.putBoolean(context.getContentResolver(), ANTISPAM_SETTINGS_SHARED_FOR_SIMS, z);
         }
 
         public static void setAutoTimerOfQuietMode(Context context, boolean z) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), AUTO_TIMER_OF_QM_ENABLE, z ? 1 : 0);
+            Settings.Secure.putInt(context.getContentResolver(), AUTO_TIMER_OF_QM_ENABLE, z ? 1 : 0);
         }
 
         public static void setEndTimeForQuietMode(Context context, int i) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), END_TIME_OF_QM, i);
+            Settings.Secure.putInt(context.getContentResolver(), END_TIME_OF_QM, i);
         }
 
         public static void setHasNewAntispam(Context context, boolean z) {
-            miui.provider.ExtraSettings.Secure.putBoolean(context.getContentResolver(), HAS_NEW_ANTISPAM, z);
+            ExtraSettings.Secure.putBoolean(context.getContentResolver(), HAS_NEW_ANTISPAM, z);
         }
 
         public static void setMarkNumBlockSet(Context context, boolean z) {
@@ -586,19 +530,19 @@ public class MiuiSettings {
         }
 
         public static void setMode(Context context, String str, int i) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), str, i);
+            Settings.Secure.putInt(context.getContentResolver(), str, i);
         }
 
         public static void setNextAutoEndTime(Context context, long j) {
-            android.provider.Settings.Secure.putLong(context.getContentResolver(), NEXT_AUTO_END_TIME_OF_QM, j);
+            Settings.Secure.putLong(context.getContentResolver(), NEXT_AUTO_END_TIME_OF_QM, j);
         }
 
         public static void setNextAutoStartTime(Context context, long j) {
-            android.provider.Settings.Secure.putLong(context.getContentResolver(), NEXT_AUTO_START_TIME_OF_QM, j);
+            Settings.Secure.putLong(context.getContentResolver(), NEXT_AUTO_START_TIME_OF_QM, j);
         }
 
         public static void setNotificationType(Context context, int i, int i2) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), i2 == 1 ? SHOW_NOTIFICATION_TYPE : SHOW_NOTIFICATION_TYPE_SIM_2, i);
+            Settings.Secure.putInt(context.getContentResolver(), i2 == 1 ? SHOW_NOTIFICATION_TYPE : SHOW_NOTIFICATION_TYPE_SIM_2, i);
         }
 
         public static void setQuietMode(Context context, boolean z) {
@@ -610,11 +554,11 @@ public class MiuiSettings {
         }
 
         public static void setQuietRepeatType(Context context, int i) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), QUIET_REPEAT_TYPE, i);
+            Settings.Secure.putInt(context.getContentResolver(), QUIET_REPEAT_TYPE, i);
         }
 
         public static void setQuietWristband(Context context, boolean z) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), QUIET_WRISTBAND, z ? 1 : 0);
+            Settings.Secure.putInt(context.getContentResolver(), QUIET_WRISTBAND, z ? 1 : 0);
         }
 
         public static void setRepeatedCallActionEnable(Context context, boolean z) {
@@ -622,31 +566,31 @@ public class MiuiSettings {
         }
 
         public static void setSMSClassifierAutoUpdate(Context context, boolean z) {
-            miui.provider.ExtraSettings.Secure.putBoolean(context.getContentResolver(), SMS_CLASSIFIER_AUTO_UPDATE, z);
+            ExtraSettings.Secure.putBoolean(context.getContentResolver(), SMS_CLASSIFIER_AUTO_UPDATE, z);
         }
 
         public static void setSMSClassifierUpdateTime(Context context, long j) {
-            android.provider.Settings.Secure.putLong(context.getContentResolver(), SMS_CLASSIFIER_UPDATE_TIME, j);
+            Settings.Secure.putLong(context.getContentResolver(), SMS_CLASSIFIER_UPDATE_TIME, j);
         }
 
         public static void setStartTimeForQuietMode(Context context, int i) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), START_TIME_OF_QM, i);
+            Settings.Secure.putInt(context.getContentResolver(), START_TIME_OF_QM, i);
         }
 
         public static void setState(Context context, String str, boolean z) {
-            miui.provider.ExtraSettings.Secure.putBoolean(context.getContentResolver(), str, z);
+            ExtraSettings.Secure.putBoolean(context.getContentResolver(), str, z);
         }
 
         public static void setVipCallActionEnable(Context context, boolean z) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), CALL_ACT_OF_VIP, z ? 1 : 0);
+            Settings.Secure.putInt(context.getContentResolver(), CALL_ACT_OF_VIP, z ? 1 : 0);
         }
 
         public static void setVipListForQuietMode(Context context, int i) {
-            android.provider.Settings.Secure.putInt(context.getContentResolver(), VIP_LIST_FOR_QM, i);
+            Settings.Secure.putInt(context.getContentResolver(), VIP_LIST_FOR_QM, i);
         }
 
         public static boolean shouldShowGuidingDialog(Context context, int i) {
-            return !Build.IS_INTERNATIONAL_BUILD && ((HashMap) mapIdToState.get(Integer.valueOf(1))).get(Integer.valueOf(i)) != null && !isMarkNumBlockOpen(context, 1) && !isMarkNumBlockOpen(context, 2) && !isMarkNumBlockSet(context) && !isMarkingTypeGuided(context, mapIdToString(i));
+            return !Build.IS_INTERNATIONAL_BUILD && mapIdToState.get(1).get(Integer.valueOf(i)) != null && !isMarkNumBlockOpen(context, 1) && !isMarkNumBlockOpen(context, 2) && !isMarkNumBlockSet(context) && !isMarkingTypeGuided(context, mapIdToString(i));
         }
     }
 
@@ -654,11 +598,11 @@ public class MiuiSettings {
         private static final String INSTALL_MONITOR_ENABLED = "virus_scan_install";
 
         public static boolean isInstallMonitorEnabled(Context context) {
-            return miui.provider.ExtraSettings.System.getBoolean(context.getContentResolver(), INSTALL_MONITOR_ENABLED, true);
+            return ExtraSettings.System.getBoolean(context.getContentResolver(), INSTALL_MONITOR_ENABLED, true);
         }
 
         public static void setInstallMonitorEnabled(Context context, boolean z) {
-            miui.provider.ExtraSettings.System.putBoolean(context.getContentResolver(), INSTALL_MONITOR_ENABLED, z);
+            ExtraSettings.System.putBoolean(context.getContentResolver(), INSTALL_MONITOR_ENABLED, z);
         }
     }
 
@@ -683,14 +627,7 @@ public class MiuiSettings {
         }
 
         public static boolean isEnabled(Context context) {
-            boolean z = false;
-            if (!isSupport()) {
-                return false;
-            }
-            if (android.provider.Settings.System.getInt(context.getContentResolver(), ForceTouchEnable, 1) != 0) {
-                z = true;
-            }
-            return z;
+            return isSupport() && Settings.System.getInt(context.getContentResolver(), ForceTouchEnable, 1) != 0;
         }
 
         public static boolean isSupport() {
@@ -704,7 +641,7 @@ public class MiuiSettings {
             if (!isSupport()) {
                 return false;
             }
-            android.provider.Settings.System.putInt(context.getContentResolver(), ForceTouchEnable, z ? 1 : 0);
+            Settings.System.putInt(context.getContentResolver(), ForceTouchEnable, z ? 1 : 0);
             return true;
         }
     }
@@ -714,7 +651,7 @@ public class MiuiSettings {
         private static final String TAG_PHRASES = "phrases";
 
         public static ArrayList<String> getFrequentPhrases(Context context) {
-            String string = miui.provider.ExtraSettings.System.getString(context.getContentResolver(), FREQUENT_PHRASES);
+            String string = ExtraSettings.System.getString(context.getContentResolver(), FREQUENT_PHRASES);
             if (TextUtils.isEmpty(string)) {
                 return null;
             }
@@ -738,21 +675,20 @@ public class MiuiSettings {
         }
 
         public static void setFrequentPhrases(Context context, ArrayList<String> arrayList) {
-            String str = FREQUENT_PHRASES;
             if (arrayList == null || arrayList.size() == 0) {
-                miui.provider.ExtraSettings.System.putString(context.getContentResolver(), str, "");
-            } else {
-                JSONArray jSONArray = new JSONArray();
-                for (int i = 0; i < arrayList.size(); i++) {
-                    jSONArray.put(arrayList.get(i));
-                }
-                JSONObject jSONObject = new JSONObject();
-                try {
-                    jSONObject.put(TAG_PHRASES, jSONArray);
-                    miui.provider.ExtraSettings.System.putString(context.getContentResolver(), str, jSONObject.toString());
-                } catch (JSONException e2) {
-                    e2.printStackTrace();
-                }
+                ExtraSettings.System.putString(context.getContentResolver(), FREQUENT_PHRASES, "");
+                return;
+            }
+            JSONArray jSONArray = new JSONArray();
+            for (int i = 0; i < arrayList.size(); i++) {
+                jSONArray.put(arrayList.get(i));
+            }
+            JSONObject jSONObject = new JSONObject();
+            try {
+                jSONObject.put(TAG_PHRASES, jSONArray);
+                ExtraSettings.System.putString(context.getContentResolver(), FREQUENT_PHRASES, jSONObject.toString());
+            } catch (JSONException e2) {
+                e2.printStackTrace();
             }
         }
     }
@@ -780,11 +716,11 @@ public class MiuiSettings {
         }
 
         public static boolean getBoolean(ContentResolver contentResolver, String str) {
-            return android.provider.Settings.Global.getInt(contentResolver, str, 0) != 0;
+            return Settings.Global.getInt(contentResolver, str, 0) != 0;
         }
 
         public static boolean isOpenSecondSpaceStatusIcon(ContentResolver contentResolver) {
-            return android.provider.Settings.Global.getInt(contentResolver, OPEN_SECOND_SPACE_STATUS_ICON, 1) != 0;
+            return Settings.Global.getInt(contentResolver, OPEN_SECOND_SPACE_STATUS_ICON, 1) != 0;
         }
 
         public static boolean isOpenedPrivacyContactMode(ContentResolver contentResolver) {
@@ -792,7 +728,7 @@ public class MiuiSettings {
         }
 
         public static boolean putBoolean(ContentResolver contentResolver, String str, boolean z) {
-            return android.provider.Settings.Global.putInt(contentResolver, str, z ? 1 : 0);
+            return Settings.Global.putInt(contentResolver, str, z ? 1 : 0);
         }
     }
 
@@ -853,8 +789,7 @@ public class MiuiSettings {
         public static final String WIRED_HEADSET_LAUNCH_XIAOAI = "wired_headset_launch_xiaoai";
 
         public static String getKeyAndGestureShortcutAction(Context context, String str) {
-            String str2 = KEY_NONE;
-            return str != null ? str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_POWER_KEY)) ? LONG_PRESS_POWER_KEY : str.equals(getKeyAndGestureShortcutFunction(context, DOUBLE_CLICK_POWER_KEY)) ? DOUBLE_CLICK_POWER_KEY : str.equals(getKeyAndGestureShortcutFunction(context, THREE_GESTURE_DOWN)) ? THREE_GESTURE_DOWN : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_MENU_KEY_WHEN_LOCK)) ? LONG_PRESS_MENU_KEY_WHEN_LOCK : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_HOME_KEY)) ? LONG_PRESS_HOME_KEY : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_MENU_KEY)) ? LONG_PRESS_MENU_KEY : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_BACK_KEY)) ? LONG_PRESS_BACK_KEY : str.equals(getKeyAndGestureShortcutFunction(context, KEY_COMBINATION_POWER_HOME)) ? KEY_COMBINATION_POWER_HOME : str.equals(getKeyAndGestureShortcutFunction(context, KEY_COMBINATION_POWER_BACK)) ? KEY_COMBINATION_POWER_BACK : str.equals(getKeyAndGestureShortcutFunction(context, KEY_COMBINATION_POWER_MENU)) ? KEY_COMBINATION_POWER_MENU : str2 : str2;
+            return str != null ? str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_POWER_KEY)) ? LONG_PRESS_POWER_KEY : str.equals(getKeyAndGestureShortcutFunction(context, DOUBLE_CLICK_POWER_KEY)) ? DOUBLE_CLICK_POWER_KEY : str.equals(getKeyAndGestureShortcutFunction(context, THREE_GESTURE_DOWN)) ? THREE_GESTURE_DOWN : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_MENU_KEY_WHEN_LOCK)) ? LONG_PRESS_MENU_KEY_WHEN_LOCK : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_HOME_KEY)) ? LONG_PRESS_HOME_KEY : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_MENU_KEY)) ? LONG_PRESS_MENU_KEY : str.equals(getKeyAndGestureShortcutFunction(context, LONG_PRESS_BACK_KEY)) ? LONG_PRESS_BACK_KEY : str.equals(getKeyAndGestureShortcutFunction(context, KEY_COMBINATION_POWER_HOME)) ? KEY_COMBINATION_POWER_HOME : str.equals(getKeyAndGestureShortcutFunction(context, KEY_COMBINATION_POWER_BACK)) ? KEY_COMBINATION_POWER_BACK : str.equals(getKeyAndGestureShortcutFunction(context, KEY_COMBINATION_POWER_MENU)) ? KEY_COMBINATION_POWER_MENU : KEY_NONE : KEY_NONE;
         }
 
         public static String getKeyAndGestureShortcutFunction(Context context, String str) {
@@ -862,10 +797,7 @@ public class MiuiSettings {
             if (!TextUtils.isEmpty(keyAndGestureShortcutSetFunction)) {
                 return keyAndGestureShortcutSetFunction;
             }
-            if (LONG_PRESS_POWER_KEY.equals(str)) {
-                return null;
-            }
-            if (DOUBLE_CLICK_POWER_KEY.equals(str)) {
+            if (LONG_PRESS_POWER_KEY.equals(str) || DOUBLE_CLICK_POWER_KEY.equals(str)) {
                 return null;
             }
             if (THREE_GESTURE_DOWN.equals(str)) {
@@ -880,24 +812,15 @@ public class MiuiSettings {
             if (LONG_PRESS_MENU_KEY_WHEN_LOCK.equals(str)) {
                 return TURN_ON_TORCH;
             }
-            if (LONG_PRESS_BACK_KEY.equals(str)) {
-                return null;
+            if (!LONG_PRESS_BACK_KEY.equals(str) && !KEY_COMBINATION_POWER_HOME.equals(str) && !KEY_COMBINATION_POWER_BACK.equals(str) && !KEY_COMBINATION_POWER_MENU.equals(str)) {
+                return keyAndGestureShortcutSetFunction;
             }
-            if (KEY_COMBINATION_POWER_HOME.equals(str)) {
-                return null;
-            }
-            if (KEY_COMBINATION_POWER_BACK.equals(str)) {
-                return null;
-            }
-            if (KEY_COMBINATION_POWER_MENU.equals(str)) {
-                return null;
-            }
-            return keyAndGestureShortcutSetFunction;
+            return null;
         }
 
         private static String getKeyAndGestureShortcutSetFunction(Context context, String str) {
             if (context != null) {
-                return android.provider.Settings.System.getStringForUser(context.getContentResolver(), str, -2);
+                return Settings.System.getStringForUser(context.getContentResolver(), str, -2);
             }
             return null;
         }
@@ -909,60 +832,44 @@ public class MiuiSettings {
                     if (packageManager.getPackageInfo("com.miui.tsmclient", 0) != null) {
                         return true;
                     }
-                } catch (NameNotFoundException e2) {
+                } catch (PackageManager.NameNotFoundException e2) {
                 }
             }
             return false;
         }
 
         public static void setPowerKeyLaunchVoiceAssistant(Context context) {
-            String str = LAUNCH_VOICE_ASSISTANT;
-            String keyAndGestureShortcutAction = getKeyAndGestureShortcutAction(context, str);
-            boolean equals = KEY_NONE.equals(keyAndGestureShortcutAction);
-            String str2 = KEY_TIPS;
-            String str3 = "none";
-            if (!equals) {
-                android.provider.Settings.System.putStringForUser(context.getContentResolver(), keyAndGestureShortcutAction, str3, -2);
-                android.provider.Settings.System.putStringForUser(context.getContentResolver(), str2, keyAndGestureShortcutAction, -2);
-            } else {
-                String str4 = LONG_PRESS_HOME_KEY;
-                if (getKeyAndGestureShortcutFunction(context, str4) == null) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str4, str3, -2);
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str2, str4, -2);
-                }
+            String keyAndGestureShortcutAction = getKeyAndGestureShortcutAction(context, LAUNCH_VOICE_ASSISTANT);
+            if (!KEY_NONE.equals(keyAndGestureShortcutAction)) {
+                Settings.System.putStringForUser(context.getContentResolver(), keyAndGestureShortcutAction, "none", -2);
+                Settings.System.putStringForUser(context.getContentResolver(), KEY_TIPS, keyAndGestureShortcutAction, -2);
+            } else if (getKeyAndGestureShortcutFunction(context, LONG_PRESS_HOME_KEY) == null) {
+                Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_HOME_KEY, "none", -2);
+                Settings.System.putStringForUser(context.getContentResolver(), KEY_TIPS, LONG_PRESS_HOME_KEY, -2);
             }
-            android.provider.Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_POWER_KEY, str, -2);
+            Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_POWER_KEY, LAUNCH_VOICE_ASSISTANT, -2);
         }
 
         public static void updateOldKeyFunctionToNew(Context context) {
-            ContentResolver contentResolver = context.getContentResolver();
-            String str = KEY_UPDATED;
-            if (android.provider.Settings.System.getIntForUser(contentResolver, str, 0, -2) == 0) {
+            if (Settings.System.getIntForUser(context.getContentResolver(), KEY_UPDATED, 0, -2) == 0) {
                 String screenKeyLongPressAction = System.getScreenKeyLongPressAction(context, System.SCREEN_KEY_LONG_PRESS_APP_SWITCH);
                 String screenKeyLongPressAction2 = System.getScreenKeyLongPressAction(context, System.SCREEN_KEY_LONG_PRESS_HOME);
                 String screenKeyLongPressAction3 = System.getScreenKeyLongPressAction(context, System.SCREEN_KEY_LONG_PRESS_BACK);
-                String str2 = System.SCREEN_KEY_LONG_PRESS_ACTION_VOICE_ASSISTANT;
-                boolean equals = str2.equals(screenKeyLongPressAction2);
-                String str3 = LONG_PRESS_MENU_KEY;
-                String str4 = LONG_PRESS_BACK_KEY;
-                String str5 = LONG_PRESS_HOME_KEY;
-                String str6 = LAUNCH_VOICE_ASSISTANT;
-                if (equals) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str5, str6, -2);
-                } else if (str2.equals(screenKeyLongPressAction3)) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str4, str6, -2);
-                } else if (str2.equals(screenKeyLongPressAction)) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str3, str6, -2);
+                if (System.SCREEN_KEY_LONG_PRESS_ACTION_VOICE_ASSISTANT.equals(screenKeyLongPressAction2)) {
+                    Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_HOME_KEY, LAUNCH_VOICE_ASSISTANT, -2);
+                } else if (System.SCREEN_KEY_LONG_PRESS_ACTION_VOICE_ASSISTANT.equals(screenKeyLongPressAction3)) {
+                    Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_BACK_KEY, LAUNCH_VOICE_ASSISTANT, -2);
+                } else if (System.SCREEN_KEY_LONG_PRESS_ACTION_VOICE_ASSISTANT.equals(screenKeyLongPressAction)) {
+                    Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_MENU_KEY, LAUNCH_VOICE_ASSISTANT, -2);
                 }
-                String str7 = "close_app";
-                if (str7.equals(screenKeyLongPressAction3)) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str4, str7, -2);
-                } else if (str7.equals(screenKeyLongPressAction2)) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str5, str7, -2);
-                } else if (str7.equals(screenKeyLongPressAction)) {
-                    android.provider.Settings.System.putStringForUser(context.getContentResolver(), str3, str7, -2);
+                if ("close_app".equals(screenKeyLongPressAction3)) {
+                    Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_BACK_KEY, "close_app", -2);
+                } else if ("close_app".equals(screenKeyLongPressAction2)) {
+                    Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_HOME_KEY, "close_app", -2);
+                } else if ("close_app".equals(screenKeyLongPressAction)) {
+                    Settings.System.putStringForUser(context.getContentResolver(), LONG_PRESS_MENU_KEY, "close_app", -2);
                 }
-                android.provider.Settings.System.putIntForUser(context.getContentResolver(), str, 1, -2);
+                Settings.System.putIntForUser(context.getContentResolver(), KEY_UPDATED, 1, -2);
             }
         }
     }
@@ -976,51 +883,51 @@ public class MiuiSettings {
         private static final String MIUI_VOIP_WIFI_AUTO = "miui_voip_wifi_auto";
 
         public static int getVoipContactCount(Context context) {
-            return miui.provider.ExtraSettings.System.getInt(context.getContentResolver(), MIUI_VOIP_CONTACT_COUNT, 0);
+            return ExtraSettings.System.getInt(context.getContentResolver(), MIUI_VOIP_CONTACT_COUNT, 0);
         }
 
         public static int getVoipNewContactCount(Context context) {
-            return miui.provider.ExtraSettings.System.getInt(context.getContentResolver(), MIUI_VOIP_NEW_CONTACT_COUNT, 0);
+            return ExtraSettings.System.getInt(context.getContentResolver(), MIUI_VOIP_NEW_CONTACT_COUNT, 0);
         }
 
         public static boolean isVoipActivated(Context context) {
-            return miui.provider.ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_ACTIVATED, false);
+            return ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_ACTIVATED, false);
         }
 
         public static boolean isVoipCallLogAuto(Context context) {
-            return miui.provider.ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_CALLLOG_AUTO, false);
+            return ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_CALLLOG_AUTO, false);
         }
 
         public static boolean isVoipEnabled(Context context) {
-            return miui.provider.ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_ENABLED, false);
+            return ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_ENABLED, false);
         }
 
         public static boolean isVoipWifiAuto(Context context) {
-            return miui.provider.ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_WIFI_AUTO, false);
+            return ExtraSettings.System.getBoolean(context.getContentResolver(), MIUI_VOIP_WIFI_AUTO, false);
         }
 
         public static void setVoipActivated(Context context, boolean z) {
-            miui.provider.ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_ACTIVATED, z);
+            ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_ACTIVATED, z);
         }
 
         public static void setVoipCallLogAuto(Context context, boolean z) {
-            miui.provider.ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_CALLLOG_AUTO, z);
+            ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_CALLLOG_AUTO, z);
         }
 
         public static void setVoipContactCount(Context context, int i) {
-            miui.provider.ExtraSettings.System.putInt(context.getContentResolver(), MIUI_VOIP_CONTACT_COUNT, i);
+            ExtraSettings.System.putInt(context.getContentResolver(), MIUI_VOIP_CONTACT_COUNT, i);
         }
 
         public static void setVoipEnabled(Context context, boolean z) {
-            miui.provider.ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_ENABLED, z);
+            ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_ENABLED, z);
         }
 
         public static void setVoipNewContactCount(Context context, int i) {
-            miui.provider.ExtraSettings.System.putInt(context.getContentResolver(), MIUI_VOIP_NEW_CONTACT_COUNT, i);
+            ExtraSettings.System.putInt(context.getContentResolver(), MIUI_VOIP_NEW_CONTACT_COUNT, i);
         }
 
         public static void setVoipWifiAuto(Context context, boolean z) {
-            miui.provider.ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_WIFI_AUTO, z);
+            ExtraSettings.System.putBoolean(context.getContentResolver(), MIUI_VOIP_WIFI_AUTO, z);
         }
     }
 
@@ -1107,7 +1014,7 @@ public class MiuiSettings {
         }
 
         public static HashMap<String, Boolean> getScreenModePkgList(Context context, String str) {
-            String stringForUser = android.provider.Settings.System.getStringForUser(context.getContentResolver(), str, -2);
+            String stringForUser = Settings.System.getStringForUser(context.getContentResolver(), str, -2);
             HashMap<String, Boolean> hashMap = new HashMap<>();
             if (!TextUtils.isEmpty(stringForUser)) {
                 String[] split = stringForUser.split(",");
@@ -1124,13 +1031,7 @@ public class MiuiSettings {
         public static boolean isInPaperModeTimeSchedule(Context context, int i, int i2) {
             Calendar instance = Calendar.getInstance();
             int i3 = (instance.get(11) * 60) + instance.get(12);
-            if (i > i2) {
-                return i3 < i2 || i3 >= i;
-            }
-            if (i < i2) {
-                return i3 >= i && i3 < i2;
-            }
-            return false;
+            return i > i2 ? i3 < i2 || i3 >= i : i < i2 && i3 >= i && i3 < i2;
         }
 
         public static boolean isScreenPaperMode() {
@@ -1140,17 +1041,17 @@ public class MiuiSettings {
         public static void setScreenModePkgList(Context context, HashMap<String, Boolean> hashMap, String str) {
             if (hashMap != null && hashMap.size() != 0) {
                 StringBuilder sb = new StringBuilder();
-                Iterator it = hashMap.entrySet().iterator();
+                Iterator<Map.Entry<String, Boolean>> it = hashMap.entrySet().iterator();
                 while (it.hasNext()) {
-                    Entry entry = (Entry) it.next();
-                    sb.append((String) entry.getKey());
+                    Map.Entry next = it.next();
+                    sb.append((String) next.getKey());
                     sb.append('=');
-                    sb.append((Boolean) entry.getValue());
+                    sb.append((Boolean) next.getValue());
                     if (it.hasNext()) {
                         sb.append(",");
                     }
                 }
-                android.provider.Settings.System.putString(context.getContentResolver(), str, sb.toString());
+                Settings.System.putString(context.getContentResolver(), str, sb.toString());
             }
         }
 
@@ -1163,7 +1064,7 @@ public class MiuiSettings {
         }
     }
 
-    public static class Secure extends android.provider.SystemSettings.Secure {
+    public static class Secure extends SystemSettings.Secure {
         public static final String ACCESS_CONTROL_LOCK_CONVENIENT = "access_control_lock_convenient";
         public static final String ACCESS_CONTROL_LOCK_ENABLED = "access_control_lock_enabled";
         public static final String ACCESS_CONTROL_LOCK_MODE = "access_control_lock_mode";
@@ -1260,42 +1161,42 @@ public class MiuiSettings {
         }
 
         public static void changeOpenCrossUserNotification(ContentResolver contentResolver, boolean z, int i) {
-            android.provider.Settings.Secure.putIntForUser(contentResolver, OPEN_CROSS_USER_NOTIFICATION, z ? 1 : 0, i);
+            Settings.Secure.putIntForUser(contentResolver, OPEN_CROSS_USER_NOTIFICATION, z ? 1 : 0, i);
         }
 
         public static void changeOpenSwitchUserNotification(ContentResolver contentResolver, boolean z, int i) {
-            android.provider.Settings.Secure.putIntForUser(contentResolver, OPEN_SWITCH_USER_NOTIFICATION, z ? 1 : 0, i);
+            Settings.Secure.putIntForUser(contentResolver, OPEN_SWITCH_USER_NOTIFICATION, z ? 1 : 0, i);
         }
 
         public static void enableHttpInvokeApp(ContentResolver contentResolver, boolean z) {
-            android.provider.Settings.Secure.putInt(contentResolver, HTTP_INVOKE_APP, z ? 1 : 0);
+            Settings.Secure.putInt(contentResolver, HTTP_INVOKE_APP, z ? 1 : 0);
         }
 
         public static void enableUploadDebugLog(ContentResolver contentResolver, boolean z) {
-            android.provider.Settings.Secure.putInt(contentResolver, UPLOAD_DEBUG_LOG, z ? 1 : 0);
+            Settings.Secure.putInt(contentResolver, UPLOAD_DEBUG_LOG, z ? 1 : 0);
         }
 
         public static void enableUserExperienceProgram(ContentResolver contentResolver, boolean z) {
-            android.provider.Settings.Secure.putInt(contentResolver, UPLOAD_LOG, z ? 1 : 0);
+            Settings.Secure.putInt(contentResolver, UPLOAD_LOG, z ? 1 : 0);
         }
 
         public static boolean getBoolean(ContentResolver contentResolver, String str, boolean z) {
-            return android.provider.Settings.Secure.getInt(contentResolver, str, z ? 1 : 0) != 0;
+            return Settings.Secure.getInt(contentResolver, str, z ? 1 : 0) != 0;
         }
 
         public static int getCtaSupported(ContentResolver contentResolver) {
             if (Build.IS_INTERNATIONAL_BUILD) {
                 return 0;
             }
-            return android.provider.Settings.Secure.getInt(contentResolver, TST_SUPPORT, -1);
+            return Settings.Secure.getInt(contentResolver, TST_SUPPORT, -1);
         }
 
         public static long getDisableHybridIconTipTS(ContentResolver contentResolver) {
-            return android.provider.Settings.Secure.getLong(contentResolver, TIMESTAMP_USER_DISABLE_HYBRID_ICON_TIP, -1);
+            return Settings.Secure.getLong(contentResolver, TIMESTAMP_USER_DISABLE_HYBRID_ICON_TIP, -1);
         }
 
         public static int getSecondSpaceEntranceStatus(ContentResolver contentResolver, int i) {
-            return android.provider.Settings.Secure.getIntForUser(contentResolver, SECOND_SPACE_ENTRANCE_STATUS, 1, i);
+            return Settings.Secure.getIntForUser(contentResolver, SECOND_SPACE_ENTRANCE_STATUS, 1, i);
         }
 
         public static boolean hasCommonPassword(Context context) {
@@ -1303,104 +1204,78 @@ public class MiuiSettings {
         }
 
         public static boolean isCommonPasswordEnabledForBusiness(Context context, String str) {
-            boolean z = true;
-            if (System.KEY_COMMON_PASSWORD_KEYGUARD.equals(str)) {
-                if (LockPatternUtilsWrapper.getActivePasswordQuality(context) == 0) {
-                    z = false;
-                }
-                return z;
-            }
-            if (android.provider.Settings.Secure.getInt(context.getContentResolver(), str, 0) == 0) {
-                z = false;
-            }
-            return z;
+            return System.KEY_COMMON_PASSWORD_KEYGUARD.equals(str) ? LockPatternUtilsWrapper.getActivePasswordQuality(context) != 0 : Settings.Secure.getInt(context.getContentResolver(), str, 0) != 0;
         }
 
         public static boolean isFingerprintEnabledForBusiness(Context context, String str) {
-            return android.provider.Settings.Secure.getInt(context.getContentResolver(), str, 0) == 2;
+            return Settings.Secure.getInt(context.getContentResolver(), str, 0) == 2;
         }
 
         public static boolean isForceCloseDialogEnabled(Context context) {
-            boolean z = false;
             try {
-                if (1 == android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), FORCE_CLOCE_DIALOG_ENABLED, -2)) {
-                    z = true;
-                }
-                return z;
-            } catch (SettingNotFoundException e2) {
-                if (!"user".equals(Build.TYPE) || Build.IS_DEVELOPMENT_VERSION || Build.IS_INTERNATIONAL_BUILD) {
-                    z = true;
-                }
-                return z;
+                return 1 == Settings.Secure.getIntForUser(context.getContentResolver(), FORCE_CLOCE_DIALOG_ENABLED, -2);
+            } catch (Settings.SettingNotFoundException e2) {
+                return !"user".equals(Build.TYPE) || Build.IS_DEVELOPMENT_VERSION || Build.IS_INTERNATIONAL_BUILD;
             }
         }
 
         public static boolean isGreenKidActive(ContentResolver contentResolver) {
-            return android.provider.Settings.Secure.getInt(contentResolver, GREEN_KID_ACTIVE, 0) == 1;
+            return Settings.Secure.getInt(contentResolver, GREEN_KID_ACTIVE, 0) == 1;
         }
 
         public static boolean isHttpInvokeAppEnable(ContentResolver contentResolver) {
-            return android.provider.Settings.Secure.getInt(contentResolver, HTTP_INVOKE_APP, 1) == 1;
+            return Settings.Secure.getInt(contentResolver, HTTP_INVOKE_APP, 1) == 1;
         }
 
         public static boolean isOpenCrossUserNotification(ContentResolver contentResolver, int i) {
-            return android.provider.Settings.Secure.getIntForUser(contentResolver, OPEN_CROSS_USER_NOTIFICATION, 1, i) != 0;
+            return Settings.Secure.getIntForUser(contentResolver, OPEN_CROSS_USER_NOTIFICATION, 1, i) != 0;
         }
 
         public static boolean isOpenSwitchUserNotification(ContentResolver contentResolver, int i) {
-            return android.provider.Settings.Secure.getIntForUser(contentResolver, OPEN_SWITCH_USER_NOTIFICATION, 1, i) != 0;
+            return Settings.Secure.getIntForUser(contentResolver, OPEN_SWITCH_USER_NOTIFICATION, 1, i) != 0;
         }
 
         public static boolean isSecureSpace(ContentResolver contentResolver) {
-            return (UserHandle.myUserId() == 0 || android.provider.Settings.Secure.getInt(contentResolver, IS_SECOND_SPACE, 0) == 0) ? false : true;
+            return (UserHandle.myUserId() == 0 || Settings.Secure.getInt(contentResolver, IS_SECOND_SPACE, 0) == 0) ? false : true;
         }
 
         public static boolean isTimeChangeDisallow(ContentResolver contentResolver) {
-            return android.provider.Settings.Secure.getInt(contentResolver, TIME_CHANGE_DISALLOW, 0) == 1;
+            return Settings.Secure.getInt(contentResolver, TIME_CHANGE_DISALLOW, 0) == 1;
         }
 
         public static boolean isUploadDebugLogEnable(ContentResolver contentResolver) {
-            return android.provider.Settings.Secure.getInt(contentResolver, UPLOAD_DEBUG_LOG, isUserExperienceProgramEnable(contentResolver) ? 1 : 0) == 1;
+            return Settings.Secure.getInt(contentResolver, UPLOAD_DEBUG_LOG, isUserExperienceProgramEnable(contentResolver) ? 1 : 0) == 1;
         }
 
         public static boolean isUserExperienceProgramEnable(ContentResolver contentResolver) {
-            return android.provider.Settings.Secure.getInt(contentResolver, UPLOAD_LOG, Build.IS_DEVELOPMENT_VERSION ? 1 : 0) == 1;
+            return Settings.Secure.getInt(contentResolver, UPLOAD_LOG, Build.IS_DEVELOPMENT_VERSION ? 1 : 0) == 1;
         }
 
         public static void putBoolean(ContentResolver contentResolver, String str, boolean z) {
-            android.provider.Settings.Secure.putInt(contentResolver, str, z ? 1 : 0);
+            Settings.Secure.putInt(contentResolver, str, z ? 1 : 0);
         }
 
         static void recordAccessibilityModifications(ContentResolver contentResolver, String str, String str2, int i) {
-            String str3;
-            String str4;
             ContentResolver contentResolver2 = contentResolver;
-            String str5 = str2;
+            String str3 = str2;
             int i2 = i;
-            String str6 = "enabled_accessibility_services";
-            if (str6.equals(str)) {
-                String stringForUser = android.provider.Settings.Secure.getStringForUser(contentResolver2, str6, i2);
-                String str7 = ":";
+            if ("enabled_accessibility_services".equals(str)) {
+                String stringForUser = Settings.Secure.getStringForUser(contentResolver2, "enabled_accessibility_services", i2);
                 int i3 = 0;
-                String[] split = stringForUser == null ? new String[0] : stringForUser.split(str7);
-                String[] split2 = str5 == null ? new String[0] : str5.split(str7);
+                String[] split = stringForUser == null ? new String[0] : stringForUser.split(":");
+                String[] split2 = str3 == null ? new String[0] : str3.split(":");
                 int length = split.length;
                 int i4 = 0;
-                while (true) {
-                    str3 = "_";
-                    str4 = "\\W";
-                    if (i4 >= length) {
-                        break;
-                    }
-                    String str8 = split[i4];
-                    if (!TextUtils.isEmpty(str8)) {
+                while (i4 < length) {
+                    String str4 = split[i4];
+                    if (!TextUtils.isEmpty(str4)) {
                         boolean z = false;
                         int length2 = split2.length;
                         int i5 = i3;
                         while (true) {
                             if (i5 >= length2) {
                                 break;
-                            } else if (str8.equals(split2[i5])) {
+                            } else if (str4.equals(split2[i5])) {
                                 z = true;
                                 break;
                             } else {
@@ -1408,24 +1283,21 @@ public class MiuiSettings {
                             }
                         }
                         if (!z) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("disable_");
-                            sb.append(str8.replaceAll(str4, str3));
-                            android.provider.Settings.Secure.putStringForUser(contentResolver2, sb.toString(), contentResolver.getPackageName(), i2);
+                            Settings.Secure.putStringForUser(contentResolver2, "disable_" + str4.replaceAll("\\W", "_"), contentResolver.getPackageName(), i2);
                         }
                     }
                     i4++;
                     i3 = 0;
                 }
-                for (String str9 : split2) {
-                    if (!TextUtils.isEmpty(str9)) {
+                for (String str5 : split2) {
+                    if (!TextUtils.isEmpty(str5)) {
                         boolean z2 = false;
                         int length3 = split.length;
                         int i6 = 0;
                         while (true) {
                             if (i6 >= length3) {
                                 break;
-                            } else if (split[i6].equals(str9)) {
+                            } else if (split[i6].equals(str5)) {
                                 z2 = true;
                                 break;
                             } else {
@@ -1433,10 +1305,7 @@ public class MiuiSettings {
                             }
                         }
                         if (!z2) {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("enable_");
-                            sb2.append(str9.replaceAll(str4, str3));
-                            android.provider.Settings.Secure.putStringForUser(contentResolver2, sb2.toString(), contentResolver.getPackageName(), i2);
+                            Settings.Secure.putStringForUser(contentResolver2, "enable_" + str5.replaceAll("\\W", "_"), contentResolver.getPackageName(), i2);
                         }
                     }
                 }
@@ -1445,49 +1314,49 @@ public class MiuiSettings {
 
         public static void setCtaSupported(ContentResolver contentResolver, int i) {
             if (!Build.IS_INTERNATIONAL_BUILD) {
-                android.provider.Settings.Secure.putInt(contentResolver, TST_SUPPORT, i);
+                Settings.Secure.putInt(contentResolver, TST_SUPPORT, i);
             }
         }
 
         public static boolean setDisableHybridIconTipTS(ContentResolver contentResolver, long j) {
-            return android.provider.Settings.Secure.putLong(contentResolver, TIMESTAMP_USER_DISABLE_HYBRID_ICON_TIP, j);
+            return Settings.Secure.putLong(contentResolver, TIMESTAMP_USER_DISABLE_HYBRID_ICON_TIP, j);
         }
 
         public static void setSecondSpaceEntranceStatus(ContentResolver contentResolver, boolean z, int i) {
-            android.provider.Settings.Secure.putIntForUser(contentResolver, SECOND_SPACE_ENTRANCE_STATUS, z ? 1 : 0, i);
+            Settings.Secure.putIntForUser(contentResolver, SECOND_SPACE_ENTRANCE_STATUS, z ? 1 : 0, i);
         }
 
         public static boolean setTimeChangeDisallow(ContentResolver contentResolver, boolean z) {
-            return android.provider.Settings.Secure.putInt(contentResolver, TIME_CHANGE_DISALLOW, z ? 1 : 0);
+            return Settings.Secure.putInt(contentResolver, TIME_CHANGE_DISALLOW, z ? 1 : 0);
         }
 
-        public static void showApplyPasswordConfirmDialog(final Activity activity, final OnClickListener onClickListener, final String str, String str2) {
-            AnonymousClass3 r0 = new OnClickListener() {
+        public static void showApplyPasswordConfirmDialog(final Activity activity, final DialogInterface.OnClickListener onClickListener, final String str, String str2) {
+            AnonymousClass3 r0 = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (i == -1) {
-                        android.provider.Settings.Secure.putInt(activity.getContentResolver(), str, 2);
+                        Settings.Secure.putInt(activity.getContentResolver(), str, 2);
                     }
-                    OnClickListener onClickListener = onClickListener;
+                    DialogInterface.OnClickListener onClickListener = onClickListener;
                     if (onClickListener != null) {
                         onClickListener.onClick(dialogInterface, i);
                     }
                 }
             };
-            new Builder(activity).setCancelable(false).setIconAttribute(16843605).setTitle(activity.getString(286130244, new Object[]{str2})).setMessage(activity.getString(286130243, new Object[]{str2})).setPositiveButton(286130242, r0).setNegativeButton(286130273, r0).create().show();
+            new AlertDialog.Builder(activity).setCancelable(false).setIconAttribute(16843605).setTitle(activity.getString(286130244, new Object[]{str2})).setMessage(activity.getString(286130243, new Object[]{str2})).setPositiveButton(286130242, r0).setNegativeButton(286130273, r0).create().show();
         }
 
-        private static void showConfirmDialog(Activity activity, OnClickListener onClickListener) {
-            new Builder(activity).setCancelable(false).setIconAttribute(16843605).setTitle(286130437).setMessage(286130436).setPositiveButton(286130435, onClickListener).setNegativeButton(286130273, onClickListener).create().show();
+        private static void showConfirmDialog(Activity activity, DialogInterface.OnClickListener onClickListener) {
+            new AlertDialog.Builder(activity).setCancelable(false).setIconAttribute(16843605).setTitle(286130437).setMessage(286130436).setPositiveButton(286130435, onClickListener).setNegativeButton(286130273, onClickListener).create().show();
         }
 
-        public static void showSetPasswordConfirmDialog(final Activity activity, final OnClickListener onClickListener, final String str, final int i) {
+        public static void showSetPasswordConfirmDialog(final Activity activity, final DialogInterface.OnClickListener onClickListener, final String str, final int i) {
             try {
-                showConfirmDialog(activity, new OnClickListener() {
+                showConfirmDialog(activity, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (i == -1) {
                             activity.startActivityForResult(Secure.buildNewPasswordIntent(str), i);
                         }
-                        OnClickListener onClickListener = onClickListener;
+                        DialogInterface.OnClickListener onClickListener = onClickListener;
                         if (onClickListener != null) {
                             onClickListener.onClick(dialogInterface, i);
                         }
@@ -1497,13 +1366,13 @@ public class MiuiSettings {
             }
         }
 
-        public static void showSetPasswordConfirmDialog(final Fragment fragment, final OnClickListener onClickListener, final String str, final int i) {
-            showConfirmDialog(fragment.getActivity(), new OnClickListener() {
+        public static void showSetPasswordConfirmDialog(final Fragment fragment, final DialogInterface.OnClickListener onClickListener, final String str, final int i) {
+            showConfirmDialog(fragment.getActivity(), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (i == -1) {
                         fragment.startActivityForResult(Secure.buildNewPasswordIntent(str), i);
                     }
-                    OnClickListener onClickListener = onClickListener;
+                    DialogInterface.OnClickListener onClickListener = onClickListener;
                     if (onClickListener != null) {
                         onClickListener.onClick(dialogInterface, i);
                     }
@@ -1519,7 +1388,7 @@ public class MiuiSettings {
         private static final Uri URI_CLOUD_ALL_DATA_SINGLE = Uri.parse("content://com.android.settings.cloud.CloudSettings/cloud_all_data/single");
 
         public static class CloudData implements Parcelable {
-            public static final Creator<CloudData> CREATOR = new Creator<CloudData>() {
+            public static final Parcelable.Creator<CloudData> CREATOR = new Parcelable.Creator<CloudData>() {
                 public CloudData createFromParcel(Parcel parcel) {
                     return new CloudData(parcel.readString());
                 }
@@ -1551,20 +1420,18 @@ public class MiuiSettings {
             }
 
             public boolean equals(Object obj) {
-                boolean z = true;
                 if (obj == this) {
                     return true;
                 }
                 if (!(obj instanceof CloudData)) {
                     return false;
                 }
-                CloudData cloudData = (CloudData) obj;
                 String str = this.data;
-                String str2 = cloudData.data;
-                if (str != str2 && (str == null || !str.equals(str2))) {
-                    z = false;
+                String str2 = ((CloudData) obj).data;
+                if (str != str2) {
+                    return str != null && str.equals(str2);
                 }
-                return z;
+                return true;
             }
 
             public boolean getBoolean(String str, boolean z) {
@@ -1639,19 +1506,19 @@ public class MiuiSettings {
         }
 
         public static boolean getCloudDataBoolean(ContentResolver contentResolver, String str, String str2, boolean z) {
-            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, null, null, false);
+            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, (String) null, (String) null, false);
             return cloudDataSingle != null ? cloudDataSingle.getBoolean(str2, z) : z;
         }
 
         public static int getCloudDataInt(ContentResolver contentResolver, String str, String str2, int i) {
-            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, null, null, false);
+            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, (String) null, (String) null, false);
             return cloudDataSingle != null ? cloudDataSingle.getInt(str2, i) : i;
         }
 
         public static List<CloudData> getCloudDataList(ContentResolver contentResolver, String str) {
             Cursor cursor = null;
             try {
-                cursor = contentResolver.query(URI_CLOUD_ALL_DATA, new String[]{str}, null, null, null);
+                cursor = contentResolver.query(URI_CLOUD_ALL_DATA, new String[]{str}, (String) null, (String[]) null, (String) null);
                 if (cursor != null) {
                     Bundle extras = cursor.getExtras();
                     if (extras != null && !extras.isEmpty()) {
@@ -1671,7 +1538,7 @@ public class MiuiSettings {
         }
 
         public static long getCloudDataLong(ContentResolver contentResolver, String str, String str2, long j) {
-            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, null, null, false);
+            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, (String) null, (String) null, false);
             return cloudDataSingle != null ? cloudDataSingle.getLong(str2, j) : j;
         }
 
@@ -1685,7 +1552,7 @@ public class MiuiSettings {
             } else if (!z || !(str2 == null || str3 == null)) {
                 Cursor cursor = null;
                 try {
-                    cursor = contentResolver.query(URI_CLOUD_ALL_DATA_SINGLE, new String[]{str, str2, str3, String.valueOf(z)}, null, null, null);
+                    cursor = contentResolver.query(URI_CLOUD_ALL_DATA_SINGLE, new String[]{str, str2, str3, String.valueOf(z)}, (String) null, (String[]) null, (String) null);
                     if (cursor != null) {
                         Bundle extras = cursor.getExtras();
                         if (extras != null && !extras.isEmpty()) {
@@ -1708,7 +1575,7 @@ public class MiuiSettings {
         }
 
         public static String getCloudDataString(ContentResolver contentResolver, String str, String str2, String str3) {
-            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, null, null, false);
+            CloudData cloudDataSingle = getCloudDataSingle(contentResolver, str, (String) null, (String) null, false);
             return cloudDataSingle != null ? cloudDataSingle.getString(str2, str3) : str3;
         }
     }
@@ -1732,7 +1599,7 @@ public class MiuiSettings {
         public static final String VIP_ENABLE = "vip_enable";
         public static final String VOLUME_MUSIC_BEFORE_MUTE = "volume_music_before_mute";
         public static final int ZEN_MODE_MIUI_SILENT = 4;
-        public static final boolean isSupported = (VERSION.SDK_INT >= 23);
+        public static final boolean isSupported = (Build.VERSION.SDK_INT >= 23);
 
         public static void enableVIPMode(Context context, boolean z) {
             ExtraNotificationManager.enableVIPMode(context, z, -3);
@@ -1771,35 +1638,18 @@ public class MiuiSettings {
         }
 
         public static boolean muteMusicStream(Context context) {
-            return getZenMode(context) == 1 && 1 == android.provider.Settings.System.getIntForUser(context.getContentResolver(), MUTE_MUSIC, 1, -3);
+            return getZenMode(context) == 1 && 1 == Settings.System.getIntForUser(context.getContentResolver(), MUTE_MUSIC, 1, -3);
         }
 
         public static void reportRingerModeInfo(String str, String str2, String str3, long j) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("type=");
-            sb.append(str);
-            String str4 = ";";
-            sb.append(str4);
-            sb.append("mode=");
-            sb.append(str2);
-            sb.append(str4);
-            sb.append("params=");
-            sb.append(str3);
-            sb.append(str4);
-            sb.append("time=");
-            sb.append(j);
-            sb.append(str4);
             if (DEBUG_MODE) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("reportRingerModeInfo:");
-                sb2.append(sb.toString());
-                Log.d(TAG, sb2.toString());
+                Log.d(TAG, "reportRingerModeInfo:" + r0.toString());
             }
-            MQSEventManagerDelegate.getInstance().reportSimpleEvent(77, sb.toString());
+            MQSEventManagerDelegate.getInstance().reportSimpleEvent(77, "type=" + str + ";" + "mode=" + str2 + ";" + "params=" + str3 + ";" + "time=" + j + ";");
         }
 
         public static void setRemainTime(Context context, long j) {
-            android.provider.Settings.Secure.putLong(context.getContentResolver(), REMAIN_TIME, j);
+            Settings.Secure.putLong(context.getContentResolver(), REMAIN_TIME, j);
         }
 
         public static void setSilenceMode(Context context, int i, Uri uri) {
@@ -1811,11 +1661,11 @@ public class MiuiSettings {
         }
 
         public static boolean showNotification(Context context) {
-            return getZenMode(context) == 1 && 1 == android.provider.Settings.System.getIntForUser(context.getContentResolver(), SHOW_NOTIFICATION, 1, -3);
+            return getZenMode(context) == 1 && 1 == Settings.System.getIntForUser(context.getContentResolver(), SHOW_NOTIFICATION, 1, -3);
         }
     }
 
-    public static class System extends android.provider.SystemSettings.System {
+    public static class System extends SystemSettings.System {
         public static final String ACTIVITY_RESOLVE_ORDER = "activity_resolve_order";
         private static final String ACTIVITY_RESOLVE_ORDER_DELIMETER = ",";
         public static final String AI_PRELOAD_USER_STATE = "ai_preload_user_state";
@@ -1863,17 +1713,17 @@ public class MiuiSettings {
         public static final String DATA_AND_WIFI_ROAM = "data_and_wifi_roam";
         public static final int DATA_AND_WIFI_ROAM_DEFAULT = 0;
         public static final String DEFAULT_ALARM_ALERT = "default_alarm_alert";
-        public static final Uri DEFAULT_CALENDAR_ALERT_URI;
+        public static final Uri DEFAULT_CALENDAR_ALERT_URI = Settings.System.getUriFor(CALENDAR_ALERT);
         public static final boolean DEFAULT_ENABLE_DEMO_MODE = false;
-        public static final Uri DEFAULT_RINGTONE_URI_SLOT_1;
-        public static final Uri DEFAULT_RINGTONE_URI_SLOT_2;
+        public static final Uri DEFAULT_RINGTONE_URI_SLOT_1 = Settings.System.getUriFor(RINGTONE_SOUND_SLOT_1);
+        public static final Uri DEFAULT_RINGTONE_URI_SLOT_2 = Settings.System.getUriFor(RINGTONE_SOUND_SLOT_2);
         public static final int DEFAULT_SCREEN_BUTTONS_TIMEOUT = 5000;
-        public static final Uri DEFAULT_SMS_DELIVERED_RINGTONE_URI = android.provider.Settings.System.getUriFor(SMS_DELIVERED_SOUND);
-        public static final Uri DEFAULT_SMS_DELIVERED_SOUND_URI_SLOT_1 = android.provider.Settings.System.getUriFor(SMS_DELIVERED_SOUND_SLOT_1);
-        public static final Uri DEFAULT_SMS_DELIVERED_SOUND_URI_SLOT_2 = android.provider.Settings.System.getUriFor(SMS_DELIVERED_SOUND_SLOT_2);
-        public static final Uri DEFAULT_SMS_RECEIVED_RINGTONE_URI;
-        public static final Uri DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_1;
-        public static final Uri DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_2;
+        public static final Uri DEFAULT_SMS_DELIVERED_RINGTONE_URI = Settings.System.getUriFor(SMS_DELIVERED_SOUND);
+        public static final Uri DEFAULT_SMS_DELIVERED_SOUND_URI_SLOT_1 = Settings.System.getUriFor(SMS_DELIVERED_SOUND_SLOT_1);
+        public static final Uri DEFAULT_SMS_DELIVERED_SOUND_URI_SLOT_2 = Settings.System.getUriFor(SMS_DELIVERED_SOUND_SLOT_2);
+        public static final Uri DEFAULT_SMS_RECEIVED_RINGTONE_URI = Settings.System.getUriFor(SMS_RECEIVED_SOUND);
+        public static final Uri DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_1 = Settings.System.getUriFor(SMS_RECEIVED_SOUND_SLOT_1);
+        public static final Uri DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_2 = Settings.System.getUriFor(SMS_RECEIVED_SOUND_SLOT_2);
         public static final boolean DEFAULT_TOUCH_SENSITIVE = false;
         public static final String DELETE_SOUND_EFFECT = "delete_sound_effect";
         public static final String DIAL_PAD_TOUCH_TONE = "dial_pad_touch_tone";
@@ -2050,7 +1900,7 @@ public class MiuiSettings {
         public static final int SCREEN_KEY_RECENT_APPS = 2;
         public static final String SCREEN_OFF_BY_LID_PROPERTY_STRING = "sys.keyguard.screen_off_by_lid";
         public static final String SHOW_LOCK_BEFORE_UNLOCK = "show_lock_before_unlock";
-        public static final boolean SHOW_LOCK_BEFORE_UNLOCK_DEFAULT = (!Build.IS_CM_CUSTOMIZATION_TEST);
+        public static final boolean SHOW_LOCK_BEFORE_UNLOCK_DEFAULT = (!miui.os.Build.IS_CM_CUSTOMIZATION_TEST);
         public static final String SHOW_ROUNDED_CORNERS = "show_rounded_corners";
         public static final String SHUTDOWN_ALARM_CLOCK_OFFSET = "shutdown_alarm_clock_offset";
         private static final String SIMPLE_MODE = "simple_mode";
@@ -2090,7 +1940,7 @@ public class MiuiSettings {
         public static final String STATUS_BAR_SHOW_NETWORK_SPEED = "status_bar_show_network_speed";
         public static final int STATUS_BAR_SHOW_NETWORK_SPEED_DEFAULT = 0;
         public static final String STATUS_BAR_SHOW_NOTIFICATION_ICON = "status_bar_show_notification_icon";
-        public static final int STATUS_BAR_SHOW_NOTIFICATION_ICON_DEFAULT;
+        public static final int STATUS_BAR_SHOW_NOTIFICATION_ICON_DEFAULT = ((miui.os.Build.IS_CTA_BUILD || miui.os.Build.IS_CM_CUSTOMIZATION_TEST || miui.os.Build.IS_CU_CUSTOMIZATION_TEST || "mx_telcel".equals(SystemProperties.get("ro.miui.customized.region", ""))) ? 1 : 0);
         public static final String STATUS_BAR_STYLE = "status_bar_style_type";
         public static final int STATUS_BAR_STYLE_DEFAULT = 0;
         public static final int STATUS_BAR_STYLE_LIST = 0;
@@ -2116,7 +1966,7 @@ public class MiuiSettings {
         public static final String USER_GUIDE_STATUS_BAR_TOGGLE_LIST = "user_guide_status_bar_toggle_list";
         public static final String USER_NETWORK_PRIORITY_ENABLED = "user_network_priority_enabled";
         public static final String VIBRATE_IN_NORMAL = "vibrate_in_normal";
-        public static final boolean VIBRATE_IN_NORMAL_DEFAULT = Build.IS_CM_CUSTOMIZATION_TEST;
+        public static final boolean VIBRATE_IN_NORMAL_DEFAULT = miui.os.Build.IS_CM_CUSTOMIZATION_TEST;
         public static final String VIBRATE_IN_SILENT = "vibrate_in_silent";
         public static final boolean VIBRATE_IN_SILENT_DEFAULT = true;
         public static final String VOICEASSIST_INVERT_STOP_REPORT = "voiceassist_invert_stop_report";
@@ -2165,188 +2015,9 @@ public class MiuiSettings {
         }
 
         static {
-            int i;
-            if (!Build.IS_CTA_BUILD && !Build.IS_CM_CUSTOMIZATION_TEST && !Build.IS_CU_CUSTOMIZATION_TEST) {
-                if (!"mx_telcel".equals(SystemProperties.get("ro.miui.customized.region", ""))) {
-                    i = 0;
-                    STATUS_BAR_SHOW_NOTIFICATION_ICON_DEFAULT = i;
-                    screenKeys.add(Integer.valueOf(2));
-                    screenKeys.add(Integer.valueOf(1));
-                    screenKeys.add(Integer.valueOf(3));
-                    String str = CALENDAR_ALERT;
-                    DEFAULT_CALENDAR_ALERT_URI = android.provider.Settings.System.getUriFor(str);
-                    String str2 = SMS_RECEIVED_SOUND;
-                    DEFAULT_SMS_RECEIVED_RINGTONE_URI = android.provider.Settings.System.getUriFor(str2);
-                    String str3 = RINGTONE_SOUND_SLOT_1;
-                    DEFAULT_RINGTONE_URI_SLOT_1 = android.provider.Settings.System.getUriFor(str3);
-                    String str4 = RINGTONE_SOUND_SLOT_2;
-                    DEFAULT_RINGTONE_URI_SLOT_2 = android.provider.Settings.System.getUriFor(str4);
-                    String str5 = SMS_RECEIVED_SOUND_SLOT_1;
-                    DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_1 = android.provider.Settings.System.getUriFor(str5);
-                    String str6 = SMS_RECEIVED_SOUND_SLOT_2;
-                    DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_2 = android.provider.Settings.System.getUriFor(str6);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CALL_LOG_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CALL_LOG_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_CALL_LOG);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_WIFI_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_WIFI_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_WIFI);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_GALLERY_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_GALLERY_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_GALLERY);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_RECORDER_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_RECORDER_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_RECORDER);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CALENDER_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CALENDER_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_CALENDER);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_NOTES_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_NOTES_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_NOTES);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_SMS_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_SMS_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_SMS);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CONTACT_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CONTACT_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_CONTACT);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_BROWSER_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_BROWSER_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_BROWSER);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_ANTISPAM_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_ANTISPAM_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_ANTISPAM);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_MUSIC_0);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_MUSIC_1);
-                    PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_MUSIC);
-                    PUBLIC_SETTINGS.add(MiuiSettings.OPEN_PDC_HOST_KEY);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MICLOUD_NETWORK_AVAILABILITY_KEY);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SETTING_MICLOUD_HOSTS);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SETTING_MICLOUD_ACCOUNTNAME);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SETTING_MICLOUD_HOSTS_V2);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SETTING_MICLOUD_ACCOUNTNAME_V2);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SETTING_MICLOUD_UPDATEHOSTS_THIRD_PARTY);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MICLOUD_GDPR_PERMISSION_GRANTED);
-                    PUBLIC_SETTINGS.add(MMS_SYNC_WILD_MSG_STATE);
-                    PUBLIC_SETTINGS.add(MMS_SYNC_WILD_NUMBERS);
-                    PUBLIC_SETTINGS.add(MMS_UPLOAD_OLD_MSG_STATE);
-                    PUBLIC_SETTINGS.add(MMS_UPLOAD_OLD_MSG_ACCOUNTS);
-                    PUBLIC_SETTINGS.add(MMS_THREAD_MARKER);
-                    PUBLIC_SETTINGS.add(MMS_PRIVATE_ADDRESS_MARKER);
-                    PUBLIC_SETTINGS.add("miprofile.settings.miprofile_user_notice");
-                    PUBLIC_SETTINGS.add("miprofile.settings.miprofile_badge_notice");
-                    PUBLIC_SETTINGS.add("miprofile.settings.miprofile_set");
-                    PUBLIC_SETTINGS.add("miprofile.settings.miprofile_on");
-                    PUBLIC_SETTINGS.add("miprofile.settings.miprofile_visible");
-                    PUBLIC_SETTINGS.add(MiuiSettings.DOWNLOADMANAGER_DEBUG_SWITCH);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DOWNLOADMANAGER_DEBUG_DP_PATH);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DOWNLOADMANAGER__XUNLEI_TOKEN);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DOWNLOADMANAGER_XUNLEI_VIP_TOKEN);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DOWNLOADMANAGER_XUNLEI_USAGE_PERMISSION);
-                    PUBLIC_SETTINGS.add(DEFAULT_ALARM_ALERT);
-                    PUBLIC_SETTINGS.add(NEXT_ALARM_CLOCK_FORMATTED);
-                    PUBLIC_SETTINGS.add(SHUTDOWN_ALARM_CLOCK_OFFSET);
-                    PUBLIC_SETTINGS.add(VOICEASSIST_REPORT_METHOD);
-                    PUBLIC_SETTINGS.add(VOICEASSIST_PHONE_REPORT);
-                    PUBLIC_SETTINGS.add(VOICEASSIST_SMS_REPORT);
-                    PUBLIC_SETTINGS.add(LAST_VALID_DEVICE_ID);
-                    PUBLIC_SETTINGS.add("livetalk_service_status");
-                    PUBLIC_SETTINGS.add("livetalk_enabled");
-                    PUBLIC_SETTINGS.add("livetalk_switch_state");
-                    PUBLIC_SETTINGS.add("need_prompt");
-                    PUBLIC_SETTINGS.add("livetalk_use_current_account");
-                    PUBLIC_SETTINGS.add("internal_dial_avaiable");
-                    PUBLIC_SETTINGS.add("international_dial_avaiable");
-                    PUBLIC_SETTINGS.add("recent_country_remain_mins");
-                    PUBLIC_SETTINGS.add("livetalk_dial_range");
-                    PUBLIC_SETTINGS.add("livetalk_available_status");
-                    PUBLIC_SETTINGS.add("livetalk_remain_minutes");
-                    PUBLIC_SETTINGS.add(android.provider.SystemSettings.System.LOCK_WALLPAPER_PROVIDER_AUTHORITY);
-                    String str7 = "clock_changed_time_";
-                    Set<String> set = PUBLIC_SETTINGS;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str7);
-                    sb.append("1x2");
-                    set.add(sb.toString());
-                    Set<String> set2 = PUBLIC_SETTINGS;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str7);
-                    sb2.append("2x2");
-                    set2.add(sb2.toString());
-                    Set<String> set3 = PUBLIC_SETTINGS;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append(str7);
-                    sb3.append("2x4");
-                    set3.add(sb3.toString());
-                    Set<String> set4 = PUBLIC_SETTINGS;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append(str7);
-                    sb4.append("4x4");
-                    set4.add(sb4.toString());
-                    Set<String> set5 = PUBLIC_SETTINGS;
-                    StringBuilder sb5 = new StringBuilder();
-                    sb5.append(str7);
-                    sb5.append("3x4");
-                    set5.add(sb5.toString());
-                    PUBLIC_SETTINGS.add(MiuiSettings.PREF_KEY_WALLPAPER_SCREEN_SPAN);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MARKET_ENABLE_SHARE_PROGRESS_STATUS);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MIUI_HOME_ENABLE_SHARE_PROGRESS_STATUS);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MARKET_ENABLE_SHARE_PROGRESS_STATUS_INTERNATIONAL);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MIPICKS_ENABLE_SHARE_PROGRESS_STATUS);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MARKET_CHOOSER_RECOMMENDED_ENABLE);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DISCOVER_AUTO_UPDATE_ENABLED);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DISCOVER_METERED_UPDATE_ANSWERED);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DISCOVER_METERED_UPDATE_CONFIRM_NEEDED_BY_REGION);
-                    PUBLIC_SETTINGS.add(MiuiSettings.DISCOVER_METERED_SYSTEM_UPDATE_CONFIRM_NEEDED_BY_REGION);
-                    PUBLIC_SETTINGS.add(MiuiSettings.MIAPPS_HOME_USER_GUIDE_SHOWN_CONTROL);
-                    PUBLIC_SETTINGS.add(KEY_TOUCH_ASSISTANT_ENABLED);
-                    PUBLIC_SETTINGS.add(KEY_TOUCH_ASSISTANT_SHOW_ON_KEYGUARD);
-                    PUBLIC_SETTINGS.add("frequent_phrases");
-                    PUBLIC_SETTINGS.add(str3);
-                    PUBLIC_SETTINGS.add(str4);
-                    PUBLIC_SETTINGS.add(str2);
-                    PUBLIC_SETTINGS.add(str5);
-                    PUBLIC_SETTINGS.add(str6);
-                    PUBLIC_SETTINGS.add(str);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SETTING_UPDATABLE_SYSTEM_APP_COUNT);
-                    PUBLIC_SETTINGS.add(MiuiSettings.SCREEN_RECORDER_SHOW_TOUCHES);
-                    PUBLIC_SETTINGS.add(HANDY_MODE_STATE);
-                    PUBLIC_SETTINGS.add(Key.LONG_PRESS_POWER_LAUNCH_XIAOAI);
-                    PUBLIC_SETTINGS.add(Key.SEND_BACK_WHEN_XIAOAI_APPEAR);
-                    PUBLIC_SETTINGS.add(Key.DOUBLE_CLICK_POWER_KEY);
-                    PUBLIC_SETTINGS.add(DRIVE_MODE_DRIVE_MODE);
-                    PUBLIC_SETTINGS.add(AI_PRELOAD_USER_STATE);
-                    PUBLIC_SETTINGS.add(AUTO_DUAL_CLOCK);
-                    PUBLIC_SETTINGS.add(RESIDENT_ID);
-                    PUBLIC_SETTINGS.add(RESIDENT_TIMEZONE);
-                    PUBLIC_SETTINGS.add(RANDOM_NOTE_MODE_RANDOM_SOUND_NUMBER);
-                    PUBLIC_SETTINGS.add(RANDOM_NOTE_MODE_SEQUENCE_SOUND_NUMBER);
-                    PUBLIC_SETTINGS.add(RANDOM_NOTE_MODE_SEQUENCE_TIME_INTERVAL_MS);
-                    PUBLIC_SETTINGS.add(RANDOM_NOTE_MODE_MUTE_TIME_INTERVAL_MS);
-                    PUBLIC_SETTINGS.add(POWERMODE_SUPERSAVE_OPEN);
-                    PUBLIC_SETTINGS_OPEN.add(str3);
-                    PUBLIC_SETTINGS_OPEN.add(str4);
-                    PUBLIC_SETTINGS_OPEN.add(str2);
-                    PUBLIC_SETTINGS_OPEN.add(str5);
-                    PUBLIC_SETTINGS_OPEN.add(str6);
-                }
-            }
-            i = 1;
-            STATUS_BAR_SHOW_NOTIFICATION_ICON_DEFAULT = i;
-            screenKeys.add(Integer.valueOf(2));
-            screenKeys.add(Integer.valueOf(1));
-            screenKeys.add(Integer.valueOf(3));
-            String str8 = CALENDAR_ALERT;
-            DEFAULT_CALENDAR_ALERT_URI = android.provider.Settings.System.getUriFor(str8);
-            String str22 = SMS_RECEIVED_SOUND;
-            DEFAULT_SMS_RECEIVED_RINGTONE_URI = android.provider.Settings.System.getUriFor(str22);
-            String str32 = RINGTONE_SOUND_SLOT_1;
-            DEFAULT_RINGTONE_URI_SLOT_1 = android.provider.Settings.System.getUriFor(str32);
-            String str42 = RINGTONE_SOUND_SLOT_2;
-            DEFAULT_RINGTONE_URI_SLOT_2 = android.provider.Settings.System.getUriFor(str42);
-            String str52 = SMS_RECEIVED_SOUND_SLOT_1;
-            DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_1 = android.provider.Settings.System.getUriFor(str52);
-            String str62 = SMS_RECEIVED_SOUND_SLOT_2;
-            DEFAULT_SMS_RECEIVED_SOUND_URI_SLOT_2 = android.provider.Settings.System.getUriFor(str62);
+            screenKeys.add(2);
+            screenKeys.add(1);
+            screenKeys.add(3);
             PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CALL_LOG_0);
             PUBLIC_SETTINGS.add(MiuiSettings.SYNC_SETTING_CALL_LOG_1);
             PUBLIC_SETTINGS.add(MiuiSettings.LAST_SYNC_TIME_CALL_LOG);
@@ -2422,33 +2093,17 @@ public class MiuiSettings {
             PUBLIC_SETTINGS.add("livetalk_dial_range");
             PUBLIC_SETTINGS.add("livetalk_available_status");
             PUBLIC_SETTINGS.add("livetalk_remain_minutes");
-            PUBLIC_SETTINGS.add(android.provider.SystemSettings.System.LOCK_WALLPAPER_PROVIDER_AUTHORITY);
-            String str72 = "clock_changed_time_";
-            Set<String> set6 = PUBLIC_SETTINGS;
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append(str72);
-            sb6.append("1x2");
-            set6.add(sb6.toString());
-            Set<String> set22 = PUBLIC_SETTINGS;
-            StringBuilder sb22 = new StringBuilder();
-            sb22.append(str72);
-            sb22.append("2x2");
-            set22.add(sb22.toString());
-            Set<String> set32 = PUBLIC_SETTINGS;
-            StringBuilder sb32 = new StringBuilder();
-            sb32.append(str72);
-            sb32.append("2x4");
-            set32.add(sb32.toString());
-            Set<String> set42 = PUBLIC_SETTINGS;
-            StringBuilder sb42 = new StringBuilder();
-            sb42.append(str72);
-            sb42.append("4x4");
-            set42.add(sb42.toString());
-            Set<String> set52 = PUBLIC_SETTINGS;
-            StringBuilder sb52 = new StringBuilder();
-            sb52.append(str72);
-            sb52.append("3x4");
-            set52.add(sb52.toString());
+            PUBLIC_SETTINGS.add(SystemSettings.System.LOCK_WALLPAPER_PROVIDER_AUTHORITY);
+            Set<String> set = PUBLIC_SETTINGS;
+            set.add("clock_changed_time_" + "1x2");
+            Set<String> set2 = PUBLIC_SETTINGS;
+            set2.add("clock_changed_time_" + "2x2");
+            Set<String> set3 = PUBLIC_SETTINGS;
+            set3.add("clock_changed_time_" + "2x4");
+            Set<String> set4 = PUBLIC_SETTINGS;
+            set4.add("clock_changed_time_" + "4x4");
+            Set<String> set5 = PUBLIC_SETTINGS;
+            set5.add("clock_changed_time_" + "3x4");
             PUBLIC_SETTINGS.add(MiuiSettings.PREF_KEY_WALLPAPER_SCREEN_SPAN);
             PUBLIC_SETTINGS.add(MiuiSettings.MARKET_ENABLE_SHARE_PROGRESS_STATUS);
             PUBLIC_SETTINGS.add(MiuiSettings.MIUI_HOME_ENABLE_SHARE_PROGRESS_STATUS);
@@ -2463,12 +2118,12 @@ public class MiuiSettings {
             PUBLIC_SETTINGS.add(KEY_TOUCH_ASSISTANT_ENABLED);
             PUBLIC_SETTINGS.add(KEY_TOUCH_ASSISTANT_SHOW_ON_KEYGUARD);
             PUBLIC_SETTINGS.add("frequent_phrases");
-            PUBLIC_SETTINGS.add(str32);
-            PUBLIC_SETTINGS.add(str42);
-            PUBLIC_SETTINGS.add(str22);
-            PUBLIC_SETTINGS.add(str52);
-            PUBLIC_SETTINGS.add(str62);
-            PUBLIC_SETTINGS.add(str8);
+            PUBLIC_SETTINGS.add(RINGTONE_SOUND_SLOT_1);
+            PUBLIC_SETTINGS.add(RINGTONE_SOUND_SLOT_2);
+            PUBLIC_SETTINGS.add(SMS_RECEIVED_SOUND);
+            PUBLIC_SETTINGS.add(SMS_RECEIVED_SOUND_SLOT_1);
+            PUBLIC_SETTINGS.add(SMS_RECEIVED_SOUND_SLOT_2);
+            PUBLIC_SETTINGS.add(CALENDAR_ALERT);
             PUBLIC_SETTINGS.add(MiuiSettings.SETTING_UPDATABLE_SYSTEM_APP_COUNT);
             PUBLIC_SETTINGS.add(MiuiSettings.SCREEN_RECORDER_SHOW_TOUCHES);
             PUBLIC_SETTINGS.add(HANDY_MODE_STATE);
@@ -2485,11 +2140,11 @@ public class MiuiSettings {
             PUBLIC_SETTINGS.add(RANDOM_NOTE_MODE_SEQUENCE_TIME_INTERVAL_MS);
             PUBLIC_SETTINGS.add(RANDOM_NOTE_MODE_MUTE_TIME_INTERVAL_MS);
             PUBLIC_SETTINGS.add(POWERMODE_SUPERSAVE_OPEN);
-            PUBLIC_SETTINGS_OPEN.add(str32);
-            PUBLIC_SETTINGS_OPEN.add(str42);
-            PUBLIC_SETTINGS_OPEN.add(str22);
-            PUBLIC_SETTINGS_OPEN.add(str52);
-            PUBLIC_SETTINGS_OPEN.add(str62);
+            PUBLIC_SETTINGS_OPEN.add(RINGTONE_SOUND_SLOT_1);
+            PUBLIC_SETTINGS_OPEN.add(RINGTONE_SOUND_SLOT_2);
+            PUBLIC_SETTINGS_OPEN.add(SMS_RECEIVED_SOUND);
+            PUBLIC_SETTINGS_OPEN.add(SMS_RECEIVED_SOUND_SLOT_1);
+            PUBLIC_SETTINGS_OPEN.add(SMS_RECEIVED_SOUND_SLOT_2);
         }
 
         public static boolean belongToCrossXSpaceSettings(String str, int i) {
@@ -2501,7 +2156,7 @@ public class MiuiSettings {
             int size = list.size() - 1;
             int i = 0;
             while (true) {
-                sb.append(((ComponentName) list.get(i)).flattenToShortString());
+                sb.append(list.get(i).flattenToShortString());
                 if (i == size) {
                     return sb.toString();
                 }
@@ -2515,11 +2170,11 @@ public class MiuiSettings {
         }
 
         public static boolean getBooleanForUser(ContentResolver contentResolver, String str, boolean z, int i) {
-            return android.provider.Settings.System.getIntForUser(contentResolver, str, z ? 1 : 0, i) != 0;
+            return Settings.System.getIntForUser(contentResolver, str, z ? 1 : 0, i) != 0;
         }
 
         public static HashSet<String> getDisableWifiAutoConnectSsid(Context context) {
-            String stringForUser = android.provider.Settings.System.getStringForUser(context.getContentResolver(), DISABLE_WIFI_AUTO_CONNECT_SSID, -3);
+            String stringForUser = Settings.System.getStringForUser(context.getContentResolver(), DISABLE_WIFI_AUTO_CONNECT_SSID, -3);
             HashSet<String> hashSet = new HashSet<>();
             if (!TextUtils.isEmpty(stringForUser)) {
                 String[] split = stringForUser.split(ACTIVITY_RESOLVE_ORDER_DELIMETER);
@@ -2563,11 +2218,11 @@ public class MiuiSettings {
         }
 
         public static int getHapticFeedbackLevel(Context context) {
-            return android.provider.Settings.System.getIntForUser(context.getContentResolver(), HAPTIC_FEEDBACK_LEVEL, HAPTIC_FEEDBACK_LEVEL_DEFAULT, -3);
+            return Settings.System.getIntForUser(context.getContentResolver(), HAPTIC_FEEDBACK_LEVEL, HAPTIC_FEEDBACK_LEVEL_DEFAULT, -3);
         }
 
         public static Set<String> getHotSpotMacBlackSet(Context context) {
-            String stringForUser = android.provider.Settings.System.getStringForUser(context.getContentResolver(), HOTSOPT_MAC_BLACK_SET, -2);
+            String stringForUser = Settings.System.getStringForUser(context.getContentResolver(), HOTSOPT_MAC_BLACK_SET, -2);
             HashSet hashSet = new HashSet();
             if (!TextUtils.isEmpty(stringForUser)) {
                 String[] split = stringForUser.split(ACTIVITY_RESOLVE_ORDER_DELIMETER);
@@ -2585,29 +2240,28 @@ public class MiuiSettings {
 
         public static int getHotSpotMaxStationNum(Context context) {
             try {
-                return android.provider.Settings.System.getIntForUser(context.getContentResolver(), HOTSOPT_MAX_STATION_NUM, -2);
-            } catch (SettingNotFoundException e2) {
+                return Settings.System.getIntForUser(context.getContentResolver(), HOTSOPT_MAX_STATION_NUM, -2);
+            } catch (Settings.SettingNotFoundException e2) {
                 return 0;
             }
         }
 
         public static String getHotSpotVendorSpecific(Context context) {
-            return android.provider.Settings.System.getStringForUser(context.getContentResolver(), HOTSOPT_VENDOR_SPECIFIC, -2);
+            return Settings.System.getStringForUser(context.getContentResolver(), HOTSOPT_VENDOR_SPECIFIC, -2);
         }
 
         public static String getScreenKeyLongPressAction(Context context, String str) {
-            String stringForUser = android.provider.Settings.System.getStringForUser(context.getContentResolver(), str, -2);
+            String stringForUser = Settings.System.getStringForUser(context.getContentResolver(), str, -2);
             if (!TextUtils.isEmpty(stringForUser)) {
                 return stringForUser;
             }
-            String str2 = "none";
             String[] stringArray = context.getResources().getStringArray(285343782);
-            return SCREEN_KEY_LONG_PRESS_MENU.equals(str) ? stringArray[0] : SCREEN_KEY_LONG_PRESS_HOME.equals(str) ? stringArray[1] : SCREEN_KEY_LONG_PRESS_BACK.equals(str) ? stringArray[2] : SCREEN_KEY_LONG_PRESS_APP_SWITCH.equals(str) ? stringArray[3] : str2;
+            return SCREEN_KEY_LONG_PRESS_MENU.equals(str) ? stringArray[0] : SCREEN_KEY_LONG_PRESS_HOME.equals(str) ? stringArray[1] : SCREEN_KEY_LONG_PRESS_BACK.equals(str) ? stringArray[2] : SCREEN_KEY_LONG_PRESS_APP_SWITCH.equals(str) ? stringArray[3] : "none";
         }
 
         public static ArrayList<Integer> getScreenKeyOrder(Context context) {
             ArrayList<Integer> arrayList = new ArrayList<>();
-            String string = android.provider.Settings.System.getString(context.getContentResolver(), SCREEN_KEY_ORDER);
+            String string = Settings.System.getString(context.getContentResolver(), SCREEN_KEY_ORDER);
             if (!TextUtils.isEmpty(string)) {
                 String[] split = string.split(" ");
                 int i = 0;
@@ -2623,31 +2277,30 @@ public class MiuiSettings {
                     }
                 }
             }
-            Iterator it = screenKeys.iterator();
+            Iterator<Integer> it = screenKeys.iterator();
             while (it.hasNext()) {
-                Integer num = (Integer) it.next();
-                if (!arrayList.contains(num)) {
-                    arrayList.add(num);
+                Integer next = it.next();
+                if (!arrayList.contains(next)) {
+                    arrayList.add(next);
                 }
             }
             return arrayList;
         }
 
         public static int getShowCustomCarrierDefault() {
-            return (Build.IS_CM_CUSTOMIZATION_TEST || Build.IS_CU_CUSTOMIZATION_TEST || Build.IS_CT_CUSTOMIZATION_TEST || Resources.getSystem().getBoolean(285474852)) ? 1 : 0;
+            return (miui.os.Build.IS_CM_CUSTOMIZATION_TEST || miui.os.Build.IS_CU_CUSTOMIZATION_TEST || miui.os.Build.IS_CT_CUSTOMIZATION_TEST || Resources.getSystem().getBoolean(285474852)) ? 1 : 0;
         }
 
         public static SmallWindowType getSmallWindowMode() {
             int[] iArr;
             int i = SystemProperties.getInt(SMARTCOVER_SMALLWIN_TYPE, -99);
             if (i == -99) {
-                String str = "small_win_cover_type";
                 if (FeatureParser.getBoolean("support_multiple_small_win_cover", false)) {
-                    iArr = FeatureParser.getIntArray(str);
+                    iArr = FeatureParser.getIntArray("small_win_cover_type");
                 } else {
                     iArr = new int[1];
                     if (FeatureParser.getBoolean("support_small_win_cover", false)) {
-                        iArr[0] = FeatureParser.getInteger(str, -1);
+                        iArr[0] = FeatureParser.getInteger("small_win_cover_type", -1);
                     } else {
                         iArr[0] = -1;
                     }
@@ -2657,18 +2310,29 @@ public class MiuiSettings {
                 }
                 i = iArr[0];
             }
-            SmallWindowType smallWindowType = i != 0 ? i != 1 ? i != 2 ? i != 3 ? null : SmallWindowType.B7_FULL : SmallWindowType.A7_LATTICE : SmallWindowType.A1_STYLE : SmallWindowType.X7_STYLE;
-            return smallWindowType;
+            if (i == 0) {
+                return SmallWindowType.X7_STYLE;
+            }
+            if (i == 1) {
+                return SmallWindowType.A1_STYLE;
+            }
+            if (i == 2) {
+                return SmallWindowType.A7_LATTICE;
+            }
+            if (i != 3) {
+                return null;
+            }
+            return SmallWindowType.B7_FULL;
         }
 
         public static String getString(ContentResolver contentResolver, String str) {
-            return android.provider.Settings.System.getString(contentResolver, str);
+            return Settings.System.getString(contentResolver, str);
         }
 
         public static synchronized String getString(ContentResolver contentResolver, String str, String str2) {
             String string;
             synchronized (System.class) {
-                string = android.provider.Settings.System.getString(contentResolver, str);
+                string = Settings.System.getString(contentResolver, str);
                 if (string == null) {
                     string = str2;
                 }
@@ -2677,15 +2341,15 @@ public class MiuiSettings {
         }
 
         public static String getStringForUser(ContentResolver contentResolver, String str, int i) {
-            return android.provider.Settings.System.getStringForUser(contentResolver, str, i);
+            return Settings.System.getStringForUser(contentResolver, str, i);
         }
 
         public static int getT9IndexingKeyDefault() {
-            return Build.checkRegion("TW") ? 1 : 0;
+            return miui.os.Build.checkRegion("TW") ? 1 : 0;
         }
 
         public static boolean isCdmaPreciseAnswerStateEnabled(Context context) {
-            return android.provider.Settings.System.getInt(context.getContentResolver(), CDMA_PRECISE_ANSWER_STATE, 1) == 1;
+            return Settings.System.getInt(context.getContentResolver(), CDMA_PRECISE_ANSWER_STATE, 1) == 1;
         }
 
         private static boolean isCnFromOperator(String str) {
@@ -2697,16 +2361,15 @@ public class MiuiSettings {
         }
 
         public static boolean isHapticFeedbackDisabled(Context context) {
-            return android.provider.Settings.System.getIntForUser(context.getContentResolver(), "haptic_feedback_enabled", 0, -3) == 0;
+            return Settings.System.getIntForUser(context.getContentResolver(), "haptic_feedback_enabled", 0, -3) == 0;
         }
 
         public static final boolean isInCnRegion() {
             TelephonyManager telephonyManager = TelephonyManager.getDefault();
-            boolean z = false;
-            boolean z2 = telephonyManager.getIccCardCount() > 0;
+            boolean z = telephonyManager.getIccCardCount() > 0;
             int phoneCount = telephonyManager.getPhoneCount();
             String str = null;
-            if (z2) {
+            if (z) {
                 for (int i = 0; i < phoneCount; i++) {
                     str = telephonyManager.getNetworkOperatorForSlot(i);
                     if (isCnFromOperator(str)) {
@@ -2714,10 +2377,10 @@ public class MiuiSettings {
                     }
                 }
             }
-            if (Build.checkRegion("CN") && (!z2 || TextUtils.isEmpty(str))) {
-                z = true;
+            if (miui.os.Build.checkRegion("CN")) {
+                return !z || TextUtils.isEmpty(str);
             }
-            return z;
+            return false;
         }
 
         public static boolean isInSmallWindowMode(Context context) {
@@ -2729,32 +2392,31 @@ public class MiuiSettings {
         }
 
         public static boolean isMiuiPublicSettings(PackageInfo packageInfo, String str) {
-            String str2 = "SystemSettings";
             if (PUBLIC_SETTINGS_OPEN.contains(str)) {
-                Slog.d(str2, "Hit MiuiSettings.System.PUBLIC_SETTINGS_OPEN");
+                Slog.d("SystemSettings", "Hit MiuiSettings.System.PUBLIC_SETTINGS_OPEN");
                 return true;
             } else if (PUBLIC_SETTINGS.contains(str) && (packageInfo.applicationInfo.flags & 1) != 0) {
                 return true;
             } else {
-                Slog.d(str2, "Want to modify SystemSettings? See MiuiSettings.System.PUBLIC_SETTINGS");
+                Slog.d("SystemSettings", "Want to modify SystemSettings? See MiuiSettings.System.PUBLIC_SETTINGS");
                 return false;
             }
         }
 
         public static boolean isSimpleMode(Context context) {
-            return android.provider.Settings.System.getInt(context.getContentResolver(), SIMPLE_MODE, Build.IS_INTERNATIONAL_BUILD ^ true ? 1 : 0) == 1;
+            return Settings.System.getInt(context.getContentResolver(), SIMPLE_MODE, miui.os.Build.IS_INTERNATIONAL_BUILD ^ true ? 1 : 0) == 1;
         }
 
         public static boolean isSuperSaveModeOpen(Context context, int i) {
-            return android.provider.Settings.System.getIntForUser(context.getContentResolver(), POWERMODE_SUPERSAVE_OPEN, 0, i) != 0;
+            return Settings.System.getIntForUser(context.getContentResolver(), POWERMODE_SUPERSAVE_OPEN, 0, i) != 0;
         }
 
         public static boolean isTouchAssistantEnabledForUser(Context context, int i, boolean z) {
-            return android.provider.Settings.System.getIntForUser(context.getContentResolver(), KEY_TOUCH_ASSISTANT_ENABLED, 0, i) == 1;
+            return Settings.System.getIntForUser(context.getContentResolver(), KEY_TOUCH_ASSISTANT_ENABLED, 0, i) == 1;
         }
 
         public static boolean isTouchAssistantTemporaryForUser(Context context, int i, boolean z) {
-            return android.provider.Settings.System.getIntForUser(context.getContentResolver(), KEY_TOUCH_ASSISTANT_ENABLED, 2, i) == 2;
+            return Settings.System.getIntForUser(context.getContentResolver(), KEY_TOUCH_ASSISTANT_ENABLED, 2, i) == 2;
         }
 
         public static void putActivityResolveOrder(ContentResolver contentResolver, List<ComponentName> list) {
@@ -2762,50 +2424,49 @@ public class MiuiSettings {
         }
 
         public static boolean putBoolean(ContentResolver contentResolver, String str, boolean z) {
-            return android.provider.Settings.System.putInt(contentResolver, str, z ? 1 : 0);
+            return Settings.System.putInt(contentResolver, str, z ? 1 : 0);
         }
 
         public static boolean putBooleanForUser(ContentResolver contentResolver, String str, boolean z, int i) {
-            return android.provider.Settings.System.putIntForUser(contentResolver, str, z ? 1 : 0, i);
+            return Settings.System.putIntForUser(contentResolver, str, z ? 1 : 0, i);
         }
 
         public static boolean putString(ContentResolver contentResolver, String str, String str2) {
-            return android.provider.Settings.System.putString(contentResolver, str, str2);
+            return Settings.System.putString(contentResolver, str, str2);
         }
 
         public static boolean putStringForUser(ContentResolver contentResolver, String str, String str2, int i) {
-            return android.provider.Settings.System.putStringForUser(contentResolver, str, str2, i);
+            return Settings.System.putStringForUser(contentResolver, str, str2, i);
         }
 
         public static void setDisableWifiAutoConnectSsid(Context context, HashSet<String> hashSet) {
             if (hashSet != null) {
                 StringBuilder sb = new StringBuilder();
-                Iterator it = hashSet.iterator();
+                Iterator<String> it = hashSet.iterator();
                 while (it.hasNext()) {
                     try {
-                        sb.append(Base64.encodeToString(((String) it.next()).getBytes(), 2));
+                        sb.append(Base64.encodeToString(it.next().getBytes(), 2));
                         sb.append(ACTIVITY_RESOLVE_ORDER_DELIMETER);
                     } catch (IllegalArgumentException e2) {
                     }
                 }
-                android.provider.Settings.System.putStringForUser(context.getContentResolver(), DISABLE_WIFI_AUTO_CONNECT_SSID, sb.toString(), -3);
+                Settings.System.putStringForUser(context.getContentResolver(), DISABLE_WIFI_AUTO_CONNECT_SSID, sb.toString(), -3);
             }
         }
 
         public static void setHotSpotMacBlackSet(Context context, Set<String> set) {
             if (set != null) {
-                String str = "^[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}$";
                 StringBuilder sb = new StringBuilder();
-                for (String str2 : set) {
+                for (String next : set) {
                     try {
-                        if (str2.matches("^[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}$")) {
-                            sb.append(Base64.encodeToString(str2.getBytes(), 2));
+                        if (next.matches("^[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}+:[a-fA-F0-9]{2}$")) {
+                            sb.append(Base64.encodeToString(next.getBytes(), 2));
                             sb.append(ACTIVITY_RESOLVE_ORDER_DELIMETER);
                         }
                     } catch (IllegalArgumentException e2) {
                     }
                 }
-                android.provider.Settings.System.putStringForUser(context.getContentResolver(), HOTSOPT_MAC_BLACK_SET, sb.toString(), -2);
+                Settings.System.putStringForUser(context.getContentResolver(), HOTSOPT_MAC_BLACK_SET, sb.toString(), -2);
             }
         }
 
@@ -2813,46 +2474,44 @@ public class MiuiSettings {
             if (i <= 0 || i >= 2008) {
                 return false;
             }
-            android.provider.Settings.System.putIntForUser(context.getContentResolver(), HOTSOPT_MAX_STATION_NUM, i, -2);
+            Settings.System.putIntForUser(context.getContentResolver(), HOTSOPT_MAX_STATION_NUM, i, -2);
             return true;
         }
 
         public static void setHotSpotVendorSpecific(Context context, String str) {
             if (str != null) {
-                android.provider.Settings.System.putStringForUser(context.getContentResolver(), HOTSOPT_VENDOR_SPECIFIC, str, -2);
+                Settings.System.putStringForUser(context.getContentResolver(), HOTSOPT_VENDOR_SPECIFIC, str, -2);
             }
         }
 
         public static void setSimpleMode(Context context, boolean z) {
-            android.provider.Settings.System.putInt(context.getContentResolver(), SIMPLE_MODE, z ? 1 : 0);
+            Settings.System.putInt(context.getContentResolver(), SIMPLE_MODE, z ? 1 : 0);
         }
 
         public static void setSmartCoverMode(boolean z) {
-            boolean z2 = FeatureParser.getBoolean("support_hall_sensor", false);
-            String str = SMARTCOVER_MODE_KEY;
-            if (!z2 || !z) {
-                SystemProperties.set(str, String.valueOf(0));
+            if (!FeatureParser.getBoolean("support_hall_sensor", false) || !z) {
+                SystemProperties.set(SMARTCOVER_MODE_KEY, String.valueOf(0));
                 return;
             }
             SmallWindowType smallWindowMode = getSmallWindowMode();
             if (smallWindowMode == null) {
-                SystemProperties.set(str, String.valueOf(1));
+                SystemProperties.set(SMARTCOVER_MODE_KEY, String.valueOf(1));
                 return;
             }
             int i = AnonymousClass1.$SwitchMap$android$provider$MiuiSettings$System$SmallWindowType[smallWindowMode.ordinal()];
             if (i == 1 || i == 2) {
-                SystemProperties.set(str, String.valueOf(2));
+                SystemProperties.set(SMARTCOVER_MODE_KEY, String.valueOf(2));
             } else if (i == 3) {
-                SystemProperties.set(str, String.valueOf(3));
+                SystemProperties.set(SMARTCOVER_MODE_KEY, String.valueOf(3));
             } else if (i != 4) {
-                SystemProperties.set(str, String.valueOf(1));
+                SystemProperties.set(SMARTCOVER_MODE_KEY, String.valueOf(1));
             } else {
-                SystemProperties.set(str, String.valueOf(4));
+                SystemProperties.set(SMARTCOVER_MODE_KEY, String.valueOf(4));
             }
         }
 
         public static void setUseWordPhoto(Context context, boolean z) {
-            android.provider.Settings.System.putInt(context.getContentResolver(), WORD_PHOTO, z ? 1 : 0);
+            Settings.System.putInt(context.getContentResolver(), WORD_PHOTO, z ? 1 : 0);
         }
 
         private static List<ComponentName> unflattenOrderFromString(String str) {
@@ -2868,52 +2527,38 @@ public class MiuiSettings {
 
         public static void updateScreenColor() {
             if (!"1".equals(SystemProperties.get("sys.boot_completed", "0")) || !FeatureParser.getBoolean("support_screen_color_persist", false)) {
-                String str = "DisplayFeatureManager";
-                String str2 = "DisplayFeatureManager";
-                Slog.d(str2, "updateScreenColor begin");
+                Slog.d("DisplayFeatureManager", "updateScreenColor begin");
                 DisplayFeatureManager instance = DisplayFeatureManager.getInstance();
                 if (ScreenEffect.isScreenPaperMode()) {
-                    Slog.d(str2, "setScreenPaperMode true");
+                    Slog.d("DisplayFeatureManager", "setScreenPaperMode true");
                     ScreenEffect.setScreenPaperMode(true);
                 } else {
                     int screenGamut = instance.getScreenGamut();
                     if (FeatureParser.getInteger("screen_standard_mode", 0) != 1 || screenGamut == 0) {
                         int colorPrefer = instance.getColorPrefer();
                         if (colorPrefer != 2) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("setColorPrefer ");
-                            sb.append(colorPrefer);
-                            Slog.d(str2, sb.toString());
+                            Slog.d("DisplayFeatureManager", "setColorPrefer " + colorPrefer);
                             instance.setColorPrefer(colorPrefer);
                         }
                     } else {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("setScreenGamut ");
-                        sb2.append(screenGamut);
-                        Slog.d(str2, sb2.toString());
+                        Slog.d("DisplayFeatureManager", "setScreenGamut " + screenGamut);
                         instance.setScreenGamut(screenGamut);
                     }
                 }
                 int screenSaturation = instance.getScreenSaturation();
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("setScreenSaturation ");
-                sb3.append(screenSaturation);
-                Slog.d(str2, sb3.toString());
+                Slog.d("DisplayFeatureManager", "setScreenSaturation " + screenSaturation);
                 instance.setScreenSaturation(screenSaturation);
                 if (FeatureParser.getBoolean("support_screen_optimize", false)) {
                     int screenCabc = instance.getScreenCabc();
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("setScreenCabc ");
-                    sb4.append(screenCabc);
-                    Slog.d(str2, sb4.toString());
+                    Slog.d("DisplayFeatureManager", "setScreenCabc " + screenCabc);
                     instance.setScreenCabc(screenCabc);
                 }
-                Slog.d(str2, "updateScreenColor end");
+                Slog.d("DisplayFeatureManager", "updateScreenColor end");
             }
         }
 
         public static boolean useWordPhoto(Context context) {
-            return android.provider.Settings.System.getInt(context.getContentResolver(), WORD_PHOTO, 0) == 1;
+            return Settings.System.getInt(context.getContentResolver(), WORD_PHOTO, 0) == 1;
         }
     }
 
@@ -2966,11 +2611,11 @@ public class MiuiSettings {
         public static final String VOLTE_FEATURE_DISABLED = "volte_feature_disabled";
 
         public static int getAutoAnswerCallDelayTime(ContentResolver contentResolver) {
-            return android.provider.Settings.System.getInt(contentResolver, AUTO_ANSWER_DELAY_TIME, 3);
+            return Settings.System.getInt(contentResolver, AUTO_ANSWER_DELAY_TIME, 3);
         }
 
         public static int getAutoAnswerCallScenario(ContentResolver contentResolver) {
-            return android.provider.Settings.System.getInt(contentResolver, AUTO_ANSWER_SCENARIO, 0);
+            return Settings.System.getInt(contentResolver, AUTO_ANSWER_SCENARIO, 0);
         }
 
         public static String getAutoIpPrefix(ContentResolver contentResolver, String str) {
@@ -2980,17 +2625,14 @@ public class MiuiSettings {
         public static String getAutoIpPrefix(ContentResolver contentResolver, String str, int i) {
             String str2 = AUTOIP_PREFIX;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(i);
-                str2 = sb.toString();
+                str2 = str2 + i;
             }
             return System.getString(contentResolver, str2, str);
         }
 
         public static int getCallWaitingTone(Context context) {
-            int i = android.provider.Settings.System.getInt(context.getContentResolver(), CALL_WAITING_TONE, 0);
-            if (!"lithium".equals(Build.DEVICE) || i != 2) {
+            int i = Settings.System.getInt(context.getContentResolver(), CALL_WAITING_TONE, 0);
+            if (!"lithium".equals(miui.os.Build.DEVICE) || i != 2) {
                 return i;
             }
             return 0;
@@ -3003,10 +2645,7 @@ public class MiuiSettings {
         public static String getCurrentAeraCode(ContentResolver contentResolver, int i) {
             String str = CURRENT_AREACODE;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             return System.getString(contentResolver, str);
         }
@@ -3024,7 +2663,7 @@ public class MiuiSettings {
         }
 
         public static int getMissedCallNotifyTimes(ContentResolver contentResolver) {
-            return android.provider.Settings.System.getInt(contentResolver, MISSED_CALL_NOTIFY_TIMES, 0);
+            return Settings.System.getInt(contentResolver, MISSED_CALL_NOTIFY_TIMES, 0);
         }
 
         public static int getRecordScenario(ContentResolver contentResolver) {
@@ -3050,10 +2689,7 @@ public class MiuiSettings {
         public static boolean isAutoAddZeroPrefix(ContentResolver contentResolver, int i) {
             String str = ADD_ZERO_PREFIX_SWITCH;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             return System.getBoolean(contentResolver, str, false);
         }
@@ -3069,10 +2705,7 @@ public class MiuiSettings {
         public static boolean isAutoIpEnable(ContentResolver contentResolver, int i) {
             String str = AUTOIP_SWITCH;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             return System.getBoolean(contentResolver, str, false);
         }
@@ -3080,10 +2713,7 @@ public class MiuiSettings {
         public static boolean isAutoIpSupportLocalNum(ContentResolver contentResolver, int i) {
             String str = AUTO_IP_SUPPORT_LOCAL_NUMBERS;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             return System.getBoolean(contentResolver, str, false);
         }
@@ -3139,10 +2769,7 @@ public class MiuiSettings {
         public static void setAutoAddZeroPrefixEnable(ContentResolver contentResolver, boolean z, int i) {
             String str = ADD_ZERO_PREFIX_SWITCH;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             System.putBoolean(contentResolver, str, z);
         }
@@ -3152,11 +2779,11 @@ public class MiuiSettings {
         }
 
         public static void setAutoAnswerCallDelayTime(ContentResolver contentResolver, int i) {
-            android.provider.Settings.System.putInt(contentResolver, AUTO_ANSWER_DELAY_TIME, i);
+            Settings.System.putInt(contentResolver, AUTO_ANSWER_DELAY_TIME, i);
         }
 
         public static void setAutoAnswerCallScenario(ContentResolver contentResolver, int i) {
-            android.provider.Settings.System.putInt(contentResolver, AUTO_ANSWER_SCENARIO, i);
+            Settings.System.putInt(contentResolver, AUTO_ANSWER_SCENARIO, i);
         }
 
         public static void setAutoCountryCodeEnable(ContentResolver contentResolver, boolean z) {
@@ -3166,10 +2793,7 @@ public class MiuiSettings {
         public static void setAutoIpEnable(ContentResolver contentResolver, boolean z, int i) {
             String str = AUTOIP_SWITCH;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             System.putBoolean(contentResolver, str, z);
         }
@@ -3181,10 +2805,7 @@ public class MiuiSettings {
         public static void setAutoIpPrefix(ContentResolver contentResolver, String str, int i) {
             String str2 = AUTOIP_PREFIX;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(i);
-                str2 = sb.toString();
+                str2 = str2 + i;
             }
             System.putString(contentResolver, str2, str);
         }
@@ -3192,10 +2813,7 @@ public class MiuiSettings {
         public static void setAutoIpSupportLocalNumEnable(ContentResolver contentResolver, boolean z, int i) {
             String str = AUTO_IP_SUPPORT_LOCAL_NUMBERS;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(i);
-                str = sb.toString();
+                str = str + i;
             }
             System.putBoolean(contentResolver, str, z);
         }
@@ -3209,7 +2827,7 @@ public class MiuiSettings {
         }
 
         public static void setCallWaitingTone(Context context, int i) {
-            android.provider.Settings.System.putInt(context.getContentResolver(), CALL_WAITING_TONE, i);
+            Settings.System.putInt(context.getContentResolver(), CALL_WAITING_TONE, i);
         }
 
         public static void setContactCountrycode(ContentResolver contentResolver, String str) {
@@ -3223,10 +2841,7 @@ public class MiuiSettings {
         public static void setCurrentAeraCode(ContentResolver contentResolver, String str, int i) {
             String str2 = CURRENT_AREACODE;
             if (i >= 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(i);
-                str2 = sb.toString();
+                str2 = str2 + i;
             }
             System.putString(contentResolver, str2, str);
         }
@@ -3244,7 +2859,7 @@ public class MiuiSettings {
         }
 
         public static void setMissedCallNotifyTimes(ContentResolver contentResolver, int i) {
-            android.provider.Settings.System.putInt(contentResolver, MISSED_CALL_NOTIFY_TIMES, i);
+            Settings.System.putInt(contentResolver, MISSED_CALL_NOTIFY_TIMES, i);
         }
 
         public static void setProximitySensorEnable(ContentResolver contentResolver, boolean z) {
@@ -3312,40 +2927,40 @@ public class MiuiSettings {
         public static final String VIRTUAL_SIM_TYPE = "virtual_sim_type";
 
         public static long getMiSimId(Context context) {
-            return miui.provider.ExtraSettings.Secure.getLong(context.getContentResolver(), MISIM_ID, 0);
+            return ExtraSettings.Secure.getLong(context.getContentResolver(), MISIM_ID, 0);
         }
 
         public static String getSupportNetworkType(Context context) {
-            return miui.provider.ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_NETWORK_TYPE, "");
+            return ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_NETWORK_TYPE, "");
         }
 
         public static String getVirtualSimIccId(Context context) {
-            return miui.provider.ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_ICCID, "");
+            return ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_ICCID, "");
         }
 
         public static String getVirtualSimImsi(Context context) {
-            return miui.provider.ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_IMSI, "");
+            return ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_IMSI, "");
         }
 
         public static int getVirtualSimSlotId(Context context) {
-            return miui.provider.ExtraSettings.Secure.getInt(context.getContentResolver(), VIRTUAL_SIM_SLOT_ID, 0);
+            return ExtraSettings.Secure.getInt(context.getContentResolver(), VIRTUAL_SIM_SLOT_ID, 0);
         }
 
         public static int getVirtualSimStatus(Context context) {
-            return miui.provider.ExtraSettings.Secure.getInt(context.getContentResolver(), VIRTUAL_SIM_STATUS, 2);
+            return ExtraSettings.Secure.getInt(context.getContentResolver(), VIRTUAL_SIM_STATUS, 2);
         }
 
         public static int getVirtualSimType(Context context) {
-            return miui.provider.ExtraSettings.Secure.getInt(context.getContentResolver(), VIRTUAL_SIM_TYPE, 0);
+            return ExtraSettings.Secure.getInt(context.getContentResolver(), VIRTUAL_SIM_TYPE, 0);
         }
 
         public static boolean isMiSimEnabled(Context context) {
-            String string = miui.provider.ExtraSettings.Secure.getString(context.getContentResolver(), MISIM_IMSI, null);
+            String string = ExtraSettings.Secure.getString(context.getContentResolver(), MISIM_IMSI, (String) null);
             return !TextUtils.isEmpty(string) && isVirtualSimEnabled(context) && string.equals(getVirtualSimImsi(context));
         }
 
         public static boolean isSupport4G(Context context) {
-            String string = miui.provider.ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_NETWORK_TYPE, "");
+            String string = ExtraSettings.Secure.getString(context.getContentResolver(), VIRTUAL_SIM_NETWORK_TYPE, "");
             return TextUtils.isEmpty(string) || string.contains("4G");
         }
 
@@ -3354,35 +2969,35 @@ public class MiuiSettings {
         }
 
         public static void setMiSimId(Context context, long j) {
-            miui.provider.ExtraSettings.Secure.putLong(context.getContentResolver(), MISIM_ID, j);
+            ExtraSettings.Secure.putLong(context.getContentResolver(), MISIM_ID, j);
         }
 
         public static void setMiSimImsi(Context context, String str) {
-            miui.provider.ExtraSettings.Secure.putString(context.getContentResolver(), MISIM_IMSI, str);
+            ExtraSettings.Secure.putString(context.getContentResolver(), MISIM_IMSI, str);
         }
 
         public static void setSupportNetworkType(Context context, String str) {
-            miui.provider.ExtraSettings.Secure.putString(context.getContentResolver(), VIRTUAL_SIM_NETWORK_TYPE, str);
+            ExtraSettings.Secure.putString(context.getContentResolver(), VIRTUAL_SIM_NETWORK_TYPE, str);
         }
 
         public static void setVirtualSimIccId(Context context, String str) {
-            miui.provider.ExtraSettings.Secure.putString(context.getContentResolver(), VIRTUAL_SIM_ICCID, str);
+            ExtraSettings.Secure.putString(context.getContentResolver(), VIRTUAL_SIM_ICCID, str);
         }
 
         public static void setVirtualSimImsi(Context context, String str) {
-            miui.provider.ExtraSettings.Secure.putString(context.getContentResolver(), VIRTUAL_SIM_IMSI, str);
+            ExtraSettings.Secure.putString(context.getContentResolver(), VIRTUAL_SIM_IMSI, str);
         }
 
         public static void setVirtualSimSlotId(Context context, int i) {
-            miui.provider.ExtraSettings.Secure.putInt(context.getContentResolver(), VIRTUAL_SIM_SLOT_ID, i);
+            ExtraSettings.Secure.putInt(context.getContentResolver(), VIRTUAL_SIM_SLOT_ID, i);
         }
 
         public static void setVirtualSimStatus(Context context, int i) {
-            miui.provider.ExtraSettings.Secure.putInt(context.getContentResolver(), VIRTUAL_SIM_STATUS, i);
+            ExtraSettings.Secure.putInt(context.getContentResolver(), VIRTUAL_SIM_STATUS, i);
         }
 
         public static void setVirtualSimType(Context context, int i) {
-            miui.provider.ExtraSettings.Secure.putInt(context.getContentResolver(), VIRTUAL_SIM_TYPE, i);
+            ExtraSettings.Secure.putInt(context.getContentResolver(), VIRTUAL_SIM_TYPE, i);
         }
     }
 
@@ -3504,20 +3119,20 @@ public class MiuiSettings {
                         } else if (str.equals(KEY_XSPACE_QQ_SEND_TO_FRIEND) || str.equals(KEY_XSPACE_QQ_SEND_TO_PC) || str.equals(KEY_XSPACE_QQ_OPEN)) {
                             str = KEY_XSPACE_QQ_SEND;
                         }
-                        return android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), str, 0);
+                        return Settings.Secure.getIntForUser(context.getContentResolver(), str, 0);
                     }
                 }
                 str = KEY_WEIXIN_SHARE;
-                return android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), str, 0);
-            } catch (SettingNotFoundException e2) {
+                return Settings.Secure.getIntForUser(context.getContentResolver(), str, 0);
+            } catch (Settings.SettingNotFoundException e2) {
                 return 0;
             }
         }
 
         public static int getGuideNotificationTimes(Context context, String str) {
             try {
-                return android.provider.Settings.Secure.getIntForUser(context.getContentResolver(), str, 0);
-            } catch (SettingNotFoundException e2) {
+                return Settings.Secure.getIntForUser(context.getContentResolver(), str, 0);
+            } catch (Settings.SettingNotFoundException e2) {
                 return 0;
             }
         }
@@ -3559,11 +3174,11 @@ public class MiuiSettings {
             } else if (str.equals(KEY_XSPACE_QQ_SEND_TO_FRIEND) || str.equals(KEY_XSPACE_QQ_SEND_TO_PC) || str.equals(KEY_XSPACE_QQ_OPEN)) {
                 str = KEY_XSPACE_QQ_SEND;
             }
-            android.provider.Settings.Secure.putIntForUser(context.getContentResolver(), str, i, 0);
+            Settings.Secure.putIntForUser(context.getContentResolver(), str, i, 0);
         }
 
         public static void setGuideNotificationTimes(Context context, String str, int i) {
-            android.provider.Settings.Secure.putIntForUser(context.getContentResolver(), str, i, 0);
+            Settings.Secure.putIntForUser(context.getContentResolver(), str, i, 0);
         }
     }
 
@@ -3579,7 +3194,7 @@ public class MiuiSettings {
 
     public static void getConfigurationForUser(ContentResolver contentResolver, Configuration configuration, int i) {
         boolean z = true;
-        int i2 = android.provider.Settings.System.getInt(contentResolver, System.UI_MODE_SCALE, 1) & 15;
+        int i2 = Settings.System.getInt(contentResolver, System.UI_MODE_SCALE, 1) & 15;
         if (!(i2 == 12 || i2 == 13 || i2 == 14 || i2 == 15 || i2 == 11)) {
             z = false;
         }

@@ -26,8 +26,9 @@ public class MovieBox extends NodeBox {
     }
 
     public boolean isPureRefMovie() {
+        TrakBox[] tracks = getTracks();
         boolean z = true;
-        for (TrakBox isPureRef : getTracks()) {
+        for (TrakBox isPureRef : tracks) {
             z &= isPureRef.isPureRef();
         }
         return z;

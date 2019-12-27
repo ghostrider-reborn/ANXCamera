@@ -4,13 +4,12 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import com.android.camera.log.Log;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public class FocusTask implements Parcelable {
-    public static final Creator<FocusTask> CREATOR = new Creator<FocusTask>() {
+    public static final Parcelable.Creator<FocusTask> CREATOR = new Parcelable.Creator<FocusTask>() {
         public FocusTask createFromParcel(Parcel parcel) {
             return new FocusTask(parcel);
         }
@@ -50,10 +49,7 @@ public class FocusTask implements Parcelable {
         this.mElapsedTime = parcel.readLong();
         this.mSuccess = parcel.readByte() != 0;
         this.mRequestHash = parcel.readInt();
-        if (parcel.readByte() != 0) {
-            z = true;
-        }
-        this.mTaskProcessed = z;
+        this.mTaskProcessed = parcel.readByte() != 0 ? true : z;
     }
 
     public static final FocusTask create(int i) {
@@ -92,12 +88,7 @@ public class FocusTask implements Parcelable {
         if (hashCode == this.mRequestHash) {
             if (!this.mTaskProcessed) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("processResult the task=");
-                sb.append(hashCode());
-                sb.append(", request=");
-                sb.append(hashCode);
-                Log.d(str, sb.toString());
+                Log.d(str, "processResult the task=" + hashCode() + ", request=" + hashCode);
             }
             this.mTaskProcessed = true;
         }
@@ -106,12 +97,7 @@ public class FocusTask implements Parcelable {
     public void setRequest(CaptureRequest captureRequest) {
         this.mRequestHash = captureRequest.hashCode();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setRequest the task=");
-        sb.append(hashCode());
-        sb.append(", request=");
-        sb.append(this.mRequestHash);
-        Log.d(str, sb.toString());
+        Log.d(str, "setRequest the task=" + hashCode() + ", request=" + this.mRequestHash);
     }
 
     public void setResult(boolean z) {

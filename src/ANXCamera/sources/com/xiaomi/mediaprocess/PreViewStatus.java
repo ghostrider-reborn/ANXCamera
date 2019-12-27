@@ -12,7 +12,6 @@ public enum PreViewStatus {
     }
 
     public static PreViewStatus int2enum(int i) {
-        PreViewStatus[] values;
         PreViewStatus preViewStatus = PreViewStopped;
         for (PreViewStatus preViewStatus2 : values()) {
             if (preViewStatus2.ordinal() == i) {

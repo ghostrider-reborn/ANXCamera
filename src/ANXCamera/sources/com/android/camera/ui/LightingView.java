@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import com.android.camera.ui.drawable.lighting.LightingAnimateDrawable;
 
 public class LightingView extends View implements Rotatable {
@@ -60,7 +59,7 @@ public class LightingView extends View implements Rotatable {
     /* access modifiers changed from: protected */
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        this.mLightingAnimateDrawable.setCallback(null);
+        this.mLightingAnimateDrawable.setCallback((Drawable.Callback) null);
         this.mLightingAnimateDrawable.clear();
     }
 
@@ -71,12 +70,12 @@ public class LightingView extends View implements Rotatable {
 
     /* access modifiers changed from: protected */
     public void onMeasure(int i, int i2) {
-        if (MeasureSpec.getMode(i) != 1073741824) {
+        if (View.MeasureSpec.getMode(i) != 1073741824) {
             super.onMeasure(i, i2);
             return;
         }
-        this.mWidth = MeasureSpec.getSize(i);
-        this.mHeight = MeasureSpec.getSize(i2);
+        this.mWidth = View.MeasureSpec.getSize(i);
+        this.mHeight = View.MeasureSpec.getSize(i2);
         setMeasuredDimension(this.mWidth, this.mHeight);
         LightingAnimateDrawable lightingAnimateDrawable = this.mLightingAnimateDrawable;
         if (lightingAnimateDrawable != null) {

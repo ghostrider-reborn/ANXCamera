@@ -45,7 +45,7 @@ public final class ObservableConcatMapCompletable<T> extends Completable {
                 this.parent = sourceObserver;
             }
 
-            /* access modifiers changed from: 0000 */
+            /* access modifiers changed from: package-private */
             public void dispose() {
                 DisposableHelper.dispose(this);
             }
@@ -80,14 +80,14 @@ public final class ObservableConcatMapCompletable<T> extends Completable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 while (!this.disposed) {
                     if (!this.active) {
                         boolean z = this.done;
                         try {
-                            Object poll = this.queue.poll();
+                            T poll = this.queue.poll();
                             boolean z2 = poll == null;
                             if (z && z2) {
                                 this.disposed = true;
@@ -124,7 +124,7 @@ public final class ObservableConcatMapCompletable<T> extends Completable {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete() {
             this.active = false;
             drain();

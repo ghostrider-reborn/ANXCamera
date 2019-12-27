@@ -1,14 +1,14 @@
 package com.bumptech.glide.request.a;
 
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.request.a.j.a;
+import com.bumptech.glide.request.a.j;
 
 /* compiled from: ViewPropertyAnimationFactory */
 public class i<R> implements g<R> {
     private j<R> animation;
-    private final a animator;
+    private final j.a animator;
 
-    public i(a aVar) {
+    public i(j.a aVar) {
         this.animator = aVar;
     }
 

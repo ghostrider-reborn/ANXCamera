@@ -4,10 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.IntentSender.SendIntentException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutManager;
-import android.os.Build.VERSION;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -25,7 +26,7 @@ public class ShortcutManagerCompat {
 
     @NonNull
     public static Intent createShortcutResultIntent(@NonNull Context context, @NonNull ShortcutInfoCompat shortcutInfoCompat) {
-        Intent createShortcutResultIntent = VERSION.SDK_INT >= 26 ? ((ShortcutManager) context.getSystemService(ShortcutManager.class)).createShortcutResultIntent(shortcutInfoCompat.toShortcutInfo()) : null;
+        Intent createShortcutResultIntent = Build.VERSION.SDK_INT >= 26 ? ((ShortcutManager) context.getSystemService(ShortcutManager.class)).createShortcutResultIntent(shortcutInfoCompat.toShortcutInfo()) : null;
         if (createShortcutResultIntent == null) {
             createShortcutResultIntent = new Intent();
         }
@@ -33,26 +34,26 @@ public class ShortcutManagerCompat {
     }
 
     public static boolean isRequestPinShortcutSupported(@NonNull Context context) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return ((ShortcutManager) context.getSystemService(ShortcutManager.class)).isRequestPinShortcutSupported();
         }
-        String str = INSTALL_SHORTCUT_PERMISSION;
-        if (ContextCompat.checkSelfPermission(context, str) != 0) {
+        if (ContextCompat.checkSelfPermission(context, INSTALL_SHORTCUT_PERMISSION) != 0) {
             return false;
         }
         for (ResolveInfo resolveInfo : context.getPackageManager().queryBroadcastReceivers(new Intent(ACTION_INSTALL_SHORTCUT), 0)) {
-            String str2 = resolveInfo.activityInfo.permission;
-            if (!TextUtils.isEmpty(str2)) {
-                if (str.equals(str2)) {
-                }
+            String str = resolveInfo.activityInfo.permission;
+            if (TextUtils.isEmpty(str)) {
+                return true;
             }
-            return true;
+            if (INSTALL_SHORTCUT_PERMISSION.equals(str)) {
+                return true;
+            }
         }
         return false;
     }
 
     public static boolean requestPinShortcut(@NonNull Context context, @NonNull ShortcutInfoCompat shortcutInfoCompat, @Nullable final IntentSender intentSender) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             return ((ShortcutManager) context.getSystemService(ShortcutManager.class)).requestPinShortcut(shortcutInfoCompat.toShortcutInfo(), intentSender);
         }
         if (!isRequestPinShortcutSupported(context)) {
@@ -63,14 +64,14 @@ public class ShortcutManagerCompat {
             context.sendBroadcast(addToIntent);
             return true;
         }
-        context.sendOrderedBroadcast(addToIntent, null, new BroadcastReceiver() {
+        context.sendOrderedBroadcast(addToIntent, (String) null, new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 try {
-                    intentSender.sendIntent(context, 0, null, null, null);
-                } catch (SendIntentException unused) {
+                    intentSender.sendIntent(context, 0, (Intent) null, (IntentSender.OnFinished) null, (Handler) null);
+                } catch (IntentSender.SendIntentException unused) {
                 }
             }
-        }, null, -1, null, null);
+        }, (Handler) null, -1, (String) null, (Bundle) null);
         return true;
     }
 }

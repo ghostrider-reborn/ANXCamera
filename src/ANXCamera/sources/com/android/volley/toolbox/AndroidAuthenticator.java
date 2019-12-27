@@ -2,11 +2,13 @@ package com.android.volley.toolbox;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.VisibleForTesting;
 import com.android.volley.AuthFailureError;
 
@@ -38,25 +40,21 @@ public class AndroidAuthenticator implements Authenticator {
     }
 
     public String getAuthToken() throws AuthFailureError {
-        AccountManagerFuture authToken = this.mAccountManager.getAuthToken(this.mAccount, this.mAuthTokenType, this.mNotifyAuthFailure, null, null);
+        AccountManagerFuture<Bundle> authToken = this.mAccountManager.getAuthToken(this.mAccount, this.mAuthTokenType, this.mNotifyAuthFailure, (AccountManagerCallback) null, (Handler) null);
         try {
-            Bundle bundle = (Bundle) authToken.getResult();
+            Bundle result = authToken.getResult();
             String str = null;
             if (authToken.isDone() && !authToken.isCancelled()) {
-                String str2 = "intent";
-                if (!bundle.containsKey(str2)) {
-                    str = bundle.getString("authtoken");
+                if (!result.containsKey("intent")) {
+                    str = result.getString("authtoken");
                 } else {
-                    throw new AuthFailureError((Intent) bundle.getParcelable(str2));
+                    throw new AuthFailureError((Intent) result.getParcelable("intent"));
                 }
             }
             if (str != null) {
                 return str;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Got null auth token for type: ");
-            sb.append(this.mAuthTokenType);
-            throw new AuthFailureError(sb.toString());
+            throw new AuthFailureError("Got null auth token for type: " + this.mAuthTokenType);
         } catch (Exception e2) {
             throw new AuthFailureError("Error while retrieving auth token", e2);
         }

@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.model;
 
-import com.bumptech.glide.load.model.i.d;
+import com.bumptech.glide.load.model.i;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /* compiled from: FileLoader */
-class k implements d<InputStream> {
+class k implements i.d<InputStream> {
     k() {
     }
 

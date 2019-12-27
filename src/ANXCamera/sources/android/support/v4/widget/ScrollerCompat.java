@@ -20,7 +20,7 @@ public final class ScrollerCompat {
 
     @Deprecated
     public static ScrollerCompat create(Context context) {
-        return create(context, null);
+        return create(context, (Interpolator) null);
     }
 
     @Deprecated

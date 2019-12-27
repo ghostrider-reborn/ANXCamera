@@ -37,12 +37,12 @@ public class ComponentManuallyET extends ComponentData {
         if (currentCameraCapabilities == null) {
             return arrayList;
         }
-        Range exposureTimeRange = currentCameraCapabilities.getExposureTimeRange();
+        Range<Long> exposureTimeRange = currentCameraCapabilities.getExposureTimeRange();
         ComponentDataItem[] fullItems = getFullItems();
         arrayList.add(fullItems[0]);
         if (exposureTimeRange != null) {
-            long longValue = ((Long) exposureTimeRange.getLower()).longValue();
-            long longValue2 = ((Long) exposureTimeRange.getUpper()).longValue();
+            long longValue = exposureTimeRange.getLower().longValue();
+            long longValue2 = exposureTimeRange.getUpper().longValue();
             for (int i = 1; i < fullItems.length; i++) {
                 ComponentDataItem componentDataItem = fullItems[i];
                 long parseLong = Long.parseLong(componentDataItem.mValue);
@@ -68,11 +68,11 @@ public class ComponentManuallyET extends ComponentData {
 
     public String getComponentValue(int i) {
         String componentValue = super.getComponentValue(i);
-        List items = getItems();
+        List<ComponentDataItem> items = getItems();
         if (items.isEmpty()) {
             return componentValue;
         }
-        String str = ((ComponentDataItem) items.get(items.size() - 1)).mValue;
+        String str = items.get(items.size() - 1).mValue;
         if (Long.parseLong(componentValue) <= Long.parseLong(str)) {
             return componentValue;
         }
@@ -100,7 +100,6 @@ public class ComponentManuallyET extends ComponentData {
     }
 
     public int getValueDisplayString(int i) {
-        ComponentDataItem[] fullItems;
         String componentValue = getComponentValue(i);
         for (ComponentDataItem componentDataItem : getFullItems()) {
             if (componentDataItem.mValue.equals(componentValue)) {

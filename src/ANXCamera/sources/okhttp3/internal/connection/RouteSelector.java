@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -50,7 +49,7 @@ public final class RouteSelector {
                 List<Route> list = this.routes;
                 int i = this.nextRouteIndex;
                 this.nextRouteIndex = i + 1;
-                return (Route) list.get(i);
+                return list.get(i);
             }
             throw new NoSuchElementException();
         }
@@ -78,23 +77,18 @@ public final class RouteSelector {
             List<Proxy> list = this.proxies;
             int i = this.nextProxyIndex;
             this.nextProxyIndex = i + 1;
-            Proxy proxy = (Proxy) list.get(i);
+            Proxy proxy = list.get(i);
             resetNextInetSocketAddress(proxy);
             return proxy;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("No route to ");
-        sb.append(this.address.url().host());
-        sb.append("; exhausted proxy configurations: ");
-        sb.append(this.proxies);
-        throw new SocketException(sb.toString());
+        throw new SocketException("No route to " + this.address.url().host() + "; exhausted proxy configurations: " + this.proxies);
     }
 
     private void resetNextInetSocketAddress(Proxy proxy) throws IOException {
         String str;
         int i;
         this.inetSocketAddresses = new ArrayList();
-        if (proxy.type() == Type.DIRECT || proxy.type() == Type.SOCKS) {
+        if (proxy.type() == Proxy.Type.DIRECT || proxy.type() == Proxy.Type.SOCKS) {
             str = this.address.url().host();
             i = this.address.url().port();
         } else {
@@ -104,38 +98,25 @@ public final class RouteSelector {
                 str = getHostString(inetSocketAddress);
                 i = inetSocketAddress.getPort();
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Proxy.address() is not an InetSocketAddress: ");
-                sb.append(address2.getClass());
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("Proxy.address() is not an InetSocketAddress: " + address2.getClass());
             }
         }
         if (i < 1 || i > 65535) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("No route to ");
-            sb2.append(str);
-            sb2.append(":");
-            sb2.append(i);
-            sb2.append("; port is out of range");
-            throw new SocketException(sb2.toString());
-        } else if (proxy.type() == Type.SOCKS) {
+            throw new SocketException("No route to " + str + ":" + i + "; port is out of range");
+        } else if (proxy.type() == Proxy.Type.SOCKS) {
             this.inetSocketAddresses.add(InetSocketAddress.createUnresolved(str, i));
         } else {
             this.eventListener.dnsStart(this.call, str);
-            List lookup = this.address.dns().lookup(str);
+            List<InetAddress> lookup = this.address.dns().lookup(str);
             if (!lookup.isEmpty()) {
                 this.eventListener.dnsEnd(this.call, str, lookup);
                 int size = lookup.size();
                 for (int i2 = 0; i2 < size; i2++) {
-                    this.inetSocketAddresses.add(new InetSocketAddress((InetAddress) lookup.get(i2), i));
+                    this.inetSocketAddresses.add(new InetSocketAddress(lookup.get(i2), i));
                 }
                 return;
             }
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(this.address.dns());
-            sb3.append(" returned no addresses for ");
-            sb3.append(str);
-            throw new UnknownHostException(sb3.toString());
+            throw new UnknownHostException(this.address.dns() + " returned no addresses for " + str);
         }
     }
 
@@ -144,7 +125,7 @@ public final class RouteSelector {
         if (proxy != null) {
             this.proxies = Collections.singletonList(proxy);
         } else {
-            List select = this.address.proxySelector().select(httpUrl.uri());
+            List<Proxy> select = this.address.proxySelector().select(httpUrl.uri());
             if (select == null || select.isEmpty()) {
                 list = Util.immutableList((T[]) new Proxy[]{Proxy.NO_PROXY});
             } else {
@@ -156,7 +137,7 @@ public final class RouteSelector {
     }
 
     public void connectFailed(Route route, IOException iOException) {
-        if (!(route.proxy().type() == Type.DIRECT || this.address.proxySelector() == null)) {
+        if (!(route.proxy().type() == Proxy.Type.DIRECT || this.address.proxySelector() == null)) {
             this.address.proxySelector().connectFailed(this.address.url().uri(), route.proxy().address(), iOException);
         }
         this.routeDatabase.failed(route);
@@ -173,7 +154,7 @@ public final class RouteSelector {
                 Proxy nextProxy = nextProxy();
                 int size = this.inetSocketAddresses.size();
                 for (int i = 0; i < size; i++) {
-                    Route route = new Route(this.address, nextProxy, (InetSocketAddress) this.inetSocketAddresses.get(i));
+                    Route route = new Route(this.address, nextProxy, this.inetSocketAddresses.get(i));
                     if (this.routeDatabase.shouldPostpone(route)) {
                         this.postponedRoutes.add(route);
                     } else {

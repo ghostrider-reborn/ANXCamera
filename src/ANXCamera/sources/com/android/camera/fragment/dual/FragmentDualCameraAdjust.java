@@ -1,19 +1,15 @@
 package com.android.camera.fragment.dual;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewCompat;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -39,24 +35,11 @@ import com.android.camera.fragment.manually.adapter.sat.TriSatZoomSliderAdapter;
 import com.android.camera.lib.compatibility.related.vibrator.ViberatorContext;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.CameraClickObservable;
-import com.android.camera.protocol.ModeProtocol.CameraModuleSpecial;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ManuallyValueChanged;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.SnapShotIndicator;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.HorizontalSlideView;
 import com.android.camera.ui.zoom.ZoomRatioToggleView;
-import com.android.camera.ui.zoom.ZoomRatioToggleView.ToggleStateListener;
-import com.android.camera.ui.zoom.ZoomRatioToggleView.ViewSpec;
 import com.android.camera.ui.zoom.ZoomRatioView;
 import com.mi.config.b;
 import io.reactivex.Completable;
@@ -66,7 +49,7 @@ import miui.view.animation.BackEaseOutInterpolator;
 import miui.view.animation.ElasticEaseOutInterpolator;
 import miui.view.animation.QuadraticEaseInOutInterpolator;
 
-public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStateListener, ManuallyListener, HandleBackTrace, DualController, SnapShotIndicator {
+public class FragmentDualCameraAdjust extends BaseFragment implements ZoomRatioToggleView.ToggleStateListener, ManuallyListener, ModeProtocol.HandleBackTrace, ModeProtocol.DualController, ModeProtocol.SnapShotIndicator {
     public static final int FRAGMENT_INFO = 4084;
     private static final int HIDE_POPUP = 1;
     private static final String TAG = "FragmentDualCameraAdjust";
@@ -100,7 +83,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     private ZoomRatioToggleView mZoomRatioToggleView;
     private int mZoomSliderLayoutHeight;
     private int mZoomSliderViewMiddleX = -1;
-    private OnTouchListener mZoomSliderViewTouchListener = new OnTouchListener() {
+    private View.OnTouchListener mZoomSliderViewTouchListener = new View.OnTouchListener() {
         private boolean mAnimated = false;
 
         public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -129,12 +112,12 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             this.mSlidingAdapter.setEnable(false);
             Completable.create(new TranslateYAlphaOutOnSubscribe(this.mHorizontalSlideLayout, this.mZoomSliderLayoutHeight).setInterpolator(new OvershootInterpolator())).subscribe((Action) new Action() {
                 public void run() throws Exception {
-                    FragmentDualCameraAdjust.this.mIsHiding = false;
+                    boolean unused = FragmentDualCameraAdjust.this.mIsHiding = false;
                     FragmentDualCameraAdjust.this.mHorizontalSlideLayout.setVisibility(4);
                 }
             });
             if (this.mCurrentMode == 163) {
-                CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+                ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
                 if (cameraModuleSpecial != null) {
                     cameraModuleSpecial.showOrHideChip(false);
                 }
@@ -144,7 +127,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             Completable.create(new TranslateYAlphaOutOnSubscribe(this.mZoomRatioToggleView, this.mZoomSliderLayoutHeight).setInterpolator(new OvershootInterpolator())).subscribe();
         } else {
             hideZoomButton();
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (topAlert != null) {
                 topAlert.alertUpdateValue(2);
             }
@@ -167,7 +150,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     /* JADX WARNING: Removed duplicated region for block: B:109:0x013c  */
     /* JADX WARNING: Removed duplicated region for block: B:51:0x00a0  */
     /* JADX WARNING: Removed duplicated region for block: B:52:0x00a2  */
-    private static ViewSpec getViewSpecForCapturingMode(int i) {
+    private static ZoomRatioToggleView.ViewSpec getViewSpecForCapturingMode(int i) {
         boolean z;
         boolean z2;
         int i2;
@@ -185,7 +168,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
                 z2 = i2 == -1;
             } else if (i == 162) {
                 if (!HybridZoomingSystem.IS_2_SAT) {
-                    MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+                    ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
                     if ((miBeautyProtocol == null || !miBeautyProtocol.isBeautyPanelShow()) && (((!CameraSettings.isMacroModeEnabled(i) || DataRepository.dataItemFeature().mb()) && !CameraSettings.isUltraWideConfigOpen(i)) || DataRepository.dataItemFeature().ad())) {
                         i3 = 1;
                         z2 = i2 != -1;
@@ -215,14 +198,14 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
                     if (CameraSettings.isSupportedOpticalZoom()) {
                         z4 = z5;
                     }
-                    return new ViewSpec(i4, z2, z, z4);
+                    return new ZoomRatioToggleView.ViewSpec(i4, z2, z, z4);
                 } else if (i == 166 && DataRepository.dataItemFeature().Yb()) {
                     i4 = 1;
                 }
                 z2 = z;
                 if (CameraSettings.isSupportedOpticalZoom()) {
                 }
-                return new ViewSpec(i4, z2, z, z4);
+                return new ZoomRatioToggleView.ViewSpec(i4, z2, z, z4);
             }
             z5 = false;
             i4 = i2;
@@ -230,14 +213,14 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             z5 = false;
             if (CameraSettings.isSupportedOpticalZoom()) {
             }
-            return new ViewSpec(i4, z2, z, z4);
+            return new ZoomRatioToggleView.ViewSpec(i4, z2, z, z4);
         }
         z = true;
         z2 = true;
         z5 = false;
         if (CameraSettings.isSupportedOpticalZoom()) {
         }
-        return new ViewSpec(i4, z2, z, z4);
+        return new ZoomRatioToggleView.ViewSpec(i4, z2, z, z4);
     }
 
     private void initSlideZoomView(ComponentData componentData) {
@@ -262,9 +245,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     }
 
     private void initiateZoomRatio() {
-        boolean isZoomByCameraSwitchingSupported = CameraSettings.isZoomByCameraSwitchingSupported();
-        String str = TAG;
-        if (isZoomByCameraSwitchingSupported) {
+        if (CameraSettings.isZoomByCameraSwitchingSupported()) {
             String cameraLensType = CameraSettings.getCameraLensType(this.mCurrentMode);
             if (ComponentManuallyDualLens.LENS_ULTRA.equals(cameraLensType)) {
                 this.mZoomRatio = 0.6f;
@@ -277,83 +258,57 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             } else if (ComponentManuallyDualLens.LENS_STANDALONE.equals(cameraLensType)) {
                 this.mZoomRatio = 5.0f;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("initiateZoomRatio(): Unknown camera lens type: ");
-                sb.append(cameraLensType);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("initiateZoomRatio(): Unknown camera lens type: " + cameraLensType);
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("initiateZoomRatio(): lens-switch-zoom: ");
-            sb2.append(this.mZoomRatio);
-            Log.d(str, sb2.toString());
+            Log.d(TAG, "initiateZoomRatio(): lens-switch-zoom: " + this.mZoomRatio);
             return;
         }
-        String str2 = "initiateZoomRatio(): fake-sat-zoom: ";
-        String str3 = "1.0";
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i = this.mCurrentMode;
             if (i == 162) {
-                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i, str3));
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str2);
-                sb3.append(this.mZoomRatio);
-                Log.d(str, sb3.toString());
+                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i, "1.0"));
+                Log.d(TAG, "initiateZoomRatio(): fake-sat-zoom: " + this.mZoomRatio);
                 return;
             }
         }
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i2 = this.mCurrentMode;
             if (i2 == 174) {
-                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i2, str3));
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str2);
-                sb4.append(this.mZoomRatio);
-                Log.d(str, sb4.toString());
+                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i2, "1.0"));
+                Log.d(TAG, "initiateZoomRatio(): fake-sat-zoom: " + this.mZoomRatio);
                 return;
             }
         }
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i3 = this.mCurrentMode;
             if (i3 == 161) {
-                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i3, str3));
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append(str2);
-                sb5.append(this.mZoomRatio);
-                Log.d(str, sb5.toString());
+                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i3, "1.0"));
+                Log.d(TAG, "initiateZoomRatio(): fake-sat-zoom: " + this.mZoomRatio);
                 return;
             }
         }
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i4 = this.mCurrentMode;
             if (i4 == 163 || i4 == 165 || i4 == 173 || i4 == 177 || this.mCurrentState == 167) {
-                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(this.mCurrentMode, str3));
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append(str2);
-                sb6.append(this.mZoomRatio);
-                Log.d(str, sb6.toString());
+                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(this.mCurrentMode, "1.0"));
+                Log.d(TAG, "initiateZoomRatio(): fake-sat-zoom: " + this.mZoomRatio);
                 return;
             }
         }
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i5 = this.mCurrentMode;
             if (i5 == 169) {
-                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i5, str3));
-                StringBuilder sb7 = new StringBuilder();
-                sb7.append(str2);
-                sb7.append(this.mZoomRatio);
-                Log.d(str, sb7.toString());
+                this.mZoomRatio = Float.parseFloat(HybridZoomingSystem.getZoomRatioHistory(i5, "1.0"));
+                Log.d(TAG, "initiateZoomRatio(): fake-sat-zoom: " + this.mZoomRatio);
                 return;
             }
         }
         this.mZoomRatio = 1.0f;
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append("initiateZoomRatio(): real-sat-zoom: ");
-        sb8.append(this.mZoomRatio);
-        Log.d(str, sb8.toString());
+        Log.d(TAG, "initiateZoomRatio(): real-sat-zoom: " + this.mZoomRatio);
     }
 
     private void notifyTipsMargin() {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.directHideTipImage();
             bottomPopupTips.directlyHideTips();
@@ -363,7 +318,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
 
     /* access modifiers changed from: private */
     public void notifyZoom2X(boolean z) {
-        ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+        ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
         if (manuallyValueChanged == null) {
             return;
         }
@@ -374,7 +329,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
 
     /* access modifiers changed from: private */
     public void notifyZooming(boolean z) {
-        ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+        ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
         if (manuallyValueChanged != null) {
             manuallyValueChanged.onDualLensZooming(z);
         }
@@ -382,7 +337,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
 
     /* access modifiers changed from: private */
     public void requestZoomRatio(float f2, int i) {
-        ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+        ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
         if (manuallyValueChanged != null) {
             manuallyValueChanged.onDualZoomValueChanged(f2, i);
         }
@@ -406,12 +361,12 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
         Completable.create(new TranslateYOnSubscribe(this.mZoomRatioToggleView, 0).setInterpolator(new BackEaseOutInterpolator())).subscribe();
         notifyTipsMargin();
         if (this.mCurrentMode == 163) {
-            CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+            ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
             if (cameraModuleSpecial != null) {
                 cameraModuleSpecial.showOrHideChip(false);
             }
         }
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.directHideLyingDirectHint();
         }
@@ -420,7 +375,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     private void switchCameraLens() {
         String str;
         ComponentManuallyDualLens manuallyDualLens = DataRepository.dataItemConfig().getManuallyDualLens();
-        ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+        ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
         if (manuallyValueChanged != null) {
             manuallyValueChanged.onDualLensSwitch(manuallyDualLens, this.mCurrentMode);
             updateZoomRatio(0);
@@ -433,10 +388,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
         } else if (ComponentManuallyDualLens.LENS_TELE.equals(componentValue)) {
             str = HybridZoomingSystem.STRING_ZOOM_RATIO_TELE;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("switchCameraLens(): Unknown camera lens type: ");
-            sb.append(componentValue);
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("switchCameraLens(): Unknown camera lens type: " + componentValue);
         }
         CameraStatUtil.trackDualZoomChanged(this.mCurrentMode, str);
     }
@@ -463,18 +415,18 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             this.mSlidingAdapter.setEnable(false);
             Completable.create(new TranslateYOnSubscribe(this.mHorizontalSlideLayout, this.mZoomSliderLayoutHeight).setInterpolator(new ElasticEaseOutInterpolator(1.1f, 2.0f))).subscribe((Action) new Action() {
                 public void run() throws Exception {
-                    FragmentDualCameraAdjust.this.mIsHiding = false;
+                    boolean unused = FragmentDualCameraAdjust.this.mIsHiding = false;
                     FragmentDualCameraAdjust.this.mHorizontalSlideLayout.setVisibility(4);
                 }
             });
-            ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+            ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
             if (manuallyValueChanged != null) {
                 manuallyValueChanged.updateSATIsZooming(false);
             }
             ViewCompat.setTranslationY(this.mZoomRatioToggleView, 0.0f);
             setImmersiveModeEnabled(false);
             Completable.create(new TranslateYOnSubscribe(this.mZoomRatioToggleView, this.mZoomSliderLayoutHeight).setInterpolator(new OvershootInterpolator())).subscribe();
-            BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+            ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
             if (bottomPopupTips != null) {
                 bottomPopupTips.reInitTipImage();
             }
@@ -482,7 +434,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
                 bottomPopupTips.updateLyingDirectHint(false, true);
             }
             if (this.mCurrentMode == 163) {
-                CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+                ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
                 if (cameraModuleSpecial != null) {
                     cameraModuleSpecial.showOrHideChip(true);
                 }
@@ -507,7 +459,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
 
     /* access modifiers changed from: protected */
     public void initView(View view) {
-        ((MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources());
+        ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources());
         this.mDualParentLayout = (ViewGroup) view.findViewById(R.id.dual_layout_parent);
         this.mHorizontalSlideLayout = (ViewGroup) view.findViewById(R.id.dual_camera_zoom_slider_container);
         this.mZoomRatioToggleView = (ZoomRatioToggleView) view.findViewById(R.id.zoom_ratio_toggle_button);
@@ -525,26 +477,23 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
         } else {
             this.mZoomRatioToggleAnimator.setDuration(100);
         }
-        this.mZoomRatioToggleAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mZoomRatioToggleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
-                StringBuilder sb = new StringBuilder();
-                sb.append("onAnimationUpdate(): zoom ratio = ");
-                sb.append(floatValue);
-                Log.d(FragmentDualCameraAdjust.TAG, sb.toString());
+                Log.d(FragmentDualCameraAdjust.TAG, "onAnimationUpdate(): zoom ratio = " + floatValue);
                 FragmentDualCameraAdjust.this.requestZoomRatio(floatValue, 0);
             }
         });
-        this.mZoomRatioToggleAnimator.addListener(new AnimatorListener() {
+        this.mZoomRatioToggleAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
                 FragmentDualCameraAdjust.this.notifyZooming(false);
-                FragmentDualCameraAdjust.this.mIsZoomTo2X = false;
+                boolean unused = FragmentDualCameraAdjust.this.mIsZoomTo2X = false;
                 FragmentDualCameraAdjust.this.notifyZoom2X(false);
             }
 
             public void onAnimationEnd(Animator animator) {
                 FragmentDualCameraAdjust.this.notifyZooming(false);
-                FragmentDualCameraAdjust.this.mIsZoomTo2X = false;
+                boolean unused = FragmentDualCameraAdjust.this.mIsZoomTo2X = false;
                 FragmentDualCameraAdjust.this.notifyZoom2X(false);
             }
 
@@ -572,15 +521,18 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
         this.mZoomSliderLayoutHeight = this.mHorizontalSlideLayout.getLayoutParams().height;
         this.mZoomSwitchLayoutHeight = this.mZoomRatioToggleView.getLayoutParams().height;
         adjustViewBackground(this.mHorizontalSlideLayout, this.mCurrentMode);
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
     }
 
     public boolean isInteractive() {
         if (!isEnableClick()) {
             return false;
         }
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
-        return cameraAction == null || (!cameraAction.isDoingAction() && !cameraAction.isRecording());
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        if (cameraAction != null) {
+            return !cameraAction.isDoingAction() && !cameraAction.isRecording();
+        }
+        return true;
     }
 
     public boolean isSlideVisible() {
@@ -600,7 +552,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
 
     public void notifyAfterFrameAvailable(int i) {
         super.notifyAfterFrameAvailable(i);
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
     }
 
     public void notifyDataChanged(int i, int i2) {
@@ -629,16 +581,8 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     public void onClick(ZoomRatioView zoomRatioView) {
         int zoomRatioIndex = zoomRatioView.getZoomRatioIndex();
         if (!isSlideVisible()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onClick(): current zoom ratio index = ");
-            sb.append(zoomRatioIndex);
-            String sb2 = sb.toString();
-            String str = TAG;
-            Log.d(str, sb2);
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("onClick(): current zoom ratio value = ");
-            sb3.append(this.mZoomRatio);
-            Log.d(str, sb3.toString());
+            Log.d(TAG, "onClick(): current zoom ratio index = " + zoomRatioIndex);
+            Log.d(TAG, "onClick(): current zoom ratio value = " + this.mZoomRatio);
             if (this.mZoomRatioToggleView.isSuppressed()) {
                 if (CameraSettings.isZoomByCameraSwitchingSupported()) {
                     switchCameraLens();
@@ -661,9 +605,9 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
                     }
                 }
             } else if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
-                ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+                ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
                 if (configChanges != null) {
-                    CameraClickObservable cameraClickObservable = (CameraClickObservable) ModeCoordinatorImpl.getInstance().getAttachProtocol(227);
+                    ModeProtocol.CameraClickObservable cameraClickObservable = (ModeProtocol.CameraClickObservable) ModeCoordinatorImpl.getInstance().getAttachProtocol(227);
                     if (cameraClickObservable != null) {
                         cameraClickObservable.subscribe(167);
                     }
@@ -690,7 +634,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             ViberatorContext.getInstance(getContext().getApplicationContext()).performSelectZoomNormal();
         }
         onBackEvent(5);
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.reConfigQrCodeTip();
         }
@@ -700,11 +644,11 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
         initSlideZoomView(new ComponentManuallyDualZoom(DataRepository.dataItemRunning()));
         showSlideView();
         this.mPassTouchFromZoomButtonToSlide = true;
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.hideQrCodeTip();
         }
-        ManuallyValueChanged manuallyValueChanged = (ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
+        ModeProtocol.ManuallyValueChanged manuallyValueChanged = (ModeProtocol.ManuallyValueChanged) ModeCoordinatorImpl.getInstance().getAttachProtocol(174);
         if (manuallyValueChanged != null) {
             manuallyValueChanged.updateSATIsZooming(true);
         }
@@ -736,14 +680,14 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
                 } else {
                     motionEvent.setLocation(((float) this.mZoomSliderViewMiddleX) + (motionEvent.getX() - this.mTouchDownX), motionEvent.getY());
                     this.mHorizontalSlideView.onTouchEvent(motionEvent);
-                    this.mZoomSliderViewTouchListener.onTouch(null, motionEvent);
+                    this.mZoomSliderViewTouchListener.onTouch((View) null, motionEvent);
                 }
             }
             return true;
         }
         motionEvent.setLocation(((float) this.mZoomSliderViewMiddleX) + (motionEvent.getX() - this.mTouchDownX), motionEvent.getY());
         this.mHorizontalSlideView.onTouchEvent(motionEvent);
-        this.mZoomSliderViewTouchListener.onTouch(null, motionEvent);
+        this.mZoomSliderViewTouchListener.onTouch((View) null, motionEvent);
         this.mPassTouchFromZoomButtonToSlide = false;
         this.mTouchDownX = -1.0f;
         return true;
@@ -761,24 +705,16 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
         }
         this.mIsRecordingOrPausing = false;
         initiateZoomRatio();
-        ViewSpec viewSpecForCapturingMode = getViewSpecForCapturingMode(this.mCurrentMode);
+        ZoomRatioToggleView.ViewSpec viewSpecForCapturingMode = getViewSpecForCapturingMode(this.mCurrentMode);
         if (viewSpecForCapturingMode.visibility == 1) {
             onBackEvent(4);
-            int zoomingSourceIdentity = HybridZoomingSystem.getZoomingSourceIdentity();
-            String str = TAG;
-            if (zoomingSourceIdentity != 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("provideAnimateElement(): getZoomingSourceIdentity: ");
-                sb.append(zoomingSourceIdentity);
-                Log.d(str, sb.toString());
+            if (HybridZoomingSystem.getZoomingSourceIdentity() != 0) {
+                Log.d(TAG, "provideAnimateElement(): getZoomingSourceIdentity: " + r2);
                 z = true;
             } else {
                 z = false;
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("provideAnimateElement(): initialized zoom ratio: ");
-            sb2.append(this.mZoomRatio);
-            Log.d(str, sb2.toString());
+            Log.d(TAG, "provideAnimateElement(): initialized zoom ratio: " + this.mZoomRatio);
             this.mZoomRatioToggleView.onDatasetChange(this.mCurrentMode, this.mIsStandaloneMacroMode);
             this.mZoomRatioToggleView.setRotation((float) this.mDegree);
             this.mZoomRatioToggleView.setSuppressed(viewSpecForCapturingMode.suppress);
@@ -831,7 +767,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(182, this);
         registerBackStack(modeCoordinator, this);
@@ -874,12 +810,12 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
                     this.mZoomRatioToggleView.setVisibility(0);
                 }
                 this.mZoomRatioToggleView.setImmersive(true);
-            } else {
-                updateZoomRatio(-1);
-                this.mZoomRatioToggleView.setImmersive(false);
-                if (z2) {
-                    this.mZoomOutAnimator.start();
-                }
+                return;
+            }
+            updateZoomRatio(-1);
+            this.mZoomRatioToggleView.setImmersive(false);
+            if (z2) {
+                this.mZoomOutAnimator.start();
             }
         }
     }
@@ -894,9 +830,9 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         modeCoordinator.detachProtocol(182, this);
         unRegisterBackStack(modeCoordinator, this);
         if (b.isSupportedOpticalZoom() || HybridZoomingSystem.IS_3_OR_MORE_SAT) {
@@ -914,10 +850,7 @@ public class FragmentDualCameraAdjust extends BaseFragment implements ToggleStat
             } else if (ComponentManuallyDualLens.LENS_TELE.equals(cameraLensType)) {
                 this.mZoomRatio = 2.0f;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("updateZoomRatio(): Unknown camera lens type: ");
-                sb.append(cameraLensType);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("updateZoomRatio(): Unknown camera lens type: " + cameraLensType);
             }
         } else {
             this.mZoomRatio = CameraSettings.readZoom();

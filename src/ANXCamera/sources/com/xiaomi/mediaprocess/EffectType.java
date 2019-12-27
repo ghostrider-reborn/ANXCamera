@@ -29,7 +29,6 @@ public enum EffectType {
     }
 
     public static EffectType int2enum(int i) {
-        EffectType[] values;
         EffectType effectType = BasicTransitionFilter2;
         for (EffectType effectType2 : values()) {
             if (effectType2.ordinal() == i) {

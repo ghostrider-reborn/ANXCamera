@@ -1,6 +1,6 @@
 package com.mi.config;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import com.android.camera.AutoLockManager;
@@ -96,30 +96,25 @@ public class b {
     public static final boolean sn = "ugg".equals(km);
     public static final boolean tm = Build.IS_MITWO;
     public static final boolean tn = "vince".equals(km);
-    public static final boolean um;
+    public static final boolean um = "pisces".equals(km);
     public static final boolean un = "whyred".equals(km);
     public static final boolean vm = ("cancro".equals(km) && Build.MODEL.startsWith("MI 3"));
     public static final boolean vn = "beryllium".equals(km);
     public static final boolean wm = (vm || um);
     public static final boolean wn = "violet".equals(km);
     public static final boolean xm = (Build.IS_HONGMI_TWO && !Build.IS_HONGMI_TWO_A && !Build.IS_HONGMI_TWO_S);
-    public static final boolean xn;
+    public static final boolean xn = "pisces".equals(km);
     public static final boolean ym = Build.IS_HONGMI_TWO_S;
     public static final boolean yn = "hammerhead".equals(km);
     public static final boolean zm = (xm || ym);
     public static final boolean zn = "santoni".equals(km);
 
     static {
-        String str = "pisces";
-        um = str.equals(km);
         boolean z = true;
-        if (!Build.IS_HONGMI_TWOX) {
-            if (!"HM2014816".equals(km)) {
-                z = false;
-            }
+        if (!Build.IS_HONGMI_TWOX && !"HM2014816".equals(km)) {
+            z = false;
         }
         Jm = z;
-        xn = str.equals(km);
     }
 
     public static boolean Ai() {
@@ -275,14 +270,7 @@ public class b {
     }
 
     public static String Sh() {
-        if (_h()) {
-            return "_l";
-        }
-        if (qi()) {
-            return "_in";
-        }
-        String str = "";
-        return !DataRepository.dataItemFeature().getBoolean(c.Ls, false) ? str : (android.os.Build.MODEL.contains("BROWN EDITION") || android.os.Build.MODEL.contains("Explorer")) ? "_a" : android.os.Build.MODEL.contains("ROY") ? "_b" : ai() ? "_s" : (ji() || ii()) ? "_global" : str;
+        return _h() ? "_l" : qi() ? "_in" : !DataRepository.dataItemFeature().getBoolean(c.Ls, false) ? "" : (android.os.Build.MODEL.contains("BROWN EDITION") || android.os.Build.MODEL.contains("Explorer")) ? "_a" : android.os.Build.MODEL.contains("ROY") ? "_b" : ai() ? "_s" : (ji() || ii()) ? "_global" : "";
     }
 
     public static boolean Si() {
@@ -366,12 +354,7 @@ public class b {
     }
 
     public static boolean ai() {
-        if (km.equalsIgnoreCase("lavender")) {
-            if ("India_48_5".equalsIgnoreCase(SystemProperties.get("ro.boot.hwc"))) {
-                return true;
-            }
-        }
-        return false;
+        return km.equalsIgnoreCase("lavender") && "India_48_5".equalsIgnoreCase(SystemProperties.get("ro.boot.hwc"));
     }
 
     public static boolean aj() {
@@ -387,7 +370,7 @@ public class b {
     }
 
     public static boolean ci() {
-        return Ai() && 21 <= VERSION.SDK_INT;
+        return Ai() && 21 <= Build.VERSION.SDK_INT;
     }
 
     public static boolean cj() {
@@ -411,10 +394,7 @@ public class b {
     }
 
     public static boolean fi() {
-        if (!un) {
-            return d.getBoolean(d.jp, false);
-        }
-        return "India".equals(SystemProperties.get("ro.boot.hwc"));
+        return un ? "India".equals(SystemProperties.get("ro.boot.hwc")) : d.getBoolean(d.jp, false);
     }
 
     public static boolean fj() {
@@ -430,7 +410,7 @@ public class b {
     }
 
     public static boolean gi() {
-        return !Bm && !Km && !Build.IS_HONGMI_TWOX && !vm && !Cm && !xm && !ym && !Am && !tm && !IS_MI2A && !wm && d.getBoolean(d.tp, true);
+        return !Bm && !Km && !miui.os.Build.IS_HONGMI_TWOX && !vm && !Cm && !xm && !ym && !Am && !tm && !IS_MI2A && !wm && d.getBoolean(d.tp, true);
     }
 
     public static boolean gj() {
@@ -465,14 +445,14 @@ public class b {
     }
 
     public static boolean isMTKPlatform() {
-        if (!((Optional) Yn.get()).isPresent()) {
+        if (!Yn.get().isPresent()) {
             synchronized (Yn) {
-                if (!((Optional) Yn.get()).isPresent()) {
+                if (!Yn.get().isPresent()) {
                     Yn.set(Optional.of(Boolean.valueOf(mm.equals(d.getString(d.VENDOR)))));
                 }
             }
         }
-        return ((Boolean) ((Optional) Yn.get()).get()).booleanValue();
+        return ((Boolean) Yn.get().get()).booleanValue();
     }
 
     public static boolean isPad() {
@@ -543,12 +523,7 @@ public class b {
     }
 
     public static boolean qi() {
-        if (vn) {
-            if ("India".equalsIgnoreCase(SystemProperties.get("ro.boot.hwc"))) {
-                return true;
-            }
-        }
-        return false;
+        return vn && "India".equalsIgnoreCase(SystemProperties.get("ro.boot.hwc"));
     }
 
     public static boolean qj() {
@@ -611,7 +586,7 @@ public class b {
     }
 
     public static boolean xi() {
-        return !vm && !Lm && !Build.IS_HONGMI_TWOX && !Bm && d.getBoolean(d.zp, true);
+        return !vm && !Lm && !miui.os.Build.IS_HONGMI_TWOX && !Bm && d.getBoolean(d.zp, true);
     }
 
     public static boolean xj() {

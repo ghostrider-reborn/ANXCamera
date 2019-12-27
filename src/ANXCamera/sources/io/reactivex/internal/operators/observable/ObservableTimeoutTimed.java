@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.internal.disposables.ObserverFullArbiter;
@@ -41,7 +40,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
         Disposable s;
         final long timeout;
         final TimeUnit unit;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         final class TimeoutTask implements Runnable {
             private final long idx;
@@ -62,7 +61,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
             }
         }
 
-        TimeoutTimedObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Worker worker2) {
+        TimeoutTimedObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Scheduler.Worker worker2) {
             this.actual = observer;
             this.timeout = j;
             this.unit = timeUnit;
@@ -113,7 +112,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void scheduleTimeout(long j) {
             Disposable disposable = (Disposable) get();
             if (disposable != null) {
@@ -135,7 +134,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
         Disposable s;
         final long timeout;
         final TimeUnit unit;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
         final class SubscribeNext implements Runnable {
             private final long idx;
@@ -156,7 +155,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
             }
         }
 
-        TimeoutTimedOtherObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Worker worker2, ObservableSource<? extends T> observableSource) {
+        TimeoutTimedOtherObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Scheduler.Worker worker2, ObservableSource<? extends T> observableSource) {
             this.actual = observer;
             this.timeout = j;
             this.unit = timeUnit;
@@ -212,7 +211,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void scheduleTimeout(long j) {
             Disposable disposable = (Disposable) get();
             if (disposable != null) {
@@ -223,7 +222,7 @@ public final class ObservableTimeoutTimed<T> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             this.other.subscribe(new FullArbiterObserver(this.arbiter));
         }

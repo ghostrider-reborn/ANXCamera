@@ -8,7 +8,6 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,12 +20,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import com.android.camera.HybridZoomingSystem;
 import com.android.camera.R;
@@ -38,7 +33,7 @@ import miui.maml.animation.interpolater.QuartEaseOutInterpolater;
 import miui.maml.animation.interpolater.SineEaseInOutInterpolater;
 import miui.view.animation.QuadraticEaseOutInterpolator;
 
-public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, OnLongClickListener {
+public class ZoomRatioToggleView extends ViewGroup implements View.OnClickListener, View.OnLongClickListener {
     private static final int DEFAULT_DURATION_OF_FADEOUT_ANIMATION = 400;
     private static final int DEFAULT_DURATION_OF_MOVING_ANIMATION = 260;
     private static final int INVALID_INDEX = -1;
@@ -123,7 +118,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
     }
 
     public ZoomRatioToggleView(@NonNull Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public ZoomRatioToggleView(@NonNull Context context, @Nullable AttributeSet attributeSet) {
@@ -150,22 +145,14 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
         this.mIndexUpdater = new Runnable() {
             public void run() {
                 int opticalZoomRatioIndex = HybridZoomingSystem.getOpticalZoomRatioIndex(ZoomRatioToggleView.this.mCurrentModule, ZoomRatioToggleView.this.mZoomRatio);
-                boolean access$200 = ZoomRatioToggleView.this.isAnimating();
-                String str = ZoomRatioToggleView.TAG;
-                if (access$200) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("postpone index updater again: ");
-                    sb.append(opticalZoomRatioIndex);
-                    ZoomRatioToggleView.access$300(str, sb.toString());
+                if (ZoomRatioToggleView.this.isAnimating()) {
+                    ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "postpone index updater again: " + opticalZoomRatioIndex);
                     ZoomRatioToggleView.this.post(this);
                     return;
                 }
-                ZoomRatioToggleView.access$300(str, "Macro mode not change");
+                ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "Macro mode not change");
                 ZoomRatioToggleView.this.setSelectedChildIndex(opticalZoomRatioIndex, false);
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("run index updater: ");
-                sb2.append(opticalZoomRatioIndex);
-                ZoomRatioToggleView.access$300(str, sb2.toString());
+                ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "run index updater: " + opticalZoomRatioIndex);
             }
         };
         this.mInactiveTask = new Runnable() {
@@ -334,20 +321,18 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
         if (getContext() == null) {
             return false;
         }
-        boolean z = true;
-        if (getResources().getConfiguration().getLayoutDirection() != 1) {
-            z = false;
-        }
-        return z;
+        return getResources().getConfiguration().getLayoutDirection() == 1;
     }
 
     /* access modifiers changed from: private */
     public void longClickChild(int i) {
-        if (i == this.mCurrentSelectedChildIndex && this.mLongClickAllowed && !((this.mIsImmersive && !this.mIsSuppressed) || i == HybridZoomingSystem.getMacroZoomRatioIndex(this.mCurrentModule) || this.mActionListener == null)) {
-            View childAt = getChildAt(i);
-            if (childAt != null) {
-                performHapticFeedback(0);
-                this.mActionListener.onLongClick((ZoomRatioView) childAt);
+        if (i == this.mCurrentSelectedChildIndex && this.mLongClickAllowed) {
+            if ((!this.mIsImmersive || this.mIsSuppressed) && i != HybridZoomingSystem.getMacroZoomRatioIndex(this.mCurrentModule) && this.mActionListener != null) {
+                View childAt = getChildAt(i);
+                if (childAt != null) {
+                    performHapticFeedback(0);
+                    this.mActionListener.onLongClick((ZoomRatioView) childAt);
+                }
             }
         }
     }
@@ -355,12 +340,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
     private void moveTo(int i, int i2, int i3, boolean z) {
         int i4 = i;
         int i5 = i3;
-        StringBuilder sb = new StringBuilder();
-        sb.append("move E: target = ");
-        sb.append(i4);
-        sb.append(" V.S. current = ");
-        sb.append(this.mCurrentSelectedChildIndex);
-        sb.toString();
+        "move E: target = " + i4 + " V.S. current = " + this.mCurrentSelectedChildIndex;
         if (i4 != -1 && i4 != this.mCurrentSelectedChildIndex && !this.mIsSuppressed) {
             removeCallbacks(this.mIndexUpdater);
             int abs = Math.abs(i4 - this.mCurrentSelectedChildIndex);
@@ -392,37 +372,29 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
             final boolean z2 = z;
             AnonymousClass3 r0 = new AnimatorListenerAdapter() {
                 public void onAnimationEnd(Animator animator) {
-                    String str = ZoomRatioToggleView.TAG;
-                    ZoomRatioToggleView.access$300(str, "onAnimationEnd()");
+                    ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "onAnimationEnd()");
                     ZoomRatioView zoomRatioView = zoomRatioView2;
                     if (zoomRatioView != null) {
                         zoomRatioView2.setZoomRatio(HybridZoomingSystem.getOpticalZoomRatioAt(ZoomRatioToggleView.this.mCurrentModule, zoomRatioView.getZoomRatioIndex()));
                     }
                     if (z2 && !ZoomRatioToggleView.this.mIsImmersive && !ZoomRatioToggleView.this.mIsSuppressed && ZoomRatioToggleView.this.isEnabled()) {
-                        ZoomRatioToggleView.access$300(str, "onAnimationEnd(): startFadeInAnimation");
+                        ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "onAnimationEnd(): startFadeInAnimation");
                         ZoomRatioToggleView.this.startFadeInAnimation();
                     }
                 }
 
                 public void onAnimationStart(Animator animator) {
-                    String str = ZoomRatioToggleView.TAG;
-                    ZoomRatioToggleView.access$300(str, "onAnimationStart()");
+                    ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "onAnimationStart()");
                     ZoomRatioView zoomRatioView = zoomRatioView3;
                     if (zoomRatioView != null) {
                         int zoomRatioIndex = zoomRatioView.getZoomRatioIndex();
                         int i = i9;
                         if (i == 1) {
                             float opticalZoomRatioAt = HybridZoomingSystem.getOpticalZoomRatioAt(ZoomRatioToggleView.this.mCurrentModule, zoomRatioIndex);
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("onAnimationStart(): click, set zoom ratio to ");
-                            sb.append(opticalZoomRatioAt);
-                            ZoomRatioToggleView.access$300(str, sb.toString());
+                            ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "onAnimationStart(): click, set zoom ratio to " + opticalZoomRatioAt);
                             zoomRatioView3.setZoomRatio(opticalZoomRatioAt);
                         } else if (i != 2) {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("onAnimationStart(): others, set zoom ratio to ");
-                            sb2.append(ZoomRatioToggleView.this.mZoomRatio);
-                            ZoomRatioToggleView.access$300(str, sb2.toString());
+                            ZoomRatioToggleView.access$300(ZoomRatioToggleView.TAG, "onAnimationStart(): others, set zoom ratio to " + ZoomRatioToggleView.this.mZoomRatio);
                             zoomRatioView3.setZoomRatio(ZoomRatioToggleView.this.mZoomRatio);
                         }
                         int i2 = i9;
@@ -435,10 +407,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
             animatorSet.addListener(r0);
             this.mMovingAnimatorSet.playTogether(arrayList);
             this.mMovingAnimatorSet.start();
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("start moving to: ");
-            sb2.append(i4);
-            sb2.toString();
+            "start moving to: " + i4;
         } else if (i4 == this.mCurrentSelectedChildIndex) {
             if (z && !this.mIsImmersive && !this.mIsSuppressed && isEnabled()) {
                 startFadeInAnimation();
@@ -454,16 +423,10 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
                 }
             }
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("moving ignored: ");
-            sb3.append(i4);
-            sb3.toString();
+            "moving ignored: " + i4;
         }
         announceCurrentZoomRatioForAccessibility();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("move X: ");
-        sb4.append(i4);
-        sb4.toString();
+        "move X: " + i4;
     }
 
     /* access modifiers changed from: private */
@@ -562,14 +525,14 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
                 removeAllViews();
                 int i2 = 0;
                 while (i2 < length) {
-                    ZoomRatioView zoomRatioView = (ZoomRatioView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_ratio_item_view, null);
+                    ZoomRatioView zoomRatioView = (ZoomRatioView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_ratio_item_view, (ViewGroup) null);
                     zoomRatioView.getIconView().setVisibility(0);
                     zoomRatioView.setZoomRatioIcon(supportedOpticalZoomRatios[i2]);
                     zoomRatioView.getTextView().setVisibility(0);
                     zoomRatioView.setZoomRatio(supportedOpticalZoomRatios[i2]);
                     zoomRatioView.setZoomRatioIndex(i2);
                     zoomRatioView.setIconify(i2 != defaultOpticalZoomRatioIndex);
-                    addView(zoomRatioView, new LayoutParams(-2, -2));
+                    addView(zoomRatioView, new ViewGroup.LayoutParams(-2, -2));
                     i2++;
                 }
                 this.mCurrentSelectedChildIndex = defaultOpticalZoomRatioIndex;
@@ -587,7 +550,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
         int save = canvas.save();
         canvas.scale(this.mScaleX, this.mScaleY, ((float) getWidth()) / 2.0f, ((float) getHeight()) / 2.0f);
         this.mPaint.setColor(this.mColor);
-        this.mPaint.setStyle(Style.FILL);
+        this.mPaint.setStyle(Paint.Style.FILL);
         Canvas canvas2 = canvas;
         float f2 = (float) width;
         float f3 = (float) height;
@@ -596,7 +559,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
         canvas2.drawOval(f2, f3, f4, f5, this.mPaint);
         this.mPaint.setStrokeWidth((float) this.mStrokeWidth);
         this.mPaint.setColor(this.mStrokeColor);
-        this.mPaint.setStyle(Style.STROKE);
+        this.mPaint.setStyle(Paint.Style.STROKE);
         canvas2.drawOval(f2, f3, f4, f5, this.mPaint);
         canvas.restoreToCount(save);
         super.onDraw(canvas);
@@ -609,7 +572,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
         this.mZoomRatio = HybridZoomingSystem.getOpticalZoomRatioAt(this.mCurrentModule, this.mCurrentSelectedChildIndex);
         int length = HybridZoomingSystem.getSupportedOpticalZoomRatios(this.mCurrentModule).length;
         if (length > 0) {
-            this.mOverlayView = (ZoomRatioView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_ratio_item_view, null);
+            this.mOverlayView = (ZoomRatioView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_ratio_item_view, (ViewGroup) null);
             this.mOverlayView.getTextView().setVisibility(0);
             this.mOverlayView.setIconify(false);
             int i = this.mCurrentSelectedChildIndex;
@@ -617,14 +580,14 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
                 removeAllViews();
                 int i2 = 0;
                 while (i2 < length) {
-                    ZoomRatioView zoomRatioView = (ZoomRatioView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_ratio_item_view, null);
+                    ZoomRatioView zoomRatioView = (ZoomRatioView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_ratio_item_view, (ViewGroup) null);
                     zoomRatioView.getIconView().setVisibility(0);
                     zoomRatioView.setZoomRatioIcon(HybridZoomingSystem.getOpticalZoomRatioAt(this.mCurrentModule, i2));
                     zoomRatioView.getTextView().setVisibility(0);
                     zoomRatioView.setZoomRatio(HybridZoomingSystem.getOpticalZoomRatioAt(this.mCurrentModule, i2));
                     zoomRatioView.setZoomRatioIndex(i2);
                     zoomRatioView.setIconify(i2 != i);
-                    addView(zoomRatioView, new LayoutParams(-2, -2));
+                    addView(zoomRatioView, new ViewGroup.LayoutParams(-2, -2));
                     i2++;
                 }
             }
@@ -634,10 +597,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
     public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
         int action = motionEvent.getAction();
         if (action == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onInterceptTouchEvent() DOWN: ");
-            sb.append(this.mIsImmersive);
-            sb.toString();
+            "onInterceptTouchEvent() DOWN: " + this.mIsImmersive;
             if ((this.mIsImmersive || this.mIsSuppressed) && getContainingChildIndex((int) motionEvent.getX(), (int) motionEvent.getY()) != this.mCurrentSelectedChildIndex) {
                 return false;
             }
@@ -655,10 +615,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
             endTouch(0.0f);
             return false;
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("onInterceptTouchEvent() MOVE: ");
-            sb2.append(this.mIsImmersive);
-            sb2.toString();
+            "onInterceptTouchEvent() MOVE: " + this.mIsImmersive;
             return startScrollIfNeeded(motionEvent);
         }
     }
@@ -671,13 +628,11 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
             int defaultOpticalZoomRatioIndex = HybridZoomingSystem.getDefaultOpticalZoomRatioIndex(this.mCurrentModule);
             boolean isLayoutRTL = isLayoutRTL();
             if (!isLayoutRTL) {
-                int width = getWidth() / 2;
                 int i6 = this.mItemWidth;
-                i5 = (width - (i6 / 2)) - (defaultOpticalZoomRatioIndex * i6);
+                i5 = ((getWidth() / 2) - (i6 / 2)) - (defaultOpticalZoomRatioIndex * i6);
             } else {
-                int width2 = getWidth() / 2;
                 int i7 = this.mItemWidth;
-                i5 = (width2 - (i7 / 2)) + (defaultOpticalZoomRatioIndex * i7);
+                i5 = ((getWidth() / 2) - (i7 / 2)) + (defaultOpticalZoomRatioIndex * i7);
             }
             int height = (getHeight() / 2) - (this.mItemHeight / 2);
             int i8 = i5;
@@ -685,13 +640,13 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
                 getChildAt(i9).layout(i8, height, this.mItemWidth + i8, this.mItemHeight + height);
                 i8 = !isLayoutRTL ? i8 + this.mItemWidth : i8 - this.mItemWidth;
             }
-            int width3 = (getWidth() / 2) - (this.mItemWidth / 2);
+            int width = (getWidth() / 2) - (this.mItemWidth / 2);
             int height2 = (getHeight() / 2) - (this.mItemHeight / 2);
-            int width4 = (getWidth() / 2) + (this.mItemWidth / 2);
+            int width2 = (getWidth() / 2) + (this.mItemWidth / 2);
             int height3 = (getHeight() / 2) + (this.mItemHeight / 2);
-            this.mOverlayView.measure(MeasureSpec.makeMeasureSpec(this.mItemWidth, 1073741824), MeasureSpec.makeMeasureSpec(this.mItemHeight, 1073741824));
-            this.mOverlayView.getTextView().measure(MeasureSpec.makeMeasureSpec(this.mItemWidth, 1073741824), MeasureSpec.makeMeasureSpec(this.mItemHeight, 1073741824));
-            this.mOverlayView.layout(width3, height2, width4, height3);
+            this.mOverlayView.measure(View.MeasureSpec.makeMeasureSpec(this.mItemWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(this.mItemHeight, 1073741824));
+            this.mOverlayView.getTextView().measure(View.MeasureSpec.makeMeasureSpec(this.mItemWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(this.mItemHeight, 1073741824));
+            this.mOverlayView.layout(width, height2, width2, height3);
             this.mOverlayView.getTextView().layout(0, 0, this.mItemWidth, this.mItemHeight);
         }
     }
@@ -741,10 +696,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
             float f2 = 0.0f;
             if (action != 1) {
                 if (action == 2) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onTouchEvent() MOVE: ");
-                    sb.append(this.mIsImmersive);
-                    sb.toString();
+                    "onTouchEvent() MOVE: " + this.mIsImmersive;
                     if (this.mIsImmersive && this.mLongClickAllowed) {
                         ToggleStateListener toggleStateListener = this.mActionListener;
                         if (toggleStateListener != null && toggleStateListener.isInteractive() && this.mActionListener.onTouch(this, motionEvent)) {
@@ -761,10 +713,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
                     endTouch(0.0f);
                 }
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("onTouchEvent() UP: ");
-            sb2.append(this.mIsImmersive);
-            sb2.toString();
+            "onTouchEvent() UP: " + this.mIsImmersive;
             if (this.mIsImmersive && this.mLongClickAllowed) {
                 ToggleStateListener toggleStateListener2 = this.mActionListener;
                 if (toggleStateListener2 != null && toggleStateListener2.isInteractive() && this.mActionListener.onTouch(this, motionEvent)) {
@@ -781,10 +730,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
             }
             endTouch(f2);
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("onTouchEvent() DOWN: ");
-            sb3.append(this.mIsImmersive);
-            sb3.toString();
+            "onTouchEvent() DOWN: " + this.mIsImmersive;
             if ((this.mIsImmersive || this.mIsSuppressed) && getContainingChildIndex((int) motionEvent.getX(), (int) motionEvent.getY()) != this.mCurrentSelectedChildIndex) {
                 return false;
             }
@@ -819,22 +765,13 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
 
     public void setEnabled(boolean z) {
         super.setEnabled(z);
-        StringBuilder sb = new StringBuilder();
-        sb.append("setEnabled(): ");
-        sb.append(z);
-        sb.toString();
+        "setEnabled(): " + z;
     }
 
     public void setImmersive(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setImmersive(): ");
-        sb.append(z);
-        sb.toString();
+        "setImmersive(): " + z;
         if (z == this.mIsImmersive) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("setImmersive() ignored: ");
-            sb2.append(z);
-            sb2.toString();
+            "setImmersive() ignored: " + z;
             return;
         }
         this.mIsImmersive = z;
@@ -897,10 +834,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
     }
 
     public void setSuppressed(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSuppressed(): ");
-        sb.append(z);
-        sb.toString();
+        "setSuppressed(): " + z;
         if (z != this.mIsSuppressed) {
             this.mIsSuppressed = z;
             if (z) {
@@ -933,10 +867,7 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
 
     public void setVisibility(int i) {
         super.setVisibility(i);
-        StringBuilder sb = new StringBuilder();
-        sb.append("setVisibility(): ");
-        sb.append(Util.viewVisibilityToString(i));
-        sb.toString();
+        "setVisibility(): " + Util.viewVisibilityToString(i);
     }
 
     public void setZoomRatio(float f2, int i) {
@@ -946,26 +877,11 @@ public class ZoomRatioToggleView extends ViewGroup implements OnClickListener, O
                 opticalZoomRatioIndex = HybridZoomingSystem.getMacroZoomRatioIndex(this.mCurrentModule);
                 f2 = (float) HybridZoomingSystem.getOpticalZoomRatioIndex(this.mCurrentModule, (float) opticalZoomRatioIndex);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("setZoomRatio(): zooming action = ");
-            sb.append(ZoomingAction.toString(i));
-            sb.toString();
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("setZoomRatio():  current index = ");
-            sb2.append(this.mCurrentSelectedChildIndex);
-            sb2.toString();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("setZoomRatio():   current zoom = ");
-            sb3.append(this.mZoomRatio);
-            sb3.toString();
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("setZoomRatio():   target index = ");
-            sb4.append(opticalZoomRatioIndex);
-            sb4.toString();
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("setZoomRatio():    target zoom = ");
-            sb5.append(f2);
-            sb5.toString();
+            "setZoomRatio(): zooming action = " + ZoomingAction.toString(i);
+            "setZoomRatio():  current index = " + this.mCurrentSelectedChildIndex;
+            "setZoomRatio():   current zoom = " + this.mZoomRatio;
+            "setZoomRatio():   target index = " + opticalZoomRatioIndex;
+            "setZoomRatio():    target zoom = " + f2;
             this.mZoomRatio = f2;
             if (this.mIsSuppressed) {
                 getOverlayView().setZoomRatio(this.mZoomRatio);

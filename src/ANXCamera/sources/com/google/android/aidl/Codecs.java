@@ -1,9 +1,9 @@
 package com.google.android.aidl;
 
+import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class Codecs {
         return parcel.readHashMap(CLASS_LOADER);
     }
 
-    public static <T extends Parcelable> T createParcelable(Parcel parcel, Creator<T> creator) {
+    public static <T extends Parcelable> T createParcelable(Parcel parcel, Parcelable.Creator<T> creator) {
         if (parcel.readInt() == 0) {
             return null;
         }
@@ -93,7 +93,7 @@ public class Codecs {
 
     public static void writeStrongBinder(Parcel parcel, IInterface iInterface) {
         if (iInterface == null) {
-            parcel.writeStrongBinder(null);
+            parcel.writeStrongBinder((IBinder) null);
         } else {
             parcel.writeStrongBinder(iInterface.asBinder());
         }

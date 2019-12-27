@@ -5,22 +5,18 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.transition.TransitionInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import com.android.camera.R;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.BaseFragmentDelegate;
 import com.android.camera.fragment.BaseFragmentPagerAdapter;
 import com.android.camera.fragment.FragmentUtils;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.ArrayList;
 
-public class FragmentVVPreview extends BaseFragment implements OnClickListener, HandleBackTrace {
+public class FragmentVVPreview extends BaseFragment implements View.OnClickListener, ModeProtocol.HandleBackTrace {
     private BaseFragmentPagerAdapter mPreviewAdapter;
     private int mPreviewIndex;
     private ViewGroup mPreviewLayout;
@@ -31,11 +27,11 @@ public class FragmentVVPreview extends BaseFragment implements OnClickListener, 
     public VVList mVVList;
 
     private void initViewPager() {
-        LayoutParams layoutParams = this.mPreviewViewPager.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = this.mPreviewViewPager.getLayoutParams();
         int dimensionPixelSize = getResources().getDimensionPixelSize(R.dimen.vv_preview_image_height);
         int i = (int) ((((float) dimensionPixelSize) / 9.0f) * 16.0f);
         layoutParams.width = i;
-        this.mPreviewViewPager.addOnPageChangeListener(new OnPageChangeListener() {
+        this.mPreviewViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public void onPageScrollStateChanged(int i) {
             }
 
@@ -94,7 +90,7 @@ public class FragmentVVPreview extends BaseFragment implements OnClickListener, 
     }
 
     public boolean onBackEvent(int i) {
-        transformToGallery(0, null);
+        transformToGallery(0, (View) null);
         return true;
     }
 
@@ -108,7 +104,7 @@ public class FragmentVVPreview extends BaseFragment implements OnClickListener, 
         super.onCreate(bundle);
         postponeEnterTransition();
         setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(17760257));
-        setSharedElementReturnTransition(null);
+        setSharedElementReturnTransition((Object) null);
     }
 
     public void onPause() {
@@ -116,7 +112,7 @@ public class FragmentVVPreview extends BaseFragment implements OnClickListener, 
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         registerBackStack(modeCoordinator, this);
     }
@@ -131,7 +127,7 @@ public class FragmentVVPreview extends BaseFragment implements OnClickListener, 
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         unRegisterBackStack(modeCoordinator, this);
     }

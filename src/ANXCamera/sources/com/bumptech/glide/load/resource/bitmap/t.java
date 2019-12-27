@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.annotation.TargetApi;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory.Options;
-import android.os.Build.VERSION;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
 import java.io.File;
@@ -27,18 +27,12 @@ final class t {
         if (i >= 50) {
             boolean z = false;
             this.jj = 0;
-            int length = mj.list().length;
-            if (length < 700) {
+            if (mj.list().length < 700) {
                 z = true;
             }
             this.kj = z;
             if (!this.kj && Log.isLoggable("Downsampler", 5)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Excluding HARDWARE bitmap config because we're over the file descriptor limit, file descriptors ");
-                sb.append(length);
-                sb.append(", limit ");
-                sb.append(700);
-                Log.w("Downsampler", sb.toString());
+                Log.w("Downsampler", "Excluding HARDWARE bitmap config because we're over the file descriptor limit, file descriptors " + r2 + ", limit " + 700);
             }
         }
         return this.kj;
@@ -55,15 +49,15 @@ final class t {
         return instance;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @TargetApi(26)
-    public boolean a(int i, int i2, Options options, DecodeFormat decodeFormat, boolean z, boolean z2) {
-        if (!z || VERSION.SDK_INT < 26 || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE || z2) {
+    public boolean a(int i, int i2, BitmapFactory.Options options, DecodeFormat decodeFormat, boolean z, boolean z2) {
+        if (!z || Build.VERSION.SDK_INT < 26 || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE || z2) {
             return false;
         }
         boolean z3 = i >= 128 && i2 >= 128 && Hk();
         if (z3) {
-            options.inPreferredConfig = Config.HARDWARE;
+            options.inPreferredConfig = Bitmap.Config.HARDWARE;
             options.inMutable = false;
         }
         return z3;

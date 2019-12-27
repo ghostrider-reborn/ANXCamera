@@ -7,6 +7,7 @@ import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.HttpException;
+import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.model.l;
 import com.bumptech.glide.util.e;
 import com.ss.android.vesdk.runtime.cloudconfig.HttpRequest;
@@ -16,7 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /* compiled from: HttpUrlFetcher */
 public class k implements d<InputStream> {
@@ -70,12 +70,8 @@ public class k implements d<InputStream> {
         if (TextUtils.isEmpty(httpURLConnection.getContentEncoding())) {
             this.stream = com.bumptech.glide.util.b.a(httpURLConnection.getInputStream(), (long) httpURLConnection.getContentLength());
         } else {
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Got non empty content encoding: ");
-                sb.append(httpURLConnection.getContentEncoding());
-                Log.d(str, sb.toString());
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Got non empty content encoding: " + httpURLConnection.getContentEncoding());
             }
             this.stream = httpURLConnection.getInputStream();
         }
@@ -93,8 +89,8 @@ public class k implements d<InputStream> {
                 }
             }
             this.urlConnection = this.Ud.c(url);
-            for (Entry entry : map.entrySet()) {
-                this.urlConnection.addRequestProperty((String) entry.getKey(), (String) entry.getValue());
+            for (Map.Entry next : map.entrySet()) {
+                this.urlConnection.addRequestProperty((String) next.getKey(), (String) next.getValue());
             }
             this.urlConnection.setConnectTimeout(this.timeout);
             this.urlConnection.setReadTimeout(this.timeout);
@@ -133,33 +129,28 @@ public class k implements d<InputStream> {
         return InputStream.class;
     }
 
-    public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super InputStream> aVar) {
+    public void a(@NonNull Priority priority, @NonNull d.a<? super InputStream> aVar) {
         StringBuilder sb;
-        String str = "Finished http url fetcher fetch in ";
-        String str2 = TAG;
         long Gh = e.Gh();
         try {
-            aVar.b(a(this.Td.toURL(), 0, null, this.Td.getHeaders()));
-            if (Log.isLoggable(str2, 2)) {
+            aVar.b(a(this.Td.toURL(), 0, (URL) null, this.Td.getHeaders()));
+            if (Log.isLoggable(TAG, 2)) {
                 sb = new StringBuilder();
-                sb.append(str);
+                sb.append("Finished http url fetcher fetch in ");
                 sb.append(e.g(Gh));
-                Log.v(str2, sb.toString());
+                Log.v(TAG, sb.toString());
             }
         } catch (IOException e2) {
-            if (Log.isLoggable(str2, 3)) {
-                Log.d(str2, "Failed to load data for url", e2);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to load data for url", e2);
             }
             aVar.b((Exception) e2);
-            if (Log.isLoggable(str2, 2)) {
+            if (Log.isLoggable(TAG, 2)) {
                 sb = new StringBuilder();
             }
         } catch (Throwable th) {
-            if (Log.isLoggable(str2, 2)) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(e.g(Gh));
-                Log.v(str2, sb2.toString());
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "Finished http url fetcher fetch in " + e.g(Gh));
             }
             throw th;
         }

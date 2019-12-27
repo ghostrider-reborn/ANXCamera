@@ -1,6 +1,6 @@
 package com.android.camera.preferences;
 
-import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences;
 import java.util.HashMap;
 
 public class SettingsOverrider {
@@ -8,13 +8,13 @@ public class SettingsOverrider {
 
     public void overrideSettings(String... strArr) {
         CameraSettingPreferences instance = CameraSettingPreferences.instance();
-        Editor edit = instance.edit();
+        SharedPreferences.Editor edit = instance.edit();
         synchronized (this.mRestoredMap) {
             this.mRestoredMap.clear();
             for (int i = 0; i < strArr.length; i += 2) {
                 String str = strArr[i];
                 String str2 = strArr[i + 1];
-                this.mRestoredMap.put(str, instance.getString(str, null));
+                this.mRestoredMap.put(str, instance.getString(str, (String) null));
                 if (str2 == null) {
                     edit.remove(str);
                 } else {
@@ -32,19 +32,19 @@ public class SettingsOverrider {
     public boolean restoreSettings() {
         boolean z;
         CameraSettingPreferences instance = CameraSettingPreferences.instance();
-        Editor edit = instance.edit();
+        SharedPreferences.Editor edit = instance.edit();
         synchronized (this.mRestoredMap) {
             z = false;
-            for (String str : this.mRestoredMap.keySet()) {
-                String string = instance.getString(str, null);
-                String str2 = (String) this.mRestoredMap.get(str);
-                if (str2 == null) {
-                    edit.remove(str);
+            for (String next : this.mRestoredMap.keySet()) {
+                String string = instance.getString(next, (String) null);
+                String str = this.mRestoredMap.get(next);
+                if (str == null) {
+                    edit.remove(next);
                     if (string == null) {
                     }
                 } else {
-                    edit.putString(str, str2);
-                    if (!str2.equals(string)) {
+                    edit.putString(next, str);
+                    if (!str.equals(string)) {
                     }
                 }
                 z = true;

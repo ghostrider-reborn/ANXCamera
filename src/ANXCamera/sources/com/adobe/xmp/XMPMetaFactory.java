@@ -74,7 +74,7 @@ public final class XMPMetaFactory {
     }
 
     public static XMPMeta parse(InputStream inputStream) throws XMPException {
-        return parse(inputStream, null);
+        return parse(inputStream, (ParseOptions) null);
     }
 
     public static XMPMeta parse(InputStream inputStream, ParseOptions parseOptions) throws XMPException {
@@ -82,7 +82,7 @@ public final class XMPMetaFactory {
     }
 
     public static XMPMeta parseFromBuffer(byte[] bArr) throws XMPException {
-        return parseFromBuffer(bArr, null);
+        return parseFromBuffer(bArr, (ParseOptions) null);
     }
 
     public static XMPMeta parseFromBuffer(byte[] bArr, ParseOptions parseOptions) throws XMPException {
@@ -90,7 +90,7 @@ public final class XMPMetaFactory {
     }
 
     public static XMPMeta parseFromString(String str) throws XMPException {
-        return parseFromString(str, null);
+        return parseFromString(str, (ParseOptions) null);
     }
 
     public static XMPMeta parseFromString(String str, ParseOptions parseOptions) throws XMPException {
@@ -102,7 +102,7 @@ public final class XMPMetaFactory {
     }
 
     public static void serialize(XMPMeta xMPMeta, OutputStream outputStream) throws XMPException {
-        serialize(xMPMeta, outputStream, null);
+        serialize(xMPMeta, outputStream, (SerializeOptions) null);
     }
 
     public static void serialize(XMPMeta xMPMeta, OutputStream outputStream, SerializeOptions serializeOptions) throws XMPException {

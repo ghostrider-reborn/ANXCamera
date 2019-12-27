@@ -1,10 +1,9 @@
 package com.android.camera.fragment;
 
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 
 /* compiled from: lambda */
-public final /* synthetic */ class e implements OnClickListener {
+public final /* synthetic */ class e implements DialogInterface.OnClickListener {
     private final /* synthetic */ GoogleLensFragment ub;
 
     public /* synthetic */ e(GoogleLensFragment googleLensFragment) {

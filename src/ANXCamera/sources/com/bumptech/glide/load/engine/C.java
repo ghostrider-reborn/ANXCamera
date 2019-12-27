@@ -34,7 +34,7 @@ final class C implements c {
     }
 
     private byte[] nk() {
-        byte[] bArr = (byte[]) Wf.get(this.Uf);
+        byte[] bArr = Wf.get(this.Uf);
         if (bArr != null) {
             return bArr;
         }
@@ -61,24 +61,7 @@ final class C implements c {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ResourceCacheKey{sourceKey=");
-        sb.append(this.we);
-        sb.append(", signature=");
-        sb.append(this.signature);
-        sb.append(", width=");
-        sb.append(this.width);
-        sb.append(", height=");
-        sb.append(this.height);
-        sb.append(", decodedResourceClass=");
-        sb.append(this.Uf);
-        sb.append(", transformation='");
-        sb.append(this.Vf);
-        sb.append('\'');
-        sb.append(", options=");
-        sb.append(this.options);
-        sb.append('}');
-        return sb.toString();
+        return "ResourceCacheKey{sourceKey=" + this.we + ", signature=" + this.signature + ", width=" + this.width + ", height=" + this.height + ", decodedResourceClass=" + this.Uf + ", transformation='" + this.Vf + '\'' + ", options=" + this.options + '}';
     }
 
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {

@@ -10,7 +10,6 @@ import com.ss.android.ugc.effectmanager.common.ErrorConstants;
 import com.ss.android.ugc.effectmanager.common.Preconditions;
 import com.ss.android.ugc.effectmanager.common.SimpleThreadFactory;
 import com.ss.android.ugc.effectmanager.common.TaskManager;
-import com.ss.android.ugc.effectmanager.common.TaskManager.TaskManagerConfig;
 import com.ss.android.ugc.effectmanager.common.cache.FileCache;
 import com.ss.android.ugc.effectmanager.common.listener.ICache;
 import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
@@ -34,9 +33,7 @@ import com.ss.android.ugc.effectmanager.effect.model.EffectCategoryResponse;
 import com.ss.android.ugc.effectmanager.effect.model.EffectChannelResponse;
 import com.ss.android.ugc.effectmanager.effect.model.ProviderEffect;
 import com.ss.android.ugc.effectmanager.effect.repository.EffectChannelRepository;
-import com.ss.android.ugc.effectmanager.effect.repository.EffectChannelRepository.EffectListListener;
 import com.ss.android.ugc.effectmanager.effect.repository.EffectRepository;
-import com.ss.android.ugc.effectmanager.effect.repository.EffectRepository.EffectListener;
 import com.ss.android.ugc.effectmanager.effect.repository.EffectStore;
 import com.ss.android.ugc.effectmanager.effect.repository.FavoriteRepository;
 import com.ss.android.ugc.effectmanager.effect.repository.UpdateTagRepository;
@@ -63,72 +60,67 @@ public class EffectManager {
     UpdateTagRepository mUpdateTagRepository;
 
     private boolean checkConfiguration(EffectConfiguration effectConfiguration) {
-        String str = SDK_TAG;
         if (effectConfiguration == null) {
-            Log.e(str, ErrorConstants.LOG_CONFIGURATION_NOT_SET);
+            Log.e(SDK_TAG, ErrorConstants.LOG_CONFIGURATION_NOT_SET);
         } else if (effectConfiguration.getLinkSelectorConfiguration().getOriginHosts() == null || effectConfiguration.getLinkSelectorConfiguration().getOriginHosts().isEmpty()) {
-            Log.e(str, ErrorConstants.LOG_HOST_NOT_SET);
+            Log.e(SDK_TAG, ErrorConstants.LOG_HOST_NOT_SET);
         } else if (effectConfiguration.getLinkSelectorConfiguration().getContext() == null) {
-            Log.e(str, ErrorConstants.LOG_CONTEXT_NOT_SET);
+            Log.e(SDK_TAG, ErrorConstants.LOG_CONTEXT_NOT_SET);
         } else if (effectConfiguration.getJsonConverter() == null) {
-            Log.e(str, ErrorConstants.LOG_JSON_CONCERT_NOT_SET);
+            Log.e(SDK_TAG, ErrorConstants.LOG_JSON_CONCERT_NOT_SET);
         } else if (effectConfiguration.getEffectNetWorker() == null) {
-            Log.e(str, ErrorConstants.LOG_NET_WORKER_NOT_SET);
+            Log.e(SDK_TAG, ErrorConstants.LOG_NET_WORKER_NOT_SET);
         } else if (effectConfiguration.getEffectDir() != null && effectConfiguration.getEffectDir().exists()) {
             return true;
         } else {
-            Log.e(str, ErrorConstants.LOG_CACHE_DIR_NOT_SET);
+            Log.e(SDK_TAG, ErrorConstants.LOG_CACHE_DIR_NOT_SET);
         }
         return false;
     }
 
     private void checkUpdate(String str, @Nullable String str2, int i, ICheckChannelListener iCheckChannelListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iCheckChannelListener != null) {
-                iCheckChannelListener.checkChannelFailed(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setCheckChannelListener(currentTaskID, iCheckChannelListener);
+            this.mEffectChannelRepository.checkUpdate(str, str2, i, currentTaskID);
+        } else if (iCheckChannelListener != null) {
+            iCheckChannelListener.checkChannelFailed(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setCheckChannelListener(currentTaskID, iCheckChannelListener);
-        this.mEffectChannelRepository.checkUpdate(str, str2, i, currentTaskID);
     }
 
     /* access modifiers changed from: private */
     public EffectChannelResponse divideEffectList(EffectChannelResponse effectChannelResponse, List<Effect> list) {
         effectChannelResponse.setAllCategoryEffects(list);
-        for (EffectCategoryResponse effectCategoryResponse : effectChannelResponse.getCategoryResponseList()) {
+        for (EffectCategoryResponse next : effectChannelResponse.getCategoryResponseList()) {
             ArrayList arrayList = new ArrayList();
-            for (Effect effect : effectCategoryResponse.getTotalEffects()) {
-                if (list.contains(effect)) {
-                    arrayList.add(effect);
+            for (Effect next2 : next.getTotalEffects()) {
+                if (list.contains(next2)) {
+                    arrayList.add(next2);
                 }
             }
-            effectCategoryResponse.setTotalEffects(arrayList);
+            next.setTotalEffects(arrayList);
         }
         return effectChannelResponse;
     }
 
     /* access modifiers changed from: private */
     public void downloadEffectList(List<Effect> list, IFetchEffectListListener iFetchEffectListListener) {
-        if (this.mEffectContext == null || this.mEffectRepository == null) {
-            if (iFetchEffectListListener != null) {
-                iFetchEffectListListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectListListener(currentTaskID, iFetchEffectListListener);
+            this.mEffectRepository.fetchEffectList(list, currentTaskID);
+        } else if (iFetchEffectListListener != null) {
+            iFetchEffectListListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectListListener(currentTaskID, iFetchEffectListListener);
-        this.mEffectRepository.fetchEffectList(list, currentTaskID);
     }
 
     /* access modifiers changed from: private */
     public List<Effect> getNeedDownloadEffectList(List<Effect> list) {
         ArrayList arrayList = new ArrayList();
-        List currentDownloadingEffectList = this.mEffectStore.getCurrentDownloadingEffectList();
-        for (Effect effect : list) {
-            if (!currentDownloadingEffectList.contains(effect)) {
-                arrayList.add(effect);
+        List<Effect> currentDownloadingEffectList = this.mEffectStore.getCurrentDownloadingEffectList();
+        for (Effect next : list) {
+            if (!currentDownloadingEffectList.contains(next)) {
+                arrayList.add(next);
             }
         }
         return arrayList;
@@ -148,12 +140,12 @@ public class EffectManager {
         this.mEffectChannelRepository = new EffectChannelRepository(this.mEffectContext);
         this.mEffectRepository = new EffectRepository(this.mEffectContext);
         this.mFavoriteRepository = new FavoriteRepository(this.mEffectContext);
-        this.mEffectChannelRepository.setOnEffectListListener(new EffectListListener() {
+        this.mEffectChannelRepository.setOnEffectListListener(new EffectChannelRepository.EffectListListener() {
             public void updateEffectChannel(String str, EffectChannelResponse effectChannelResponse, int i, ExceptionResult exceptionResult) {
                 EffectManager.this.mEffectStore.updateEffectChannel(str, effectChannelResponse, i, exceptionResult);
             }
         });
-        this.mEffectRepository.setListener(new EffectListener() {
+        this.mEffectRepository.setListener(new EffectRepository.EffectListener() {
             public void updateEffectListStatus(String str, List<Effect> list, ExceptionResult exceptionResult) {
                 EffectManager.this.mEffectStore.updateEffectListDownloadStatus(str, list, exceptionResult);
             }
@@ -167,7 +159,7 @@ public class EffectManager {
 
     private void initTaskManager() {
         TaskManager taskManager = new TaskManager();
-        taskManager.init(new TaskManagerConfig().setExecutor(Executors.newCachedThreadPool(new SimpleThreadFactory(SDK_TAG, true))).setEffectContext(this.mEffectContext));
+        taskManager.init(new TaskManager.TaskManagerConfig().setExecutor(Executors.newCachedThreadPool(new SimpleThreadFactory(SDK_TAG, true))).setEffectContext(this.mEffectContext));
         LinkSelectorInterceptor linkSelectorInterceptor = new LinkSelectorInterceptor(this.mLinkSelector);
         linkSelectorInterceptor.enable(true);
         taskManager.addInterception(EffectConstants.LINK_SELECTOR, linkSelectorInterceptor);
@@ -179,15 +171,11 @@ public class EffectManager {
     }
 
     private boolean needLinkSelector(EffectConfiguration effectConfiguration) {
-        boolean z = false;
         if (effectConfiguration == null) {
             return false;
         }
         LinkSelectorConfiguration linkSelectorConfiguration = effectConfiguration.getLinkSelectorConfiguration();
-        if (linkSelectorConfiguration != null && linkSelectorConfiguration.getOriginHosts().size() > 1 && linkSelectorConfiguration.isNetworkChangeMonitor()) {
-            z = true;
-        }
-        return z;
+        return linkSelectorConfiguration != null && linkSelectorConfiguration.getOriginHosts().size() > 1 && linkSelectorConfiguration.isNetworkChangeMonitor();
     }
 
     public void checkCategoryIsUpdate(String str, @NonNull String str2, ICheckChannelListener iCheckChannelListener) {
@@ -195,11 +183,11 @@ public class EffectManager {
     }
 
     public void checkPanelIsUpdate(String str, ICheckChannelListener iCheckChannelListener) {
-        checkUpdate(str, null, 2, iCheckChannelListener);
+        checkUpdate(str, (String) null, 2, iCheckChannelListener);
     }
 
     public void checkedEffectListUpdate(String str, ICheckChannelListener iCheckChannelListener) {
-        checkUpdate(str, null, 0, iCheckChannelListener);
+        checkUpdate(str, (String) null, 0, iCheckChannelListener);
     }
 
     public void clearCache(String str) {
@@ -212,20 +200,14 @@ public class EffectManager {
 
     public void clearVersion(String str) {
         ICache iCache = this.mCache;
-        StringBuilder sb = new StringBuilder();
-        sb.append("effect_version");
-        sb.append(str);
-        iCache.remove(sb.toString());
+        iCache.remove("effect_version" + str);
     }
 
     public void deleteEffect(Effect effect) {
         if (effect != null) {
             this.mCache.remove(effect.getId());
             ICache iCache = this.mCache;
-            StringBuilder sb = new StringBuilder();
-            sb.append(effect.getId());
-            sb.append(".zip");
-            iCache.remove(sb.toString());
+            iCache.remove(effect.getId() + ".zip");
         }
     }
 
@@ -242,253 +224,227 @@ public class EffectManager {
     }
 
     public void downloadProviderEffect(@NonNull ProviderEffect providerEffect, IDownloadProviderEffectListener iDownloadProviderEffectListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iDownloadProviderEffectListener != null) {
-                iDownloadProviderEffectListener.onFail(providerEffect, new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setDownloadProviderEffectListener(currentTaskID, iDownloadProviderEffectListener);
+            this.mEffectRepository.downloadProviderEffectList(providerEffect, currentTaskID);
+        } else if (iDownloadProviderEffectListener != null) {
+            iDownloadProviderEffectListener.onFail(providerEffect, new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setDownloadProviderEffectListener(currentTaskID, iDownloadProviderEffectListener);
-        this.mEffectRepository.downloadProviderEffectList(providerEffect, currentTaskID);
     }
 
     public void fetchCategoryEffect(String str, String str2, int i, int i2, int i3, String str3, IFetchCategoryEffectListener iFetchCategoryEffectListener) {
         IFetchCategoryEffectListener iFetchCategoryEffectListener2 = iFetchCategoryEffectListener;
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchCategoryEffectListener2 != null) {
-                iFetchCategoryEffectListener2.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchCategoryEffectListener(currentTaskID, iFetchCategoryEffectListener2);
+            this.mEffectChannelRepository.fetchCategoryEffect(str, currentTaskID, str2, i, i2, i3, str3, false);
+        } else if (iFetchCategoryEffectListener2 != null) {
+            iFetchCategoryEffectListener2.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchCategoryEffectListener(currentTaskID, iFetchCategoryEffectListener2);
-        this.mEffectChannelRepository.fetchCategoryEffect(str, currentTaskID, str2, i, i2, i3, str3, false);
     }
 
     public void fetchCategoryEffectFromCache(String str, String str2, int i, int i2, int i3, String str3, IFetchCategoryEffectListener iFetchCategoryEffectListener) {
         IFetchCategoryEffectListener iFetchCategoryEffectListener2 = iFetchCategoryEffectListener;
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchCategoryEffectListener2 != null) {
-                iFetchCategoryEffectListener2.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchCategoryEffectListener(currentTaskID, iFetchCategoryEffectListener2);
+            this.mEffectChannelRepository.fetchCategoryEffect(str, currentTaskID, str2, i, i2, i3, str3, true);
+        } else if (iFetchCategoryEffectListener2 != null) {
+            iFetchCategoryEffectListener2.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchCategoryEffectListener(currentTaskID, iFetchCategoryEffectListener2);
-        this.mEffectChannelRepository.fetchCategoryEffect(str, currentTaskID, str2, i, i2, i3, str3, true);
     }
 
     public void fetchEffect(Effect effect, IFetchEffectListener iFetchEffectListener) {
-        if (this.mEffectContext == null || this.mEffectRepository == null) {
-            if (iFetchEffectListener != null) {
-                iFetchEffectListener.onFail(effect, new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
+        if (this.mEffectContext != null && this.mEffectRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectListener(currentTaskID, iFetchEffectListener);
+            if (!isEffectDownloading(effect)) {
+                this.mEffectRepository.fetchEffect(effect, currentTaskID);
             }
-            return;
-        }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectListener(currentTaskID, iFetchEffectListener);
-        if (!isEffectDownloading(effect)) {
-            this.mEffectRepository.fetchEffect(effect, currentTaskID);
+        } else if (iFetchEffectListener != null) {
+            iFetchEffectListener.onFail(effect, new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
     }
 
     public void fetchEffect(String str, IFetchEffectListener iFetchEffectListener) {
-        fetchEffectWithDownload(str, null, iFetchEffectListener);
+        fetchEffectWithDownload(str, (Map<String, String>) null, iFetchEffectListener);
     }
 
     public void fetchEffectList(String str, final boolean z, final IFetchEffectChannelListener iFetchEffectChannelListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchEffectChannelListener != null) {
-                iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
-        }
-        AnonymousClass3 r0 = new IFetchEffectChannelListener() {
-            public void onFail(ExceptionResult exceptionResult) {
-                IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
-                if (iFetchEffectChannelListener != null) {
-                    iFetchEffectChannelListener.onFail(exceptionResult);
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            AnonymousClass3 r0 = new IFetchEffectChannelListener() {
+                public void onFail(ExceptionResult exceptionResult) {
+                    IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
+                    if (iFetchEffectChannelListener != null) {
+                        iFetchEffectChannelListener.onFail(exceptionResult);
+                    }
                 }
-            }
 
-            public void onSuccess(final EffectChannelResponse effectChannelResponse) {
-                if (z) {
-                    final String generatePanelKey = EffectCacheKeyGenerator.generatePanelKey(EffectManager.this.mEffectContext.getEffectConfiguration().getChannel(), effectChannelResponse.getPanel());
-                    final String queryToString = EffectManager.this.mCache.queryToString(generatePanelKey);
-                    EffectManager.this.mCache.remove(generatePanelKey);
-                    EffectManager.this.downloadEffectList(EffectManager.this.getNeedDownloadEffectList(effectChannelResponse.getAllCategoryEffects()), new IFetchEffectListListener() {
-                        public void onFail(ExceptionResult exceptionResult) {
-                            IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
-                            if (iFetchEffectChannelListener != null) {
-                                iFetchEffectChannelListener.onFail(exceptionResult);
+                public void onSuccess(final EffectChannelResponse effectChannelResponse) {
+                    if (z) {
+                        final String generatePanelKey = EffectCacheKeyGenerator.generatePanelKey(EffectManager.this.mEffectContext.getEffectConfiguration().getChannel(), effectChannelResponse.getPanel());
+                        final String queryToString = EffectManager.this.mCache.queryToString(generatePanelKey);
+                        EffectManager.this.mCache.remove(generatePanelKey);
+                        EffectManager.this.downloadEffectList(EffectManager.this.getNeedDownloadEffectList(effectChannelResponse.getAllCategoryEffects()), new IFetchEffectListListener() {
+                            public void onFail(ExceptionResult exceptionResult) {
+                                IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
+                                if (iFetchEffectChannelListener != null) {
+                                    iFetchEffectChannelListener.onFail(exceptionResult);
+                                }
                             }
-                        }
 
-                        public void onSuccess(List<Effect> list) {
-                            EffectManager effectManager = EffectManager.this;
-                            EffectChannelResponse effectChannelResponse = effectChannelResponse;
-                            effectManager.divideEffectList(effectChannelResponse, list);
-                            IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
-                            if (iFetchEffectChannelListener != null) {
-                                iFetchEffectChannelListener.onSuccess(effectChannelResponse);
+                            public void onSuccess(List<Effect> list) {
+                                EffectManager effectManager = EffectManager.this;
+                                EffectChannelResponse effectChannelResponse = effectChannelResponse;
+                                EffectChannelResponse unused = effectManager.divideEffectList(effectChannelResponse, list);
+                                IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
+                                if (iFetchEffectChannelListener != null) {
+                                    iFetchEffectChannelListener.onSuccess(effectChannelResponse);
+                                }
+                                EffectManager.this.mCache.save(generatePanelKey, queryToString);
                             }
-                            EffectManager.this.mCache.save(generatePanelKey, queryToString);
-                        }
-                    });
-                    return;
+                        });
+                        return;
+                    }
+                    IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
+                    if (iFetchEffectChannelListener != null) {
+                        iFetchEffectChannelListener.onSuccess(effectChannelResponse);
+                    }
                 }
-                IFetchEffectChannelListener iFetchEffectChannelListener = iFetchEffectChannelListener;
-                if (iFetchEffectChannelListener != null) {
-                    iFetchEffectChannelListener.onSuccess(effectChannelResponse);
-                }
+            };
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectChannelListener(currentTaskID, r0);
+            if (!TextUtils.isEmpty(str)) {
+                this.mEffectChannelRepository.fetchList(str, currentTaskID, false);
+            } else {
+                this.mEffectChannelRepository.fetchList(E2EScenario.DEFAULT_CATEGORY, currentTaskID, false);
             }
-        };
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectChannelListener(currentTaskID, r0);
-        if (!TextUtils.isEmpty(str)) {
-            this.mEffectChannelRepository.fetchList(str, currentTaskID, false);
-        } else {
-            this.mEffectChannelRepository.fetchList(E2EScenario.DEFAULT_CATEGORY, currentTaskID, false);
+        } else if (iFetchEffectChannelListener != null) {
+            iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
     }
 
     public void fetchEffectList(List<String> list, IFetchEffectListListener iFetchEffectListListener) {
-        fetchEffectList(list, true, null, iFetchEffectListListener);
+        fetchEffectList(list, true, (Map<String, String>) null, iFetchEffectListListener);
     }
 
     public void fetchEffectList(List<String> list, boolean z, IFetchEffectListListener iFetchEffectListListener) {
-        fetchEffectList(list, z, null, iFetchEffectListListener);
+        fetchEffectList(list, z, (Map<String, String>) null, iFetchEffectListListener);
     }
 
     public void fetchEffectList(List<String> list, final boolean z, Map<String, String> map, final IFetchEffectListListener iFetchEffectListListener) {
-        if (this.mEffectContext == null || this.mEffectRepository == null) {
-            if (iFetchEffectListListener != null) {
-                iFetchEffectListListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
-        }
-        AnonymousClass5 r0 = new IFetchEffectListListener() {
-            public void onFail(ExceptionResult exceptionResult) {
-                iFetchEffectListListener.onFail(exceptionResult);
-            }
-
-            public void onSuccess(List<Effect> list) {
-                if (z) {
-                    EffectManager.this.downloadEffectList(list, iFetchEffectListListener);
-                } else {
-                    iFetchEffectListListener.onSuccess(list);
+        if (this.mEffectContext != null && this.mEffectRepository != null) {
+            AnonymousClass5 r0 = new IFetchEffectListListener() {
+                public void onFail(ExceptionResult exceptionResult) {
+                    iFetchEffectListListener.onFail(exceptionResult);
                 }
-            }
-        };
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectListListener(currentTaskID, r0);
-        this.mEffectRepository.fetchEffectListById(list, currentTaskID, map);
+
+                public void onSuccess(List<Effect> list) {
+                    if (z) {
+                        EffectManager.this.downloadEffectList(list, iFetchEffectListListener);
+                    } else {
+                        iFetchEffectListListener.onSuccess(list);
+                    }
+                }
+            };
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectListListener(currentTaskID, r0);
+            this.mEffectRepository.fetchEffectListById(list, currentTaskID, map);
+        } else if (iFetchEffectListListener != null) {
+            iFetchEffectListListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
+        }
     }
 
     public void fetchEffectListFromCache(String str, IFetchEffectChannelListener iFetchEffectChannelListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchEffectChannelListener != null) {
-                iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectChannelListener(currentTaskID, iFetchEffectChannelListener);
+            if (!TextUtils.isEmpty(str)) {
+                this.mEffectChannelRepository.fetchList(str, currentTaskID, true);
+            } else {
+                this.mEffectChannelRepository.fetchList(E2EScenario.DEFAULT_CATEGORY, currentTaskID, true);
             }
-            return;
-        }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectChannelListener(currentTaskID, iFetchEffectChannelListener);
-        if (!TextUtils.isEmpty(str)) {
-            this.mEffectChannelRepository.fetchList(str, currentTaskID, true);
-        } else {
-            this.mEffectChannelRepository.fetchList(E2EScenario.DEFAULT_CATEGORY, currentTaskID, true);
+        } else if (iFetchEffectChannelListener != null) {
+            iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
     }
 
     public void fetchEffectWithDownload(String str, Map<String, String> map, final IFetchEffectListener iFetchEffectListener) {
-        if (this.mEffectContext == null) {
-            if (iFetchEffectListener != null) {
-                iFetchEffectListener.onFail(null, new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
-        }
-        AnonymousClass4 r0 = new IFetchEffectListListener() {
-            public void onFail(ExceptionResult exceptionResult) {
-                iFetchEffectListener.onFail(null, exceptionResult);
-            }
-
-            public void onSuccess(List<Effect> list) {
-                if (!list.isEmpty()) {
-                    iFetchEffectListener.onSuccess((Effect) list.get(0));
-                } else {
-                    iFetchEffectListener.onFail(null, new ExceptionResult(1));
+        if (this.mEffectContext != null) {
+            AnonymousClass4 r0 = new IFetchEffectListListener() {
+                public void onFail(ExceptionResult exceptionResult) {
+                    iFetchEffectListener.onFail((Effect) null, exceptionResult);
                 }
-            }
-        };
-        ArrayList arrayList = new ArrayList();
-        arrayList.add(str);
-        fetchEffectList(arrayList, true, map, r0);
+
+                public void onSuccess(List<Effect> list) {
+                    if (!list.isEmpty()) {
+                        iFetchEffectListener.onSuccess(list.get(0));
+                    } else {
+                        iFetchEffectListener.onFail((Effect) null, new ExceptionResult(1));
+                    }
+                }
+            };
+            ArrayList arrayList = new ArrayList();
+            arrayList.add(str);
+            fetchEffectList(arrayList, true, map, r0);
+        } else if (iFetchEffectListener != null) {
+            iFetchEffectListener.onFail((Effect) null, new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
+        }
     }
 
     public void fetchExistEffectList(String str, IFetchEffectChannelListener iFetchEffectChannelListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchEffectChannelListener != null) {
-                iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectChannelListener(currentTaskID, iFetchEffectChannelListener);
+            if (!TextUtils.isEmpty(str)) {
+                this.mEffectChannelRepository.fetchExistEffectList(str, currentTaskID);
+            } else {
+                this.mEffectChannelRepository.fetchExistEffectList(E2EScenario.DEFAULT_CATEGORY, currentTaskID);
             }
-            return;
-        }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchEffectChannelListener(currentTaskID, iFetchEffectChannelListener);
-        if (!TextUtils.isEmpty(str)) {
-            this.mEffectChannelRepository.fetchExistEffectList(str, currentTaskID);
-        } else {
-            this.mEffectChannelRepository.fetchExistEffectList(E2EScenario.DEFAULT_CATEGORY, currentTaskID);
+        } else if (iFetchEffectChannelListener != null) {
+            iFetchEffectChannelListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
     }
 
     public void fetchFavoriteList(String str, IFetchFavoriteList iFetchFavoriteList) {
-        if (this.mEffectContext == null || this.mFavoriteRepository == null) {
-            if (iFetchFavoriteList != null) {
-                iFetchFavoriteList.onFailed(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mFavoriteRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchFavoriteListListener(currentTaskID, iFetchFavoriteList);
+            this.mFavoriteRepository.fetchFavoriteList(str, currentTaskID);
+        } else if (iFetchFavoriteList != null) {
+            iFetchFavoriteList.onFailed(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchFavoriteListListener(currentTaskID, iFetchFavoriteList);
-        this.mFavoriteRepository.fetchFavoriteList(str, currentTaskID);
     }
 
     public void fetchPanelInfo(String str, boolean z, String str2, int i, int i2, IFetchPanelInfoListener iFetchPanelInfoListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchPanelInfoListener != null) {
-                iFetchPanelInfoListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchPanelInfoListener(currentTaskID, iFetchPanelInfoListener);
+            this.mEffectChannelRepository.fetchPanelInfo(str, currentTaskID, z, str2, i, i2, false, iFetchPanelInfoListener);
+        } else if (iFetchPanelInfoListener != null) {
+            iFetchPanelInfoListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchPanelInfoListener(currentTaskID, iFetchPanelInfoListener);
-        this.mEffectChannelRepository.fetchPanelInfo(str, currentTaskID, z, str2, i, i2, false, iFetchPanelInfoListener);
     }
 
     public void fetchPanelInfoFromCache(String str, boolean z, String str2, int i, int i2, IFetchPanelInfoListener iFetchPanelInfoListener) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchPanelInfoListener != null) {
-                iFetchPanelInfoListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchPanelInfoListener(currentTaskID, iFetchPanelInfoListener);
+            this.mEffectChannelRepository.fetchPanelInfo(str, currentTaskID, z, str2, i, i2, true, iFetchPanelInfoListener);
+        } else if (iFetchPanelInfoListener != null) {
+            iFetchPanelInfoListener.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchPanelInfoListener(currentTaskID, iFetchPanelInfoListener);
-        this.mEffectChannelRepository.fetchPanelInfo(str, currentTaskID, z, str2, i, i2, true, iFetchPanelInfoListener);
     }
 
     public void fetchProviderEffect(@Nullable String str, boolean z, int i, int i2, IFetchProviderEffect iFetchProviderEffect) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchProviderEffect != null) {
-                iFetchProviderEffect.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchProviderEffectListener(currentTaskID, iFetchProviderEffect);
+            this.mEffectChannelRepository.fetchProviderEffectList(str, i, i2, currentTaskID);
+        } else if (iFetchProviderEffect != null) {
+            iFetchProviderEffect.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchProviderEffectListener(currentTaskID, iFetchProviderEffect);
-        this.mEffectChannelRepository.fetchProviderEffectList(str, i, i2, currentTaskID);
     }
 
     public EffectChannelResponse getCurrentEffectChannel() {
@@ -499,7 +455,7 @@ public class EffectManager {
         return effectStore.getCurrentEffectChannel();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String getCurrentTaskID() {
         return UUID.randomUUID().toString();
     }
@@ -541,27 +497,23 @@ public class EffectManager {
     }
 
     public void modifyFavoriteList(String str, String str2, Boolean bool, IModFavoriteList iModFavoriteList) {
-        if (this.mEffectContext == null || this.mFavoriteRepository == null) {
-            if (iModFavoriteList != null) {
-                iModFavoriteList.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mFavoriteRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setModFavoriteListener(currentTaskID, iModFavoriteList);
+            this.mFavoriteRepository.modFavoriteList(str, str2, bool, currentTaskID);
+        } else if (iModFavoriteList != null) {
+            iModFavoriteList.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setModFavoriteListener(currentTaskID, iModFavoriteList);
-        this.mFavoriteRepository.modFavoriteList(str, str2, bool, currentTaskID);
     }
 
     public void modifyFavoriteList(String str, List<String> list, Boolean bool, IModFavoriteList iModFavoriteList) {
-        if (this.mEffectContext == null || this.mFavoriteRepository == null) {
-            if (iModFavoriteList != null) {
-                iModFavoriteList.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mFavoriteRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setModFavoriteListener(currentTaskID, iModFavoriteList);
+            this.mFavoriteRepository.modFavoriteList(str, list, bool, currentTaskID);
+        } else if (iModFavoriteList != null) {
+            iModFavoriteList.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setModFavoriteListener(currentTaskID, iModFavoriteList);
-        this.mFavoriteRepository.modFavoriteList(str, list, bool, currentTaskID);
     }
 
     public void removeListener() {
@@ -572,15 +524,13 @@ public class EffectManager {
     }
 
     public void searchProviderEffect(@NonNull String str, @Nullable String str2, int i, int i2, boolean z, IFetchProviderEffect iFetchProviderEffect) {
-        if (this.mEffectContext == null || this.mEffectChannelRepository == null) {
-            if (iFetchProviderEffect != null) {
-                iFetchProviderEffect.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
-            }
-            return;
+        if (this.mEffectContext != null && this.mEffectChannelRepository != null) {
+            String currentTaskID = getCurrentTaskID();
+            this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchProviderEffectListener(currentTaskID, iFetchProviderEffect);
+            this.mEffectChannelRepository.searchProviderEffectList(str, str2, i, i2, currentTaskID);
+        } else if (iFetchProviderEffect != null) {
+            iFetchProviderEffect.onFail(new ExceptionResult((Exception) new IllegalStateException("请先初始化")));
         }
-        String currentTaskID = getCurrentTaskID();
-        this.mEffectContext.getEffectConfiguration().getListenerManger().setFetchProviderEffectListener(currentTaskID, iFetchProviderEffect);
-        this.mEffectChannelRepository.searchProviderEffectList(str, str2, i, i2, currentTaskID);
     }
 
     public void updateDeviceId(String str) {
@@ -595,12 +545,10 @@ public class EffectManager {
     }
 
     public void updateTag(String str, String str2, IUpdateTagListener iUpdateTagListener) {
-        if (this.mUpdateTagRepository == null) {
-            if (iUpdateTagListener != null) {
-                iUpdateTagListener.onFinally();
-            }
-            return;
+        if (this.mUpdateTagRepository != null) {
+            this.mUpdateTagRepository.updateTag(getCurrentTaskID(), str, str2, iUpdateTagListener);
+        } else if (iUpdateTagListener != null) {
+            iUpdateTagListener.onFinally();
         }
-        this.mUpdateTagRepository.updateTag(getCurrentTaskID(), str, str2, iUpdateTagListener);
     }
 }

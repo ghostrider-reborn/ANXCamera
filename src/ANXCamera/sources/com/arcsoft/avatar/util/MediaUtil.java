@@ -8,18 +8,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Images;
-import android.provider.MediaStore.Images.Media;
-import android.provider.MediaStore.Video;
-import android.provider.MediaStore.Video.Thumbnails;
+import android.provider.MediaStore;
 import com.android.camera.storage.Storage;
 import com.ss.android.ugc.effectmanager.common.EffectConstants;
 import java.io.File;
@@ -33,7 +28,7 @@ public class MediaUtil {
     public static final int DATE_COLUMN_INDEX = 3;
     public static final int DURATION_COLUMN_INDEX = 14;
     public static final String EXTERNAL_BUCKET_NAME = b(f135a);
-    public static final Uri EXTERNAL_CONTENT_URI = Files.getContentUri("external");
+    public static final Uri EXTERNAL_CONTENT_URI = MediaStore.Files.getContentUri("external");
     public static final int FULLPATH_COLUMN_INDEX = 1;
     public static final int HEIGHT_COLUMN_INDEX = 12;
     public static final int ID_COLUMN_INDEX = 0;
@@ -49,23 +44,23 @@ public class MediaUtil {
     public static final int URI_COLUMN_INDEX = 4;
     public static final int WIDTH_COLUMN_INDEX = 11;
 
-    /* renamed from: a reason: collision with root package name */
-    private static final String f135a;
+    /* renamed from: a  reason: collision with root package name */
+    private static final String f135a = (Environment.getExternalStorageDirectory().toString() + "/DCIM/Avatar/Result");
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private static MediaUtil f136b = null;
     private static final String[] k = {"max(_id) as newId", "_data", "_size", "datetaken", FileColumns.f145e, "bucket_id", "mime_type", "date_modified", "media_type", "resolution", "tags", "width", "height", "orientation", "duration"};
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private Context f137c = null;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private ContentResolver f138d = null;
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private final String f139e = "image/jpeg";
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private final String f140f = "image/gif";
     private final String g = "video/3gpp";
     private final String h = "video/mp4";
@@ -74,22 +69,22 @@ public class MediaUtil {
 
     private static final class FileColumns {
 
-        /* renamed from: a reason: collision with root package name */
+        /* renamed from: a  reason: collision with root package name */
         public static final String f141a = "_id";
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         public static final String f142b = "_data";
 
-        /* renamed from: c reason: collision with root package name */
+        /* renamed from: c  reason: collision with root package name */
         public static final String f143c = "_size";
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         public static final String f144d = "datetaken";
 
-        /* renamed from: e reason: collision with root package name */
-        public static final String f145e;
+        /* renamed from: e  reason: collision with root package name */
+        public static final String f145e = ("case media_type when 1 then \"" + MediaStore.Images.Media.EXTERNAL_CONTENT_URI + "\" else \"" + MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "\" end");
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         public static final String f146f = "bucket_id";
         public static final String g = "mime_type";
         public static final String h = "date_modified";
@@ -105,16 +100,6 @@ public class MediaUtil {
         public static final String r = "title";
         public static final String s = "_display_name";
 
-        static {
-            StringBuilder sb = new StringBuilder();
-            sb.append("case media_type when 1 then \"");
-            sb.append(Media.EXTERNAL_CONTENT_URI);
-            sb.append("\" else \"");
-            sb.append(Video.Media.EXTERNAL_CONTENT_URI);
-            sb.append("\" end");
-            f145e = sb.toString();
-        }
-
         private FileColumns() {
         }
     }
@@ -122,27 +107,27 @@ public class MediaUtil {
     public static class MediaFileInfo {
         /* access modifiers changed from: private */
 
-        /* renamed from: a reason: collision with root package name */
+        /* renamed from: a  reason: collision with root package name */
         public boolean f147a;
         /* access modifiers changed from: private */
 
-        /* renamed from: b reason: collision with root package name */
+        /* renamed from: b  reason: collision with root package name */
         public Uri f148b;
         /* access modifiers changed from: private */
 
-        /* renamed from: c reason: collision with root package name */
+        /* renamed from: c  reason: collision with root package name */
         public long f149c;
         /* access modifiers changed from: private */
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         public long f150d;
         /* access modifiers changed from: private */
 
-        /* renamed from: e reason: collision with root package name */
+        /* renamed from: e  reason: collision with root package name */
         public String f151e;
         /* access modifiers changed from: private */
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         public String f152f;
         /* access modifiers changed from: private */
         public String g;
@@ -172,13 +157,6 @@ public class MediaUtil {
         public String s;
     }
 
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().toString());
-        sb.append("/DCIM/Avatar/Result");
-        f135a = sb.toString();
-    }
-
     private MediaUtil(Context context) {
         this.f137c = context;
         this.f138d = this.f137c.getContentResolver();
@@ -195,58 +173,44 @@ public class MediaUtil {
             return null;
         }
         MediaFileInfo mediaFileInfo = new MediaFileInfo();
-        mediaFileInfo.f147a = z2;
-        String str = "date_added";
-        String str2 = "date_modified";
-        String str3 = "datetaken";
-        String str4 = "mime_type";
-        String str5 = "_size";
-        String str6 = "height";
-        String str7 = "width";
-        String str8 = "_display_name";
-        String str9 = "_data";
-        String str10 = "bucket_display_name";
-        String str11 = "longitude";
-        String str12 = "bucket_id";
-        String str13 = "latitude";
-        String str14 = "_id";
+        boolean unused = mediaFileInfo.f147a = z2;
+        Object obj = "longitude";
+        Object obj2 = "latitude";
         if (z2) {
-            String str15 = str;
-            mediaFileInfo.f149c = cursor2.getLong(ArrayUtil.getIndex(this.i, str14));
-            mediaFileInfo.f148b = ContentUris.withAppendedId(Video.Media.EXTERNAL_CONTENT_URI, mediaFileInfo.f149c);
-            mediaFileInfo.f150d = (long) cursor2.getInt(ArrayUtil.getIndex(this.i, str12));
-            mediaFileInfo.f151e = cursor2.getString(ArrayUtil.getIndex(this.i, str10));
-            mediaFileInfo.f152f = cursor2.getString(ArrayUtil.getIndex(this.i, str9));
-            mediaFileInfo.g = cursor2.getString(ArrayUtil.getIndex(this.i, str8));
-            mediaFileInfo.h = cursor2.getInt(ArrayUtil.getIndex(this.i, str7));
-            mediaFileInfo.i = cursor2.getInt(ArrayUtil.getIndex(this.i, str6));
-            mediaFileInfo.j = cursor2.getLong(ArrayUtil.getIndex(this.i, str5));
-            mediaFileInfo.k = cursor2.getString(ArrayUtil.getIndex(this.i, str4));
-            mediaFileInfo.l = cursor2.getString(ArrayUtil.getIndex(this.i, str3));
-            mediaFileInfo.m = cursor2.getString(ArrayUtil.getIndex(this.i, str2));
-            mediaFileInfo.n = cursor2.getString(ArrayUtil.getIndex(this.i, str15));
-            mediaFileInfo.o = cursor2.getDouble(ArrayUtil.getIndex(this.i, str13));
-            mediaFileInfo.p = cursor2.getDouble(ArrayUtil.getIndex(this.i, str11));
-            mediaFileInfo.r = cursor2.getLong(ArrayUtil.getIndex(this.i, "duration"));
-            mediaFileInfo.s = cursor2.getString(ArrayUtil.getIndex(this.i, "resolution"));
+            long unused2 = mediaFileInfo.f149c = cursor2.getLong(ArrayUtil.getIndex(this.i, "_id"));
+            Uri unused3 = mediaFileInfo.f148b = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, mediaFileInfo.f149c);
+            long unused4 = mediaFileInfo.f150d = (long) cursor2.getInt(ArrayUtil.getIndex(this.i, "bucket_id"));
+            String unused5 = mediaFileInfo.f151e = cursor2.getString(ArrayUtil.getIndex(this.i, "bucket_display_name"));
+            String unused6 = mediaFileInfo.f152f = cursor2.getString(ArrayUtil.getIndex(this.i, "_data"));
+            String unused7 = mediaFileInfo.g = cursor2.getString(ArrayUtil.getIndex(this.i, "_display_name"));
+            int unused8 = mediaFileInfo.h = cursor2.getInt(ArrayUtil.getIndex(this.i, "width"));
+            int unused9 = mediaFileInfo.i = cursor2.getInt(ArrayUtil.getIndex(this.i, "height"));
+            long unused10 = mediaFileInfo.j = cursor2.getLong(ArrayUtil.getIndex(this.i, "_size"));
+            String unused11 = mediaFileInfo.k = cursor2.getString(ArrayUtil.getIndex(this.i, "mime_type"));
+            String unused12 = mediaFileInfo.l = cursor2.getString(ArrayUtil.getIndex(this.i, "datetaken"));
+            String unused13 = mediaFileInfo.m = cursor2.getString(ArrayUtil.getIndex(this.i, "date_modified"));
+            String unused14 = mediaFileInfo.n = cursor2.getString(ArrayUtil.getIndex(this.i, "date_added"));
+            double unused15 = mediaFileInfo.o = cursor2.getDouble(ArrayUtil.getIndex(this.i, obj2));
+            double unused16 = mediaFileInfo.p = cursor2.getDouble(ArrayUtil.getIndex(this.i, obj));
+            long unused17 = mediaFileInfo.r = cursor2.getLong(ArrayUtil.getIndex(this.i, "duration"));
+            String unused18 = mediaFileInfo.s = cursor2.getString(ArrayUtil.getIndex(this.i, "resolution"));
         } else {
-            String str16 = str;
-            mediaFileInfo.f149c = cursor2.getLong(ArrayUtil.getIndex(this.j, str14));
-            mediaFileInfo.f148b = ContentUris.withAppendedId(Media.EXTERNAL_CONTENT_URI, mediaFileInfo.f149c);
-            mediaFileInfo.f150d = (long) cursor2.getInt(ArrayUtil.getIndex(this.j, str12));
-            mediaFileInfo.f151e = cursor2.getString(ArrayUtil.getIndex(this.j, str10));
-            mediaFileInfo.f152f = cursor2.getString(ArrayUtil.getIndex(this.j, str9));
-            mediaFileInfo.g = cursor2.getString(ArrayUtil.getIndex(this.j, str8));
-            mediaFileInfo.h = cursor2.getInt(ArrayUtil.getIndex(this.j, str7));
-            mediaFileInfo.i = cursor2.getInt(ArrayUtil.getIndex(this.j, str6));
-            mediaFileInfo.j = cursor2.getLong(ArrayUtil.getIndex(this.j, str5));
-            mediaFileInfo.k = cursor2.getString(ArrayUtil.getIndex(this.j, str4));
-            mediaFileInfo.l = cursor2.getString(ArrayUtil.getIndex(this.j, str3));
-            mediaFileInfo.m = cursor2.getString(ArrayUtil.getIndex(this.j, str2));
-            mediaFileInfo.n = cursor2.getString(ArrayUtil.getIndex(this.j, str16));
-            mediaFileInfo.o = cursor2.getDouble(ArrayUtil.getIndex(this.j, str13));
-            mediaFileInfo.p = cursor2.getDouble(ArrayUtil.getIndex(this.j, str11));
-            mediaFileInfo.q = cursor2.getInt(ArrayUtil.getIndex(this.j, "orientation"));
+            long unused19 = mediaFileInfo.f149c = cursor2.getLong(ArrayUtil.getIndex(this.j, "_id"));
+            Uri unused20 = mediaFileInfo.f148b = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mediaFileInfo.f149c);
+            long unused21 = mediaFileInfo.f150d = (long) cursor2.getInt(ArrayUtil.getIndex(this.j, "bucket_id"));
+            String unused22 = mediaFileInfo.f151e = cursor2.getString(ArrayUtil.getIndex(this.j, "bucket_display_name"));
+            String unused23 = mediaFileInfo.f152f = cursor2.getString(ArrayUtil.getIndex(this.j, "_data"));
+            String unused24 = mediaFileInfo.g = cursor2.getString(ArrayUtil.getIndex(this.j, "_display_name"));
+            int unused25 = mediaFileInfo.h = cursor2.getInt(ArrayUtil.getIndex(this.j, "width"));
+            int unused26 = mediaFileInfo.i = cursor2.getInt(ArrayUtil.getIndex(this.j, "height"));
+            long unused27 = mediaFileInfo.j = cursor2.getLong(ArrayUtil.getIndex(this.j, "_size"));
+            String unused28 = mediaFileInfo.k = cursor2.getString(ArrayUtil.getIndex(this.j, "mime_type"));
+            String unused29 = mediaFileInfo.l = cursor2.getString(ArrayUtil.getIndex(this.j, "datetaken"));
+            String unused30 = mediaFileInfo.m = cursor2.getString(ArrayUtil.getIndex(this.j, "date_modified"));
+            String unused31 = mediaFileInfo.n = cursor2.getString(ArrayUtil.getIndex(this.j, "date_added"));
+            double unused32 = mediaFileInfo.o = cursor2.getDouble(ArrayUtil.getIndex(this.j, obj2));
+            double unused33 = mediaFileInfo.p = cursor2.getDouble(ArrayUtil.getIndex(this.j, obj));
+            int unused34 = mediaFileInfo.q = cursor2.getInt(ArrayUtil.getIndex(this.j, "orientation"));
         }
         return mediaFileInfo;
     }
@@ -310,11 +274,11 @@ public class MediaUtil {
     }
 
     public Uri addMediaFile(String str, int i2, int i3) {
-        return addMediaFile(str, i2, i3, null, 0);
+        return addMediaFile(str, i2, i3, (Location) null, 0);
     }
 
     public Uri addMediaFile(String str, int i2, int i3, int i4) {
-        return addMediaFile(str, i2, i3, null, i4);
+        return addMediaFile(str, i2, i3, (Location) null, i4);
     }
 
     public Uri addMediaFile(String str, int i2, int i3, Location location) {
@@ -331,57 +295,43 @@ public class MediaUtil {
         String name = file.getName();
         String substring = name.substring(0, name.lastIndexOf("."));
         ContentValues contentValues = new ContentValues();
-        String str3 = "longitude";
-        String str4 = "latitude";
-        String str5 = "datetaken";
-        String str6 = "mime_type";
-        String str7 = "_size";
-        String str8 = "height";
-        String str9 = "width";
-        String str10 = "title";
-        String str11 = "_display_name";
-        String str12 = "_data";
         if (isVideoFile) {
-            contentValues.put(str12, file.getPath());
-            contentValues.put(str11, name);
-            contentValues.put(str10, substring);
-            contentValues.put(str9, Integer.valueOf(i2));
-            contentValues.put(str8, Integer.valueOf(i3));
-            contentValues.put(str7, Long.valueOf(file.length()));
-            contentValues.put(str6, a2);
-            contentValues.put(str5, Long.valueOf(System.currentTimeMillis()));
+            contentValues.put("_data", file.getPath());
+            contentValues.put("_display_name", name);
+            contentValues.put("title", substring);
+            contentValues.put("width", Integer.valueOf(i2));
+            contentValues.put("height", Integer.valueOf(i3));
+            contentValues.put("_size", Long.valueOf(file.length()));
+            contentValues.put("mime_type", a2);
+            contentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
             if (location != null) {
-                contentValues.put(str4, Double.valueOf(location.getLatitude()));
-                contentValues.put(str3, Double.valueOf(location.getLongitude()));
+                contentValues.put("latitude", Double.valueOf(location.getLatitude()));
+                contentValues.put("longitude", Double.valueOf(location.getLongitude()));
             }
             contentValues.put("duration", Long.valueOf(e(str)));
-            StringBuilder sb = new StringBuilder();
-            sb.append(i2);
-            sb.append("x");
-            sb.append(i3);
-            contentValues.put("resolution", sb.toString());
+            contentValues.put("resolution", i2 + "x" + i3);
             mediaUtil = this;
-            uri = mediaUtil.f138d.insert(Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+            uri = mediaUtil.f138d.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
             str2 = "android.hardware.action.NEW_VIDEO";
         } else {
-            contentValues.put(str12, file.getPath());
-            contentValues.put(str11, name);
-            contentValues.put(str10, substring);
-            contentValues.put(str9, Integer.valueOf(i2));
-            contentValues.put(str8, Integer.valueOf(i3));
-            contentValues.put(str7, Long.valueOf(file.length()));
-            contentValues.put(str6, a2);
-            contentValues.put(str5, Long.valueOf(System.currentTimeMillis()));
+            contentValues.put("_data", file.getPath());
+            contentValues.put("_display_name", name);
+            contentValues.put("title", substring);
+            contentValues.put("width", Integer.valueOf(i2));
+            contentValues.put("height", Integer.valueOf(i3));
+            contentValues.put("_size", Long.valueOf(file.length()));
+            contentValues.put("mime_type", a2);
+            contentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
             if (location != null) {
-                contentValues.put(str4, Double.valueOf(location.getLatitude()));
-                contentValues.put(str3, Double.valueOf(location.getLongitude()));
+                contentValues.put("latitude", Double.valueOf(location.getLatitude()));
+                contentValues.put("longitude", Double.valueOf(location.getLongitude()));
             }
             contentValues.put("orientation", Integer.valueOf(i4));
             mediaUtil = this;
-            uri = mediaUtil.f138d.insert(Media.EXTERNAL_CONTENT_URI, contentValues);
+            uri = mediaUtil.f138d.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
             str2 = "android.hardware.action.NEW_PICTURE";
         }
-        if (VERSION.SDK_INT >= 14) {
+        if (Build.VERSION.SDK_INT >= 14) {
             mediaUtil.f137c.sendBroadcast(new Intent(str2, uri));
         }
         return uri;
@@ -389,7 +339,7 @@ public class MediaUtil {
 
     public boolean deleteMediaFile(String str) {
         MediaFileInfo mediaFileInfo = getMediaFileInfo(str);
-        return mediaFileInfo != null && this.f138d.delete(mediaFileInfo.f148b, null, null) > 0;
+        return mediaFileInfo != null && this.f138d.delete(mediaFileInfo.f148b, (String) null, (String[]) null) > 0;
     }
 
     public String getLastMediaFilePath() {
@@ -430,9 +380,9 @@ public class MediaUtil {
         }
         boolean isVideoFile = isVideoFile(str);
         if (isVideoFile) {
-            cursor = this.f138d.query(Video.Media.EXTERNAL_CONTENT_URI, this.i, "_data=?", new String[]{str}, "_id DESC");
+            cursor = this.f138d.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, this.i, "_data=?", new String[]{str}, "_id DESC");
         } else {
-            cursor = this.f138d.query(Media.EXTERNAL_CONTENT_URI, this.j, "_data=?", new String[]{str}, "_id DESC");
+            cursor = this.f138d.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, this.j, "_data=?", new String[]{str}, "_id DESC");
         }
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -457,9 +407,9 @@ public class MediaUtil {
             str = str.substring(lastIndexOf + 1);
         }
         if (z) {
-            cursor = this.f138d.query(Video.Media.EXTERNAL_CONTENT_URI, this.i, "bucket_display_name=?", new String[]{str}, "_id ASC");
+            cursor = this.f138d.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, this.i, "bucket_display_name=?", new String[]{str}, "_id ASC");
         } else {
-            cursor = this.f138d.query(Media.EXTERNAL_CONTENT_URI, this.j, "bucket_display_name=?", new String[]{str}, "_id ASC");
+            cursor = this.f138d.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, this.j, "bucket_display_name=?", new String[]{str}, "_id ASC");
         }
         ArrayList arrayList = null;
         if (cursor != null && cursor.getCount() > 0) {
@@ -476,7 +426,7 @@ public class MediaUtil {
         return arrayList;
     }
 
-    public Bitmap getMediaThumbnail(String str, Options options) {
+    public Bitmap getMediaThumbnail(String str, BitmapFactory.Options options) {
         MediaFileInfo mediaFileInfo = getMediaFileInfo(str);
         if (mediaFileInfo == null) {
             int i2 = 20;
@@ -495,7 +445,7 @@ public class MediaUtil {
             }
             return null;
         }
-        return mediaFileInfo.f147a ? Thumbnails.getThumbnail(this.f138d, mediaFileInfo.f149c, 3, options) : Images.Thumbnails.getThumbnail(this.f138d, mediaFileInfo.f149c, 3, options);
+        return mediaFileInfo.f147a ? MediaStore.Video.Thumbnails.getThumbnail(this.f138d, mediaFileInfo.f149c, 3, options) : MediaStore.Images.Thumbnails.getThumbnail(this.f138d, mediaFileInfo.f149c, 3, options);
     }
 
     public Bitmap getMediaThumbnailFromFile(String str, float f2) {
@@ -505,7 +455,7 @@ public class MediaUtil {
         if (str == null) {
             return null;
         }
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         int i2 = (int) (((float) options.outHeight) / f2);
         if (i2 <= 0) {
@@ -524,17 +474,15 @@ public class MediaUtil {
     }
 
     public int readPictureDegree(String str) {
-        int i2 = 0;
         try {
             int attributeInt = new ExifInterface(str).getAttributeInt("Orientation", 1);
             if (attributeInt == 3) {
-                i2 = 180;
-            } else if (attributeInt == 6) {
-                i2 = 90;
-            } else if (attributeInt == 8) {
-                i2 = 270;
+                return 180;
             }
-            return i2;
+            if (attributeInt != 6) {
+                return attributeInt != 8 ? 0 : 270;
+            }
+            return 90;
         } catch (IOException e2) {
             e2.printStackTrace();
             return 0;
@@ -551,29 +499,22 @@ public class MediaUtil {
         if (-1 != lastIndexOf) {
             str2 = str2.substring(lastIndexOf + 1);
         }
-        String str4 = ".";
-        int lastIndexOf2 = str2.lastIndexOf(str4);
+        int lastIndexOf2 = str2.lastIndexOf(".");
         if (-1 != lastIndexOf2) {
-            String str5 = str2;
+            String str4 = str2;
             str2 = str2.substring(0, lastIndexOf2);
-            str3 = str5;
+            str3 = str4;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(str4);
-            sb.append(c(str));
-            str3 = sb.toString();
+            str3 = str2 + "." + c(str);
         }
         ContentValues contentValues = new ContentValues();
-        String str6 = "title";
-        String str7 = "_display_name";
         if (mediaFileInfo.f147a) {
-            contentValues.put(str7, str3);
-            contentValues.put(str6, str2);
+            contentValues.put("_display_name", str3);
+            contentValues.put("title", str2);
         } else {
-            contentValues.put(str7, str3);
-            contentValues.put(str6, str2);
+            contentValues.put("_display_name", str3);
+            contentValues.put("title", str2);
         }
-        return this.f138d.update(mediaFileInfo.f148b, contentValues, null, null) > 0;
+        return this.f138d.update(mediaFileInfo.f148b, contentValues, (String) null, (String[]) null) > 0;
     }
 }

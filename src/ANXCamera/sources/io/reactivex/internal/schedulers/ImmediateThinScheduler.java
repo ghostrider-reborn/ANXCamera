@@ -1,7 +1,6 @@
 package io.reactivex.internal.schedulers;
 
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.Disposables;
@@ -10,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 public final class ImmediateThinScheduler extends Scheduler {
     static final Disposable DISPOSED = Disposables.empty();
     public static final Scheduler INSTANCE = new ImmediateThinScheduler();
-    static final Worker WORKER = new ImmediateThinWorker();
+    static final Scheduler.Worker WORKER = new ImmediateThinWorker();
 
-    static final class ImmediateThinWorker extends Worker {
+    static final class ImmediateThinWorker extends Scheduler.Worker {
         ImmediateThinWorker() {
         }
 
@@ -48,7 +47,7 @@ public final class ImmediateThinScheduler extends Scheduler {
     }
 
     @NonNull
-    public Worker createWorker() {
+    public Scheduler.Worker createWorker() {
         return WORKER;
     }
 

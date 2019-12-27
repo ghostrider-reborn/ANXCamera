@@ -81,11 +81,7 @@ public abstract class Box {
 
     /* access modifiers changed from: protected */
     public void dump(StringBuilder sb) {
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("{\"tag\":\"");
-        sb2.append(this.header.getFourcc());
-        sb2.append("\"}");
-        sb.append(sb2.toString());
+        sb.append("{\"tag\":\"" + this.header.getFourcc() + "\"}");
     }
 
     public abstract int estimateSize();

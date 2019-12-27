@@ -2,7 +2,7 @@ package com.android.camera.fragment.top;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,12 +12,11 @@ import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import com.android.camera.CameraSettings;
 import com.android.camera.HybridZoomingSystem;
@@ -32,12 +31,8 @@ import com.android.camera.log.Log;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.module.loader.camera2.Camera2OpenManager;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ToggleSwitch;
-import com.android.camera.ui.ToggleSwitch.OnCheckedChangeListener;
 import com.android.camera2.Camera2Proxy;
 import com.mi.config.b;
 import io.reactivex.Completable;
@@ -52,7 +47,7 @@ public class FragmentTopAlert extends BaseFragment {
     /* access modifiers changed from: private */
     public ToggleSwitch mAiSceneSelectView;
     private Runnable mAlertAiDetectTipHitRunable = new TopAlertRunnable() {
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runToSafe() {
             FragmentTopAlert fragmentTopAlert = FragmentTopAlert.this;
             fragmentTopAlert.removeViewToTipLayout(fragmentTopAlert.mRecommendTip);
@@ -84,7 +79,7 @@ public class FragmentTopAlert extends BaseFragment {
     private boolean mShow;
     private Runnable mShowAction = new TopAlertRunnable() {
         public void runToSafe() {
-            LayoutParams layoutParams = new LayoutParams(-2, FragmentTopAlert.this.getResources().getDimensionPixelOffset(R.dimen.ai_scene_selector_layout_height));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-2, FragmentTopAlert.this.getResources().getDimensionPixelOffset(R.dimen.ai_scene_selector_layout_height));
             FragmentTopAlert fragmentTopAlert = FragmentTopAlert.this;
             fragmentTopAlert.addViewToTipLayout(fragmentTopAlert.mAiSceneSelectView, layoutParams);
         }
@@ -99,7 +94,7 @@ public class FragmentTopAlert extends BaseFragment {
     private LinearLayout mTopTipLayout;
     private TextView mVideoUltraClearTip;
     public final Runnable mViewHideRunnable = new TopAlertRunnable() {
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runToSafe() {
             FragmentTopAlert fragmentTopAlert = FragmentTopAlert.this;
             fragmentTopAlert.removeViewToToastLayout(fragmentTopAlert.mToastAiSwitchTip);
@@ -117,12 +112,12 @@ public class FragmentTopAlert extends BaseFragment {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void runToSafe();
     }
 
     static /* synthetic */ void a(ToggleSwitch toggleSwitch, boolean z) {
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
         if (z) {
             if (configChanges != null) {
                 configChanges.onConfigChanged(248);
@@ -133,11 +128,11 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     private void addViewToTipLayout(View view) {
-        addViewToTipLayout(view, null);
+        addViewToTipLayout(view, (LinearLayout.LayoutParams) null);
     }
 
     /* access modifiers changed from: private */
-    public void addViewToTipLayout(View view, LayoutParams layoutParams) {
+    public void addViewToTipLayout(View view, LinearLayout.LayoutParams layoutParams) {
         if (view != null) {
             LinearLayout linearLayout = this.mTopTipLayout;
             if (linearLayout != null && linearLayout.indexOfChild(view) == -1) {
@@ -150,14 +145,14 @@ public class FragmentTopAlert extends BaseFragment {
                     Log.w(TAG, "The specified child already has a parent. You must call removeView() on the child's parent first");
                 }
                 if (layoutParams == null) {
-                    layoutParams = new LayoutParams(-2, -2);
+                    layoutParams = new LinearLayout.LayoutParams(-2, -2);
                 }
                 view.setLayoutParams(layoutParams);
             }
         }
     }
 
-    private void addViewToTipLayout(View view, LayoutParams layoutParams, Runnable runnable, Runnable runnable2) {
+    private void addViewToTipLayout(View view, LinearLayout.LayoutParams layoutParams, Runnable runnable, Runnable runnable2) {
         if (view != null) {
             LinearLayout linearLayout = this.mTopTipLayout;
             if (linearLayout != null && linearLayout.indexOfChild(view) == -1) {
@@ -173,7 +168,7 @@ public class FragmentTopAlert extends BaseFragment {
                     Log.w(TAG, "The specified child already has a parent. You must call removeView() on the child's parent first");
                 }
                 if (layoutParams == null) {
-                    layoutParams = new LayoutParams(-2, -2);
+                    layoutParams = new LinearLayout.LayoutParams(-2, -2);
                 }
                 view.setLayoutParams(layoutParams);
                 if (runnable2 != null) {
@@ -184,7 +179,7 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     private void addViewToTipLayout(View view, Runnable runnable, Runnable runnable2) {
-        addViewToTipLayout(view, null, runnable, runnable2);
+        addViewToTipLayout(view, (LinearLayout.LayoutParams) null, runnable, runnable2);
     }
 
     private void addViewToToastLayout(View view) {
@@ -203,7 +198,7 @@ public class FragmentTopAlert extends BaseFragment {
                 } else {
                     this.mToastTopTipLayout.addView(view, i);
                 }
-                LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
                 layoutParams.width = -2;
                 layoutParams.height = -2;
                 view.setLayoutParams(layoutParams);
@@ -214,7 +209,7 @@ public class FragmentTopAlert extends BaseFragment {
         }
     }
 
-    private void alertAiSceneSelector(String str, String str2, int i, OnCheckedChangeListener onCheckedChangeListener, boolean z) {
+    private void alertAiSceneSelector(String str, String str2, int i, ToggleSwitch.OnCheckedChangeListener onCheckedChangeListener, boolean z) {
         if (!TextUtils.isEmpty(str) && !TextUtils.isEmpty(str2)) {
             this.mAiSceneSelectView.setTextOnAndOff(str, str2);
         }
@@ -237,7 +232,7 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     static /* synthetic */ void b(ToggleSwitch toggleSwitch, boolean z) {
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
         if (z) {
             if (configChanges != null) {
                 configChanges.onConfigChanged(246);
@@ -253,9 +248,8 @@ public class FragmentTopAlert extends BaseFragment {
     private LayoutTransition customStubViewTransition() {
         if (this.mCustomStubTransition == null) {
             this.mCustomStubTransition = new LayoutTransition();
-            String str = "alpha";
-            ObjectAnimator ofFloat = ObjectAnimator.ofFloat(null, str, new float[]{0.0f, 1.0f});
-            ObjectAnimator ofFloat2 = ObjectAnimator.ofFloat(null, str, new float[]{1.0f, 0.0f});
+            ObjectAnimator ofFloat = ObjectAnimator.ofFloat((Object) null, "alpha", new float[]{0.0f, 1.0f});
+            ObjectAnimator ofFloat2 = ObjectAnimator.ofFloat((Object) null, "alpha", new float[]{1.0f, 0.0f});
             this.mCustomStubTransition.setStartDelay(2, 0);
             this.mCustomStubTransition.setDuration(2, 250);
             this.mCustomStubTransition.setAnimator(2, ofFloat);
@@ -268,7 +262,7 @@ public class FragmentTopAlert extends BaseFragment {
 
     private LayoutTransition customToastLayoutTransition() {
         if (this.mCustomToastTransition == null) {
-            ObjectAnimator ofFloat = ObjectAnimator.ofFloat(null, "alpha", new float[]{0.0f, 1.0f});
+            ObjectAnimator ofFloat = ObjectAnimator.ofFloat((Object) null, "alpha", new float[]{0.0f, 1.0f});
             this.mCustomToastTransition = new LayoutTransition();
             this.mCustomToastTransition.setStartDelay(2, 0);
             this.mCustomToastTransition.setDuration(2, 250);
@@ -311,10 +305,7 @@ public class FragmentTopAlert extends BaseFragment {
         if (id == Camera2DataContainer.getInstance().getAuxCameraId() && decimal <= 2.0f && this.mCurrentMode != 167) {
             return null;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("x ");
-        sb.append(decimal);
-        return sb.toString();
+        return "x " + decimal;
     }
 
     private void initHandler() {
@@ -322,19 +313,19 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     private TextView initHorizonDirectTipText() {
-        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.top_tip_lying_direct_hint_layout, null);
+        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.top_tip_lying_direct_hint_layout, (ViewGroup) null);
     }
 
     private LinearLayout initMusicTipText() {
-        return (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.top_tip_music_layout, null);
+        return (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.top_tip_music_layout, (ViewGroup) null);
     }
 
     private TextView initPermanentTip() {
-        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.permanent_top_tip_layout, null);
+        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.permanent_top_tip_layout, (ViewGroup) null);
     }
 
     private TextView initRecommendTipText() {
-        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.recommend_top_tip_layout, null);
+        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.recommend_top_tip_layout, (ViewGroup) null);
     }
 
     private void initToastTipLayout() {
@@ -345,19 +336,19 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     private ImageView initToastTopTipImage() {
-        return (ImageView) LayoutInflater.from(getContext()).inflate(R.layout.toast_top_tip_image_layout, null);
+        return (ImageView) LayoutInflater.from(getContext()).inflate(R.layout.toast_top_tip_image_layout, (ViewGroup) null);
     }
 
     private TextView initToastTopTipText() {
-        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.toast_top_tip_text_layout, null);
+        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.toast_top_tip_text_layout, (ViewGroup) null);
     }
 
     private ToggleSwitch initTopTipToggleSwitch() {
-        return (ToggleSwitch) LayoutInflater.from(getContext()).inflate(R.layout.top_tip_toggleswitch_layout, null);
+        return (ToggleSwitch) LayoutInflater.from(getContext()).inflate(R.layout.top_tip_toggleswitch_layout, (ViewGroup) null);
     }
 
     private TextView initZoomTipText() {
-        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_top_tip_layout, null);
+        return (TextView) LayoutInflater.from(getContext()).inflate(R.layout.zoom_top_tip_layout, (ViewGroup) null);
     }
 
     /* access modifiers changed from: private */
@@ -409,14 +400,14 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     private void setViewMargin(View view, int i) {
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) view.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
         marginLayoutParams.topMargin = i;
         view.setLayoutParams(marginLayoutParams);
         ViewCompat.setTranslationY(view, 0.0f);
     }
 
     private void showCloseConfirm() {
-        Builder builder = new Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage(R.string.live_music_close_message);
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.live_music_close_sure_message, new f(this));
@@ -443,11 +434,12 @@ public class FragmentTopAlert extends BaseFragment {
             }
             if (!z || !isLandScape()) {
                 addViewToTipLayout(this.mZoomTip);
+                return;
             }
-        } else {
-            this.mStateValueTextFromLighting = false;
-            removeViewToTipLayout(this.mZoomTip);
+            return;
         }
+        this.mStateValueTextFromLighting = false;
+        removeViewToTipLayout(this.mZoomTip);
     }
 
     private void updateTopHint(int i, String str, long j) {
@@ -497,14 +489,18 @@ public class FragmentTopAlert extends BaseFragment {
                             if (i2 == 1) {
                                 this.mToastTipFlashHDR.setImageResource(R.drawable.ic_alert_flash);
                                 addViewToToastLayout(this.mToastTipFlashHDR, 0);
+                                return;
                             } else if (i2 == 2) {
                                 this.mToastTipFlashHDR.setImageResource(R.drawable.ic_alert_flash_torch);
                                 addViewToToastLayout(this.mToastTipFlashHDR, 0);
+                                return;
                             } else if (i2 != 5) {
                                 removeViewToToastLayout(this.mToastTipFlashHDR);
+                                return;
                             } else {
                                 this.mToastTipFlashHDR.setImageResource(R.drawable.ic_alert_flash_back_soft_light);
                                 addViewToToastLayout(this.mToastTipFlashHDR, 0);
+                                return;
                             }
                         } else {
                             return;
@@ -548,13 +544,14 @@ public class FragmentTopAlert extends BaseFragment {
                 this.mAlertImageType = i2;
                 this.mToastTipFlashHDR.setImageResource(z ? R.drawable.ic_alert_hdr_live : R.drawable.ic_alert_hdr);
                 addViewToToastLayout(this.mToastTipFlashHDR, 0);
+                return;
             }
-        } else {
-            int i3 = this.mAlertImageType;
-            if (i3 == 4 || i3 == 3) {
-                this.mAlertImageType = -1;
-                removeViewToToastLayout(this.mToastTipFlashHDR);
-            }
+            return;
+        }
+        int i3 = this.mAlertImageType;
+        if (i3 == 4 || i3 == 3) {
+            this.mAlertImageType = -1;
+            removeViewToToastLayout(this.mToastTipFlashHDR);
         }
     }
 
@@ -706,14 +703,11 @@ public class FragmentTopAlert extends BaseFragment {
 
     public void alertUpdateValue(int i) {
         this.mStateValueText = "";
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController == null || !dualController.isZoomVisible() || CameraSettings.isMacroModeEnabled(this.mCurrentMode)) {
             String zoomRatioTipText = getZoomRatioTipText();
             if (zoomRatioTipText != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(this.mStateValueText);
-                sb.append(zoomRatioTipText);
-                this.mStateValueText = sb.toString();
+                this.mStateValueText += zoomRatioTipText;
             }
             updateStateText(false);
         }
@@ -738,10 +732,10 @@ public class FragmentTopAlert extends BaseFragment {
 
     public /* synthetic */ void b(DialogInterface dialogInterface, int i) {
         removeViewToTipLayout(this.mLiveMusicHintLayout);
-        LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+        ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
         if (liveConfigChanges != null && !liveConfigChanges.isRecording() && !liveConfigChanges.isRecordingPaused()) {
             liveConfigChanges.closeBGM();
-            ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(245);
+            ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).updateConfigItem(245);
         }
     }
 
@@ -808,7 +802,7 @@ public class FragmentTopAlert extends BaseFragment {
     }
 
     public /* synthetic */ void ga() {
-        this.mTopTipLayout.setLayoutTransition(null);
+        this.mTopTipLayout.setLayoutTransition((LayoutTransition) null);
     }
 
     public int getFragmentInto() {
@@ -845,7 +839,7 @@ public class FragmentTopAlert extends BaseFragment {
         }
         this.mTopTipLayout = (LinearLayout) view.findViewById(R.id.top_tip_layout);
         this.mToastTopTipLayout = (LinearLayout) this.mTopTipLayout.findViewById(R.id.top_toast_layout);
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.mTopTipLayout.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.mTopTipLayout.getLayoutParams();
         marginLayoutParams.topMargin = getAlertTopMargin();
         this.mTopTipLayout.setLayoutParams(marginLayoutParams);
         this.mTopTipLayout.setDividerDrawable(getResources().getDrawable(R.drawable.top_tip_vertical_divider));
@@ -889,7 +883,7 @@ public class FragmentTopAlert extends BaseFragment {
 
     public void onActivityCreated(@Nullable Bundle bundle) {
         super.onActivityCreated(bundle);
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null) {
             topAlert.reInitAlert(false);
         }
@@ -899,7 +893,7 @@ public class FragmentTopAlert extends BaseFragment {
         super.onStop();
         Handler handler = this.mHandler;
         if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+            handler.removeCallbacksAndMessages((Object) null);
         }
         AlphaAnimation alphaAnimation = this.mBlingAnimation;
         if (alphaAnimation != null) {
@@ -973,7 +967,7 @@ public class FragmentTopAlert extends BaseFragment {
 
     public void updateMusicHint() {
         if (this.mCurrentMode != 174) {
-            alertMusicTip(8, null);
+            alertMusicTip(8, (String) null);
             return;
         }
         String[] currentLiveMusic = CameraSettings.getCurrentLiveMusic();

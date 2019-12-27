@@ -20,7 +20,7 @@ public class f {
             this.encoder = iVar;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean g(@NonNull Class<?> cls) {
             return this.Be.isAssignableFrom(cls);
         }
@@ -38,7 +38,7 @@ public class f {
     public synchronized <Z> i<Z> get(@NonNull Class<Z> cls) {
         int size = this.tk.size();
         for (int i = 0; i < size; i++) {
-            a aVar = (a) this.tk.get(i);
+            a aVar = this.tk.get(i);
             if (aVar.g(cls)) {
                 return aVar.encoder;
             }

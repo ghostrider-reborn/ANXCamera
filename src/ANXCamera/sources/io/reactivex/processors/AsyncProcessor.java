@@ -32,14 +32,14 @@ public final class AsyncProcessor<T> extends FlowableProcessor<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onComplete() {
             if (!isCancelled()) {
                 this.actual.onComplete();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onError(Throwable th) {
             if (isCancelled()) {
                 RxJavaPlugins.onError(th);
@@ -58,7 +58,7 @@ public final class AsyncProcessor<T> extends FlowableProcessor<T> {
         return new AsyncProcessor<>();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(AsyncSubscription<T> asyncSubscription) {
         AsyncSubscription[] asyncSubscriptionArr;
         AsyncSubscription[] asyncSubscriptionArr2;
@@ -132,39 +132,39 @@ public final class AsyncProcessor<T> extends FlowableProcessor<T> {
     }
 
     public void onComplete() {
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj != obj2) {
+        AsyncSubscription<T>[] asyncSubscriptionArr = this.subscribers.get();
+        AsyncSubscription<T>[] asyncSubscriptionArr2 = TERMINATED;
+        if (asyncSubscriptionArr != asyncSubscriptionArr2) {
             T t = this.value;
-            AsyncSubscription[] asyncSubscriptionArr = (AsyncSubscription[]) this.subscribers.getAndSet(obj2);
+            AsyncSubscription[] asyncSubscriptionArr3 = (AsyncSubscription[]) this.subscribers.getAndSet(asyncSubscriptionArr2);
             int i = 0;
             if (t == null) {
-                int length = asyncSubscriptionArr.length;
+                int length = asyncSubscriptionArr3.length;
                 while (i < length) {
-                    asyncSubscriptionArr[i].onComplete();
+                    asyncSubscriptionArr3[i].onComplete();
                     i++;
                 }
-            } else {
-                int length2 = asyncSubscriptionArr.length;
-                while (i < length2) {
-                    asyncSubscriptionArr[i].complete(t);
-                    i++;
-                }
+                return;
+            }
+            int length2 = asyncSubscriptionArr3.length;
+            while (i < length2) {
+                asyncSubscriptionArr3[i].complete(t);
+                i++;
             }
         }
     }
 
     public void onError(Throwable th) {
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj == obj2) {
+        AsyncSubscription<T>[] asyncSubscriptionArr = this.subscribers.get();
+        AsyncSubscription<T>[] asyncSubscriptionArr2 = TERMINATED;
+        if (asyncSubscriptionArr == asyncSubscriptionArr2) {
             RxJavaPlugins.onError(th);
             return;
         }
         this.value = null;
         this.error = th;
-        for (AsyncSubscription onError : (AsyncSubscription[]) this.subscribers.getAndSet(obj2)) {
+        for (AsyncSubscription onError : (AsyncSubscription[]) this.subscribers.getAndSet(asyncSubscriptionArr2)) {
             onError.onError(th);
         }
     }
@@ -184,7 +184,7 @@ public final class AsyncProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(AsyncSubscription<T> asyncSubscription) {
         AsyncSubscription<T>[] asyncSubscriptionArr;
         AsyncSubscription[] asyncSubscriptionArr2;

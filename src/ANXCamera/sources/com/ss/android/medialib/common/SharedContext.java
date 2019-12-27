@@ -6,7 +6,7 @@ import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
-import android.os.Build.VERSION;
+import android.os.Build;
 import com.ss.android.vesdk.VELogUtil;
 
 @SuppressLint({"InlinedApi"})
@@ -31,24 +31,20 @@ public class SharedContext {
         int eglGetError = EGL14.eglGetError();
         if (eglGetError != 12288) {
             String str2 = LOG_TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": EGL error: 0x");
-            sb.append(Integer.toHexString(eglGetError));
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(str2, str + ": EGL error: 0x" + Integer.toHexString(eglGetError));
         }
     }
 
     public static SharedContext create() {
-        return create(EGL14.EGL_NO_CONTEXT, 64, 64, 1, null);
+        return create(EGL14.EGL_NO_CONTEXT, 64, 64, 1, (Object) null);
     }
 
     public static SharedContext create(int i, int i2) {
-        return create(EGL14.EGL_NO_CONTEXT, i, i2, 1, null);
+        return create(EGL14.EGL_NO_CONTEXT, i, i2, 1, (Object) null);
     }
 
     public static SharedContext create(EGLContext eGLContext, int i, int i2) {
-        return create(eGLContext, i, i2, 1, null);
+        return create(eGLContext, i, i2, 1, (Object) null);
     }
 
     public static SharedContext create(EGLContext eGLContext, int i, int i2, int i3, Object obj) {
@@ -126,19 +122,13 @@ public class SharedContext {
                 return false;
             } else if (!EGL14.eglMakeCurrent(this.mDisplay, eGLSurface, eGLSurface, this.mContext)) {
                 String str2 = LOG_TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("eglMakeCurrent failed:");
-                sb.append(EGL14.eglGetError());
-                VELogUtil.e(str2, sb.toString());
+                VELogUtil.e(str2, "eglMakeCurrent failed:" + EGL14.eglGetError());
                 return false;
             } else {
                 int[] iArr8 = new int[1];
                 EGL14.eglQueryContext(this.mDisplay, this.mContext, 12440, iArr8, 0);
                 String str3 = LOG_TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("EGLContext created, client version ");
-                sb2.append(iArr8[0]);
-                VELogUtil.i(str3, sb2.toString());
+                VELogUtil.i(str3, "EGLContext created, client version " + iArr8[0]);
                 this.mInitialized = true;
                 return true;
             }
@@ -163,23 +153,21 @@ public class SharedContext {
         int[] iArr = new int[1];
         EGL14.eglQueryContext(this.mDisplay, this.mContext, 12440, iArr, 0);
         String str = LOG_TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("EGLContext created, client version ");
-        sb.append(iArr[0]);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(str, "EGLContext created, client version " + iArr[0]);
         return "";
     }
 
     public String getConfigAttrib(int i) {
-        if (isInitialized()) {
-            EGLConfig eGLConfig = this.mConfig;
-            if (eGLConfig != null) {
-                int[] iArr = new int[1];
-                EGL14.eglGetConfigAttrib(this.mDisplay, eGLConfig, i, iArr, 0);
-                return String.valueOf(iArr[0]);
-            }
+        if (!isInitialized()) {
+            return "Not initialized";
         }
-        return "Not initialized";
+        EGLConfig eGLConfig = this.mConfig;
+        if (eGLConfig == null) {
+            return "Not initialized";
+        }
+        int[] iArr = new int[1];
+        EGL14.eglGetConfigAttrib(this.mDisplay, eGLConfig, i, iArr, 0);
+        return String.valueOf(iArr[0]);
     }
 
     public EGLContext getContext() {
@@ -203,15 +191,12 @@ public class SharedContext {
         EGLSurface eGLSurface = this.mSurface;
         if (!EGL14.eglMakeCurrent(eGLDisplay, eGLSurface, eGLSurface, this.mContext)) {
             String str = LOG_TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("eglMakeCurrent failed:");
-            sb.append(EGL14.eglGetError());
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(str, "eglMakeCurrent failed:" + EGL14.eglGetError());
         }
     }
 
     public String queryString(int i) {
-        return !isInitialized() ? "Not initialized" : VERSION.SDK_INT >= 17 ? EGL14.eglQueryString(this.mDisplay, i) : "";
+        return !isInitialized() ? "Not initialized" : Build.VERSION.SDK_INT >= 17 ? EGL14.eglQueryString(this.mDisplay, i) : "";
     }
 
     public void release() {

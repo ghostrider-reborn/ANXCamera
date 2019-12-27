@@ -1,12 +1,11 @@
 package com.android.camera.ui.drawable.lighting;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -61,7 +60,7 @@ public class LightingAnimateDrawable extends Drawable {
         this.mFocusingAnimator.setDuration(600);
         this.mFocusingAnimator.setRepeatMode(2);
         this.mFocusingAnimator.setRepeatCount(-1);
-        this.mFocusingAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mFocusingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 LightingAnimateDrawable.this.mPaintMask.mCurrentWidthPercent = floatValue;
@@ -69,7 +68,7 @@ public class LightingAnimateDrawable extends Drawable {
                 LightingAnimateDrawable.this.invalidateSelf();
             }
         });
-        this.mFocusingAnimator.addListener(new AnimatorListener() {
+        this.mFocusingAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -83,7 +82,7 @@ public class LightingAnimateDrawable extends Drawable {
             }
 
             public void onAnimationStart(Animator animator) {
-                LightingAnimateDrawable.this.mAnimateFocusDoing = false;
+                boolean unused = LightingAnimateDrawable.this.mAnimateFocusDoing = false;
             }
         });
         this.mFocusingAnimator.start();
@@ -101,7 +100,7 @@ public class LightingAnimateDrawable extends Drawable {
         this.mUpdateDegreeAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         this.mUpdateDegreeAnimator.setDuration(300);
         this.mUpdateDegreeAnimator.setInterpolator(new PathInterpolator(0.25f, 0.1f, 0.25f, 1.0f));
-        this.mUpdateDegreeAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mUpdateDegreeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 LightingAnimateDrawable.this.mPaintMask.updateValue(floatValue);
@@ -109,7 +108,7 @@ public class LightingAnimateDrawable extends Drawable {
                 LightingAnimateDrawable.this.invalidateSelf();
             }
         });
-        this.mUpdateDegreeAnimator.addListener(new AnimatorListener() {
+        this.mUpdateDegreeAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -164,13 +163,13 @@ public class LightingAnimateDrawable extends Drawable {
         this.mAlphaAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         this.mAlphaAnimator.setDuration(200);
         this.mAlphaAnimator.setInterpolator(new CubicEaseInOutInterpolator());
-        this.mAlphaAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mAlphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 LightingAnimateDrawable.this.mPaintCircle.updateValue(((Float) valueAnimator.getAnimatedValue()).floatValue());
                 LightingAnimateDrawable.this.invalidateSelf();
             }
         });
-        this.mAlphaAnimator.addListener(new AnimatorListener() {
+        this.mAlphaAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -195,18 +194,18 @@ public class LightingAnimateDrawable extends Drawable {
         this.mExitAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         this.mExitAnimator.setDuration(200);
         this.mExitAnimator.setInterpolator(new PathInterpolator(0.25f, 0.1f, 0.25f, 1.0f));
-        this.mExitAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mExitAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 LightingAnimateDrawable.this.mPaintMask.updateValue(((Float) valueAnimator.getAnimatedValue()).floatValue());
                 LightingAnimateDrawable.this.invalidateSelf();
             }
         });
-        this.mExitAnimator.addListener(new AnimatorListener() {
+        this.mExitAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
             public void onAnimationEnd(Animator animator) {
-                LightingAnimateDrawable.this.isShown = false;
+                boolean unused = LightingAnimateDrawable.this.isShown = false;
             }
 
             public void onAnimationRepeat(Animator animator) {
@@ -227,13 +226,13 @@ public class LightingAnimateDrawable extends Drawable {
         this.mStartAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         this.mStartAnimator.setDuration(380);
         this.mStartAnimator.setInterpolator(new PathInterpolator(0.25f, 0.1f, 0.25f, 1.0f));
-        this.mStartAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mStartAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 LightingAnimateDrawable.this.mPaintMask.updateValue(((Float) valueAnimator.getAnimatedValue()).floatValue());
                 LightingAnimateDrawable.this.invalidateSelf();
             }
         });
-        this.mStartAnimator.addListener(new AnimatorListener() {
+        this.mStartAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -258,7 +257,7 @@ public class LightingAnimateDrawable extends Drawable {
         ValueAnimator ofFloat = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         ofFloat.setInterpolator(new CubicEaseInOutInterpolator());
         ofFloat.setDuration(250);
-        ofFloat.addUpdateListener(new AnimatorUpdateListener() {
+        ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 LightingAnimateDrawable.this.mPaintMask.updateValue(floatValue);
@@ -277,7 +276,7 @@ public class LightingAnimateDrawable extends Drawable {
 
     public void draw(@NonNull Canvas canvas) {
         if (this.isShown && canvas != null) {
-            int saveLayer = canvas.saveLayer(0.0f, 0.0f, (float) this.mWidth, (float) this.mHeight, null, 31);
+            int saveLayer = canvas.saveLayer(0.0f, 0.0f, (float) this.mWidth, (float) this.mHeight, (Paint) null, 31);
             canvas.save();
             this.mPaintMask.drawCanvas(canvas);
             canvas.restore();

@@ -1,7 +1,6 @@
 package com.ss.android.ugc.effectmanager.effect.task.task;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.JsonReader;
@@ -47,16 +46,13 @@ public class CheckUpdateTask extends NormalTask {
     private EffectRequest buildRequest() {
         HashMap hashMap = new HashMap();
         LinkSelector linkSelector = this.mEffectContext.getLinkSelector();
-        String str = "";
         boolean z = false;
-        String str2 = "app_version";
-        String str3 = "version";
         if (linkSelector != null) {
-            SharedPreferences sharedPreferences = linkSelector.getContext().getSharedPreferences(str3, 0);
-            z = !sharedPreferences.getString(str2, str).equals(this.mConfiguration.getAppVersion());
+            SharedPreferences sharedPreferences = linkSelector.getContext().getSharedPreferences("version", 0);
+            z = !sharedPreferences.getString("app_version", "").equals(this.mConfiguration.getAppVersion());
             if (z) {
-                Editor edit = sharedPreferences.edit();
-                edit.putString(str2, this.mConfiguration.getAppVersion());
+                SharedPreferences.Editor edit = sharedPreferences.edit();
+                edit.putString("app_version", this.mConfiguration.getAppVersion());
                 edit.commit();
             }
         }
@@ -64,7 +60,7 @@ public class CheckUpdateTask extends NormalTask {
             hashMap.put(EffectConfiguration.KEY_ACCESS_KEY, this.mConfiguration.getAccessKey());
         }
         if (!TextUtils.isEmpty(this.mConfiguration.getAppVersion())) {
-            hashMap.put(str2, this.mConfiguration.getAppVersion());
+            hashMap.put("app_version", this.mConfiguration.getAppVersion());
         }
         if (!TextUtils.isEmpty(this.mConfiguration.getSdkVersion())) {
             hashMap.put(EffectConfiguration.KEY_SDK_VERSION, this.mConfiguration.getSdkVersion());
@@ -95,21 +91,17 @@ public class CheckUpdateTask extends NormalTask {
         }
         hashMap.put(EffectConfiguration.KEY_PANEL, this.mPanel);
         int i = this.mCheckType;
-        String str4 = EffectConstants.ROUTE_CHECK_UPDATE_PAGE;
+        String str = EffectConstants.ROUTE_CHECK_UPDATE_PAGE;
         if (i == 1) {
             hashMap.put(EffectConfiguration.KEY_CATEGORY, this.mCategory);
-            str4 = EffectConstants.ROUTE_CATEGORY_CHECK_UPDATE;
+            str = EffectConstants.ROUTE_CATEGORY_CHECK_UPDATE;
         }
         if (z) {
-            hashMap.put(str3, str);
+            hashMap.put("version", "");
         } else {
-            hashMap.put(str3, this.mVersion);
+            hashMap.put("version", this.mVersion);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mEffectContext.getLinkSelector().getBestHostUrl());
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(str4);
-        return new EffectRequest("GET", NetworkUtils.buildRequestUrl(hashMap, sb.toString()));
+        return new EffectRequest("GET", NetworkUtils.buildRequestUrl(hashMap, this.mEffectContext.getLinkSelector().getBestHostUrl() + this.mConfiguration.getApiAdress() + str));
     }
 
     private boolean checkedChannelCache() {
@@ -119,10 +111,7 @@ public class CheckUpdateTask extends NormalTask {
         if (i == 1) {
             str = EffectCacheKeyGenerator.generateCategoryVersionKey(this.mPanel, this.mCategory);
         } else if (i != 2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("effect_version");
-            sb.append(this.mPanel);
-            str = sb.toString();
+            str = "effect_version" + this.mPanel;
         } else {
             str = EffectCacheKeyGenerator.generatePanelInfoVersionKey(this.mPanel);
         }
@@ -182,7 +171,7 @@ public class CheckUpdateTask extends NormalTask {
             try {
                 EffectCheckUpdateResponse effectCheckUpdateResponse = (EffectCheckUpdateResponse) this.mConfiguration.getEffectNetWorker().execute(buildRequest, this.mConfiguration.getJsonConverter(), EffectCheckUpdateResponse.class);
                 if (effectCheckUpdateResponse != null) {
-                    sendMessage(13, new EffectCheckUpdateResult(effectCheckUpdateResponse.isUpdated(), null));
+                    sendMessage(13, new EffectCheckUpdateResult(effectCheckUpdateResponse.isUpdated(), (ExceptionResult) null));
                 } else {
                     sendMessage(13, new EffectCheckUpdateResult(false, new ExceptionResult((int) ErrorConstants.CODE_DOWNLOAD_ERROR)));
                 }
@@ -191,7 +180,7 @@ public class CheckUpdateTask extends NormalTask {
                 sendMessage(13, new EffectCheckUpdateResult(false, new ExceptionResult(e2)));
             }
         } else {
-            sendMessage(13, new EffectCheckUpdateResult(true, null));
+            sendMessage(13, new EffectCheckUpdateResult(true, (ExceptionResult) null));
         }
     }
 }

@@ -5,10 +5,6 @@ import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistryLite;
 import com.google.protobuf.FieldType;
 import com.google.protobuf.GeneratedMessageLite;
-import com.google.protobuf.GeneratedMessageLite.DefaultInstanceBasedParser;
-import com.google.protobuf.GeneratedMessageLite.ExtendableBuilder;
-import com.google.protobuf.GeneratedMessageLite.ExtendableMessage;
-import com.google.protobuf.GeneratedMessageLite.MethodToInvoke;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Parser;
 import com.google.protobuf.ProtoField;
@@ -21,7 +17,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 @ProtoMessage(checkInitialized = {}, messageSetWireFormat = false, protoSyntax = ProtoSyntax.PROTO2)
-public final class ServiceEventProto extends ExtendableMessage<ServiceEventProto, Builder> implements ServiceEventProtoOrBuilder {
+public final class ServiceEventProto extends GeneratedMessageLite.ExtendableMessage<ServiceEventProto, Builder> implements ServiceEventProtoOrBuilder {
     /* access modifiers changed from: private */
     public static final ServiceEventProto DEFAULT_INSTANCE = new ServiceEventProto();
     public static final int EVENT_ID_FIELD_NUMBER = 1;
@@ -33,9 +29,9 @@ public final class ServiceEventProto extends ExtendableMessage<ServiceEventProto
     private int eventId_;
     private byte memoizedIsInitialized = 2;
 
-    /* renamed from: com.google.android.apps.gsa.search.shared.service.proto.ServiceEventProto$1 reason: invalid class name */
+    /* renamed from: com.google.android.apps.gsa.search.shared.service.proto.ServiceEventProto$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
-        static final /* synthetic */ int[] $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke = new int[MethodToInvoke.values().length];
+        static final /* synthetic */ int[] $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke = new int[GeneratedMessageLite.MethodToInvoke.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(14:0|1|2|3|4|5|6|7|8|9|10|11|12|(3:13|14|16)) */
         /* JADX WARNING: Can't wrap try/catch for region: R(16:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|16) */
@@ -47,20 +43,20 @@ public final class ServiceEventProto extends ExtendableMessage<ServiceEventProto
         /* JADX WARNING: Missing exception handler attribute for start block: B:7:0x002a */
         /* JADX WARNING: Missing exception handler attribute for start block: B:9:0x0035 */
         static {
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.NEW_MUTABLE_INSTANCE.ordinal()] = 1;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.NEW_BUILDER.ordinal()] = 2;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.BUILD_MESSAGE_INFO.ordinal()] = 3;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_DEFAULT_INSTANCE.ordinal()] = 4;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_PARSER.ordinal()] = 5;
-            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.GET_MEMOIZED_IS_INITIALIZED.ordinal()] = 6;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.NEW_MUTABLE_INSTANCE.ordinal()] = 1;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.NEW_BUILDER.ordinal()] = 2;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.BUILD_MESSAGE_INFO.ordinal()] = 3;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_DEFAULT_INSTANCE.ordinal()] = 4;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_PARSER.ordinal()] = 5;
+            $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.GET_MEMOIZED_IS_INITIALIZED.ordinal()] = 6;
             try {
-                $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[MethodToInvoke.SET_MEMOIZED_IS_INITIALIZED.ordinal()] = 7;
+                $SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[GeneratedMessageLite.MethodToInvoke.SET_MEMOIZED_IS_INITIALIZED.ordinal()] = 7;
             } catch (NoSuchFieldError unused) {
             }
         }
     }
 
-    public static final class Builder extends ExtendableBuilder<ServiceEventProto, Builder> implements ServiceEventProtoOrBuilder {
+    public static final class Builder extends GeneratedMessageLite.ExtendableBuilder<ServiceEventProto, Builder> implements ServiceEventProtoOrBuilder {
         private Builder() {
             super(ServiceEventProto.DEFAULT_INSTANCE);
         }
@@ -174,24 +170,24 @@ public final class ServiceEventProto extends ExtendableMessage<ServiceEventProto
     }
 
     /* access modifiers changed from: protected */
-    public final Object dynamicMethod(MethodToInvoke methodToInvoke, Object obj, Object obj2) {
+    public final Object dynamicMethod(GeneratedMessageLite.MethodToInvoke methodToInvoke, Object obj, Object obj2) {
         int i = 1;
         switch (AnonymousClass1.$SwitchMap$com$google$protobuf$GeneratedMessageLite$MethodToInvoke[methodToInvoke.ordinal()]) {
             case 1:
                 return new ServiceEventProto();
             case 2:
-                return new Builder(null);
+                return new Builder((AnonymousClass1) null);
             case 3:
                 return newMessageInfo(DEFAULT_INSTANCE, "\u0001\u0001\u0000\u0001\u0001\u0001\u0001\u0002\u0000\u0000\u0000\u0001\u0004\u0000", new Object[]{"bitField0_", "eventId_"});
             case 4:
                 return DEFAULT_INSTANCE;
             case 5:
-                DefaultInstanceBasedParser defaultInstanceBasedParser = PARSER;
+                GeneratedMessageLite.DefaultInstanceBasedParser defaultInstanceBasedParser = PARSER;
                 if (defaultInstanceBasedParser == null) {
                     synchronized (ServiceEventProto.class) {
                         defaultInstanceBasedParser = PARSER;
                         if (defaultInstanceBasedParser == null) {
-                            defaultInstanceBasedParser = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+                            defaultInstanceBasedParser = new GeneratedMessageLite.DefaultInstanceBasedParser(DEFAULT_INSTANCE);
                             PARSER = defaultInstanceBasedParser;
                         }
                     }

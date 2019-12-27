@@ -1,10 +1,9 @@
 package com.arcsoft.avatar.util;
 
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigValue;
+import com.arcsoft.avatar.AvatarConfig;
 
 public class AvatarConfigUtils {
-    public static int getCurrentConfigIdWithType(int i, ASAvatarConfigValue aSAvatarConfigValue) {
+    public static int getCurrentConfigIdWithType(int i, AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         if (i == 26) {
             return aSAvatarConfigValue.configNoseShapeID;
         }
@@ -66,7 +65,7 @@ public class AvatarConfigUtils {
         }
     }
 
-    public static float getCurrentContinuousValueWithType(int i, ASAvatarConfigValue aSAvatarConfigValue) {
+    public static float getCurrentContinuousValueWithType(int i, AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         if (i == 2) {
             return aSAvatarConfigValue.configHairColorValue;
         }
@@ -149,7 +148,7 @@ public class AvatarConfigUtils {
         return i == 2 || i == 3 || i == 4 || i == 5 || i == 6 || i == 13 || i == 17 || i == 20 || i == 10 || i == 11;
     }
 
-    public static boolean isSupportContinuousConfigInfo(ASAvatarConfigInfo aSAvatarConfigInfo) {
+    public static boolean isSupportContinuousConfigInfo(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo) {
         int i = aSAvatarConfigInfo.configType;
         if (i == 21 || i == 23 || i == 26 || i == 22 || i == 10 || i == 11) {
             return false;
@@ -157,7 +156,7 @@ public class AvatarConfigUtils {
         return aSAvatarConfigInfo.isSupportContinuous;
     }
 
-    public static void updateConfigID(int i, int i2, ASAvatarConfigValue aSAvatarConfigValue) {
+    public static void updateConfigID(int i, int i2, AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         if (i == 26) {
             aSAvatarConfigValue.configNoseShapeID = i2;
         } else if (i == 29) {
@@ -241,7 +240,7 @@ public class AvatarConfigUtils {
         }
     }
 
-    public static void updateConfigValue(int i, float f2, ASAvatarConfigValue aSAvatarConfigValue) {
+    public static void updateConfigValue(int i, float f2, AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         if (i == 2) {
             aSAvatarConfigValue.configHairColorValue = f2;
         } else if (i == 3) {

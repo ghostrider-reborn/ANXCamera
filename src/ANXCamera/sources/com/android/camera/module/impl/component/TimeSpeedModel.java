@@ -24,8 +24,8 @@ public class TimeSpeedModel {
             return 0;
         }
         int i = 0;
-        for (TimeSpeedModel timeSpeedModel : list) {
-            i = (int) (((long) i) + calculateRealTime(timeSpeedModel.duration, timeSpeedModel.speed));
+        for (TimeSpeedModel next : list) {
+            i = (int) (((long) i) + calculateRealTime(next.duration, next.speed));
         }
         return (long) i;
     }

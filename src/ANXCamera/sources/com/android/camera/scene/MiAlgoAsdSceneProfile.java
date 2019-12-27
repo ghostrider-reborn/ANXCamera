@@ -62,9 +62,9 @@ public class MiAlgoAsdSceneProfile {
     public static void clearInitASDScenes() {
         List<MiScene> list = sSceneList;
         if (list != null) {
-            for (MiScene miScene : list) {
-                miScene.setEnable(false);
-                miScene.isChange(0.0f);
+            for (MiScene next : list) {
+                next.setEnable(false);
+                next.isChange(0.0f);
             }
         }
     }
@@ -75,17 +75,17 @@ public class MiAlgoAsdSceneProfile {
 
     public static int getSceneTipResId(int i, int i2) {
         if (i <= 0 || i2 <= 0) {
-            return ((Integer) ((MiScene) sSceneList.get(0)).valueArray.get(0)).intValue();
+            return sSceneList.get(0).valueArray.get(0).intValue();
         }
-        for (MiScene miScene : sSceneList) {
-            if (miScene.type == i) {
-                Integer num = (Integer) miScene.valueArray.get(i2);
+        for (MiScene next : sSceneList) {
+            if (next.type == i) {
+                Integer num = next.valueArray.get(i2);
                 if (num != null) {
                     return num.intValue();
                 }
             }
         }
-        return ((Integer) ((MiScene) sSceneList.get(0)).valueArray.get(0)).intValue();
+        return sSceneList.get(0).valueArray.get(0).intValue();
     }
 
     public static boolean isAlreadyTip() {
@@ -103,11 +103,12 @@ public class MiAlgoAsdSceneProfile {
 
     public static boolean isSceneChange(int i, int i2) {
         List<MiScene> list = sSceneList;
-        if (list != null) {
-            for (MiScene miScene : list) {
-                if (miScene.type == i) {
-                    return miScene.isChange((float) i2);
-                }
+        if (list == null) {
+            return false;
+        }
+        for (MiScene next : list) {
+            if (next.type == i) {
+                return next.isChange((float) i2);
             }
         }
         return false;
@@ -115,11 +116,12 @@ public class MiAlgoAsdSceneProfile {
 
     public static boolean isTipEnable(int i) {
         List<MiScene> list = sSceneList;
-        if (list != null) {
-            for (MiScene miScene : list) {
-                if (miScene.type == i) {
-                    return miScene.isEnable();
-                }
+        if (list == null) {
+            return false;
+        }
+        for (MiScene next : list) {
+            if (next.type == i) {
+                return next.isEnable();
             }
         }
         return false;
@@ -128,9 +130,9 @@ public class MiAlgoAsdSceneProfile {
     public static void setTipEnable(int i, boolean z) {
         List<MiScene> list = sSceneList;
         if (list != null) {
-            for (MiScene miScene : list) {
-                if (miScene.type == i) {
-                    miScene.setEnable(z);
+            for (MiScene next : list) {
+                if (next.type == i) {
+                    next.setEnable(z);
                     return;
                 }
             }

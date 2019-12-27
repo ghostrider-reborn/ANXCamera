@@ -41,7 +41,7 @@ public class ResourceMonitor implements MessageInterceptor {
     public void reset() {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setListener(Listener listener) {
         this.mListener = listener;
     }

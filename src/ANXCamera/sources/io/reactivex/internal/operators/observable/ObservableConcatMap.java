@@ -30,7 +30,7 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
         final int bufferSize;
         volatile boolean cancelled;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f308d;
         volatile boolean done;
         final AtomicThrowable error = new AtomicThrowable();
@@ -50,7 +50,7 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
                 this.parent = concatMapDelayErrorObserver;
             }
 
-            /* access modifiers changed from: 0000 */
+            /* access modifiers changed from: package-private */
             public void dispose() {
                 DisposableHelper.dispose(this);
             }
@@ -97,7 +97,7 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
             this.observer.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 Observer<? super R> observer2 = this.actual;
@@ -111,17 +111,18 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
                         } else if (this.tillTheEnd || ((Throwable) atomicThrowable.get()) == null) {
                             boolean z = this.done;
                             try {
-                                Object poll = simpleQueue.poll();
+                                T poll = simpleQueue.poll();
                                 boolean z2 = poll == null;
                                 if (z && z2) {
                                     this.cancelled = true;
                                     Throwable terminate = atomicThrowable.terminate();
                                     if (terminate != null) {
                                         observer2.onError(terminate);
+                                        return;
                                     } else {
                                         observer2.onComplete();
+                                        return;
                                     }
-                                    return;
                                 } else if (!z2) {
                                     try {
                                         Object apply = this.mapper.apply(poll);
@@ -247,7 +248,7 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
                 this.parent = sourceObserver;
             }
 
-            /* access modifiers changed from: 0000 */
+            /* access modifiers changed from: package-private */
             public void dispose() {
                 DisposableHelper.dispose(this);
             }
@@ -286,14 +287,14 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 while (!this.disposed) {
                     if (!this.active) {
                         boolean z = this.done;
                         try {
-                            Object poll = this.queue.poll();
+                            T poll = this.queue.poll();
                             boolean z2 = poll == null;
                             if (z && z2) {
                                 this.disposed = true;
@@ -330,7 +331,7 @@ public final class ObservableConcatMap<T, U> extends AbstractObservableWithUpstr
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete() {
             this.active = false;
             drain();

@@ -1,28 +1,26 @@
 package com.android.camera.data.data;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.support.v4.util.SimpleArrayMap;
 import com.android.camera.CameraAppImpl;
-import com.android.camera.data.cloud.DataCloud.CloudItem;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
-import com.android.camera.data.provider.DataProvider.ProviderEvent;
+import com.android.camera.data.cloud.DataCloud;
+import com.android.camera.data.provider.DataProvider;
 
-public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
-    private CloudItem mDataCloudItem;
-    private Editor mEditor;
+public abstract class DataItemBase implements DataProvider.ProviderEvent, DataProvider.ProviderEditor {
+    private DataCloud.CloudItem mDataCloudItem;
+    private SharedPreferences.Editor mEditor;
     /* access modifiers changed from: private */
     public final Object mLock = new Object();
     private SharedPreferences mPreferences;
     /* access modifiers changed from: private */
     public SimpleArrayMap<String, Object> mValues = new SimpleArrayMap<>();
 
-    public final class ConcurrentEditor implements ProviderEditor {
+    public final class ConcurrentEditor implements DataProvider.ProviderEditor {
         private boolean mIsClear;
         private SimpleArrayMap<String, Object> mModified = new SimpleArrayMap<>();
-        private Editor mPreferenceEditor;
+        private SharedPreferences.Editor mPreferenceEditor;
 
-        public ConcurrentEditor(Editor editor) {
+        public ConcurrentEditor(SharedPreferences.Editor editor) {
             this.mPreferenceEditor = editor;
         }
 
@@ -42,9 +40,9 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
             }
         }
 
-        public ProviderEditor clear() {
+        public DataProvider.ProviderEditor clear() {
             this.mIsClear = true;
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.clear();
             }
@@ -55,54 +53,54 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
             return false;
         }
 
-        public ProviderEditor putBoolean(String str, boolean z) {
+        public DataProvider.ProviderEditor putBoolean(String str, boolean z) {
             this.mModified.put(str, Boolean.valueOf(z));
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.putBoolean(str, z);
             }
             return this;
         }
 
-        public ProviderEditor putFloat(String str, float f2) {
+        public DataProvider.ProviderEditor putFloat(String str, float f2) {
             this.mModified.put(str, Float.valueOf(f2));
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.putFloat(str, f2);
             }
             return this;
         }
 
-        public ProviderEditor putInt(String str, int i) {
+        public DataProvider.ProviderEditor putInt(String str, int i) {
             this.mModified.put(str, Integer.valueOf(i));
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.putInt(str, i);
             }
             return this;
         }
 
-        public ProviderEditor putLong(String str, long j) {
+        public DataProvider.ProviderEditor putLong(String str, long j) {
             this.mModified.put(str, Long.valueOf(j));
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.putLong(str, j);
             }
             return this;
         }
 
-        public ProviderEditor putString(String str, String str2) {
+        public DataProvider.ProviderEditor putString(String str, String str2) {
             this.mModified.put(str, str2);
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.putString(str, str2);
             }
             return this;
         }
 
-        public ProviderEditor remove(String str) {
+        public DataProvider.ProviderEditor remove(String str) {
             this.mModified.put(str, null);
-            Editor editor = this.mPreferenceEditor;
+            SharedPreferences.Editor editor = this.mPreferenceEditor;
             if (editor != null) {
                 editor.remove(str);
             }
@@ -151,7 +149,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         }
     }
 
-    public ProviderEditor clear() {
+    public DataProvider.ProviderEditor clear() {
         synchronized (this.mLock) {
             this.mValues.clear();
             if (this.mEditor != null) {
@@ -197,7 +195,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return getSharedPreferences().contains(str);
     }
 
-    public ProviderEditor editor() {
+    public DataProvider.ProviderEditor editor() {
         synchronized (this.mLock) {
             if (!isMutable()) {
                 throw new RuntimeException("not allowed to modify");
@@ -209,7 +207,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
     }
 
     public boolean getBoolean(String str, boolean z) {
-        CloudItem cloudItem = this.mDataCloudItem;
+        DataCloud.CloudItem cloudItem = this.mDataCloudItem;
         if (cloudItem != null) {
             z = cloudItem.getCloudBooleanDefault(str, z);
         }
@@ -236,7 +234,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
     }
 
     public float getFloat(String str, float f2) {
-        CloudItem cloudItem = this.mDataCloudItem;
+        DataCloud.CloudItem cloudItem = this.mDataCloudItem;
         if (cloudItem != null) {
             f2 = cloudItem.getCloudFloatDefault(str, f2);
         }
@@ -253,7 +251,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
     }
 
     public int getInt(String str, int i) {
-        CloudItem cloudItem = this.mDataCloudItem;
+        DataCloud.CloudItem cloudItem = this.mDataCloudItem;
         if (cloudItem != null) {
             i = cloudItem.getCloudIntDefault(str, i);
         }
@@ -270,7 +268,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
     }
 
     public long getLong(String str, long j) {
-        CloudItem cloudItem = this.mDataCloudItem;
+        DataCloud.CloudItem cloudItem = this.mDataCloudItem;
         if (cloudItem != null) {
             j = cloudItem.getCloudLongDefault(str, j);
         }
@@ -288,7 +286,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
 
     public String getString(String str, String str2) {
         String string;
-        CloudItem cloudItem = this.mDataCloudItem;
+        DataCloud.CloudItem cloudItem = this.mDataCloudItem;
         if (cloudItem != null) {
             str2 = cloudItem.getCloudStringDefault(str, str2);
         }
@@ -311,7 +309,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return simpleArrayMap;
     }
 
-    public void injectCloud(CloudItem cloudItem) {
+    public void injectCloud(DataCloud.CloudItem cloudItem) {
         this.mDataCloudItem = cloudItem;
     }
 
@@ -320,7 +318,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return true;
     }
 
-    public ProviderEditor putBoolean(String str, boolean z) {
+    public DataProvider.ProviderEditor putBoolean(String str, boolean z) {
         synchronized (this.mLock) {
             this.mValues.put(str, Boolean.valueOf(z));
             if (this.mEditor != null) {
@@ -330,7 +328,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return this;
     }
 
-    public ProviderEditor putFloat(String str, float f2) {
+    public DataProvider.ProviderEditor putFloat(String str, float f2) {
         synchronized (this.mLock) {
             this.mValues.put(str, Float.valueOf(f2));
             if (this.mEditor != null) {
@@ -340,7 +338,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return this;
     }
 
-    public ProviderEditor putInt(String str, int i) {
+    public DataProvider.ProviderEditor putInt(String str, int i) {
         synchronized (this.mLock) {
             this.mValues.put(str, Integer.valueOf(i));
             if (this.mEditor != null) {
@@ -350,7 +348,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return this;
     }
 
-    public ProviderEditor putLong(String str, long j) {
+    public DataProvider.ProviderEditor putLong(String str, long j) {
         synchronized (this.mLock) {
             this.mValues.put(str, Long.valueOf(j));
             if (this.mEditor != null) {
@@ -360,7 +358,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return this;
     }
 
-    public ProviderEditor putString(String str, String str2) {
+    public DataProvider.ProviderEditor putString(String str, String str2) {
         synchronized (this.mLock) {
             this.mValues.put(str, str2);
             if (this.mEditor != null) {
@@ -370,7 +368,7 @@ public abstract class DataItemBase implements ProviderEvent, ProviderEditor {
         return this;
     }
 
-    public ProviderEditor remove(String str) {
+    public DataProvider.ProviderEditor remove(String str) {
         synchronized (this.mLock) {
             this.mValues.remove(str);
             if (this.mEditor != null) {

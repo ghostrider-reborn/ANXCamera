@@ -8,6 +8,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.single.SingleMap;
 import io.reactivex.plugins.RxJavaPlugins;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,7 +55,7 @@ public final class SingleZipArray<T, R> extends Single<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeExcept(int i) {
             ZipSingleObserver<T>[] zipSingleObserverArr = this.observers;
             int length = zipSingleObserverArr.length;
@@ -71,7 +72,7 @@ public final class SingleZipArray<T, R> extends Single<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(Throwable th, int i) {
             if (getAndSet(0) > 0) {
                 disposeExcept(i);
@@ -81,7 +82,7 @@ public final class SingleZipArray<T, R> extends Single<R> {
             RxJavaPlugins.onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerSuccess(T t, int i) {
             this.values[i] = t;
             if (decrementAndGet() == 0) {
@@ -139,7 +140,7 @@ public final class SingleZipArray<T, R> extends Single<R> {
         int length = singleSourceArr.length;
         int i = 0;
         if (length == 1) {
-            singleSourceArr[0].subscribe(new MapSingleObserver(singleObserver, new SingletonArrayFunc()));
+            singleSourceArr[0].subscribe(new SingleMap.MapSingleObserver(singleObserver, new SingletonArrayFunc()));
             return;
         }
         ZipCoordinator zipCoordinator = new ZipCoordinator(singleObserver, length, this.zipper);

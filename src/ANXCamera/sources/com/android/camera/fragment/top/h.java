@@ -1,10 +1,9 @@
 package com.android.camera.fragment.top;
 
 import com.android.camera.ui.ToggleSwitch;
-import com.android.camera.ui.ToggleSwitch.OnCheckedChangeListener;
 
 /* compiled from: lambda */
-public final /* synthetic */ class h implements OnCheckedChangeListener {
+public final /* synthetic */ class h implements ToggleSwitch.OnCheckedChangeListener {
     public static final /* synthetic */ h INSTANCE = new h();
 
     private /* synthetic */ h() {

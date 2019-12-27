@@ -37,7 +37,7 @@ public class IdentityScopeObject<K, T> implements IdentityScope<K, T> {
     public T get(K k) {
         this.lock.lock();
         try {
-            Reference reference = (Reference) this.map.get(k);
+            Reference reference = this.map.get(k);
             if (reference != null) {
                 return reference.get();
             }
@@ -48,7 +48,7 @@ public class IdentityScopeObject<K, T> implements IdentityScope<K, T> {
     }
 
     public T getNoLock(K k) {
-        Reference reference = (Reference) this.map.get(k);
+        Reference reference = this.map.get(k);
         if (reference != null) {
             return reference.get();
         }

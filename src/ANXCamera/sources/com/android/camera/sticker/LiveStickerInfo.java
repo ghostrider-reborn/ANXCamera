@@ -31,10 +31,7 @@ public class LiveStickerInfo extends LiveResource {
         this.downloadState = 0;
         this.isLocal = true;
         this.name = str;
-        StringBuilder sb = new StringBuilder();
-        sb.append("file:///android_asset/live/");
-        sb.append(str3);
-        this.icon = sb.toString();
+        this.icon = "file:///android_asset/live/" + str3;
         this.hash = str2;
     }
 
@@ -44,10 +41,7 @@ public class LiveStickerInfo extends LiveResource {
     }
 
     private boolean isLocalExists() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(FileUtils.STICKER_RESOURCE_DIR);
-        sb.append(this.hash);
-        return new File(sb.toString()).exists();
+        return new File(FileUtils.STICKER_RESOURCE_DIR + this.hash).exists();
     }
 
     public int getDownloadState() {
@@ -63,11 +57,7 @@ public class LiveStickerInfo extends LiveResource {
     }
 
     public boolean isDownloaded() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(FileUtils.STICKER_RESOURCE_DIR);
-        sb.append(this.hash);
-        sb.append(".zip");
-        File file = new File(sb.toString());
+        File file = new File(FileUtils.STICKER_RESOURCE_DIR + this.hash + ".zip");
         if (!file.exists()) {
             return false;
         }

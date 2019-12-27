@@ -24,17 +24,17 @@ import com.android.camera.effect.renders.SnapshotEffectRender;
 import com.android.camera.log.Log;
 import com.android.camera.module.ModuleManager;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.ScreenHint;
 import com.android.camera.watermark.WaterMarkData;
 import com.android.gallery3d.exif.ExifInterface;
-import com.xiaomi.camera.base.Constants.ShotType;
+import com.xiaomi.camera.base.Constants;
 import com.xiaomi.camera.base.PerformanceTracker;
 import com.xiaomi.camera.core.ParallelCallback;
 import com.xiaomi.camera.core.ParallelTaskData;
 import com.xiaomi.camera.core.ParallelTaskDataParameter;
 import com.xiaomi.camera.core.PictureInfo;
-import com.xiaomi.camera.liveshot.CircularMediaRecorder.VideoClipSavingCallback;
+import com.xiaomi.camera.liveshot.CircularMediaRecorder;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Queue;
@@ -47,7 +47,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSavingCallback {
+public class ImageSaver implements ParallelCallback, SaverCallback, CircularMediaRecorder.VideoClipSavingCallback {
     private static final Executor CAMERA_SAVER_EXECUTOR;
     private static final int HOST_STATE_DESTROY = 2;
     private static final int HOST_STATE_PAUSE = 1;
@@ -61,10 +61,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
         private final AtomicInteger mCount = new AtomicInteger(1);
 
         public Thread newThread(Runnable runnable) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("camera-saver-");
-            sb.append(this.mCount.getAndIncrement());
-            Thread thread = new Thread(runnable, sb.toString());
+            Thread thread = new Thread(runnable, "camera-saver-" + this.mCount.getAndIncrement());
             thread.setPriority(10);
             return thread;
         }
@@ -191,9 +188,9 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
 
     private void insertParallelTaskData(ParallelTaskData parallelTaskData, @Nullable CaptureResult captureResult, @Nullable CameraCharacteristics cameraCharacteristics) {
         switch (parallelTaskData.getParallelType()) {
-            case ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
-            case ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
-            case ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
+            case Constants.ShotType.INTENT_PARALLEL_DUAL_SHOT /*-7*/:
+            case Constants.ShotType.INTENT_PARALLEL_SINGLE_PORTRAIT /*-6*/:
+            case Constants.ShotType.INTENT_PARALLEL_SINGLE_SHOT /*-5*/:
                 processParallelIntentResult(parallelTaskData);
                 return;
             case -4:
@@ -223,10 +220,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
                 insertImageSaveRequest(parallelTaskData);
                 return;
             default:
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown shot type: ");
-                sb.append(parallelTaskData.getParallelType());
-                throw new RuntimeException(sb.toString());
+                throw new RuntimeException("Unknown shot type: " + parallelTaskData.getParallelType());
         }
         if (!parallelTaskData.isShot2Gallery()) {
             insertImageSaveRequest(parallelTaskData);
@@ -284,8 +278,10 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
     private void showCaptureResultOnCover(ParallelTaskData parallelTaskData, int i, int i2) {
         ParallelTaskDataParameter dataParameter = parallelTaskData.getDataParameter();
         this.mStoredTaskData = parallelTaskData;
+        int highestOneBit = Integer.highestOneBit((int) Math.round(((double) i) / ((double) dataParameter.getPreviewSize().getWidth())));
+        int shootOrientation = 360 - dataParameter.getShootOrientation();
         ImageSaverCallback imageSaverCallback = (ImageSaverCallback) this.mSaverCallback.get();
-        Bitmap createBitmap = Thumbnail.createBitmap(parallelTaskData.getJpegImageData(), i2 + (360 - dataParameter.getShootOrientation()) + (imageSaverCallback == null ? 0 : imageSaverCallback.getDisplayRotation()), false, Integer.highestOneBit((int) Math.round(((double) i) / ((double) dataParameter.getPreviewSize().getWidth()))));
+        Bitmap createBitmap = Thumbnail.createBitmap(parallelTaskData.getJpegImageData(), i2 + shootOrientation + (imageSaverCallback == null ? 0 : imageSaverCallback.getDisplayRotation()), false, highestOneBit);
         if (createBitmap != null && imageSaverCallback != null) {
             imageSaverCallback.getCameraScreenNail().renderBitmapToCanvas(createBitmap);
         }
@@ -295,10 +291,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
     public void updateThumbnail(boolean z) {
         Thumbnail thumbnail;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateThumbnail needAnimation:");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "updateThumbnail needAnimation:" + z);
         synchronized (this.mUpdateThumbnailLock) {
             this.mHandler.removeCallbacks(this.mUpdateThumbnail);
             thumbnail = this.mPendingThumbnail;
@@ -318,20 +311,12 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
     public void addImage(byte[] bArr, boolean z, String str, String str2, long j, Uri uri, Location location, int i, int i2, ExifInterface exifInterface, int i3, boolean z2, boolean z3, boolean z4, boolean z5, boolean z6, String str3, PictureInfo pictureInfo, int i4) {
         Uri uri2 = uri;
         String str4 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("isParallelProcess: parallel=");
-        sb.append(z6);
-        sb.append(" uri=");
-        sb.append(uri2);
-        sb.append(" algo=");
-        sb.append(str3);
-        Log.d(str4, sb.toString());
+        Log.d(str4, "isParallelProcess: parallel=" + z6 + " uri=" + uri2 + " algo=" + str3);
         if (str2 != null && uri2 == null) {
             uri2 = this.mLastImageUri;
         }
-        Uri uri3 = uri2;
         PerformanceTracker.trackImageSaver(bArr, 0);
-        ImageSaveRequest imageSaveRequest = new ImageSaveRequest(bArr, z, str, str2, j, uri3, location, i, i2, exifInterface, i3, z2, z3, z4, z5, z6, str3, pictureInfo, i4);
+        ImageSaveRequest imageSaveRequest = new ImageSaveRequest(bArr, z, str, str2, j, uri2, location, i, i2, exifInterface, i3, z2, z3, z4, z5, z6, str3, pictureInfo, i4);
         addSaveRequest(imageSaveRequest);
     }
 
@@ -381,22 +366,13 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
         if (parallelTaskData.isShot2Gallery()) {
             str = Util.getFileTitleFromPath(parallelTaskData.getSavePath());
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Util.createJpegName(System.currentTimeMillis()));
-            sb.append(parallelTaskData.getDataParameter().getSuffix());
-            str = sb.toString();
+            str = Util.createJpegName(System.currentTimeMillis()) + parallelTaskData.getDataParameter().getSuffix();
         }
         String str2 = str;
         int width = dataParameter.getRawSize().getWidth();
         int height = dataParameter.getRawSize().getHeight();
         int intValue = ((Integer) captureResult.get(CaptureResult.JPEG_ORIENTATION)).intValue();
-        String str3 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("insertRawImageSaveRequest title = ");
-        sb2.append(str2);
-        sb2.append(", orientation = ");
-        sb2.append(intValue);
-        Log.d(str3, sb2.toString());
+        Log.d(TAG, "insertRawImageSaveRequest title = " + str2 + ", orientation = " + intValue);
         PerformanceTracker.trackImageSaver(rawImageData, 0);
         RawImageSaveRequest rawImageSaveRequest = new RawImageSaveRequest(rawImageData, captureResult, cameraCharacteristics, str2, width, height, intValue);
         addSaveRequest(rawImageSaveRequest);
@@ -433,7 +409,8 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
                     if (isLastImageForThumbnail() && !this.mIsCaptureIntent) {
                         z2 = true;
                     }
-                } finally {
+                } catch (Throwable th) {
+                    throw th;
                 }
             }
             z2 = false;
@@ -468,7 +445,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
             releaseResourcesIfQueueEmpty();
         }
         synchronized (this.mUpdateThumbnailLock) {
-            this.mHandler.removeCallbacksAndMessages(null);
+            this.mHandler.removeCallbacksAndMessages((Object) null);
             this.mPendingThumbnail = null;
         }
         Log.v(TAG, "onHostDestroy");
@@ -479,7 +456,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
             this.mHostState = 1;
         }
         synchronized (this.mUpdateThumbnailLock) {
-            this.mHandler.removeCallbacksAndMessages(null);
+            this.mHandler.removeCallbacksAndMessages((Object) null);
             this.mPendingThumbnail = null;
         }
         Log.v(TAG, "onHostPause");
@@ -490,10 +467,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
             this.mIsCaptureIntent = z;
             this.mHostState = 0;
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onHostResume: isCapture=");
-            sb.append(this.mIsCaptureIntent);
-            Log.v(str, sb.toString());
+            Log.v(str, "onHostResume: isCapture=" + this.mIsCaptureIntent);
         }
     }
 
@@ -503,49 +477,24 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
 
     public boolean onParallelProcessFinish(ParallelTaskData parallelTaskData, @Nullable CaptureResult captureResult, @Nullable CameraCharacteristics cameraCharacteristics) {
         int i;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onParallelProcessFinish: path: ");
-        sb.append(parallelTaskData.getSavePath());
-        Log.i(str, sb.toString());
-        String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("onParallelProcessFinish: live: ");
-        sb2.append(parallelTaskData.isLiveShotTask());
-        Log.i(str2, sb2.toString());
-        String str3 = "onParallelProcessFinish: insert: ";
+        Log.i(TAG, "onParallelProcessFinish: path: " + parallelTaskData.getSavePath());
+        Log.i(TAG, "onParallelProcessFinish: live: " + parallelTaskData.isLiveShotTask());
         if (parallelTaskData.isLiveShotTask()) {
             byte[] microVideoData = parallelTaskData.getMicroVideoData();
-            String str4 = ", task: ";
             if (microVideoData != null) {
-                String str5 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str3);
-                sb3.append(parallelTaskData.hashCode());
-                Log.d(str5, sb3.toString());
+                Log.d(TAG, "onParallelProcessFinish: insert: " + parallelTaskData.hashCode());
                 if (this.mLiveShotPendingTaskQueue.remove(parallelTaskData)) {
-                    int length = microVideoData.length;
-                    reduceUsedMemory(length);
-                    String str6 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("onParallelProcessFinish: memory[-]: ");
-                    sb4.append(length);
-                    sb4.append(str4);
-                    sb4.append(parallelTaskData.hashCode());
-                    Log.d(str6, sb4.toString());
+                    reduceUsedMemory(microVideoData.length);
+                    Log.d(TAG, "onParallelProcessFinish: memory[-]: " + r6 + ", task: " + parallelTaskData.hashCode());
                 }
                 if (parallelTaskData.getJpegImageData() != null) {
-                    insertParallelTaskData(parallelTaskData, null, null);
+                    insertParallelTaskData(parallelTaskData, (CaptureResult) null, (CameraCharacteristics) null);
                 } else {
                     Log.e(TAG, "onParallelProcessFinish: error: jpeg data is null");
                     return false;
                 }
             } else {
-                String str7 = TAG;
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("onParallelProcessFinish: enqueue: ");
-                sb5.append(parallelTaskData.hashCode());
-                Log.d(str7, sb5.toString());
+                Log.d(TAG, "onParallelProcessFinish: enqueue: " + parallelTaskData.hashCode());
                 this.mLiveShotPendingTaskQueue.offer(parallelTaskData);
                 byte[] jpegImageData = parallelTaskData.getJpegImageData();
                 if (jpegImageData != null) {
@@ -554,26 +503,12 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
                 } else {
                     i = 0;
                 }
-                String str8 = TAG;
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append("onParallelProcessFinish: memory[+]: ");
-                sb6.append(i);
-                sb6.append(str4);
-                sb6.append(parallelTaskData.hashCode());
-                Log.d(str8, sb6.toString());
+                Log.d(TAG, "onParallelProcessFinish: memory[+]: " + i + ", task: " + parallelTaskData.hashCode());
             }
-            String str9 = TAG;
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append("onParallelProcessFinish: pending: ");
-            sb7.append(this.mLiveShotPendingTaskQueue.size());
-            Log.d(str9, sb7.toString());
+            Log.d(TAG, "onParallelProcessFinish: pending: " + this.mLiveShotPendingTaskQueue.size());
             return false;
         }
-        String str10 = TAG;
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append(str3);
-        sb8.append(parallelTaskData.hashCode());
-        Log.d(str10, sb8.toString());
+        Log.d(TAG, "onParallelProcessFinish: insert: " + parallelTaskData.hashCode());
         insertParallelTaskData(parallelTaskData, captureResult, cameraCharacteristics);
         return false;
     }
@@ -600,63 +535,35 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
         }
         ParallelTaskData parallelTaskData = (ParallelTaskData) obj;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onVideoClipSavingCompleted: video: ");
-        sb.append(bArr.length);
-        sb.append(", timestamp = ");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "onVideoClipSavingCompleted: video: " + bArr.length + ", timestamp = " + j);
         parallelTaskData.fillVideoData(bArr, j);
-        String str2 = "onVideoClipSavingCompleted: memory[-]: ";
-        String str3 = ", task: ";
         if (parallelTaskData.isJpegDataReady()) {
             if (this.mLiveShotPendingTaskQueue.remove(parallelTaskData)) {
                 int length = parallelTaskData.getJpegImageData().length;
                 reduceUsedMemory(length);
-                String str4 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str2);
-                sb2.append(length);
-                sb2.append(str3);
-                sb2.append(parallelTaskData.hashCode());
-                Log.d(str4, sb2.toString());
+                String str2 = TAG;
+                Log.d(str2, "onVideoClipSavingCompleted: memory[-]: " + length + ", task: " + parallelTaskData.hashCode());
             }
-            insertParallelTaskData(parallelTaskData, null, null);
+            insertParallelTaskData(parallelTaskData, (CaptureResult) null, (CameraCharacteristics) null);
         } else if (parallelTaskData.isPictureFilled()) {
             Log.e(TAG, "onVideoClipSavingCompleted: get error jpeg data, ignore this liveshot");
             if (this.mLiveShotPendingTaskQueue.remove(parallelTaskData)) {
                 int length2 = parallelTaskData.getJpegImageData().length;
                 reduceUsedMemory(length2);
-                String str5 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str2);
-                sb3.append(length2);
-                sb3.append(str3);
-                sb3.append(parallelTaskData.hashCode());
-                Log.d(str5, sb3.toString());
+                String str3 = TAG;
+                Log.d(str3, "onVideoClipSavingCompleted: memory[-]: " + length2 + ", task: " + parallelTaskData.hashCode());
             }
         } else {
-            String str6 = TAG;
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("onVideoClipSavingCompleted: enqueue: ");
-            sb4.append(parallelTaskData.hashCode());
-            Log.d(str6, sb4.toString());
+            String str4 = TAG;
+            Log.d(str4, "onVideoClipSavingCompleted: enqueue: " + parallelTaskData.hashCode());
             this.mLiveShotPendingTaskQueue.offer(parallelTaskData);
             int length3 = bArr.length;
             addUsedMemory(length3);
-            String str7 = TAG;
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("onVideoClipSavingCompleted: memory[+]: ");
-            sb5.append(length3);
-            sb5.append(str3);
-            sb5.append(parallelTaskData.hashCode());
-            Log.d(str7, sb5.toString());
+            String str5 = TAG;
+            Log.d(str5, "onVideoClipSavingCompleted: memory[+]: " + length3 + ", task: " + parallelTaskData.hashCode());
         }
-        String str8 = TAG;
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append("onVideoClipSavingCompleted: pending: ");
-        sb6.append(this.mLiveShotPendingTaskQueue.size());
-        Log.d(str8, sb6.toString());
+        String str6 = TAG;
+        Log.d(str6, "onVideoClipSavingCompleted: pending: " + this.mLiveShotPendingTaskQueue.size());
     }
 
     public void onVideoClipSavingException(@Nullable Object obj, @NonNull Throwable th) {
@@ -668,7 +575,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
         synchronized (this.mUpdateThumbnailLock) {
             this.mHandler.post(new Runnable() {
                 public void run() {
-                    ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+                    ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
                     if (actionProcessing != null) {
                         actionProcessing.updateLoading(true);
                     }
@@ -725,7 +632,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
             i = width;
             i2 = height;
         }
-        addImage(this.mStoredTaskData.getJpegImageData(), parallelTaskData.isNeedThumbnail(), createJpegName, null, System.currentTimeMillis(), null, dataParameter.getLocation(), i2, i, null, orientation, false, false, true, false, false, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), -1);
+        addImage(this.mStoredTaskData.getJpegImageData(), parallelTaskData.isNeedThumbnail(), createJpegName, (String) null, System.currentTimeMillis(), (Uri) null, dataParameter.getLocation(), i2, i, (ExifInterface) null, orientation, false, false, true, false, false, dataParameter.getAlgorithmName(), dataParameter.getPictureInfo(), -1);
     }
 
     public void updateImage(String str, String str2) {
@@ -744,12 +651,7 @@ public class ImageSaver implements ParallelCallback, SaverCallback, VideoClipSav
             }
             if (thumbnail != null) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("previewThumbnailHash:");
-                sb.append(i);
-                sb.append(" current thumbnail hash:");
-                sb.append(thumbnail.hashCode());
-                Log.d(str, sb.toString());
+                Log.d(str, "previewThumbnailHash:" + i + " current thumbnail hash:" + thumbnail.hashCode());
                 if (i <= 0 || thumbnail.hashCode() == i) {
                     thumbnail.setUri(uri);
                 }

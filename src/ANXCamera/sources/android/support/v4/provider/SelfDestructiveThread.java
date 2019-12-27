@@ -1,12 +1,10 @@
 package android.support.v4.provider;
 
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.support.annotation.GuardedBy;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.VisibleForTesting;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +13,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class SelfDestructiveThread {
     private static final int MSG_DESTRUCTION = 0;
     private static final int MSG_INVOKE_RUNNABLE = 1;
-    private Callback mCallback = new Callback() {
+    private Handler.Callback mCallback = new Handler.Callback() {
         public boolean handleMessage(Message message) {
             int i = message.what;
             if (i == 0) {
@@ -86,7 +84,7 @@ public class SelfDestructiveThread {
         return z;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onDestruction() {
         synchronized (this.mLock) {
             if (!this.mHandler.hasMessages(1)) {
@@ -97,7 +95,7 @@ public class SelfDestructiveThread {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void onInvokeRunnable(Runnable runnable) {
         runnable.run();
         synchronized (this.mLock) {

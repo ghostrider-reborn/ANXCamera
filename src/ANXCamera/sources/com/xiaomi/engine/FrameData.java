@@ -52,10 +52,7 @@ public class FrameData {
     public void release() {
         if (this.mBufferImage != null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("release: close Image: ");
-            sb.append(this.mBufferImage);
-            Log.d(str, sb.toString());
+            Log.d(str, "release: close Image: " + this.mBufferImage);
             this.mBufferImage.close();
             FrameStatusCallback frameStatusCallback = this.mFrameStatusCallback;
             if (frameStatusCallback != null) {
@@ -89,16 +86,6 @@ public class FrameData {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("FrameData{ mImageFlag=");
-        sb.append(this.mImageFlag);
-        sb.append(", mFrameNumber=");
-        sb.append(this.mFrameNumber);
-        sb.append(", mCaptureResultMetadataNative=");
-        sb.append(this.mCaptureResultMetadataNative);
-        sb.append(", mBufferImage=");
-        sb.append(this.mBufferImage);
-        sb.append('}');
-        return sb.toString();
+        return "FrameData{ mImageFlag=" + this.mImageFlag + ", mFrameNumber=" + this.mFrameNumber + ", mCaptureResultMetadataNative=" + this.mCaptureResultMetadataNative + ", mBufferImage=" + this.mBufferImage + '}';
     }
 }

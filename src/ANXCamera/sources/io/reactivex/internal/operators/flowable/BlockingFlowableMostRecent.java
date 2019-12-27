@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.internal.util.NotificationLite;
 import io.reactivex.subscribers.DefaultSubscriber;
@@ -57,8 +56,8 @@ public final class BlockingFlowableMostRecent<T> implements Iterable<T> {
             this.value = t;
         }
 
-        public Iterator getIterable() {
-            return new Iterator<>();
+        public MostRecentSubscriber<T>.Iterator getIterable() {
+            return new Iterator();
         }
 
         public void onComplete() {
@@ -82,7 +81,7 @@ public final class BlockingFlowableMostRecent<T> implements Iterable<T> {
 
     public Iterator<T> iterator() {
         MostRecentSubscriber mostRecentSubscriber = new MostRecentSubscriber(this.initialValue);
-        this.source.subscribe((FlowableSubscriber<? super T>) mostRecentSubscriber);
+        this.source.subscribe(mostRecentSubscriber);
         return mostRecentSubscriber.getIterable();
     }
 }

@@ -26,7 +26,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
     final BackpressureStrategy backpressure;
     final FlowableOnSubscribe<T> source;
 
-    /* renamed from: io.reactivex.internal.operators.flowable.FlowableCreate$1 reason: invalid class name */
+    /* renamed from: io.reactivex.internal.operators.flowable.FlowableCreate$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$io$reactivex$BackpressureStrategy = new int[BackpressureStrategy.values().length];
 
@@ -105,11 +105,11 @@ public final class FlowableCreate<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRequested() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onUnsubscribed() {
         }
 
@@ -153,7 +153,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
             this.queue = new SpscLinkedArrayQueue<>(i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (this.wip.getAndIncrement() == 0) {
@@ -172,16 +172,17 @@ public final class FlowableCreate<T> extends Flowable<T> {
                             return;
                         } else {
                             boolean z = this.done;
-                            Object poll = spscLinkedArrayQueue.poll();
+                            T poll = spscLinkedArrayQueue.poll();
                             boolean z2 = poll == null;
                             if (z && z2) {
                                 Throwable th = this.error;
                                 if (th != null) {
                                     error(th);
+                                    return;
                                 } else {
                                     complete();
+                                    return;
                                 }
-                                return;
                             } else if (z2) {
                                 break;
                             } else {
@@ -201,10 +202,11 @@ public final class FlowableCreate<T> extends Flowable<T> {
                             Throwable th2 = this.error;
                             if (th2 != null) {
                                 error(th2);
+                                return;
                             } else {
                                 complete();
+                                return;
                             }
-                            return;
                         }
                     }
                     if (j2 != 0) {
@@ -224,19 +226,19 @@ public final class FlowableCreate<T> extends Flowable<T> {
             if (!this.done && !isCancelled()) {
                 if (t == null) {
                     onError(new NullPointerException("onNext called with null. Null values are generally not allowed in 2.x operators and sources."));
-                } else {
-                    this.queue.offer(t);
-                    drain();
+                    return;
                 }
+                this.queue.offer(t);
+                drain();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRequested() {
             drain();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onUnsubscribed() {
             if (this.wip.getAndIncrement() == 0) {
                 this.queue.clear();
@@ -264,7 +266,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
             super(subscriber);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onOverflow() {
         }
     }
@@ -276,7 +278,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
             super(subscriber);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onOverflow() {
             onError(new MissingBackpressureException("create: could not emit value due to lack of requests"));
         }
@@ -293,7 +295,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
             super(subscriber);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             boolean z;
@@ -310,20 +312,21 @@ public final class FlowableCreate<T> extends Flowable<T> {
                         if (i == 0) {
                             break;
                         } else if (isCancelled()) {
-                            atomicReference.lazySet(null);
+                            atomicReference.lazySet((Object) null);
                             return;
                         } else {
                             boolean z2 = this.done;
-                            Object andSet = atomicReference.getAndSet(null);
+                            T andSet = atomicReference.getAndSet((Object) null);
                             boolean z3 = andSet == null;
                             if (z2 && z3) {
                                 Throwable th = this.error;
                                 if (th != null) {
                                     error(th);
+                                    return;
                                 } else {
                                     complete();
+                                    return;
                                 }
-                                return;
                             } else if (z3) {
                                 break;
                             } else {
@@ -334,7 +337,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
                     }
                     if (i == 0) {
                         if (isCancelled()) {
-                            atomicReference.lazySet(null);
+                            atomicReference.lazySet((Object) null);
                             return;
                         }
                         boolean z4 = this.done;
@@ -345,10 +348,11 @@ public final class FlowableCreate<T> extends Flowable<T> {
                             Throwable th2 = this.error;
                             if (th2 != null) {
                                 error(th2);
+                                return;
                             } else {
                                 complete();
+                                return;
                             }
-                            return;
                         }
                     }
                     if (j2 != 0) {
@@ -368,22 +372,22 @@ public final class FlowableCreate<T> extends Flowable<T> {
             if (!this.done && !isCancelled()) {
                 if (t == null) {
                     onError(new NullPointerException("onNext called with null. Null values are generally not allowed in 2.x operators and sources."));
-                } else {
-                    this.queue.set(t);
-                    drain();
+                    return;
                 }
+                this.queue.set(t);
+                drain();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onRequested() {
             drain();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void onUnsubscribed() {
             if (this.wip.getAndIncrement() == 0) {
-                this.queue.lazySet(null);
+                this.queue.lazySet((Object) null);
             }
         }
 
@@ -416,7 +420,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
                     do {
                         j = get();
                         if (j == 0) {
-                            break;
+                            return;
                         }
                     } while (!compareAndSet(j, j - 1));
                     return;
@@ -437,9 +441,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
             if (!isCancelled()) {
                 if (t == null) {
                     onError(new NullPointerException("onNext called with null. Null values are generally not allowed in 2.x operators and sources."));
-                    return;
-                }
-                if (get() != 0) {
+                } else if (get() != 0) {
                     this.actual.onNext(t);
                     BackpressureHelper.produced(this, 1);
                 } else {
@@ -448,7 +450,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void onOverflow();
     }
 
@@ -463,14 +465,14 @@ public final class FlowableCreate<T> extends Flowable<T> {
             this.emitter = baseEmitter;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             BaseEmitter<T> baseEmitter = this.emitter;
             SimplePlainQueue<T> simplePlainQueue = this.queue;
@@ -483,7 +485,7 @@ public final class FlowableCreate<T> extends Flowable<T> {
                     return;
                 }
                 boolean z = this.done;
-                Object poll = simplePlainQueue.poll();
+                T poll = simplePlainQueue.poll();
                 boolean z2 = poll == null;
                 if (z && z2) {
                     baseEmitter.onComplete();
@@ -579,13 +581,13 @@ public final class FlowableCreate<T> extends Flowable<T> {
 
     public void subscribeActual(Subscriber<? super T> subscriber) {
         int i = AnonymousClass1.$SwitchMap$io$reactivex$BackpressureStrategy[this.backpressure.ordinal()];
-        BaseEmitter baseEmitter = i != 1 ? i != 2 ? i != 3 ? i != 4 ? new BufferAsyncEmitter(subscriber, Flowable.bufferSize()) : new LatestAsyncEmitter(subscriber) : new DropAsyncEmitter(subscriber) : new ErrorAsyncEmitter(subscriber) : new MissingEmitter(subscriber);
-        subscriber.onSubscribe(baseEmitter);
+        BaseEmitter bufferAsyncEmitter = i != 1 ? i != 2 ? i != 3 ? i != 4 ? new BufferAsyncEmitter(subscriber, Flowable.bufferSize()) : new LatestAsyncEmitter(subscriber) : new DropAsyncEmitter(subscriber) : new ErrorAsyncEmitter(subscriber) : new MissingEmitter(subscriber);
+        subscriber.onSubscribe(bufferAsyncEmitter);
         try {
-            this.source.subscribe(baseEmitter);
+            this.source.subscribe(bufferAsyncEmitter);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            baseEmitter.onError(th);
+            bufferAsyncEmitter.onError(th);
         }
     }
 }

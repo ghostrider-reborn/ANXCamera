@@ -2,7 +2,6 @@ package com.android.camera.sticker;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import com.android.camera.log.Log;
 import com.sensetime.stmobile.STMobileAuthentificationNative;
 import java.io.BufferedReader;
@@ -23,7 +22,6 @@ public class STLicenseUtils {
     /* JADX WARNING: Removed duplicated region for block: B:65:0x0103 A[SYNTHETIC, Splitter:B:65:0x0103] */
     public static boolean checkLicense(Context context) {
         InputStreamReader inputStreamReader;
-        int length;
         BufferedReader bufferedReader;
         StringBuilder sb = new StringBuilder();
         BufferedReader bufferedReader2 = null;
@@ -58,9 +56,7 @@ public class STLicenseUtils {
                             if (bufferedReader != null) {
                                 bufferedReader.close();
                             }
-                            length = sb.toString().length();
-                            String str = TAG;
-                            if (length != 0) {
+                            if (sb.toString().length() != 0) {
                             }
                         } catch (Throwable th) {
                             th = th;
@@ -92,9 +88,7 @@ public class STLicenseUtils {
                 }
                 if (bufferedReader != null) {
                 }
-                length = sb.toString().length();
-                String str2 = TAG;
-                if (length != 0) {
+                if (sb.toString().length() != 0) {
                 }
             } catch (Throwable th2) {
                 th = th2;
@@ -118,9 +112,7 @@ public class STLicenseUtils {
             }
             if (bufferedReader != null) {
             }
-            length = sb.toString().length();
-            String str22 = TAG;
-            if (length != 0) {
+            if (sb.toString().length() != 0) {
             }
         } catch (Throwable th3) {
             th = th3;
@@ -131,40 +123,29 @@ public class STLicenseUtils {
             }
             throw th;
         }
-        length = sb.toString().length();
-        String str222 = TAG;
-        if (length != 0) {
-            Log.e(str222, "read license data error");
+        if (sb.toString().length() != 0) {
+            Log.e(TAG, "read license data error");
             return false;
         }
         String sb2 = sb.toString();
         SharedPreferences sharedPreferences = context.getApplicationContext().getSharedPreferences(PREF_ACTIVATE_CODE_FILE, 0);
-        String str3 = PREF_ACTIVATE_CODE;
-        String string = sharedPreferences.getString(str3, null);
-        Integer valueOf = Integer.valueOf(-1);
-        String str4 = "activeCode: ";
+        String string = sharedPreferences.getString(PREF_ACTIVATE_CODE, (String) null);
         if (string == null || STMobileAuthentificationNative.checkActiveCodeFromBuffer(sb2, sb2.length(), string) != 0) {
             StringBuilder sb3 = new StringBuilder();
-            sb3.append(str4);
+            sb3.append("activeCode: ");
             sb3.append(string == null);
-            Log.e(str222, sb3.toString());
+            Log.e(TAG, sb3.toString());
             String generateActiveCodeFromBuffer = STMobileAuthentificationNative.generateActiveCodeFromBuffer(sb2, sb2.length());
             if (generateActiveCodeFromBuffer == null || generateActiveCodeFromBuffer.length() == 0) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("generate license error: ");
-                sb4.append(valueOf);
-                Log.e(str222, sb4.toString());
+                Log.e(TAG, "generate license error: " + -1);
                 return false;
             }
-            Editor edit = sharedPreferences.edit();
-            edit.putString(str3, generateActiveCodeFromBuffer);
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putString(PREF_ACTIVATE_CODE, generateActiveCodeFromBuffer);
             edit.commit();
             return true;
         }
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(str4);
-        sb5.append(string);
-        Log.e(str222, sb5.toString());
+        Log.e(TAG, "activeCode: " + string);
         return true;
     }
 }

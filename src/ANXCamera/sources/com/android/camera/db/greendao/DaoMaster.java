@@ -2,7 +2,6 @@ package com.android.camera.db.greendao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import com.android.camera.log.Log;
 import org.greenrobot.greendao.AbstractDaoMaster;
 import org.greenrobot.greendao.database.Database;
@@ -20,19 +19,13 @@ public class DaoMaster extends AbstractDaoMaster {
             super(context, str);
         }
 
-        public DevOpenHelper(Context context, String str, CursorFactory cursorFactory) {
+        public DevOpenHelper(Context context, String str, SQLiteDatabase.CursorFactory cursorFactory) {
             super(context, str, cursorFactory);
         }
 
         public void onUpgrade(Database database, int i, int i2) {
             String access$000 = DaoMaster.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Upgrading schema from version ");
-            sb.append(i);
-            sb.append(" to ");
-            sb.append(i2);
-            sb.append(" by dropping all tables");
-            Log.i(access$000, sb.toString());
+            Log.i(access$000, "Upgrading schema from version " + i + " to " + i2 + " by dropping all tables");
             DaoMaster.dropAllTables(database, true);
             onCreate(database);
         }
@@ -43,7 +36,7 @@ public class DaoMaster extends AbstractDaoMaster {
             super(context, str, 1);
         }
 
-        public OpenHelper(Context context, String str, CursorFactory cursorFactory) {
+        public OpenHelper(Context context, String str, SQLiteDatabase.CursorFactory cursorFactory) {
             super(context, str, cursorFactory, 1);
         }
 

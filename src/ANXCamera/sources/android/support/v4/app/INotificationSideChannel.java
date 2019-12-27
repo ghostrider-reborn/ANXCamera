@@ -33,7 +33,7 @@ public interface INotificationSideChannel extends IInterface {
                     obtain.writeString(str);
                     obtain.writeInt(i);
                     obtain.writeString(str2);
-                    this.mRemote.transact(2, obtain, null, 1);
+                    this.mRemote.transact(2, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -44,7 +44,7 @@ public interface INotificationSideChannel extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeString(str);
-                    this.mRemote.transact(3, obtain, null, 1);
+                    this.mRemote.transact(3, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -67,7 +67,7 @@ public interface INotificationSideChannel extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(1, obtain, null, 1);
+                    this.mRemote.transact(1, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -91,23 +91,22 @@ public interface INotificationSideChannel extends IInterface {
         }
 
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            String str = DESCRIPTOR;
             if (i == 1) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 notify(parcel.readString(), parcel.readInt(), parcel.readString(), parcel.readInt() != 0 ? (Notification) Notification.CREATOR.createFromParcel(parcel) : null);
                 return true;
             } else if (i == 2) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 cancel(parcel.readString(), parcel.readInt(), parcel.readString());
                 return true;
             } else if (i == 3) {
-                parcel.enforceInterface(str);
+                parcel.enforceInterface(DESCRIPTOR);
                 cancelAll(parcel.readString());
                 return true;
             } else if (i != 1598968902) {
                 return super.onTransact(i, parcel, parcel2, i2);
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

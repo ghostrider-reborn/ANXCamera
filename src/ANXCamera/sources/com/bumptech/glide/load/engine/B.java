@@ -2,14 +2,15 @@ package com.bumptech.glide.load.engine;
 
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.a.d.a;
+import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.c;
+import com.bumptech.glide.load.engine.f;
 import com.bumptech.glide.load.model.t;
 import java.io.File;
 import java.util.List;
 
 /* compiled from: ResourceCacheGenerator */
-class B implements f, a<Object> {
+class B implements f, d.a<Object> {
     private File Ae;
     private int Sf = -1;
     private C Tf;
@@ -46,12 +47,12 @@ class B implements f, a<Object> {
     }
 
     public boolean q() {
-        List dg = this.ue.dg();
+        List<c> dg = this.ue.dg();
         boolean z = false;
         if (dg.isEmpty()) {
             return false;
         }
-        List hg = this.ue.hg();
+        List<Class<?>> hg = this.ue.hg();
         if (hg.isEmpty() && File.class.equals(this.ue.ig())) {
             return false;
         }
@@ -65,10 +66,9 @@ class B implements f, a<Object> {
                     }
                     this.Sf = 0;
                 }
-                c cVar = (c) dg.get(this.ve);
-                Class cls = (Class) hg.get(this.Sf);
-                c cVar2 = cVar;
-                C c2 = new C(this.ue.V(), cVar2, this.ue.getSignature(), this.ue.getWidth(), this.ue.getHeight(), this.ue.d(cls), cls, this.ue.getOptions());
+                c cVar = dg.get(this.ve);
+                Class cls = hg.get(this.Sf);
+                C c2 = new C(this.ue.V(), cVar, this.ue.getSignature(), this.ue.getWidth(), this.ue.getHeight(), this.ue.d(cls), cls, this.ue.getOptions());
                 this.Tf = c2;
                 this.Ae = this.ue.n().b(this.Tf);
                 File file = this.Ae;
@@ -83,8 +83,8 @@ class B implements f, a<Object> {
                     List<t<File, ?>> list = this.xe;
                     int i = this.ye;
                     this.ye = i + 1;
-                    this.ze = ((t) list.get(i)).a(this.Ae, this.ue.getWidth(), this.ue.getHeight(), this.ue.getOptions());
-                    if (this.ze != null && this.ue.e(this.ze.bi.M())) {
+                    this.ze = list.get(i).a(this.Ae, this.ue.getWidth(), this.ue.getHeight(), this.ue.getOptions());
+                    if (this.ze != null && this.ue.e((Class<?>) this.ze.bi.M())) {
                         this.ze.bi.a(this.ue.getPriority(), this);
                         z = true;
                     }

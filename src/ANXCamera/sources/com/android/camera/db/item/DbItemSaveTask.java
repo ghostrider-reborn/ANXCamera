@@ -4,7 +4,6 @@ import android.content.Context;
 import com.android.camera.CameraAppImpl;
 import com.android.camera.db.element.SaveTask;
 import com.android.camera.db.greendao.SaveTaskDao;
-import com.android.camera.db.greendao.SaveTaskDao.Properties;
 import com.android.camera.log.Log;
 import com.xiaomi.camera.parallelservice.util.ParallelUtil;
 import java.util.List;
@@ -39,10 +38,10 @@ public class DbItemSaveTask extends DbItemBase<SaveTask, Long> {
 
     public SaveTask getItemByMediaId(Long l) {
         synchronized (this.mLock) {
-            List list = getDao().queryBuilder().where(Properties.MediaStoreId.eq(l), new WhereCondition[0]).limit(1).build().list();
+            List<SaveTask> list = getDao().queryBuilder().where(SaveTaskDao.Properties.MediaStoreId.eq(l), new WhereCondition[0]).limit(1).build().list();
             if (list != null) {
                 if (!list.isEmpty()) {
-                    SaveTask saveTask = (SaveTask) list.get(0);
+                    SaveTask saveTask = list.get(0);
                     return saveTask;
                 }
             }
@@ -52,10 +51,10 @@ public class DbItemSaveTask extends DbItemBase<SaveTask, Long> {
 
     public SaveTask getItemByPath(String str) {
         synchronized (this.mLock) {
-            List list = getDao().queryBuilder().where(Properties.Path.eq(str), new WhereCondition[0]).limit(1).build().list();
+            List<SaveTask> list = getDao().queryBuilder().where(SaveTaskDao.Properties.Path.eq(str), new WhereCondition[0]).limit(1).build().list();
             if (list != null) {
                 if (!list.isEmpty()) {
-                    SaveTask saveTask = (SaveTask) list.get(0);
+                    SaveTask saveTask = list.get(0);
                     return saveTask;
                 }
             }
@@ -66,10 +65,10 @@ public class DbItemSaveTask extends DbItemBase<SaveTask, Long> {
     public SaveTask getItemWithExistedQuery(Query query, String str) {
         synchronized (this.mLock) {
             query.setParameter(0, (Object) str);
-            List list = getDao().queryBuilder().where(Properties.Path.eq(str), new WhereCondition[0]).limit(1).build().list();
+            List<SaveTask> list = getDao().queryBuilder().where(SaveTaskDao.Properties.Path.eq(str), new WhereCondition[0]).limit(1).build().list();
             if (list != null) {
                 if (!list.isEmpty()) {
-                    SaveTask saveTask = (SaveTask) list.get(0);
+                    SaveTask saveTask = list.get(0);
                     return saveTask;
                 }
             }
@@ -79,7 +78,7 @@ public class DbItemSaveTask extends DbItemBase<SaveTask, Long> {
 
     /* access modifiers changed from: protected */
     public Property getOrderProperty() {
-        return Properties.Id;
+        return SaveTaskDao.Properties.Id;
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:20:0x0074, code lost:
@@ -95,18 +94,10 @@ public class DbItemSaveTask extends DbItemBase<SaveTask, Long> {
                     for (SaveTask saveTask : allItems) {
                         if (saveTask.isDeparted(currentTimeMillis)) {
                             if (!saveTask.isValid()) {
-                                String str = TAG;
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("not valid, remove:");
-                                sb.append(saveTask.getPath());
-                                Log.e(str, sb.toString());
+                                Log.e(TAG, "not valid, remove:" + saveTask.getPath());
                                 removeItem(saveTask);
                             } else {
-                                String str2 = TAG;
-                                StringBuilder sb2 = new StringBuilder();
-                                sb2.append("mark departed:");
-                                sb2.append(saveTask.getPath());
-                                Log.e(str2, sb2.toString());
+                                Log.e(TAG, "mark departed:" + saveTask.getPath());
                                 ParallelUtil.markTaskFinish(androidContext, saveTask, false);
                             }
                         }

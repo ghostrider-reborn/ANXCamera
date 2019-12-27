@@ -17,7 +17,6 @@ public enum PlayerPlaybackState {
     }
 
     public static PlayerPlaybackState int2enum(int i) {
-        PlayerPlaybackState[] values;
         PlayerPlaybackState playerPlaybackState = PlayerPlaybackStateIdle;
         for (PlayerPlaybackState playerPlaybackState2 : values()) {
             if (playerPlaybackState2.ordinal() == i) {

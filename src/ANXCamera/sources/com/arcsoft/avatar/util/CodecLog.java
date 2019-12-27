@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class CodecLog {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static boolean f129a;
 
     public static void d(String str, String str2) {

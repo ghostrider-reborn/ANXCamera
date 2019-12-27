@@ -8,8 +8,7 @@ import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.net.Uri.Builder;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.GuardedBy;
@@ -23,7 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Map;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class FileProvider extends ContentProvider {
@@ -57,16 +56,13 @@ public class FileProvider extends ContentProvider {
             this.mAuthority = str;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void addRoot(String str, File file) {
             if (!TextUtils.isEmpty(str)) {
                 try {
                     this.mRoots.put(str, file.getCanonicalFile());
                 } catch (IOException e2) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Failed to resolve canonical path for ");
-                    sb.append(file);
-                    throw new IllegalArgumentException(sb.toString(), e2);
+                    throw new IllegalArgumentException("Failed to resolve canonical path for " + file, e2);
                 }
             } else {
                 throw new IllegalArgumentException("Name must not be empty");
@@ -78,7 +74,7 @@ public class FileProvider extends ContentProvider {
             int indexOf = encodedPath.indexOf(47, 1);
             String decode = Uri.decode(encodedPath.substring(1, indexOf));
             String decode2 = Uri.decode(encodedPath.substring(indexOf + 1));
-            File file = (File) this.mRoots.get(decode);
+            File file = this.mRoots.get(decode);
             if (file != null) {
                 File file2 = new File(file, decode2);
                 try {
@@ -88,48 +84,31 @@ public class FileProvider extends ContentProvider {
                     }
                     throw new SecurityException("Resolved path jumped beyond configured root");
                 } catch (IOException unused) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Failed to resolve canonical path for ");
-                    sb.append(file2);
-                    throw new IllegalArgumentException(sb.toString());
+                    throw new IllegalArgumentException("Failed to resolve canonical path for " + file2);
                 }
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Unable to find configured root for ");
-                sb2.append(uri);
-                throw new IllegalArgumentException(sb2.toString());
+                throw new IllegalArgumentException("Unable to find configured root for " + uri);
             }
         }
 
         public Uri getUriForFile(File file) {
             try {
                 String canonicalPath = file.getCanonicalPath();
-                Entry entry = null;
-                for (Entry entry2 : this.mRoots.entrySet()) {
-                    String path = ((File) entry2.getValue()).getPath();
+                Map.Entry entry = null;
+                for (Map.Entry next : this.mRoots.entrySet()) {
+                    String path = ((File) next.getValue()).getPath();
                     if (canonicalPath.startsWith(path) && (entry == null || path.length() > ((File) entry.getValue()).getPath().length())) {
-                        entry = entry2;
+                        entry = next;
                     }
                 }
                 if (entry != null) {
                     String path2 = ((File) entry.getValue()).getPath();
-                    String str = "/";
-                    String substring = path2.endsWith(str) ? canonicalPath.substring(path2.length()) : canonicalPath.substring(path2.length() + 1);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(Uri.encode((String) entry.getKey()));
-                    sb.append('/');
-                    sb.append(Uri.encode(substring, str));
-                    return new Builder().scheme(ComposerHelper.COMPOSER_CONTENT).authority(this.mAuthority).encodedPath(sb.toString()).build();
+                    String substring = path2.endsWith("/") ? canonicalPath.substring(path2.length()) : canonicalPath.substring(path2.length() + 1);
+                    return new Uri.Builder().scheme(ComposerHelper.COMPOSER_CONTENT).authority(this.mAuthority).encodedPath(Uri.encode((String) entry.getKey()) + '/' + Uri.encode(substring, "/")).build();
                 }
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Failed to find configured root that contains ");
-                sb2.append(canonicalPath);
-                throw new IllegalArgumentException(sb2.toString());
+                throw new IllegalArgumentException("Failed to find configured root that contains " + canonicalPath);
             } catch (IOException unused) {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Failed to resolve canonical path for ");
-                sb3.append(file);
-                throw new IllegalArgumentException(sb3.toString());
+                throw new IllegalArgumentException("Failed to resolve canonical path for " + file);
             }
         }
     }
@@ -158,7 +137,7 @@ public class FileProvider extends ContentProvider {
     private static PathStrategy getPathStrategy(Context context, String str) {
         PathStrategy pathStrategy;
         synchronized (sCache) {
-            pathStrategy = (PathStrategy) sCache.get(str);
+            pathStrategy = sCache.get(str);
             if (pathStrategy == null) {
                 try {
                     pathStrategy = parsePathStrategy(context, str);
@@ -193,10 +172,7 @@ public class FileProvider extends ContentProvider {
         if ("rwt".equals(str)) {
             return 1006632960;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Invalid mode: ");
-        sb.append(str);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Invalid mode: " + str);
     }
 
     private static PathStrategy parsePathStrategy(Context context, String str) throws IOException, XmlPullParserException {
@@ -211,8 +187,8 @@ public class FileProvider extends ContentProvider {
                 if (next == 2) {
                     String name = loadXmlMetaData.getName();
                     File file = null;
-                    String attributeValue = loadXmlMetaData.getAttributeValue(null, ATTR_NAME);
-                    String attributeValue2 = loadXmlMetaData.getAttributeValue(null, "path");
+                    String attributeValue = loadXmlMetaData.getAttributeValue((String) null, ATTR_NAME);
+                    String attributeValue2 = loadXmlMetaData.getAttributeValue((String) null, "path");
                     if (TAG_ROOT_PATH.equals(name)) {
                         file = DEVICE_ROOT;
                     } else if (TAG_FILES_PATH.equals(name)) {
@@ -222,7 +198,7 @@ public class FileProvider extends ContentProvider {
                     } else if (TAG_EXTERNAL.equals(name)) {
                         file = Environment.getExternalStorageDirectory();
                     } else if (TAG_EXTERNAL_FILES.equals(name)) {
-                        File[] externalFilesDirs = ContextCompat.getExternalFilesDirs(context, null);
+                        File[] externalFilesDirs = ContextCompat.getExternalFilesDirs(context, (String) null);
                         if (externalFilesDirs.length > 0) {
                             file = externalFilesDirs[0];
                         }
@@ -231,7 +207,7 @@ public class FileProvider extends ContentProvider {
                         if (externalCacheDirs.length > 0) {
                             file = externalCacheDirs[0];
                         }
-                    } else if (VERSION.SDK_INT >= 21 && TAG_EXTERNAL_MEDIA.equals(name)) {
+                    } else if (Build.VERSION.SDK_INT >= 21 && TAG_EXTERNAL_MEDIA.equals(name)) {
                         File[] externalMediaDirs = context.getExternalMediaDirs();
                         if (externalMediaDirs.length > 0) {
                             file = externalMediaDirs[0];
@@ -265,13 +241,11 @@ public class FileProvider extends ContentProvider {
     public String getType(@NonNull Uri uri) {
         File fileForUri = this.mStrategy.getFileForUri(uri);
         int lastIndexOf = fileForUri.getName().lastIndexOf(46);
-        if (lastIndexOf >= 0) {
-            String mimeTypeFromExtension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileForUri.getName().substring(lastIndexOf + 1));
-            if (mimeTypeFromExtension != null) {
-                return mimeTypeFromExtension;
-            }
+        if (lastIndexOf < 0) {
+            return "application/octet-stream";
         }
-        return "application/octet-stream";
+        String mimeTypeFromExtension = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileForUri.getName().substring(lastIndexOf + 1));
+        return mimeTypeFromExtension != null ? mimeTypeFromExtension : "application/octet-stream";
     }
 
     public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
@@ -296,18 +270,14 @@ public class FileProvider extends ContentProvider {
         Object[] objArr = new Object[strArr.length];
         int i2 = 0;
         for (String str3 : strArr) {
-            String str4 = "_display_name";
-            if (str4.equals(str3)) {
-                strArr3[i2] = str4;
+            if ("_display_name".equals(str3)) {
+                strArr3[i2] = "_display_name";
                 i = i2 + 1;
                 objArr[i2] = fileForUri.getName();
-            } else {
-                String str5 = "_size";
-                if (str5.equals(str3)) {
-                    strArr3[i2] = str5;
-                    i = i2 + 1;
-                    objArr[i2] = Long.valueOf(fileForUri.length());
-                }
+            } else if ("_size".equals(str3)) {
+                strArr3[i2] = "_size";
+                i = i2 + 1;
+                objArr[i2] = Long.valueOf(fileForUri.length());
             }
             i2 = i;
         }

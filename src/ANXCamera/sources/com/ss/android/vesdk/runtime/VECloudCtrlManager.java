@@ -5,7 +5,6 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import com.ss.android.ttve.common.TECloudCtrlInvoker;
 import com.ss.android.ttve.common.TESpdLogManager;
-import com.ss.android.ttve.common.TESpdLogManager.InfoLevel;
 import com.ss.android.vesdk.VELogUtil;
 import com.ss.android.vesdk.runtime.persistence.VESP;
 import java.text.SimpleDateFormat;
@@ -36,13 +35,6 @@ public class VECloudCtrlManager {
         boolean z;
         boolean z2;
         String str3 = str;
-        String str4 = "sign";
-        String str5 = "level";
-        String str6 = "endtime";
-        String str7 = "starttime";
-        String str8 = "enable";
-        String str9 = "";
-        int i = -1;
         try {
             JSONObject jSONObject = new JSONObject(str2);
             if (str.hashCode() == 2043549244) {
@@ -50,99 +42,69 @@ public class VECloudCtrlManager {
                     z = false;
                     if (!z) {
                         VELogUtil.e(TAG, " json contail invalid command ");
-                        i = -2;
-                    } else {
-                        String str10 = "false";
-                        String string = jSONObject.has(str8) ? jSONObject.getString(str8) : str10;
-                        String str11 = "2018-12-08 00:00:00";
-                        String string2 = jSONObject.has(str7) ? jSONObject.getString(str7) : str11;
-                        if (jSONObject.has(str6)) {
-                            str11 = jSONObject.getString(str6);
-                        }
-                        String string3 = jSONObject.has(str5) ? jSONObject.getString(str5) : str9;
-                        String string4 = jSONObject.has(str4) ? jSONObject.getString(str4) : str9;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(str3);
-                        sb.append(string);
-                        sb.append(string2);
-                        sb.append(str11);
-                        sb.append(string3);
-                        if (!this.mCloudCtrlInvoker.verifyJson(sb.toString(), string4)) {
-                            storeCommand(str3, str9);
-                            VELogUtil.e(TAG, "Cloud Ctrl Command Json is doctored");
-                            return -1;
-                        }
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        long time = simpleDateFormat.parse(string2).getTime();
-                        long time2 = simpleDateFormat.parse(str11).getTime();
-                        long currentTimeMillis = System.currentTimeMillis();
-                        InfoLevel infoLevel = InfoLevel.LEVEL3;
-                        if (string3.hashCode() == 68) {
-                            if (string3.equals(Field.DOUBLE_SIGNATURE_PRIMITIVE)) {
-                                z2 = false;
-                                InfoLevel infoLevel2 = !z2 ? InfoLevel.LEVEL3 : InfoLevel.LEVEL0;
-                                if (this.mLogStatus && string.equals("true") && currentTimeMillis >= time && currentTimeMillis < time2) {
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append(this.mWorkpsace);
-                                    sb2.append("/vesdklog");
-                                    String sb3 = sb2.toString();
-                                    VELogUtil.d(TAG, sb3);
-                                    int initSpdLog = TESpdLogManager.getInstance().initSpdLog(sb3, infoLevel2.ordinal(), 3);
-                                    if (initSpdLog < 0) {
-                                        String str12 = TAG;
-                                        StringBuilder sb4 = new StringBuilder();
-                                        sb4.append(" TESpdLog init fail ");
-                                        sb4.append(initSpdLog);
-                                        VELogUtil.e(str12, sb4.toString());
-                                        return -3;
-                                    }
-                                    TESpdLogManager.getInstance().setLevel(infoLevel2);
-                                    this.mLogStatus = true;
-                                } else if (string.equals(str10) || (currentTimeMillis < time && currentTimeMillis >= time2)) {
-                                    if (this.mLogStatus) {
-                                        TESpdLogManager.getInstance().close();
-                                        this.mLogStatus = false;
-                                    }
-                                    String str13 = TAG;
-                                    StringBuilder sb5 = new StringBuilder();
-                                    sb5.append(str3);
-                                    sb5.append(" expired");
-                                    VELogUtil.d(str13, sb5.toString());
-                                    storeCommand(str3, str9);
-                                }
-                                i = 0;
-                            }
-                        }
-                        z2 = true;
-                        if (!z2) {
-                        }
-                        if (this.mLogStatus) {
-                        }
-                        if (this.mLogStatus) {
-                        }
-                        String str132 = TAG;
-                        StringBuilder sb52 = new StringBuilder();
-                        sb52.append(str3);
-                        sb52.append(" expired");
-                        VELogUtil.d(str132, sb52.toString());
-                        storeCommand(str3, str9);
-                        i = 0;
+                        return -2;
                     }
-                    return i;
+                    String string = jSONObject.has("enable") ? jSONObject.getString("enable") : "false";
+                    String str4 = "2018-12-08 00:00:00";
+                    String string2 = jSONObject.has("starttime") ? jSONObject.getString("starttime") : str4;
+                    if (jSONObject.has("endtime")) {
+                        str4 = jSONObject.getString("endtime");
+                    }
+                    String string3 = jSONObject.has("level") ? jSONObject.getString("level") : "";
+                    if (!this.mCloudCtrlInvoker.verifyJson(str3 + string + string2 + str4 + string3, jSONObject.has("sign") ? jSONObject.getString("sign") : "")) {
+                        storeCommand(str3, "");
+                        VELogUtil.e(TAG, "Cloud Ctrl Command Json is doctored");
+                        return -1;
+                    }
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    long time = simpleDateFormat.parse(string2).getTime();
+                    long time2 = simpleDateFormat.parse(str4).getTime();
+                    long currentTimeMillis = System.currentTimeMillis();
+                    TESpdLogManager.InfoLevel infoLevel = TESpdLogManager.InfoLevel.LEVEL3;
+                    if (string3.hashCode() == 68) {
+                        if (string3.equals(Field.DOUBLE_SIGNATURE_PRIMITIVE)) {
+                            z2 = false;
+                            TESpdLogManager.InfoLevel infoLevel2 = !z2 ? TESpdLogManager.InfoLevel.LEVEL3 : TESpdLogManager.InfoLevel.LEVEL0;
+                            if (this.mLogStatus && string.equals("true") && currentTimeMillis >= time && currentTimeMillis < time2) {
+                                String str5 = this.mWorkpsace + "/vesdklog";
+                                VELogUtil.d(TAG, str5);
+                                if (TESpdLogManager.getInstance().initSpdLog(str5, infoLevel2.ordinal(), 3) < 0) {
+                                    VELogUtil.e(TAG, " TESpdLog init fail " + r3);
+                                    return -3;
+                                }
+                                TESpdLogManager.getInstance().setLevel(infoLevel2);
+                                this.mLogStatus = true;
+                            } else if (string.equals("false") || (currentTimeMillis < time && currentTimeMillis >= time2)) {
+                                if (this.mLogStatus) {
+                                    TESpdLogManager.getInstance().close();
+                                    this.mLogStatus = false;
+                                }
+                                VELogUtil.d(TAG, str3 + " expired");
+                                storeCommand(str3, "");
+                            }
+                            return 0;
+                        }
+                    }
+                    z2 = true;
+                    if (!z2) {
+                    }
+                    if (this.mLogStatus) {
+                    }
+                    if (this.mLogStatus) {
+                    }
+                    VELogUtil.d(TAG, str3 + " expired");
+                    storeCommand(str3, "");
+                    return 0;
                 }
             }
             z = true;
             if (!z) {
             }
         } catch (Exception e2) {
-            String str14 = TAG;
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append(" json parse failed ");
-            sb6.append(e2.toString());
-            VELogUtil.e(str14, sb6.toString());
-            storeCommand(str3, str9);
+            VELogUtil.e(TAG, " json parse failed " + e2.toString());
+            storeCommand(str3, "");
+            return -1;
         }
-        return i;
     }
 
     public static VECloudCtrlManager getInstance() {
@@ -168,7 +130,6 @@ public class VECloudCtrlManager {
     }
 
     public void execStoredCommands(@NonNull String str) {
-        String[] strArr;
         this.mWorkpsace = str;
         for (String str2 : COMMANDS) {
             String str3 = (String) VESP.getInstance().get(str2, "");
@@ -187,10 +148,7 @@ public class VECloudCtrlManager {
             storeCommand(string, jSONObject.toString());
         } catch (Exception e2) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append(" json parse failed ");
-            sb.append(e2.toString());
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(str2, " json parse failed " + e2.toString());
         }
     }
 }

@@ -24,22 +24,22 @@ public class SubscriptionArbiter extends AtomicInteger implements Subscription {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void drain() {
         if (getAndIncrement() == 0) {
             drainLoop();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final void drainLoop() {
         Subscription subscription = null;
         int i = 1;
         long j = 0;
         do {
-            Subscription subscription2 = (Subscription) this.missedSubscription.get();
+            Subscription subscription2 = this.missedSubscription.get();
             if (subscription2 != null) {
-                subscription2 = (Subscription) this.missedSubscription.getAndSet(null);
+                subscription2 = this.missedSubscription.getAndSet((Object) null);
             }
             long j2 = this.missedRequested.get();
             if (j2 != 0) {
@@ -157,16 +157,16 @@ public class SubscriptionArbiter extends AtomicInteger implements Subscription {
         }
         ObjectHelper.requireNonNull(subscription, "s is null");
         if (get() != 0 || !compareAndSet(0, 1)) {
-            Subscription subscription2 = (Subscription) this.missedSubscription.getAndSet(subscription);
-            if (subscription2 != null) {
-                subscription2.cancel();
+            Subscription andSet = this.missedSubscription.getAndSet(subscription);
+            if (andSet != null) {
+                andSet.cancel();
             }
             drain();
             return;
         }
-        Subscription subscription3 = this.actual;
-        if (subscription3 != null) {
-            subscription3.cancel();
+        Subscription subscription2 = this.actual;
+        if (subscription2 != null) {
+            subscription2.cancel();
         }
         this.actual = subscription;
         long j = this.requested;

@@ -2,7 +2,6 @@ package com.android.camera.fragment.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnKeyListener;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,23 +9,21 @@ import android.support.v4.app.DialogFragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.LinearLayout.LayoutParams;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.data.DataRepository;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
+import com.android.camera.protocol.ModeProtocol;
 
-public class LensDirtyDetectDialogFragment extends DialogFragment implements OnKeyListener, OnClickListener, HandleBackTrace {
+public class LensDirtyDetectDialogFragment extends DialogFragment implements DialogInterface.OnKeyListener, View.OnClickListener, ModeProtocol.HandleBackTrace {
     public static final String TAG = "LensDirtyDetectDialog";
 
     private void adjustView(View view) {
         Rect displayRect = Util.getDisplayRect(getContext());
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
         layoutParams.topMargin = Util.getDialogTopMargin(displayRect.top);
         layoutParams.width = displayRect.width();
         layoutParams.height = (displayRect.width() * 4) / 3;
@@ -66,7 +63,7 @@ public class LensDirtyDetectDialogFragment extends DialogFragment implements OnK
     }
 
     public void onDestroyView() {
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.removeBackStack(this);
         }
@@ -91,7 +88,7 @@ public class LensDirtyDetectDialogFragment extends DialogFragment implements OnK
 
     public void onViewCreated(View view, @Nullable Bundle bundle) {
         super.onViewCreated(view, bundle);
-        BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+        ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
         if (backStack != null) {
             backStack.addInBackStack(this);
         }

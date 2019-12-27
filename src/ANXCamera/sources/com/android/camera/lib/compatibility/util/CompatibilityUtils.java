@@ -1,13 +1,12 @@
 package com.android.camera.lib.compatibility.util;
 
 import android.app.Activity;
-import android.app.Notification.Builder;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession.StateCallback;
+import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
@@ -18,7 +17,7 @@ import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRecorder;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.SystemProperties;
@@ -49,7 +48,7 @@ public class CompatibilityUtils {
         void onPackageInstalled(String str, boolean z);
     }
 
-    public static void addChannelForNotificationBuilder(NotificationManager notificationManager, String str, CharSequence charSequence, Builder builder) {
+    public static void addChannelForNotificationBuilder(NotificationManager notificationManager, String str, CharSequence charSequence, Notification.Builder builder) {
         V26Utils.addChannelForNotificationBuilder(notificationManager, str, charSequence, builder);
     }
 
@@ -61,12 +60,12 @@ public class CompatibilityUtils {
         return V28Utils.constructCaptureRequestBuilder(cameraMetadataNative, z, i, captureRequest);
     }
 
-    public static void createCaptureSessionWithSessionConfiguration(CameraDevice cameraDevice, int i, InputConfiguration inputConfiguration, List<OutputConfiguration> list, CaptureRequest captureRequest, StateCallback stateCallback, Handler handler) throws CameraAccessException {
+    public static void createCaptureSessionWithSessionConfiguration(CameraDevice cameraDevice, int i, InputConfiguration inputConfiguration, List<OutputConfiguration> list, CaptureRequest captureRequest, CameraCaptureSession.StateCallback stateCallback, Handler handler) throws CameraAccessException {
         V28Utils.createCaptureSessionWithSessionConfiguration(cameraDevice, i, inputConfiguration, list, captureRequest, stateCallback, handler);
     }
 
     public static StreamConfigurationMap createStreamConfigMap(List<StreamConfiguration> list, CameraCharacteristics cameraCharacteristics) {
-        return VERSION.SDK_INT >= 29 ? V29Utils.createStreamConfigMap(list, cameraCharacteristics) : V28Utils.createStreamConfigMap(list, cameraCharacteristics);
+        return Build.VERSION.SDK_INT >= 29 ? V29Utils.createStreamConfigMap(list, cameraCharacteristics) : V28Utils.createStreamConfigMap(list, cameraCharacteristics);
     }
 
     public static String getInstallMethodDescription() {
@@ -132,7 +131,7 @@ public class CompatibilityUtils {
         V28Utils.setPhysicalCameraId(outputConfiguration, str);
     }
 
-    public static void setSurfaceTextureOnFrameAvailableListener(SurfaceTexture surfaceTexture, OnFrameAvailableListener onFrameAvailableListener, Handler handler) {
+    public static void setSurfaceTextureOnFrameAvailableListener(SurfaceTexture surfaceTexture, SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener, Handler handler) {
         V21Utils.setSurfaceTextureOnFrameAvailableListener(surfaceTexture, onFrameAvailableListener, handler);
     }
 

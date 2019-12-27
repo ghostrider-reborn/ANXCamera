@@ -8,6 +8,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.internal.functions.ObjectHelper;
+import io.reactivex.internal.operators.maybe.MaybeMap;
 import io.reactivex.plugins.RxJavaPlugins;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,7 +55,7 @@ public final class MaybeZipArray<T, R> extends Maybe<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeExcept(int i) {
             ZipMaybeObserver<T>[] zipMaybeObserverArr = this.observers;
             int length = zipMaybeObserverArr.length;
@@ -71,7 +72,7 @@ public final class MaybeZipArray<T, R> extends Maybe<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete(int i) {
             if (getAndSet(0) > 0) {
                 disposeExcept(i);
@@ -79,7 +80,7 @@ public final class MaybeZipArray<T, R> extends Maybe<R> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(Throwable th, int i) {
             if (getAndSet(0) > 0) {
                 disposeExcept(i);
@@ -89,7 +90,7 @@ public final class MaybeZipArray<T, R> extends Maybe<R> {
             RxJavaPlugins.onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerSuccess(T t, int i) {
             this.values[i] = t;
             if (decrementAndGet() == 0) {
@@ -151,7 +152,7 @@ public final class MaybeZipArray<T, R> extends Maybe<R> {
         int length = maybeSourceArr.length;
         int i = 0;
         if (length == 1) {
-            maybeSourceArr[0].subscribe(new MapMaybeObserver(maybeObserver, new SingletonArrayFunc()));
+            maybeSourceArr[0].subscribe(new MaybeMap.MapMaybeObserver(maybeObserver, new SingletonArrayFunc()));
             return;
         }
         ZipCoordinator zipCoordinator = new ZipCoordinator(maybeObserver, length, this.zipper);

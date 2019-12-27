@@ -20,10 +20,10 @@ public class e implements j<b> {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof e)) {
-            return false;
+        if (obj instanceof e) {
+            return this.wa.equals(((e) obj).wa);
         }
-        return this.wa.equals(((e) obj).wa);
+        return false;
     }
 
     public int hashCode() {
@@ -32,13 +32,13 @@ public class e implements j<b> {
 
     @NonNull
     public A<b> transform(@NonNull Context context, @NonNull A<b> a2, int i, int i2) {
-        b bVar = (b) a2.get();
+        b bVar = a2.get();
         f fVar = new f(bVar.Z(), c.get(context).Cf());
-        A transform = this.wa.transform(context, fVar, i, i2);
+        A<Bitmap> transform = this.wa.transform(context, fVar, i, i2);
         if (!fVar.equals(transform)) {
             fVar.recycle();
         }
-        bVar.a(this.wa, (Bitmap) transform.get());
+        bVar.a(this.wa, transform.get());
         return a2;
     }
 

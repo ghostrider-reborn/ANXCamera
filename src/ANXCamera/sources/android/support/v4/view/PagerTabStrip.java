@@ -14,7 +14,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 
 public class PagerTabStrip extends PagerTitleStrip {
@@ -44,7 +43,7 @@ public class PagerTabStrip extends PagerTitleStrip {
     private int mTouchSlop;
 
     public PagerTabStrip(@NonNull Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public PagerTabStrip(@NonNull Context context, @Nullable AttributeSet attributeSet) {
@@ -68,14 +67,14 @@ public class PagerTabStrip extends PagerTitleStrip {
         setTextSpacing(getTextSpacing());
         setWillNotDraw(false);
         this.mPrevText.setFocusable(true);
-        this.mPrevText.setOnClickListener(new OnClickListener() {
+        this.mPrevText.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 ViewPager viewPager = PagerTabStrip.this.mPager;
                 viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
             }
         });
         this.mNextText.setFocusable(true);
-        this.mNextText.setOnClickListener(new OnClickListener() {
+        this.mNextText.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 ViewPager viewPager = PagerTabStrip.this.mPager;
                 viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
@@ -90,7 +89,7 @@ public class PagerTabStrip extends PagerTitleStrip {
         return this.mDrawFullUnderline;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getMinHeight() {
         return Math.max(super.getMinHeight(), this.mMinStripHeight);
     }
@@ -106,10 +105,9 @@ public class PagerTabStrip extends PagerTitleStrip {
         int height = getHeight();
         int left = this.mCurrText.getLeft() - this.mTabPadding;
         int right = this.mCurrText.getRight() + this.mTabPadding;
-        int i = height - this.mIndicatorHeight;
         this.mTabPaint.setColor((this.mTabAlpha << 24) | (this.mIndicatorColor & ViewCompat.MEASURED_SIZE_MASK));
         float f2 = (float) height;
-        canvas.drawRect((float) left, (float) i, (float) right, f2, this.mTabPaint);
+        canvas.drawRect((float) left, (float) (height - this.mIndicatorHeight), (float) right, f2, this.mTabPaint);
         if (this.mDrawFullUnderline) {
             this.mTabPaint.setColor(-16777216 | (this.mIndicatorColor & ViewCompat.MEASURED_SIZE_MASK));
             canvas.drawRect((float) getPaddingLeft(), (float) (height - this.mFullUnderlineHeight), (float) (getWidth() - getPaddingRight()), f2, this.mTabPaint);
@@ -194,12 +192,14 @@ public class PagerTabStrip extends PagerTitleStrip {
         super.setTextSpacing(i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void updateTextPositions(int i, float f2, boolean z) {
         Rect rect = this.mTempRect;
         int height = getHeight();
+        int left = this.mCurrText.getLeft() - this.mTabPadding;
+        int right = this.mCurrText.getRight() + this.mTabPadding;
         int i2 = height - this.mIndicatorHeight;
-        rect.set(this.mCurrText.getLeft() - this.mTabPadding, i2, this.mCurrText.getRight() + this.mTabPadding, height);
+        rect.set(left, i2, right, height);
         super.updateTextPositions(i, f2, z);
         this.mTabAlpha = (int) (Math.abs(f2 - 0.5f) * 2.0f * 255.0f);
         rect.union(this.mCurrText.getLeft() - this.mTabPadding, i2, this.mCurrText.getRight() + this.mTabPadding, height);

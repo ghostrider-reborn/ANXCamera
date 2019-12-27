@@ -13,14 +13,13 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import com.android.camera.R;
 import com.android.camera.data.DataRepository;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.effect.EffectController;
 import com.android.camera.effect.FilterInfo;
 import com.android.camera.fragment.CtaNoticeFragment;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
-import com.android.camera.fragment.sticker.BaseSelectAdapter.BaseSelectHolder;
-import com.android.camera.fragment.sticker.BaseSelectAdapter.ItemSelectChangeListener;
-import com.android.camera.fragment.sticker.StickerAdapter.StickerHolder;
+import com.android.camera.fragment.sticker.BaseSelectAdapter;
+import com.android.camera.fragment.sticker.StickerAdapter;
 import com.android.camera.log.Log;
 import com.android.camera.network.net.base.ErrorCode;
 import com.android.camera.network.net.base.ResponseListener;
@@ -30,8 +29,7 @@ import com.android.camera.network.resource.Resource;
 import com.android.camera.network.resource.ResourceDownloadManager;
 import com.android.camera.network.resource.StickerResourceRequest;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.FilterProtocol;
-import com.android.camera.protocol.ModeProtocol.StickerProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.sticker.StickerHelper;
 import com.android.camera.sticker.StickerInfo;
 import java.util.List;
@@ -50,11 +48,7 @@ public class FragmentStickerPager extends Fragment {
     };
     private OnDownloadListener mDownloadListener = new OnDownloadListener() {
         public void onFinish(long j, int i) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(j);
-            sb.append(":");
-            sb.append(i);
-            Log.i(FragmentStickerPager.TAG, sb.toString());
+            Log.i(FragmentStickerPager.TAG, j + ":" + i);
             for (int i2 = 0; i2 < FragmentStickerPager.this.mList.size(); i2++) {
                 if (((StickerInfo) FragmentStickerPager.this.mList.get(i2)).id == j) {
                     ((StickerInfo) FragmentStickerPager.this.mList.get(i2)).downloadState = i;
@@ -64,10 +58,7 @@ public class FragmentStickerPager extends Fragment {
         }
 
         public void onProgressUpdate(long j, int i) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(i);
-            sb.append("");
-            Log.i(FragmentStickerPager.TAG, sb.toString());
+            Log.i(FragmentStickerPager.TAG, i + "");
         }
     };
     /* access modifiers changed from: private */
@@ -92,8 +83,8 @@ public class FragmentStickerPager extends Fragment {
         this.mRecyclerView.setLayoutManager(new LinearLayoutManagerWrapper(getContext(), 0, false, "sticker_item_list"));
         this.mAdapter = new StickerAdapter(getContext());
         this.mRecyclerView.setAdapter(this.mAdapter);
-        this.mAdapter.setItemSelectChangeListener(new ItemSelectChangeListener() {
-            public boolean onItemSelect(BaseSelectHolder baseSelectHolder, int i, boolean z) {
+        this.mAdapter.setItemSelectChangeListener(new BaseSelectAdapter.ItemSelectChangeListener() {
+            public boolean onItemSelect(BaseSelectAdapter.BaseSelectHolder baseSelectHolder, int i, boolean z) {
                 StickerInfo stickerInfo = (StickerInfo) FragmentStickerPager.this.mAdapter.getItemData(i);
                 int downloadState = stickerInfo.getDownloadState();
                 boolean z2 = false;
@@ -106,13 +97,13 @@ public class FragmentStickerPager extends Fragment {
                         z2 = true;
                     }
                     instance.enableMakeup(z2);
-                    StickerProtocol stickerProtocol = (StickerProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(178);
+                    ModeProtocol.StickerProtocol stickerProtocol = (ModeProtocol.StickerProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(178);
                     if (stickerProtocol != null) {
                         stickerProtocol.onStickerChanged(srcPath);
                     }
                     int filterId = stickerInfo.getFilterId();
                     if (filterId != FilterInfo.FILTER_ID_NONE) {
-                        FilterProtocol filterProtocol = (FilterProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(165);
+                        ModeProtocol.FilterProtocol filterProtocol = (ModeProtocol.FilterProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(165);
                         if (filterProtocol != null) {
                             filterProtocol.onFilterChanged(1, filterId);
                         }
@@ -120,7 +111,7 @@ public class FragmentStickerPager extends Fragment {
                     return true;
                 }
                 if ((downloadState == 0 || downloadState == 4) && CtaNoticeFragment.checkCta(FragmentStickerPager.this.getActivity().getFragmentManager())) {
-                    ((StickerHolder) baseSelectHolder).mDownloadView.startDownload();
+                    ((StickerAdapter.StickerHolder) baseSelectHolder).mDownloadView.startDownload();
                     stickerInfo.downloadState = 2;
                     ResourceDownloadManager.getInstance().download((Resource) FragmentStickerPager.this.mList.get(i), FragmentStickerPager.this.mDefaultDownloadHelper);
                 }
@@ -143,7 +134,7 @@ public class FragmentStickerPager extends Fragment {
             }
 
             public void onResponseError(ErrorCode errorCode, String str, Object obj) {
-                FragmentStickerPager.this.refreshData(null);
+                FragmentStickerPager.this.refreshData((List<StickerInfo>) null);
                 Log.e(FragmentStickerPager.TAG, String.format("errorCode %d msg:%s", new Object[]{Integer.valueOf(errorCode.CODE), str}));
             }
         });
@@ -151,7 +142,7 @@ public class FragmentStickerPager extends Fragment {
 
     /* access modifiers changed from: private */
     public void persistSticker(String str) {
-        ProviderEditor editor = DataRepository.dataItemConfig().editor();
+        DataProvider.ProviderEditor editor = DataRepository.dataItemConfig().editor();
         editor.putString("pref_sticker_path_key", str);
         editor.apply();
     }
@@ -169,15 +160,15 @@ public class FragmentStickerPager extends Fragment {
 
     /* access modifiers changed from: private */
     public void refreshDownloadState(List<StickerInfo> list) {
-        for (StickerInfo stickerInfo : list) {
-            stickerInfo.downloadState = ResourceDownloadManager.getInstance().getDownloadState(stickerInfo.id);
+        for (StickerInfo next : list) {
+            next.downloadState = ResourceDownloadManager.getInstance().getDownloadState(next.id);
         }
     }
 
     private void setSelectItem() {
         String currentSticker = EffectController.getInstance().getCurrentSticker();
         for (int i = 0; i < this.mList.size(); i++) {
-            if (TextUtils.equals(currentSticker, ((StickerInfo) this.mList.get(i)).getSrcPath())) {
+            if (TextUtils.equals(currentSticker, this.mList.get(i).getSrcPath())) {
                 this.mAdapter.initSelectItem(i);
                 return;
             }

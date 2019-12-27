@@ -52,11 +52,7 @@ public class SaveTaskDao extends AbstractDao<SaveTask, Long> {
 
     public static void createTable(Database database, boolean z) {
         String str = z ? "IF NOT EXISTS " : "";
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ");
-        sb.append(str);
-        sb.append("\"tasks\" (\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE ,\"start_time\" INTEGER,\"media_store_id\" INTEGER,\"media_path\" TEXT,\"progress_status\" INTEGER NOT NULL ,\"progress_percentage\" INTEGER NOT NULL ,\"jpeg_rotation\" INTEGER NOT NULL );");
-        database.execSQL(sb.toString());
+        database.execSQL("CREATE TABLE " + str + "\"tasks\" (\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE ,\"start_time\" INTEGER,\"media_store_id\" INTEGER,\"media_path\" TEXT,\"progress_status\" INTEGER NOT NULL ,\"progress_percentage\" INTEGER NOT NULL ,\"jpeg_rotation\" INTEGER NOT NULL );");
     }
 
     public static void dropTable(Database database, boolean z) {

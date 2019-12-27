@@ -38,19 +38,11 @@ public class Host extends BlackRoomItem {
     }
 
     public String getItemName() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getSchema());
-        sb.append("://");
-        sb.append(getHost());
-        String sb2 = sb.toString();
+        String str = getSchema() + "://" + getHost();
         if (this.port == -1) {
-            return sb2;
+            return str;
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(sb2);
-        sb3.append(":");
-        sb3.append(this.port);
-        return sb3.toString();
+        return str + ":" + this.port;
     }
 
     public int getPort() {
@@ -70,14 +62,7 @@ public class Host extends BlackRoomItem {
     }
 
     public boolean hostEquals(Host host2) {
-        boolean z = false;
-        if (host2 == null) {
-            return false;
-        }
-        if (host2.getHost().equals(getHost()) && host2.getSchema().equals(getSchema())) {
-            z = true;
-        }
-        return z;
+        return host2 != null && host2.getHost().equals(getHost()) && host2.getSchema().equals(getSchema());
     }
 
     public void setHost(String str) {
@@ -101,16 +86,6 @@ public class Host extends BlackRoomItem {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Host{weightTime=");
-        sb.append(this.weightTime);
-        sb.append(", schema='");
-        sb.append(this.schema);
-        sb.append('\'');
-        sb.append(", host='");
-        sb.append(this.host);
-        sb.append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "Host{weightTime=" + this.weightTime + ", schema='" + this.schema + '\'' + ", host='" + this.host + '\'' + '}';
     }
 }

@@ -2,14 +2,14 @@ package android.support.v4.media;
 
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.v4.media.MediaLibraryService2.MediaLibrarySession;
+import android.support.v4.media.MediaLibraryService2;
 
 class MediaLibraryService2ImplBase extends MediaSessionService2ImplBase {
     MediaLibraryService2ImplBase() {
     }
 
-    public MediaLibrarySession getSession() {
-        return (MediaLibrarySession) super.getSession();
+    public MediaLibraryService2.MediaLibrarySession getSession() {
+        return (MediaLibraryService2.MediaLibrarySession) super.getSession();
     }
 
     public int getSessionType() {

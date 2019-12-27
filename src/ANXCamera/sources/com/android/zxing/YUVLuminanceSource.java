@@ -1,7 +1,6 @@
 package com.android.zxing;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.support.v4.view.ViewCompat;
 import com.google.zxing.LuminanceSource;
 
@@ -57,10 +56,7 @@ final class YUVLuminanceSource extends LuminanceSource {
 
     public byte[] getRow(int i, byte[] bArr) {
         if (i < 0 || i >= getHeight()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Requested row is outside the image: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Requested row is outside the image: " + i);
         }
         int width = getWidth();
         if (bArr == null || bArr.length < width) {
@@ -87,7 +83,7 @@ final class YUVLuminanceSource extends LuminanceSource {
             }
             i += this.mDataWidth;
         }
-        Bitmap createBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         createBitmap.setPixels(iArr, 0, width, 0, 0, width, height);
         return createBitmap;
     }

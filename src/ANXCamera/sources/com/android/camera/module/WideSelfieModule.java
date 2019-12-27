@@ -12,7 +12,6 @@ import android.location.Location;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -34,6 +33,7 @@ import com.android.camera.CameraSize;
 import com.android.camera.ExifHelper;
 import com.android.camera.ImageHelper;
 import com.android.camera.LocationManager;
+import com.android.camera.MutexModeManager;
 import com.android.camera.OnClickAttr;
 import com.android.camera.PictureSizeManager;
 import com.android.camera.R;
@@ -43,7 +43,6 @@ import com.android.camera.Util;
 import com.android.camera.VibratorUtils;
 import com.android.camera.beautyshot.BeautyShot;
 import com.android.camera.constant.UpdateConstant;
-import com.android.camera.constant.UpdateConstant.UpdateType;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.effect.EffectController;
@@ -53,25 +52,19 @@ import com.android.camera.fragment.beauty.BeautyValues;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.FunctionParseAsdFace;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.RecordState;
-import com.android.camera.protocol.ModeProtocol.WideSelfieProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.MediaProviderUtil;
 import com.android.camera.storage.Storage;
 import com.android.camera.wideselfie.WideSelfieConfig;
 import com.android.camera.wideselfie.WideSelfieEngineWrapper;
-import com.android.camera.wideselfie.WideSelfieEngineWrapper.WideSelfStateCallback;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.CameraPreviewCallback;
-import com.android.camera2.Camera2Proxy.FaceDetectionCallback;
-import com.android.camera2.Camera2Proxy.PictureCallbackWrapper;
 import com.android.camera2.CameraHardwareFace;
 import com.arcsoft.camera.utils.d;
 import com.mi.config.b;
+import com.xiaomi.camera.core.ParallelCallback;
+import com.xiaomi.camera.core.PictureInfo;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
@@ -80,7 +73,7 @@ import io.reactivex.disposables.Disposable;
 import java.lang.ref.WeakReference;
 
 @TargetApi(21)
-public class WideSelfieModule extends BaseModule implements CameraAction, CameraPreviewCallback, WideSelfStateCallback, FaceDetectionCallback {
+public class WideSelfieModule extends BaseModule implements ModeProtocol.CameraAction, Camera2Proxy.CameraPreviewCallback, WideSelfieEngineWrapper.WideSelfStateCallback, Camera2Proxy.FaceDetectionCallback {
     private static final int MIN_SHOOTING_TIME = 600;
     public static final int STOP_ROTATION_THRESHOLD = 60;
     private static final String TAG = "WideSelfieModule";
@@ -129,25 +122,23 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         }
 
         public void handleMessage(Message message) {
-            int i = message.what;
-            String str = WideSelfieModule.TAG;
-            if (i == 45) {
-                Log.d(str, "onMessage MSG_ABANDON_HANDLER setActivity null");
-                WideSelfieModule.this.setActivity(null);
+            if (message.what == 45) {
+                Log.d(WideSelfieModule.TAG, "onMessage MSG_ABANDON_HANDLER setActivity null");
+                WideSelfieModule.this.setActivity((Camera) null);
             }
             if (!WideSelfieModule.this.isCreated()) {
-                removeCallbacksAndMessages(null);
+                removeCallbacksAndMessages((Object) null);
             } else if (WideSelfieModule.this.getActivity() != null) {
-                int i2 = message.what;
-                if (i2 == 2) {
+                int i = message.what;
+                if (i == 2) {
                     WideSelfieModule.this.getWindow().clearFlags(128);
-                } else if (i2 == 17) {
+                } else if (i == 17) {
                     WideSelfieModule.this.mHandler.removeMessages(17);
                     WideSelfieModule.this.mHandler.removeMessages(2);
                     WideSelfieModule.this.getWindow().addFlags(128);
                     WideSelfieModule wideSelfieModule = WideSelfieModule.this;
                     wideSelfieModule.mHandler.sendEmptyMessageDelayed(2, (long) wideSelfieModule.getScreenDelay());
-                } else if (i2 == 35) {
+                } else if (i == 35) {
                     WideSelfieModule wideSelfieModule2 = WideSelfieModule.this;
                     boolean z = false;
                     boolean z2 = message.arg1 > 0;
@@ -155,14 +146,14 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
                         z = true;
                     }
                     wideSelfieModule2.handleUpdateFaceView(z2, z);
-                } else if (i2 == 51) {
+                } else if (i == 51) {
                     Camera camera = WideSelfieModule.this.mActivity;
                     if (camera != null && !camera.isActivityPaused()) {
                         WideSelfieModule wideSelfieModule3 = WideSelfieModule.this;
                         wideSelfieModule3.mOpenCameraFail = true;
                         wideSelfieModule3.onCameraException();
                     }
-                } else if (i2 == 9) {
+                } else if (i == 9) {
                     WideSelfieModule.this.initPreviewLayout();
                     CameraScreenNail cameraScreenNail = WideSelfieModule.this.mActivity.getCameraScreenNail();
                     CameraSize cameraSize = WideSelfieModule.this.mPreviewSize;
@@ -170,27 +161,18 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
                     WideSelfieEngineWrapper access$100 = WideSelfieModule.this.mWideSelfEngine;
                     WideSelfieModule wideSelfieModule4 = WideSelfieModule.this;
                     CameraSize cameraSize2 = wideSelfieModule4.mPreviewSize;
-                    int i3 = cameraSize2.width;
-                    int i4 = cameraSize2.height;
+                    int i2 = cameraSize2.width;
+                    int i3 = cameraSize2.height;
                     CameraSize cameraSize3 = wideSelfieModule4.mPictureSize;
-                    access$100.setCameraParameter("1", i3, i4, cameraSize3.width, cameraSize3.height);
-                } else if (i2 != 10) {
-                    String str2 = "no consumer for this message: ";
-                    if (!BaseModule.DEBUG) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(str2);
-                        sb.append(message.what);
-                        Log.e(str, sb.toString());
-                    } else {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(str2);
-                        sb2.append(message.what);
-                        throw new RuntimeException(sb2.toString());
-                    }
-                } else {
+                    access$100.setCameraParameter("1", i2, i3, cameraSize3.width, cameraSize3.height);
+                } else if (i == 10) {
                     WideSelfieModule wideSelfieModule5 = WideSelfieModule.this;
                     wideSelfieModule5.mOpenCameraFail = true;
                     wideSelfieModule5.onCameraException();
+                } else if (!BaseModule.DEBUG) {
+                    Log.e(WideSelfieModule.TAG, "no consumer for this message: " + message.what);
+                } else {
+                    throw new RuntimeException("no consumer for this message: " + message.what);
                 }
             }
         }
@@ -227,36 +209,24 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             long currentTimeMillis = System.currentTimeMillis();
             Location currentLocation = LocationManager.instance().getCurrentLocation();
             if (bArr != null) {
-                uri = Storage.addImage(CameraAppImpl.getAndroidContext(), str2, currentTimeMillis, currentLocation, i3, bArr, i, i2, false, false, false, true, false, "", null);
+                uri = Storage.addImage(CameraAppImpl.getAndroidContext(), str2, currentTimeMillis, currentLocation, i3, bArr, i, i2, false, false, false, true, false, "", (PictureInfo) null);
             } else {
                 int i4 = i3;
                 ExifHelper.writeExifByFilePath(str3, i4, currentLocation, currentTimeMillis);
                 uri = Storage.addImageForGroupOrPanorama(CameraAppImpl.getAndroidContext(), str, i4, currentTimeMillis, currentLocation, i, i2);
             }
-            String str4 = WideSelfieModule.TAG;
             if (uri == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("insert MediaProvider failed, attempt to find uri by path, ");
-                sb.append(str3);
-                Log.w(str4, sb.toString());
+                Log.w(WideSelfieModule.TAG, "insert MediaProvider failed, attempt to find uri by path, " + str3);
                 uri = MediaProviderUtil.getContentUriFromPath(CameraAppImpl.getAndroidContext(), str3);
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("addImageAsApplication uri = ");
-            sb2.append(uri);
-            sb2.append(", path = ");
-            sb2.append(str3);
-            Log.d(str4, sb2.toString());
+            Log.d(WideSelfieModule.TAG, "addImageAsApplication uri = " + uri + ", path = " + str3);
             Camera camera = (Camera) this.mActivityRef.get();
             if (camera != null) {
                 camera.getScreenHint().updateHint();
                 if (uri != null) {
                     camera.onNewUriArrived(uri, str2);
                     Thumbnail createThumbnailFromUri = Thumbnail.createThumbnailFromUri(camera.getContentResolver(), uri, false);
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("addImageAsApplication Thumbnail = ");
-                    sb3.append(createThumbnailFromUri);
-                    Log.d(str4, sb3.toString());
+                    Log.d(WideSelfieModule.TAG, "addImageAsApplication Thumbnail = " + createThumbnailFromUri);
                     Util.broadcastNewPicture(camera, uri);
                     camera.getThumbnailUpdater().setThumbnail(createThumbnailFromUri, true, false);
                 }
@@ -278,37 +248,22 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
                 i2 = 0;
                 i = 0;
             }
-            String str = WideSelfieModule.TAG;
             if (i2 > 0 || i > 0) {
                 int i3 = DataRepository.dataItemFeature().ib() ? 2 : Util.isGlobalVersion() ? 0 : 1;
                 long currentTimeMillis = System.currentTimeMillis();
                 BeautyShot beautyShot = new BeautyShot();
                 beautyShot.init(CameraAppImpl.getAndroidContext());
-                StringBuilder sb = new StringBuilder();
-                sb.append("beautyShot start  mWidth ");
-                sb.append(this.mWidth);
-                sb.append(", mHeight = ");
-                sb.append(this.mHeight);
-                Log.d(str, sb.toString());
+                Log.d(WideSelfieModule.TAG, "beautyShot start  mWidth " + this.mWidth + ", mHeight = " + this.mHeight);
                 if (i2 > 0) {
                     i2--;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("beautyLevel ");
-                    sb2.append(i2);
-                    Log.d(str, sb2.toString());
+                    Log.d(WideSelfieModule.TAG, "beautyLevel " + i2);
                     beautyShot.processByBeautyLevel(this.mNv21Data, this.mWidth, this.mHeight, 270, i3, i2);
                 } else if (i > 0) {
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("beautyLevel smooth ");
-                    sb3.append(i);
-                    Log.d(str, sb3.toString());
+                    Log.d(WideSelfieModule.TAG, "beautyLevel smooth " + i);
                     beautyShot.processBySmoothLevel(this.mNv21Data, this.mWidth, this.mHeight, 270, i3, i);
                 }
                 beautyShot.uninit();
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("beautyShot end, time = ");
-                sb4.append(System.currentTimeMillis() - currentTimeMillis);
-                Log.d(str, sb4.toString());
+                Log.d(WideSelfieModule.TAG, "beautyShot end, time = " + (System.currentTimeMillis() - currentTimeMillis));
             }
             int i4 = i2;
             if (this.mMirror) {
@@ -320,7 +275,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             }
             byte[] encodeNv21ToJpeg = ImageHelper.encodeNv21ToJpeg(this.mNv21Data, this.mWidth, this.mHeight, BaseModule.getJpegQuality(false));
             if (encodeNv21ToJpeg == null) {
-                Log.w(str, "jpegData is null, can't save");
+                Log.w(WideSelfieModule.TAG, "jpegData is null, can't save");
                 return null;
             }
             String generateFilepath4Jpeg = Storage.generateFilepath4Jpeg(this.mFileName);
@@ -328,9 +283,9 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
                 addImageAsApplication(generateFilepath4Jpeg, this.mFileName, encodeNv21ToJpeg, this.mWidth, this.mHeight, this.mOrientation);
             } else {
                 d.a(generateFilepath4Jpeg, encodeNv21ToJpeg);
-                addImageAsApplication(generateFilepath4Jpeg, this.mFileName, null, this.mWidth, this.mHeight, this.mOrientation);
+                addImageAsApplication(generateFilepath4Jpeg, this.mFileName, (byte[]) null, this.mWidth, this.mHeight, this.mOrientation);
             }
-            CameraStatUtil.trackGeneralInfo(1, false, 176, this.mTriggerMode, true, null, CameraStatUtil.AUTO_OFF);
+            CameraStatUtil.trackGeneralInfo(1, false, 176, this.mTriggerMode, true, (MutexModeManager) null, CameraStatUtil.AUTO_OFF);
             CameraStatUtil.trackPictureTakenInWideSelfie(1, this.mStopMode, String.valueOf(i4));
             return null;
         }
@@ -347,11 +302,10 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         /* access modifiers changed from: protected */
         public void onPreExecute() {
             super.onPreExecute();
-            String str = WideSelfieModule.TAG;
-            Log.w(str, "onPreExecute");
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            Log.w(WideSelfieModule.TAG, "onPreExecute");
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (recordState == null) {
-                Log.w(str, "onPreExecute recordState is null");
+                Log.w(WideSelfieModule.TAG, "onPreExecute recordState is null");
             } else {
                 recordState.onPostSavingStart();
             }
@@ -383,7 +337,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
     private void initMetaParser() {
         this.mMetaDataDisposable = Flowable.create(new FlowableOnSubscribe<CaptureResult>() {
             public void subscribe(FlowableEmitter<CaptureResult> flowableEmitter) throws Exception {
-                WideSelfieModule.this.mMetaDataFlowableEmitter = flowableEmitter;
+                FlowableEmitter unused = WideSelfieModule.this.mMetaDataFlowableEmitter = flowableEmitter;
             }
         }, BackpressureStrategy.DROP).map(new FunctionParseAsdFace(this, isFrontCamera())).subscribe();
     }
@@ -399,7 +353,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             int height = cameraScreenNail2.getHeight();
             int dimensionPixelSize = this.mActivity.getResources().getDimensionPixelSize(R.dimen.wide_selfie_still_preview_height);
             int i = (width * dimensionPixelSize) / height;
-            WideSelfieProtocol wideSelfieProtocol = (WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
+            ModeProtocol.WideSelfieProtocol wideSelfieProtocol = (ModeProtocol.WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
             if (wideSelfieProtocol != null) {
                 CameraSize cameraSize2 = this.mPreviewSize;
                 wideSelfieProtocol.initPreviewLayout(i, dimensionPixelSize, cameraSize2.width, cameraSize2.height);
@@ -410,7 +364,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
 
     private boolean isProcessingSaveTask() {
         SaveOutputImageTask saveOutputImageTask = this.mSaveOutputImageTask;
-        return (saveOutputImageTask == null || saveOutputImageTask.getStatus() == Status.FINISHED) ? false : true;
+        return (saveOutputImageTask == null || saveOutputImageTask.getStatus() == AsyncTask.Status.FINISHED) ? false : true;
     }
 
     private boolean isShootingTooShort() {
@@ -426,8 +380,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
 
     /* access modifiers changed from: private */
     public void onSaveFinish() {
-        String str = TAG;
-        Log.d(str, "onSaveFinish E");
+        Log.d(TAG, "onSaveFinish E");
         if (isAlive() && this.mCamera2Device != null) {
             enableCameraControls(true);
             if (this.mAeLockSupported) {
@@ -438,11 +391,11 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             }
             this.mCamera2Device.setFocusMode(this.mTargetFocusMode);
             startPreview();
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (recordState != null) {
                 recordState.onPostSavingFinish();
             }
-            Log.d(str, "onSaveFinish X");
+            Log.d(TAG, "onSaveFinish X");
         }
     }
 
@@ -453,9 +406,8 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
 
     private void setupCaptureParams() {
         Camera2Proxy camera2Proxy = this.mCamera2Device;
-        String str = TAG;
         if (camera2Proxy == null) {
-            Log.e(str, "camera device is not ready");
+            Log.e(TAG, "camera device is not ready");
             return;
         }
         camera2Proxy.setFocusMode(this.mTargetFocusMode);
@@ -463,10 +415,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         this.mCamera2Device.setFlashMode(0);
         String antiBanding = CameraSettings.getAntiBanding();
         this.mCamera2Device.setAntiBanding(Integer.valueOf(antiBanding).intValue());
-        StringBuilder sb = new StringBuilder();
-        sb.append("antiBanding=");
-        sb.append(antiBanding);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "antiBanding=" + antiBanding);
         this.mCamera2Device.setEnableZsl(isZslPreferred());
         this.mCamera2Device.setHHT(false);
         this.mCamera2Device.setEnableOIS(false);
@@ -480,10 +429,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         int i4;
         int i5;
         byte[] bArr2;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startSaveTask stitchResult ");
-        sb.append(i3);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "startSaveTask stitchResult " + i3);
         keepScreenOnAwhile();
         synchronized (this.mDeviceLock) {
             if (this.mCamera2Device != null) {
@@ -519,13 +465,11 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
     }
 
     private void stopWideSelfieShooting(boolean z, boolean z2, String str) {
-        boolean z3 = this.mIsShooting;
-        String str2 = TAG;
-        if (!z3) {
-            Log.w(str2, "stopWideSelfieShooting return, is not shooting");
+        if (!this.mIsShooting) {
+            Log.w(TAG, "stopWideSelfieShooting return, is not shooting");
             return;
         }
-        Log.d(str2, "stopWideSelfieShooting");
+        Log.d(TAG, "stopWideSelfieShooting");
         if (this.mWideSelfEngine.stopCapture()) {
             this.mIsPrepareSaveTask = true;
             this.mIsShooting = false;
@@ -544,10 +488,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             this.mBeautyValues = new BeautyValues();
         }
         CameraSettings.initBeautyValues(this.mBeautyValues, this.mModuleIndex);
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateBeauty(): ");
-        sb.append(this.mBeautyValues);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "updateBeauty(): " + this.mBeautyValues);
         this.mCamera2Device.setBeautyValues(this.mBeautyValues);
     }
 
@@ -566,17 +507,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         }
         this.mPreviewSize = Util.getOptimalPreviewSize(false, this.mBogusCameraId, this.mCameraCapabilities.getSupportedOutputSize(SurfaceTexture.class), (double) CameraSettings.getPreviewAspectRatio(bestPictureSize.width, bestPictureSize.height));
         this.mPictureSize = bestPictureSize;
-        StringBuilder sb = new StringBuilder();
-        sb.append("pictureSize= ");
-        sb.append(bestPictureSize.width);
-        String str = "X";
-        sb.append(str);
-        sb.append(bestPictureSize.height);
-        sb.append(" previewSize=");
-        sb.append(this.mPreviewSize.width);
-        sb.append(str);
-        sb.append(this.mPreviewSize.height);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "pictureSize= " + bestPictureSize.width + "X" + bestPictureSize.height + " previewSize=" + this.mPreviewSize.width + "X" + this.mPreviewSize.height);
         CameraSize cameraSize = this.mPreviewSize;
         updateCameraScreenNailSize(cameraSize.width, cameraSize.height);
     }
@@ -594,7 +525,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         synchronized (this.mDeviceLock) {
             setCameraState(0);
             if (this.mCamera2Device != null) {
-                this.mCamera2Device.setErrorCallback(null);
+                this.mCamera2Device.setErrorCallback((Camera2Proxy.CameraErrorCallback) null);
                 this.mCamera2Device.stopPreviewCallback(true);
                 this.mCamera2Device = null;
             }
@@ -602,7 +533,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         Log.d(TAG, "closeCamera: end");
     }
 
-    public void consumePreference(@UpdateType int... iArr) {
+    public void consumePreference(@UpdateConstant.UpdateType int... iArr) {
         for (int i : iArr) {
             if (i == 1) {
                 updatePictureAndPreviewSize();
@@ -617,17 +548,10 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             } else if (i == 55) {
                 updateModuleRelated();
             } else if (!(i == 46 || i == 47)) {
-                String str = "no consumer for this updateType: ";
                 if (!BaseModule.DEBUG) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(i);
-                    Log.w(TAG, sb.toString());
+                    Log.w(TAG, "no consumer for this updateType: " + i);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str);
-                    sb2.append(i);
-                    throw new RuntimeException(sb2.toString());
+                    throw new RuntimeException("no consumer for this updateType: " + i);
                 }
             }
         }
@@ -723,12 +647,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         this.mToastOffsetY = this.mActivity.getResources().getDimensionPixelOffset(R.dimen.wideselfie_toast_offset_y);
         this.MOVE_DISTANCE = (WideSelfieConfig.getInstance(this.mActivity).getThumbBgWidth() - WideSelfieConfig.getInstance(this.mActivity).getStillPreviewWidth()) / 2;
         this.MOVE_DISTANCE_VERTICAL = (WideSelfieConfig.getInstance(this.mActivity).getThumbBgHeightVertical() - WideSelfieConfig.getInstance(this.mActivity).getStillPreviewHeight()) / 2;
-        StringBuilder sb = new StringBuilder();
-        sb.append("MOVE_DISTANCE ");
-        sb.append(this.MOVE_DISTANCE);
-        sb.append(", MOVE_DISTANCE_VERTICAL =  ");
-        sb.append(this.MOVE_DISTANCE_VERTICAL);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "MOVE_DISTANCE " + this.MOVE_DISTANCE + ", MOVE_DISTANCE_VERTICAL =  " + this.MOVE_DISTANCE_VERTICAL);
         this.mWideSelfEngine = new WideSelfieEngineWrapper(this.mActivity.getApplicationContext(), this);
         EffectController.getInstance().setEffect(FilterInfo.FILTER_ID_NONE);
         onCameraOpened();
@@ -742,19 +661,20 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
     }
 
     public void onFaceDetected(CameraHardwareFace[] cameraHardwareFaceArr, FaceAnalyzeInfo faceAnalyzeInfo) {
-        if (isCreated() && cameraHardwareFaceArr != null) {
-            if (!b.pj() || cameraHardwareFaceArr.length <= 0 || cameraHardwareFaceArr[0].faceType != 64206) {
-                if (!this.mMainProtocol.setFaces(1, cameraHardwareFaceArr, getActiveArraySize(), getDeviceBasedZoomRatio())) {
-                }
-            } else if (this.mObjectTrackingStarted) {
-                this.mMainProtocol.setFaces(3, cameraHardwareFaceArr, getActiveArraySize(), getDeviceBasedZoomRatio());
+        if (!isCreated() || cameraHardwareFaceArr == null) {
+            return;
+        }
+        if (!b.pj() || cameraHardwareFaceArr.length <= 0 || cameraHardwareFaceArr[0].faceType != 64206) {
+            if (!this.mMainProtocol.setFaces(1, cameraHardwareFaceArr, getActiveArraySize(), getDeviceBasedZoomRatio())) {
             }
+        } else if (this.mObjectTrackingStarted) {
+            this.mMainProtocol.setFaces(3, cameraHardwareFaceArr, getActiveArraySize(), getDeviceBasedZoomRatio());
         }
     }
 
     public void onHostStopAndNotifyActionStop() {
         if (this.mIsShooting) {
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (recordState != null) {
                 recordState.onFinish();
             }
@@ -815,7 +735,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             if (i == 27 || i == 66) {
                 return true;
             }
-        } else if (((BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
+        } else if (((ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
             return true;
         }
         return super.onKeyUp(i, keyEvent);
@@ -823,7 +743,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
 
     @UiThread
     public void onMove(int i, int i2, Point point, Point point2, boolean z) {
-        WideSelfieProtocol wideSelfieProtocol = (WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
+        ModeProtocol.WideSelfieProtocol wideSelfieProtocol = (ModeProtocol.WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
         if (wideSelfieProtocol == null) {
             VibratorUtils.getInstance(this.mActivity).cancel();
             return;
@@ -836,10 +756,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         boolean z3 = Math.abs(i3) >= i5;
         if (z || z3 || z2) {
             String str = z3 ? CameraStat.STOP_CAPTURE_MODE_HORIZONTAL_OUT : z2 ? CameraStat.STOP_CAPTURE_MODE_VERTICAL_OUT : CameraStat.STOP_CAPTURE_MODE_FILL;
-            StringBuilder sb = new StringBuilder();
-            sb.append("stop shooting completed = ");
-            sb.append(z);
-            Log.w(TAG, sb.toString());
+            Log.w(TAG, "stop shooting completed = " + z);
             stopWideSelfieShooting(true, false, str);
             return;
         }
@@ -851,6 +768,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
                     this.mIsContinuousVibratoring = true;
                 }
                 wideSelfieProtocol.updateHintText(i7);
+                return;
             }
             return;
         }
@@ -908,14 +826,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             }
             if (abs >= 60) {
                 this.mStopedForRotation = true;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOrientationChanged stop shooting mCaptureOrientation ");
-                sb.append(this.mCaptureOrientation);
-                sb.append(", orientation = ");
-                sb.append(i);
-                sb.append(", realTimeOrientation = ");
-                sb.append(i3);
-                Log.w(TAG, sb.toString());
+                Log.w(TAG, "onOrientationChanged stop shooting mCaptureOrientation " + this.mCaptureOrientation + ", orientation = " + i + ", realTimeOrientation = " + i3);
                 stopWideSelfieShooting(false, true, CameraStat.STOP_CAPTURE_MODE_ROTATE_OUT);
             }
         }
@@ -923,7 +834,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
 
     public void onPause() {
         super.onPause();
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         closeCamera();
         resetScreenOn();
         this.mWideSelfEngine.pause();
@@ -968,7 +879,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             final Bitmap rotateBitmap = d.rotateBitmap(d.b(bArr, i, i2), CameraAppImpl.getAndroidContext().getResources().getInteger(R.integer.front_lens_orientation), true);
             this.mHandler.post(new Runnable() {
                 public void run() {
-                    WideSelfieProtocol wideSelfieProtocol = (WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
+                    ModeProtocol.WideSelfieProtocol wideSelfieProtocol = (ModeProtocol.WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
                     if (wideSelfieProtocol != null) {
                         wideSelfieProtocol.updatePreviewBitmap(rotateBitmap, rect, rect2);
                     }
@@ -991,28 +902,23 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
 
     public void onShutterButtonClick(int i) {
         if (!this.mPaused && getCameraState() != 0 && !isIgnoreTouchEvent() && !this.mActivity.isScreenSlideOff()) {
-            boolean z = this.mIsPrepareSaveTask;
-            String str = TAG;
-            if (z || isProcessingSaveTask()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onShutterButtonClick return, mIsPrepareSaveTask ");
-                sb.append(this.mIsPrepareSaveTask);
-                Log.w(str, sb.toString());
+            if (this.mIsPrepareSaveTask || isProcessingSaveTask()) {
+                Log.w(TAG, "onShutterButtonClick return, mIsPrepareSaveTask " + this.mIsPrepareSaveTask);
                 return;
             }
             setTriggerMode(i);
             if (!this.mIsShooting) {
                 this.mActivity.getScreenHint().updateHint();
                 if (Storage.isLowStorageAtLastPoint()) {
-                    ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFailed();
-                    Log.w(str, "onShutterButtonClick return, isLowStorageAtLastPoint");
+                    ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFailed();
+                    Log.w(TAG, "onShutterButtonClick return, isLowStorageAtLastPoint");
                     return;
                 }
                 playCameraSound(2);
                 startWideSelfieShooting();
                 this.mShootingStartTime = SystemClock.elapsedRealtime();
             } else if (isShootingTooShort()) {
-                Log.w(str, "shooting is too short, ignore this click");
+                Log.w(TAG, "shooting is too short, ignore this click");
             } else {
                 stopWideSelfieShooting(true, false, CameraStat.STOP_CAPTURE_MODE_ON_SHUTTER_BUTTON);
             }
@@ -1035,7 +941,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             if (!isFrameAvailable()) {
                 Log.w(TAG, "onSingleTapUp: frame not available");
             } else if (!isFrontCamera() || !this.mActivity.isScreenSlideOff()) {
-                BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+                ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
                 if (backStack != null && !backStack.handleBackStackFromTapDown(i, i2)) {
                     this.mMainProtocol.setFocusViewType(true);
                 }
@@ -1099,7 +1005,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
     }
 
     public void requestRender() {
-        WideSelfieProtocol wideSelfieProtocol = (WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
+        ModeProtocol.WideSelfieProtocol wideSelfieProtocol = (ModeProtocol.WideSelfieProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(216);
         if (wideSelfieProtocol != null) {
             wideSelfieProtocol.requestRender();
         }
@@ -1185,11 +1091,8 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
         int i = this.mOrientation;
         this.mCaptureOrientation = i;
         this.mJpegRotation = Util.getJpegRotation(this.mBogusCameraId, i);
-        StringBuilder sb = new StringBuilder();
-        sb.append("startWideSelfieShooting mJpegRotation = ");
-        sb.append(this.mJpegRotation);
-        Log.v(TAG, sb.toString());
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        Log.v(TAG, "startWideSelfieShooting mJpegRotation = " + this.mJpegRotation);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         recordState.onPrepare();
         this.mIsShooting = true;
         this.mStopedForRotation = false;
@@ -1210,30 +1113,25 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
             this.mCamera2Device.setEnableZsl(isZslPreferred());
             this.mCamera2Device.setNeedPausePreview(false);
             this.mCamera2Device.setShotType(3);
-            this.mCamera2Device.captureBurstPictures(-1, new PictureCallbackWrapper() {
+            this.mCamera2Device.captureBurstPictures(-1, new Camera2Proxy.PictureCallbackWrapper() {
                 public void onPictureTakenFinished(boolean z) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onPictureBurstFinished success = ");
-                    sb.append(z);
-                    Log.d(WideSelfieModule.TAG, sb.toString());
+                    Log.d(WideSelfieModule.TAG, "onPictureBurstFinished success = " + z);
                 }
 
                 public boolean onPictureTakenImageConsumed(Image image) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onPictureTaken>>image=");
-                    sb.append(image);
-                    Log.v(WideSelfieModule.TAG, sb.toString());
-                    if (image != null) {
-                        byte[] dataFromImage = d.getDataFromImage(image, 2);
-                        if (WideSelfieModule.this.mFirstFrameNv21Data == null) {
-                            WideSelfieModule.this.mFirstFrameNv21Data = dataFromImage;
-                        }
-                        WideSelfieModule.this.mWideSelfEngine.onBurstCapture(dataFromImage);
-                        image.close();
+                    Log.v(WideSelfieModule.TAG, "onPictureTaken>>image=" + image);
+                    if (image == null) {
+                        return true;
                     }
+                    byte[] dataFromImage = d.getDataFromImage(image, 2);
+                    if (WideSelfieModule.this.mFirstFrameNv21Data == null) {
+                        byte[] unused = WideSelfieModule.this.mFirstFrameNv21Data = dataFromImage;
+                    }
+                    WideSelfieModule.this.mWideSelfEngine.onBurstCapture(dataFromImage);
+                    image.close();
                     return true;
                 }
-            }, null);
+            }, (ParallelCallback) null);
         }
         recordState.onStart();
         keepScreenOn();
@@ -1264,7 +1162,7 @@ public class WideSelfieModule extends BaseModule implements CameraAction, Camera
     /* access modifiers changed from: protected */
     public void updateFace() {
         boolean enableFaceDetection = enableFaceDetection();
-        MainContentProtocol mainContentProtocol = this.mMainProtocol;
+        ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
         if (mainContentProtocol != null) {
             mainContentProtocol.setSkipDrawFace(!enableFaceDetection);
         }

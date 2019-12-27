@@ -88,11 +88,7 @@ public class FetchProviderEffectTask extends NormalTask {
         hashMap.put(EffectConfiguration.KEY_CURSOR, String.valueOf(this.cursor));
         hashMap.put(EffectConfiguration.KEY_COUNT, String.valueOf(this.count));
         this.mSelectedHost = this.mEffectContext.getLinkSelector().getBestHostUrl();
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mSelectedHost);
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_PROVIDER_LIST);
-        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, sb.toString());
+        String buildRequestUrl = NetworkUtils.buildRequestUrl(hashMap, this.mSelectedHost + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_PROVIDER_LIST);
         this.mRequestedUrl = buildRequestUrl;
         try {
             this.mRemoteIp = InetAddress.getByName(new URL(buildRequestUrl).getHost()).getHostAddress();
@@ -106,13 +102,8 @@ public class FetchProviderEffectTask extends NormalTask {
 
     private void fillEffectPath(ProviderEffectModel providerEffectModel) {
         if (providerEffectModel != null && providerEffectModel.getStickerList() != null) {
-            for (ProviderEffect providerEffect : providerEffectModel.getStickerList()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(this.mConfiguration.getEffectDir());
-                sb.append(File.separator);
-                sb.append(providerEffect.getId());
-                sb.append(EffectConstants.GIF_FILE_SUFFIX);
-                providerEffect.setPath(sb.toString());
+            for (ProviderEffect next : providerEffectModel.getStickerList()) {
+                next.setPath(this.mConfiguration.getEffectDir() + File.separator + next.getId() + EffectConstants.GIF_FILE_SUFFIX);
             }
         }
     }
@@ -139,7 +130,7 @@ public class FetchProviderEffectTask extends NormalTask {
                         ProviderEffectModel data = providerEffectListResponse.getData();
                         fillEffectPath(data);
                         saveEffectList(data);
-                        sendMessage(18, new ProviderEffectTaskResult(data, null));
+                        sendMessage(18, new ProviderEffectTaskResult(data, (ExceptionResult) null));
                         return;
                     } else if (this.mCurCnt == 0) {
                         ExceptionResult exceptionResult2 = new ExceptionResult((int) ErrorConstants.CODE_DOWNLOAD_ERROR);

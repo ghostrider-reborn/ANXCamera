@@ -4,7 +4,7 @@ import android.view.animation.Interpolator;
 
 public class PhysicBasedInterpolator implements Interpolator {
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private float f343c;
     private float c1;
     private float c2;
@@ -28,9 +28,8 @@ public class PhysicBasedInterpolator implements Interpolator {
         this.f343c = (float) (((((double) f2) * 12.566370614359172d) * ((double) f4)) / ((double) f3));
         float f5 = f4 * 4.0f * this.k;
         float f6 = this.f343c;
-        float sqrt = (float) Math.sqrt((double) (f5 - (f6 * f6)));
         float f7 = this.m;
-        this.w = sqrt / (f7 * 2.0f);
+        this.w = ((float) Math.sqrt((double) (f5 - (f6 * f6)))) / (f7 * 2.0f);
         this.r = -((this.f343c / 2.0f) * f7);
         this.c2 = (0.0f - (this.r * this.mInitial)) / this.w;
     }

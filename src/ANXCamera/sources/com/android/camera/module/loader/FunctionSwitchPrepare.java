@@ -8,8 +8,7 @@ import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.data.data.runing.DataItemRunning;
 import com.android.camera.module.BaseModule;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -37,15 +36,15 @@ public class FunctionSwitchPrepare extends Func1Base<Camera, BaseModule> {
         if (!nullHolder.isPresent()) {
             return NullHolder.ofNullable(null, 234);
         }
-        Camera camera = (Camera) nullHolder.get();
+        Camera camera = nullHolder.get();
         if (camera.isFinishing()) {
             return NullHolder.ofNullable(null, 235);
         }
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (bottomPopupTips != null) {
             bottomPopupTips.directlyHideTips();
         }
-        ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getAnimationComposite().setClickEnable(false);
+        ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getAnimationComposite().setClickEnable(false);
         reconfigureData();
         camera.changeRequestOrientation();
         BaseModule baseModule = (BaseModule) camera.getCurrentModule();

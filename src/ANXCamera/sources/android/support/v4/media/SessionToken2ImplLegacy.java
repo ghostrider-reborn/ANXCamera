@@ -4,17 +4,18 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.media.session.MediaSessionCompat.Token;
+import android.support.v4.media.SessionToken2;
+import android.support.v4.media.session.MediaSessionCompat;
 
-final class SessionToken2ImplLegacy implements SupportLibraryImpl {
-    private final Token mLegacyToken;
+final class SessionToken2ImplLegacy implements SessionToken2.SupportLibraryImpl {
+    private final MediaSessionCompat.Token mLegacyToken;
 
-    SessionToken2ImplLegacy(Token token) {
+    SessionToken2ImplLegacy(MediaSessionCompat.Token token) {
         this.mLegacyToken = token;
     }
 
     public static SessionToken2ImplLegacy fromBundle(@NonNull Bundle bundle) {
-        return new SessionToken2ImplLegacy(Token.fromBundle(bundle.getBundle("android.media.token.LEGACY")));
+        return new SessionToken2ImplLegacy(MediaSessionCompat.Token.fromBundle(bundle.getBundle("android.media.token.LEGACY")));
     }
 
     public boolean equals(Object obj) {
@@ -66,10 +67,6 @@ final class SessionToken2ImplLegacy implements SupportLibraryImpl {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SessionToken2 {legacyToken=");
-        sb.append(this.mLegacyToken);
-        sb.append("}");
-        return sb.toString();
+        return "SessionToken2 {legacyToken=" + this.mLegacyToken + "}";
     }
 }

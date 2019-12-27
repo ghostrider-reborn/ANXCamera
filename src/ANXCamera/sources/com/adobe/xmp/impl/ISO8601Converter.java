@@ -167,9 +167,8 @@ public final class ISO8601Converter {
             stringBuffer.append(':');
             stringBuffer.append(decimalFormat.format((long) xMPDateTime.getMinute()));
             if (!(xMPDateTime.getSecond() == 0 && xMPDateTime.getNanoSecond() == 0)) {
-                double second = ((double) xMPDateTime.getSecond()) + (((double) xMPDateTime.getNanoSecond()) / 1.0E9d);
                 decimalFormat.applyPattern(":00.#########");
-                stringBuffer.append(decimalFormat.format(second));
+                stringBuffer.append(decimalFormat.format(((double) xMPDateTime.getSecond()) + (((double) xMPDateTime.getNanoSecond()) / 1.0E9d)));
             }
             if (xMPDateTime.getTimeZone() != null) {
                 int offset = xMPDateTime.getTimeZone().getOffset(xMPDateTime.getCalendar().getTimeInMillis());

@@ -2,7 +2,6 @@ package android.support.v4.view;
 
 import android.content.Context;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -14,7 +13,7 @@ public abstract class ActionProvider {
     private SubUiVisibilityListener mSubUiVisibilityListener;
     private VisibilityListener mVisibilityListener;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public interface SubUiVisibilityListener {
         void onSubUiVisibilityChanged(boolean z);
     }
@@ -62,29 +61,25 @@ public abstract class ActionProvider {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void reset() {
         this.mVisibilityListener = null;
         this.mSubUiVisibilityListener = null;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void setSubUiVisibilityListener(SubUiVisibilityListener subUiVisibilityListener) {
         this.mSubUiVisibilityListener = subUiVisibilityListener;
     }
 
     public void setVisibilityListener(VisibilityListener visibilityListener) {
         if (!(this.mVisibilityListener == null || visibilityListener == null)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("setVisibilityListener: Setting a new ActionProvider.VisibilityListener when one is already set. Are you reusing this ");
-            sb.append(ActionProvider.class.getSimpleName());
-            sb.append(" instance while it is still in use somewhere else?");
-            Log.w(TAG, sb.toString());
+            Log.w(TAG, "setVisibilityListener: Setting a new ActionProvider.VisibilityListener when one is already set. Are you reusing this " + ActionProvider.class.getSimpleName() + " instance while it is still in use somewhere else?");
         }
         this.mVisibilityListener = visibilityListener;
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public void subUiVisibilityChanged(boolean z) {
         SubUiVisibilityListener subUiVisibilityListener = this.mSubUiVisibilityListener;
         if (subUiVisibilityListener != null) {

@@ -5,11 +5,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.util.Log;
 
 final class FragmentState implements Parcelable {
-    public static final Creator<FragmentState> CREATOR = new Creator<FragmentState>() {
+    public static final Parcelable.Creator<FragmentState> CREATOR = new Parcelable.Creator<FragmentState>() {
         public FragmentState createFromParcel(Parcel parcel) {
             return new FragmentState(parcel);
         }
@@ -42,10 +41,7 @@ final class FragmentState implements Parcelable {
         this.mRetainInstance = parcel.readInt() != 0;
         this.mDetached = parcel.readInt() != 0;
         this.mArguments = parcel.readBundle();
-        if (parcel.readInt() == 0) {
-            z = false;
-        }
-        this.mHidden = z;
+        this.mHidden = parcel.readInt() == 0 ? false : z;
         this.mSavedFragmentState = parcel.readBundle();
     }
 
@@ -95,10 +91,7 @@ final class FragmentState implements Parcelable {
             fragment2.mHidden = this.mHidden;
             fragment2.mFragmentManager = fragmentHostCallback.mFragmentManager;
             if (FragmentManagerImpl.DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Instantiated fragment ");
-                sb.append(this.mInstance);
-                Log.v("FragmentManager", sb.toString());
+                Log.v("FragmentManager", "Instantiated fragment " + this.mInstance);
             }
         }
         Fragment fragment3 = this.mInstance;

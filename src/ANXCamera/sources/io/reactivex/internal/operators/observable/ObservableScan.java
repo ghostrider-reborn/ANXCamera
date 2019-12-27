@@ -55,17 +55,17 @@ public final class ObservableScan<T> extends AbstractObservableWithUpstream<T, T
                 if (t2 == null) {
                     this.value = t;
                     observer.onNext(t);
-                } else {
-                    try {
-                        T apply = this.accumulator.apply(t2, t);
-                        ObjectHelper.requireNonNull(apply, "The value returned by the accumulator is null");
-                        this.value = apply;
-                        observer.onNext(apply);
-                    } catch (Throwable th) {
-                        Exceptions.throwIfFatal(th);
-                        this.s.dispose();
-                        onError(th);
-                    }
+                    return;
+                }
+                try {
+                    T apply = this.accumulator.apply(t2, t);
+                    ObjectHelper.requireNonNull(apply, "The value returned by the accumulator is null");
+                    this.value = apply;
+                    observer.onNext(apply);
+                } catch (Throwable th) {
+                    Exceptions.throwIfFatal(th);
+                    this.s.dispose();
+                    onError(th);
                 }
             }
         }

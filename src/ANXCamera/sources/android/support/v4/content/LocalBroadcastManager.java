@@ -88,7 +88,7 @@ public final class LocalBroadcastManager {
         if (r5 >= r4) goto L_0x0042;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:14:0x002a, code lost:
-        r6 = (android.support.v4.content.LocalBroadcastManager.ReceiverRecord) r3.receivers.get(r5);
+        r6 = r3.receivers.get(r5);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:15:0x0034, code lost:
         if (r6.dead != false) goto L_0x003f;
@@ -137,7 +137,7 @@ public final class LocalBroadcastManager {
     public void registerReceiver(@NonNull BroadcastReceiver broadcastReceiver, @NonNull IntentFilter intentFilter) {
         synchronized (this.mReceivers) {
             ReceiverRecord receiverRecord = new ReceiverRecord(intentFilter, broadcastReceiver);
-            ArrayList arrayList = (ArrayList) this.mReceivers.get(broadcastReceiver);
+            ArrayList arrayList = this.mReceivers.get(broadcastReceiver);
             if (arrayList == null) {
                 arrayList = new ArrayList(1);
                 this.mReceivers.put(broadcastReceiver, arrayList);
@@ -145,7 +145,7 @@ public final class LocalBroadcastManager {
             arrayList.add(receiverRecord);
             for (int i = 0; i < intentFilter.countActions(); i++) {
                 String action = intentFilter.getAction(i);
-                ArrayList arrayList2 = (ArrayList) this.mActions.get(action);
+                ArrayList arrayList2 = this.mActions.get(action);
                 if (arrayList2 == null) {
                     arrayList2 = new ArrayList(1);
                     this.mActions.put(action, arrayList2);
@@ -158,7 +158,7 @@ public final class LocalBroadcastManager {
     /* JADX WARNING: Code restructure failed: missing block: B:59:0x0171, code lost:
         return true;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:62:0x0174, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:61:0x0173, code lost:
         return false;
      */
     public boolean sendBroadcast(@NonNull Intent intent) {
@@ -173,38 +173,22 @@ public final class LocalBroadcastManager {
             String resolveTypeIfNeeded = intent2.resolveTypeIfNeeded(this.mAppContext.getContentResolver());
             Uri data = intent.getData();
             String scheme = intent.getScheme();
-            Set categories = intent.getCategories();
+            Set<String> categories = intent.getCategories();
             boolean z = (intent.getFlags() & 8) != 0;
             if (z) {
-                String str3 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Resolving type ");
-                sb.append(resolveTypeIfNeeded);
-                sb.append(" scheme ");
-                sb.append(scheme);
-                sb.append(" of intent ");
-                sb.append(intent2);
-                Log.v(str3, sb.toString());
+                Log.v(TAG, "Resolving type " + resolveTypeIfNeeded + " scheme " + scheme + " of intent " + intent2);
             }
-            ArrayList arrayList3 = (ArrayList) this.mActions.get(intent.getAction());
+            ArrayList arrayList3 = this.mActions.get(intent.getAction());
             if (arrayList3 != null) {
                 if (z) {
-                    String str4 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Action list: ");
-                    sb2.append(arrayList3);
-                    Log.v(str4, sb2.toString());
+                    Log.v(TAG, "Action list: " + arrayList3);
                 }
                 ArrayList arrayList4 = null;
                 int i2 = 0;
                 while (i2 < arrayList3.size()) {
                     ReceiverRecord receiverRecord = (ReceiverRecord) arrayList3.get(i2);
                     if (z) {
-                        String str5 = TAG;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Matching against filter ");
-                        sb3.append(receiverRecord.filter);
-                        Log.v(str5, sb3.toString());
+                        Log.v(TAG, "Matching against filter " + receiverRecord.filter);
                     }
                     if (receiverRecord.broadcasting) {
                         if (z) {
@@ -225,11 +209,7 @@ public final class LocalBroadcastManager {
                         int match = receiverRecord.filter.match(action, resolveTypeIfNeeded, scheme, data, categories, TAG);
                         if (match >= 0) {
                             if (z) {
-                                String str6 = TAG;
-                                StringBuilder sb4 = new StringBuilder();
-                                sb4.append("  Filter matched!  match=0x");
-                                sb4.append(Integer.toHexString(match));
-                                Log.v(str6, sb4.toString());
+                                Log.v(TAG, "  Filter matched!  match=0x" + Integer.toHexString(match));
                             }
                             arrayList4 = arrayList2 == null ? new ArrayList() : arrayList2;
                             arrayList4.add(receiverRecord2);
@@ -239,12 +219,8 @@ public final class LocalBroadcastManager {
                             arrayList3 = arrayList;
                             resolveTypeIfNeeded = str;
                         } else if (z) {
-                            String str7 = match != -4 ? match != -3 ? match != -2 ? match != -1 ? "unknown reason" : "type" : PhotosOemApi.PATH_SPECIAL_TYPE_DATA : "action" : EffectConfiguration.KEY_CATEGORY;
-                            String str8 = TAG;
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append("  Filter did not match: ");
-                            sb5.append(str7);
-                            Log.v(str8, sb5.toString());
+                            String str3 = match != -4 ? match != -3 ? match != -2 ? match != -1 ? "unknown reason" : "type" : PhotosOemApi.PATH_SPECIAL_TYPE_DATA : "action" : EffectConfiguration.KEY_CATEGORY;
+                            Log.v(TAG, "  Filter did not match: " + str3);
                         }
                     }
                     arrayList4 = arrayList2;
@@ -275,23 +251,23 @@ public final class LocalBroadcastManager {
 
     public void unregisterReceiver(@NonNull BroadcastReceiver broadcastReceiver) {
         synchronized (this.mReceivers) {
-            ArrayList arrayList = (ArrayList) this.mReceivers.remove(broadcastReceiver);
-            if (arrayList != null) {
-                for (int size = arrayList.size() - 1; size >= 0; size--) {
-                    ReceiverRecord receiverRecord = (ReceiverRecord) arrayList.get(size);
+            ArrayList remove = this.mReceivers.remove(broadcastReceiver);
+            if (remove != null) {
+                for (int size = remove.size() - 1; size >= 0; size--) {
+                    ReceiverRecord receiverRecord = (ReceiverRecord) remove.get(size);
                     receiverRecord.dead = true;
                     for (int i = 0; i < receiverRecord.filter.countActions(); i++) {
                         String action = receiverRecord.filter.getAction(i);
-                        ArrayList arrayList2 = (ArrayList) this.mActions.get(action);
-                        if (arrayList2 != null) {
-                            for (int size2 = arrayList2.size() - 1; size2 >= 0; size2--) {
-                                ReceiverRecord receiverRecord2 = (ReceiverRecord) arrayList2.get(size2);
+                        ArrayList arrayList = this.mActions.get(action);
+                        if (arrayList != null) {
+                            for (int size2 = arrayList.size() - 1; size2 >= 0; size2--) {
+                                ReceiverRecord receiverRecord2 = (ReceiverRecord) arrayList.get(size2);
                                 if (receiverRecord2.receiver == broadcastReceiver) {
                                     receiverRecord2.dead = true;
-                                    arrayList2.remove(size2);
+                                    arrayList.remove(size2);
                                 }
                             }
-                            if (arrayList2.size() <= 0) {
+                            if (arrayList.size() <= 0) {
                                 this.mActions.remove(action);
                             }
                         }

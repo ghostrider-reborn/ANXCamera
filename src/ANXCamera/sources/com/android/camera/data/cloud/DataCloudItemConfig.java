@@ -9,9 +9,6 @@ public class DataCloudItemConfig extends DataCloudItemBase {
     }
 
     public String provideKey() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(KEY);
-        sb.append(this.mCameraId);
-        return sb.toString();
+        return KEY + this.mCameraId;
     }
 }

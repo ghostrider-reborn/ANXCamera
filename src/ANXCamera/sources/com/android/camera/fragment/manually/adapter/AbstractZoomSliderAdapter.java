@@ -1,10 +1,9 @@
 package com.android.camera.fragment.manually.adapter;
 
-import com.android.camera.ui.HorizontalSlideView.HorizontalDrawAdapter;
-import com.android.camera.ui.HorizontalSlideView.OnPositionSelectListener;
+import com.android.camera.ui.HorizontalSlideView;
 import com.mi.config.b;
 
-public abstract class AbstractZoomSliderAdapter extends HorizontalDrawAdapter implements OnPositionSelectListener {
+public abstract class AbstractZoomSliderAdapter extends HorizontalSlideView.HorizontalDrawAdapter implements HorizontalSlideView.OnPositionSelectListener {
     protected static int getRealZoomRatioTele() {
         return b.An ? 17 : 20;
     }

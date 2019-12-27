@@ -2,18 +2,13 @@ package com.android.camera.fragment.beauty;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
 import android.widget.TextView;
 import com.android.camera.R;
 import com.android.camera.Util;
@@ -22,7 +17,7 @@ import com.android.camera.data.data.TypeItem;
 import com.android.camera.ui.ColorImageView;
 import java.util.List;
 
-public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
+public class MakeupSingleCheckAdapter extends RecyclerView.Adapter<SingleCheckViewHolder> {
     /* access modifiers changed from: private */
     public Context mContext;
     /* access modifiers changed from: private */
@@ -39,9 +34,9 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
     /* access modifiers changed from: private */
     public int mSelectedItem = 0;
     private List<TypeItem> mSingleCheckList;
-    private OnItemClickListener onItemClickListener;
+    private AdapterView.OnItemClickListener onItemClickListener;
 
-    class SingleCheckViewHolder extends ViewHolder implements OnClickListener {
+    class SingleCheckViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         /* access modifiers changed from: private */
         public View itemView;
         private MakeupSingleCheckAdapter mAdapter;
@@ -60,7 +55,7 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         private void colorAnimate(final ColorImageView colorImageView, int i, int i2) {
             ValueAnimator ofObject = ValueAnimator.ofObject(new ArgbEvaluator(), new Object[]{Integer.valueOf(i), Integer.valueOf(i2)});
             ofObject.setDuration(200);
-            ofObject.addUpdateListener(new AnimatorUpdateListener() {
+            ofObject.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     colorImageView.setColorAndRefresh(((Integer) valueAnimator.getAnimatedValue()).intValue());
                 }
@@ -71,7 +66,7 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
         private void textColorAnimate(final TextView textView, int i, int i2) {
             ValueAnimator ofObject = ValueAnimator.ofObject(new ArgbEvaluator(), new Object[]{Integer.valueOf(i), Integer.valueOf(i2)});
             ofObject.setDuration(200);
-            ofObject.addUpdateListener(new AnimatorUpdateListener() {
+            ofObject.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     textView.setTextColor(((Integer) valueAnimator.getAnimatedValue()).intValue());
                 }
@@ -86,8 +81,8 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
                 return;
             }
             MakeupSingleCheckAdapter makeupSingleCheckAdapter = MakeupSingleCheckAdapter.this;
-            makeupSingleCheckAdapter.mPreSelectedItem = makeupSingleCheckAdapter.mSelectedItem;
-            MakeupSingleCheckAdapter.this.mSelectedItem = adapterPosition;
+            int unused = makeupSingleCheckAdapter.mPreSelectedItem = makeupSingleCheckAdapter.mSelectedItem;
+            int unused2 = MakeupSingleCheckAdapter.this.mSelectedItem = adapterPosition;
             SingleCheckViewHolder singleCheckViewHolder = (SingleCheckViewHolder) MakeupSingleCheckAdapter.this.mRecyclerView.findViewHolderForAdapterPosition(MakeupSingleCheckAdapter.this.mPreSelectedItem);
             SingleCheckViewHolder singleCheckViewHolder2 = (SingleCheckViewHolder) MakeupSingleCheckAdapter.this.mRecyclerView.findViewHolderForAdapterPosition(MakeupSingleCheckAdapter.this.mSelectedItem);
             Resources resources = MakeupSingleCheckAdapter.this.mContext.getResources();
@@ -116,7 +111,7 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             if (i != MakeupSingleCheckAdapter.this.getItemCount() - 1) {
                 z = false;
             }
-            MarginLayoutParams marginLayoutParams = (MarginLayoutParams) this.itemView.getLayoutParams();
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) this.itemView.getLayoutParams();
             if (MakeupSingleCheckAdapter.this.mIsCustomWidth) {
                 marginLayoutParams.width = MakeupSingleCheckAdapter.this.mItemWidth;
             }
@@ -137,15 +132,9 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
             if (Util.isAccessible()) {
                 TextView textView2 = this.mText;
                 if (i == MakeupSingleCheckAdapter.this.mSelectedItem) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(resources.getString(typeItem.getTextResource()));
-                    sb.append(resources.getString(R.string.accessibility_open));
-                    str = sb.toString();
+                    str = resources.getString(typeItem.getTextResource()) + resources.getString(R.string.accessibility_open);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(resources.getString(typeItem.getTextResource()));
-                    sb2.append(resources.getString(R.string.accessibility_closed));
-                    str = sb2.toString();
+                    str = resources.getString(typeItem.getTextResource()) + resources.getString(R.string.accessibility_closed);
                 }
                 textView2.setContentDescription(str);
             }
@@ -184,7 +173,7 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
 
     public void onBindViewHolder(SingleCheckViewHolder singleCheckViewHolder, int i) {
         try {
-            singleCheckViewHolder.setDataToView((TypeItem) this.mSingleCheckList.get(i), i);
+            singleCheckViewHolder.setDataToView(this.mSingleCheckList.get(i), i);
         } catch (Exception e2) {
             e2.printStackTrace();
         }
@@ -195,13 +184,13 @@ public class MakeupSingleCheckAdapter extends Adapter<SingleCheckViewHolder> {
     }
 
     public void onItemHolderClick(SingleCheckViewHolder singleCheckViewHolder) {
-        OnItemClickListener onItemClickListener2 = this.onItemClickListener;
+        AdapterView.OnItemClickListener onItemClickListener2 = this.onItemClickListener;
         if (onItemClickListener2 != null) {
-            onItemClickListener2.onItemClick(null, singleCheckViewHolder.itemView, singleCheckViewHolder.getAdapterPosition(), singleCheckViewHolder.getItemId());
+            onItemClickListener2.onItemClick((AdapterView) null, singleCheckViewHolder.itemView, singleCheckViewHolder.getAdapterPosition(), singleCheckViewHolder.getItemId());
         }
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener2) {
+    public void setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener2) {
         this.onItemClickListener = onItemClickListener2;
     }
 

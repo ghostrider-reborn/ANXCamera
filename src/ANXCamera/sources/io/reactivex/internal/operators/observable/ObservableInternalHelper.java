@@ -132,7 +132,7 @@ public final class ObservableInternalHelper {
         INSTANCE;
 
         public Object apply(Object obj) throws Exception {
-            return Integer.valueOf(0);
+            return 0;
         }
     }
 
@@ -146,7 +146,7 @@ public final class ObservableInternalHelper {
         public Observable<R> apply(T t) throws Exception {
             Object apply = this.mapper.apply(t);
             ObjectHelper.requireNonNull(apply, "The mapper returned a null SingleSource");
-            return RxJavaPlugins.onAssembly((Observable<T>) new SingleToObservable<T>((SingleSource) apply));
+            return RxJavaPlugins.onAssembly(new SingleToObservable((SingleSource) apply));
         }
     }
 
@@ -365,12 +365,16 @@ public final class ObservableInternalHelper {
         return new SimpleGenerator(consumer);
     }
 
-    public static <T, R> Observable<R> switchMapSingle(Observable<T> observable, Function<? super T, ? extends SingleSource<? extends R>> function) {
-        return observable.switchMap(convertSingleMapperToObservableMapper(function), 1);
+    /* JADX WARNING: type inference failed for: r2v0, types: [io.reactivex.functions.Function, io.reactivex.functions.Function<? super T, ? extends io.reactivex.SingleSource<? extends R>>] */
+    /* JADX WARNING: Unknown variable types count: 1 */
+    public static <T, R> Observable<R> switchMapSingle(Observable<T> observable, Function<? super T, ? extends SingleSource<? extends R>> r2) {
+        return observable.switchMap(convertSingleMapperToObservableMapper(r2), 1);
     }
 
-    public static <T, R> Observable<R> switchMapSingleDelayError(Observable<T> observable, Function<? super T, ? extends SingleSource<? extends R>> function) {
-        return observable.switchMapDelayError(convertSingleMapperToObservableMapper(function), 1);
+    /* JADX WARNING: type inference failed for: r2v0, types: [io.reactivex.functions.Function, io.reactivex.functions.Function<? super T, ? extends io.reactivex.SingleSource<? extends R>>] */
+    /* JADX WARNING: Unknown variable types count: 1 */
+    public static <T, R> Observable<R> switchMapSingleDelayError(Observable<T> observable, Function<? super T, ? extends SingleSource<? extends R>> r2) {
+        return observable.switchMapDelayError(convertSingleMapperToObservableMapper(r2), 1);
     }
 
     public static <T, R> Function<List<ObservableSource<? extends T>>, ObservableSource<? extends R>> zipIterable(Function<? super Object[], ? extends R> function) {

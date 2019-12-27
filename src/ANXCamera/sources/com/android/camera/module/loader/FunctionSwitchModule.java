@@ -18,7 +18,7 @@ public class FunctionSwitchModule extends Func1Base<BaseModule, BaseModule> {
         if (167 != this.mTargetMode) {
             EffectController.getInstance().reset();
         }
-        ((BaseModule) nullHolder.get()).isCreated();
+        nullHolder.get().isCreated();
         return nullHolder;
     }
 

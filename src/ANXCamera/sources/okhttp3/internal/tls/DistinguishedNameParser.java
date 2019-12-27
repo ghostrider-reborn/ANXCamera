@@ -90,7 +90,6 @@ final class DistinguishedNameParser {
         int i2;
         int i3;
         int i4 = i + 1;
-        String str = "Malformed DN: ";
         if (i4 < this.length) {
             char c2 = this.chars[i];
             if (c2 >= '0' && c2 <= '9') {
@@ -98,10 +97,7 @@ final class DistinguishedNameParser {
             } else if (c2 >= 'a' && c2 <= 'f') {
                 i2 = c2 - 'W';
             } else if (c2 < 'A' || c2 > 'F') {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(this.dn);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Malformed DN: " + this.dn);
             } else {
                 i2 = c2 - '7';
             }
@@ -111,19 +107,13 @@ final class DistinguishedNameParser {
             } else if (c3 >= 'a' && c3 <= 'f') {
                 i3 = c3 - 'W';
             } else if (c3 < 'A' || c3 > 'F') {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(this.dn);
-                throw new IllegalStateException(sb2.toString());
+                throw new IllegalStateException("Malformed DN: " + this.dn);
             } else {
                 i3 = c3 - '7';
             }
             return (i2 << 4) + i3;
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str);
-        sb3.append(this.dn);
-        throw new IllegalStateException(sb3.toString());
+        throw new IllegalStateException("Malformed DN: " + this.dn);
     }
 
     private char getEscaped() {
@@ -151,10 +141,7 @@ final class DistinguishedNameParser {
             }
             return this.chars[this.pos];
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unexpected end of DN: ");
-        sb.append(this.dn);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Unexpected end of DN: " + this.dn);
     }
 
     private char getUTF8() {
@@ -197,7 +184,6 @@ final class DistinguishedNameParser {
 
     private String hexAV() {
         int i = this.pos;
-        String str = "Unexpected end of DN: ";
         if (i + 4 < this.length) {
             this.beg = i;
             this.pos = i + 1;
@@ -231,10 +217,7 @@ final class DistinguishedNameParser {
             int i5 = this.beg;
             int i6 = i4 - i5;
             if (i6 < 5 || (i6 & 1) == 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(this.dn);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Unexpected end of DN: " + this.dn);
             }
             byte[] bArr = new byte[(i6 / 2)];
             int i7 = i5 + 1;
@@ -244,10 +227,7 @@ final class DistinguishedNameParser {
             }
             return new String(this.chars, this.beg, i6);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(this.dn);
-        throw new IllegalStateException(sb2.toString());
+        throw new IllegalStateException("Unexpected end of DN: " + this.dn);
     }
 
     private String nextAT() {
@@ -277,7 +257,6 @@ final class DistinguishedNameParser {
             this.pos = i3 + 1;
         }
         int i4 = this.pos;
-        String str = "Unexpected end of DN: ";
         if (i4 < this.length) {
             this.end = i4;
             if (this.chars[i4] == ' ') {
@@ -295,10 +274,7 @@ final class DistinguishedNameParser {
                 char[] cArr3 = this.chars;
                 int i6 = this.pos;
                 if (cArr3[i6] != '=' || i6 == this.length) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(this.dn);
-                    throw new IllegalStateException(sb.toString());
+                    throw new IllegalStateException("Unexpected end of DN: " + this.dn);
                 }
             }
             this.pos++;
@@ -331,10 +307,7 @@ final class DistinguishedNameParser {
             int i12 = this.beg;
             return new String(cArr7, i12, this.end - i12);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(this.dn);
-        throw new IllegalStateException(sb2.toString());
+        throw new IllegalStateException("Unexpected end of DN: " + this.dn);
     }
 
     private String quotedAV() {
@@ -368,16 +341,12 @@ final class DistinguishedNameParser {
                 this.pos++;
                 this.end++;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unexpected end of DN: ");
-                sb.append(this.dn);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Unexpected end of DN: " + this.dn);
             }
         }
     }
 
     public String findMostSpecific(String str) {
-        String str2;
         this.pos = 0;
         this.beg = 0;
         this.end = 0;
@@ -393,29 +362,22 @@ final class DistinguishedNameParser {
                 return null;
             }
             char c2 = this.chars[i];
-            String str3 = c2 != '\"' ? c2 != '#' ? (c2 == '+' || c2 == ',' || c2 == ';') ? "" : escapedAV() : hexAV() : quotedAV();
+            String escapedAV = c2 != '\"' ? c2 != '#' ? (c2 == '+' || c2 == ',' || c2 == ';') ? "" : escapedAV() : hexAV() : quotedAV();
             if (str.equalsIgnoreCase(nextAT)) {
-                return str3;
+                return escapedAV;
             }
             int i2 = this.pos;
             if (i2 >= this.length) {
                 return null;
             }
             char[] cArr = this.chars;
-            str2 = "Malformed DN: ";
             if (cArr[i2] == ',' || cArr[i2] == ';' || cArr[i2] == '+') {
                 this.pos++;
                 nextAT = nextAT();
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(this.dn);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Malformed DN: " + this.dn);
             }
         } while (nextAT != null);
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str2);
-        sb2.append(this.dn);
-        throw new IllegalStateException(sb2.toString());
+        throw new IllegalStateException("Malformed DN: " + this.dn);
     }
 }

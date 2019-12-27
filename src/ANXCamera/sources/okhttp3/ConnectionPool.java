@@ -16,7 +16,6 @@ import okhttp3.internal.Util;
 import okhttp3.internal.connection.RealConnection;
 import okhttp3.internal.connection.RouteDatabase;
 import okhttp3.internal.connection.StreamAllocation;
-import okhttp3.internal.connection.StreamAllocation.StreamAllocationReference;
 import okhttp3.internal.platform.Platform;
 
 public final class ConnectionPool {
@@ -64,10 +63,7 @@ public final class ConnectionPool {
         this.maxIdleConnections = i;
         this.keepAliveDurationNs = timeUnit.toNanos(j);
         if (j <= 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("keepAliveDuration <= 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("keepAliveDuration <= 0: " + j);
         }
     }
 
@@ -75,16 +71,11 @@ public final class ConnectionPool {
         List<Reference<StreamAllocation>> list = realConnection.allocations;
         int i = 0;
         while (i < list.size()) {
-            Reference reference = (Reference) list.get(i);
+            Reference reference = list.get(i);
             if (reference.get() != null) {
                 i++;
             } else {
-                StreamAllocationReference streamAllocationReference = (StreamAllocationReference) reference;
-                StringBuilder sb = new StringBuilder();
-                sb.append("A connection to ");
-                sb.append(realConnection.route().address().url());
-                sb.append(" was leaked. Did you forget to close a response body?");
-                Platform.get().logCloseableLeak(sb.toString(), streamAllocationReference.callStackTrace);
+                Platform.get().logCloseableLeak("A connection to " + realConnection.route().address().url() + " was leaked. Did you forget to close a response body?", ((StreamAllocation.StreamAllocationReference) reference).callStackTrace);
                 list.remove(i);
                 realConnection.noNewStreams = true;
                 if (list.isEmpty()) {
@@ -96,21 +87,21 @@ public final class ConnectionPool {
         return list.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public long cleanup(long j) {
         synchronized (this) {
             long j2 = Long.MIN_VALUE;
             int i = 0;
             RealConnection realConnection = null;
             int i2 = 0;
-            for (RealConnection realConnection2 : this.connections) {
-                if (pruneAndGetAllocationCount(realConnection2, j) > 0) {
+            for (RealConnection next : this.connections) {
+                if (pruneAndGetAllocationCount(next, j) > 0) {
                     i++;
                 } else {
                     i2++;
-                    long j3 = j - realConnection2.idleAtNanos;
+                    long j3 = j - next.idleAtNanos;
                     if (j3 > j2) {
-                        realConnection = realConnection2;
+                        realConnection = next;
                         j2 = j3;
                     }
                 }
@@ -135,7 +126,7 @@ public final class ConnectionPool {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean connectionBecameIdle(RealConnection realConnection) {
         if (realConnection.noNewStreams || this.maxIdleConnections == 0) {
             this.connections.remove(realConnection);
@@ -149,12 +140,12 @@ public final class ConnectionPool {
         return this.connections.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
     public Socket deduplicate(Address address, StreamAllocation streamAllocation) {
-        for (RealConnection realConnection : this.connections) {
-            if (realConnection.isEligible(address, null) && realConnection.isMultiplexed() && realConnection != streamAllocation.connection()) {
-                return streamAllocation.releaseAndAcquire(realConnection);
+        for (RealConnection next : this.connections) {
+            if (next.isEligible(address, (Route) null) && next.isMultiplexed() && next != streamAllocation.connection()) {
+                return streamAllocation.releaseAndAcquire(next);
             }
         }
         return null;
@@ -163,12 +154,12 @@ public final class ConnectionPool {
     public void evictAll() {
         ArrayList<RealConnection> arrayList = new ArrayList<>();
         synchronized (this) {
-            Iterator it = this.connections.iterator();
+            Iterator<RealConnection> it = this.connections.iterator();
             while (it.hasNext()) {
-                RealConnection realConnection = (RealConnection) it.next();
-                if (realConnection.allocations.isEmpty()) {
-                    realConnection.noNewStreams = true;
-                    arrayList.add(realConnection);
+                RealConnection next = it.next();
+                if (next.allocations.isEmpty()) {
+                    next.noNewStreams = true;
+                    arrayList.add(next);
                     it.remove();
                 }
             }
@@ -178,13 +169,13 @@ public final class ConnectionPool {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Nullable
     public RealConnection get(Address address, StreamAllocation streamAllocation, Route route) {
-        for (RealConnection realConnection : this.connections) {
-            if (realConnection.isEligible(address, route)) {
-                streamAllocation.acquire(realConnection, true);
-                return realConnection;
+        for (RealConnection next : this.connections) {
+            if (next.isEligible(address, route)) {
+                streamAllocation.acquire(next, true);
+                return next;
             }
         }
         return null;
@@ -201,7 +192,7 @@ public final class ConnectionPool {
         return i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void put(RealConnection realConnection) {
         if (!this.cleanupRunning) {
             this.cleanupRunning = true;

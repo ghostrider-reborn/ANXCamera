@@ -2,7 +2,7 @@ package com.android.camera.network.net;
 
 import com.android.camera.log.Log;
 import com.android.camera.network.net.base.Cacheable;
-import com.android.volley.Cache.Entry;
+import com.android.volley.Cache;
 import com.android.volley.toolbox.DiskBasedCache;
 import java.io.File;
 import java.util.HashMap;
@@ -12,15 +12,12 @@ public class GalleryCache extends DiskBasedCache {
 
     public GalleryCache(File file, int i) {
         super(file, i);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Network cache path: ");
-        sb.append(file.getAbsolutePath());
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "Network cache path: " + file.getAbsolutePath());
         initialize();
     }
 
-    public synchronized Entry get(String str) {
-        Entry entry;
+    public synchronized Cache.Entry get(String str) {
+        Cache.Entry entry;
         entry = super.get(str);
         if (entry != null) {
             HashMap hashMap = new HashMap();
@@ -35,22 +32,20 @@ public class GalleryCache extends DiskBasedCache {
     }
 
     public synchronized boolean isCacheValid(String str) {
-        Entry entry = super.get(str);
+        Cache.Entry entry = super.get(str);
         return entry != null && !entry.isExpired();
     }
 
     @Deprecated
-    public synchronized void put(String str, Entry entry) {
+    public synchronized void put(String str, Cache.Entry entry) {
     }
 
     public synchronized void put(String str, byte[] bArr, long j, long j2) {
-        Entry entry = new Entry();
+        Cache.Entry entry = new Cache.Entry();
         entry.data = bArr;
         entry.ttl = j;
         entry.softTtl = j2;
         super.put(str, entry);
-        String str2 = TAG;
-        String str3 = "put cache. key %s size %s expires %s";
         Object[] objArr = new Object[3];
         int i = 0;
         objArr[0] = Integer.valueOf(str.hashCode());
@@ -59,6 +54,6 @@ public class GalleryCache extends DiskBasedCache {
         }
         objArr[1] = Integer.valueOf(i);
         objArr[2] = Long.valueOf(j);
-        Log.d(str2, String.format(str3, objArr));
+        Log.d(TAG, String.format("put cache. key %s size %s expires %s", objArr));
     }
 }

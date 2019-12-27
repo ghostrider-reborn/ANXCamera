@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.c;
 import com.bumptech.glide.load.engine.A;
+import com.bumptech.glide.load.engine.bitmap_recycle.d;
 import com.bumptech.glide.load.j;
 import java.security.MessageDigest;
 
@@ -29,10 +30,10 @@ public class r implements j<Drawable> {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof r)) {
-            return false;
+        if (obj instanceof r) {
+            return this.wa.equals(((r) obj).wa);
         }
-        return this.wa.equals(((r) obj).wa);
+        return false;
     }
 
     public int hashCode() {
@@ -41,10 +42,11 @@ public class r implements j<Drawable> {
 
     @NonNull
     public A<Drawable> transform(@NonNull Context context, @NonNull A<Drawable> a2, int i, int i2) {
-        Drawable drawable = (Drawable) a2.get();
-        A a3 = q.a(c.get(context).Cf(), drawable, i, i2);
+        d Cf = c.get(context).Cf();
+        Drawable drawable = a2.get();
+        A<Bitmap> a3 = q.a(Cf, drawable, i, i2);
         if (a3 != null) {
-            A transform = this.wa.transform(context, a3, i, i2);
+            A<Bitmap> transform = this.wa.transform(context, a3, i, i2);
             if (!transform.equals(a3)) {
                 return a(context, transform);
             }
@@ -53,11 +55,7 @@ public class r implements j<Drawable> {
         } else if (!this.ij) {
             return a2;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unable to convert ");
-            sb.append(drawable);
-            sb.append(" to a Bitmap");
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unable to convert " + drawable + " to a Bitmap");
         }
     }
 

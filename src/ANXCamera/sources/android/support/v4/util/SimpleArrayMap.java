@@ -228,7 +228,7 @@ public class SimpleArrayMap<K, V> {
         return i4;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int indexOf(Object obj, int i) {
         int i2 = this.mSize;
         if (i2 == 0) {
@@ -259,7 +259,7 @@ public class SimpleArrayMap<K, V> {
         return obj == null ? indexOfNull() : indexOf(obj, obj.hashCode());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int indexOfNull() {
         int i = this.mSize;
         if (i == 0) {
@@ -286,7 +286,7 @@ public class SimpleArrayMap<K, V> {
         return ~i2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int indexOfValue(Object obj) {
         int i = this.mSize * 2;
         Object[] objArr = this.mArray;
@@ -296,11 +296,11 @@ public class SimpleArrayMap<K, V> {
                     return i2 >> 1;
                 }
             }
-        } else {
-            for (int i3 = 1; i3 < i; i3 += 2) {
-                if (obj.equals(objArr[i3])) {
-                    return i3 >> 1;
-                }
+            return -1;
+        }
+        for (int i3 = 1; i3 < i; i3 += 2) {
+            if (obj.equals(objArr[i3])) {
+                return i3 >> 1;
             }
         }
         return -1;
@@ -481,18 +481,17 @@ public class SimpleArrayMap<K, V> {
                 sb.append(", ");
             }
             Object keyAt = keyAt(i);
-            String str = "(this Map)";
             if (keyAt != this) {
                 sb.append(keyAt);
             } else {
-                sb.append(str);
+                sb.append("(this Map)");
             }
             sb.append('=');
             Object valueAt = valueAt(i);
             if (valueAt != this) {
                 sb.append(valueAt);
             } else {
-                sb.append(str);
+                sb.append("(this Map)");
             }
         }
         sb.append('}');

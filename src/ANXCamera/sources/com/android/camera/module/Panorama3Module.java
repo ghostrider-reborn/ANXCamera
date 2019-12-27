@@ -3,12 +3,11 @@ package com.android.camera.module;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -22,7 +21,6 @@ import android.location.Location;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -31,7 +29,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.text.format.DateFormat;
 import android.util.Size;
 import android.view.KeyEvent;
@@ -54,7 +52,6 @@ import com.android.camera.R;
 import com.android.camera.Thumbnail;
 import com.android.camera.Util;
 import com.android.camera.constant.UpdateConstant;
-import com.android.camera.constant.UpdateConstant.UpdateType;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.config.ComponentManuallyDualLens;
 import com.android.camera.effect.EffectController;
@@ -70,9 +67,7 @@ import com.android.camera.panorama.GyroscopeRoundDetector;
 import com.android.camera.panorama.InputSave;
 import com.android.camera.panorama.LeftDirectionFunction;
 import com.android.camera.panorama.MorphoPanoramaGP3;
-import com.android.camera.panorama.MorphoPanoramaGP3.GalleryInfoData;
-import com.android.camera.panorama.MorphoPanoramaGP3.InitParam;
-import com.android.camera.panorama.MorphoSensorFusion.SensorData;
+import com.android.camera.panorama.MorphoSensorFusion;
 import com.android.camera.panorama.PanoramaGP3ImageFormat;
 import com.android.camera.panorama.PanoramaSetting;
 import com.android.camera.panorama.PanoramaState;
@@ -83,17 +78,13 @@ import com.android.camera.panorama.SensorFusion;
 import com.android.camera.panorama.SensorInfoManager;
 import com.android.camera.panorama.UpDirectionFunction;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.PanoramaProtocol;
-import com.android.camera.protocol.ModeProtocol.RecordState;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.MediaProviderUtil;
 import com.android.camera.storage.Storage;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.CameraPreviewCallback;
-import com.android.camera2.Camera2Proxy.PictureCallbackWrapper;
 import com.mi.config.b;
+import com.xiaomi.camera.core.ParallelCallback;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -109,7 +100,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @TargetApi(21)
-public class Panorama3Module extends BaseModule implements CameraAction, CameraPreviewCallback {
+public class Panorama3Module extends BaseModule implements ModeProtocol.CameraAction, Camera2Proxy.CameraPreviewCallback {
     public static final boolean DUMP_YUV = SystemProperties.getBoolean("camera.debug.panorama", false);
     private static final int MIN_SHOOTING_TIME = 600;
     /* access modifiers changed from: private */
@@ -118,7 +109,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     /* access modifiers changed from: private */
     public static final Object mPreviewImageLock = new Object();
     /* access modifiers changed from: private */
-    public static final CaptureImage sAttachExit = new Camera1Image(null, 0, 0);
+    public static final CaptureImage sAttachExit = new Camera1Image((byte[]) null, 0, 0);
     private Sensor mAccelerometer = null;
     /* access modifiers changed from: private */
     public final LinkedBlockingQueue<CaptureImage> mAttachImageQueue = new LinkedBlockingQueue<>();
@@ -155,7 +146,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     /* access modifiers changed from: private */
     public String mImageFormat = PanoramaGP3ImageFormat.YVU420_SEMIPLANAR;
     /* access modifiers changed from: private */
-    public InitParam mInitParam = new InitParam();
+    public MorphoPanoramaGP3.InitParam mInitParam = new MorphoPanoramaGP3.InitParam();
     private volatile boolean mIsRegisterGravitySensor = false;
     private boolean mIsRegisterSensorListener = false;
     /* access modifiers changed from: private */
@@ -200,13 +191,13 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 access$1002[1] = access$1002[1] + sensorEvent.values[1];
                 float[] access$1003 = Panorama3Module.this.mGravities;
                 access$1003[2] = access$1003[2] + sensorEvent.values[2];
-                Panorama3Module.this.mSensorCnt = Panorama3Module.this.mSensorCnt + 1;
+                int unused = Panorama3Module.this.mSensorCnt = Panorama3Module.this.mSensorCnt + 1;
                 return;
             }
             Panorama3Module.this.mGravities[0] = sensorEvent.values[0];
             Panorama3Module.this.mGravities[1] = sensorEvent.values[1];
             Panorama3Module.this.mGravities[2] = sensorEvent.values[2];
-            Panorama3Module.this.mSensorCnt = 1;
+            int unused2 = Panorama3Module.this.mSensorCnt = 1;
         }
     });
     private SensorFusion mSensorFusion = null;
@@ -248,7 +239,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                             Log.w(Panorama3Module.TAG, "DecideRunnable exit due to mMorphoPanoramaGP3 is null");
                             return;
                         }
-                        Panorama3Module.this.mPanoramaState = new PanoramaPreview(Panorama3Module.this);
+                        PanoramaState unused = Panorama3Module.this.mPanoramaState = new PanoramaPreview(Panorama3Module.this);
                         Panorama3Module.this.mPanoramaState.setPanoramaStateEventListener(DecideDirection.this.listener);
                         DecideDirection.this.clearListener();
                     }
@@ -259,58 +250,56 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             }
 
             private void createDirection(int i) {
-                String str = "direction : VERTICAL_DOWN";
-                String str2 = "direction : VERTICAL_UP";
                 if (Panorama3Module.this.mInitParam.output_rotation == 90 || Panorama3Module.this.mInitParam.output_rotation == 270) {
                     if (i == 3) {
-                        Log.i(Panorama3Module.TAG, str2);
+                        Log.i(Panorama3Module.TAG, "direction : VERTICAL_UP");
                         int scaleV = getScaleV();
                         if (Panorama3Module.this.mCameraOrientation == 90) {
                             Panorama3Module panorama3Module = Panorama3Module.this;
                             RightDirectionFunction rightDirectionFunction = new RightDirectionFunction(panorama3Module.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleV, Panorama3Module.this.mInitParam.output_rotation);
-                            panorama3Module.mDirectionFunction = rightDirectionFunction;
+                            DirectionFunction unused = panorama3Module.mDirectionFunction = rightDirectionFunction;
                             return;
                         }
                         Panorama3Module panorama3Module2 = Panorama3Module.this;
                         LeftDirectionFunction leftDirectionFunction = new LeftDirectionFunction(panorama3Module2.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleV, Panorama3Module.this.mInitParam.output_rotation);
-                        panorama3Module2.mDirectionFunction = leftDirectionFunction;
+                        DirectionFunction unused2 = panorama3Module2.mDirectionFunction = leftDirectionFunction;
                     } else if (i == 4) {
-                        Log.i(Panorama3Module.TAG, str);
+                        Log.i(Panorama3Module.TAG, "direction : VERTICAL_DOWN");
                         int scaleV2 = getScaleV();
                         if (Panorama3Module.this.mCameraOrientation == 90) {
                             Panorama3Module panorama3Module3 = Panorama3Module.this;
                             LeftDirectionFunction leftDirectionFunction2 = new LeftDirectionFunction(panorama3Module3.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleV2, Panorama3Module.this.mInitParam.output_rotation);
-                            panorama3Module3.mDirectionFunction = leftDirectionFunction2;
+                            DirectionFunction unused3 = panorama3Module3.mDirectionFunction = leftDirectionFunction2;
                             return;
                         }
                         Panorama3Module panorama3Module4 = Panorama3Module.this;
                         RightDirectionFunction rightDirectionFunction2 = new RightDirectionFunction(panorama3Module4.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleV2, Panorama3Module.this.mInitParam.output_rotation);
-                        panorama3Module4.mDirectionFunction = rightDirectionFunction2;
+                        DirectionFunction unused4 = panorama3Module4.mDirectionFunction = rightDirectionFunction2;
                     }
                 } else if (i == 3) {
-                    Log.i(Panorama3Module.TAG, str2);
+                    Log.i(Panorama3Module.TAG, "direction : VERTICAL_UP");
                     int scaleH = getScaleH();
                     if (Panorama3Module.this.mCameraOrientation == 90) {
                         Panorama3Module panorama3Module5 = Panorama3Module.this;
                         UpDirectionFunction upDirectionFunction = new UpDirectionFunction(panorama3Module5.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleH, Panorama3Module.this.mInitParam.output_rotation);
-                        panorama3Module5.mDirectionFunction = upDirectionFunction;
+                        DirectionFunction unused5 = panorama3Module5.mDirectionFunction = upDirectionFunction;
                         return;
                     }
                     Panorama3Module panorama3Module6 = Panorama3Module.this;
                     DownDirectionFunction downDirectionFunction = new DownDirectionFunction(panorama3Module6.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleH, Panorama3Module.this.mInitParam.output_rotation);
-                    panorama3Module6.mDirectionFunction = downDirectionFunction;
+                    DirectionFunction unused6 = panorama3Module6.mDirectionFunction = downDirectionFunction;
                 } else if (i == 4) {
-                    Log.i(Panorama3Module.TAG, str);
+                    Log.i(Panorama3Module.TAG, "direction : VERTICAL_DOWN");
                     int scaleH2 = getScaleH();
                     if (Panorama3Module.this.mCameraOrientation == 90) {
                         Panorama3Module panorama3Module7 = Panorama3Module.this;
                         DownDirectionFunction downDirectionFunction2 = new DownDirectionFunction(panorama3Module7.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleH2, Panorama3Module.this.mInitParam.output_rotation);
-                        panorama3Module7.mDirectionFunction = downDirectionFunction2;
+                        DirectionFunction unused7 = panorama3Module7.mDirectionFunction = downDirectionFunction2;
                         return;
                     }
                     Panorama3Module panorama3Module8 = Panorama3Module.this;
                     UpDirectionFunction upDirectionFunction2 = new UpDirectionFunction(panorama3Module8.mPictureWidth, Panorama3Module.this.mPictureHeight, Panorama3Module.this.mMaxWidth, Panorama3Module.this.mMaxHeight, scaleH2, Panorama3Module.this.mInitParam.output_rotation);
-                    panorama3Module8.mDirectionFunction = upDirectionFunction2;
+                    DirectionFunction unused8 = panorama3Module8.mDirectionFunction = upDirectionFunction2;
                 }
             }
 
@@ -331,10 +320,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
              */
             /* JADX WARNING: Code restructure failed: missing block: B:25:0x00c8, code lost:
                 r5 = com.android.camera.module.Panorama3Module.access$300();
-                r6 = new java.lang.StringBuilder();
-                r6.append("DecideDirectionAttach error ret:");
-                r6.append(r0);
-                com.android.camera.log.Log.e(r5, r6.toString());
+                com.android.camera.log.Log.e(r5, "DecideDirectionAttach error ret:" + r0);
              */
             /* JADX WARNING: Code restructure failed: missing block: B:26:0x00e0, code lost:
                 com.android.camera.log.Log.e(com.android.camera.module.Panorama3Module.access$300(), java.lang.String.format(java.util.Locale.US, "attach error ret:0x%08X", new java.lang.Object[]{java.lang.Integer.valueOf(r0)}));
@@ -369,7 +355,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                             synchronized (Panorama3Module.mEngineLock) {
                                 if (Panorama3Module.this.mMorphoPanoramaGP3.getAttachCount() % 5 == 0) {
                                     Panorama3Module.this.setInitialRotationByGravity();
-                                    Panorama3Module.this.mIsSensorAverage = true;
+                                    boolean unused = Panorama3Module.this.mIsSensorAverage = true;
                                 }
                                 Panorama3Module.this.setSensorFusionValue(captureImage);
                                 if (Panorama3Module.this.mRequestStop) {
@@ -378,7 +364,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                                     return;
                                 }
                                 Log.d(Panorama3Module.TAG, "DecideDirectionAttach attach start");
-                                int attach = Panorama3Module.this.mMorphoPanoramaGP3.attach(this.byteBuffer[0], this.byteBuffer[1], this.byteBuffer[2], this.rowStride[0], this.rowStride[1], this.rowStride[2], this.pixelStride[0], this.pixelStride[1], this.pixelStride[2], Panorama3Module.this.mCurrentSensorInfoManager, null, Panorama3Module.this.getActivity().getApplicationContext());
+                                int attach = Panorama3Module.this.mMorphoPanoramaGP3.attach(this.byteBuffer[0], this.byteBuffer[1], this.byteBuffer[2], this.rowStride[0], this.rowStride[1], this.rowStride[2], this.pixelStride[0], this.pixelStride[1], this.pixelStride[2], Panorama3Module.this.mCurrentSensorInfoManager, (double[]) null, Panorama3Module.this.getActivity().getApplicationContext());
                                 Log.d(Panorama3Module.TAG, "DecideDirectionAttach attach end");
                                 boolean z = attach == -1073741823;
                                 if (attach != 0) {
@@ -392,10 +378,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                                     i = Panorama3Module.this.mInitParam.direction;
                                 }
                                 String access$300 = Panorama3Module.TAG;
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("getDirection = ");
-                                sb.append(i);
-                                Log.d(access$300, sb.toString());
+                                Log.d(access$300, "getDirection = " + i);
                                 int[] iArr = new int[2];
                                 int outputImageSize = Panorama3Module.this.mMorphoPanoramaGP3.getOutputImageSize(iArr);
                                 if (outputImageSize != 0) {
@@ -403,15 +386,10 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                                     closeSrc();
                                     return;
                                 }
-                                Panorama3Module.this.mMaxWidth = iArr[0];
-                                Panorama3Module.this.mMaxHeight = iArr[1];
+                                int unused2 = Panorama3Module.this.mMaxWidth = iArr[0];
+                                int unused3 = Panorama3Module.this.mMaxHeight = iArr[1];
                                 String access$3002 = Panorama3Module.TAG;
-                                StringBuilder sb2 = new StringBuilder();
-                                sb2.append("mMaxWidth = ");
-                                sb2.append(Panorama3Module.this.mMaxWidth);
-                                sb2.append(", mMaxHeight = ");
-                                sb2.append(Panorama3Module.this.mMaxHeight);
-                                Log.d(access$3002, sb2.toString());
+                                Log.d(access$3002, "mMaxWidth = " + Panorama3Module.this.mMaxWidth + ", mMaxHeight = " + Panorama3Module.this.mMaxHeight);
                             }
                         } catch (Throwable th) {
                             closeSrc();
@@ -449,10 +427,10 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         public void handleMessage(Message message) {
             if (message.what == 45) {
                 Log.d(Panorama3Module.TAG, "onMessage MSG_ABANDON_HANDLER setActivity null");
-                Panorama3Module.this.setActivity(null);
+                Panorama3Module.this.setActivity((Camera) null);
             }
             if (!Panorama3Module.this.isCreated()) {
-                removeCallbacksAndMessages(null);
+                removeCallbacksAndMessages((Object) null);
             } else if (Panorama3Module.this.getActivity() != null) {
                 int i = message.what;
                 if (i != 2) {
@@ -462,13 +440,16 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                         Panorama3Module.this.getWindow().addFlags(128);
                         Panorama3Module panorama3Module = Panorama3Module.this;
                         panorama3Module.mHandler.sendEmptyMessageDelayed(2, (long) panorama3Module.getScreenDelay());
+                        return;
                     } else if (i == 51) {
                         Camera camera = Panorama3Module.this.mActivity;
                         if (camera != null && !camera.isActivityPaused()) {
                             Panorama3Module panorama3Module2 = Panorama3Module.this;
                             panorama3Module2.mOpenCameraFail = true;
                             panorama3Module2.onCameraException();
+                            return;
                         }
+                        return;
                     } else if (i == 9) {
                         CameraSize cameraSize = Panorama3Module.this.mPreviewSize;
                         int uIStyleByPreview = CameraSettings.getUIStyleByPreview(cameraSize.width, cameraSize.height);
@@ -478,24 +459,17 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                         }
                         Panorama3Module.this.registerGravitySensorListener();
                         Panorama3Module.this.initPreviewLayout();
-                    } else if (i != 10) {
-                        String str = "no consumer for this message: ";
-                        if (!BaseModule.DEBUG) {
-                            String access$300 = Panorama3Module.TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(str);
-                            sb.append(message.what);
-                            Log.e(access$300, sb.toString());
-                        } else {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append(str);
-                            sb2.append(message.what);
-                            throw new RuntimeException(sb2.toString());
-                        }
-                    } else {
+                        return;
+                    } else if (i == 10) {
                         Panorama3Module panorama3Module4 = Panorama3Module.this;
                         panorama3Module4.mOpenCameraFail = true;
                         panorama3Module4.onCameraException();
+                        return;
+                    } else if (!BaseModule.DEBUG) {
+                        String access$300 = Panorama3Module.TAG;
+                        Log.e(access$300, "no consumer for this message: " + message.what);
+                    } else {
+                        throw new RuntimeException("no consumer for this message: " + message.what);
                     }
                 }
                 Panorama3Module.this.getWindow().clearFlags(128);
@@ -532,18 +506,15 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 Log.e(Panorama3Module.TAG, "PanoramaFirst.onSaveImage request stop");
                 return false;
             }
-            Panorama3Module.this.configMorphoPanoramaGP3();
+            boolean unused = Panorama3Module.this.configMorphoPanoramaGP3();
             int start = Panorama3Module.this.mMorphoPanoramaGP3.start(Panorama3Module.this.mPictureWidth, Panorama3Module.this.mPictureHeight);
             if (start != 0) {
                 String access$300 = Panorama3Module.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("start error resultCode:");
-                sb.append(start);
-                Log.e(access$300, sb.toString());
+                Log.e(access$300, "start error resultCode:" + start);
                 return false;
             }
             Panorama3Module panorama3Module = Panorama3Module.this;
-            panorama3Module.mPanoramaState = new DecideDirection();
+            PanoramaState unused2 = panorama3Module.mPanoramaState = new DecideDirection();
             Panorama3Module.this.mPanoramaState.setPanoramaStateEventListener(this.listener);
             clearListener();
             return true;
@@ -555,12 +526,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         }
 
         public boolean onSaveImage(CaptureImage captureImage) {
-            Panorama3Module.this.mImageFormat = captureImage.getImageFormat();
+            String unused = Panorama3Module.this.mImageFormat = captureImage.getImageFormat();
             String access$300 = Panorama3Module.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("PanoramaInit onSaveImage start, ImageFormat :");
-            sb.append(Panorama3Module.this.mImageFormat);
-            Log.d(access$300, sb.toString());
+            Log.d(access$300, "PanoramaInit onSaveImage start, ImageFormat :" + Panorama3Module.this.mImageFormat);
             if (Panorama3Module.this.mRequestStop) {
                 Log.w(Panorama3Module.TAG, "mRequestStop when PanoramaInit");
                 captureImage.close();
@@ -571,12 +539,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                     int inputImageFormat = Panorama3Module.this.mMorphoPanoramaGP3.setInputImageFormat(Panorama3Module.this.mImageFormat);
                     if (inputImageFormat != 0) {
                         String access$3002 = Panorama3Module.TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("setInputImageFormat error resultCode:");
-                        sb2.append(inputImageFormat);
-                        Log.e(access$3002, sb2.toString());
+                        Log.e(access$3002, "setInputImageFormat error resultCode:" + inputImageFormat);
                     }
-                    Panorama3Module.this.mPanoramaState = new PanoramaFirst();
+                    PanoramaState unused2 = Panorama3Module.this.mPanoramaState = new PanoramaFirst();
                     Panorama3Module.this.mPanoramaState.setPanoramaStateEventListener(this.listener);
                     clearListener();
                     Panorama3Module.this.mPanoramaState.onSaveImage(captureImage);
@@ -615,7 +580,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                         if (!PanoramaPreview.this.this$0.mCaptureOrientationDecided) {
                             PanoramaPreview.this.this$0.onCaptureOrientationDecided();
                         }
-                        PanoramaProtocol panoramaProtocol = (PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
+                        ModeProtocol.PanoramaProtocol panoramaProtocol = (ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
                         synchronized (Panorama3Module.mPreviewImageLock) {
                             if (panoramaProtocol != null) {
                                 if (PanoramaPreview.this.this$0.mDispPreviewImage != null) {
@@ -636,10 +601,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             private void checkAttachEnd(double[] dArr) {
                 int detect = PanoramaPreview.this.mDetector.detect(dArr[0], dArr[1]);
                 String access$300 = Panorama3Module.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("checkAttachEnd detect_result = ");
-                sb.append(detect);
-                Log.v(access$300, sb.toString());
+                Log.v(access$300, "checkAttachEnd detect_result = " + detect);
                 if (detect == -2 || detect == -1 || detect == 1) {
                     this.mResultCode = 0;
                     this.mIsAttachEnd = true;
@@ -659,10 +621,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                     int updatePreviewImage = PanoramaPreview.this.this$0.mMorphoPanoramaGP3.updatePreviewImage(PanoramaPreview.this.this$0.mPreviewImage);
                     if (updatePreviewImage != 0) {
                         String access$300 = Panorama3Module.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("updatePreviewImage error ret:");
-                        sb.append(updatePreviewImage);
-                        Log.e(access$300, sb.toString());
+                        Log.e(access$300, "updatePreviewImage error ret:" + updatePreviewImage);
                     } else if (PanoramaPreview.this.this$0.mPreviewImage == null) {
                         Log.w(Panorama3Module.TAG, "mPreviewImage is null when updatePreviewImage");
                     } else {
@@ -684,12 +643,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                             int height2 = ((int) ((((float) bitmap.getHeight()) * (1.0f - PanoramaPreview.this.this$0.mLongSideCropRatio)) / 2.0f)) + ((i2 - round) / 2);
                             Rect rect2 = new Rect(0, height2, width, i2 + height2);
                             String access$3002 = Panorama3Module.TAG;
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("src ");
-                            sb2.append(rect2);
-                            sb2.append(", dst = ");
-                            sb2.append(rect);
-                            Log.v(access$3002, sb2.toString());
+                            Log.v(access$3002, "src " + rect2 + ", dst = " + rect);
                             PanoramaPreview.this.this$0.mDispPreviewImageCanvas.drawBitmap(bitmap, rect2, rect, PanoramaPreview.this.this$0.mDispPreviewImagePaint);
                         } else {
                             if (PanoramaPreview.this.this$0.mInitParam.output_rotation == 180) {
@@ -707,12 +661,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                             int height4 = ((int) ((((float) createBitmap.getHeight()) * (1.0f - PanoramaPreview.this.this$0.mLongSideCropRatio)) / 2.0f)) + ((i3 - round2) / 2);
                             Rect rect4 = new Rect(0, height4, width3, i3 + height4);
                             String access$3003 = Panorama3Module.TAG;
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("src ");
-                            sb3.append(rect4);
-                            sb3.append(", dst = ");
-                            sb3.append(rect3);
-                            Log.v(access$3003, sb3.toString());
+                            Log.v(access$3003, "src " + rect4 + ", dst = " + rect3);
                             PanoramaPreview.this.this$0.mDispPreviewImageCanvas.drawBitmap(createBitmap, rect4, rect3, PanoramaPreview.this.this$0.mDispPreviewImagePaint);
                         }
                     }
@@ -774,15 +723,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                                             this.mResultCode = -1;
                                         } else {
                                             Log.v(Panorama3Module.TAG, "PreviewAttach attach end");
-                                            PanoramaPreview.this.this$0.mCanSavePanorama = true;
+                                            boolean unused = PanoramaPreview.this.this$0.mCanSavePanorama = true;
                                             updatePreviewImage();
-                                            String access$300 = Panorama3Module.TAG;
-                                            StringBuilder sb = new StringBuilder();
-                                            sb.append("mCenter = ");
-                                            sb.append(dArr4[0]);
-                                            sb.append(", ");
-                                            sb.append(dArr4[1]);
-                                            Log.v(access$300, sb.toString());
+                                            Log.v(Panorama3Module.TAG, "mCenter = " + dArr4[0] + ", " + dArr4[1]);
                                         }
                                     } catch (Throwable th) {
                                         th = th;
@@ -846,7 +789,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 r0 = (com.android.camera.protocol.ModeProtocol.PanoramaProtocol) com.android.camera.protocol.ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
              */
             /* JADX WARNING: Code restructure failed: missing block: B:20:0x009d, code lost:
-                if (r0 == null) goto L_0x00b8;
+                if (r0 == null) goto L_?;
              */
             /* JADX WARNING: Code restructure failed: missing block: B:21:0x009f, code lost:
                 r0.setDirectionPosition(r2, com.android.camera.module.Panorama3Module.access$6400(r5.this$1.this$0));
@@ -860,7 +803,13 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             /* JADX WARNING: Code restructure failed: missing block: B:24:0x00b3, code lost:
                 r0.setDirectionTooFast(true, com.android.camera.constant.DurationConstant.DURATION_LANDSCAPE_HINT);
              */
-            /* JADX WARNING: Code restructure failed: missing block: B:25:0x00b8, code lost:
+            /* JADX WARNING: Code restructure failed: missing block: B:37:?, code lost:
+                return;
+             */
+            /* JADX WARNING: Code restructure failed: missing block: B:38:?, code lost:
+                return;
+             */
+            /* JADX WARNING: Code restructure failed: missing block: B:39:?, code lost:
                 return;
              */
             public void run() {
@@ -868,20 +817,14 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 if (i == -2 || i == -1 || i == 1) {
                     if (this.mDetectResult != 1) {
                         String access$300 = Panorama3Module.TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("stopPanoramaShooting due to detect result ");
-                        sb.append(this.mDetectResult);
-                        Log.w(access$300, sb.toString());
+                        Log.w(access$300, "stopPanoramaShooting due to detect result " + this.mDetectResult);
                     }
                     PanoramaPreview.this.this$0.stopPanoramaShooting(true);
                     return;
                 }
                 RectF frameRect = PanoramaPreview.this.mDetector.getFrameRect();
                 String access$3002 = Panorama3Module.TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("frame_rect = ");
-                sb2.append(frameRect);
-                Log.v(access$3002, sb2.toString());
+                Log.v(access$3002, "frame_rect = " + frameRect);
                 Point point = new Point();
                 if (PanoramaPreview.this.this$0.mDirection == 3) {
                     point.x = (int) frameRect.right;
@@ -914,17 +857,12 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             this.mPreviewImgWidth = previewSize.getWidth();
             this.mPreviewImgHeight = previewSize.getHeight();
             String access$300 = Panorama3Module.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("mPreviewImgWidth = ");
-            sb.append(this.mPreviewImgWidth);
-            sb.append(", mPreviewImgHeight = ");
-            sb.append(this.mPreviewImgHeight);
-            Log.d(access$300, sb.toString());
+            Log.d(access$300, "mPreviewImgWidth = " + this.mPreviewImgWidth + ", mPreviewImgHeight = " + this.mPreviewImgHeight);
             int previewImage = panorama3Module.mMorphoPanoramaGP3.setPreviewImage(this.mPreviewImgWidth, this.mPreviewImgHeight);
             if (previewImage != 0) {
                 Log.e(Panorama3Module.TAG, String.format(Locale.US, "setPreviewImage error ret:0x%08X", new Object[]{Integer.valueOf(previewImage)}));
             }
-            PanoramaProtocol panoramaProtocol = (PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
+            ModeProtocol.PanoramaProtocol panoramaProtocol = (ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
             if (panoramaProtocol != null) {
                 PositionDetector positionDetector = new PositionDetector(panorama3Module.mInitParam, panoramaProtocol.getPreivewContainer(), false, panorama3Module2.mCameraDisplayOrientation, panorama3Module.mPictureWidth, panorama3Module.mPictureHeight, panorama3Module.mDirectionFunction.getDirection(), panorama3Module.mMaxWidth, panorama3Module.mMaxHeight);
                 this.mDetector = positionDetector;
@@ -937,22 +875,19 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             synchronized (Panorama3Module.mPreviewImageLock) {
                 if (!(this.this$0.mPreviewImage == null || (this.this$0.mPreviewImage.getWidth() == this.mPreviewImgWidth && this.this$0.mPreviewImage.getHeight() == this.mPreviewImgHeight))) {
                     this.this$0.mPreviewImage.recycle();
-                    this.this$0.mPreviewImage = null;
+                    Bitmap unused = this.this$0.mPreviewImage = null;
                     this.this$0.mDispPreviewImage.recycle();
-                    this.this$0.mDispPreviewImage = null;
+                    Bitmap unused2 = this.this$0.mDispPreviewImage = null;
                 }
                 if (this.this$0.mPreviewImage == null) {
-                    this.this$0.mPreviewImage = Bitmap.createBitmap(this.mPreviewImgWidth, this.mPreviewImgHeight, Config.ARGB_8888);
-                    this.this$0.mDispPreviewImage = Bitmap.createBitmap(Util.sWindowWidth, this.this$0.mSmallPreviewHeight, Config.ARGB_8888);
-                    this.this$0.mAttachPosOffsetY = ((this.this$0.mDispPreviewImage.getWidth() * this.this$0.mPictureWidth) / this.this$0.mPictureHeight) / 2;
+                    Bitmap unused3 = this.this$0.mPreviewImage = Bitmap.createBitmap(this.mPreviewImgWidth, this.mPreviewImgHeight, Bitmap.Config.ARGB_8888);
+                    Bitmap unused4 = this.this$0.mDispPreviewImage = Bitmap.createBitmap(Util.sWindowWidth, this.this$0.mSmallPreviewHeight, Bitmap.Config.ARGB_8888);
+                    int unused5 = this.this$0.mAttachPosOffsetY = ((this.this$0.mDispPreviewImage.getWidth() * this.this$0.mPictureWidth) / this.this$0.mPictureHeight) / 2;
                     String access$300 = Panorama3Module.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("mAttachPosOffsetY = ");
-                    sb.append(this.this$0.mAttachPosOffsetY);
-                    Log.d(access$300, sb.toString());
-                    this.this$0.mDispPreviewImageCanvas = new Canvas(this.this$0.mDispPreviewImage);
-                    this.this$0.mDispPreviewImagePaint = new Paint();
-                    this.this$0.mDispPreviewImagePaint.setXfermode(new PorterDuffXfermode(Mode.SRC));
+                    Log.d(access$300, "mAttachPosOffsetY = " + this.this$0.mAttachPosOffsetY);
+                    Canvas unused6 = this.this$0.mDispPreviewImageCanvas = new Canvas(this.this$0.mDispPreviewImage);
+                    Paint unused7 = this.this$0.mDispPreviewImagePaint = new Paint();
+                    this.this$0.mDispPreviewImagePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
                 }
             }
         }
@@ -1005,10 +940,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                         int noiseReductionParam = Panorama3Module.this.mMorphoPanoramaGP3.setNoiseReductionParam(0);
                         if (noiseReductionParam != 0) {
                             String access$300 = Panorama3Module.TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("setNoiseReductionParam error ret:");
-                            sb.append(noiseReductionParam);
-                            Log.e(access$300, sb.toString());
+                            Log.e(access$300, "setNoiseReductionParam error ret:" + noiseReductionParam);
                         }
                         int unsharpStrength = Panorama3Module.this.mMorphoPanoramaGP3.setUnsharpStrength(1536);
                         if (unsharpStrength != 0) {
@@ -1034,10 +966,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                                 int createOutputImage = Panorama3Module.this.mMorphoPanoramaGP3.createOutputImage(rect);
                                 if (createOutputImage != 0) {
                                     String access$3002 = Panorama3Module.TAG;
-                                    StringBuilder sb2 = new StringBuilder();
-                                    sb2.append("createOutputImage error ret:");
-                                    sb2.append(createOutputImage);
-                                    Log.e(access$3002, sb2.toString());
+                                    Log.e(access$3002, "createOutputImage error ret:" + createOutputImage);
                                     Panorama3Module.this.finishEngine();
                                     return;
                                 }
@@ -1054,10 +983,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                             }
                         }
                         String access$3003 = Panorama3Module.TAG;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("getClippingRect() ");
-                        sb3.append(rect);
-                        Log.e(access$3003, sb3.toString());
+                        Log.e(access$3003, "getClippingRect() " + rect);
                         Panorama3Module.this.finishEngine();
                     }
                 } catch (Throwable th) {
@@ -1082,7 +1008,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 AutoLockManager.getInstance(camera).hibernateDelayed();
             }
             if (Panorama3Module.this.mPaused) {
-                Panorama3Module.this.mIsShooting = false;
+                boolean unused = Panorama3Module.this.mIsShooting = false;
                 Log.w(Panorama3Module.TAG, "panorama mode has been paused");
                 return;
             }
@@ -1098,7 +1024,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                     Panorama3Module.this.handlePendingScreenSlide();
                 }
             });
-            Panorama3Module.this.mIsShooting = false;
+            boolean unused2 = Panorama3Module.this.mIsShooting = false;
             Log.d(Panorama3Module.TAG, String.format(Locale.ENGLISH, "[MORTIME] PanoramaFinish time = %d", new Object[]{Long.valueOf(System.currentTimeMillis() - this.start_time)}));
         }
 
@@ -1132,10 +1058,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         }, new RejectedExecutionHandler() {
             public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
                 String access$300 = Panorama3Module.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("rejectedExecution ");
-                sb.append(runnable);
-                Log.w(access$300, sb.toString());
+                Log.w(access$300, "rejectedExecution " + runnable);
             }
         });
         this.mExecutor = threadPoolExecutor;
@@ -1158,9 +1081,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             }
             z = this.mAttachImageQueue.offer(captureImage);
             while (this.mAttachImageQueue.size() > 1) {
-                CaptureImage captureImage2 = (CaptureImage) this.mAttachImageQueue.poll();
-                if (captureImage2 != null) {
-                    captureImage2.close();
+                CaptureImage poll = this.mAttachImageQueue.poll();
+                if (poll != null) {
+                    poll.close();
                 }
             }
             Log.v(TAG, "addAttachQueue");
@@ -1185,7 +1108,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 try {
                     ExifHelper.writeExifByFd(parcelFileDescriptor.getFileDescriptor(), i4, currentLocation, this.mTimeTaken);
                     if (parcelFileDescriptor != null) {
-                        $closeResource(null, parcelFileDescriptor);
+                        $closeResource((Throwable) null, parcelFileDescriptor);
                     }
                 } catch (Throwable th2) {
                     Throwable th3 = th2;
@@ -1196,32 +1119,21 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 }
             } catch (Exception e2) {
                 String str4 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("open file failed, filePath ");
-                sb.append(str3);
-                Log.e(str4, sb.toString(), e2);
+                Log.e(str4, "open file failed, filePath " + str3, e2);
             }
         }
         boolean z = currentLocation != null;
         Uri addImageForGroupOrPanorama = Storage.addImageForGroupOrPanorama(CameraAppImpl.getAndroidContext(), str, i3, this.mTimeTaken, this.mLocation, i, i2);
         if (addImageForGroupOrPanorama == null) {
             String str5 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("insert MediaProvider failed, attempt to find uri by path, ");
-            sb2.append(str3);
-            Log.w(str5, sb2.toString());
+            Log.w(str5, "insert MediaProvider failed, attempt to find uri by path, " + str3);
             addImageForGroupOrPanorama = MediaProviderUtil.getContentUriFromPath(CameraAppImpl.getAndroidContext(), str3);
         }
         Uri uri = addImageForGroupOrPanorama;
         String str6 = TAG;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("addImageAsApplication uri = ");
-        sb3.append(uri);
-        sb3.append(", path = ");
-        sb3.append(str3);
-        Log.d(str6, sb3.toString());
+        Log.d(str6, "addImageAsApplication uri = " + uri + ", path = " + str3);
         trackGeneralInfo(1, false);
-        trackPictureTaken(1, false, z, null, false, false);
+        trackPictureTaken(1, false, z, (String) null, false, false);
         Camera camera = this.mActivity;
         if (isCreated() && camera != null) {
             camera.getScreenHint().updateHint();
@@ -1239,7 +1151,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         if (!(i == 0 || i == 90 || i == 180 || i == 270)) {
             i = 0;
         }
-        return (i + this.mDeviceOrientationAtCapture) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        return (i + this.mDeviceOrientationAtCapture) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
     }
 
     /* access modifiers changed from: private */
@@ -1318,16 +1230,16 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         }
         this.mMorphoPanoramaGP3 = new MorphoPanoramaGP3();
         if (PanoramaGP3ImageFormat.YUV420_PLANAR.equals(this.mImageFormat)) {
-            InitParam initParam = this.mInitParam;
+            MorphoPanoramaGP3.InitParam initParam = this.mInitParam;
             initParam.input_format = this.mImageFormat;
             initParam.output_format = PanoramaGP3ImageFormat.YUV420_SEMIPLANAR;
         } else {
-            InitParam initParam2 = this.mInitParam;
+            MorphoPanoramaGP3.InitParam initParam2 = this.mInitParam;
             String str = this.mImageFormat;
             initParam2.input_format = str;
             initParam2.output_format = str;
         }
-        InitParam initParam3 = this.mInitParam;
+        MorphoPanoramaGP3.InitParam initParam3 = this.mInitParam;
         initParam3.input_width = this.mPictureWidth;
         initParam3.input_height = this.mPictureHeight;
         initParam3.aovx = (double) this.mViewAngleH;
@@ -1336,16 +1248,13 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         int displayRotation = Util.getDisplayRotation(this.mActivity);
         int i = this.mOrientation;
         if (i == -1) {
-            this.mInitParam.output_rotation = ((this.mCameraOrientation + displayRotation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+            this.mInitParam.output_rotation = ((this.mCameraOrientation + displayRotation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         } else {
-            this.mInitParam.output_rotation = (((this.mCameraOrientation + displayRotation) + i) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+            this.mInitParam.output_rotation = (((this.mCameraOrientation + displayRotation) + i) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         }
         String cameraLensType = CameraSettings.getCameraLensType(166);
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("lensType ");
-        sb.append(cameraLensType);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "lensType " + cameraLensType);
         if (ComponentManuallyDualLens.LENS_WIDE.equals(cameraLensType)) {
             this.mInitParam.goal_angle = (double) this.mGoalAngle;
         } else if (Build.DEVICE.equals("cepheus")) {
@@ -1354,8 +1263,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             this.mInitParam.goal_angle = ((double) this.mGoalAngle) * 0.6265d;
         }
         int i2 = this.mCameraOrientation;
-        int i3 = i2 != 90 ? i2 != 180 ? i2 != 270 ? 0 : 3 : 2 : 1;
-        int rotation = this.mSensorFusion.setRotation(i3);
+        int rotation = this.mSensorFusion.setRotation(i2 != 90 ? i2 != 180 ? i2 != 270 ? 0 : 3 : 2 : 1);
         if (rotation != 0) {
             Log.e(TAG, String.format(Locale.US, "SensorFusion.setRotation error ret:0x%08X", new Object[]{Integer.valueOf(rotation)}));
         }
@@ -1393,9 +1301,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     /* access modifiers changed from: private */
     public void initAttachQueue() {
         while (this.mAttachImageQueue.size() > 0) {
-            CaptureImage captureImage = (CaptureImage) this.mAttachImageQueue.poll();
-            if (captureImage != null) {
-                captureImage.close();
+            CaptureImage poll = this.mAttachImageQueue.poll();
+            if (poll != null) {
+                poll.close();
             }
         }
         Log.d(TAG, "initAttachQueue");
@@ -1409,16 +1317,14 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             cameraScreenNail.setPreviewSize(cameraSize.width, cameraSize.height);
             CameraScreenNail cameraScreenNail2 = this.mActivity.getCameraScreenNail();
             int width = cameraScreenNail2.getWidth();
-            int height = (int) (((float) cameraScreenNail2.getHeight()) * this.mLongSideCropRatio);
             int dimensionPixelSize = this.mActivity.getResources().getDimensionPixelSize(R.dimen.pano_preview_hint_frame_height);
-            int i = (width * dimensionPixelSize) / height;
-            PanoramaProtocol panoramaProtocol = (PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
+            int height = (width * dimensionPixelSize) / ((int) (((float) cameraScreenNail2.getHeight()) * this.mLongSideCropRatio));
             CameraSize cameraSize2 = this.mPreviewSize;
-            panoramaProtocol.initPreviewLayout(i, dimensionPixelSize, cameraSize2.width, cameraSize2.height);
+            ((ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176)).initPreviewLayout(height, dimensionPixelSize, cameraSize2.width, cameraSize2.height);
         }
     }
 
-    private boolean initializeEngine(MorphoPanoramaGP3 morphoPanoramaGP3, InitParam initParam) {
+    private boolean initializeEngine(MorphoPanoramaGP3 morphoPanoramaGP3, MorphoPanoramaGP3.InitParam initParam) {
         Log.d(TAG, "initializeEngine start");
         int createNativeOutputInfo = morphoPanoramaGP3.createNativeOutputInfo();
         if (createNativeOutputInfo != 0) {
@@ -1435,7 +1341,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
 
     private boolean isProcessingFinishTask() {
         SaveOutputImageTask saveOutputImageTask = this.mSaveOutputImageTask;
-        return (saveOutputImageTask == null || saveOutputImageTask.getStatus() == Status.FINISHED) ? false : true;
+        return (saveOutputImageTask == null || saveOutputImageTask.getStatus() == AsyncTask.Status.FINISHED) ? false : true;
     }
 
     private boolean isShootingTooShort() {
@@ -1452,13 +1358,13 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     /* access modifiers changed from: private */
     public void onCaptureOrientationDecided() {
         Log.d(TAG, "onCaptureOrientationDecided");
-        ((PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176)).onCaptureOrientationDecided(this.mDirection, this.mAttachPosOffsetX, this.mAttachPosOffsetY);
+        ((ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176)).onCaptureOrientationDecided(this.mDirection, this.mAttachPosOffsetX, this.mAttachPosOffsetY);
         this.mCaptureOrientationDecided = true;
     }
 
     /* access modifiers changed from: private */
     public void onPreviewMoving() {
-        ((PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176)).onPreviewMoving();
+        ((ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176)).onPreviewMoving();
     }
 
     /* access modifiers changed from: private */
@@ -1473,7 +1379,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             }
             this.mCamera2Device.setFocusMode(this.mTargetFocusMode);
             startPreview();
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (recordState != null) {
                 recordState.onPostSavingFinish();
             }
@@ -1481,16 +1387,11 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     }
 
     private void onStopShooting(boolean z) {
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         if (recordState == null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onStopShooting recordState is null, succeed = ");
-            sb.append(z);
-            Log.w(str, sb.toString());
-            return;
-        }
-        if (z) {
+            Log.w(str, "onStopShooting recordState is null, succeed = " + z);
+        } else if (z) {
             recordState.onPostSavingStart();
         } else {
             recordState.onFailed();
@@ -1507,9 +1408,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             this.mGravities = new float[3];
             SensorManager sensorManager = this.mSensorManager;
             if (sensorManager != null) {
-                List sensorList = sensorManager.getSensorList(9);
+                List<Sensor> sensorList = sensorManager.getSensorList(9);
                 if (sensorList.size() > 0) {
-                    this.mSensorManager.registerListener(this.mSensorEventListener, (Sensor) sensorList.get(0), 2);
+                    this.mSensorManager.registerListener(this.mSensorEventListener, sensorList.get(0), 2);
                 }
             }
         }
@@ -1551,16 +1452,19 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         this.mHandler.removeMessages(2);
     }
 
+    /* JADX WARNING: type inference failed for: r10v1 */
+    /* JADX WARNING: type inference failed for: r10v2 */
     /* access modifiers changed from: private */
+    /* JADX WARNING: Incorrect type for immutable var: ssa=int, code=?, for r10v0, types: [int, boolean] */
     /* JADX WARNING: Removed duplicated region for block: B:32:0x007e  */
     /* JADX WARNING: Removed duplicated region for block: B:34:0x0088  */
     public boolean savePanoramaFile(String str, int i, int i2) {
-        boolean z;
+        ? r10;
         int i3;
         ParcelFileDescriptor parcelFileDescriptor;
         Throwable th;
         String str2 = str;
-        GalleryInfoData galleryInfoData = new GalleryInfoData();
+        MorphoPanoramaGP3.GalleryInfoData galleryInfoData = new MorphoPanoramaGP3.GalleryInfoData();
         int jpegQuality = (BaseModule.getJpegQuality(false) * 256) / 100;
         if (Storage.isUseDocumentMode()) {
             try {
@@ -1571,7 +1475,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                         i3 = this.mMorphoPanoramaGP3.savePanorama360(i, i2, parcelFileDescriptor2.getFileDescriptor(), jpegQuality, this.mShutterStartTime, this.mShutterEndTime, false, galleryInfoData, false);
                         if (parcelFileDescriptor != null) {
                             try {
-                                $closeResource(null, parcelFileDescriptor);
+                                $closeResource((Throwable) null, parcelFileDescriptor);
                             } catch (Exception e2) {
                                 e = e2;
                             }
@@ -1591,11 +1495,8 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 e = e3;
                 i3 = -1;
                 String str3 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("open file failed, filePath ");
-                sb.append(str2);
-                Log.e(str3, sb.toString(), e);
-                z = true;
+                Log.e(str3, "open file failed, filePath " + str2, e);
+                r10 = 1;
                 if (i3 != 0) {
                 }
             } catch (Throwable th4) {
@@ -1605,17 +1506,17 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 }
                 throw th5;
             }
-            z = true;
+            r10 = 1;
         } else {
-            z = true;
+            r10 = 1;
             i3 = this.mMorphoPanoramaGP3.savePanorama360(i, i2, str, jpegQuality, this.mShutterStartTime, this.mShutterEndTime, false, galleryInfoData, false);
         }
         if (i3 != 0) {
             Log.d(TAG, galleryInfoData.toString());
-            return z;
+            return r10;
         }
         String str4 = TAG;
-        Object[] objArr = new Object[(z ? 1 : 0)];
+        Object[] objArr = new Object[r10];
         objArr[0] = Integer.valueOf(i3);
         Log.e(str4, String.format("savePanorama360() -> 0x%x", objArr));
         return false;
@@ -1645,11 +1546,11 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             SensorFusion sensorFusion = this.mSensorFusion;
             if (sensorFusion != null) {
                 int[] iArr = new int[4];
-                int sensorMatrix = sensorFusion.getSensorMatrix(null, null, null, iArr);
+                int sensorMatrix = sensorFusion.getSensorMatrix((double[]) null, (double[]) null, (double[]) null, iArr);
                 if (sensorMatrix != 0) {
                     Log.e(TAG, String.format(Locale.US, "SensorFusion.getSensorMatrix error ret:0x%08X", new Object[]{Integer.valueOf(sensorMatrix)}));
                 }
-                ArrayList stockData = this.mSensorFusion.getStockData();
+                ArrayList<ArrayList<MorphoSensorFusion.SensorData>> stockData = this.mSensorFusion.getStockData();
                 SensorInfoManager sensorInfoManager = new SensorInfoManager(4);
                 sensorInfoManager.g_ix = iArr[0];
                 sensorInfoManager.r_ix = iArr[3];
@@ -1661,13 +1562,13 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 sensorInfoManager.exposureTime = captureImage.getExposureTime();
                 sensorInfoManager.rollingShutterSkew = captureImage.getRollingShutterSkew();
                 sensorInfoManager.sensorTimeStamp = captureImage.getSensorTimeStamp();
-                sensorInfoManager.sensorData[0] = (ArrayList) ((ArrayList) stockData.get(0)).clone();
-                sensorInfoManager.sensorData[3] = (ArrayList) ((ArrayList) stockData.get(3)).clone();
-                sensorInfoManager.sensorData[1] = (ArrayList) ((ArrayList) stockData.get(1)).clone();
+                sensorInfoManager.sensorData[0] = (ArrayList) stockData.get(0).clone();
+                sensorInfoManager.sensorData[3] = (ArrayList) stockData.get(3).clone();
+                sensorInfoManager.sensorData[1] = (ArrayList) stockData.get(1).clone();
                 if (sensorInfoManager.sensorData[0].isEmpty()) {
                     int size = this.mSensorInfoManagerList.size();
                     if (size > 0) {
-                        SensorInfoManager sensorInfoManager2 = (SensorInfoManager) this.mSensorInfoManagerList.get(size - 1);
+                        SensorInfoManager sensorInfoManager2 = this.mSensorInfoManagerList.get(size - 1);
                         sensorInfoManager.g_ix = sensorInfoManager2.g_ix;
                         sensorInfoManager.sensorData[0] = sensorInfoManager2.sensorData[0];
                     }
@@ -1675,7 +1576,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 if (sensorInfoManager.sensorData[3].isEmpty()) {
                     int size2 = this.mSensorInfoManagerList.size();
                     if (size2 > 0) {
-                        SensorInfoManager sensorInfoManager3 = (SensorInfoManager) this.mSensorInfoManagerList.get(size2 - 1);
+                        SensorInfoManager sensorInfoManager3 = this.mSensorInfoManagerList.get(size2 - 1);
                         sensorInfoManager.r_ix = sensorInfoManager3.r_ix;
                         sensorInfoManager.sensorData[3] = sensorInfoManager3.sensorData[3];
                     }
@@ -1683,7 +1584,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 if (sensorInfoManager.sensorData[1].isEmpty()) {
                     int size3 = this.mSensorInfoManagerList.size();
                     if (size3 > 0) {
-                        SensorInfoManager sensorInfoManager4 = (SensorInfoManager) this.mSensorInfoManagerList.get(size3 - 1);
+                        SensorInfoManager sensorInfoManager4 = this.mSensorInfoManagerList.get(size3 - 1);
                         sensorInfoManager.a_ix = sensorInfoManager4.a_ix;
                         sensorInfoManager.sensorData[1] = sensorInfoManager4.sensorData[1];
                     }
@@ -1691,9 +1592,9 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
                 this.mCurrentSensorInfoManager = sensorInfoManager;
                 this.mSensorInfoManagerList.add(sensorInfoManager);
                 long attachCount = this.mMorphoPanoramaGP3.getAttachCount();
-                int size4 = ((ArrayList) stockData.get(0)).size();
+                int size4 = stockData.get(0).size();
                 if (size4 > 0 && attachCount > 0) {
-                    int gyroscopeData = this.mMorphoPanoramaGP3.setGyroscopeData((SensorData[]) ((ArrayList) stockData.get(0)).toArray(new SensorData[size4]));
+                    int gyroscopeData = this.mMorphoPanoramaGP3.setGyroscopeData((MorphoSensorFusion.SensorData[]) stockData.get(0).toArray(new MorphoSensorFusion.SensorData[size4]));
                     if (gyroscopeData != 0) {
                         Log.e(TAG, String.format(Locale.US, "setGyroscopeData error ret:0x%08X", new Object[]{Integer.valueOf(gyroscopeData)}));
                     }
@@ -1715,10 +1616,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         String antiBanding = CameraSettings.getAntiBanding();
         this.mCamera2Device.setAntiBanding(Integer.valueOf(antiBanding).intValue());
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("antiBanding=");
-        sb.append(antiBanding);
-        Log.d(str, sb.toString());
+        Log.d(str, "antiBanding=" + antiBanding);
         this.mCamera2Device.setEnableZsl(isZslPreferred());
         this.mCamera2Device.setHHT(false);
         this.mCamera2Device.setEnableOIS(false);
@@ -1737,22 +1635,17 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             return;
         }
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("stopPanoramaShooting: saveImage=");
-        sb.append(z);
-        sb.append(", isRelease=");
-        sb.append(z2);
-        Log.v(str, sb.toString());
+        Log.v(str, "stopPanoramaShooting: saveImage=" + z + ", isRelease=" + z2);
         requestStopShoot();
         keepScreenOnAwhile();
         this.mRoundDetector.stop();
         synchronized (this.mDeviceLock) {
             if (this.mCamera2Device != null) {
                 if (z2) {
-                    PanoramaProtocol panoramaProtocol = (PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
+                    ModeProtocol.PanoramaProtocol panoramaProtocol = (ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
                     if (panoramaProtocol != null) {
                         Log.d(TAG, "onPause setDisplayPreviewBitmap null");
-                        panoramaProtocol.setDisplayPreviewBitmap(null);
+                        panoramaProtocol.setDisplayPreviewBitmap((Bitmap) null);
                     }
                 } else {
                     this.mCamera2Device.captureAbortBurst();
@@ -1803,17 +1696,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         this.mPictureWidth = cameraSize.width;
         this.mPictureHeight = cameraSize.height;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("pictureSize= ");
-        sb.append(bestPanoPictureSize.width);
-        String str2 = "X";
-        sb.append(str2);
-        sb.append(bestPanoPictureSize.height);
-        sb.append(" previewSize=");
-        sb.append(this.mPreviewSize.width);
-        sb.append(str2);
-        sb.append(this.mPreviewSize.height);
-        Log.d(str, sb.toString());
+        Log.d(str, "pictureSize= " + bestPanoPictureSize.width + "X" + bestPanoPictureSize.height + " previewSize=" + this.mPreviewSize.width + "X" + this.mPreviewSize.height);
         CameraSize cameraSize2 = this.mPreviewSize;
         updateCameraScreenNailSize(cameraSize2.width, cameraSize2.height);
     }
@@ -1823,7 +1706,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         synchronized (this.mDeviceLock) {
             setCameraState(0);
             if (this.mCamera2Device != null) {
-                this.mCamera2Device.setErrorCallback(null);
+                this.mCamera2Device.setErrorCallback((Camera2Proxy.CameraErrorCallback) null);
                 this.mCamera2Device.stopPreviewCallback(true);
                 this.mCamera2Device = null;
             }
@@ -1831,7 +1714,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         Log.d(TAG, "closeCamera: end");
     }
 
-    public void consumePreference(@UpdateType int... iArr) {
+    public void consumePreference(@UpdateConstant.UpdateType int... iArr) {
         for (int i : iArr) {
             if (i == 1) {
                 updatePictureAndPreviewSize();
@@ -1842,18 +1725,10 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             } else if (i == 55) {
                 updateModuleRelated();
             } else if (!(i == 46 || i == 47)) {
-                String str = "no consumer for this updateType: ";
                 if (!BaseModule.DEBUG) {
-                    String str2 = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(i);
-                    Log.w(str2, sb.toString());
+                    Log.w(TAG, "no consumer for this updateType: " + i);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str);
-                    sb2.append(i);
-                    throw new RuntimeException(sb2.toString());
+                    throw new RuntimeException("no consumer for this updateType: " + i);
                 }
             }
         }
@@ -1939,17 +1814,17 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         EffectController.getInstance().setEffect(FilterInfo.FILTER_ID_NONE);
         onCameraOpened();
         this.mSensorManager = (SensorManager) CameraAppImpl.getAndroidContext().getSystemService("sensor");
-        for (Sensor sensor : this.mSensorManager.getSensorList(-1)) {
-            if (sensor.getType() == 4) {
+        for (Sensor next : this.mSensorManager.getSensorList(-1)) {
+            if (next.getType() == 4) {
                 this.mGyroscope = this.mSensorManager.getDefaultSensor(4);
             }
-            if (sensor.getType() == 16) {
+            if (next.getType() == 16) {
                 this.mGyroscopeUncalibrated = this.mSensorManager.getDefaultSensor(16);
             }
-            if (sensor.getType() == 1) {
+            if (next.getType() == 1) {
                 this.mAccelerometer = this.mSensorManager.getDefaultSensor(1);
             }
-            if (sensor.getType() == 15) {
+            if (next.getType() == 15) {
                 this.mRotationVector = this.mSensorManager.getDefaultSensor(15);
             }
         }
@@ -1988,10 +1863,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             }
             if (this.mDispPreviewImage != null) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onPause recycle bitmap ");
-                sb.append(this.mDispPreviewImage);
-                Log.d(str, sb.toString());
+                Log.d(str, "onPause recycle bitmap " + this.mDispPreviewImage);
                 this.mDispPreviewImage.recycle();
                 this.mDispPreviewImage = null;
             }
@@ -2050,7 +1922,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             if (i == 27 || i == 66) {
                 return true;
             }
-        } else if (((BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
+        } else if (((ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
             return true;
         }
         return super.onKeyUp(i, keyEvent);
@@ -2060,7 +1932,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
         super.onPause();
         unregisterGravitySensorListener();
         unRegisterSensorListener();
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         closeCamera();
         resetScreenOn();
     }
@@ -2104,7 +1976,10 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     }
 
     public void onShutterButtonClick(int i) {
-        if (!this.mPaused && getCameraState() != 0 && !isIgnoreTouchEvent() && (!isFrontCamera() || !this.mActivity.isScreenSlideOff())) {
+        if (!this.mPaused && getCameraState() != 0 && !isIgnoreTouchEvent()) {
+            if (isFrontCamera() && this.mActivity.isScreenSlideOff()) {
+                return;
+            }
             if (isDoingAction()) {
                 Log.w(TAG, "onShutterButtonClick return, isDoingAction");
                 return;
@@ -2113,7 +1988,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             if (!this.mIsShooting) {
                 this.mActivity.getScreenHint().updateHint();
                 if (Storage.isLowStorageAtLastPoint()) {
-                    ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFailed();
+                    ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFailed();
                     return;
                 }
                 this.mPanoramaState = new PanoramaInit();
@@ -2192,7 +2067,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
     }
 
     public void requestRender() {
-        PanoramaProtocol panoramaProtocol = (PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
+        ModeProtocol.PanoramaProtocol panoramaProtocol = (ModeProtocol.PanoramaProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(176);
         if (panoramaProtocol != null) {
             panoramaProtocol.requestRender();
         }
@@ -2234,7 +2109,7 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             Log.e(TAG, "previous save task is on going");
             return;
         }
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         recordState.onPrepare();
         Log.v(TAG, "startPanoramaShooting");
         this.mCaptureOrientationDecided = false;
@@ -2261,32 +2136,26 @@ public class Panorama3Module extends BaseModule implements CameraAction, CameraP
             this.mCamera2Device.setEnableZsl(isZslPreferred());
             this.mCamera2Device.setNeedPausePreview(false);
             this.mCamera2Device.setShotType(3);
-            this.mCamera2Device.captureBurstPictures(-1, new PictureCallbackWrapper() {
+            this.mCamera2Device.captureBurstPictures(-1, new Camera2Proxy.PictureCallbackWrapper() {
                 public void onPictureTakenFinished(boolean z) {
                     String access$300 = Panorama3Module.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onPictureBurstFinished success = ");
-                    sb.append(z);
-                    Log.d(access$300, sb.toString());
+                    Log.d(access$300, "onPictureBurstFinished success = " + z);
                 }
 
                 public boolean onPictureTakenImageConsumed(Image image) {
                     String access$300 = Panorama3Module.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onPictureTaken>>image=");
-                    sb.append(image);
-                    Log.v(access$300, sb.toString());
+                    Log.v(access$300, "onPictureTaken>>image=" + image);
                     if (Panorama3Module.this.mCamera2Device == null) {
                         image.close();
                         return true;
                     }
                     if (!Panorama3Module.this.mPanoramaState.onSaveImage(new Camera2Image(image))) {
                         Log.w(Panorama3Module.TAG, "set mPanoramaState PanoramaState");
-                        Panorama3Module.this.mPanoramaState = new PanoramaState();
+                        PanoramaState unused = Panorama3Module.this.mPanoramaState = new PanoramaState();
                     }
                     return true;
                 }
-            }, null);
+            }, (ParallelCallback) null);
         }
         keepScreenOnAwhile();
         recordState.onStart();

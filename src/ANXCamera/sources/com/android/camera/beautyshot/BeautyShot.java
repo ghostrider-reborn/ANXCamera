@@ -14,10 +14,7 @@ public class BeautyShot {
             System.loadLibrary("camera_arcsoft_beautyshot");
             System.loadLibrary("jni_arcsoft_beautyshot");
         } catch (UnsatisfiedLinkError e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("can't loadLibrary, ");
-            sb.append(e2.getMessage());
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "can't loadLibrary, " + e2.getMessage());
         }
     }
 

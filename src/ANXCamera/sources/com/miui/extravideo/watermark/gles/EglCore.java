@@ -21,7 +21,7 @@ public final class EglCore {
     private int mGlVersion;
 
     public EglCore() {
-        this(null, 0);
+        this((EGLContext) null, 0);
     }
 
     public EglCore(EGLContext eGLContext, int i) {
@@ -30,9 +30,7 @@ public final class EglCore {
         this.mEGLConfig = null;
         this.mGlVersion = -1;
         if (this.mEGLDisplay == EGL14.EGL_NO_DISPLAY) {
-            if (eGLContext == null) {
-                eGLContext = EGL14.EGL_NO_CONTEXT;
-            }
+            eGLContext = eGLContext == null ? EGL14.EGL_NO_CONTEXT : eGLContext;
             this.mEGLDisplay = EGL14.eglGetDisplay(0);
             EGLDisplay eGLDisplay = this.mEGLDisplay;
             if (eGLDisplay != EGL14.EGL_NO_DISPLAY) {
@@ -63,10 +61,7 @@ public final class EglCore {
                     }
                     int[] iArr2 = new int[1];
                     EGL14.eglQueryContext(this.mEGLDisplay, this.mEGLContext, 12440, iArr2, 0);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("EGLContext created, client version ");
-                    sb.append(iArr2[0]);
-                    Log.d(TAG, sb.toString());
+                    Log.d(TAG, "EGLContext created, client version " + iArr2[0]);
                     return;
                 }
                 this.mEGLDisplay = null;
@@ -80,11 +75,7 @@ public final class EglCore {
     private void checkEglError(String str) {
         int eglGetError = EGL14.eglGetError();
         if (eglGetError != 12288) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": EGL error: 0x");
-            sb.append(Integer.toHexString(eglGetError));
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException(str + ": EGL error: 0x" + Integer.toHexString(eglGetError));
         }
     }
 
@@ -98,11 +89,7 @@ public final class EglCore {
         if (EGL14.eglChooseConfig(this.mEGLDisplay, iArr, 0, eGLConfigArr, 0, eGLConfigArr.length, new int[1], 0)) {
             return eGLConfigArr[0];
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("unable to find RGB8888 / ");
-        sb.append(i2);
-        sb.append(" EGLConfig");
-        Log.w(TAG, sb.toString());
+        Log.w(TAG, "unable to find RGB8888 / " + i2 + " EGLConfig");
         return null;
     }
 
@@ -110,16 +97,7 @@ public final class EglCore {
         EGLDisplay eglGetCurrentDisplay = EGL14.eglGetCurrentDisplay();
         EGLContext eglGetCurrentContext = EGL14.eglGetCurrentContext();
         EGLSurface eglGetCurrentSurface = EGL14.eglGetCurrentSurface(12377);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Current EGL (");
-        sb.append(str);
-        sb.append("): display=");
-        sb.append(eglGetCurrentDisplay);
-        sb.append(", context=");
-        sb.append(eglGetCurrentContext);
-        sb.append(", surface=");
-        sb.append(eglGetCurrentSurface);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "Current EGL (" + str + "): display=" + eglGetCurrentDisplay + ", context=" + eglGetCurrentContext + ", surface=" + eglGetCurrentSurface);
     }
 
     public EGLSurface createPbufferSurface(int i, int i2) {
@@ -140,10 +118,7 @@ public final class EglCore {
             }
             throw new RuntimeException("surface was null");
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("invalid surface: ");
-        sb.append(obj);
-        throw new RuntimeException(sb.toString());
+        throw new RuntimeException("invalid surface: " + obj);
     }
 
     /* access modifiers changed from: protected */

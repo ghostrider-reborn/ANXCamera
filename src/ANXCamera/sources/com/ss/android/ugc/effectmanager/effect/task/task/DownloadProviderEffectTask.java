@@ -62,12 +62,7 @@ public class DownloadProviderEffectTask extends NormalTask {
             try {
                 if (TextUtils.isEmpty(this.mEffect.getPath())) {
                     ProviderEffect providerEffect = this.mEffect;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(this.mConfiguration.getEffectDir());
-                    sb.append(File.separator);
-                    sb.append(this.mEffect.getId());
-                    sb.append(EffectConstants.GIF_FILE_SUFFIX);
-                    providerEffect.setPath(sb.toString());
+                    providerEffect.setPath(this.mConfiguration.getEffectDir() + File.separator + this.mEffect.getId() + EffectConstants.GIF_FILE_SUFFIX);
                 }
                 this.mRequestedUrl = this.mDownLoadUrl;
                 try {
@@ -79,7 +74,7 @@ public class DownloadProviderEffectTask extends NormalTask {
                 }
                 ProviderEffect download = download(this.mDownLoadUrl, this.mEffect.getPath());
                 if (download != null) {
-                    sendMessage(19, new DownloadProviderEffectTaskResult(download, null));
+                    sendMessage(19, new DownloadProviderEffectTaskResult(download, (ExceptionResult) null));
                     return;
                 }
                 i2++;

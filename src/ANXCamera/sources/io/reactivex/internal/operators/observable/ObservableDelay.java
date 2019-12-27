@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.observers.SerializedObserver;
@@ -21,7 +20,7 @@ public final class ObservableDelay<T> extends AbstractObservableWithUpstream<T, 
         final boolean delayError;
         Disposable s;
         final TimeUnit unit;
-        final Worker w;
+        final Scheduler.Worker w;
 
         final class OnComplete implements Runnable {
             OnComplete() {
@@ -64,7 +63,7 @@ public final class ObservableDelay<T> extends AbstractObservableWithUpstream<T, 
             }
         }
 
-        DelayObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Worker worker, boolean z) {
+        DelayObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Scheduler.Worker worker, boolean z) {
             this.actual = observer;
             this.delay = j;
             this.unit = timeUnit;
@@ -110,8 +109,8 @@ public final class ObservableDelay<T> extends AbstractObservableWithUpstream<T, 
     }
 
     public void subscribeActual(Observer<? super T> observer) {
-        Observer<? super T> serializedObserver = this.delayError ? observer : new SerializedObserver<>(observer);
-        Worker createWorker = this.scheduler.createWorker();
+        SerializedObserver serializedObserver = this.delayError ? observer : new SerializedObserver(observer);
+        Scheduler.Worker createWorker = this.scheduler.createWorker();
         ObservableSource<T> observableSource = this.source;
         DelayObserver delayObserver = new DelayObserver(serializedObserver, this.delay, this.unit, createWorker, this.delayError);
         observableSource.subscribe(delayObserver);

@@ -4,6 +4,7 @@ import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.v4.media.session.MediaSessionCompatApi23;
 import android.util.Log;
 import java.lang.reflect.InvocationTargetException;
 
@@ -11,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 class MediaSessionCompatApi24 {
     private static final String TAG = "MediaSessionCompatApi24";
 
-    public interface Callback extends android.support.v4.media.session.MediaSessionCompatApi23.Callback {
+    public interface Callback extends MediaSessionCompatApi23.Callback {
         void onPrepare();
 
         void onPrepareFromMediaId(String str, Bundle bundle);
@@ -21,7 +22,7 @@ class MediaSessionCompatApi24 {
         void onPrepareFromUri(Uri uri, Bundle bundle);
     }
 
-    static class CallbackProxy<T extends Callback> extends CallbackProxy<T> {
+    static class CallbackProxy<T extends Callback> extends MediaSessionCompatApi23.CallbackProxy<T> {
         public CallbackProxy(T t) {
             super(t);
         }

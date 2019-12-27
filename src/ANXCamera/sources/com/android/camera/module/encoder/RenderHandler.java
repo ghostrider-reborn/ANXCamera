@@ -8,7 +8,7 @@ import android.view.SurfaceHolder;
 import com.android.camera.effect.VideoRecorderCanvas;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.log.Log;
-import com.android.camera.module.encoder.EGLBase.EglSurface;
+import com.android.camera.module.encoder.EGLBase;
 import java.util.Locale;
 
 public final class RenderHandler implements Runnable {
@@ -16,7 +16,7 @@ public final class RenderHandler implements Runnable {
     private VideoRecorderCanvas mCanvas;
     private EGLBase mEgl;
     private DrawExtTexAttribute mExtTexture = new DrawExtTexAttribute();
-    private EglSurface mInputSurface;
+    private EGLBase.EglSurface mInputSurface;
     private boolean mIsReady;
     private boolean mIsRecordable;
     private int mPreviewHeight;
@@ -67,7 +67,7 @@ public final class RenderHandler implements Runnable {
 
     private final void internalRelease() {
         Log.v(TAG, "internalRelease");
-        EglSurface eglSurface = this.mInputSurface;
+        EGLBase.EglSurface eglSurface = this.mInputSurface;
         if (eglSurface != null) {
             eglSurface.release();
             this.mInputSurface = null;
@@ -204,10 +204,7 @@ public final class RenderHandler implements Runnable {
                 }
             }
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("unsupported window type:");
-            sb.append(obj);
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException("unsupported window type:" + obj);
         }
     }
 }

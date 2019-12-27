@@ -2,7 +2,7 @@ package miui.external;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Log;
 import java.io.File;
@@ -43,7 +43,7 @@ public class SdkHelper {
     private static PackageInfo getPackageInfo(Context context, String str) {
         try {
             return context.getPackageManager().getPackageInfo(str, 128);
-        } catch (NameNotFoundException e2) {
+        } catch (PackageManager.NameNotFoundException e2) {
             e2.printStackTrace();
             return null;
         }
@@ -51,8 +51,8 @@ public class SdkHelper {
 
     private static Context getSystemContext() {
         try {
-            Class cls = Class.forName("android.app.ActivityThread");
-            return (Context) cls.getDeclaredMethod("getSystemContext", new Class[0]).invoke(cls.getDeclaredMethod("currentActivityThread", new Class[0]).invoke(null, new Object[0]), new Object[0]);
+            Class<?> cls = Class.forName("android.app.ActivityThread");
+            return (Context) cls.getDeclaredMethod("getSystemContext", new Class[0]).invoke(cls.getDeclaredMethod("currentActivityThread", new Class[0]).invoke((Object) null, new Object[0]), new Object[0]);
         } catch (Exception e2) {
             Log.e("miuisdk", "getSystemContext error", e2);
             return null;
@@ -61,7 +61,7 @@ public class SdkHelper {
 
     private static String getSystemProperty(String str, String str2) {
         try {
-            return (String) Class.forName("android.os.SystemProperties").getDeclaredMethod("get", new Class[]{String.class, String.class}).invoke(null, new Object[]{str, str2});
+            return (String) Class.forName("android.os.SystemProperties").getDeclaredMethod("get", new Class[]{String.class, String.class}).invoke((Object) null, new Object[]{str, str2});
         } catch (Exception e2) {
             Log.e("miuisdk", "getSystemProperty error", e2);
             return str2;
@@ -74,60 +74,15 @@ public class SdkHelper {
     }
 
     private static String guessDataApkPath(String str) {
-        StringBuilder sb = new StringBuilder();
-        String str2 = "/data/app/";
-        sb.append(str2);
-        sb.append(str);
-        sb.append("-1.apk");
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str2);
-        sb2.append(str);
-        sb2.append("-2.apk");
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str2);
-        sb3.append(str);
-        sb3.append("-1/base.apk");
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str2);
-        sb4.append(str);
-        sb4.append("-2/base.apk");
-        return searchApkPath(new String[]{sb.toString(), sb2.toString(), sb3.toString(), sb4.toString()});
+        return searchApkPath(new String[]{"/data/app/" + str + "-1.apk", "/data/app/" + str + "-2.apk", "/data/app/" + str + "-1/base.apk", "/data/app/" + str + "-2/base.apk"});
     }
 
     private static String guessLibPath(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("/data/data/");
-        sb.append(str);
-        sb.append("/lib/");
-        return sb.toString();
+        return "/data/data/" + str + "/lib/";
     }
 
     private static String guessSystemApkPath(String str) {
-        StringBuilder sb = new StringBuilder();
-        String str2 = "/system/app/";
-        sb.append(str2);
-        sb.append(str);
-        String str3 = ".apk";
-        sb.append(str3);
-        StringBuilder sb2 = new StringBuilder();
-        String str4 = "/system/priv-app/";
-        sb2.append(str4);
-        sb2.append(str);
-        sb2.append(str3);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str2);
-        sb3.append(str);
-        String str5 = "/";
-        sb3.append(str5);
-        sb3.append(str);
-        sb3.append(str3);
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str4);
-        sb4.append(str);
-        sb4.append(str5);
-        sb4.append(str);
-        sb4.append(str3);
-        return searchApkPath(new String[]{sb.toString(), sb2.toString(), sb3.toString(), sb4.toString()});
+        return searchApkPath(new String[]{"/system/app/" + str + ".apk", "/system/priv-app/" + str + ".apk", "/system/app/" + str + "/" + str + ".apk", "/system/priv-app/" + str + "/" + str + ".apk"});
     }
 
     public static boolean isMiuiSystem() {

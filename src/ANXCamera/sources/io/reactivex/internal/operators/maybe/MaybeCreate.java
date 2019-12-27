@@ -93,20 +93,20 @@ public final class MaybeCreate<T> extends Maybe<T> {
             }
             Object obj = get();
             DisposableHelper disposableHelper = DisposableHelper.DISPOSED;
-            if (obj != disposableHelper) {
-                Disposable disposable = (Disposable) getAndSet(disposableHelper);
-                if (disposable != DisposableHelper.DISPOSED) {
-                    try {
-                        this.actual.onError(th);
-                        return true;
-                    } finally {
-                        if (disposable != null) {
-                            disposable.dispose();
-                        }
-                    }
+            if (obj == disposableHelper) {
+                return false;
+            }
+            Disposable disposable = (Disposable) getAndSet(disposableHelper);
+            if (disposable == DisposableHelper.DISPOSED) {
+                return false;
+            }
+            try {
+                this.actual.onError(th);
+            } finally {
+                if (disposable != null) {
+                    disposable.dispose();
                 }
             }
-            return false;
         }
     }
 

@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.internal.schedulers.TrampolineScheduler;
@@ -59,7 +58,7 @@ public final class ObservableInterval extends Observable<Long> {
         observer.onSubscribe(intervalObserver);
         Scheduler scheduler2 = this.scheduler;
         if (scheduler2 instanceof TrampolineScheduler) {
-            Worker createWorker = scheduler2.createWorker();
+            Scheduler.Worker createWorker = scheduler2.createWorker();
             intervalObserver.setResource(createWorker);
             createWorker.schedulePeriodically(intervalObserver, this.initialDelay, this.period, this.unit);
             return;

@@ -7,14 +7,13 @@ import okhttp3.Call;
 import okhttp3.Connection;
 import okhttp3.EventListener;
 import okhttp3.Interceptor;
-import okhttp3.Interceptor.Chain;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.RealConnection;
 import okhttp3.internal.connection.StreamAllocation;
 
-public final class RealInterceptorChain implements Chain {
+public final class RealInterceptorChain implements Interceptor.Chain {
     private final Call call;
     private int calls;
     private final int connectTimeout;
@@ -69,50 +68,22 @@ public final class RealInterceptorChain implements Chain {
     public Response proceed(Request request2, StreamAllocation streamAllocation2, HttpCodec httpCodec2, RealConnection realConnection) throws IOException {
         if (this.index < this.interceptors.size()) {
             this.calls++;
-            String str = "network interceptor ";
-            if (this.httpCodec == null || this.connection.supportsUrl(request2.url())) {
-                String str2 = " must call proceed() exactly once";
-                if (this.httpCodec == null || this.calls <= 1) {
-                    RealInterceptorChain realInterceptorChain = new RealInterceptorChain(this.interceptors, streamAllocation2, httpCodec2, realConnection, this.index + 1, request2, this.call, this.eventListener, this.connectTimeout, this.readTimeout, this.writeTimeout);
-                    Interceptor interceptor = (Interceptor) this.interceptors.get(this.index);
-                    Response intercept = interceptor.intercept(realInterceptorChain);
-                    if (httpCodec2 == null || this.index + 1 >= this.interceptors.size() || realInterceptorChain.calls == 1) {
-                        String str3 = "interceptor ";
-                        if (intercept == null) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(str3);
-                            sb.append(interceptor);
-                            sb.append(" returned null");
-                            throw new NullPointerException(sb.toString());
-                        } else if (intercept.body() != null) {
-                            return intercept;
-                        } else {
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append(str3);
-                            sb2.append(interceptor);
-                            sb2.append(" returned a response with no body");
-                            throw new IllegalStateException(sb2.toString());
-                        }
-                    } else {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append(str);
-                        sb3.append(interceptor);
-                        sb3.append(str2);
-                        throw new IllegalStateException(sb3.toString());
-                    }
+            if (this.httpCodec != null && !this.connection.supportsUrl(request2.url())) {
+                throw new IllegalStateException("network interceptor " + this.interceptors.get(this.index - 1) + " must retain the same host and port");
+            } else if (this.httpCodec == null || this.calls <= 1) {
+                RealInterceptorChain realInterceptorChain = new RealInterceptorChain(this.interceptors, streamAllocation2, httpCodec2, realConnection, this.index + 1, request2, this.call, this.eventListener, this.connectTimeout, this.readTimeout, this.writeTimeout);
+                Response intercept = this.interceptors.get(this.index).intercept(realInterceptorChain);
+                if (httpCodec2 != null && this.index + 1 < this.interceptors.size() && realInterceptorChain.calls != 1) {
+                    throw new IllegalStateException("network interceptor " + r5 + " must call proceed() exactly once");
+                } else if (intercept == null) {
+                    throw new NullPointerException("interceptor " + r5 + " returned null");
+                } else if (intercept.body() != null) {
+                    return intercept;
                 } else {
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append(str);
-                    sb4.append(this.interceptors.get(this.index - 1));
-                    sb4.append(str2);
-                    throw new IllegalStateException(sb4.toString());
+                    throw new IllegalStateException("interceptor " + r5 + " returned a response with no body");
                 }
             } else {
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append(str);
-                sb5.append(this.interceptors.get(this.index - 1));
-                sb5.append(" must retain the same host and port");
-                throw new IllegalStateException(sb5.toString());
+                throw new IllegalStateException("network interceptor " + this.interceptors.get(this.index - 1) + " must call proceed() exactly once");
             }
         } else {
             throw new AssertionError();
@@ -131,17 +102,17 @@ public final class RealInterceptorChain implements Chain {
         return this.streamAllocation;
     }
 
-    public Chain withConnectTimeout(int i, TimeUnit timeUnit) {
+    public Interceptor.Chain withConnectTimeout(int i, TimeUnit timeUnit) {
         RealInterceptorChain realInterceptorChain = new RealInterceptorChain(this.interceptors, this.streamAllocation, this.httpCodec, this.connection, this.index, this.request, this.call, this.eventListener, Util.checkDuration("timeout", (long) i, timeUnit), this.readTimeout, this.writeTimeout);
         return realInterceptorChain;
     }
 
-    public Chain withReadTimeout(int i, TimeUnit timeUnit) {
+    public Interceptor.Chain withReadTimeout(int i, TimeUnit timeUnit) {
         RealInterceptorChain realInterceptorChain = new RealInterceptorChain(this.interceptors, this.streamAllocation, this.httpCodec, this.connection, this.index, this.request, this.call, this.eventListener, this.connectTimeout, Util.checkDuration("timeout", (long) i, timeUnit), this.writeTimeout);
         return realInterceptorChain;
     }
 
-    public Chain withWriteTimeout(int i, TimeUnit timeUnit) {
+    public Interceptor.Chain withWriteTimeout(int i, TimeUnit timeUnit) {
         RealInterceptorChain realInterceptorChain = new RealInterceptorChain(this.interceptors, this.streamAllocation, this.httpCodec, this.connection, this.index, this.request, this.call, this.eventListener, this.connectTimeout, this.readTimeout, Util.checkDuration("timeout", (long) i, timeUnit));
         return realInterceptorChain;
     }

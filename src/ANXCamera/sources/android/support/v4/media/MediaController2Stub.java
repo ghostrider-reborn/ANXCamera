@@ -3,9 +3,9 @@ package android.support.v4.media;
 import android.app.PendingIntent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import android.support.v4.media.IMediaController2.Stub;
-import android.support.v4.media.MediaController2.PlaybackInfo;
-import android.support.v4.media.MediaSession2.CommandButton;
+import android.support.v4.media.IMediaController2;
+import android.support.v4.media.MediaController2;
+import android.support.v4.media.MediaSession2;
 import android.text.TextUtils;
 import android.util.Log;
 import java.lang.ref.WeakReference;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-class MediaController2Stub extends Stub {
+class MediaController2Stub extends IMediaController2.Stub {
     private static final boolean DEBUG = true;
     private static final String TAG = "MediaController2Stub";
     private final WeakReference<MediaController2ImplBase> mController;
@@ -43,19 +43,18 @@ class MediaController2Stub extends Stub {
     }
 
     public void onAllowedCommandsChanged(Bundle bundle) {
-        String str = TAG;
         try {
             MediaController2ImplBase controller = getController();
             if (controller != null) {
                 SessionCommandGroup2 fromBundle = SessionCommandGroup2.fromBundle(bundle);
                 if (fromBundle == null) {
-                    Log.w(str, "onAllowedCommandsChanged(): Ignoring null commands");
+                    Log.w(TAG, "onAllowedCommandsChanged(): Ignoring null commands");
                 } else {
                     controller.onAllowedCommandsChanged(fromBundle);
                 }
             }
         } catch (IllegalStateException unused) {
-            Log.w(str, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
@@ -68,27 +67,26 @@ class MediaController2Stub extends Stub {
     }
 
     public void onChildrenChanged(String str, int i, Bundle bundle) {
-        String str2 = TAG;
         if (str == null) {
-            Log.w(str2, "onChildrenChanged(): Ignoring null parentId");
+            Log.w(TAG, "onChildrenChanged(): Ignoring null parentId");
             return;
         }
         try {
             final MediaBrowser2 browser = getBrowser();
             if (browser != null) {
                 Executor callbackExecutor = browser.getCallbackExecutor();
-                final String str3 = str;
+                final String str2 = str;
                 final int i2 = i;
                 final Bundle bundle2 = bundle;
                 AnonymousClass6 r1 = new Runnable() {
                     public void run() {
-                        browser.getCallback().onChildrenChanged(browser, str3, i2, bundle2);
+                        browser.getCallback().onChildrenChanged(browser, str2, i2, bundle2);
                     }
                 };
                 callbackExecutor.execute(r1);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str2, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
@@ -103,7 +101,7 @@ class MediaController2Stub extends Stub {
         if (list2 != null) {
             arrayList = new ArrayList();
             for (int i4 = 0; i4 < list.size(); i4++) {
-                MediaItem2 fromBundle = MediaItem2.fromBundle((Bundle) list2.get(i4));
+                MediaItem2 fromBundle = MediaItem2.fromBundle(list2.get(i4));
                 if (fromBundle != null) {
                     arrayList.add(fromBundle);
                 }
@@ -115,7 +113,7 @@ class MediaController2Stub extends Stub {
         long j5 = j2;
         float f3 = f2;
         long j6 = j3;
-        mediaController2ImplBase.onConnectedNotLocked(iMediaSession22, SessionCommandGroup2.fromBundle(bundle), i5, MediaItem2.fromBundle(bundle2), j4, j5, f3, j6, PlaybackInfo.fromBundle(bundle3), i3, i2, arrayList, pendingIntent);
+        mediaController2ImplBase.onConnectedNotLocked(iMediaSession22, SessionCommandGroup2.fromBundle(bundle), i5, MediaItem2.fromBundle(bundle2), j4, j5, f3, j6, MediaController2.PlaybackInfo.fromBundle(bundle3), i3, i2, arrayList, pendingIntent);
     }
 
     public void onCurrentMediaItemChanged(Bundle bundle) {
@@ -127,24 +125,22 @@ class MediaController2Stub extends Stub {
     }
 
     public void onCustomCommand(Bundle bundle, Bundle bundle2, ResultReceiver resultReceiver) {
-        String str = TAG;
         try {
             MediaController2ImplBase controller = getController();
             SessionCommand2 fromBundle = SessionCommand2.fromBundle(bundle);
             if (fromBundle == null) {
-                Log.w(str, "onCustomCommand(): Ignoring null command");
+                Log.w(TAG, "onCustomCommand(): Ignoring null command");
             } else {
                 controller.onCustomCommand(fromBundle, bundle2, resultReceiver);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
     public void onCustomLayoutChanged(List<Bundle> list) {
-        String str = TAG;
         if (list == null) {
-            Log.w(str, "onCustomLayoutChanged(): Ignoring null commandButtonlist");
+            Log.w(TAG, "onCustomLayoutChanged(): Ignoring null commandButtonlist");
             return;
         }
         try {
@@ -152,7 +148,7 @@ class MediaController2Stub extends Stub {
             if (controller != null) {
                 ArrayList arrayList = new ArrayList();
                 for (int i = 0; i < list.size(); i++) {
-                    CommandButton fromBundle = CommandButton.fromBundle((Bundle) list.get(i));
+                    MediaSession2.CommandButton fromBundle = MediaSession2.CommandButton.fromBundle(list.get(i));
                     if (fromBundle != null) {
                         arrayList.add(fromBundle);
                     }
@@ -160,7 +156,7 @@ class MediaController2Stub extends Stub {
                 controller.onCustomLayoutChanged(arrayList);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
@@ -182,36 +178,34 @@ class MediaController2Stub extends Stub {
     }
 
     public void onGetChildrenDone(String str, int i, int i2, List<Bundle> list, Bundle bundle) throws RuntimeException {
-        String str2 = TAG;
         if (str == null) {
-            Log.w(str2, "onGetChildrenDone(): Ignoring null parentId");
+            Log.w(TAG, "onGetChildrenDone(): Ignoring null parentId");
             return;
         }
         try {
             final MediaBrowser2 browser = getBrowser();
             if (browser != null) {
                 Executor callbackExecutor = browser.getCallbackExecutor();
-                final String str3 = str;
+                final String str2 = str;
                 final int i3 = i;
                 final int i4 = i2;
                 final List<Bundle> list2 = list;
                 final Bundle bundle2 = bundle;
                 AnonymousClass3 r1 = new Runnable() {
                     public void run() {
-                        browser.getCallback().onGetChildrenDone(browser, str3, i3, i4, MediaUtils2.convertBundleListToMediaItem2List(list2), bundle2);
+                        browser.getCallback().onGetChildrenDone(browser, str2, i3, i4, MediaUtils2.convertBundleListToMediaItem2List(list2), bundle2);
                     }
                 };
                 callbackExecutor.execute(r1);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str2, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
     public void onGetItemDone(final String str, final Bundle bundle) throws RuntimeException {
-        String str2 = TAG;
         if (str == null) {
-            Log.w(str2, "onGetItemDone(): Ignoring null mediaId");
+            Log.w(TAG, "onGetItemDone(): Ignoring null mediaId");
             return;
         }
         try {
@@ -224,7 +218,7 @@ class MediaController2Stub extends Stub {
                 });
             }
         } catch (IllegalStateException unused) {
-            Log.w(str2, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
@@ -249,46 +243,43 @@ class MediaController2Stub extends Stub {
     }
 
     public void onGetSearchResultDone(String str, int i, int i2, List<Bundle> list, Bundle bundle) throws RuntimeException {
-        boolean isEmpty = TextUtils.isEmpty(str);
-        String str2 = TAG;
-        if (isEmpty) {
-            Log.w(str2, "onGetSearchResultDone(): Ignoring empty query");
+        if (TextUtils.isEmpty(str)) {
+            Log.w(TAG, "onGetSearchResultDone(): Ignoring empty query");
             return;
         }
         try {
             final MediaBrowser2 browser = getBrowser();
             if (browser != null) {
                 Executor callbackExecutor = browser.getCallbackExecutor();
-                final String str3 = str;
+                final String str2 = str;
                 final int i3 = i;
                 final int i4 = i2;
                 final List<Bundle> list2 = list;
                 final Bundle bundle2 = bundle;
                 AnonymousClass5 r2 = new Runnable() {
                     public void run() {
-                        browser.getCallback().onGetSearchResultDone(browser, str3, i3, i4, MediaUtils2.convertBundleListToMediaItem2List(list2), bundle2);
+                        browser.getCallback().onGetSearchResultDone(browser, str2, i3, i4, MediaUtils2.convertBundleListToMediaItem2List(list2), bundle2);
                     }
                 };
                 callbackExecutor.execute(r2);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str2, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
     public void onPlaybackInfoChanged(Bundle bundle) throws RuntimeException {
-        String str = TAG;
-        Log.d(str, "onPlaybackInfoChanged");
+        Log.d(TAG, "onPlaybackInfoChanged");
         try {
             MediaController2ImplBase controller = getController();
-            PlaybackInfo fromBundle = PlaybackInfo.fromBundle(bundle);
+            MediaController2.PlaybackInfo fromBundle = MediaController2.PlaybackInfo.fromBundle(bundle);
             if (fromBundle == null) {
-                Log.w(str, "onPlaybackInfoChanged(): Ignoring null playbackInfo");
+                Log.w(TAG, "onPlaybackInfoChanged(): Ignoring null playbackInfo");
             } else {
                 controller.notifyPlaybackInfoChanges(fromBundle);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
@@ -309,28 +300,24 @@ class MediaController2Stub extends Stub {
     }
 
     public void onPlaylistChanged(List<Bundle> list, Bundle bundle) {
-        String str = TAG;
         try {
             MediaController2ImplBase controller = getController();
             if (list == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onPlaylistChanged(): Ignoring null playlist from ");
-                sb.append(controller);
-                Log.w(str, sb.toString());
+                Log.w(TAG, "onPlaylistChanged(): Ignoring null playlist from " + controller);
                 return;
             }
             ArrayList arrayList = new ArrayList();
             for (Bundle fromBundle : list) {
                 MediaItem2 fromBundle2 = MediaItem2.fromBundle(fromBundle);
                 if (fromBundle2 == null) {
-                    Log.w(str, "onPlaylistChanged(): Ignoring null item in playlist");
+                    Log.w(TAG, "onPlaylistChanged(): Ignoring null item in playlist");
                 } else {
                     arrayList.add(fromBundle2);
                 }
             }
             controller.notifyPlaylistChanges(arrayList, MediaMetadata2.fromBundle(bundle));
         } catch (IllegalStateException unused) {
-            Log.w(str, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 
@@ -359,28 +346,26 @@ class MediaController2Stub extends Stub {
     }
 
     public void onSearchResultChanged(String str, int i, Bundle bundle) throws RuntimeException {
-        boolean isEmpty = TextUtils.isEmpty(str);
-        String str2 = TAG;
-        if (isEmpty) {
-            Log.w(str2, "onSearchResultChanged(): Ignoring empty query");
+        if (TextUtils.isEmpty(str)) {
+            Log.w(TAG, "onSearchResultChanged(): Ignoring empty query");
             return;
         }
         try {
             final MediaBrowser2 browser = getBrowser();
             if (browser != null) {
                 Executor callbackExecutor = browser.getCallbackExecutor();
-                final String str3 = str;
+                final String str2 = str;
                 final int i2 = i;
                 final Bundle bundle2 = bundle;
                 AnonymousClass4 r2 = new Runnable() {
                     public void run() {
-                        browser.getCallback().onSearchResultChanged(browser, str3, i2, bundle2);
+                        browser.getCallback().onSearchResultChanged(browser, str2, i2, bundle2);
                     }
                 };
                 callbackExecutor.execute(r2);
             }
         } catch (IllegalStateException unused) {
-            Log.w(str2, "Don't fail silently here. Highly likely a bug");
+            Log.w(TAG, "Don't fail silently here. Highly likely a bug");
         }
     }
 

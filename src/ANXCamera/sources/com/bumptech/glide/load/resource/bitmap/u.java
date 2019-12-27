@@ -44,7 +44,7 @@ public final class u implements A<BitmapDrawable>, v {
 
     @NonNull
     public BitmapDrawable get() {
-        return new BitmapDrawable(this.resources, (Bitmap) this.pj.get());
+        return new BitmapDrawable(this.resources, this.pj.get());
     }
 
     public int getSize() {

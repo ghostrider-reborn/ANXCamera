@@ -24,10 +24,7 @@ public final class a extends m<AssetFileDescriptor> {
         if (openAssetFileDescriptor != null) {
             return openAssetFileDescriptor;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("FileDescriptor is null for: ");
-        sb.append(uri);
-        throw new FileNotFoundException(sb.toString());
+        throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }
 
     /* access modifiers changed from: protected */

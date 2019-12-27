@@ -58,7 +58,7 @@ public final class ObservableRange extends Observable<Integer> {
             return 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             if (!this.fused) {
                 Observer<? super Integer> observer = this.actual;

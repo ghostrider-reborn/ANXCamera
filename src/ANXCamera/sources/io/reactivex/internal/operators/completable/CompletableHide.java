@@ -12,7 +12,7 @@ public final class CompletableHide extends Completable {
     static final class HideCompletableObserver implements CompletableObserver, Disposable {
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f274d;
 
         HideCompletableObserver(CompletableObserver completableObserver) {

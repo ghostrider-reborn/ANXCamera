@@ -22,7 +22,7 @@ public final class CompletableConcatArray extends Completable {
             this.sources = completableSourceArr;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void next() {
             if (!this.sd.isDisposed() && getAndIncrement() == 0) {
                 CompletableSource[] completableSourceArr = this.sources;

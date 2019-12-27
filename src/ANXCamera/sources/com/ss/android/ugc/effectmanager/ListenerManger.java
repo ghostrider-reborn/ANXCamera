@@ -32,28 +32,28 @@ public class ListenerManger {
 
     public void destroy() {
         for (String put : this.checkChannelListenerMap.keySet()) {
-            this.checkChannelListenerMap.put(put, null);
+            this.checkChannelListenerMap.put(put, (Object) null);
         }
         for (String put2 : this.fetchEffectChannelListenerMap.keySet()) {
-            this.fetchEffectChannelListenerMap.put(put2, null);
+            this.fetchEffectChannelListenerMap.put(put2, (Object) null);
         }
         for (String put3 : this.fetchEffectListListenerMap.keySet()) {
-            this.fetchEffectListListenerMap.put(put3, null);
+            this.fetchEffectListListenerMap.put(put3, (Object) null);
         }
         for (String put4 : this.fetchEffectListenerMap.keySet()) {
-            this.fetchEffectListenerMap.put(put4, null);
+            this.fetchEffectListenerMap.put(put4, (Object) null);
         }
         for (String put5 : this.mModFavoriteListMap.keySet()) {
-            this.mModFavoriteListMap.put(put5, null);
+            this.mModFavoriteListMap.put(put5, (Object) null);
         }
         for (String put6 : this.mFetchFavoriteListMap.keySet()) {
-            this.mFetchFavoriteListMap.put(put6, null);
+            this.mFetchFavoriteListMap.put(put6, (Object) null);
         }
         for (String put7 : this.mReadUpdateTagMap.keySet()) {
-            this.mReadUpdateTagMap.put(put7, null);
+            this.mReadUpdateTagMap.put(put7, (Object) null);
         }
         for (String put8 : this.mWriteUpdateTagMap.keySet()) {
-            this.mWriteUpdateTagMap.put(put8, null);
+            this.mWriteUpdateTagMap.put(put8, (Object) null);
         }
         Map<String, IFetchProviderEffect> map = this.mFetchProviderEffectMap;
         if (map != null) {
@@ -65,7 +65,7 @@ public class ListenerManger {
         if (this.checkChannelListenerMap == null) {
             this.checkChannelListenerMap = new HashMap();
         }
-        return (ICheckChannelListener) this.checkChannelListenerMap.get(str);
+        return this.checkChannelListenerMap.get(str);
     }
 
     @Nullable
@@ -74,7 +74,7 @@ public class ListenerManger {
         if (map == null) {
             return null;
         }
-        return (IDownloadProviderEffectListener) map.get(str);
+        return map.get(str);
     }
 
     public IFetchCategoryEffectListener getFetchCategoryEffectListener(String str) {
@@ -82,35 +82,35 @@ public class ListenerManger {
         if (map == null) {
             return null;
         }
-        return (IFetchCategoryEffectListener) map.get(str);
+        return map.get(str);
     }
 
     public IFetchEffectChannelListener getFetchEffectChannelListener(String str) {
         if (this.fetchEffectChannelListenerMap == null) {
             this.fetchEffectChannelListenerMap = new HashMap();
         }
-        return (IFetchEffectChannelListener) this.fetchEffectChannelListenerMap.get(str);
+        return this.fetchEffectChannelListenerMap.get(str);
     }
 
     public IFetchEffectListListener getFetchEffectLisListener(String str) {
         if (this.fetchEffectListListenerMap == null) {
             this.fetchEffectListListenerMap = new HashMap();
         }
-        return (IFetchEffectListListener) this.fetchEffectListListenerMap.get(str);
+        return this.fetchEffectListListenerMap.get(str);
     }
 
     public IFetchEffectListener getFetchEffectListener(String str) {
         if (this.fetchEffectListenerMap == null) {
             this.fetchEffectListenerMap = new HashMap();
         }
-        return (IFetchEffectListener) this.fetchEffectListenerMap.get(str);
+        return this.fetchEffectListenerMap.get(str);
     }
 
     public IFetchFavoriteList getFetchFavoriteListListener(String str) {
         if (this.mFetchFavoriteListMap == null) {
             this.mFetchFavoriteListMap = new HashMap();
         }
-        return (IFetchFavoriteList) this.mFetchFavoriteListMap.get(str);
+        return this.mFetchFavoriteListMap.get(str);
     }
 
     public IFetchPanelInfoListener getFetchPanelInfoListener(String str) {
@@ -118,7 +118,7 @@ public class ListenerManger {
         if (map == null) {
             return null;
         }
-        return (IFetchPanelInfoListener) map.get(str);
+        return map.get(str);
     }
 
     @Nullable
@@ -127,28 +127,28 @@ public class ListenerManger {
         if (map == null) {
             return null;
         }
-        return (IFetchProviderEffect) map.get(str);
+        return map.get(str);
     }
 
     public IModFavoriteList getModFavoriteListListener(String str) {
         if (this.mModFavoriteListMap == null) {
             this.mModFavoriteListMap = new HashMap();
         }
-        return (IModFavoriteList) this.mModFavoriteListMap.get(str);
+        return this.mModFavoriteListMap.get(str);
     }
 
     public IReadUpdateTagListener getReadUpdateTagListener(String str) {
         if (this.mReadUpdateTagMap == null) {
             this.mReadUpdateTagMap = new HashMap();
         }
-        return (IReadUpdateTagListener) this.mReadUpdateTagMap.get(str);
+        return this.mReadUpdateTagMap.get(str);
     }
 
     public IWriteUpdateTagListener getWriteUpdateTagListener(String str) {
         if (this.mWriteUpdateTagMap == null) {
             this.mWriteUpdateTagMap = new HashMap();
         }
-        return (IWriteUpdateTagListener) this.mWriteUpdateTagMap.get(str);
+        return this.mWriteUpdateTagMap.get(str);
     }
 
     public void removeReadUpdateTagListener(String str) {

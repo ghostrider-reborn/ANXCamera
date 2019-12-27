@@ -17,7 +17,7 @@ public class TrackFragmentBaseMediaDecodeTimeBox extends FullBox {
         }
 
         public Factory baseMediaDecodeTime(long j) {
-            this.box.baseMediaDecodeTime = j;
+            long unused = this.box.baseMediaDecodeTime = j;
             return this;
         }
 

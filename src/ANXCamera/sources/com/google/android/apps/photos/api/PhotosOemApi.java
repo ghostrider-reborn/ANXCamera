@@ -3,7 +3,6 @@ package com.google.android.apps.photos.api;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.net.Uri.Builder;
 import android.os.Bundle;
 import com.android.camera.R;
 import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
@@ -21,8 +20,8 @@ public final class PhotosOemApi {
         return context.getString(R.string.provider_authority);
     }
 
-    private static Builder getBaseBuilder(Context context) {
-        return new Builder().scheme(ComposerHelper.COMPOSER_CONTENT).authority(getAuthority(context));
+    private static Uri.Builder getBaseBuilder(Context context) {
+        return new Uri.Builder().scheme(ComposerHelper.COMPOSER_CONTENT).authority(getAuthority(context));
     }
 
     public static Uri getDeleteUri(Context context, long j) {
@@ -50,7 +49,7 @@ public final class PhotosOemApi {
     }
 
     public static String getSpecialTypeId(Context context, long j) {
-        Cursor query = context.getContentResolver().query(getQueryTypeUri(context, j), null, null, null, null);
+        Cursor query = context.getContentResolver().query(getQueryTypeUri(context, j), (String[]) null, (String) null, (String[]) null, (String) null);
         if (query != null) {
             try {
                 if (query.moveToFirst()) {
@@ -73,11 +72,10 @@ public final class PhotosOemApi {
     }
 
     public static int getVersion(Context context) {
-        String str = "version";
-        Bundle call = context.getContentResolver().call(new Builder().scheme(ComposerHelper.COMPOSER_CONTENT).authority(getAuthority(context)).build(), str, null, null);
+        Bundle call = context.getContentResolver().call(new Uri.Builder().scheme(ComposerHelper.COMPOSER_CONTENT).authority(getAuthority(context)).build(), "version", (String) null, (Bundle) null);
         if (call == null) {
             return 1;
         }
-        return call.getInt(str);
+        return call.getInt("version");
     }
 }

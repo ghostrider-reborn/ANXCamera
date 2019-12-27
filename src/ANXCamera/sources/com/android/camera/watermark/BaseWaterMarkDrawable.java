@@ -2,11 +2,8 @@ package com.android.camera.watermark;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import com.android.camera.CameraAppImpl;
@@ -42,15 +39,15 @@ public abstract class BaseWaterMarkDrawable {
         this.mWaterMarkInfos = list;
         List<WaterMarkData> list2 = this.mWaterMarkInfos;
         if (list2 != null && !list2.isEmpty()) {
-            this.mWidth = ((WaterMarkData) this.mWaterMarkInfos.get(0)).getFaceViewWidth();
-            this.mHeight = ((WaterMarkData) this.mWaterMarkInfos.get(0)).getFaceViewHeight();
-            this.mOrientation = ((WaterMarkData) this.mWaterMarkInfos.get(0)).getOrientation();
+            this.mWidth = this.mWaterMarkInfos.get(0).getFaceViewWidth();
+            this.mHeight = this.mWaterMarkInfos.get(0).getFaceViewHeight();
+            this.mOrientation = this.mWaterMarkInfos.get(0).getOrientation();
         }
         this.mFaceInfoTextPaint = new Paint();
         this.mFaceInfoTextPaint.setAntiAlias(true);
         this.mFaceInfoTextPaint.setColor(-1);
         this.mFaceInfoTextPaint.setTextSize(CameraAppImpl.getAndroidContext().getResources().getDimension(R.dimen.face_info_magic_textSize));
-        this.mFaceInfoTextPaint.setTextAlign(Align.CENTER);
+        this.mFaceInfoTextPaint.setTextAlign(Paint.Align.CENTER);
         this.mFaceInfoTextPaint.setFakeBoldText(true);
         this.mGap = CameraAppImpl.getAndroidContext().getResources().getDimensionPixelSize(R.dimen.face_info_text_left_dis);
         this.mCorrection = CameraAppImpl.getAndroidContext().getResources().getDimensionPixelOffset(R.dimen.face_info_correction);
@@ -68,8 +65,8 @@ public abstract class BaseWaterMarkDrawable {
         List<WaterMarkData> list = this.mWaterMarkInfos;
         if (list != null && !list.isEmpty()) {
             this.mWaterMarkData = new WaterMarkData();
-            this.mWaterMarkData.setWatermarkType(((WaterMarkData) this.mWaterMarkInfos.get(0)).getWatermarkType());
-            this.mWaterMarkBitmap = Bitmap.createBitmap(this.mWidth, this.mHeight, Config.ARGB_8888);
+            this.mWaterMarkData.setWatermarkType(this.mWaterMarkInfos.get(0).getWatermarkType());
+            this.mWaterMarkBitmap = Bitmap.createBitmap(this.mWidth, this.mHeight, Bitmap.Config.ARGB_8888);
             onDraw(new Canvas(this.mWaterMarkBitmap));
         }
     }
@@ -140,7 +137,7 @@ public abstract class BaseWaterMarkDrawable {
                 getTopBackgroundDrawable(waterMarkData).setBounds(rect);
                 getTopBackgroundDrawable(waterMarkData).draw(canvas2);
             }
-            Bitmap createBitmap = Bitmap.createBitmap(rect.width(), rect.height(), Config.ARGB_8888);
+            Bitmap createBitmap = Bitmap.createBitmap(rect.width(), rect.height(), Bitmap.Config.ARGB_8888);
             Canvas canvas3 = new Canvas(createBitmap);
             Rect rect2 = new Rect();
             Iterator it2 = it;
@@ -148,13 +145,13 @@ public abstract class BaseWaterMarkDrawable {
             getTopIndicatorDrawable(waterMarkData).setBounds(rect2);
             getTopIndicatorDrawable(waterMarkData).draw(canvas3);
             if (f2 != 0.0f) {
-                FontMetricsInt fontMetricsInt = this.mFaceInfoTextPaint.getFontMetricsInt();
+                Paint.FontMetricsInt fontMetricsInt = this.mFaceInfoTextPaint.getFontMetricsInt();
                 drawFaceInfoText(canvas3, waterMarkData.getInfo(), rect2.right + this.mGap, (((rect2.bottom + rect2.top) - fontMetricsInt.bottom) - fontMetricsInt.top) / 2);
             }
             if (!CameraSettings.isFrontMirror()) {
                 createBitmap = Util.flipBitmap(createBitmap, 0);
             }
-            canvas2.drawBitmap(createBitmap, (float) (((int) waterMarkData.getFaceRectF().centerX()) - intrinsicWidth), (float) (((((int) waterMarkData.getFaceRectF().top) - intrinsicHeight) - this.mPopBottomMargin) - this.mFacePopupBottom), null);
+            canvas2.drawBitmap(createBitmap, (float) (((int) waterMarkData.getFaceRectF().centerX()) - intrinsicWidth), (float) (((((int) waterMarkData.getFaceRectF().top) - intrinsicHeight) - this.mPopBottomMargin) - this.mFacePopupBottom), (Paint) null);
             it = it2;
         }
         canvas.restore();
@@ -169,10 +166,7 @@ public abstract class BaseWaterMarkDrawable {
         }
         this.mWaterMarkData.setImage(this.mWaterMarkBitmap);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("end make water mark...time consuming：");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        Log.e(str, sb.toString());
+        Log.e(str, "end make water mark...time consuming：" + (System.currentTimeMillis() - currentTimeMillis));
     }
 
     public void setWaterMarkInfos(List<WaterMarkData> list) {

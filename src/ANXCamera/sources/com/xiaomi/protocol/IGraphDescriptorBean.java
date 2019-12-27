@@ -2,10 +2,9 @@ package com.xiaomi.protocol;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public final class IGraphDescriptorBean implements Parcelable {
-    public static final Creator<IGraphDescriptorBean> CREATOR = new Creator<IGraphDescriptorBean>() {
+    public static final Parcelable.Creator<IGraphDescriptorBean> CREATOR = new Parcelable.Creator<IGraphDescriptorBean>() {
         public IGraphDescriptorBean createFromParcel(Parcel parcel) {
             return new IGraphDescriptorBean(parcel);
         }
@@ -38,10 +37,7 @@ public final class IGraphDescriptorBean implements Parcelable {
         this.mStreamNumber = parcel.readInt();
         boolean z = true;
         this.mIsSnapshot = parcel.readByte() != 0;
-        if (parcel.readByte() == 0) {
-            z = false;
-        }
-        this.mIsFrontCamera = z;
+        this.mIsFrontCamera = parcel.readByte() == 0 ? false : z;
     }
 
     public int describeContents() {

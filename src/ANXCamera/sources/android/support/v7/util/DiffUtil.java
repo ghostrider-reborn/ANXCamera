@@ -3,7 +3,7 @@ package android.support.v7.util;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class DiffUtil {
         }
 
         private void addRootSnake() {
-            Snake snake = this.mSnakes.isEmpty() ? null : (Snake) this.mSnakes.get(0);
+            Snake snake = this.mSnakes.isEmpty() ? null : this.mSnakes.get(0);
             if (snake == null || snake.x != 0 || snake.y != 0) {
                 Snake snake2 = new Snake();
                 snake2.x = 0;
@@ -98,12 +98,7 @@ public class DiffUtil {
                 } else if (i6 == 16) {
                     list.add(new PostponedUpdate(i5, i, false));
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("unknown flag for pos ");
-                    sb.append(i5);
-                    sb.append(" ");
-                    sb.append(Long.toBinaryString((long) i6));
-                    throw new IllegalStateException(sb.toString());
+                    throw new IllegalStateException("unknown flag for pos " + i5 + " " + Long.toBinaryString((long) i6));
                 }
             }
         }
@@ -131,12 +126,7 @@ public class DiffUtil {
                 } else if (i6 == 16) {
                     list.add(new PostponedUpdate(i5, i + i4, true));
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("unknown flag for pos ");
-                    sb.append(i5);
-                    sb.append(" ");
-                    sb.append(Long.toBinaryString((long) i6));
-                    throw new IllegalStateException(sb.toString());
+                    throw new IllegalStateException("unknown flag for pos " + i5 + " " + Long.toBinaryString((long) i6));
                 }
             }
         }
@@ -159,7 +149,7 @@ public class DiffUtil {
                 i4 = i5;
             }
             while (i3 >= 0) {
-                Snake snake = (Snake) this.mSnakes.get(i3);
+                Snake snake = this.mSnakes.get(i3);
                 int i6 = snake.x;
                 int i7 = snake.size;
                 int i8 = i6 + i7;
@@ -202,7 +192,7 @@ public class DiffUtil {
             int i = this.mOldListSize;
             int i2 = this.mNewListSize;
             for (int size = this.mSnakes.size() - 1; size >= 0; size--) {
-                Snake snake = (Snake) this.mSnakes.get(size);
+                Snake snake = this.mSnakes.get(size);
                 int i3 = snake.x;
                 int i4 = snake.size;
                 int i5 = i3 + i4;
@@ -238,12 +228,11 @@ public class DiffUtil {
         private static PostponedUpdate removePostponedUpdate(List<PostponedUpdate> list, int i, boolean z) {
             int size = list.size() - 1;
             while (size >= 0) {
-                PostponedUpdate postponedUpdate = (PostponedUpdate) list.get(size);
+                PostponedUpdate postponedUpdate = list.get(size);
                 if (postponedUpdate.posInOwnerList == i && postponedUpdate.removal == z) {
                     list.remove(size);
                     while (size < list.size()) {
-                        PostponedUpdate postponedUpdate2 = (PostponedUpdate) list.get(size);
-                        postponedUpdate2.currentPos += z ? 1 : -1;
+                        list.get(size).currentPos += z ? 1 : -1;
                         size++;
                     }
                     return postponedUpdate;
@@ -259,7 +248,7 @@ public class DiffUtil {
             int i = this.mOldListSize;
             int i2 = this.mNewListSize;
             for (int size = this.mSnakes.size() - 1; size >= 0; size--) {
-                Snake snake = (Snake) this.mSnakes.get(size);
+                Snake snake = this.mSnakes.get(size);
                 int i3 = snake.size;
                 int i4 = snake.x + i3;
                 int i5 = snake.y + i3;
@@ -282,11 +271,11 @@ public class DiffUtil {
             batchingListUpdateCallback.dispatchLastEvent();
         }
 
-        public void dispatchUpdatesTo(@NonNull Adapter adapter) {
+        public void dispatchUpdatesTo(@NonNull RecyclerView.Adapter adapter) {
             dispatchUpdatesTo((ListUpdateCallback) new AdapterListUpdateCallback(adapter));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         @VisibleForTesting
         public List<Snake> getSnakes() {
             return this.mSnakes;
@@ -413,177 +402,132 @@ public class DiffUtil {
         return diffResult;
     }
 
-    /* JADX WARNING: type inference failed for: r10v0 */
-    /* JADX WARNING: type inference failed for: r10v1 */
-    /* JADX WARNING: type inference failed for: r10v2 */
-    /* JADX WARNING: type inference failed for: r5v3 */
-    /* JADX WARNING: type inference failed for: r5v4 */
-    /* JADX WARNING: type inference failed for: r10v5 */
-    /* JADX WARNING: type inference failed for: r14v0, types: [boolean] */
-    /* JADX WARNING: type inference failed for: r5v6 */
-    /* JADX WARNING: type inference failed for: r14v1 */
-    /* JADX WARNING: type inference failed for: r14v2 */
-    /* JADX WARNING: type inference failed for: r14v5, types: [boolean] */
-    /* JADX WARNING: type inference failed for: r10v7 */
-    /* JADX WARNING: type inference failed for: r14v6 */
-    /* JADX WARNING: type inference failed for: r14v7 */
-    /* JADX WARNING: type inference failed for: r10v14 */
-    /* JADX WARNING: type inference failed for: r10v15 */
-    /* JADX WARNING: type inference failed for: r10v16 */
-    /* JADX WARNING: type inference failed for: r5v16 */
     /* JADX WARNING: Code restructure failed: missing block: B:14:0x0042, code lost:
-        if (r1[r13 - 1] < r1[r13 + r5]) goto L_0x004d;
+        if (r1[r13 - 1] < r1[(r26 + r12) + r5]) goto L_0x004d;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:41:0x00ba, code lost:
-        if (r2[r13 - 1] < r2[r13 + 1]) goto L_0x00c7;
+        if (r2[r13 - 1] < r2[(r26 + r12) + 1]) goto L_0x00c7;
      */
-    /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r10v1
-  assigns: []
-  uses: []
-  mth insns count: 161
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-    	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-    	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-    	at jadx.core.ProcessClass.lambda$processDependencies$0(ProcessClass.java:49)
-    	at java.util.ArrayList.forEach(Unknown Source)
-    	at jadx.core.ProcessClass.processDependencies(ProcessClass.java:49)
-    	at jadx.core.ProcessClass.process(ProcessClass.java:35)
-    	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-    	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-    	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-     */
-    /* JADX WARNING: Unknown variable types count: 8 */
     private static Snake diffPartial(Callback callback, int i, int i2, int i3, int i4, int[] iArr, int[] iArr2, int i5) {
-        ? r14;
+        boolean z;
         int i6;
         int i7;
         int i8;
+        boolean z2;
+        boolean z3;
         int i9;
-        ? r142;
         int i10;
-        int i11;
         Callback callback2 = callback;
         int[] iArr3 = iArr;
         int[] iArr4 = iArr2;
-        int i12 = i2 - i;
-        int i13 = i4 - i3;
-        int i14 = 1;
-        if (i12 < 1 || i13 < 1) {
+        int i11 = i2 - i;
+        int i12 = i4 - i3;
+        boolean z4 = true;
+        if (i11 < 1 || i12 < 1) {
             return null;
         }
-        int i15 = i12 - i13;
-        int i16 = ((i12 + i13) + 1) / 2;
-        int i17 = (i5 - i16) - 1;
-        int i18 = i5 + i16 + 1;
-        ? r10 = 0;
-        Arrays.fill(iArr3, i17, i18, 0);
-        Arrays.fill(iArr4, i17 + i15, i18 + i15, i12);
-        boolean z = i15 % 2 != 0;
-        int i19 = 0;
-        ? r102 = r10;
-        while (i19 <= i16) {
-            int i20 = -i19;
-            int i21 = i20;
-            ? r103 = r102;
-            while (i21 <= i19) {
-                if (i21 != i20) {
-                    if (i21 != i19) {
-                        int i22 = i5 + i21;
+        int i13 = i11 - i12;
+        int i14 = ((i11 + i12) + 1) / 2;
+        int i15 = (i5 - i14) - 1;
+        int i16 = i5 + i14 + 1;
+        boolean z5 = false;
+        Arrays.fill(iArr3, i15, i16, 0);
+        Arrays.fill(iArr4, i15 + i13, i16 + i13, i11);
+        boolean z6 = i13 % 2 != 0;
+        int i17 = 0;
+        while (i17 <= i14) {
+            int i18 = -i17;
+            int i19 = i18;
+            while (i19 <= i17) {
+                if (i19 != i18) {
+                    if (i19 != i17) {
                     }
-                    i10 = iArr3[(i5 + i21) - i14] + i14;
-                    r142 = i14;
-                    i11 = i10 - i21;
-                    while (i10 < i12 && i11 < i13 && callback2.areItemsTheSame(i + i10, i3 + i11)) {
+                    i9 = iArr3[(i5 + i19) - z4] + z4;
+                    z3 = z4;
+                    i10 = i9 - i19;
+                    while (i9 < i11 && i10 < i12 && callback2.areItemsTheSame(i + i9, i3 + i10)) {
+                        i9++;
                         i10++;
-                        i11++;
                     }
-                    int i23 = i5 + i21;
-                    iArr3[i23] = i10;
-                    if (z || i21 < (i15 - i19) + 1 || i21 > (i15 + i19) - 1 || iArr3[i23] < iArr4[i23]) {
-                        i21 += 2;
-                        r103 = 0;
-                        i14 = 1;
+                    int i20 = i5 + i19;
+                    iArr3[i20] = i9;
+                    if (z6 || i19 < (i13 - i17) + 1 || i19 > (i13 + i17) - 1 || iArr3[i20] < iArr4[i20]) {
+                        i19 += 2;
+                        z5 = false;
+                        z4 = true;
                     } else {
                         Snake snake = new Snake();
-                        snake.x = iArr4[i23];
-                        snake.y = snake.x - i21;
-                        snake.size = iArr3[i23] - iArr4[i23];
-                        snake.removal = r142;
+                        snake.x = iArr4[i20];
+                        snake.y = snake.x - i19;
+                        snake.size = iArr3[i20] - iArr4[i20];
+                        snake.removal = z3;
                         snake.reverse = false;
                         return snake;
                     }
                 }
-                i10 = iArr3[i5 + i21 + i14];
-                r142 = r103;
-                i11 = i10 - i21;
-                while (i10 < i12) {
+                i9 = iArr3[i5 + i19 + (z4 ? 1 : 0)];
+                z3 = z5;
+                i10 = i9 - i19;
+                while (i9 < i11) {
+                    i9++;
                     i10++;
-                    i11++;
                 }
-                int i232 = i5 + i21;
-                iArr3[i232] = i10;
-                if (z) {
+                int i202 = i5 + i19;
+                iArr3[i202] = i9;
+                if (z6) {
                 }
-                i21 += 2;
-                r103 = 0;
-                i14 = 1;
+                i19 += 2;
+                z5 = false;
+                z4 = true;
             }
-            ? r5 = r103;
-            int i24 = i20;
-            while (i24 <= i19) {
-                int i25 = i24 + i15;
-                if (i25 != i19 + i15) {
-                    if (i25 != i20 + i15) {
-                        int i26 = i5 + i25;
-                        i9 = 1;
+            boolean z7 = z5;
+            int i21 = i18;
+            while (i21 <= i17) {
+                int i22 = i21 + i13;
+                if (i22 != i17 + i13) {
+                    if (i22 != i18 + i13) {
+                        z2 = true;
                     } else {
-                        i9 = 1;
+                        z2 = true;
                     }
-                    i6 = iArr4[(i5 + i25) + i9] - i9;
-                    r14 = i9;
-                    i7 = i6 - i25;
+                    i6 = iArr4[(i5 + i22) + (z2 ? 1 : 0)] - z2;
+                    z = z2;
+                    i7 = i6 - i22;
                     while (true) {
                         if (i6 > 0 && i7 > 0) {
-                            i8 = i12;
+                            i8 = i11;
                             if (!callback2.areItemsTheSame((i + i6) - 1, (i3 + i7) - 1)) {
                                 break;
                             }
                             i6--;
                             i7--;
-                            i12 = i8;
+                            i11 = i8;
                         } else {
-                            i8 = i12;
+                            i8 = i11;
                         }
                     }
-                    i8 = i12;
-                    int i27 = i5 + i25;
-                    iArr4[i27] = i6;
-                    if (!z || i25 < i20 || i25 > i19 || iArr3[i27] < iArr4[i27]) {
-                        i24 += 2;
-                        i12 = i8;
-                        r5 = 0;
+                    i8 = i11;
+                    int i23 = i5 + i22;
+                    iArr4[i23] = i6;
+                    if (!z6 || i22 < i18 || i22 > i17 || iArr3[i23] < iArr4[i23]) {
+                        i21 += 2;
+                        i11 = i8;
+                        z7 = false;
                     } else {
                         Snake snake2 = new Snake();
-                        snake2.x = iArr4[i27];
-                        snake2.y = snake2.x - i25;
-                        snake2.size = iArr3[i27] - iArr4[i27];
-                        snake2.removal = r14;
+                        snake2.x = iArr4[i23];
+                        snake2.y = snake2.x - i22;
+                        snake2.size = iArr3[i23] - iArr4[i23];
+                        snake2.removal = z;
                         snake2.reverse = true;
                         return snake2;
                     }
                 } else {
-                    i9 = 1;
+                    z2 = true;
                 }
-                i6 = iArr4[(i5 + i25) - i9];
-                r14 = r5;
-                i7 = i6 - i25;
+                i6 = iArr4[(i5 + i22) - (z2 ? 1 : 0)];
+                z = z7;
+                i7 = i6 - i22;
                 while (true) {
                     if (i6 > 0) {
                         break;
@@ -591,21 +535,21 @@ public class DiffUtil {
                     break;
                     i6--;
                     i7--;
-                    i12 = i8;
+                    i11 = i8;
                 }
-                i8 = i12;
-                int i272 = i5 + i25;
-                iArr4[i272] = i6;
-                if (!z) {
+                i8 = i11;
+                int i232 = i5 + i22;
+                iArr4[i232] = i6;
+                if (!z6) {
                 }
-                i24 += 2;
-                i12 = i8;
-                r5 = 0;
+                i21 += 2;
+                i11 = i8;
+                z7 = false;
             }
-            i19++;
-            i14 = 1;
-            i12 = i12;
-            r102 = 0;
+            i17++;
+            z4 = true;
+            i11 = i11;
+            z5 = false;
         }
         throw new IllegalStateException("DiffUtil hit an unexpected case while trying to calculate the optimal path. Please make sure your data is not changing during the diff calculation.");
     }

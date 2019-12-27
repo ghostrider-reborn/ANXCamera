@@ -1,7 +1,7 @@
 package com.android.volley.toolbox;
 
 import android.os.SystemClock;
-import com.android.volley.Cache.Entry;
+import com.android.volley.Cache;
 import com.android.volley.Header;
 import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
@@ -67,7 +67,7 @@ public class BasicNetwork implements Network {
         }
     }
 
-    private static List<Header> combineHeaders(List<Header> list, Entry entry) {
+    private static List<Header> combineHeaders(List<Header> list, Cache.Entry entry) {
         TreeSet treeSet = new TreeSet(String.CASE_INSENSITIVE_ORDER);
         if (!list.isEmpty()) {
             for (Header name : list) {
@@ -78,16 +78,16 @@ public class BasicNetwork implements Network {
         List<Header> list2 = entry.allResponseHeaders;
         if (list2 != null) {
             if (!list2.isEmpty()) {
-                for (Header header : entry.allResponseHeaders) {
-                    if (!treeSet.contains(header.getName())) {
-                        arrayList.add(header);
+                for (Header next : entry.allResponseHeaders) {
+                    if (!treeSet.contains(next.getName())) {
+                        arrayList.add(next);
                     }
                 }
             }
         } else if (!entry.responseHeaders.isEmpty()) {
-            for (Map.Entry entry2 : entry.responseHeaders.entrySet()) {
-                if (!treeSet.contains(entry2.getKey())) {
-                    arrayList.add(new Header((String) entry2.getKey(), (String) entry2.getValue()));
+            for (Map.Entry next2 : entry.responseHeaders.entrySet()) {
+                if (!treeSet.contains(next2.getKey())) {
+                    arrayList.add(new Header((String) next2.getKey(), (String) next2.getValue()));
                 }
             }
         }
@@ -103,7 +103,7 @@ public class BasicNetwork implements Network {
         return treeMap;
     }
 
-    private Map<String, String> getCacheHeaders(Entry entry) {
+    private Map<String, String> getCacheHeaders(Cache.Entry entry) {
         if (entry == null) {
             return Collections.emptyMap();
         }
@@ -121,7 +121,6 @@ public class BasicNetwork implements Network {
 
     private byte[] inputStreamToBytes(InputStream inputStream, int i) throws IOException, ServerError {
         PoolingByteArrayOutputStream poolingByteArrayOutputStream = new PoolingByteArrayOutputStream(this.mPool, i);
-        String str = "Error occurred when closing InputStream";
         byte[] bArr = null;
         if (inputStream != null) {
             try {
@@ -133,21 +132,13 @@ public class BasicNetwork implements Network {
                     }
                     poolingByteArrayOutputStream.write(bArr, 0, read);
                 }
-                byte[] byteArray = poolingByteArrayOutputStream.toByteArray();
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (IOException unused) {
-                        VolleyLog.v(str, new Object[0]);
-                    }
-                }
-                return byteArray;
+                return poolingByteArrayOutputStream.toByteArray();
             } finally {
                 if (inputStream != null) {
                     try {
                         inputStream.close();
-                    } catch (IOException unused2) {
-                        VolleyLog.v(str, new Object[0]);
+                    } catch (IOException unused) {
+                        VolleyLog.v("Error occurred when closing InputStream", new Object[0]);
                     }
                 }
                 this.mPool.returnBuf(bArr);
@@ -175,8 +166,6 @@ public class BasicNetwork implements Network {
         VolleyLog.v("HTTP ERROR(%s) %d ms to fetch %s", str, Long.valueOf(SystemClock.elapsedRealtime() - j), str2);
     }
 
-    /* JADX INFO: used method not loaded: com.android.volley.NetworkResponse.<init>(int, byte[], boolean, long, java.util.List):null, types can be incorrect */
-    /* JADX INFO: used method not loaded: com.android.volley.AuthFailureError.<init>(com.android.volley.NetworkResponse):null, types can be incorrect */
     /* JADX WARNING: Code restructure failed: missing block: B:15:0x005d, code lost:
         r0 = e;
      */
@@ -254,13 +243,8 @@ public class BasicNetwork implements Network {
     /* JADX WARNING: Code restructure failed: missing block: B:75:0x0147, code lost:
         r0 = move-exception;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:76:0x0148, code lost:
-        r2 = new java.lang.StringBuilder();
-        r2.append("Bad URL ");
-        r2.append(r29.getUrl());
-     */
     /* JADX WARNING: Code restructure failed: missing block: B:77:0x0162, code lost:
-        throw new java.lang.RuntimeException(r2.toString(), r0);
+        throw new java.lang.RuntimeException("Bad URL " + r29.getUrl(), r0);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:78:0x0163, code lost:
         attemptRetryOnException("socket", r8, new com.android.volley.TimeoutError());
@@ -272,19 +256,19 @@ public class BasicNetwork implements Network {
     /* JADX WARNING: Removed duplicated region for block: B:86:0x0141 A[SYNTHETIC] */
     public NetworkResponse performRequest(Request<?> request) throws VolleyError {
         HttpResponse httpResponse;
-        List headers;
+        List<Header> headers;
         byte[] inputStreamToBytes;
-        List list;
+        List<Header> list;
         Request<?> request2 = request;
         long elapsedRealtime = SystemClock.elapsedRealtime();
         while (true) {
-            List emptyList = Collections.emptyList();
+            List<Header> emptyList = Collections.emptyList();
             try {
                 httpResponse = this.mBaseHttpStack.executeRequest(request2, getCacheHeaders(request.getCacheEntry()));
                 int statusCode = httpResponse.getStatusCode();
                 headers = httpResponse.getHeaders();
                 if (statusCode == 304) {
-                    Entry cacheEntry = request.getCacheEntry();
+                    Cache.Entry cacheEntry = request.getCacheEntry();
                     if (cacheEntry == null) {
                         NetworkResponse networkResponse = new NetworkResponse(304, (byte[]) null, true, SystemClock.elapsedRealtime() - elapsedRealtime, headers);
                         return networkResponse;
@@ -296,7 +280,7 @@ public class BasicNetwork implements Network {
                 inputStreamToBytes = content != null ? inputStreamToBytes(content, httpResponse.getContentLength()) : new byte[0];
                 logSlowRequests(SystemClock.elapsedRealtime() - elapsedRealtime, request, inputStreamToBytes, statusCode);
                 if (statusCode < 200 || statusCode > 299) {
-                    List list2 = headers;
+                    List<Header> list2 = headers;
                 } else {
                     list = headers;
                     r13 = r13;
@@ -308,13 +292,13 @@ public class BasicNetwork implements Network {
             } catch (IOException e3) {
                 e = e3;
                 list = headers;
-                List list3 = list;
+                List<Header> list3 = list;
                 byte[] bArr = inputStreamToBytes;
                 if (httpResponse == null) {
                 }
             }
         }
-        List list22 = headers;
+        List<Header> list22 = headers;
         throw new IOException();
     }
 }

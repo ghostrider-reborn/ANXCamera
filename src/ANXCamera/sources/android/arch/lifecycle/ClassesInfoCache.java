@@ -1,6 +1,6 @@
 package android.arch.lifecycle;
 
-import android.arch.lifecycle.Lifecycle.Event;
+import android.arch.lifecycle.Lifecycle;
 import android.support.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 class ClassesInfoCache {
     private static final int CALL_TYPE_NO_ARG = 0;
@@ -19,34 +18,34 @@ class ClassesInfoCache {
     private final Map<Class, Boolean> mHasLifecycleMethods = new HashMap();
 
     static class CallbackInfo {
-        final Map<Event, List<MethodReference>> mEventToHandlers = new HashMap();
-        final Map<MethodReference, Event> mHandlerToEvent;
+        final Map<Lifecycle.Event, List<MethodReference>> mEventToHandlers = new HashMap();
+        final Map<MethodReference, Lifecycle.Event> mHandlerToEvent;
 
-        CallbackInfo(Map<MethodReference, Event> map) {
+        CallbackInfo(Map<MethodReference, Lifecycle.Event> map) {
             this.mHandlerToEvent = map;
-            for (Entry entry : map.entrySet()) {
-                Event event = (Event) entry.getValue();
-                List list = (List) this.mEventToHandlers.get(event);
+            for (Map.Entry next : map.entrySet()) {
+                Lifecycle.Event event = (Lifecycle.Event) next.getValue();
+                List list = this.mEventToHandlers.get(event);
                 if (list == null) {
                     list = new ArrayList();
                     this.mEventToHandlers.put(event, list);
                 }
-                list.add(entry.getKey());
+                list.add(next.getKey());
             }
         }
 
-        private static void invokeMethodsForEvent(List<MethodReference> list, LifecycleOwner lifecycleOwner, Event event, Object obj) {
+        private static void invokeMethodsForEvent(List<MethodReference> list, LifecycleOwner lifecycleOwner, Lifecycle.Event event, Object obj) {
             if (list != null) {
                 for (int size = list.size() - 1; size >= 0; size--) {
-                    ((MethodReference) list.get(size)).invokeCallback(lifecycleOwner, event, obj);
+                    list.get(size).invokeCallback(lifecycleOwner, event, obj);
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
-        public void invokeCallbacks(LifecycleOwner lifecycleOwner, Event event, Object obj) {
-            invokeMethodsForEvent((List) this.mEventToHandlers.get(event), lifecycleOwner, event, obj);
-            invokeMethodsForEvent((List) this.mEventToHandlers.get(Event.ON_ANY), lifecycleOwner, event, obj);
+        /* access modifiers changed from: package-private */
+        public void invokeCallbacks(LifecycleOwner lifecycleOwner, Lifecycle.Event event, Object obj) {
+            invokeMethodsForEvent(this.mEventToHandlers.get(event), lifecycleOwner, event, obj);
+            invokeMethodsForEvent(this.mEventToHandlers.get(Lifecycle.Event.ON_ANY), lifecycleOwner, event, obj);
         }
     }
 
@@ -61,7 +60,6 @@ class ClassesInfoCache {
         }
 
         public boolean equals(Object obj) {
-            boolean z = true;
             if (this == obj) {
                 return true;
             }
@@ -69,18 +67,15 @@ class ClassesInfoCache {
                 return false;
             }
             MethodReference methodReference = (MethodReference) obj;
-            if (this.mCallType != methodReference.mCallType || !this.mMethod.getName().equals(methodReference.mMethod.getName())) {
-                z = false;
-            }
-            return z;
+            return this.mCallType == methodReference.mCallType && this.mMethod.getName().equals(methodReference.mMethod.getName());
         }
 
         public int hashCode() {
             return (this.mCallType * 31) + this.mMethod.getName().hashCode();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void invokeCallback(LifecycleOwner lifecycleOwner, Event event, Object obj) {
+        /* access modifiers changed from: package-private */
+        public void invokeCallback(LifecycleOwner lifecycleOwner, Lifecycle.Event event, Object obj) {
             try {
                 int i = this.mCallType;
                 if (i == 0) {
@@ -112,8 +107,8 @@ class ClassesInfoCache {
             }
         }
         for (Class info2 : cls.getInterfaces()) {
-            for (Entry entry : getInfo(info2).mHandlerToEvent.entrySet()) {
-                verifyAndPutHandler(hashMap, (MethodReference) entry.getKey(), (Event) entry.getValue(), cls);
+            for (Map.Entry next : getInfo(info2).mHandlerToEvent.entrySet()) {
+                verifyAndPutHandler(hashMap, (MethodReference) next.getKey(), (Lifecycle.Event) next.getValue(), cls);
             }
         }
         if (methodArr == null) {
@@ -131,11 +126,11 @@ class ClassesInfoCache {
                 } else {
                     throw new IllegalArgumentException("invalid parameter type. Must be one and instanceof LifecycleOwner");
                 }
-                Event value = onLifecycleEvent.value();
+                Lifecycle.Event value = onLifecycleEvent.value();
                 if (parameterTypes.length > 1) {
-                    if (!parameterTypes[1].isAssignableFrom(Event.class)) {
+                    if (!parameterTypes[1].isAssignableFrom(Lifecycle.Event.class)) {
                         throw new IllegalArgumentException("invalid parameter type. second arg must be an event");
-                    } else if (value == Event.ON_ANY) {
+                    } else if (value == Lifecycle.Event.ON_ANY) {
                         i = 2;
                     } else {
                         throw new IllegalArgumentException("Second arg is supported only for ON_ANY value");
@@ -163,35 +158,26 @@ class ClassesInfoCache {
         }
     }
 
-    private void verifyAndPutHandler(Map<MethodReference, Event> map, MethodReference methodReference, Event event, Class cls) {
-        Event event2 = (Event) map.get(methodReference);
+    private void verifyAndPutHandler(Map<MethodReference, Lifecycle.Event> map, MethodReference methodReference, Lifecycle.Event event, Class cls) {
+        Lifecycle.Event event2 = map.get(methodReference);
         if (event2 != null && event != event2) {
             Method method = methodReference.mMethod;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Method ");
-            sb.append(method.getName());
-            sb.append(" in ");
-            sb.append(cls.getName());
-            sb.append(" already declared with different @OnLifecycleEvent value: previous value ");
-            sb.append(event2);
-            sb.append(", new value ");
-            sb.append(event);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Method " + method.getName() + " in " + cls.getName() + " already declared with different @OnLifecycleEvent value: previous value " + event2 + ", new value " + event);
         } else if (event2 == null) {
             map.put(methodReference, event);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public CallbackInfo getInfo(Class cls) {
-        CallbackInfo callbackInfo = (CallbackInfo) this.mCallbackMap.get(cls);
-        return callbackInfo != null ? callbackInfo : createInfo(cls, null);
+        CallbackInfo callbackInfo = this.mCallbackMap.get(cls);
+        return callbackInfo != null ? callbackInfo : createInfo(cls, (Method[]) null);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean hasLifecycleMethods(Class cls) {
         if (this.mHasLifecycleMethods.containsKey(cls)) {
-            return ((Boolean) this.mHasLifecycleMethods.get(cls)).booleanValue();
+            return this.mHasLifecycleMethods.get(cls).booleanValue();
         }
         Method[] declaredMethods = getDeclaredMethods(cls);
         for (Method annotation : declaredMethods) {
@@ -200,7 +186,7 @@ class ClassesInfoCache {
                 return true;
             }
         }
-        this.mHasLifecycleMethods.put(cls, Boolean.valueOf(false));
+        this.mHasLifecycleMethods.put(cls, false);
         return false;
     }
 }

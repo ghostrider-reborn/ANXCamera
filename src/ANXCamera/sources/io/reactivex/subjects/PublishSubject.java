@@ -63,7 +63,7 @@ public final class PublishSubject<T> extends Subject<T> {
         return new PublishSubject<>();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(PublishDisposable<T> publishDisposable) {
         PublishDisposable[] publishDisposableArr;
         PublishDisposable[] publishDisposableArr2;
@@ -100,10 +100,10 @@ public final class PublishSubject<T> extends Subject<T> {
     }
 
     public void onComplete() {
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj != obj2) {
-            for (PublishDisposable onComplete : (PublishDisposable[]) this.subscribers.getAndSet(obj2)) {
+        PublishDisposable<T>[] publishDisposableArr = this.subscribers.get();
+        PublishDisposable<T>[] publishDisposableArr2 = TERMINATED;
+        if (publishDisposableArr != publishDisposableArr2) {
+            for (PublishDisposable onComplete : (PublishDisposable[]) this.subscribers.getAndSet(publishDisposableArr2)) {
                 onComplete.onComplete();
             }
         }
@@ -111,14 +111,14 @@ public final class PublishSubject<T> extends Subject<T> {
 
     public void onError(Throwable th) {
         ObjectHelper.requireNonNull(th, "onError called with null. Null values are generally not allowed in 2.x operators and sources.");
-        Object obj = this.subscribers.get();
-        Object obj2 = TERMINATED;
-        if (obj == obj2) {
+        PublishDisposable<T>[] publishDisposableArr = this.subscribers.get();
+        PublishDisposable<T>[] publishDisposableArr2 = TERMINATED;
+        if (publishDisposableArr == publishDisposableArr2) {
             RxJavaPlugins.onError(th);
             return;
         }
         this.error = th;
-        for (PublishDisposable onError : (PublishDisposable[]) this.subscribers.getAndSet(obj2)) {
+        for (PublishDisposable onError : (PublishDisposable[]) this.subscribers.getAndSet(publishDisposableArr2)) {
             onError.onError(th);
         }
     }
@@ -138,7 +138,7 @@ public final class PublishSubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(PublishDisposable<T> publishDisposable) {
         PublishDisposable<T>[] publishDisposableArr;
         PublishDisposable[] publishDisposableArr2;
@@ -170,6 +170,8 @@ public final class PublishSubject<T> extends Subject<T> {
                 } else {
                     return;
                 }
+            } else {
+                return;
             }
         } while (!this.subscribers.compareAndSet(publishDisposableArr, publishDisposableArr2));
     }

@@ -131,12 +131,12 @@ public class GLCanvasState {
 
     public void popState() {
         if (!this.mCanvasStateStack.isEmpty()) {
-            CanvasStateConfig canvasStateConfig = (CanvasStateConfig) this.mCanvasStateStack.pop();
-            if (canvasStateConfig != null) {
-                this.mModelMatrix = canvasStateConfig.getModelMatrix();
-                this.mTexMatrix = canvasStateConfig.getTexMatrix();
-                this.mAlpha = canvasStateConfig.getAlpha();
-                this.mBlendAlpha = canvasStateConfig.getBlendAlpha();
+            CanvasStateConfig pop = this.mCanvasStateStack.pop();
+            if (pop != null) {
+                this.mModelMatrix = pop.getModelMatrix();
+                this.mTexMatrix = pop.getTexMatrix();
+                this.mAlpha = pop.getAlpha();
+                this.mBlendAlpha = pop.getBlendAlpha();
                 return;
             }
             throw new IllegalStateException();

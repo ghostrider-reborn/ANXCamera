@@ -8,7 +8,7 @@ import java.io.File;
 /* compiled from: DiskCache */
 public interface a {
 
-    /* renamed from: com.bumptech.glide.load.engine.a.a$a reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.load.engine.a.a$a  reason: collision with other inner class name */
     /* compiled from: DiskCache */
     public interface C0007a {
         public static final String Jb = "image_manager_disk_cache";

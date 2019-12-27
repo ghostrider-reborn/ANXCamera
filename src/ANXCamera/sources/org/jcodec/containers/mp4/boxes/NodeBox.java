@@ -15,7 +15,7 @@ import org.jcodec.platform.Platform;
 
 public class NodeBox extends Box {
     protected List<Box> boxes = new LinkedList();
-    protected IBoxFactory factory = new SimpleBoxFactory(new LocalBoxes());
+    protected IBoxFactory factory;
 
     public NodeBox(Header header) {
         super(header);
@@ -57,15 +57,15 @@ public class NodeBox extends Box {
 
     public static void findBox(Box box, List<String> list, Collection<Box> collection) {
         if (list.size() > 0) {
-            String str = (String) list.remove(0);
+            String remove = list.remove(0);
             if (box instanceof NodeBox) {
-                for (Box box2 : ((NodeBox) box).getBoxes()) {
-                    if (str == null || str.equals(box2.header.getFourcc())) {
-                        findBox(box2, list, collection);
+                for (Box next : ((NodeBox) box).getBoxes()) {
+                    if (remove == null || remove.equals(next.header.getFourcc())) {
+                        findBox(next, list, collection);
                     }
                 }
             }
-            list.add(0, str);
+            list.add(0, remove);
             return;
         }
         collection.add(box);
@@ -81,9 +81,7 @@ public class NodeBox extends Box {
         if (box != null) {
             if (str.equals(box.getHeader().getFourcc())) {
                 list.add(box);
-                return;
-            }
-            if (box instanceof NodeBox) {
+            } else if (box instanceof NodeBox) {
                 for (Box findDeepInner : ((NodeBox) box).getBoxes()) {
                     findDeepInner(findDeepInner, cls, str, list);
                 }
@@ -108,15 +106,14 @@ public class NodeBox extends Box {
         while (byteBuffer.remaining() >= 4 && duplicate.getInt() == 0) {
             byteBuffer.getInt();
         }
-        Box box = null;
         if (byteBuffer.remaining() < 4) {
             return null;
         }
         Header read = Header.read(byteBuffer);
-        if (read != null && ((long) byteBuffer.remaining()) >= read.getBodySize()) {
-            box = Box.parseBox(NIOUtils.read(byteBuffer, (int) read.getBodySize()), read, iBoxFactory);
+        if (read == null || ((long) byteBuffer.remaining()) < read.getBodySize()) {
+            return null;
         }
-        return box;
+        return Box.parseBox(NIOUtils.read(byteBuffer, (int) read.getBodySize()), read, iBoxFactory);
     }
 
     public void add(Box box) {
@@ -136,11 +133,7 @@ public class NodeBox extends Box {
 
     /* access modifiers changed from: protected */
     public void dump(StringBuilder sb) {
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("{\"tag\":\"");
-        sb2.append(this.header.getFourcc());
-        sb2.append("\",");
-        sb.append(sb2.toString());
+        sb.append("{\"tag\":\"" + this.header.getFourcc() + "\",");
         sb.append("\"boxes\": [");
         dumpBoxes(sb);
         sb.append("]");
@@ -150,7 +143,7 @@ public class NodeBox extends Box {
     /* access modifiers changed from: protected */
     public void dumpBoxes(StringBuilder sb) {
         for (int i = 0; i < this.boxes.size(); i++) {
-            ((Box) this.boxes.get(i)).dump(sb);
+            this.boxes.get(i).dump(sb);
             if (i < this.boxes.size() - 1) {
                 sb.append(",");
             }
@@ -179,9 +172,9 @@ public class NodeBox extends Box {
     }
 
     public void removeChildren(String[] strArr) {
-        Iterator it = this.boxes.iterator();
+        Iterator<Box> it = this.boxes.iterator();
         while (it.hasNext()) {
-            String fourcc = ((Box) it.next()).getFourcc();
+            String fourcc = it.next().getFourcc();
             int i = 0;
             while (true) {
                 if (i >= strArr.length) {

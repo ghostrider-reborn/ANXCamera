@@ -26,7 +26,7 @@ class FieldData implements Cloneable {
         return bArr;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addUnknownField(UnknownFieldData unknownFieldData2) throws IOException {
         Object obj;
         List<UnknownFieldData> list = this.unknownFieldData;
@@ -47,9 +47,9 @@ class FieldData implements Cloneable {
         } else if (obj2 instanceof MessageNano[]) {
             MessageNano[] messageNanoArr = (MessageNano[]) this.cachedExtension.getValueFrom(Collections.singletonList(unknownFieldData2));
             MessageNano[] messageNanoArr2 = (MessageNano[]) this.value;
-            Object obj3 = (MessageNano[]) Arrays.copyOf(messageNanoArr2, messageNanoArr2.length + messageNanoArr.length);
-            System.arraycopy(messageNanoArr, 0, obj3, messageNanoArr2.length, messageNanoArr.length);
-            obj = obj3;
+            MessageNano[] messageNanoArr3 = (MessageNano[]) Arrays.copyOf(messageNanoArr2, messageNanoArr2.length + messageNanoArr.length);
+            System.arraycopy(messageNanoArr, 0, messageNanoArr3, messageNanoArr2.length, messageNanoArr.length);
+            obj = messageNanoArr3;
         } else {
             obj = this.cachedExtension.getValueFrom(Collections.singletonList(unknownFieldData2));
         }
@@ -107,7 +107,7 @@ class FieldData implements Cloneable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int computeSerializedSize() {
         Object obj = this.value;
         if (obj != null) {
@@ -120,7 +120,7 @@ class FieldData implements Cloneable {
         return i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int computeSerializedSizeAsMessageSet() {
         Object obj = this.value;
         if (obj != null) {
@@ -167,16 +167,16 @@ class FieldData implements Cloneable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public UnknownFieldData getUnknownField(int i) {
         List<UnknownFieldData> list = this.unknownFieldData;
         if (list != null && i < list.size()) {
-            return (UnknownFieldData) this.unknownFieldData.get(i);
+            return this.unknownFieldData.get(i);
         }
         return null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int getUnknownFieldSize() {
         List<UnknownFieldData> list = this.unknownFieldData;
         if (list == null) {
@@ -185,7 +185,7 @@ class FieldData implements Cloneable {
         return list.size();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public <T> T getValue(Extension<?, T> extension) {
         if (this.value == null) {
             this.cachedExtension = extension;
@@ -205,14 +205,14 @@ class FieldData implements Cloneable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public <T> void setValue(Extension<?, T> extension, T t) {
         this.cachedExtension = extension;
         this.value = t;
         this.unknownFieldData = null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeAsMessageSetTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
         Object obj = this.value;
         if (obj != null) {
@@ -224,7 +224,7 @@ class FieldData implements Cloneable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
         Object obj = this.value;
         if (obj != null) {

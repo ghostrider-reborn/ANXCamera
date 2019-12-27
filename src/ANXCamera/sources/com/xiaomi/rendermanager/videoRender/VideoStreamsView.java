@@ -5,24 +5,22 @@ import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLSurfaceView.Renderer;
 import android.os.Debug;
-import android.os.Debug.MemoryInfo;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import com.android.camera.Util;
-import com.xiaomi.rendermanager.videoRender.VideoRenderer.I420Frame;
+import com.xiaomi.rendermanager.videoRender.VideoRenderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class VideoStreamsView extends GLSurfaceView implements Renderer {
+public class VideoStreamsView extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static final String FRAGMENT_SHADER_STRING = "precision mediump float;\nvarying vec2 interp_tc;\n\nuniform float width;\nuniform float height;\nuniform float width_stride;\nuniform float height_stride;\nuniform float offset;\nuniform float slope;\nuniform float sharpCoff;\nuniform float sourceCoff;\nuniform sampler2D y_tex;\nuniform sampler2D u_tex;\nuniform sampler2D v_tex;\n\nvarying highp float imageWidthFactor; \nvarying highp float imageHeightFactor; \nvarying highp vec2 leftTextureCoordinate;\nvarying highp vec2 rightTextureCoordinate; \nvarying highp vec2 topTextureCoordinate;\nvarying highp vec2 bottomTextureCoordinate;\n\nvarying highp float centerMultiplier;\nvarying highp float edgeMultiplier;\n\nuniform sampler2D inputImageTexture;\n\nvoid main() {\n  float wRatio = (width - 1.0) / width_stride;\n  float hRatio = height / height_stride;\n  vec2 pos = interp_tc * vec2(wRatio, hRatio);\n  mediump vec2 widthStep = vec2(imageWidthFactor, 0.0);\n  mediump vec2 heightStep = vec2(0.0, imageHeightFactor);\n  vec2 leftTextureCoordinate = interp_tc.xy - widthStep/width;\n  vec2 rightTextureCoordinate = interp_tc.xy + widthStep/width;\n  vec2 topTextureCoordinate = interp_tc.xy + heightStep/height;     \n  vec2 bottomTextureCoordinate = interp_tc.xy - heightStep/height;\n  vec2 lpos = leftTextureCoordinate * vec2(wRatio, hRatio);\n  vec2 rpos = rightTextureCoordinate * vec2(wRatio, hRatio);\n  vec2 tpos = topTextureCoordinate * vec2(wRatio, hRatio);\n  vec2 bpos = bottomTextureCoordinate * vec2(wRatio, hRatio);\n  mediump float ly = texture2D(y_tex, lpos).r;\n  mediump float lu = texture2D(u_tex, lpos).r - .5;\n  mediump float lv = texture2D(v_tex, lpos).r - .5;\n  mediump float ry = texture2D(y_tex, rpos).r;\n  mediump float ru = texture2D(u_tex, rpos).r - .5;\n  mediump float rv = texture2D(v_tex, rpos).r - .5;\n  mediump float ty = texture2D(y_tex, tpos).r;\n  mediump float tu = texture2D(u_tex, tpos).r - .5;\n  mediump float tv = texture2D(v_tex, tpos).r - .5;\n  mediump float by = texture2D(y_tex, bpos).r;\n  mediump float bu = texture2D(u_tex, bpos).r - .5;\n  mediump float bv = texture2D(v_tex, bpos).r - .5;\n  float y =  texture2D(y_tex, pos).r;\n  float u =  texture2D(u_tex, pos).r - .5;\n  float v =  texture2D(v_tex, pos).r - .5;\n  y = (y * centerMultiplier - (ly + ry +ty  + by) * edgeMultiplier)*sharpCoff + y*sourceCoff;\n  y = (1.0 + slope)*y  -  slope*offset;\n  gl_FragColor = vec4(y + 1.403 * v,                       y - 0.344 * u - 0.714 * v,                       y + 1.77 * u, 1);\n}\n";
     private static final int ORIENTATION_DOWN = 1;
     private static final int ORIENTATION_LEFT = 2;
@@ -61,7 +59,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
     public int currentIndex;
     private int debug_increment = 0;
     private FramePool framePool = null;
-    private I420Frame framesToRender;
+    private VideoRenderer.I420Frame framesToRender;
     private int heightLocation = -1;
     private int heightStrideLocation = -1;
     public boolean isRenderThreadRunning = false;
@@ -114,12 +112,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         int height = defaultDisplay.getHeight();
         this.screenHeight = height;
         this.screenHeight = height;
-        StringBuilder sb = new StringBuilder();
-        sb.append(" get screen resolution:");
-        sb.append(this.screenWidth);
-        sb.append("x");
-        sb.append(this.screenHeight);
-        Log.i("VideoStreamView", sb.toString());
+        Log.i("VideoStreamView", " get screen resolution:" + this.screenWidth + "x" + this.screenHeight);
         Log.i("VideoStreamView", " init OK");
     }
 
@@ -133,22 +126,13 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         int height = defaultDisplay.getHeight();
         this.screenHeight = height;
         this.screenHeight = height;
-        StringBuilder sb = new StringBuilder();
-        sb.append(" get screen resolution:");
-        sb.append(this.screenWidth);
-        sb.append("x");
-        sb.append(this.screenHeight);
-        Log.i("VideoStreamView", sb.toString());
+        Log.i("VideoStreamView", " get screen resolution:" + this.screenWidth + "x" + this.screenHeight);
         TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, new int[]{16842996, 16842997});
         int layoutDimension = obtainStyledAttributes.getLayoutDimension(0, -1);
         int layoutDimension2 = obtainStyledAttributes.getLayoutDimension(1, -1);
         obtainStyledAttributes.recycle();
-        if (layoutDimension < 0) {
-            layoutDimension = this.screenWidth;
-        }
-        if (layoutDimension2 < 0) {
-            layoutDimension2 = this.screenHeight;
-        }
+        layoutDimension = layoutDimension < 0 ? this.screenWidth : layoutDimension;
+        layoutDimension2 = layoutDimension2 < 0 ? this.screenHeight : layoutDimension2;
         this._oriViewWidth = layoutDimension;
         this._oriViewHeight = layoutDimension2;
         this.screenDimensions = new Point(this._oriViewWidth, this._oriViewHeight);
@@ -184,11 +168,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         if (iArr[0] != 1) {
             z = false;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
-        sb.append(", source: ");
-        sb.append(str);
-        abortUnless(z, sb.toString());
+        abortUnless(z, GLES20.glGetShaderInfoLog(glCreateShader) + ", source: " + str);
         GLES20.glAttachShader(i2, glCreateShader);
         checkNoGLES2Error();
         GLES20.glDeleteShader(glCreateShader);
@@ -200,16 +180,10 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
     private static void checkNoGLES2Error() {
         int glGetError = GLES20.glGetError();
         if (glGetError != 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("GLES20 error:");
-            sb.append(glGetError);
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "GLES20 error:" + glGetError);
         }
         boolean z = glGetError == 0;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("GLES20 error: ");
-        sb2.append(glGetError);
-        abortUnless(z, sb2.toString());
+        abortUnless(z, "GLES20 error: " + glGetError);
     }
 
     private native long create();
@@ -255,7 +229,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
     private void sleep(int i) {
     }
 
-    private void texImage2D(I420Frame i420Frame, int[] iArr) {
+    private void texImage2D(VideoRenderer.I420Frame i420Frame, int[] iArr) {
         FloatBuffer floatBuffer;
         int i = 0;
         while (i < 3) {
@@ -287,18 +261,14 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         checkNoGLES2Error();
         boolean z = i420Frame.localPreview && !i420Frame.backCamera;
         FloatBuffer floatBuffer2 = null;
-        int i4 = (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        int i4 = (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
         if (i4 != 0) {
             if (i4 == 90) {
                 floatBuffer = z ? leftTextureCoordMirror : leftTextureCoord;
             } else if (i4 == 180) {
                 floatBuffer = z ? downTextureCoordMirror : downTextureCoord;
             } else if (i4 != 270) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("totalAngle: ");
-                sb.append(i4);
-                sb.append(" not supported.");
-                abortUnless(false, sb.toString());
+                abortUnless(false, "totalAngle: " + i4 + " not supported.");
             } else {
                 floatBuffer = z ? rightTextureCoordMirror : rightTextureCoord;
             }
@@ -318,21 +288,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         int i = logCounter;
         logCounter = i + 1;
         if (i % 200 == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("The view size top:");
-            sb.append(getTop());
-            sb.append(" bottom:");
-            sb.append(getBottom());
-            sb.append(" left:");
-            sb.append(getLeft());
-            sb.append(" right:");
-            sb.append(getRight());
-            sb.append(" visiblility:");
-            sb.append(getVisibility());
-            sb.append(" 0 for visible 4 for invisible and 8 for gone");
-            sb.append(" view:");
-            sb.append(this);
-            Log.i(TAG, sb.toString());
+            Log.i(TAG, "The view size top:" + getTop() + " bottom:" + getBottom() + " left:" + getLeft() + " right:" + getRight() + " visiblility:" + getVisibility() + " 0 for visible 4 for invisible and 8 for gone" + " view:" + this);
         }
         requestRender();
     }
@@ -350,12 +306,10 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
             i5 = i6;
             i4 = i7;
         }
-        double d2 = ((double) i5) * 1.0d;
         int i9 = this._oriViewWidth;
-        float f2 = (float) (d2 / ((double) i9));
-        double d3 = ((double) i4) * 1.0d;
+        float f2 = (float) ((((double) i5) * 1.0d) / ((double) i9));
         int i10 = this._oriViewHeight;
-        float f3 = (float) (d3 / ((double) i10));
+        float f3 = (float) ((((double) i4) * 1.0d) / ((double) i10));
         if (f2 > f3) {
             this._RatioHeight = i10;
             this._RatioWidth = (i10 * i5) / i4;
@@ -373,29 +327,22 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         StringBuilder sb = new StringBuilder();
         sb.append("VideoStreamView: VideoStreamView opengl setting first calculate: ");
         sb.append(this._RatioX);
-        String str = " _RatioY:";
-        sb.append(str);
+        sb.append(" _RatioY:");
         sb.append(this._RatioY);
-        String str2 = " _RatioWidth:";
-        sb.append(str2);
+        sb.append(" _RatioWidth:");
         sb.append(this._RatioWidth);
-        String str3 = " _RatioHeight:";
-        sb.append(str3);
+        sb.append(" _RatioHeight:");
         sb.append(this._RatioHeight);
-        String str4 = " screen height:";
-        sb.append(str4);
+        sb.append(" screen height:");
         sb.append(this._oriViewHeight);
-        String str5 = " screen Width:";
-        sb.append(str5);
-        String str6 = str5;
+        sb.append(" screen Width:");
+        String str = " screen Width:";
         sb.append(this._oriViewWidth);
-        String str7 = " frame height:";
-        sb.append(str7);
+        sb.append(" frame height:");
         sb.append(i7);
-        String str8 = " frame width:";
-        sb.append(str8);
+        sb.append(" frame width:");
         sb.append(i6);
-        String str9 = str8;
+        String str2 = " frame width:";
         sb.append(" showRatio:");
         sb.append(f4);
         sb.append(" screen:");
@@ -410,13 +357,11 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         sb.append(i5);
         sb.append(" rotateImageHeight:");
         sb.append(i4);
-        String sb2 = sb.toString();
-        String str10 = TAG;
-        Log.i(str10, sb2);
+        Log.i(TAG, sb.toString());
         if ((((double) f4) >= 0.45d || this.renderModel != RenderModel.RENDER_MODEL_AUTO) && this.renderModel != RenderModel.RENDER_MODEL_FIT) {
-            Log.i(str10, "VideoStreamView: opengl setting using CUT modal");
+            Log.i(TAG, "VideoStreamView: opengl setting using CUT modal");
         } else {
-            Log.i(str10, "VideoStreamView: opengl setting using FIT modal");
+            Log.i(TAG, "VideoStreamView: opengl setting using FIT modal");
             if (f3 > f2) {
                 this._RatioHeight = this._oriViewHeight;
                 this._RatioWidth = (this._RatioHeight * i5) / i4;
@@ -438,35 +383,12 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         if (Math.abs((((float) i5) / ((float) Math.max(i4, 1))) - this._shiftUpVideoRatio) < this._shiftUpVideoRatioDelta && Math.abs(max - this._shiftUpViewRatio) < this._shiftUpViewRatioDelta) {
             this._RatioY = (int) (((float) this._RatioY) + (this._shiftUpVideoValue * ((float) this._oriViewHeight)));
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("VideoStreamView: VideoStreamView opengl setting _RatioX: ");
-        sb3.append(this._RatioX);
-        sb3.append(str);
-        sb3.append(this._RatioY);
-        sb3.append(str2);
-        sb3.append(this._RatioWidth);
-        sb3.append(str3);
-        sb3.append(this._RatioHeight);
-        sb3.append(str4);
-        sb3.append(this._oriViewHeight);
-        sb3.append(str6);
-        sb3.append(this._oriViewWidth);
-        sb3.append(str7);
-        String str11 = str9;
-        sb3.append(i2);
-        sb3.append(str11);
-        sb3.append(i6);
-        Log.i(str10, sb3.toString());
+        Log.i(TAG, "VideoStreamView: VideoStreamView opengl setting _RatioX: " + this._RatioX + " _RatioY:" + this._RatioY + " _RatioWidth:" + this._RatioWidth + " _RatioHeight:" + this._RatioHeight + " screen height:" + this._oriViewHeight + str + this._oriViewWidth + " frame height:" + i2 + str2 + i6);
         return 0;
     }
 
     public boolean bindRenderWithStream(String str, boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: bindRenderWithStream with:");
-        sb.append(str);
-        sb.append(" view:");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: bindRenderWithStream with:" + str + " view:" + this);
         this.participantUID = str;
         if (this.nativeObject == 0) {
             this.nativeObject = create();
@@ -539,7 +461,7 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
                 Log.i(TAG, "onDrawFrame: framesToRender  is null !");
                 return;
             }
-            I420Frame i420Frame = this.framesToRender;
+            VideoRenderer.I420Frame i420Frame = this.framesToRender;
             this.framesToRender = null;
             if (this.framePool == null) {
                 Log.i(TAG, "onDrawFrame: framePool is null !");
@@ -550,21 +472,9 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
             }
             if (i420Frame != null) {
                 if (!(this._lastYUVWidth == i420Frame.width && this._lastYUVHeight == i420Frame.height && !this._renderModelChanged && !this._surfaceSizeChanged && this._lastFrameAngle == i420Frame.rotateAngle && this._lastYStride == i420Frame.yuvStrides[0])) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Generate texture because one of following property change: _lastYUVWidth:");
-                    sb.append(this._lastYUVWidth);
-                    sb.append(" _lastYUVHeight:");
-                    sb.append(this._lastYUVHeight);
-                    sb.append(" _renderModelChanged:");
-                    sb.append(this._renderModelChanged);
-                    sb.append(" _surfaceSizeChanged:");
-                    sb.append(this._surfaceSizeChanged);
-                    sb.append(" _lastYStride:");
-                    sb.append(this._lastYStride);
-                    Log.i(str, sb.toString());
+                    Log.i(TAG, "Generate texture because one of following property change: _lastYUVWidth:" + this._lastYUVWidth + " _lastYUVHeight:" + this._lastYUVHeight + " _renderModelChanged:" + this._renderModelChanged + " _surfaceSizeChanged:" + this._surfaceSizeChanged + " _lastYStride:" + this._lastYStride);
                     this._lastYStride = i420Frame.yuvStrides[0];
-                    CalcRatioViewPort(i420Frame.width, i420Frame.height, (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
+                    CalcRatioViewPort(i420Frame.width, i420Frame.height, (i420Frame.rotateAngle + Util.LIMIT_SURFACE_WIDTH) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT);
                     checkNoGLES2Error();
                     this._lastYUVWidth = i420Frame.width;
                     this._lastYUVHeight = i420Frame.height;
@@ -579,12 +489,12 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
             abortUnless(i420Frame != null, "Nothing to render!");
             GLES20.glViewport(this._RatioX, this._RatioY, this._RatioWidth, this._RatioHeight);
             GLES20.glClear(16384);
-            Boolean valueOf = Boolean.valueOf(false);
+            Boolean bool = false;
             FloatBuffer directNativeFloatBuffer = directNativeFloatBuffer(new float[]{0.0f - ((float) ((((double) this.debug_increment) * 0.01d) + 0.5d)), 0.0f - ((float) ((((double) this.debug_increment) * 0.01d) + 0.5d)), 0.0f - ((float) ((((double) this.debug_increment) * 0.01d) + 0.5d)), 0.0f - ((float) ((((double) this.debug_increment) * 0.01d) + 0.5d)), (float) ((((double) this.debug_increment) * 0.01d) + 0.5d), (float) ((((double) this.debug_increment) * 0.01d) + 0.5d), (float) ((((double) this.debug_increment) * 0.01d) + 0.5d), 0.0f - ((float) ((((double) this.debug_increment) * 0.01d) + 0.5d))});
             this.debug_increment++;
             this.debug_increment %= 50;
             int[] iArr = this.yuvTextures;
-            if (!valueOf.booleanValue()) {
+            if (!bool.booleanValue()) {
                 directNativeFloatBuffer = vertices;
             }
             drawRectangle(iArr, directNativeFloatBuffer);
@@ -600,90 +510,45 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
     }
 
     public void onPause() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: VideoStreamView paused render. view:");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: VideoStreamView paused render. view:" + this);
         super.onPause();
     }
 
     public void onResume() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: VideoStreamView resume render. view:");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: VideoStreamView resume render. view:" + this);
         super.onResume();
     }
 
     public void onSurfaceChanged(GL10 gl10, int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: On Surface changed with with:");
-        sb.append(i);
-        sb.append(" height:");
-        sb.append(i2);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.i(str, sb2);
+        Log.i(TAG, "VideoStreamView: On Surface changed with with:" + i + " height:" + i2);
         this._oriViewWidth = i;
         this._oriViewHeight = i2;
         this._surfaceSizeChanged = true;
         float f2 = ((float) i) / ((float) this.screenWidth);
         float f3 = ((float) i2) / ((float) this.screenHeight);
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append("VideoStreamView: On Surface set width_ratio:");
-        sb3.append(f2);
-        sb3.append(" height_ratio:");
-        sb3.append(f3);
-        Log.i(str, sb3.toString());
+        Log.i(TAG, "VideoStreamView: On Surface set width_ratio:" + f2 + " height_ratio:" + f3);
         setWindowsResolution(this.participantUID, f2, f3);
     }
 
     public void onSurfaceCreated(GL10 gl10, EGLConfig eGLConfig) {
-        String str = TAG;
-        Log.i(str, "VideoStreamView: surface created");
+        Log.i(TAG, "VideoStreamView: surface created");
         try {
             generateTexture(1024, 1024);
         } catch (Exception unused) {
-            MemoryInfo memoryInfo = new MemoryInfo();
-            Debug.getMemoryInfo(memoryInfo);
+            Debug.getMemoryInfo(new Debug.MemoryInfo());
+            Log.i(TAG, " dalvikPrivateDirty: " + r11.dalvikPrivateDirty + "");
+            Log.i(TAG, " nativePss: " + r11.nativePss + "");
+            Log.i(TAG, " otherSharedDirty: " + r11.otherSharedDirty + "");
+            Log.i(TAG, " totalPrivate: " + r11.getTotalPrivateDirty() + ", " + " totalPss:" + r11.getTotalPss() + " totalShared" + r11.getTotalSharedDirty() + "");
             StringBuilder sb = new StringBuilder();
-            sb.append(" dalvikPrivateDirty: ");
-            sb.append(memoryInfo.dalvikPrivateDirty);
-            String str2 = "";
-            sb.append(str2);
-            Log.i(str, sb.toString());
+            sb.append("NativeHeapSizeTotal:");
+            sb.append(Debug.getNativeHeapSize() >> 10);
+            Log.i(TAG, sb.toString());
             StringBuilder sb2 = new StringBuilder();
-            sb2.append(" nativePss: ");
-            sb2.append(memoryInfo.nativePss);
-            sb2.append(str2);
-            Log.i(str, sb2.toString());
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(" otherSharedDirty: ");
-            sb3.append(memoryInfo.otherSharedDirty);
-            sb3.append(str2);
-            Log.i(str, sb3.toString());
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(" totalPrivate: ");
-            sb4.append(memoryInfo.getTotalPrivateDirty());
-            sb4.append(", ");
-            sb4.append(" totalPss:");
-            sb4.append(memoryInfo.getTotalPss());
-            sb4.append(" totalShared");
-            sb4.append(memoryInfo.getTotalSharedDirty());
-            sb4.append(str2);
-            Log.i(str, sb4.toString());
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("NativeHeapSizeTotal:");
-            sb5.append(Debug.getNativeHeapSize() >> 10);
-            Log.i(str, sb5.toString());
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append("NativeAllocatedHeapSize:");
-            sb6.append(Debug.getNativeHeapAllocatedSize() >> 10);
-            Log.i(str, sb6.toString());
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append("NativeAllocatedFree:");
-            sb7.append(Debug.getNativeHeapFreeSize() >> 10);
-            Log.i(str, sb7.toString());
+            sb2.append("NativeAllocatedHeapSize:");
+            sb2.append(Debug.getNativeHeapAllocatedSize() >> 10);
+            Log.i(TAG, sb2.toString());
+            Log.i(TAG, "NativeAllocatedFree:" + (Debug.getNativeHeapFreeSize() >> 10));
         }
         int glCreateProgram = GLES20.glCreateProgram();
         boolean z = false;
@@ -788,15 +653,18 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
         android.util.Log.w(TAG, "updateFrame renderFrame framesToRender is null");
      */
     /* JADX WARNING: Code restructure failed: missing block: B:28:0x0070, code lost:
-        if (r4 == false) goto L_0x007a;
+        if (r4 == false) goto L_?;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:29:0x0072, code lost:
         queueEvent(new com.xiaomi.rendermanager.videoRender.VideoStreamsView.AnonymousClass2(r3));
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:30:0x007a, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:37:?, code lost:
         return;
      */
-    public void renderFrame(I420Frame i420Frame) {
+    /* JADX WARNING: Code restructure failed: missing block: B:38:?, code lost:
+        return;
+     */
+    public void renderFrame(VideoRenderer.I420Frame i420Frame) {
         abortUnless(FramePool.validateDimensions(i420Frame), "Frame too large!");
         if (!this.isRenderThreadRunning) {
             Log.w(TAG, "VideoStreamView: The render thread is not running, so we discard this frame.");
@@ -807,20 +675,14 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
                 Log.w(TAG, "VideoStreamView: frame pool is null!");
                 return;
             }
-            I420Frame takeFrame = this.framePool.takeFrame(i420Frame);
+            VideoRenderer.I420Frame takeFrame = this.framePool.takeFrame(i420Frame);
             if (takeFrame == null) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("VideoStreamView: Take an frame from frame pool is empty, discard this frame:");
-                sb.append(i420Frame.width);
-                sb.append(" X ");
-                sb.append(i420Frame.height);
-                Log.w(str, sb.toString());
+                Log.w(TAG, "VideoStreamView: Take an frame from frame pool is empty, discard this frame:" + i420Frame.width + " X " + i420Frame.height);
                 return;
             }
             takeFrame.copyFrom(i420Frame);
             boolean z = this.framesToRender == null;
-            I420Frame i420Frame2 = this.framesToRender;
+            VideoRenderer.I420Frame i420Frame2 = this.framesToRender;
             if (i420Frame2 != null) {
                 this.framePool.returnFrame(i420Frame2);
             }
@@ -844,53 +706,28 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
     }
 
     public void setShiftUpInternal(float f2, float f3, float f4, float f5, float f6) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: setShiftUp with:");
-        sb.append(f2);
-        sb.append(" viewRatioDelta:");
-        sb.append(f3);
-        sb.append(" videoRatio:");
-        sb.append(f4);
-        sb.append(" videoRatioDelta:");
-        sb.append(f5);
-        sb.append(" shiftUpValue:");
-        sb.append(f6);
-        sb.append(" view:");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: setShiftUp with:" + f2 + " viewRatioDelta:" + f3 + " videoRatio:" + f4 + " videoRatioDelta:" + f5 + " shiftUpValue:" + f6 + " view:" + this);
         setShiftUp(this.nativeObject, f2, f3, f4, f5, f6);
     }
 
     public void setSize(final int i, final int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: The thread id (NATIVE thread) for setSize is:");
-        sb.append(Thread.currentThread().getId());
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: The thread id (NATIVE thread) for setSize is:" + Thread.currentThread().getId());
         queueEvent(new Runnable() {
             public void run() {
-                StringBuilder sb = new StringBuilder();
-                sb.append("VideoStreamView: The thread id for videoSizeChanged is:");
-                sb.append(Thread.currentThread().getId());
-                Log.i(VideoStreamsView.TAG, sb.toString());
+                Log.i(VideoStreamsView.TAG, "VideoStreamView: The thread id for videoSizeChanged is:" + Thread.currentThread().getId());
                 this.videoSizeChanged(i, i2);
             }
         });
     }
 
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("surfaceCreated, this pointer is  ");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "surfaceCreated, this pointer is  " + this);
         super.surfaceCreated(surfaceHolder);
         this.isRenderThreadRunning = true;
     }
 
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("surfaceDestroyed, this pointer is  ");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "surfaceDestroyed, this pointer is  " + this);
         super.surfaceDestroyed(surfaceHolder);
         this.isRenderThreadRunning = false;
         synchronized (this) {
@@ -904,19 +741,11 @@ public class VideoStreamsView extends GLSurfaceView implements Renderer {
     }
 
     public boolean unbindRenderWithStream() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: unbindRenderWithStream");
-        sb.append(this);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: unbindRenderWithStream" + this);
         return unbindStream(this.nativeObject);
     }
 
     public void videoSizeChanged(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VideoStreamView: The video size changed to ");
-        sb.append(i);
-        sb.append(" ");
-        sb.append(i2);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "VideoStreamView: The video size changed to " + i + " " + i2);
     }
 }

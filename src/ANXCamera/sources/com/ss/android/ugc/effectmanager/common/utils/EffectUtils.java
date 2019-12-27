@@ -3,7 +3,6 @@ package com.ss.android.ugc.effectmanager.common.utils;
 import android.accounts.NetworkErrorException;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import com.ss.android.ugc.effectmanager.common.EffectRequest;
 import com.ss.android.ugc.effectmanager.common.ErrorConstants;
@@ -110,24 +109,27 @@ public class EffectUtils {
                     }
                 }
             }
+            inputStream.close();
         } catch (IOException e3) {
             e3.printStackTrace();
-        } finally {
+            inputStream.close();
+        } catch (Throwable th) {
             try {
                 inputStream.close();
             } catch (IOException e4) {
                 e4.printStackTrace();
             }
+            throw th;
         }
         return sb.toString();
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static File download(EffectConfiguration effectConfiguration, String str, String str2) throws Exception {
         return download(effectConfiguration.getEffectNetWorker(), str, str2);
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static File download(EffectNetWorkerWrapper effectNetWorkerWrapper, String str, String str2) throws Exception {
         InputStream execute = effectNetWorkerWrapper.execute(new EffectRequest("GET", str));
         if (execute != null) {
@@ -137,14 +139,14 @@ public class EffectUtils {
     }
 
     public static void downloadEffect(EffectConfiguration effectConfiguration, Effect effect) throws Exception {
-        List url = getUrl(effect.getFileUrl());
+        List<String> url = getUrl(effect.getFileUrl());
         if (url == null || url.isEmpty()) {
             throw new UrlNotExistException(ErrorConstants.EXCEPTION_DOWNLOAD_URL_ERROR);
         }
         int i = 0;
         while (i < url.size()) {
             try {
-                String fileMD5 = MD5Utils.getFileMD5(download(effectConfiguration, (String) url.get(i), effect.getZipPath()));
+                String fileMD5 = MD5Utils.getFileMD5(download(effectConfiguration, url.get(i), effect.getZipPath()));
                 if (fileMD5.equals(effect.getFileUrl().getUri())) {
                     FileUtils.unZip(effect.getZipPath(), effect.getUnzipPath());
                     return;
@@ -153,12 +155,7 @@ public class EffectUtils {
                 if (i != url.size() - 1) {
                     i++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("downloadMD5: ");
-                    sb.append(fileMD5);
-                    sb.append(" expectMD5:");
-                    sb.append(effect.getFileUrl().getUri());
-                    throw new MD5Exception(sb.toString());
+                    throw new MD5Exception("downloadMD5: " + fileMD5 + " expectMD5:" + effect.getFileUrl().getUri());
                 }
             } catch (Exception e2) {
                 e2.printStackTrace();
@@ -191,9 +188,6 @@ public class EffectUtils {
     }
 
     public static void throwIllegalNullException(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" should not null");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(str + " should not null");
     }
 }

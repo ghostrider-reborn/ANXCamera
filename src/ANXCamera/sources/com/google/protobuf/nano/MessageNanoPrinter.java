@@ -63,25 +63,23 @@ public final class MessageNanoPrinter {
     }
 
     public static <T extends MessageNano> String print(T t) {
-        String str = "Error printing proto: ";
         if (t == null) {
             return "";
         }
         StringBuffer stringBuffer = new StringBuffer();
         try {
-            print(null, t, new StringBuffer(), stringBuffer);
+            print((String) null, t, new StringBuffer(), stringBuffer);
             return stringBuffer.toString();
         } catch (IllegalAccessException e2) {
             String valueOf = String.valueOf(e2.getMessage());
-            return valueOf.length() != 0 ? str.concat(valueOf) : new String(str);
+            return valueOf.length() != 0 ? "Error printing proto: ".concat(valueOf) : new String("Error printing proto: ");
         } catch (InvocationTargetException e3) {
             String valueOf2 = String.valueOf(e3.getMessage());
-            return valueOf2.length() != 0 ? str.concat(valueOf2) : new String(str);
+            return valueOf2.length() != 0 ? "Error printing proto: ".concat(valueOf2) : new String("Error printing proto: ");
         }
     }
 
     private static void print(String str, Object obj, StringBuffer stringBuffer, StringBuffer stringBuffer2) throws IllegalAccessException, InvocationTargetException {
-        Field[] fields;
         if (obj != null) {
             if (obj instanceof MessageNano) {
                 int length = stringBuffer.length();
@@ -91,24 +89,21 @@ public final class MessageNanoPrinter {
                     stringBuffer2.append(" <\n");
                     stringBuffer.append(INDENT);
                 }
-                Class cls = obj.getClass();
+                Class<?> cls = obj.getClass();
                 for (Field field : cls.getFields()) {
                     int modifiers = field.getModifiers();
                     String name = field.getName();
-                    if (!"cachedSize".equals(name) && (modifiers & 1) == 1 && (modifiers & 8) != 8) {
-                        String str2 = "_";
-                        if (!name.startsWith(str2) && !name.endsWith(str2)) {
-                            Class type = field.getType();
-                            Object obj2 = field.get(obj);
-                            if (!type.isArray()) {
-                                print(name, obj2, stringBuffer, stringBuffer2);
-                            } else if (type.getComponentType() == Byte.TYPE) {
-                                print(name, obj2, stringBuffer, stringBuffer2);
-                            } else {
-                                int length2 = obj2 == null ? 0 : Array.getLength(obj2);
-                                for (int i = 0; i < length2; i++) {
-                                    print(name, Array.get(obj2, i), stringBuffer, stringBuffer2);
-                                }
+                    if (!"cachedSize".equals(name) && (modifiers & 1) == 1 && (modifiers & 8) != 8 && !name.startsWith("_") && !name.endsWith("_")) {
+                        Class<?> type = field.getType();
+                        Object obj2 = field.get(obj);
+                        if (!type.isArray()) {
+                            print(name, obj2, stringBuffer, stringBuffer2);
+                        } else if (type.getComponentType() == Byte.TYPE) {
+                            print(name, obj2, stringBuffer, stringBuffer2);
+                        } else {
+                            int length2 = obj2 == null ? 0 : Array.getLength(obj2);
+                            for (int i = 0; i < length2; i++) {
+                                print(name, Array.get(obj2, i), stringBuffer, stringBuffer2);
                             }
                         }
                     }
@@ -117,13 +112,11 @@ public final class MessageNanoPrinter {
                     String name3 = name2.getName();
                     if (name3.startsWith("set")) {
                         String substring = name3.substring(3);
-                        String str3 = "has";
                         try {
                             String valueOf = String.valueOf(substring);
-                            if (((Boolean) cls.getMethod(valueOf.length() != 0 ? str3.concat(valueOf) : new String(str3), new Class[0]).invoke(obj, new Object[0])).booleanValue()) {
-                                String str4 = "get";
+                            if (((Boolean) cls.getMethod(valueOf.length() != 0 ? "has".concat(valueOf) : new String("has"), new Class[0]).invoke(obj, new Object[0])).booleanValue()) {
                                 String valueOf2 = String.valueOf(substring);
-                                print(substring, cls.getMethod(valueOf2.length() != 0 ? str4.concat(valueOf2) : new String(str4), new Class[0]).invoke(obj, new Object[0]), stringBuffer, stringBuffer2);
+                                print(substring, cls.getMethod(valueOf2.length() != 0 ? "get".concat(valueOf2) : new String("get"), new Class[0]).invoke(obj, new Object[0]), stringBuffer, stringBuffer2);
                             }
                         } catch (NoSuchMethodException unused) {
                         }
@@ -143,10 +136,9 @@ public final class MessageNanoPrinter {
             stringBuffer2.append(": ");
             if (obj instanceof String) {
                 String sanitizeString = sanitizeString((String) obj);
-                String str5 = "\"";
-                stringBuffer2.append(str5);
+                stringBuffer2.append("\"");
                 stringBuffer2.append(sanitizeString);
-                stringBuffer2.append(str5);
+                stringBuffer2.append("\"");
             } else if (obj instanceof byte[]) {
                 appendQuotedBytes((byte[]) obj, stringBuffer2);
             } else {

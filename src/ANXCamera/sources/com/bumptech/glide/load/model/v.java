@@ -2,7 +2,7 @@ package com.bumptech.glide.load.model;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,7 +18,7 @@ public class v {
     private static class a {
         private final Map<Class<?>, C0011a<?>> di = new HashMap();
 
-        /* renamed from: com.bumptech.glide.load.model.v$a$a reason: collision with other inner class name */
+        /* renamed from: com.bumptech.glide.load.model.v$a$a  reason: collision with other inner class name */
         /* compiled from: ModelLoaderRegistry */
         private static class C0011a<Model> {
             final List<t<Model, ?>> loaders;
@@ -32,11 +32,8 @@ public class v {
         }
 
         public <Model> void a(Class<Model> cls, List<t<Model, ?>> list) {
-            if (((C0011a) this.di.put(cls, new C0011a(list))) != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Already cached loaders for model: ");
-                sb.append(cls);
-                throw new IllegalStateException(sb.toString());
+            if (this.di.put(cls, new C0011a(list)) != null) {
+                throw new IllegalStateException("Already cached loaders for model: " + cls);
             }
         }
 
@@ -46,7 +43,7 @@ public class v {
 
         @Nullable
         public <Model> List<t<Model, ?>> get(Class<Model> cls) {
-            C0011a aVar = (C0011a) this.di.get(cls);
+            C0011a aVar = this.di.get(cls);
             if (aVar == null) {
                 return null;
             }
@@ -54,7 +51,7 @@ public class v {
         }
     }
 
-    public v(@NonNull Pool<List<Throwable>> pool) {
+    public v(@NonNull Pools.Pool<List<Throwable>> pool) {
         this(new x(pool));
     }
 
@@ -64,7 +61,7 @@ public class v {
     }
 
     private <Model, Data> void f(@NonNull List<u<? extends Model, ? extends Data>> list) {
-        for (u D : list) {
+        for (u<? extends Model, ? extends Data> D : list) {
             D.D();
         }
     }

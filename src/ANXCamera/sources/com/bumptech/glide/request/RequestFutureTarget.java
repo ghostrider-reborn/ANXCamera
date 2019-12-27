@@ -38,12 +38,12 @@ public class RequestFutureTarget<R> implements b<R>, e<R>, Runnable {
         Waiter() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void a(Object obj, long j) throws InterruptedException {
             obj.wait(j);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void n(Object obj) {
             obj.notifyAll();
         }
@@ -153,7 +153,7 @@ public class RequestFutureTarget<R> implements b<R>, e<R>, Runnable {
 
     public R get() throws InterruptedException, ExecutionException {
         try {
-            return doGet(null);
+            return doGet((Long) null);
         } catch (TimeoutException e2) {
             throw new AssertionError(e2);
         }

@@ -95,32 +95,24 @@ public final class DataSourceDesc {
         public DataSourceDesc build() {
             int i = this.mType;
             if (i != 1 && i != 2 && i != 3) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Illegal type: ");
-                sb.append(this.mType);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Illegal type: " + this.mType);
             } else if (this.mStartPositionMs <= this.mEndPositionMs) {
                 DataSourceDesc dataSourceDesc = new DataSourceDesc();
-                dataSourceDesc.mType = this.mType;
-                dataSourceDesc.mMedia2DataSource = this.mMedia2DataSource;
-                dataSourceDesc.mFD = this.mFD;
-                dataSourceDesc.mFDOffset = this.mFDOffset;
-                dataSourceDesc.mFDLength = this.mFDLength;
-                dataSourceDesc.mUri = this.mUri;
-                dataSourceDesc.mUriHeader = this.mUriHeader;
-                dataSourceDesc.mUriCookies = this.mUriCookies;
-                dataSourceDesc.mUriContext = this.mUriContext;
-                dataSourceDesc.mMediaId = this.mMediaId;
-                dataSourceDesc.mStartPositionMs = this.mStartPositionMs;
-                dataSourceDesc.mEndPositionMs = this.mEndPositionMs;
+                int unused = dataSourceDesc.mType = this.mType;
+                Media2DataSource unused2 = dataSourceDesc.mMedia2DataSource = this.mMedia2DataSource;
+                FileDescriptor unused3 = dataSourceDesc.mFD = this.mFD;
+                long unused4 = dataSourceDesc.mFDOffset = this.mFDOffset;
+                long unused5 = dataSourceDesc.mFDLength = this.mFDLength;
+                Uri unused6 = dataSourceDesc.mUri = this.mUri;
+                Map unused7 = dataSourceDesc.mUriHeader = this.mUriHeader;
+                List unused8 = dataSourceDesc.mUriCookies = this.mUriCookies;
+                Context unused9 = dataSourceDesc.mUriContext = this.mUriContext;
+                String unused10 = dataSourceDesc.mMediaId = this.mMediaId;
+                long unused11 = dataSourceDesc.mStartPositionMs = this.mStartPositionMs;
+                long unused12 = dataSourceDesc.mEndPositionMs = this.mEndPositionMs;
                 return dataSourceDesc;
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Illegal start/end position: ");
-                sb2.append(this.mStartPositionMs);
-                sb2.append(" : ");
-                sb2.append(this.mEndPositionMs);
-                throw new IllegalStateException(sb2.toString());
+                throw new IllegalStateException("Illegal start/end position: " + this.mStartPositionMs + " : " + this.mEndPositionMs);
             }
         }
 

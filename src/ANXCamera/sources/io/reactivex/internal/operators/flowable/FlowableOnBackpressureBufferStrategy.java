@@ -21,7 +21,7 @@ public final class FlowableOnBackpressureBufferStrategy<T> extends AbstractFlowa
     final Action onOverflow;
     final BackpressureOverflowStrategy strategy;
 
-    /* renamed from: io.reactivex.internal.operators.flowable.FlowableOnBackpressureBufferStrategy$1 reason: invalid class name */
+    /* renamed from: io.reactivex.internal.operators.flowable.FlowableOnBackpressureBufferStrategy$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$io$reactivex$BackpressureOverflowStrategy = new int[BackpressureOverflowStrategy.values().length];
 
@@ -65,18 +65,18 @@ public final class FlowableOnBackpressureBufferStrategy<T> extends AbstractFlowa
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear(Deque<T> deque2) {
             synchronized (deque2) {
                 deque2.clear();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             boolean isEmpty;
-            Object poll;
+            T poll;
             if (getAndIncrement() == 0) {
                 Deque<T> deque2 = this.deque;
                 Subscriber<? super T> subscriber = this.actual;

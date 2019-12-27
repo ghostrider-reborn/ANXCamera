@@ -2,12 +2,11 @@ package com.ss.android.vesdk.settings;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.Keep;
 
 @Keep
 public class VEVideoCompileEncodeSettings implements Parcelable {
-    public static final Creator<VEVideoCompileEncodeSettings> CREATOR = new Creator<VEVideoCompileEncodeSettings>() {
+    public static final Parcelable.Creator<VEVideoCompileEncodeSettings> CREATOR = new Parcelable.Creator<VEVideoCompileEncodeSettings>() {
         public VEVideoCompileEncodeSettings createFromParcel(Parcel parcel) {
             return new VEVideoCompileEncodeSettings(parcel);
         }

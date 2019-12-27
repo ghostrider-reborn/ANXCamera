@@ -1,17 +1,16 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader.TileMode;
+import android.graphics.Shader;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
@@ -65,7 +64,7 @@ public final class y {
     }
 
     static {
-        wj.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+        wj.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
     }
 
     private y() {
@@ -84,11 +83,10 @@ public final class y {
             matrix.setRotate((float) i);
             return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
         } catch (Exception e2) {
-            String str = TAG;
-            if (!Log.isLoggable(str, 6)) {
+            if (!Log.isLoggable(TAG, 6)) {
                 return bitmap;
             }
-            Log.e(str, "Exception when trying to orient image", e2);
+            Log.e(TAG, "Exception when trying to orient image", e2);
             return bitmap;
         }
     }
@@ -152,27 +150,27 @@ public final class y {
     }
 
     private static void a(Canvas canvas) {
-        canvas.setBitmap(null);
+        canvas.setBitmap((Bitmap) null);
     }
 
     private static Bitmap b(@NonNull d dVar, @NonNull Bitmap bitmap) {
-        Config n = n(bitmap);
+        Bitmap.Config n = n(bitmap);
         if (n.equals(bitmap.getConfig())) {
             return bitmap;
         }
         Bitmap d2 = dVar.d(bitmap.getWidth(), bitmap.getHeight(), n);
-        new Canvas(d2).drawBitmap(bitmap, 0.0f, 0.0f, null);
+        new Canvas(d2).drawBitmap(bitmap, 0.0f, 0.0f, (Paint) null);
         return d2;
     }
 
     /* JADX INFO: finally extract failed */
     public static Bitmap b(@NonNull d dVar, @NonNull Bitmap bitmap, int i) {
         i.a(i > 0, "roundingRadius must be greater than 0.");
-        Config n = n(bitmap);
+        Bitmap.Config n = n(bitmap);
         Bitmap b2 = b(dVar, bitmap);
         Bitmap d2 = dVar.d(b2.getWidth(), b2.getHeight(), n);
         d2.setHasAlpha(true);
-        TileMode tileMode = TileMode.CLAMP;
+        Shader.TileMode tileMode = Shader.TileMode.CLAMP;
         BitmapShader bitmapShader = new BitmapShader(b2, tileMode, tileMode);
         Paint paint = new Paint();
         paint.setAntiAlias(true);
@@ -181,7 +179,7 @@ public final class y {
         yj.lock();
         try {
             Canvas canvas = new Canvas(d2);
-            canvas.drawColor(0, Mode.CLEAR);
+            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
             float f2 = (float) i;
             canvas.drawRoundRect(rectF, f2, f2, paint);
             a(canvas);
@@ -197,16 +195,14 @@ public final class y {
     }
 
     public static Bitmap b(@NonNull d dVar, @NonNull Bitmap bitmap, int i, int i2) {
-        int width = bitmap.getWidth();
-        String str = TAG;
-        if (width > i || bitmap.getHeight() > i2) {
-            if (Log.isLoggable(str, 2)) {
-                Log.v(str, "requested target size too big for input, fit centering instead");
+        if (bitmap.getWidth() > i || bitmap.getHeight() > i2) {
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "requested target size too big for input, fit centering instead");
             }
             return d(dVar, bitmap, i, i2);
         }
-        if (Log.isLoggable(str, 2)) {
-            Log.v(str, "requested target size larger or equal to input, returning input");
+        if (Log.isLoggable(TAG, 2)) {
+            Log.v(TAG, "requested target size larger or equal to input, returning input");
         }
         return bitmap;
     }
@@ -231,7 +227,7 @@ public final class y {
         try {
             Canvas canvas = new Canvas(d2);
             canvas.drawCircle(f3, f3, f3, vj);
-            canvas.drawBitmap(b2, null, rectF, wj);
+            canvas.drawBitmap(b2, (Rect) null, rectF, wj);
             a(canvas);
             yj.unlock();
             if (!b2.equals(bitmap)) {
@@ -245,11 +241,9 @@ public final class y {
     }
 
     public static Bitmap d(@NonNull d dVar, @NonNull Bitmap bitmap, int i, int i2) {
-        int width = bitmap.getWidth();
-        String str = TAG;
-        if (width == i && bitmap.getHeight() == i2) {
-            if (Log.isLoggable(str, 2)) {
-                Log.v(str, "requested target size matches input, returning input");
+        if (bitmap.getWidth() == i && bitmap.getHeight() == i2) {
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "requested target size matches input, returning input");
             }
             return bitmap;
         }
@@ -257,37 +251,21 @@ public final class y {
         int round = Math.round(((float) bitmap.getWidth()) * min);
         int round2 = Math.round(((float) bitmap.getHeight()) * min);
         if (bitmap.getWidth() == round && bitmap.getHeight() == round2) {
-            if (Log.isLoggable(str, 2)) {
-                Log.v(str, "adjusted target size matches input, returning input");
+            if (Log.isLoggable(TAG, 2)) {
+                Log.v(TAG, "adjusted target size matches input, returning input");
             }
             return bitmap;
         }
         Bitmap d2 = dVar.d((int) (((float) bitmap.getWidth()) * min), (int) (((float) bitmap.getHeight()) * min), o(bitmap));
         a(bitmap, d2);
-        if (Log.isLoggable(str, 2)) {
+        if (Log.isLoggable(TAG, 2)) {
+            Log.v(TAG, "request: " + i + "x" + i2);
+            Log.v(TAG, "toFit:   " + bitmap.getWidth() + "x" + bitmap.getHeight());
+            Log.v(TAG, "toReuse: " + d2.getWidth() + "x" + d2.getHeight());
             StringBuilder sb = new StringBuilder();
-            sb.append("request: ");
-            sb.append(i);
-            String str2 = "x";
-            sb.append(str2);
-            sb.append(i2);
-            Log.v(str, sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("toFit:   ");
-            sb2.append(bitmap.getWidth());
-            sb2.append(str2);
-            sb2.append(bitmap.getHeight());
-            Log.v(str, sb2.toString());
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("toReuse: ");
-            sb3.append(d2.getWidth());
-            sb3.append(str2);
-            sb3.append(d2.getHeight());
-            Log.v(str, sb3.toString());
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("minPct:   ");
-            sb4.append(min);
-            Log.v(str, sb4.toString());
+            sb.append("minPct:   ");
+            sb.append(min);
+            Log.v(TAG, sb.toString());
         }
         Matrix matrix = new Matrix();
         matrix.setScale(min, min);
@@ -328,13 +306,13 @@ public final class y {
     }
 
     @NonNull
-    private static Config n(@NonNull Bitmap bitmap) {
-        return (VERSION.SDK_INT < 26 || !Config.RGBA_F16.equals(bitmap.getConfig())) ? Config.ARGB_8888 : Config.RGBA_F16;
+    private static Bitmap.Config n(@NonNull Bitmap bitmap) {
+        return (Build.VERSION.SDK_INT < 26 || !Bitmap.Config.RGBA_F16.equals(bitmap.getConfig())) ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGBA_F16;
     }
 
     @NonNull
-    private static Config o(@NonNull Bitmap bitmap) {
-        return bitmap.getConfig() != null ? bitmap.getConfig() : Config.ARGB_8888;
+    private static Bitmap.Config o(@NonNull Bitmap bitmap) {
+        return bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
     }
 
     public static int v(int i) {

@@ -5,8 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.support.v4.view.ViewCompat;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import com.android.camera.R;
 import com.android.camera.Util;
@@ -17,22 +16,20 @@ import com.android.camera.animation.type.SlideInOnSubscribe;
 import com.android.camera.animation.type.SlideOutOnSubscribe;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.HandleBeautyRecording;
+import com.android.camera.protocol.ModeProtocol;
 import io.reactivex.Completable;
 import java.util.List;
 import miui.view.animation.CubicEaseOutInterpolator;
 
 @Deprecated
-public class FragmentPopupBeauty extends BaseFragment implements OnClickListener, HandleBeautyRecording {
+public class FragmentPopupBeauty extends BaseFragment implements View.OnClickListener, ModeProtocol.HandleBeautyRecording {
     public static final int FRAGMENT_INFO = 249;
     private View mIconBeauty;
     private View mIconSticker;
 
     private void disappear() {
-        String str = "alpha";
-        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this.mIconSticker, str, new float[]{1.0f, 0.0f});
-        ObjectAnimator ofFloat2 = ObjectAnimator.ofFloat(this.mIconBeauty, str, new float[]{1.0f, 0.0f});
+        ObjectAnimator ofFloat = ObjectAnimator.ofFloat(this.mIconSticker, "alpha", new float[]{1.0f, 0.0f});
+        ObjectAnimator ofFloat2 = ObjectAnimator.ofFloat(this.mIconBeauty, "alpha", new float[]{1.0f, 0.0f});
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(new Animator[]{ofFloat, ofFloat2});
         animatorSet.setInterpolator(new CubicEaseOutInterpolator());
@@ -51,12 +48,12 @@ public class FragmentPopupBeauty extends BaseFragment implements OnClickListener
 
     /* access modifiers changed from: protected */
     public void initView(View view) {
-        ((MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources());
+        ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources());
         this.mIconSticker = view.findViewById(R.id.icon_sticker);
         this.mIconBeauty = view.findViewById(R.id.icon_beauty);
         this.mIconSticker.setOnClickListener(this);
         this.mIconBeauty.setOnClickListener(this);
-        provideAnimateElement(this.mCurrentMode, null, 2);
+        provideAnimateElement(this.mCurrentMode, (List<Completable>) null, 2);
     }
 
     public void onAngleChanged(float f2) {
@@ -74,14 +71,14 @@ public class FragmentPopupBeauty extends BaseFragment implements OnClickListener
         if (isEnableClick()) {
             int id = view.getId();
             if (id == R.id.icon_beauty) {
-                BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+                ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
                 if (baseDelegate != null) {
                     baseDelegate.delegateEvent(2);
                 } else {
                     return;
                 }
             } else if (id == R.id.icon_sticker) {
-                BaseDelegate baseDelegate2 = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+                ModeProtocol.BaseDelegate baseDelegate2 = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
                 if (baseDelegate2 != null) {
                     baseDelegate2.delegateEvent(4);
                 } else {
@@ -101,10 +98,10 @@ public class FragmentPopupBeauty extends BaseFragment implements OnClickListener
                 if (i3 == 1) {
                     AlphaInOnSubscribe.directSetResult(this.mIconSticker);
                     AlphaInOnSubscribe.directSetResult(this.mIconBeauty);
-                } else {
-                    AlphaOutOnSubscribe.directSetResult(this.mIconSticker);
-                    AlphaOutOnSubscribe.directSetResult(this.mIconBeauty);
+                    return;
                 }
+                AlphaOutOnSubscribe.directSetResult(this.mIconSticker);
+                AlphaOutOnSubscribe.directSetResult(this.mIconBeauty);
             } else if (i3 == 1) {
                 list.add(Completable.create(new SlideInOnSubscribe(this.mIconSticker, 3)));
                 list.add(Completable.create(new SlideInOnSubscribe(this.mIconBeauty, 5)));

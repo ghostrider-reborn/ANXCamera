@@ -18,7 +18,7 @@ public final class MaybeDoFinally<T> extends AbstractMaybeWithUpstream<T, T> {
         private static final long serialVersionUID = 4109457741734051389L;
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f283d;
         final Action onFinally;
 
@@ -58,7 +58,7 @@ public final class MaybeDoFinally<T> extends AbstractMaybeWithUpstream<T, T> {
             runFinally();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void runFinally() {
             if (compareAndSet(0, 1)) {
                 try {

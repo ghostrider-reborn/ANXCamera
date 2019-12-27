@@ -10,7 +10,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import org.jcodec.platform.Platform;
@@ -94,7 +93,7 @@ public class NIOUtils {
 
     public static final MappedByteBuffer mapFile(File file) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(file);
-        MappedByteBuffer map = fileInputStream.getChannel().map(MapMode.READ_ONLY, 0, file.length());
+        MappedByteBuffer map = fileInputStream.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
         fileInputStream.close();
         return map;
     }

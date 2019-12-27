@@ -8,7 +8,6 @@ import android.os.HwBinder;
 import android.os.HwBlob;
 import android.os.HwParcel;
 import android.os.IHwBinder;
-import android.os.IHwBinder.DeathRecipient;
 import android.os.IHwInterface;
 import android.os.NativeHandle;
 import android.os.RemoteException;
@@ -46,7 +45,7 @@ public interface IDisplayFeatureCallback extends IBase {
             return IDisplayFeatureCallback.kInterfaceName;
         }
 
-        public final boolean linkToDeath(DeathRecipient deathRecipient, long j) {
+        public final boolean linkToDeath(IHwBinder.DeathRecipient deathRecipient, long j) {
             return true;
         }
 
@@ -55,7 +54,6 @@ public interface IDisplayFeatureCallback extends IBase {
         }
 
         public void onTransact(int i, HwParcel hwParcel, HwParcel hwParcel2, int i2) throws RemoteException {
-            String str = b.kInterfaceName;
             boolean z = false;
             boolean z2 = true;
             switch (i) {
@@ -87,8 +85,8 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
-                    ArrayList interfaceChain = interfaceChain();
+                    hwParcel.enforceInterface(b.kInterfaceName);
+                    ArrayList<String> interfaceChain = interfaceChain();
                     hwParcel2.writeStatus(0);
                     hwParcel2.writeStringVector(interfaceChain);
                     hwParcel2.send();
@@ -102,7 +100,7 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     hwParcel2.writeStatus(0);
                     hwParcel2.send();
                     return;
@@ -115,7 +113,7 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     String interfaceDescriptor = interfaceDescriptor();
                     hwParcel2.writeStatus(0);
                     hwParcel2.writeString(interfaceDescriptor);
@@ -130,8 +128,8 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
-                    ArrayList hashChain = getHashChain();
+                    hwParcel.enforceInterface(b.kInterfaceName);
+                    ArrayList<byte[]> hashChain = getHashChain();
                     hwParcel2.writeStatus(0);
                     HwBlob hwBlob = new HwBlob(16);
                     int size = hashChain.size();
@@ -139,7 +137,7 @@ public interface IDisplayFeatureCallback extends IBase {
                     hwBlob.putBool(12, false);
                     HwBlob hwBlob2 = new HwBlob(size * 32);
                     for (int i3 = 0; i3 < size; i3++) {
-                        hwBlob2.putInt8Array((long) (i3 * 32), (byte[]) hashChain.get(i3));
+                        hwBlob2.putInt8Array((long) (i3 * 32), hashChain.get(i3));
                     }
                     hwBlob.putBlob(0, hwBlob2);
                     hwParcel2.writeBuffer(hwBlob);
@@ -154,7 +152,7 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     setHALInstrumentation();
                     return;
                 case 256660548:
@@ -176,7 +174,7 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     ping();
                     hwParcel2.writeStatus(0);
                     hwParcel2.send();
@@ -190,7 +188,7 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     DebugInfo debugInfo = getDebugInfo();
                     hwParcel2.writeStatus(0);
                     debugInfo.writeToParcel(hwParcel2);
@@ -205,7 +203,7 @@ public interface IDisplayFeatureCallback extends IBase {
                         hwParcel2.send();
                         return;
                     }
-                    hwParcel.enforceInterface(str);
+                    hwParcel.enforceInterface(b.kInterfaceName);
                     notifySyspropsChanged();
                     return;
                 case 257250372:
@@ -241,13 +239,10 @@ public interface IDisplayFeatureCallback extends IBase {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(interfaceDescriptor());
-            sb.append("@Stub");
-            return sb.toString();
+            return interfaceDescriptor() + "@Stub";
         }
 
-        public final boolean unlinkToDeath(DeathRecipient deathRecipient) {
+        public final boolean unlinkToDeath(IHwBinder.DeathRecipient deathRecipient) {
             return true;
         }
     }

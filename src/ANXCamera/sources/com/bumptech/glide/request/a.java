@@ -79,15 +79,13 @@ public final class a implements d, c {
     }
 
     public void e(c cVar) {
-        if (!cVar.equals(this.error)) {
-            if (!this.error.isRunning()) {
-                this.error.begin();
+        if (cVar.equals(this.error)) {
+            d dVar = this.parent;
+            if (dVar != null) {
+                dVar.e(this);
             }
-            return;
-        }
-        d dVar = this.parent;
-        if (dVar != null) {
-            dVar.e(this);
+        } else if (!this.error.isRunning()) {
+            this.error.begin();
         }
     }
 

@@ -85,9 +85,8 @@ public abstract class LensSdkParamsProto {
         }
 
         public LensSdkParams clear() {
-            String str = "";
-            this.lensSdkVersion = str;
-            this.agsaVersionName = str;
+            this.lensSdkVersion = "";
+            this.agsaVersionName = "";
             this.lensAvailabilityStatus = -1;
             this.arStickersAvailabilityStatus = -1;
             this.unknownFieldData = null;
@@ -107,12 +106,11 @@ public abstract class LensSdkParamsProto {
         public int computeSerializedSize() {
             int computeSerializedSize = super.computeSerializedSize();
             String str = this.lensSdkVersion;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(1, this.lensSdkVersion);
             }
-            String str3 = this.agsaVersionName;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.agsaVersionName;
+            if (str2 != null && !str2.equals("")) {
                 computeSerializedSize += CodedOutputByteBufferNano.computeStringSize(2, this.agsaVersionName);
             }
             int i = this.lensAvailabilityStatus;
@@ -161,12 +159,11 @@ public abstract class LensSdkParamsProto {
 
         public void writeTo(CodedOutputByteBufferNano codedOutputByteBufferNano) throws IOException {
             String str = this.lensSdkVersion;
-            String str2 = "";
-            if (str != null && !str.equals(str2)) {
+            if (str != null && !str.equals("")) {
                 codedOutputByteBufferNano.writeString(1, this.lensSdkVersion);
             }
-            String str3 = this.agsaVersionName;
-            if (str3 != null && !str3.equals(str2)) {
+            String str2 = this.agsaVersionName;
+            if (str2 != null && !str2.equals("")) {
                 codedOutputByteBufferNano.writeString(2, this.agsaVersionName);
             }
             int i = this.lensAvailabilityStatus;

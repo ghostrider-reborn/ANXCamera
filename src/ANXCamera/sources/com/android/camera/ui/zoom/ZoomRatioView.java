@@ -17,7 +17,7 @@ public class ZoomRatioView extends FrameLayout {
     private ZoomTextImageView mZoomRatioText;
 
     public ZoomRatioView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public ZoomRatioView(Context context, AttributeSet attributeSet) {
@@ -59,20 +59,13 @@ public class ZoomRatioView extends FrameLayout {
     }
 
     public void setAlpha(float f2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setAlpha(): index = ");
-        sb.append(this.mZoomRatioIndex);
-        sb.append(", alpha = ");
-        sb.append(f2);
-        sb.toString();
+        "setAlpha(): index = " + this.mZoomRatioIndex + ", alpha = " + f2;
         this.mZoomRatioIcon.setAlpha(f2);
         this.mZoomRatioText.setAlpha(1.0f - f2);
     }
 
     public void setCaptureCount(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%02d", new Object[]{Integer.valueOf(i)}));
-        this.mZoomRatioText.setText(1, sb.toString());
+        this.mZoomRatioText.setText(1, String.format("%02d", new Object[]{Integer.valueOf(i)}));
     }
 
     public void setIconify(boolean z) {
@@ -80,12 +73,7 @@ public class ZoomRatioView extends FrameLayout {
     }
 
     public void setVisibility(int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("setVisibility(): index = ");
-        sb.append(this.mZoomRatioIndex);
-        sb.append(", visibility = ");
-        sb.append(Util.viewVisibilityToString(i));
-        sb.toString();
+        "setVisibility(): index = " + this.mZoomRatioIndex + ", visibility = " + Util.viewVisibilityToString(i);
         super.setVisibility(i);
     }
 
@@ -99,10 +87,7 @@ public class ZoomRatioView extends FrameLayout {
             } else {
                 sb.append(decimal);
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("setZoomRatio(): ");
-            sb2.append(f2);
-            sb2.toString();
+            "setZoomRatio(): " + f2;
             this.mZoomRatioText.setText(0, sb.toString());
             return;
         }

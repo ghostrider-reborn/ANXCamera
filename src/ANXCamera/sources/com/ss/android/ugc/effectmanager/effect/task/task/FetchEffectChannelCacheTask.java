@@ -42,21 +42,21 @@ public class FetchEffectChannelCacheTask extends NormalTask {
         effectChannelResponse.setAllCategoryEffects(effectChannelModel.getEffects());
         ArrayList arrayList = new ArrayList();
         effectChannelResponse.setCollections(effectChannelModel.getCollection());
-        for (EffectCategoryModel effectCategoryModel : effectChannelModel.getCategory()) {
+        for (EffectCategoryModel next : effectChannelModel.getCategory()) {
             EffectCategoryResponse effectCategoryResponse = new EffectCategoryResponse();
-            effectCategoryModel.checkValued();
-            effectCategoryResponse.setName(effectCategoryModel.getName());
-            effectCategoryResponse.setId(effectCategoryModel.getId());
-            if (!effectCategoryModel.getIcon().getUrl_list().isEmpty()) {
-                effectCategoryResponse.setIcon_normal_url((String) effectCategoryModel.getIcon().getUrl_list().get(0));
+            next.checkValued();
+            effectCategoryResponse.setName(next.getName());
+            effectCategoryResponse.setId(next.getId());
+            if (!next.getIcon().getUrl_list().isEmpty()) {
+                effectCategoryResponse.setIcon_normal_url(next.getIcon().getUrl_list().get(0));
             }
-            if (!effectCategoryModel.getIcon_selected().getUrl_list().isEmpty()) {
-                effectCategoryResponse.setIcon_selected_url((String) effectCategoryModel.getIcon_selected().getUrl_list().get(0));
+            if (!next.getIcon_selected().getUrl_list().isEmpty()) {
+                effectCategoryResponse.setIcon_selected_url(next.getIcon_selected().getUrl_list().get(0));
             }
-            effectCategoryResponse.setTotalEffects(getCategoryAllEffects(effectCategoryModel, effectChannelModel));
-            effectCategoryResponse.setTagsUpdateTime(effectCategoryModel.getTagsUpdateTime());
-            effectCategoryResponse.setTags(effectCategoryModel.getTags());
-            effectCategoryResponse.setKey(effectCategoryModel.getKey());
+            effectCategoryResponse.setTotalEffects(getCategoryAllEffects(next, effectChannelModel));
+            effectCategoryResponse.setTagsUpdateTime(next.getTagsUpdateTime());
+            effectCategoryResponse.setTags(next.getTags());
+            effectCategoryResponse.setKey(next.getKey());
             arrayList.add(effectCategoryResponse);
         }
         effectChannelResponse.setCategoryResponseList(arrayList);
@@ -69,10 +69,10 @@ public class FetchEffectChannelCacheTask extends NormalTask {
     }
 
     private void downloadEffect(List<Effect> list) {
-        for (Effect effect : list) {
-            if (!this.mCache.has(effect.getId())) {
+        for (Effect next : list) {
+            if (!this.mCache.has(next.getId())) {
                 try {
-                    EffectUtils.downloadEffect(this.mEffectContext.getEffectConfiguration(), effect);
+                    EffectUtils.downloadEffect(this.mEffectContext.getEffectConfiguration(), next);
                 } catch (Exception e2) {
                     e2.printStackTrace();
                 }
@@ -82,10 +82,10 @@ public class FetchEffectChannelCacheTask extends NormalTask {
 
     private List<Effect> getCategoryAllEffects(EffectCategoryModel effectCategoryModel, EffectChannelModel effectChannelModel) {
         ArrayList arrayList = new ArrayList();
-        for (String str : effectCategoryModel.getEffects()) {
-            for (Effect effect : effectChannelModel.getEffects()) {
-                if (TextUtils.equals(str, effect.getEffectId())) {
-                    arrayList.add(effect);
+        for (String next : effectCategoryModel.getEffects()) {
+            for (Effect next2 : effectChannelModel.getEffects()) {
+                if (TextUtils.equals(next, next2.getEffectId())) {
+                    arrayList.add(next2);
                 }
             }
         }
@@ -104,7 +104,7 @@ public class FetchEffectChannelCacheTask extends NormalTask {
         } else if (!effectChannelModel.checkValued()) {
             sendMessage(14, new EffectChannelTaskResult(new EffectChannelResponse(this.panel), new ExceptionResult((int) ErrorConstants.CODE_INVALID_EFFECT_CACHE)));
         } else {
-            sendMessage(14, new EffectChannelTaskResult(new BuildEffectChannelResponse(this.panel, this.mEffectContext.getEffectConfiguration().getEffectDir().getAbsolutePath(), true).buildChannelResponse(effectChannelModel), null));
+            sendMessage(14, new EffectChannelTaskResult(new BuildEffectChannelResponse(this.panel, this.mEffectContext.getEffectConfiguration().getEffectDir().getAbsolutePath(), true).buildChannelResponse(effectChannelModel), (ExceptionResult) null));
         }
     }
 }

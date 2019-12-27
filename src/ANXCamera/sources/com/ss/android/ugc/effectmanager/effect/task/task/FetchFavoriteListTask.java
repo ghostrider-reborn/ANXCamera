@@ -71,11 +71,7 @@ public class FetchFavoriteListTask extends NormalTask {
         if (!TextUtils.isEmpty(this.mConfiguration.getSysLanguage())) {
             hashMap.put(EffectConfiguration.KEY_SYS_LANGUAGE, this.mConfiguration.getSysLanguage());
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.mEffectContext.getLinkSelector().getBestHostUrl());
-        sb.append(this.mConfiguration.getApiAdress());
-        sb.append(EffectConstants.ROUTE_FAVORITE_LIST);
-        return new EffectRequest("GET", NetworkUtils.buildRequestUrl(hashMap, sb.toString()));
+        return new EffectRequest("GET", NetworkUtils.buildRequestUrl(hashMap, this.mEffectContext.getLinkSelector().getBestHostUrl() + this.mConfiguration.getApiAdress() + EffectConstants.ROUTE_FAVORITE_LIST));
     }
 
     public void execute() {
@@ -88,19 +84,14 @@ public class FetchFavoriteListTask extends NormalTask {
                     throw new NetException(Integer.valueOf(ErrorConstants.CODE_DOWNLOAD_ERROR), ErrorConstants.EXCEPTION_DOWNLOAD_ERROR);
                 }
                 List<Effect> effects = fetchFavoriteListResponse.getEffects();
-                for (Effect effect : effects) {
-                    if (TextUtils.isEmpty(effect.getZipPath()) || TextUtils.isEmpty(effect.getUnzipPath())) {
+                for (Effect next : effects) {
+                    if (TextUtils.isEmpty(next.getZipPath()) || TextUtils.isEmpty(next.getUnzipPath())) {
+                        next.setZipPath(this.mConfiguration.getEffectDir() + File.separator + next.getId() + ".zip");
                         StringBuilder sb = new StringBuilder();
                         sb.append(this.mConfiguration.getEffectDir());
                         sb.append(File.separator);
-                        sb.append(effect.getId());
-                        sb.append(".zip");
-                        effect.setZipPath(sb.toString());
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(this.mConfiguration.getEffectDir());
-                        sb2.append(File.separator);
-                        sb2.append(effect.getId());
-                        effect.setUnzipPath(sb2.toString());
+                        sb.append(next.getId());
+                        next.setUnzipPath(sb.toString());
                     }
                 }
                 sendMessage(41, new FetchFavoriteListTaskResult(effects, fetchFavoriteListResponse.getType()));

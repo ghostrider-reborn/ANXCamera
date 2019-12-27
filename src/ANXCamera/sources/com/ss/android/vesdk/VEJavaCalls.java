@@ -61,12 +61,7 @@ public class VEJavaCalls {
         try {
             return callMethodOrThrow(obj, str, objArr);
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Meet exception when call Method '");
-            sb.append(str);
-            sb.append("' in ");
-            sb.append(obj);
-            Log.w(LOG_TAG, sb.toString(), e2);
+            Log.w(LOG_TAG, "Meet exception when call Method '" + str + "' in " + obj, e2);
             return null;
         }
     }
@@ -79,46 +74,35 @@ public class VEJavaCalls {
         try {
             return callStaticMethodOrThrow(Class.forName(str), str2, objArr);
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Meet exception when call Method '");
-            sb.append(str2);
-            sb.append("' in ");
-            sb.append(str);
-            Log.w(LOG_TAG, sb.toString(), e2);
+            Log.w(LOG_TAG, "Meet exception when call Method '" + str2 + "' in " + str, e2);
             return null;
         }
     }
 
     public static <T> T callStaticMethodOrThrow(Class<?> cls, String str, Object... objArr) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return getDeclaredMethod(cls, str, getParameterTypes(objArr)).invoke(null, getParameters(objArr));
+        return getDeclaredMethod(cls, str, getParameterTypes(objArr)).invoke((Object) null, getParameters(objArr));
     }
 
     public static <T> T callStaticMethodOrThrow(String str, String str2, Object... objArr) throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
-        return getDeclaredMethod(Class.forName(str), str2, getParameterTypes(objArr)).invoke(null, getParameters(objArr));
+        return getDeclaredMethod(Class.forName(str), str2, getParameterTypes(objArr)).invoke((Object) null, getParameters(objArr));
     }
 
     private static boolean compareClassLists(Class<?>[] clsArr, Class<?>[] clsArr2) {
-        boolean z = true;
         if (clsArr == null) {
-            if (!(clsArr2 == null || clsArr2.length == 0)) {
-                z = false;
-            }
-            return z;
-        } else if (clsArr2 == null) {
-            if (clsArr.length != 0) {
-                z = false;
-            }
-            return z;
-        } else if (clsArr.length != clsArr2.length) {
-            return false;
-        } else {
-            for (int i = 0; i < clsArr.length; i++) {
-                if (!clsArr[i].isAssignableFrom(clsArr2[i]) && (!PRIMITIVE_MAP.containsKey(clsArr[i]) || !((Class) PRIMITIVE_MAP.get(clsArr[i])).equals(PRIMITIVE_MAP.get(clsArr2[i])))) {
-                    return false;
-                }
-            }
-            return true;
+            return clsArr2 == null || clsArr2.length == 0;
         }
+        if (clsArr2 == null) {
+            return clsArr.length == 0;
+        }
+        if (clsArr.length != clsArr2.length) {
+            return false;
+        }
+        for (int i = 0; i < clsArr.length; i++) {
+            if (!clsArr[i].isAssignableFrom(clsArr2[i]) && (!PRIMITIVE_MAP.containsKey(clsArr[i]) || !PRIMITIVE_MAP.get(clsArr[i]).equals(PRIMITIVE_MAP.get(clsArr2[i])))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static Method findMethodByName(Method[] methodArr, String str, Class<?>[] clsArr) {
@@ -147,15 +131,12 @@ public class VEJavaCalls {
 
     private static Object getDefaultValue(Class<?> cls) {
         if (Integer.TYPE.equals(cls) || Integer.class.equals(cls) || Byte.TYPE.equals(cls) || Byte.class.equals(cls) || Short.TYPE.equals(cls) || Short.class.equals(cls) || Long.TYPE.equals(cls) || Long.class.equals(cls) || Double.TYPE.equals(cls) || Double.class.equals(cls) || Float.TYPE.equals(cls) || Float.class.equals(cls)) {
-            return Integer.valueOf(0);
+            return 0;
         }
         if (Boolean.TYPE.equals(cls) || Boolean.class.equals(cls)) {
-            return Boolean.valueOf(false);
+            return false;
         }
-        if (Character.TYPE.equals(cls) || Character.class.equals(cls)) {
-            return Character.valueOf(0);
-        }
-        return null;
+        return (Character.TYPE.equals(cls) || Character.class.equals(cls)) ? (char) 0 : null;
     }
 
     public static <T> T getField(Object obj, String str) {
@@ -226,10 +207,7 @@ public class VEJavaCalls {
         try {
             return newEmptyInstanceOrThrow(cls);
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Meet exception when make instance as a ");
-            sb.append(cls.getSimpleName());
-            Log.w(LOG_TAG, sb.toString(), e2);
+            Log.w(LOG_TAG, "Meet exception when make instance as a " + cls.getSimpleName(), e2);
             return null;
         }
     }
@@ -237,10 +215,7 @@ public class VEJavaCalls {
     public static <T> T newEmptyInstanceOrThrow(Class<?> cls) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException {
         Constructor[] declaredConstructors = cls.getDeclaredConstructors();
         if (declaredConstructors == null || declaredConstructors.length == 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Can't get even one available constructor for ");
-            sb.append(cls);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Can't get even one available constructor for " + cls);
         }
         Constructor constructor = declaredConstructors[0];
         constructor.setAccessible(true);
@@ -259,10 +234,7 @@ public class VEJavaCalls {
         try {
             return newInstanceOrThrow(cls, objArr);
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Meet exception when make instance as a ");
-            sb.append(cls.getSimpleName());
-            Log.w(LOG_TAG, sb.toString(), e2);
+            Log.w(LOG_TAG, "Meet exception when make instance as a " + cls.getSimpleName(), e2);
             return null;
         }
     }
@@ -271,10 +243,7 @@ public class VEJavaCalls {
         try {
             return newInstanceOrThrow(str, objArr);
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Meet exception when make instance as a ");
-            sb.append(str);
-            Log.w(LOG_TAG, sb.toString(), e2);
+            Log.w(LOG_TAG, "Meet exception when make instance as a " + str, e2);
             return null;
         }
     }

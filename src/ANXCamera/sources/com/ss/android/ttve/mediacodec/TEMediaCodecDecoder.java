@@ -2,15 +2,13 @@ package com.ss.android.ttve.mediacodec;
 
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.support.annotation.Keep;
 import android.util.Log;
 import android.view.Surface;
@@ -24,7 +22,7 @@ import java.nio.FloatBuffer;
 
 @Keep
 @SuppressLint({"NewApi"})
-public class TEMediaCodecDecoder implements OnFrameAvailableListener {
+public class TEMediaCodecDecoder implements SurfaceTexture.OnFrameAvailableListener {
     private static final int ERROR_EOF = -1;
     private static final int ERROR_FAIL = -2;
     private static final int ERROR_OK = 0;
@@ -35,7 +33,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
     private final int MAX_DELAY_COUNT = 10;
     private final long MAX_SLEEP_MS = 0;
     private boolean m_bIsNeedReconfigure = false;
-    private BufferInfo m_bufferInfo = new BufferInfo();
+    private MediaCodec.BufferInfo m_bufferInfo = new MediaCodec.BufferInfo();
     private MediaCodec m_decoder = null;
     private boolean m_decoderStarted = false;
     private TEEglStateSaver m_eglStateSaver = null;
@@ -90,7 +88,6 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
 
         private int createProgram(String str, String str2) {
             int loadShader = loadShader(35633, str);
-            int i = 0;
             if (loadShader == 0) {
                 return 0;
             }
@@ -100,34 +97,28 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             }
             int glCreateProgram = GLES20.glCreateProgram();
             checkGlError("glCreateProgram");
-            String str3 = TEMediaCodecDecoder.TAG;
             if (glCreateProgram == 0) {
-                Log.e(str3, "Could not create program");
+                Log.e(TEMediaCodecDecoder.TAG, "Could not create program");
             }
             GLES20.glAttachShader(glCreateProgram, loadShader);
-            String str4 = "glAttachShader";
-            checkGlError(str4);
+            checkGlError("glAttachShader");
             GLES20.glAttachShader(glCreateProgram, loadShader2);
-            checkGlError(str4);
+            checkGlError("glAttachShader");
             GLES20.glLinkProgram(glCreateProgram);
             int[] iArr = new int[1];
             GLES20.glGetProgramiv(glCreateProgram, 35714, iArr, 0);
-            if (iArr[0] != 1) {
-                Log.e(str3, "Could not link program: ");
-                Log.e(str3, GLES20.glGetProgramInfoLog(glCreateProgram));
-                GLES20.glDeleteProgram(glCreateProgram);
-            } else {
-                i = glCreateProgram;
+            if (iArr[0] == 1) {
+                return glCreateProgram;
             }
-            return i;
+            Log.e(TEMediaCodecDecoder.TAG, "Could not link program: ");
+            Log.e(TEMediaCodecDecoder.TAG, GLES20.glGetProgramInfoLog(glCreateProgram));
+            GLES20.glDeleteProgram(glCreateProgram);
+            return 0;
         }
 
         private int loadShader(int i, String str) {
             int glCreateShader = GLES20.glCreateShader(i);
-            StringBuilder sb = new StringBuilder();
-            sb.append("glCreateShader type=");
-            sb.append(i);
-            checkGlError(sb.toString());
+            checkGlError("glCreateShader type=" + i);
             GLES20.glShaderSource(glCreateShader, str);
             GLES20.glCompileShader(glCreateShader);
             int[] iArr = new int[1];
@@ -135,17 +126,11 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             if (iArr[0] != 0) {
                 return glCreateShader;
             }
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Could not compile shader ");
-            sb2.append(i);
-            sb2.append(":");
-            String sb3 = sb2.toString();
-            String str2 = TEMediaCodecDecoder.TAG;
-            Log.e(str2, sb3);
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(" ");
-            sb4.append(GLES20.glGetShaderInfoLog(glCreateShader));
-            Log.e(str2, sb4.toString());
+            Log.e(TEMediaCodecDecoder.TAG, "Could not compile shader " + i + ":");
+            StringBuilder sb = new StringBuilder();
+            sb.append(" ");
+            sb.append(GLES20.glGetShaderInfoLog(glCreateShader));
+            Log.e(TEMediaCodecDecoder.TAG, sb.toString());
             GLES20.glDeleteShader(glCreateShader);
             return 0;
         }
@@ -164,25 +149,15 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
         public void checkGlError(String str) {
             int glGetError = GLES20.glGetError();
             if (glGetError != 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                String str2 = ": glError ";
-                sb.append(str2);
-                sb.append(glGetError);
-                Log.e(TEMediaCodecDecoder.TAG, sb.toString());
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(str2);
-                sb2.append(glGetError);
-                throw new RuntimeException(sb2.toString());
+                Log.e(TEMediaCodecDecoder.TAG, str + ": glError " + glGetError);
+                throw new RuntimeException(str + ": glError " + glGetError);
             }
         }
 
         public void drawFrame(int i, int i2, int i3, int i4) throws IOException {
             GLES20.glViewport(0, 0, i, i2);
             GLES20.glBindTexture(3553, i4);
-            String str = "glBindTexture";
-            checkGlError(str);
+            checkGlError("glBindTexture");
             GLES20.glBindFramebuffer(36160, this.muFrameBuffer[0]);
             GLES20.glFramebufferTexture2D(36160, 36064, 3553, i4, 0);
             checkGlError("glFramebufferTexture2D");
@@ -193,7 +168,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             checkGlError("glUseProgram");
             GLES20.glActiveTexture(33984);
             GLES20.glBindTexture(36197, i3);
-            checkGlError(str);
+            checkGlError("glBindTexture");
             this.mTriangleVertices.position(0);
             GLES20.glVertexAttribPointer(this.maPositionHandle, 3, 5126, false, 20, this.mTriangleVertices);
             checkGlError("glVertexAttribPointer maPosition");
@@ -269,11 +244,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
                     try {
                         this.m_frameSyncObject.wait(500);
                     } catch (InterruptedException e2) {
-                        String str = TAG;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("");
-                        sb.append(e2.getMessage());
-                        Log.e(str, sb.toString());
+                        Log.e(TAG, "" + e2.getMessage());
                         e2.printStackTrace();
                         return false;
                     }
@@ -298,10 +269,8 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
         int i2;
         int dequeueOutputBuffer;
         int i3 = i;
-        boolean z2 = this.m_sawInputEOS;
-        String str = TAG;
-        boolean z3 = true;
-        if (!z2) {
+        boolean z2 = true;
+        if (!this.m_sawInputEOS) {
             int dequeueInputBuffer = this.m_decoder.dequeueInputBuffer(30000);
             int i4 = 0;
             while (true) {
@@ -316,10 +285,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
                 dequeueInputBuffer = this.m_decoder.dequeueInputBuffer(30000);
                 i4++;
                 if (i4 >= 20) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("try dequeueInputBuffer timeout -- ");
-                    sb.append(i4);
-                    Log.e(str, sb.toString());
+                    Log.e(TAG, "try dequeueInputBuffer timeout -- " + i4);
                     break;
                 }
             }
@@ -337,7 +303,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
                     this.m_pendingInputFrameCount++;
                 }
             } else {
-                Log.e(str, "Input buffer not available");
+                Log.e(TAG, "Input buffer not available");
                 z = true;
                 i2 = !this.m_sawOutputEOS ? 600000 : this.m_pendingInputFrameCount > 2 ? 30000 : 0;
                 while (true) {
@@ -353,10 +319,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
                     return z ? -3 : -2;
                 }
                 if (dequeueOutputBuffer < 0) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Unexpected result from decoder.dequeueOutputBuffer: ");
-                    sb2.append(dequeueOutputBuffer);
-                    Log.e(str, sb2.toString());
+                    Log.e(TAG, "Unexpected result from decoder.dequeueOutputBuffer: " + dequeueOutputBuffer);
                     return -2;
                 }
                 if ((this.m_bufferInfo.flags & 4) != 0) {
@@ -366,29 +329,21 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
                     this.m_timestampOfLastDecodedFrame = this.m_bufferInfo.presentationTimeUs;
                     this.m_pendingInputFrameCount--;
                 } else {
-                    z3 = false;
+                    z2 = false;
                 }
-                this.m_decoder.releaseOutputBuffer(dequeueOutputBuffer, z3);
-                if (!z3) {
+                this.m_decoder.releaseOutputBuffer(dequeueOutputBuffer, z2);
+                if (!z2) {
                     return -1;
                 }
                 if (AwaitNewImage()) {
                     this.m_timestampOfCurTexFrame = this.m_bufferInfo.presentationTimeUs;
-                    int glGetError = GLES20.glGetError();
-                    if (glGetError == 0) {
+                    if (GLES20.glGetError() == 0) {
                         return 0;
                     }
-                    StringBuilder sb3 = new StringBuilder();
-                    String str2 = ": glError ";
-                    sb3.append(str2);
-                    sb3.append(glGetError);
-                    Log.e(str, sb3.toString());
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append(str2);
-                    sb4.append(glGetError);
-                    throw new RuntimeException(sb4.toString());
+                    Log.e(TAG, ": glError " + r0);
+                    throw new RuntimeException(": glError " + r0);
                 }
-                Log.e(str, "Render decoded frame to surface texture failed!");
+                Log.e(TAG, "Render decoded frame to surface texture failed!");
                 return -2;
             }
         }
@@ -429,16 +384,13 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
     private boolean SetupDecoder(String str) {
         try {
             this.m_decoder = MediaCodec.createDecoderByType(str);
-            this.m_decoder.configure(this.m_format, this.m_surface, null, 0);
+            this.m_decoder.configure(this.m_format, this.m_surface, (MediaCrypto) null, 0);
             this.m_decoder.start();
             this.m_decoderStarted = true;
             this.m_iCurCount = 0;
             return true;
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("");
-            sb.append(e2.getMessage());
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "" + e2.getMessage());
             e2.printStackTrace();
             CleanupDecoder();
             return false;
@@ -469,7 +421,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
     }
 
     private ByteBuffer getInputBufferByIdx(int i) {
-        return VERSION.SDK_INT >= 21 ? this.m_decoder.getInputBuffer(i) : this.m_decoder.getInputBuffers()[i];
+        return Build.VERSION.SDK_INT >= 21 ? this.m_decoder.getInputBuffer(i) : this.m_decoder.getInputBuffers()[i];
     }
 
     private int reconfigureMediaFormat() {
@@ -481,7 +433,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             if (this.m_ppsBuf != null) {
                 this.m_format.setByteBuffer("csd-1", this.m_ppsBuf);
             }
-            if (VERSION.SDK_INT != 16) {
+            if (Build.VERSION.SDK_INT != 16) {
                 return 0;
             }
             this.m_format.setInteger("max-input-size", 0);
@@ -498,10 +450,8 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
     }
 
     private int startDecoder() {
-        boolean IsValid = IsValid();
-        String str = TAG;
-        if (IsValid) {
-            Log.e(str, "You can't call startDecoder() twice!");
+        if (IsValid()) {
+            Log.e(TAG, "You can't call startDecoder() twice!");
             return -1;
         }
         int i = this.m_surfaceTexID[0];
@@ -513,11 +463,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
         }
         try {
             this.m_surfaceTexture = new SurfaceTexture(i);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Surface texture with texture (id=");
-            sb.append(i);
-            sb.append(") has been created.");
-            Log.e(str, sb.toString());
+            Log.e(TAG, "Surface texture with texture (id=" + i + ") has been created.");
             this.m_surfaceTexture.setOnFrameAvailableListener(this);
             this.m_surface = new Surface(this.m_surfaceTexture);
             this.m_textureRender = new SOES2DTextureRender(this.m_surfaceTexture);
@@ -528,10 +474,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             stopDecoder();
             return -1;
         } catch (Exception e2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("");
-            sb2.append(e2.getMessage());
-            Log.e(str, sb2.toString());
+            Log.e(TAG, "" + e2.getMessage());
             e2.printStackTrace();
             stopDecoder();
             return -1;
@@ -551,11 +494,12 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             this.m_surface = null;
         }
         SurfaceTexture surfaceTexture = this.m_surfaceTexture;
-        if (surfaceTexture != null) {
-            surfaceTexture.setOnFrameAvailableListener(null);
-            this.m_surfaceTexture.release();
-            this.m_surfaceTexture = null;
+        if (surfaceTexture == null) {
+            return 0;
         }
+        surfaceTexture.setOnFrameAvailableListener((SurfaceTexture.OnFrameAvailableListener) null);
+        this.m_surfaceTexture.release();
+        this.m_surfaceTexture = null;
         return 0;
     }
 
@@ -570,10 +514,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
                     }
                     this.m_decoder.stop();
                 } catch (Exception e2) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("");
-                    sb.append(e2.getMessage());
-                    Log.e(TAG, sb.toString());
+                    Log.e(TAG, "" + e2.getMessage());
                     e2.printStackTrace();
                 }
                 this.m_decoderStarted = false;
@@ -604,15 +545,8 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
             this.m_eglStateSaver = new TEEglStateSaver();
             this.m_eglStateSaver.saveEGLState();
         }
-        boolean equals = EGL14.eglGetCurrentContext().equals(this.m_eglStateSaver.getSavedEGLContext());
-        String str = TAG;
-        if (!equals) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("eglGetCurrentContext = ");
-            sb.append(EGL14.eglGetCurrentContext());
-            sb.append(" getSavedEGLContext = ");
-            sb.append(this.m_eglStateSaver.getSavedEGLContext());
-            Log.e(str, sb.toString());
+        if (!EGL14.eglGetCurrentContext().equals(this.m_eglStateSaver.getSavedEGLContext())) {
+            Log.e(TAG, "eglGetCurrentContext = " + EGL14.eglGetCurrentContext() + " getSavedEGLContext = " + this.m_eglStateSaver.getSavedEGLContext());
             this.m_bIsNeedReconfigure = true;
         }
         if (this.m_bIsNeedReconfigure) {
@@ -629,11 +563,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
         if (this.m_iCurCount < 10 && currentTimeMillis2 > 0) {
             try {
                 Thread.sleep(currentTimeMillis2, 0);
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Sleep ");
-                sb2.append(currentTimeMillis2);
-                sb2.append("ms for delay output!!!");
-                Log.e(str, sb2.toString());
+                Log.e(TAG, "Sleep " + currentTimeMillis2 + "ms for delay output!!!");
             } catch (InterruptedException e2) {
                 e2.printStackTrace();
             }
@@ -650,10 +580,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
     }
 
     public int flushDecoder() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("flushDecoder m_decoder = ");
-        sb.append(this.m_decoder);
-        Log.e(TAG, sb.toString());
+        Log.e(TAG, "flushDecoder m_decoder = " + this.m_decoder);
         MediaCodec mediaCodec = this.m_decoder;
         if (mediaCodec == null) {
             return -3;
@@ -698,12 +625,7 @@ public class TEMediaCodecDecoder implements OnFrameAvailableListener {
     }
 
     public int initDecoder(int i, int i2, byte[] bArr, int i3, byte[] bArr2, int i4) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("width = ");
-        sb.append(i);
-        sb.append(" height = ");
-        sb.append(i2);
-        Log.e(TAG, sb.toString());
+        Log.e(TAG, "width = " + i + " height = " + i2);
         int encoder = setEncoder(i, i2, bArr, i3, bArr2, i4);
         if (this.m_bIsNeedReconfigure) {
             encoder = reconfigureMediaFormat();

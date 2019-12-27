@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 final class DisposeOnCancel implements Future<Object> {
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     final Disposable f340d;
 
     DisposeOnCancel(Disposable disposable) {

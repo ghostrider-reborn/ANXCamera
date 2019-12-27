@@ -34,11 +34,14 @@ public abstract class PixelEffectRender extends ShaderRender {
         if (target == 5) {
             DrawBasicTexAttribute drawBasicTexAttribute = (DrawBasicTexAttribute) drawAttribute;
             drawTexture(drawBasicTexAttribute.mBasicTexture, (float) drawBasicTexAttribute.mX, (float) drawBasicTexAttribute.mY, (float) drawBasicTexAttribute.mWidth, (float) drawBasicTexAttribute.mHeight, drawBasicTexAttribute.mIsSnapshot);
-        } else if (target == 6) {
+            return true;
+        } else if (target != 6) {
+            return true;
+        } else {
             DrawIntTexAttribute drawIntTexAttribute = (DrawIntTexAttribute) drawAttribute;
             drawTexture(drawIntTexAttribute.mTexId, (float) drawIntTexAttribute.mX, (float) drawIntTexAttribute.mY, (float) drawIntTexAttribute.mWidth, (float) drawIntTexAttribute.mHeight, drawIntTexAttribute.mIsSnapshot);
+            return true;
         }
-        return true;
     }
 
     /* access modifiers changed from: protected */
@@ -60,10 +63,7 @@ public abstract class PixelEffectRender extends ShaderRender {
     public void drawTexture(BasicTexture basicTexture, float f2, float f3, float f4, float f5, boolean z) {
         GLES20.glUseProgram(this.mProgram);
         if (!basicTexture.onBind(this.mGLCanvas)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("drawTexture: fail bind texture ");
-            sb.append(basicTexture.getId());
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "drawTexture: fail bind texture " + basicTexture.getId());
         } else if (bindTexture(basicTexture, 33984)) {
             bindExtraTexture();
             updateViewport();
@@ -91,10 +91,7 @@ public abstract class PixelEffectRender extends ShaderRender {
             this.mUniformAlphaH = GLES20.glGetUniformLocation(this.mProgram, "uAlpha");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass());
-        sb.append(": mProgram = 0");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(getClass() + ": mProgram = 0");
     }
 
     /* access modifiers changed from: protected */
@@ -111,8 +108,8 @@ public abstract class PixelEffectRender extends ShaderRender {
 
     /* access modifiers changed from: protected */
     public void initSupportAttriList() {
-        this.mAttriSupportedList.add(Integer.valueOf(5));
-        this.mAttriSupportedList.add(Integer.valueOf(6));
+        this.mAttriSupportedList.add(5);
+        this.mAttriSupportedList.add(6);
     }
 
     /* access modifiers changed from: protected */

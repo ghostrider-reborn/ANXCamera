@@ -6,10 +6,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.LinearLayout;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
@@ -24,7 +21,7 @@ import io.reactivex.Completable;
 import java.util.Iterator;
 import java.util.List;
 
-public class ModeSelectView extends LinearLayout implements OnClickListener {
+public class ModeSelectView extends LinearLayout implements View.OnClickListener {
     private ColorActivateTextView mLastActivateTextView;
     private onModeClickedListener mOnModeClickedListener;
 
@@ -48,13 +45,13 @@ public class ModeSelectView extends LinearLayout implements OnClickListener {
     }
 
     private static final int getChildMeasureWidth(View view) {
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) view.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
         int i = marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
         int measuredWidth = view.getMeasuredWidth();
         if (measuredWidth > 0) {
             return measuredWidth + i;
         }
-        int makeMeasureSpec = MeasureSpec.makeMeasureSpec(0, 0);
+        int makeMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, 0);
         view.measure(makeMeasureSpec, makeMeasureSpec);
         return view.getMeasuredWidth() + i;
     }
@@ -80,10 +77,7 @@ public class ModeSelectView extends LinearLayout implements OnClickListener {
         ColorActivateTextView colorActivateTextView2 = (ColorActivateTextView) viewGroup.findViewById(R.id.text_item_title);
         colorActivateTextView2.setActivated(true);
         if (Util.isAccessible()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(colorActivateTextView2.getText().toString());
-            sb.append(getContext().getString(R.string.accessibility_selected));
-            colorActivateTextView2.setContentDescription(sb.toString());
+            colorActivateTextView2.setContentDescription(colorActivateTextView2.getText().toString() + getContext().getString(R.string.accessibility_selected));
             colorActivateTextView2.sendAccessibilityEvent(128);
         }
         this.mLastActivateTextView = colorActivateTextView2;
@@ -101,28 +95,28 @@ public class ModeSelectView extends LinearLayout implements OnClickListener {
     public void init(ComponentModuleList componentModuleList, int i) {
         int i2;
         removeAllViews();
-        List items = componentModuleList.getItems();
-        Iterator it = items.iterator();
+        List<ComponentDataItem> items = componentModuleList.getItems();
+        Iterator<ComponentDataItem> it = items.iterator();
         while (true) {
             if (!it.hasNext()) {
                 break;
             }
-            ComponentDataItem componentDataItem = (ComponentDataItem) it.next();
+            ComponentDataItem next = it.next();
             ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.fragment_mode_select_item, this, false);
             ColorActivateTextView colorActivateTextView = (ColorActivateTextView) viewGroup.findViewById(R.id.text_item_title);
             viewGroup.setOnClickListener(this);
             colorActivateTextView.setNormalCor(ColorConstant.WHITE_ALPHA_99);
-            int intValue = Integer.valueOf(componentDataItem.mValue).intValue();
+            int intValue = Integer.valueOf(next.mValue).intValue();
             if (intValue == 174 && componentModuleList.needShowLiveRedDot()) {
                 viewGroup.findViewById(R.id.mode_select_red_dot).setVisibility(0);
                 CameraSettings.setTTLiveStickerNeedRedDot(true);
             }
             colorActivateTextView.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
             if (!b.Ln && !DataRepository.dataItemFeature().Xb()) {
-                if (!TextUtils.isEmpty(componentDataItem.mDisplayNameStr)) {
-                    colorActivateTextView.setText(componentDataItem.mDisplayNameStr);
+                if (!TextUtils.isEmpty(next.mDisplayNameStr)) {
+                    colorActivateTextView.setText(next.mDisplayNameStr);
                 } else {
-                    colorActivateTextView.setText(componentDataItem.mDisplayNameRes);
+                    colorActivateTextView.setText(next.mDisplayNameRes);
                 }
             }
             viewGroup.setTag(Integer.valueOf(intValue));
@@ -130,8 +124,8 @@ public class ModeSelectView extends LinearLayout implements OnClickListener {
         }
         int transferredMode = ComponentModuleList.getTransferredMode(i);
         for (i2 = 0; i2 < items.size(); i2++) {
-            if (Integer.valueOf(((ComponentDataItem) items.get(i2)).mValue).intValue() == transferredMode) {
-                setSelection(i2, null);
+            if (Integer.valueOf(items.get(i2).mValue).intValue() == transferredMode) {
+                setSelection(i2, (List<Completable>) null);
                 return;
             }
         }

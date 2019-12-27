@@ -2,6 +2,7 @@ package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
+import io.reactivex.internal.operators.flowable.FlowableMap;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -16,6 +17,6 @@ public final class FlowableMapPublisher<T, U> extends Flowable<U> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super U> subscriber) {
-        this.source.subscribe(new MapSubscriber(subscriber, this.mapper));
+        this.source.subscribe(new FlowableMap.MapSubscriber(subscriber, this.mapper));
     }
 }

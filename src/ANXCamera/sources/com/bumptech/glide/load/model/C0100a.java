@@ -8,11 +8,11 @@ import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.a.i;
 import com.bumptech.glide.load.a.n;
 import com.bumptech.glide.load.g;
-import com.bumptech.glide.load.model.t.a;
+import com.bumptech.glide.load.model.t;
 import com.ss.android.ugc.effectmanager.effect.model.ComposerHelper;
 import java.io.InputStream;
 
-/* renamed from: com.bumptech.glide.load.model.a reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.model.a  reason: case insensitive filesystem */
 /* compiled from: AssetUriLoader */
 public class C0100a<Data> implements t<Uri, Data> {
     private static final String Gh = "android_asset";
@@ -21,7 +21,7 @@ public class C0100a<Data> implements t<Uri, Data> {
     private final AssetManager Qd;
     private final C0009a<Data> factory;
 
-    /* renamed from: com.bumptech.glide.load.model.a$a reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.load.model.a$a  reason: collision with other inner class name */
     /* compiled from: AssetUriLoader */
     public interface C0009a<Data> {
         d<Data> a(AssetManager assetManager, String str);
@@ -76,15 +76,12 @@ public class C0100a<Data> implements t<Uri, Data> {
         this.factory = aVar;
     }
 
-    public a<Data> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
-        return new a<>(new com.bumptech.glide.e.d(uri), this.factory.a(this.Qd, uri.toString().substring(Ih)));
+    public t.a<Data> a(@NonNull Uri uri, int i, int i2, @NonNull g gVar) {
+        return new t.a<>(new com.bumptech.glide.e.d(uri), this.factory.a(this.Qd, uri.toString().substring(Ih)));
     }
 
     /* renamed from: i */
     public boolean c(@NonNull Uri uri) {
-        if (!ComposerHelper.COMPOSER_PATH.equals(uri.getScheme()) || uri.getPathSegments().isEmpty()) {
-            return false;
-        }
-        return Gh.equals(uri.getPathSegments().get(0));
+        return ComposerHelper.COMPOSER_PATH.equals(uri.getScheme()) && !uri.getPathSegments().isEmpty() && Gh.equals(uri.getPathSegments().get(0));
     }
 }

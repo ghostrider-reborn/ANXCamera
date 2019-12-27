@@ -1,5 +1,6 @@
 package android.support.v4.app;
 
+import android.arch.lifecycle.ViewModelStore;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Parcelable;
@@ -166,7 +167,7 @@ public class FragmentController {
 
     @Deprecated
     public void restoreAllState(Parcelable parcelable, List<Fragment> list) {
-        this.mHost.mFragmentManager.restoreAllState(parcelable, new FragmentManagerNonConfig(list, null, null));
+        this.mHost.mFragmentManager.restoreAllState(parcelable, new FragmentManagerNonConfig(list, (List<FragmentManagerNonConfig>) null, (List<ViewModelStore>) null));
     }
 
     @Deprecated

@@ -4,10 +4,9 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Process;
 import android.util.Log;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,7 +46,7 @@ class WebRtcAudioTrack {
         if (this._audioManager == null) {
             Context context = this._context;
             if (context != null) {
-                this._audioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+                this._audioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
             }
         }
         AudioManager audioManager = this._audioManager;
@@ -78,7 +77,7 @@ class WebRtcAudioTrack {
             if (this._audioManager == null) {
                 Context context = this._context;
                 if (context != null) {
-                    this._audioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+                    this._audioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
                 }
             }
             AudioManager audioManager = this._audioManager;
@@ -121,10 +120,7 @@ class WebRtcAudioTrack {
                 }
             }
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Set play thread priority failed: ");
-            sb.append(e2.getMessage());
-            DoLog(sb.toString());
+            DoLog("Set play thread priority failed: " + e2.getMessage());
         } catch (Throwable th) {
             this._playLock.unlock();
             throw th;
@@ -137,14 +133,14 @@ class WebRtcAudioTrack {
         if (this._audioManager == null) {
             Context context = this._context;
             if (context != null) {
-                this._audioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+                this._audioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
             }
         }
         if (this._audioManager == null) {
             DoLogErr("Could not change audio routing - no audio manager");
             return -1;
         }
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (3 == i || 4 == i) {
             if (z) {
                 this._audioManager.setMode(0);
@@ -167,7 +163,7 @@ class WebRtcAudioTrack {
         if (this._audioManager == null) {
             Context context = this._context;
             if (context != null) {
-                this._audioManager = (AudioManager) context.getSystemService(MVConsts.TYPE_AUDIO);
+                this._audioManager = (AudioManager) context.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
             }
         }
         AudioManager audioManager = this._audioManager;

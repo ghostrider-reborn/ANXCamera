@@ -11,9 +11,8 @@ public final class ThermalHelper {
     }
 
     public static void notifyThermal4KRecordStart() {
-        String str = TAG;
-        if (Log.isLoggable(str, 3)) {
-            Log.d(str, "notifyThermal4KRecordStart");
+        if (Log.isLoggable(TAG, 3)) {
+            Log.d(TAG, "notifyThermal4KRecordStart");
         }
         Intent intent = new Intent();
         intent.setPackage(PACKAGE_NAME);
@@ -22,9 +21,8 @@ public final class ThermalHelper {
     }
 
     public static void notifyThermal4KRecordStop() {
-        String str = TAG;
-        if (Log.isLoggable(str, 3)) {
-            Log.d(str, "notifyThermal4KRecordStop");
+        if (Log.isLoggable(TAG, 3)) {
+            Log.d(TAG, "notifyThermal4KRecordStop");
         }
         Intent intent = new Intent();
         intent.setPackage(PACKAGE_NAME);

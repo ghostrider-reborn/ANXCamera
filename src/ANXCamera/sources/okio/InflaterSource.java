@@ -47,10 +47,7 @@ public final class InflaterSource implements Source {
         Segment writableSegment;
         int i = (j > 0 ? 1 : (j == 0 ? 0 : -1));
         if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("byteCount < 0: ");
-            sb.append(j);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("byteCount < 0: " + j);
         } else if (this.closed) {
             throw new IllegalStateException("closed");
         } else if (i == 0) {
@@ -78,10 +75,11 @@ public final class InflaterSource implements Source {
                 }
             }
             releaseInflatedBytes();
-            if (writableSegment.pos == writableSegment.limit) {
-                buffer.head = writableSegment.pop();
-                SegmentPool.recycle(writableSegment);
+            if (writableSegment.pos != writableSegment.limit) {
+                return -1;
             }
+            buffer.head = writableSegment.pop();
+            SegmentPool.recycle(writableSegment);
             return -1;
         }
     }

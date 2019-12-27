@@ -10,22 +10,22 @@ import java.util.Queue;
 
 public class FrameQueue {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f103a = "FrameQueue";
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private FrameItem f104b = null;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private FrameItem f105c = null;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private List<FrameItem> f106d = new ArrayList();
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private Queue<FrameItem> f107e = new LinkedList();
 
-    /* renamed from: f reason: collision with root package name */
+    /* renamed from: f  reason: collision with root package name */
     private boolean f108f;
 
     public void addEmptyFrameForConsumer() {
@@ -48,19 +48,13 @@ public class FrameQueue {
         try {
             if (0 != frameItem.f102a) {
                 String str = f103a;
-                StringBuilder sb = new StringBuilder();
-                sb.append("deleteSync delete_a_sync : ");
-                sb.append(frameItem.f102a);
-                CodecLog.d(str, sb.toString());
+                CodecLog.d(str, "deleteSync delete_a_sync : " + frameItem.f102a);
                 GLES30.glDeleteSync(frameItem.f102a);
             }
         } catch (Exception e2) {
             e2.printStackTrace();
             String str2 = f103a;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("deleteSync meet error : ");
-            sb2.append(e2.getMessage());
-            CodecLog.e(str2, sb2.toString());
+            CodecLog.e(str2, "deleteSync meet error : " + e2.getMessage());
         } catch (Throwable th) {
             frameItem.f102a = 0;
             throw th;
@@ -76,7 +70,7 @@ public class FrameQueue {
         if (this.f107e.isEmpty()) {
             return null;
         }
-        this.f105c = (FrameItem) this.f107e.poll();
+        this.f105c = this.f107e.poll();
         return this.f105c;
     }
 
@@ -86,11 +80,11 @@ public class FrameQueue {
             return frameItem;
         }
         if (!this.f106d.isEmpty()) {
-            this.f104b = (FrameItem) this.f106d.remove(0);
+            this.f104b = this.f106d.remove(0);
         } else if (this.f107e.isEmpty()) {
             return null;
         } else {
-            this.f104b = (FrameItem) this.f107e.poll();
+            this.f104b = this.f107e.poll();
         }
         return this.f104b;
     }
@@ -139,24 +133,24 @@ public class FrameQueue {
             }
         }
         if (!this.f106d.isEmpty()) {
-            for (FrameItem frameItem3 : this.f106d) {
-                GLFramebuffer gLFramebuffer3 = frameItem3.mFramebuffer;
+            for (FrameItem next : this.f106d) {
+                GLFramebuffer gLFramebuffer3 = next.mFramebuffer;
                 if (gLFramebuffer3 != null) {
                     gLFramebuffer3.unInit();
-                    deleteSync(frameItem3);
-                    frameItem3.mFramebuffer = null;
+                    deleteSync(next);
+                    next.mFramebuffer = null;
                 }
             }
         }
         this.f106d.clear();
         while (!this.f107e.isEmpty()) {
-            FrameItem frameItem4 = (FrameItem) this.f107e.poll();
-            if (frameItem4 != null) {
-                GLFramebuffer gLFramebuffer4 = frameItem4.mFramebuffer;
+            FrameItem poll = this.f107e.poll();
+            if (poll != null) {
+                GLFramebuffer gLFramebuffer4 = poll.mFramebuffer;
                 if (gLFramebuffer4 != null) {
                     gLFramebuffer4.unInit();
-                    deleteSync(frameItem4);
-                    frameItem4.mFramebuffer = null;
+                    deleteSync(poll);
+                    poll.mFramebuffer = null;
                 }
             }
         }

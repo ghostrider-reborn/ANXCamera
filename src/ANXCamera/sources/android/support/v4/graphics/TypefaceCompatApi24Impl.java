@@ -9,10 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
-import android.support.v4.content.res.FontResourcesParserCompat.FontFamilyFilesResourceEntry;
-import android.support.v4.content.res.FontResourcesParserCompat.FontFileResourceEntry;
-import android.support.v4.provider.FontsContractCompat.FontInfo;
+import android.support.v4.content.res.FontResourcesParserCompat;
+import android.support.v4.provider.FontsContractCompat;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.Log;
 import java.lang.reflect.Array;
@@ -23,7 +21,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 @RequiresApi(24)
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 class TypefaceCompatApi24Impl extends TypefaceCompatBaseImpl {
     private static final String ADD_FONT_WEIGHT_STYLE_METHOD = "addFontWeightStyle";
     private static final String CREATE_FROM_FAMILIES_WITH_DEFAULT_METHOD = "createFromFamiliesWithDefault";
@@ -37,14 +35,13 @@ class TypefaceCompatApi24Impl extends TypefaceCompatBaseImpl {
     static {
         Method method;
         Method method2;
-        Class cls;
-        Constructor constructor = null;
+        Class<?> cls;
+        Constructor<?> constructor = null;
         try {
             cls = Class.forName(FONT_FAMILY_CLASS);
-            Constructor constructor2 = cls.getConstructor(new Class[0]);
+            Constructor<?> constructor2 = cls.getConstructor(new Class[0]);
             method = cls.getMethod(ADD_FONT_WEIGHT_STYLE_METHOD, new Class[]{ByteBuffer.class, Integer.TYPE, List.class, Integer.TYPE, Boolean.TYPE});
-            Object newInstance = Array.newInstance(cls, 1);
-            method2 = Typeface.class.getMethod(CREATE_FROM_FAMILIES_WITH_DEFAULT_METHOD, new Class[]{newInstance.getClass()});
+            method2 = Typeface.class.getMethod(CREATE_FROM_FAMILIES_WITH_DEFAULT_METHOD, new Class[]{Array.newInstance(cls, 1).getClass()});
             constructor = constructor2;
         } catch (ClassNotFoundException | NoSuchMethodException e2) {
             Log.e(TAG, e2.getClass().getName(), e2);
@@ -73,7 +70,7 @@ class TypefaceCompatApi24Impl extends TypefaceCompatBaseImpl {
         try {
             Object newInstance = Array.newInstance(sFontFamily, 1);
             Array.set(newInstance, 0, obj);
-            return (Typeface) sCreateFromFamiliesWithDefault.invoke(null, new Object[]{newInstance});
+            return (Typeface) sCreateFromFamiliesWithDefault.invoke((Object) null, new Object[]{newInstance});
         } catch (IllegalAccessException | InvocationTargetException e2) {
             throw new RuntimeException(e2);
         }
@@ -94,10 +91,9 @@ class TypefaceCompatApi24Impl extends TypefaceCompatBaseImpl {
         }
     }
 
-    public Typeface createFromFontFamilyFilesResourceEntry(Context context, FontFamilyFilesResourceEntry fontFamilyFilesResourceEntry, Resources resources, int i) {
-        FontFileResourceEntry[] entries;
+    public Typeface createFromFontFamilyFilesResourceEntry(Context context, FontResourcesParserCompat.FontFamilyFilesResourceEntry fontFamilyFilesResourceEntry, Resources resources, int i) {
         Object newFamily = newFamily();
-        for (FontFileResourceEntry fontFileResourceEntry : fontFamilyFilesResourceEntry.getEntries()) {
+        for (FontResourcesParserCompat.FontFileResourceEntry fontFileResourceEntry : fontFamilyFilesResourceEntry.getEntries()) {
             ByteBuffer copyToDirectBuffer = TypefaceCompatUtil.copyToDirectBuffer(context, resources, fontFileResourceEntry.getResourceId());
             if (copyToDirectBuffer == null || !addFontWeightStyle(newFamily, copyToDirectBuffer, fontFileResourceEntry.getTtcIndex(), fontFileResourceEntry.getWeight(), fontFileResourceEntry.isItalic())) {
                 return null;
@@ -106,10 +102,10 @@ class TypefaceCompatApi24Impl extends TypefaceCompatBaseImpl {
         return createFromFamiliesWithDefault(newFamily);
     }
 
-    public Typeface createFromFontInfo(Context context, @Nullable CancellationSignal cancellationSignal, @NonNull FontInfo[] fontInfoArr, int i) {
+    public Typeface createFromFontInfo(Context context, @Nullable CancellationSignal cancellationSignal, @NonNull FontsContractCompat.FontInfo[] fontInfoArr, int i) {
         Object newFamily = newFamily();
         SimpleArrayMap simpleArrayMap = new SimpleArrayMap();
-        for (FontInfo fontInfo : fontInfoArr) {
+        for (FontsContractCompat.FontInfo fontInfo : fontInfoArr) {
             Uri uri = fontInfo.getUri();
             ByteBuffer byteBuffer = (ByteBuffer) simpleArrayMap.get(uri);
             if (byteBuffer == null) {

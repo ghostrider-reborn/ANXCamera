@@ -13,7 +13,6 @@ public enum PlayerScalingMode {
     }
 
     public static PlayerScalingMode int2enum(int i) {
-        PlayerScalingMode[] values;
         PlayerScalingMode playerScalingMode = PlayerScalingModeNone;
         for (PlayerScalingMode playerScalingMode2 : values()) {
             if (playerScalingMode2.ordinal() == i) {

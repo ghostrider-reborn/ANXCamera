@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.disposables.DisposableHelper;
 import io.reactivex.observers.SerializedObserver;
@@ -57,9 +56,9 @@ public final class ObservableDebounceTimed<T> extends AbstractObservableWithUpst
         final long timeout;
         final AtomicReference<Disposable> timer = new AtomicReference<>();
         final TimeUnit unit;
-        final Worker worker;
+        final Scheduler.Worker worker;
 
-        DebounceTimedObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Worker worker2) {
+        DebounceTimedObserver(Observer<? super T> observer, long j, TimeUnit timeUnit, Scheduler.Worker worker2) {
             this.actual = observer;
             this.timeout = j;
             this.unit = timeUnit;
@@ -71,7 +70,7 @@ public final class ObservableDebounceTimed<T> extends AbstractObservableWithUpst
             this.worker.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit(long j, T t, DebounceEmitter<T> debounceEmitter) {
             if (j == this.index) {
                 this.actual.onNext(t);
@@ -86,7 +85,7 @@ public final class ObservableDebounceTimed<T> extends AbstractObservableWithUpst
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
-                Disposable disposable = (Disposable) this.timer.get();
+                Disposable disposable = this.timer.get();
                 if (disposable != DisposableHelper.DISPOSED) {
                     DebounceEmitter debounceEmitter = (DebounceEmitter) disposable;
                     if (debounceEmitter != null) {
@@ -112,7 +111,7 @@ public final class ObservableDebounceTimed<T> extends AbstractObservableWithUpst
             if (!this.done) {
                 long j = this.index + 1;
                 this.index = j;
-                Disposable disposable = (Disposable) this.timer.get();
+                Disposable disposable = this.timer.get();
                 if (disposable != null) {
                     disposable.dispose();
                 }

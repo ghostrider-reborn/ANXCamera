@@ -1,12 +1,15 @@
 package com.android.camera.effect;
 
 import com.android.camera.Util;
+import com.android.camera.effect.renders.RenderGroup;
 import com.android.camera.effect.renders.VideoRecorderRender;
 import com.android.camera.log.Log;
 import com.android.gallery3d.ui.BaseGLCanvas;
 
 public class VideoRecorderCanvas extends BaseGLCanvas {
     public VideoRecorderCanvas() {
+        this.mRenderCaches = new RenderGroup(this);
+        this.mRenderGroup = new VideoRecorderRender(this);
         initialize();
     }
 
@@ -22,13 +25,6 @@ public class VideoRecorderCanvas extends BaseGLCanvas {
 
     public void setSize(int i, int i2) {
         super.setSize(i, i2);
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSize: size=");
-        sb.append(i);
-        sb.append("x");
-        sb.append(i2);
-        sb.append(" modelMatrix=");
-        sb.append(Util.dumpMatrix(this.mState.getModelMatrix()));
-        Log.d("VideoRecorderCanvas", sb.toString());
+        Log.d("VideoRecorderCanvas", "setSize: size=" + i + "x" + i2 + " modelMatrix=" + Util.dumpMatrix(this.mState.getModelMatrix()));
     }
 }

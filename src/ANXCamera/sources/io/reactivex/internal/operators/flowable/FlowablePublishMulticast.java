@@ -47,7 +47,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
             this.delayError = z;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean add(MulticastSubscription<T> multicastSubscription) {
             MulticastSubscription[] multicastSubscriptionArr;
             MulticastSubscription[] multicastSubscriptionArr2;
@@ -64,9 +64,8 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
             return true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeAll() {
-            MulticastSubscription[] multicastSubscriptionArr;
             for (MulticastSubscription multicastSubscription : (MulticastSubscription[]) this.subscribers.getAndSet(TERMINATED)) {
                 if (multicastSubscription.get() != Long.MIN_VALUE) {
                     multicastSubscription.actual.onComplete();
@@ -84,7 +83,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (this.wip.getAndIncrement() == 0) {
@@ -123,16 +122,17 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
                                     }
                                 }
                                 try {
-                                    Object poll = simpleQueue.poll();
+                                    T poll = simpleQueue.poll();
                                     boolean z3 = poll == null;
                                     if (z2 && z3) {
                                         Throwable th2 = this.error;
                                         if (th2 != null) {
                                             errorAll(th2);
+                                            return;
                                         } else {
                                             completeAll();
+                                            return;
                                         }
-                                        return;
                                     } else if (z3) {
                                         break;
                                     } else {
@@ -151,7 +151,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
                                         if (z) {
                                             int i8 = i4 + 1;
                                             if (i8 == i3) {
-                                                ((Subscription) this.s.get()).request((long) i3);
+                                                this.s.get().request((long) i3);
                                                 i4 = 0;
                                             } else {
                                                 i4 = i8;
@@ -184,10 +184,11 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
                                 Throwable th6 = this.error;
                                 if (th6 != null) {
                                     errorAll(th6);
+                                    return;
                                 } else {
                                     completeAll();
+                                    return;
                                 }
-                                return;
                             }
                         }
                         for (MulticastSubscription produced : multicastSubscriptionArr) {
@@ -207,9 +208,8 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void errorAll(Throwable th) {
-            MulticastSubscription[] multicastSubscriptionArr;
             for (MulticastSubscription multicastSubscription : (MulticastSubscription[]) this.subscribers.getAndSet(TERMINATED)) {
                 if (multicastSubscription.get() != Long.MIN_VALUE) {
                     multicastSubscription.actual.onError(th);
@@ -218,7 +218,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
         }
 
         public boolean isDisposed() {
-            return SubscriptionHelper.isCancelled((Subscription) this.s.get());
+            return SubscriptionHelper.isCancelled(this.s.get());
         }
 
         public void onComplete() {
@@ -244,7 +244,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
                     drain();
                     return;
                 }
-                ((Subscription) this.s.get()).cancel();
+                this.s.get().cancel();
                 onError(new MissingBackpressureException());
             }
         }
@@ -272,7 +272,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void remove(MulticastSubscription<T> multicastSubscription) {
             MulticastSubscription<T>[] multicastSubscriptionArr;
             MulticastSubscription[] multicastSubscriptionArr2;
@@ -304,6 +304,8 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
                     } else {
                         return;
                     }
+                } else {
+                    return;
                 }
             } while (!this.subscribers.compareAndSet(multicastSubscriptionArr, multicastSubscriptionArr2));
         }
@@ -411,7 +413,7 @@ public final class FlowablePublishMulticast<T, R> extends AbstractFlowableWithUp
             Object apply = this.selector.apply(multicastProcessor);
             ObjectHelper.requireNonNull(apply, "selector returned a null Publisher");
             ((Publisher) apply).subscribe(new OutputCanceller(subscriber, multicastProcessor));
-            this.source.subscribe((FlowableSubscriber<? super T>) multicastProcessor);
+            this.source.subscribe(multicastProcessor);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
             EmptySubscription.error(th, subscriber);

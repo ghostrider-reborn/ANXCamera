@@ -97,7 +97,7 @@ public class CameraIntentManager {
     }
 
     public static CameraIntentManager getInstance(Intent intent) {
-        CameraIntentManager cameraIntentManager = (CameraIntentManager) sMap.get(intent);
+        CameraIntentManager cameraIntentManager = sMap.get(intent);
         if (cameraIntentManager != null) {
             return cameraIntentManager;
         }
@@ -144,11 +144,7 @@ public class CameraIntentManager {
 
     public boolean checkCallerLegality() {
         String caller = getCaller();
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("The caller:");
-        sb.append(caller);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "The caller:" + caller);
         if (caller == null) {
             return false;
         }
@@ -188,11 +184,7 @@ public class CameraIntentManager {
         if (c2 == 0 || c2 == 1 || c2 == 2 || c2 == 3 || c2 == 4) {
             return true;
         }
-        String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("checkCallerLegality: Unknown caller: ");
-        sb2.append(caller);
-        Log.e(str2, sb2.toString());
+        Log.e(TAG, "checkCallerLegality: Unknown caller: " + caller);
         return false;
     }
 
@@ -217,20 +209,14 @@ public class CameraIntentManager {
     }
 
     public String getCameraMode() {
-        Intent intent = this.mIntent;
-        String str = CameraExtras.CAMERA_MODE;
-        boolean hasExtra = intent.hasExtra(str);
-        String str2 = CameraMode.UNSPECIFIED;
-        if (!hasExtra) {
-            if ("android.media.action.VIDEO_CAMERA".equals(this.mIntent.getAction())) {
-                return CameraMode.VIDEO;
-            }
-            return "android.media.action.STILL_IMAGE_CAMERA".equals(this.mIntent.getAction()) ? "CAPTURE" : str2;
+        if (!this.mIntent.hasExtra(CameraExtras.CAMERA_MODE)) {
+            return "android.media.action.VIDEO_CAMERA".equals(this.mIntent.getAction()) ? CameraMode.VIDEO : "android.media.action.STILL_IMAGE_CAMERA".equals(this.mIntent.getAction()) ? "CAPTURE" : CameraMode.UNSPECIFIED;
         }
-        String stringExtra = this.mIntent.getStringExtra(str);
-        return (stringExtra == null || stringExtra.isEmpty()) ? str2 : stringExtra;
+        String stringExtra = this.mIntent.getStringExtra(CameraExtras.CAMERA_MODE);
+        return (stringExtra == null || stringExtra.isEmpty()) ? CameraMode.UNSPECIFIED : stringExtra;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public int getCameraModeId() {
         char c2;
         String cameraMode = getCameraMode();
@@ -363,7 +349,10 @@ public class CameraIntentManager {
 
     public Boolean getExtraShouldSaveCapture() {
         Bundle extras = this.mIntent.getExtras();
-        return extras != null ? Boolean.valueOf(extras.getBoolean("save-image", false)) : Boolean.valueOf(false);
+        if (extras != null) {
+            return Boolean.valueOf(extras.getBoolean("save-image", false));
+        }
+        return false;
     }
 
     public int getFilterMode() {
@@ -391,31 +380,25 @@ public class CameraIntentManager {
     }
 
     public int getVideoDurationTime() {
-        String str = "android.intent.extra.durationLimit";
-        if (this.mIntent.hasExtra(str)) {
-            return this.mIntent.getIntExtra(str, 0);
+        if (this.mIntent.hasExtra("android.intent.extra.durationLimit")) {
+            return this.mIntent.getIntExtra("android.intent.extra.durationLimit", 0);
         }
         throw new RuntimeException("EXTRA_DURATION_LIMIT has not been defined");
     }
 
     public int getVideoQuality() {
-        String str = "android.intent.extra.videoQuality";
-        if (this.mIntent.hasExtra(str)) {
-            return this.mIntent.getIntExtra(str, 0);
+        if (this.mIntent.hasExtra("android.intent.extra.videoQuality")) {
+            return this.mIntent.getIntExtra("android.intent.extra.videoQuality", 0);
         }
         throw new RuntimeException("EXTRA_VIDEO_QUALITY has not been defined");
     }
 
     public String getVoiceControlAction() {
-        Intent intent = this.mIntent;
-        String str = BroadcastControlExtras.EXTRAS_VOICE_CONTROL_ACTION;
-        boolean hasExtra = intent.hasExtra(str);
-        String str2 = ControlActions.CONTROL_ACTION_UNKNOWN;
-        if (!hasExtra) {
-            return str2;
+        if (!this.mIntent.hasExtra(BroadcastControlExtras.EXTRAS_VOICE_CONTROL_ACTION)) {
+            return ControlActions.CONTROL_ACTION_UNKNOWN;
         }
-        String stringExtra = this.mIntent.getStringExtra(str);
-        return stringExtra == null ? str2 : stringExtra;
+        String stringExtra = this.mIntent.getStringExtra(BroadcastControlExtras.EXTRAS_VOICE_CONTROL_ACTION);
+        return stringExtra == null ? ControlActions.CONTROL_ACTION_UNKNOWN : stringExtra;
     }
 
     public Boolean isFromScreenSlide() {
@@ -461,25 +444,17 @@ public class CameraIntentManager {
     }
 
     public boolean isQuickLaunch() {
-        boolean z = true;
-        String str = "android.media.action.STILL_IMAGE_CAMERA";
         if (DataRepository.dataItemFeature().Sa()) {
             String action = this.mIntent.getAction();
-            if (!TextUtils.equals(action, str) && !TextUtils.equals(action, "android.media.action.STILL_IMAGE_CAMERA_SECURE")) {
+            if (!TextUtils.equals(action, "android.media.action.STILL_IMAGE_CAMERA") && !TextUtils.equals(action, "android.media.action.STILL_IMAGE_CAMERA_SECURE")) {
                 return false;
             }
             String stringExtra = this.mIntent.getStringExtra(EXTRA_LAUNCH_SOURCE);
-            if (!TextUtils.equals(stringExtra, "lockscreen_affordance") && !TextUtils.equals(stringExtra, "power_double_tap")) {
-                z = false;
-            }
-            return z;
-        } else if (!TextUtils.equals(this.mIntent.getAction(), str)) {
+            return TextUtils.equals(stringExtra, "lockscreen_affordance") || TextUtils.equals(stringExtra, "power_double_tap");
+        } else if (!TextUtils.equals(this.mIntent.getAction(), "android.media.action.STILL_IMAGE_CAMERA")) {
             return false;
         } else {
-            if (!this.mIntent.getBooleanExtra(EXTRA_START_WHEN_LOCKED, false) || !this.mIntent.getBooleanExtra(EXTRA_SHOW_WHEN_LOCKED, false)) {
-                z = false;
-            }
-            return z;
+            return this.mIntent.getBooleanExtra(EXTRA_START_WHEN_LOCKED, false) && this.mIntent.getBooleanExtra(EXTRA_SHOW_WHEN_LOCKED, false);
         }
     }
 
@@ -489,10 +464,8 @@ public class CameraIntentManager {
     }
 
     public boolean isUseFrontCamera() throws Exception {
-        Intent intent = this.mIntent;
-        String str = CameraExtras.USE_FRONT_CAMERA;
-        if (intent.hasExtra(str)) {
-            return this.mIntent.getBooleanExtra(str, false);
+        if (this.mIntent.hasExtra(CameraExtras.USE_FRONT_CAMERA)) {
+            return this.mIntent.getBooleanExtra(CameraExtras.USE_FRONT_CAMERA, false);
         }
         throw new Exception("USE_FRONT_CAMERA extras has not been defined!");
     }

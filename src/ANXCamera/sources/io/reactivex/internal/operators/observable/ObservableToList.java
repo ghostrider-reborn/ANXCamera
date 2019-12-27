@@ -68,12 +68,12 @@ public final class ObservableToList<T, U extends Collection<? super T>> extends 
 
     public void subscribeActual(Observer<? super U> observer) {
         try {
-            Object call = this.collectionSupplier.call();
+            U call = this.collectionSupplier.call();
             ObjectHelper.requireNonNull(call, "The collectionSupplier returned a null collection. Null values are generally not allowed in 2.x operators and sources.");
             this.source.subscribe(new ToListObserver(observer, (Collection) call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

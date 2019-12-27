@@ -2,11 +2,8 @@ package com.android.camera;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnKeyListener;
 import android.text.SpannableString;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
@@ -15,7 +12,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -44,10 +41,7 @@ public class RotateDialogController implements Rotatable {
 
     public RotateDialogController(Activity activity, int i) {
         this.mActivity = activity;
-        if (i == 0) {
-            i = R.layout.rotate_dialog;
-        }
-        this.mLayoutResourceID = i;
+        this.mLayoutResourceID = i == 0 ? R.layout.rotate_dialog : i;
     }
 
     private void fadeInDialog() {
@@ -80,12 +74,12 @@ public class RotateDialogController implements Rotatable {
     }
 
     public static AlertDialog showSystemAlertDialog(Context context, String str, String str2, String str3, final Runnable runnable, String str4, final Runnable runnable2) {
-        Builder builder = new Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(str);
         builder.setMessage(str2);
         builder.setCancelable(false);
         if (str3 != null) {
-            builder.setPositiveButton(str3, new OnClickListener() {
+            builder.setPositiveButton(str3, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Runnable runnable = runnable;
                     if (runnable != null) {
@@ -95,7 +89,7 @@ public class RotateDialogController implements Rotatable {
             });
         }
         if (str4 != null) {
-            builder.setNegativeButton(str4, new OnClickListener() {
+            builder.setNegativeButton(str4, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Runnable runnable = runnable2;
                     if (runnable != null) {
@@ -110,13 +104,13 @@ public class RotateDialogController implements Rotatable {
     }
 
     public static AlertDialog showSystemChoiceDialog(final Context context, String str, String str2, String str3, String str4, final Runnable runnable, final Runnable runnable2) {
-        AnonymousClass5 r0 = new OnKeyListener() {
+        AnonymousClass5 r0 = new DialogInterface.OnKeyListener() {
             public boolean onKey(DialogInterface dialogInterface, int i, KeyEvent keyEvent) {
                 return i == 25 || i == 24;
             }
         };
-        Builder builder = new Builder(context);
-        View inflate = LayoutInflater.from(context).inflate(R.layout.v6_choice_alertdialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        View inflate = LayoutInflater.from(context).inflate(R.layout.v6_choice_alertdialog, (ViewGroup) null);
         ((TextView) inflate.findViewById(R.id.alert_declaration)).setText(str2);
         String string = context.getResources().getString(R.string.view_anxbattle);
         SpannableString spannableString = new SpannableString(string);
@@ -148,7 +142,7 @@ public class RotateDialogController implements Rotatable {
         builder.setCancelable(false);
         builder.setView(inflate);
         if (str4 != null) {
-            builder.setPositiveButton(str4, new OnClickListener() {
+            builder.setPositiveButton(str4, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (checkBox.isChecked()) {
                         Runnable runnable = runnable;
@@ -166,7 +160,7 @@ public class RotateDialogController implements Rotatable {
             });
         }
         AlertDialog create = builder.create();
-        LayoutParams attributes = create.getWindow().getAttributes();
+        WindowManager.LayoutParams attributes = create.getWindow().getAttributes();
         attributes.type = 99;
         create.getWindow().setAttributes(attributes);
         create.show();

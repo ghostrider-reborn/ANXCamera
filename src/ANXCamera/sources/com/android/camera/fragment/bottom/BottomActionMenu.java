@@ -6,7 +6,6 @@ import android.support.v4.view.ViewCompat;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import com.android.camera.CameraSettings;
@@ -19,8 +18,7 @@ import com.android.camera.data.data.runing.ComponentRunningShine;
 import com.android.camera.fragment.beauty.MenuItem;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.ColorActivateTextView;
 import com.android.camera.ui.EdgeHorizonScrollView;
@@ -32,7 +30,7 @@ import java.util.List;
 import miui.view.animation.QuinticEaseInInterpolator;
 import miui.view.animation.QuinticEaseOutInterpolator;
 
-public class BottomActionMenu implements OnClickListener {
+public class BottomActionMenu implements View.OnClickListener {
     public static final int ANIM_EXPAND = 160;
     public static final int ANIM_SHRINK = 161;
     public static final int BEAUTY_BOTTOM_MENU = 1;
@@ -189,93 +187,68 @@ public class BottomActionMenu implements OnClickListener {
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:13:0x003c  */
-    /* JADX WARNING: Removed duplicated region for block: B:42:0x00e3  */
-    /* JADX WARNING: Removed duplicated region for block: B:48:? A[RETURN, SYNTHETIC] */
-    /* JADX WARNING: Removed duplicated region for block: B:8:0x0030  */
-    /* JADX WARNING: Removed duplicated region for block: B:9:0x0032  */
     public void expandShine(ComponentRunningShine componentRunningShine, int i) {
-        boolean z;
-        int i2;
-        BottomPopupTips bottomPopupTips;
-        List items = componentRunningShine.getItems();
+        List<ComponentDataItem> items = componentRunningShine.getItems();
         String currentType = componentRunningShine.getCurrentType();
         this.beautyOperateMenuView.removeAllViews();
         LayoutInflater from = LayoutInflater.from(this.mContext);
-        if (!componentRunningShine.isSmoothDependBeautyVersion()) {
-            if (BeautyConstant.LEVEL_CLOSE.equals(CameraSettings.getFaceBeautifyLevel())) {
-                z = true;
-                boolean z2 = items.size() <= 1;
-                for (i2 = 0; i2 < items.size(); i2++) {
-                    ComponentDataItem componentDataItem = (ComponentDataItem) items.get(i2);
-                    ColorActivateTextView colorActivateTextView = (ColorActivateTextView) from.inflate(R.layout.beauty_menu_select_item, this.mContainerView, false);
-                    colorActivateTextView.setNormalCor(ColorConstant.WHITE_ALPHA_99);
-                    colorActivateTextView.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
-                    colorActivateTextView.setText(this.mContext.getString(componentDataItem.mDisplayNameRes));
-                    colorActivateTextView.setTag(componentDataItem.mValue);
-                    if (z2) {
-                        colorActivateTextView.setOnClickListener(this);
-                        if (currentType.equals(componentDataItem.mValue)) {
-                            this.mLastSelectedView = colorActivateTextView;
-                            colorActivateTextView.setActivated(true);
-                        }
-                    }
-                    this.beautyOperateMenuView.addView(colorActivateTextView);
-                    if (z) {
-                        String str = componentDataItem.mValue;
-                        char c2 = 65535;
-                        switch (str.hashCode()) {
-                            case 51:
-                                if (str.equals("3")) {
-                                    c2 = 0;
-                                    break;
-                                }
-                                break;
-                            case 52:
-                                if (str.equals("4")) {
-                                    c2 = 1;
-                                    break;
-                                }
-                                break;
-                            case 53:
-                                if (str.equals("5")) {
-                                    c2 = 2;
-                                    break;
-                                }
-                                break;
-                            case 54:
-                                if (str.equals("6")) {
-                                    c2 = 3;
-                                    break;
-                                }
-                                break;
-                        }
-                        if (c2 == 0 || c2 == 1 || c2 == 2 || c2 == 3) {
-                            colorActivateTextView.setVisibility(8);
-                        }
-                    }
+        boolean z = !componentRunningShine.isSmoothDependBeautyVersion() && BeautyConstant.LEVEL_CLOSE.equals(CameraSettings.getFaceBeautifyLevel());
+        boolean z2 = items.size() > 1;
+        for (int i2 = 0; i2 < items.size(); i2++) {
+            ComponentDataItem componentDataItem = items.get(i2);
+            ColorActivateTextView colorActivateTextView = (ColorActivateTextView) from.inflate(R.layout.beauty_menu_select_item, this.mContainerView, false);
+            colorActivateTextView.setNormalCor(ColorConstant.WHITE_ALPHA_99);
+            colorActivateTextView.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
+            colorActivateTextView.setText(this.mContext.getString(componentDataItem.mDisplayNameRes));
+            colorActivateTextView.setTag(componentDataItem.mValue);
+            if (z2) {
+                colorActivateTextView.setOnClickListener(this);
+                if (currentType.equals(componentDataItem.mValue)) {
+                    this.mLastSelectedView = colorActivateTextView;
+                    colorActivateTextView.setActivated(true);
                 }
-                this.beautyOperateMenuView.setVisibility(0);
-                this.mCameraOperateMenuView.setVisibility(8);
-                enterAnim(this.beautyOperateMenuView);
-                bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-                if (bottomPopupTips == null) {
-                    bottomPopupTips.hideQrCodeTip();
-                    return;
-                }
-                return;
             }
-        }
-        z = false;
-        if (items.size() <= 1) {
-        }
-        while (i2 < items.size()) {
+            this.beautyOperateMenuView.addView(colorActivateTextView);
+            if (z) {
+                String str = componentDataItem.mValue;
+                char c2 = 65535;
+                switch (str.hashCode()) {
+                    case 51:
+                        if (str.equals("3")) {
+                            c2 = 0;
+                            break;
+                        }
+                        break;
+                    case 52:
+                        if (str.equals("4")) {
+                            c2 = 1;
+                            break;
+                        }
+                        break;
+                    case 53:
+                        if (str.equals("5")) {
+                            c2 = 2;
+                            break;
+                        }
+                        break;
+                    case 54:
+                        if (str.equals("6")) {
+                            c2 = 3;
+                            break;
+                        }
+                        break;
+                }
+                if (c2 == 0 || c2 == 1 || c2 == 2 || c2 == 3) {
+                    colorActivateTextView.setVisibility(8);
+                }
+            }
         }
         this.beautyOperateMenuView.setVisibility(0);
         this.mCameraOperateMenuView.setVisibility(8);
         enterAnim(this.beautyOperateMenuView);
-        bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
-        if (bottomPopupTips == null) {
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        if (bottomPopupTips != null) {
+            bottomPopupTips.hideQrCodeTip();
         }
     }
 
@@ -311,7 +284,7 @@ public class BottomActionMenu implements OnClickListener {
             this.mLastSelectedView.setActivated(true);
         }
         String str = (String) view.getTag();
-        MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+        ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
         if (miBeautyProtocol != null) {
             char c2 = 65535;
             int hashCode = str.hashCode();

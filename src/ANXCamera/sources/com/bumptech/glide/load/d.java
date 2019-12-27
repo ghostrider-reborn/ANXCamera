@@ -29,10 +29,10 @@ public class d<T> implements j<T> {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof d)) {
-            return false;
+        if (obj instanceof d) {
+            return this.Ld.equals(((d) obj).Ld);
         }
-        return this.Ld.equals(((d) obj).Ld);
+        return false;
     }
 
     public int hashCode() {

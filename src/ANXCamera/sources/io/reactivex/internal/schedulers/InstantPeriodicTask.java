@@ -9,7 +9,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class InstantPeriodicTask implements Callable<Void>, Disposable {
-    static final FutureTask<Void> CANCELLED = new FutureTask<>(Functions.EMPTY_RUNNABLE, null);
+    static final FutureTask<Void> CANCELLED = new FutureTask<>(Functions.EMPTY_RUNNABLE, (Object) null);
     final ExecutorService executor;
     final AtomicReference<Future<?>> first = new AtomicReference<>();
     final AtomicReference<Future<?>> rest = new AtomicReference<>();
@@ -35,17 +35,17 @@ final class InstantPeriodicTask implements Callable<Void>, Disposable {
     }
 
     public void dispose() {
-        Future future = (Future) this.first.getAndSet(CANCELLED);
+        Future andSet = this.first.getAndSet(CANCELLED);
         boolean z = true;
-        if (!(future == null || future == CANCELLED)) {
-            future.cancel(this.runner != Thread.currentThread());
+        if (!(andSet == null || andSet == CANCELLED)) {
+            andSet.cancel(this.runner != Thread.currentThread());
         }
-        Future future2 = (Future) this.rest.getAndSet(CANCELLED);
-        if (future2 != null && future2 != CANCELLED) {
+        Future andSet2 = this.rest.getAndSet(CANCELLED);
+        if (andSet2 != null && andSet2 != CANCELLED) {
             if (this.runner == Thread.currentThread()) {
                 z = false;
             }
-            future2.cancel(z);
+            andSet2.cancel(z);
         }
     }
 
@@ -53,22 +53,22 @@ final class InstantPeriodicTask implements Callable<Void>, Disposable {
         return this.first.get() == CANCELLED;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setFirst(Future<?> future) {
         Future future2;
         do {
-            future2 = (Future) this.first.get();
+            future2 = this.first.get();
             if (future2 == CANCELLED) {
                 future.cancel(this.runner != Thread.currentThread());
             }
         } while (!this.first.compareAndSet(future2, future));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setRest(Future<?> future) {
         Future future2;
         do {
-            future2 = (Future) this.rest.get();
+            future2 = this.rest.get();
             if (future2 == CANCELLED) {
                 future.cancel(this.runner != Thread.currentThread());
             }

@@ -39,9 +39,8 @@ public class BatchingListUpdateCallback implements ListUpdateCallback {
             if (i <= i3 + i4) {
                 int i5 = i + i2;
                 if (i5 >= i3 && this.mLastEventPayload == obj) {
-                    int i6 = i4 + i3;
                     this.mLastEventPosition = Math.min(i, i3);
-                    this.mLastEventCount = Math.max(i6, i5) - this.mLastEventPosition;
+                    this.mLastEventCount = Math.max(i4 + i3, i5) - this.mLastEventPosition;
                     return;
                 }
             }

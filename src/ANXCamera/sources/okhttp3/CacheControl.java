@@ -48,10 +48,7 @@ public final class CacheControl {
                 this.maxAgeSeconds = seconds > 2147483647L ? Integer.MAX_VALUE : (int) seconds;
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("maxAge < 0: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("maxAge < 0: " + i);
         }
 
         public Builder maxStale(int i, TimeUnit timeUnit) {
@@ -60,10 +57,7 @@ public final class CacheControl {
                 this.maxStaleSeconds = seconds > 2147483647L ? Integer.MAX_VALUE : (int) seconds;
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("maxStale < 0: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("maxStale < 0: " + i);
         }
 
         public Builder minFresh(int i, TimeUnit timeUnit) {
@@ -72,10 +66,7 @@ public final class CacheControl {
                 this.minFreshSeconds = seconds > 2147483647L ? Integer.MAX_VALUE : (int) seconds;
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("minFresh < 0: ");
-            sb.append(i);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("minFresh < 0: " + i);
         }
 
         public Builder noCache() {
@@ -138,16 +129,15 @@ public final class CacheControl {
         if (this.noStore) {
             sb.append("no-store, ");
         }
-        String str = ", ";
         if (this.maxAgeSeconds != -1) {
             sb.append("max-age=");
             sb.append(this.maxAgeSeconds);
-            sb.append(str);
+            sb.append(", ");
         }
         if (this.sMaxAgeSeconds != -1) {
             sb.append("s-maxage=");
             sb.append(this.sMaxAgeSeconds);
-            sb.append(str);
+            sb.append(", ");
         }
         if (this.isPrivate) {
             sb.append("private, ");
@@ -161,12 +151,12 @@ public final class CacheControl {
         if (this.maxStaleSeconds != -1) {
             sb.append("max-stale=");
             sb.append(this.maxStaleSeconds);
-            sb.append(str);
+            sb.append(", ");
         }
         if (this.minFreshSeconds != -1) {
             sb.append("min-fresh=");
             sb.append(this.minFreshSeconds);
-            sb.append(str);
+            sb.append(", ");
         }
         if (this.onlyIfCached) {
             sb.append("only-if-cached, ");

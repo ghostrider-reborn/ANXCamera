@@ -206,10 +206,7 @@ public final class ColorUtils {
             double calculateLuminance2 = calculateLuminance(i2) + 0.05d;
             return Math.max(calculateLuminance, calculateLuminance2) / Math.min(calculateLuminance, calculateLuminance2);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("background can not be translucent: #");
-        sb.append(Integer.toHexString(i2));
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("background can not be translucent: #" + Integer.toHexString(i2));
     }
 
     @FloatRange(from = 0.0d, to = 1.0d)
@@ -237,10 +234,7 @@ public final class ColorUtils {
             }
             return i3;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("background can not be translucent: #");
-        sb.append(Integer.toHexString(i2));
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("background can not be translucent: #" + Integer.toHexString(i2));
     }
 
     @VisibleForTesting
@@ -300,13 +294,7 @@ public final class ColorUtils {
             }
             return Color.valueOf(components2, color2.getColorSpace());
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Color models must match (");
-        sb.append(color.getModel());
-        sb.append(" vs. ");
-        sb.append(color2.getModel());
-        sb.append(")");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Color models must match (" + color.getModel() + " vs. " + color2.getModel() + ")");
     }
 
     private static int compositeComponent(int i, int i2, int i3, int i4, int i5) {
@@ -329,7 +317,7 @@ public final class ColorUtils {
     }
 
     private static double[] getTempDouble3Array() {
-        double[] dArr = (double[]) TEMP_ARRAY.get();
+        double[] dArr = TEMP_ARRAY.get();
         if (dArr != null) {
             return dArr;
         }

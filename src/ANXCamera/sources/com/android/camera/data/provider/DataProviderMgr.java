@@ -1,7 +1,7 @@
 package com.android.camera.data.provider;
 
 import android.util.SparseArray;
-import com.android.camera.data.cloud.DataCloud.CloudManager;
+import com.android.camera.data.cloud.DataCloud;
 import com.android.camera.data.data.config.DataItemConfig;
 import com.android.camera.data.data.extra.DataItemLive;
 import com.android.camera.data.data.global.DataItemGlobal;
@@ -12,14 +12,14 @@ public class DataProviderMgr {
     private DataProvider mDataProvider;
 
     private final class DataProviderImpl implements DataProvider {
-        private CloudManager mDataCloudManager;
+        private DataCloud.CloudManager mDataCloudManager;
         private DataItemGlobal mDataGlobal = new DataItemGlobal(this.mDataItemFeature);
         private SparseArray<DataItemConfig> mDataItemConfigs;
         private a mDataItemFeature = new a();
         private DataItemLive mDataItemLive;
         private DataItemRunning mDataRunning;
 
-        public DataProviderImpl(CloudManager cloudManager) {
+        public DataProviderImpl(DataCloud.CloudManager cloudManager) {
             this.mDataCloudManager = cloudManager;
             this.mDataGlobal.injectCloud(cloudManager.provideDataCloudGlobal());
             this.mDataItemConfigs = new SparseArray<>(4);
@@ -36,7 +36,7 @@ public class DataProviderMgr {
 
         public DataItemConfig dataConfig(int i, int i2) {
             int provideLocalId = DataItemConfig.provideLocalId(i, i2);
-            DataItemConfig dataItemConfig = (DataItemConfig) this.mDataItemConfigs.get(provideLocalId);
+            DataItemConfig dataItemConfig = this.mDataItemConfigs.get(provideLocalId);
             if (dataItemConfig != null) {
                 return dataItemConfig;
             }
@@ -70,7 +70,7 @@ public class DataProviderMgr {
         }
     }
 
-    public DataProviderMgr(CloudManager cloudManager) {
+    public DataProviderMgr(DataCloud.CloudManager cloudManager) {
         this.mDataProvider = new DataProviderImpl(cloudManager);
     }
 

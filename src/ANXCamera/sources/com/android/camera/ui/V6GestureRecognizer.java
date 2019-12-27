@@ -2,8 +2,8 @@ package com.android.camera.ui;
 
 import android.graphics.Point;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import com.android.camera.ActivityBase;
@@ -16,14 +16,10 @@ import com.android.camera.effect.EffectController;
 import com.android.camera.log.Log;
 import com.android.camera.module.Module;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.HandlerSwitcher;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
-import com.android.camera.protocol.ModeProtocol.ModeChangeController;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.zoom.ScaleGestureDetector;
-import com.android.camera.ui.zoom.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import java.lang.ref.WeakReference;
 
 public class V6GestureRecognizer {
@@ -76,32 +72,26 @@ public class V6GestureRecognizer {
             if (action == 0) {
                 this.mStartPoint.set((int) motionEvent.getX(), (int) motionEvent.getY());
             } else if (action == 2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("CameraGestureDetector ACTION_MOVE mGesture=");
-                sb.append(V6GestureRecognizer.this.mGesture);
-                String sb2 = sb.toString();
-                String str = Log.GESTURE_TAG;
-                Log.v(str, sb2);
+                Log.v(Log.GESTURE_TAG, "CameraGestureDetector ACTION_MOVE mGesture=" + V6GestureRecognizer.this.mGesture);
                 int i = 100;
                 if (V6GestureRecognizer.this.mGesture / 100 == 0) {
                     V6GestureRecognizer v6GestureRecognizer = V6GestureRecognizer.this;
                     Point point = this.mStartPoint;
                     Point access$300 = v6GestureRecognizer.getMoveVector(point.x, point.y, (int) motionEvent.getX(), (int) motionEvent.getY());
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("mGesture=");
-                    sb3.append(V6GestureRecognizer.this.mGesture);
-                    sb3.append(" orientation=");
-                    sb3.append(Math.abs(access$300.x) > Math.abs(access$300.y) ? SupportedConfigFactory.CLOSE_BY_VIDEO : "v");
-                    sb3.append(" dx=");
-                    sb3.append(access$300.x);
-                    sb3.append(" dy=");
-                    sb3.append(access$300.y);
-                    Log.v(V6GestureRecognizer.TAG, sb3.toString());
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("mGesture=");
+                    sb.append(V6GestureRecognizer.this.mGesture);
+                    sb.append(" orientation=");
+                    sb.append(Math.abs(access$300.x) > Math.abs(access$300.y) ? SupportedConfigFactory.CLOSE_BY_VIDEO : "v");
+                    sb.append(" dx=");
+                    sb.append(access$300.x);
+                    sb.append(" dy=");
+                    sb.append(access$300.y);
+                    Log.v(V6GestureRecognizer.TAG, sb.toString());
                     int access$400 = V6GestureRecognizer.this.MIN_DETECT_DISTANCE;
                     int i2 = access$300.x;
-                    int i3 = i2 * i2;
-                    int i4 = access$300.y;
-                    if (access$400 <= i3 + (i4 * i4)) {
+                    int i3 = access$300.y;
+                    if (access$400 <= (i2 * i2) + (i3 * i3)) {
                         V6GestureRecognizer v6GestureRecognizer2 = V6GestureRecognizer.this;
                         if (Math.abs(i2) <= Math.abs(access$300.y)) {
                             i = 200;
@@ -109,10 +99,7 @@ public class V6GestureRecognizer {
                         V6GestureRecognizer.access$212(v6GestureRecognizer2, i);
                     }
                 }
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("CameraGestureDetector ACTION_MOVE end mGesture=");
-                sb4.append(V6GestureRecognizer.this.mGesture);
-                Log.v(str, sb4.toString());
+                Log.v(Log.GESTURE_TAG, "CameraGestureDetector ACTION_MOVE end mGesture=" + V6GestureRecognizer.this.mGesture);
             } else if (action == 6 && motionEvent.getPointerCount() == 2 && V6GestureRecognizer.this.couldNotifyGesture(false)) {
                 if (motionEvent.getX(0) < motionEvent.getX(1)) {
                     f3 = motionEvent.getX(0);
@@ -136,7 +123,7 @@ public class V6GestureRecognizer {
         }
     }
 
-    private class MyGestureListener extends SimpleOnGestureListener {
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
         private boolean mHandleConfirmTap;
 
         private MyGestureListener() {
@@ -175,21 +162,7 @@ public class V6GestureRecognizer {
             if (V6GestureRecognizer.this.mInScaling || V6GestureRecognizer.this.mScrolled) {
                 return false;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("onScroll: ");
-            sb.append(motionEvent.getX());
-            String str = "|";
-            sb.append(str);
-            sb.append(motionEvent.getY());
-            sb.append(str);
-            sb.append(motionEvent2.getX());
-            sb.append(str);
-            sb.append(motionEvent2.getY());
-            sb.append("|distanceX:");
-            sb.append(f2);
-            sb.append("|distanceY:");
-            sb.append(f3);
-            Log.d(V6GestureRecognizer.TAG, sb.toString());
+            Log.d(V6GestureRecognizer.TAG, "onScroll: " + motionEvent.getX() + "|" + motionEvent.getY() + "|" + motionEvent2.getX() + "|" + motionEvent2.getY() + "|distanceX:" + f2 + "|distanceY:" + f3);
             V6GestureRecognizer.access$916(V6GestureRecognizer.this, -f3);
             if (Math.abs(V6GestureRecognizer.this.mDistanceY) > ((float) Util.dpToPixel(80.0f)) || V6GestureRecognizer.this.getCurrentGesture() == 7 || V6GestureRecognizer.this.getCurrentGesture() == 6) {
                 return false;
@@ -197,7 +170,7 @@ public class V6GestureRecognizer {
             V6GestureRecognizer.access$1016(V6GestureRecognizer.this, -f2);
             if (V6GestureRecognizer.this.mScrollDirection == 0 && ((float) V6GestureRecognizer.this.MIN_DETECT_DISTANCE) <= (V6GestureRecognizer.this.mDistanceX * V6GestureRecognizer.this.mDistanceX) + (V6GestureRecognizer.this.mDistanceY * V6GestureRecognizer.this.mDistanceY)) {
                 V6GestureRecognizer v6GestureRecognizer = V6GestureRecognizer.this;
-                v6GestureRecognizer.mScrollDirection = Math.abs(v6GestureRecognizer.mDistanceX) > Math.abs(V6GestureRecognizer.this.mDistanceY) ? 100 : 200;
+                int unused = v6GestureRecognizer.mScrollDirection = Math.abs(v6GestureRecognizer.mDistanceX) > Math.abs(V6GestureRecognizer.this.mDistanceY) ? 100 : 200;
             }
             if (V6GestureRecognizer.this.mScrollDirection != 100) {
                 return false;
@@ -206,20 +179,20 @@ public class V6GestureRecognizer {
             float f4 = (float) 35;
             if (V6GestureRecognizer.this.mDistanceX > ((float) Util.dpToPixel(f4)) && V6GestureRecognizer.this.mDistanceY < ((float) Util.dpToPixel(f4))) {
                 i = 3;
-                V6GestureRecognizer.this.mScrolled = true;
+                boolean unused2 = V6GestureRecognizer.this.mScrolled = true;
             } else if (V6GestureRecognizer.this.mDistanceX < ((float) (-Util.dpToPixel(f4))) && V6GestureRecognizer.this.mDistanceY > ((float) (-Util.dpToPixel(f4)))) {
                 i = 5;
-                V6GestureRecognizer.this.mScrolled = true;
+                boolean unused3 = V6GestureRecognizer.this.mScrolled = true;
             }
-            HandlerSwitcher handlerSwitcher = (HandlerSwitcher) ModeCoordinatorImpl.getInstance().getAttachProtocol(183);
+            ModeProtocol.HandlerSwitcher handlerSwitcher = (ModeProtocol.HandlerSwitcher) ModeCoordinatorImpl.getInstance().getAttachProtocol(183);
             if (handlerSwitcher != null && handlerSwitcher.onHandleSwitcher(i)) {
                 return true;
             }
-            MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+            ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
             if (miBeautyProtocol != null && miBeautyProtocol.isBeautyPanelShow()) {
                 return true;
             }
-            ModeChangeController modeChangeController = (ModeChangeController) ModeCoordinatorImpl.getInstance().getAttachProtocol(179);
+            ModeProtocol.ModeChangeController modeChangeController = (ModeProtocol.ModeChangeController) ModeCoordinatorImpl.getInstance().getAttachProtocol(179);
             if (modeChangeController == null || !modeChangeController.canSwipeChangeMode()) {
                 return false;
             }
@@ -228,7 +201,7 @@ public class V6GestureRecognizer {
         }
 
         public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-            MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+            ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
             if (mainContentProtocol == null || !mainContentProtocol.isEffectViewVisible() || !this.mHandleConfirmTap) {
                 return false;
             }
@@ -237,7 +210,7 @@ public class V6GestureRecognizer {
 
         public boolean onSingleTapUp(MotionEvent motionEvent) {
             Log.v(V6GestureRecognizer.TAG, "onSingleTapUp");
-            MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+            ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
             if (mainContentProtocol == null || !mainContentProtocol.isEffectViewVisible()) {
                 return handleSingleTap(motionEvent);
             }
@@ -246,7 +219,7 @@ public class V6GestureRecognizer {
         }
     }
 
-    private class MyScaleListener extends SimpleOnScaleGestureListener {
+    private class MyScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         private boolean mZoomScaled;
 
         private MyScaleListener() {
@@ -291,7 +264,7 @@ public class V6GestureRecognizer {
         Camera camera = (Camera) activityBase;
         this.mActivityRef = new WeakReference<>(camera);
         this.MIN_DETECT_DISTANCE = ViewConfiguration.get(camera).getScaledTouchSlop() * ViewConfiguration.get(camera).getScaledTouchSlop();
-        this.mGestureDetector = new GestureDetector(camera, new MyGestureListener(), null, true);
+        this.mGestureDetector = new GestureDetector(camera, new MyGestureListener(), (Handler) null, true);
         this.mScaleDetector = new ScaleGestureDetector(camera, new MyScaleListener());
         this.mCameraGestureDetector = new CameraGestureDetector();
     }
@@ -315,7 +288,7 @@ public class V6GestureRecognizer {
     }
 
     private boolean checkControlView(MotionEvent motionEvent) {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (mainContentProtocol != null && !mainContentProtocol.isAutoZoomViewEnabled()) {
             if (mainContentProtocol.isEffectViewVisible()) {
                 mainContentProtocol.onViewTouchEvent(R.id.v6_effect_crop_view, motionEvent);
@@ -404,14 +377,7 @@ public class V6GestureRecognizer {
     }
 
     public boolean onTouchEvent(MotionEvent motionEvent) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onTouchEvent mGesture=");
-        sb.append(this.mGesture);
-        sb.append(" action=");
-        sb.append(motionEvent.getAction());
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.v(str, sb2);
+        Log.v(TAG, "onTouchEvent mGesture=" + this.mGesture + " action=" + motionEvent.getAction());
         if (motionEvent.getActionMasked() == 0) {
             this.mGesture = 0;
         }
@@ -433,7 +399,7 @@ public class V6GestureRecognizer {
             this.mDistanceX = 0.0f;
             this.mDistanceY = 0.0f;
         }
-        Log.v(str, "set to detector");
+        Log.v(TAG, "set to detector");
         if (this.mScaleDetectorEnable) {
             this.mScaleDetector.onTouchEvent(motionEvent);
         }

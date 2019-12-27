@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -97,11 +96,10 @@ public class ShortcutInfoCompat {
     private ShortcutInfoCompat() {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Intent addToIntent(Intent intent) {
         Intent[] intentArr = this.mIntents;
-        String str = "android.intent.extra.shortcut.NAME";
-        intent.putExtra("android.intent.extra.shortcut.INTENT", intentArr[intentArr.length - 1]).putExtra(str, this.mLabel.toString());
+        intent.putExtra("android.intent.extra.shortcut.INTENT", intentArr[intentArr.length - 1]).putExtra("android.intent.extra.shortcut.NAME", this.mLabel.toString());
         if (this.mIcon != null) {
             Drawable drawable = null;
             if (this.mIsAlwaysBadged) {
@@ -110,7 +108,7 @@ public class ShortcutInfoCompat {
                 if (componentName != null) {
                     try {
                         drawable = packageManager.getActivityIcon(componentName);
-                    } catch (NameNotFoundException unused) {
+                    } catch (PackageManager.NameNotFoundException unused) {
                     }
                 }
                 if (drawable == null) {
@@ -161,7 +159,7 @@ public class ShortcutInfoCompat {
 
     @RequiresApi(25)
     public ShortcutInfo toShortcutInfo() {
-        android.content.pm.ShortcutInfo.Builder intents = new android.content.pm.ShortcutInfo.Builder(this.mContext, this.mId).setShortLabel(this.mLabel).setIntents(this.mIntents);
+        ShortcutInfo.Builder intents = new ShortcutInfo.Builder(this.mContext, this.mId).setShortLabel(this.mLabel).setIntents(this.mIntents);
         IconCompat iconCompat = this.mIcon;
         if (iconCompat != null) {
             intents.setIcon(iconCompat.toIcon());

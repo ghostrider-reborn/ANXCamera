@@ -29,7 +29,7 @@ public final class ExceptionHelper {
         Throwable th2;
         Throwable th3;
         do {
-            th2 = (Throwable) atomicReference.get();
+            th2 = atomicReference.get();
             if (th2 == TERMINATED) {
                 return false;
             }
@@ -49,7 +49,7 @@ public final class ExceptionHelper {
         while (!arrayDeque.isEmpty()) {
             Throwable th2 = (Throwable) arrayDeque.removeFirst();
             if (th2 instanceof CompositeException) {
-                List exceptions = ((CompositeException) th2).getExceptions();
+                List<Throwable> exceptions = ((CompositeException) th2).getExceptions();
                 for (int size = exceptions.size() - 1; size >= 0; size--) {
                     arrayDeque.offerFirst(exceptions.get(size));
                 }
@@ -61,9 +61,9 @@ public final class ExceptionHelper {
     }
 
     public static <T> Throwable terminate(AtomicReference<Throwable> atomicReference) {
-        Throwable th = (Throwable) atomicReference.get();
+        Throwable th = atomicReference.get();
         Throwable th2 = TERMINATED;
-        return th != th2 ? (Throwable) atomicReference.getAndSet(th2) : th;
+        return th != th2 ? atomicReference.getAndSet(th2) : th;
     }
 
     public static <E extends Throwable> Exception throwIfThrowable(Throwable th) throws Throwable {

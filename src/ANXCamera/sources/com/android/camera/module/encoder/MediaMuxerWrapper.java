@@ -1,6 +1,6 @@
 package com.android.camera.module.encoder;
 
-import android.media.MediaCodec.BufferInfo;
+import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.ParcelFileDescriptor;
@@ -30,10 +30,7 @@ public class MediaMuxerWrapper {
                 this.mMediaMuxer = new MediaMuxer(parcelFileDescriptor.getFileDescriptor(), 0);
             } catch (Exception e2) {
                 String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("open file failed, path = ");
-                sb.append(str);
-                Log.w(str2, sb.toString(), e2);
+                Log.w(str2, "open file failed, path = " + str, e2);
             } catch (Throwable th) {
                 Util.closeSafely(parcelFileDescriptor);
                 throw th;
@@ -45,7 +42,7 @@ public class MediaMuxerWrapper {
         this.mIsStarted = false;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addEncoder(MediaEncoder mediaEncoder) {
         if (mediaEncoder instanceof MediaVideoEncoder) {
             if (this.mVideoEncoder == null) {
@@ -68,20 +65,13 @@ public class MediaMuxerWrapper {
         this.mEncoderCount = i2 + i;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized int addTrack(MediaFormat mediaFormat) {
         int addTrack;
         if (!this.mIsStarted) {
             addTrack = this.mMediaMuxer.addTrack(mediaFormat);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("addTrack: trackNum=");
-            sb.append(this.mEncoderCount);
-            sb.append(" trackIndex=");
-            sb.append(addTrack);
-            sb.append(" format=");
-            sb.append(mediaFormat);
-            Log.v(str, sb.toString());
+            Log.v(str, "addTrack: trackNum=" + this.mEncoderCount + " trackIndex=" + addTrack + " format=" + mediaFormat);
         } else {
             throw new IllegalStateException("muxer already started");
         }
@@ -126,14 +116,11 @@ public class MediaMuxerWrapper {
         this.mMediaMuxer.setOrientationHint(i);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized boolean start() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("start: startedCount=");
-        sb.append(this.mStartedCount);
-        Log.d(str, sb.toString());
-        this.mStartedCount++;
+        Log.d(str, "start: startedCount=" + this.mStartedCount);
+        this.mStartedCount = this.mStartedCount + 1;
         if (this.mEncoderCount > 0 && this.mStartedCount == this.mEncoderCount) {
             this.mMediaMuxer.start();
             this.mIsStarted = true;
@@ -145,26 +132,19 @@ public class MediaMuxerWrapper {
 
     public boolean startRecording(long j) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startRecording: offset=");
-        sb.append(j);
-        Log.d(str, sb.toString());
+        Log.d(str, "startRecording: offset=" + j);
         MediaEncoder mediaEncoder = this.mVideoEncoder;
         boolean z = mediaEncoder == null || mediaEncoder.startRecording(j);
         MediaEncoder mediaEncoder2 = this.mAudioEncoder;
         return mediaEncoder2 != null ? mediaEncoder2.startRecording(j) && z : z;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public synchronized boolean stop() {
         boolean z;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("stop: startedCount=");
-        sb.append(this.mStartedCount);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "stop: startedCount=" + this.mStartedCount);
         z = true;
-        this.mStartedCount--;
+        this.mStartedCount = this.mStartedCount - 1;
         if (this.mEncoderCount > 0 && this.mStartedCount <= 0) {
             this.mMediaMuxer.stop();
             this.mMediaMuxer.release();
@@ -190,8 +170,8 @@ public class MediaMuxerWrapper {
         Log.d(TAG, "stopRecording<<<");
     }
 
-    /* access modifiers changed from: 0000 */
-    public synchronized void writeSampleData(int i, ByteBuffer byteBuffer, BufferInfo bufferInfo) {
+    /* access modifiers changed from: package-private */
+    public synchronized void writeSampleData(int i, ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo) {
         if (this.mStartedCount > 0) {
             this.mMediaMuxer.writeSampleData(i, byteBuffer, bufferInfo);
         }

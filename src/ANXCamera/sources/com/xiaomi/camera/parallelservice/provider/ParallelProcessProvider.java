@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.content.pm.ProviderInfo;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
@@ -21,7 +22,6 @@ import com.android.camera.db.item.DbItemSaveTask;
 import com.android.camera.log.Log;
 import com.arcsoft.camera.wideselfie.WideSelfieEngine;
 import com.google.android.apps.photos.api.ProcessingMetadataQuery;
-import com.google.android.apps.photos.api.ProcessingMetadataQuery.ProgressStatus;
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -40,18 +40,13 @@ public class ParallelProcessProvider extends ContentProvider {
     private int deleteProcessingMetadata(Uri uri) {
         long parseId = ContentUris.parseId(uri);
         SaveTask itemByMediaId = this.dbItemSaveTask.getItemByMediaId(Long.valueOf(parseId));
-        StringBuilder sb = new StringBuilder();
-        sb.append("deleteProcessingMetadata: mediaStoreId=");
-        sb.append(parseId);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.d(str, sb2);
+        Log.d(TAG, "deleteProcessingMetadata: mediaStoreId=" + parseId);
         if (itemByMediaId != null) {
             this.dbItemSaveTask.removeItem(itemByMediaId);
             notifyChange(uri);
             return 1;
         }
-        Log.v(str, "deleteProcessingMetadata: no match task found");
+        Log.v(TAG, "deleteProcessingMetadata: no match task found");
         return 0;
     }
 
@@ -59,12 +54,7 @@ public class ParallelProcessProvider extends ContentProvider {
         if (l == null || TextUtils.isEmpty(str)) {
             throw new IllegalArgumentException("error insert values");
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("algo db: insert: ");
-        sb.append(l);
-        sb.append(" | ");
-        sb.append(str);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "algo db: insert: " + l + " | " + str);
         SaveTask itemByPath = this.dbItemSaveTask.getItemByPath(str);
         itemByPath.setMediaStoreId(l);
         this.dbItemSaveTask.updateItem(itemByPath);
@@ -78,16 +68,13 @@ public class ParallelProcessProvider extends ContentProvider {
         if (itemByMediaId != null) {
             return ParcelFileDescriptor.open(new File(itemByMediaId.getPath()), WideSelfieEngine.MPAF_RGB_BASE);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Media removed: ");
-        sb.append(j);
-        throw new FileNotFoundException(sb.toString());
+        throw new FileNotFoundException("Media removed: " + j);
     }
 
     private void notifyChange(Uri uri) {
         Context context = getContext();
         if (context != null) {
-            context.getContentResolver().notifyChange(uri, null);
+            context.getContentResolver().notifyChange(uri, (ContentObserver) null);
         }
     }
 
@@ -96,7 +83,7 @@ public class ParallelProcessProvider extends ContentProvider {
         boolean z = l == null;
         for (SaveTask saveTask : this.dbItemSaveTask.getAllItems()) {
             if (z || saveTask.getMediaStoreId() == l) {
-                matrixCursor.addRow(new Object[]{saveTask.getMediaStoreId(), saveTask.getPath(), Integer.valueOf(ProgressStatus.INDETERMINATE.getIdentifier()), Integer.valueOf(saveTask.getPercentage()), saveTask.getStartTime()});
+                matrixCursor.addRow(new Object[]{saveTask.getMediaStoreId(), saveTask.getPath(), Integer.valueOf(ProcessingMetadataQuery.ProgressStatus.INDETERMINATE.getIdentifier()), Integer.valueOf(saveTask.getPercentage()), saveTask.getStartTime()});
             }
         }
         matrixCursor.moveToPosition(-1);
@@ -110,19 +97,14 @@ public class ParallelProcessProvider extends ContentProvider {
     }
 
     private void updateProcessingMetadata(long j, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateProcessingMetadata: mediaStoreId=");
-        sb.append(j);
-        String sb2 = sb.toString();
-        String str = TAG;
-        Log.v(str, sb2);
+        Log.v(TAG, "updateProcessingMetadata: mediaStoreId=" + j);
         SaveTask itemByMediaId = this.dbItemSaveTask.getItemByMediaId(Long.valueOf(j));
         if (itemByMediaId != null) {
             itemByMediaId.setPercentage(i);
             this.dbItemSaveTask.updateItem(itemByMediaId);
             return;
         }
-        Log.v(str, "updateProcessingMetadata: no match task found");
+        Log.v(TAG, "updateProcessingMetadata: no match task found");
     }
 
     public void attachInfo(Context context, ProviderInfo providerInfo) {
@@ -139,18 +121,12 @@ public class ParallelProcessProvider extends ContentProvider {
     }
 
     public int delete(@NonNull Uri uri, @Nullable String str, @Nullable String[] strArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("delete uri: ");
-        sb.append(uri);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "delete uri: " + uri);
         getContext();
         if (this.mUriMatcher.match(uri) == 8) {
             return deleteProcessingMetadata(uri);
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Unrecognized uri: ");
-        sb2.append(uri);
-        throw new IllegalArgumentException(sb2.toString());
+        throw new IllegalArgumentException("Unrecognized uri: " + uri);
     }
 
     @Nullable
@@ -160,16 +136,10 @@ public class ParallelProcessProvider extends ContentProvider {
 
     @Nullable
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("insert uri: ");
-        sb.append(uri);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "insert uri: " + uri);
         getContext();
         if (this.mUriMatcher.match(uri) != 7) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Unrecognized uri: ");
-            sb2.append(uri);
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("Unrecognized uri: " + uri);
         } else if (contentValues != null) {
             return insertProcessingMetadata(uri, contentValues.getAsLong(ProcessingMetadataQuery.MEDIA_STORE_ID), contentValues.getAsString(ProcessingMetadataQuery.MEDIA_PATH));
         } else {
@@ -187,54 +157,33 @@ public class ParallelProcessProvider extends ContentProvider {
     @Nullable
     public ParcelFileDescriptor openFile(@NonNull Uri uri, @NonNull String str) throws FileNotFoundException {
         if (!"r".equals(str)) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unsupported mode: ");
-            sb.append(str);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Unsupported mode: " + str);
         } else if (this.mUriMatcher.match(uri) == 8) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("loading processing thumb: ");
-            sb2.append(uri);
-            Log.v(TAG, sb2.toString());
+            Log.v(TAG, "loading processing thumb: " + uri);
             return loadProcessingImage(ContentUris.parseId(uri));
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Unrecognized format: ");
-            sb3.append(uri);
-            throw new IllegalArgumentException(sb3.toString());
+            throw new IllegalArgumentException("Unrecognized format: " + uri);
         }
     }
 
     @Nullable
     public Cursor query(@NonNull Uri uri, @Nullable String[] strArr, @Nullable String str, @Nullable String[] strArr2, @Nullable String str2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("query uri: ");
-        sb.append(uri);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "query uri: " + uri);
         getContext();
         int match = this.mUriMatcher.match(uri);
         if (match == 7) {
-            return queryProcessingMetadata(null);
+            return queryProcessingMetadata((Long) null);
         }
         if (match == 8) {
             return queryProcessingMetadata(Long.valueOf(ContentUris.parseId(uri)));
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Unrecognized uri: ");
-        sb2.append(uri);
-        throw new IllegalArgumentException(sb2.toString());
+        throw new IllegalArgumentException("Unrecognized uri: " + uri);
     }
 
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String str, @Nullable String[] strArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("update uri: ");
-        sb.append(uri);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "update uri: " + uri);
         if (this.mUriMatcher.match(uri) != 8) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Unrecognized uri: ");
-            sb2.append(uri);
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("Unrecognized uri: " + uri);
         } else if (contentValues != null) {
             updateProcessingMetadata(ContentUris.parseId(uri), contentValues.getAsInteger(ProcessingMetadataQuery.PROGRESS_PERCENTAGE).intValue());
             notifyChange(uri);

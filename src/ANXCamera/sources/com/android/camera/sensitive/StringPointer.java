@@ -2,10 +2,9 @@ package com.android.camera.sensitive;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public class StringPointer implements Parcelable, CharSequence, Comparable<StringPointer> {
-    public static final Creator<StringPointer> CREATOR = new Creator<StringPointer>() {
+    public static final Parcelable.Creator<StringPointer> CREATOR = new Parcelable.Creator<StringPointer>() {
         public StringPointer createFromParcel(Parcel parcel) {
             return new StringPointer(parcel);
         }

@@ -3,17 +3,15 @@ package android.os.statistics;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.text.TextUtils;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializable {
-    public static final Creator<E2EScenarioPayload> CREATOR = new Creator<E2EScenarioPayload>() {
+    public static final Parcelable.Creator<E2EScenarioPayload> CREATOR = new Parcelable.Creator<E2EScenarioPayload>() {
         public E2EScenarioPayload createFromParcel(Parcel parcel) {
             return new E2EScenarioPayload(parcel);
         }
@@ -40,9 +38,9 @@ public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializ
     }
 
     public E2EScenarioPayload(Parcel parcel) {
-        HashMap readHashMap = parcel.readHashMap(null);
+        HashMap readHashMap = parcel.readHashMap((ClassLoader) null);
         if (readHashMap != null) {
-            for (Entry entry : readHashMap.entrySet()) {
+            for (Map.Entry entry : readHashMap.entrySet()) {
                 String str = (String) entry.getKey();
                 String str2 = (String) entry.getValue();
                 if (!TextUtils.isEmpty(str)) {
@@ -63,7 +61,7 @@ public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializ
     }
 
     public String get(String str) {
-        return (String) this.values.get(str);
+        return this.values.get(str);
     }
 
     public boolean isEmpty() {
@@ -76,7 +74,7 @@ public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializ
 
     public void put(Object obj, Object obj2) {
         String str = null;
-        CharSequence obj3 = obj == null ? null : obj.toString();
+        String obj3 = obj == null ? null : obj.toString();
         if (obj2 != null) {
             str = obj2.toString();
         }
@@ -88,7 +86,7 @@ public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializ
     public void putAll(Map map) {
         if (map != null) {
             for (Object next : map.entrySet()) {
-                put(((Entry) next).getKey(), ((Entry) next).getValue());
+                put(((Map.Entry) next).getKey(), ((Map.Entry) next).getValue());
             }
         }
     }
@@ -108,8 +106,8 @@ public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializ
     public JSONObject toJson() {
         JSONObject jSONObject = new JSONObject();
         try {
-            for (Entry entry : this.values.entrySet()) {
-                jSONObject.put((String) entry.getKey(), entry.getValue());
+            for (Map.Entry next : this.values.entrySet()) {
+                jSONObject.put((String) next.getKey(), next.getValue());
             }
         } catch (JSONException e2) {
             e2.printStackTrace();
@@ -118,8 +116,8 @@ public final class E2EScenarioPayload implements Parcelable, Cloneable, Serializ
     }
 
     public void writeToBundle(Bundle bundle) {
-        for (Entry entry : this.values.entrySet()) {
-            bundle.putString((String) entry.getKey(), (String) entry.getValue());
+        for (Map.Entry next : this.values.entrySet()) {
+            bundle.putString((String) next.getKey(), (String) next.getValue());
         }
     }
 

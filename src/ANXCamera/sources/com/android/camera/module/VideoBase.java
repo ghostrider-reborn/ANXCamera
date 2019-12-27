@@ -17,7 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.provider.MiuiSettings.ScreenEffect;
+import android.provider.MiuiSettings;
 import android.support.v4.app.FrameMetricsAggregator;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -37,7 +37,7 @@ import com.android.camera.LocationManager;
 import com.android.camera.OnClickAttr;
 import com.android.camera.R;
 import com.android.camera.RotateDialogController;
-import com.android.camera.SensorStateManager.SensorStateListener;
+import com.android.camera.SensorStateManager;
 import com.android.camera.ThermalDetector;
 import com.android.camera.Thumbnail;
 import com.android.camera.Util;
@@ -51,28 +51,18 @@ import com.android.camera.fragment.beauty.BeautyValues;
 import com.android.camera.log.Log;
 import com.android.camera.module.loader.FunctionParseAsdFace;
 import com.android.camera.module.loader.camera2.FocusManager2;
-import com.android.camera.module.loader.camera2.FocusManager2.Listener;
 import com.android.camera.module.loader.camera2.FocusTask;
 import com.android.camera.permission.PermissionManager;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.LiveVVChooser;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.PlayVideoProtocol;
-import com.android.camera.protocol.ModeProtocol.RecordState;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.Storage;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.CameraPreviewCallback;
-import com.android.camera2.Camera2Proxy.FaceDetectionCallback;
-import com.android.camera2.Camera2Proxy.FocusCallback;
 import com.android.camera2.CameraCapabilities;
 import com.android.camera2.CameraHardwareFace;
 import com.mi.config.b;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
@@ -86,7 +76,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public abstract class VideoBase extends BaseModule implements FaceDetectionCallback, FocusCallback, CameraPreviewCallback, Listener, CameraAction, PlayVideoProtocol {
+public abstract class VideoBase extends BaseModule implements Camera2Proxy.FaceDetectionCallback, Camera2Proxy.FocusCallback, Camera2Proxy.CameraPreviewCallback, FocusManager2.Listener, ModeProtocol.CameraAction, ModeProtocol.PlayVideoProtocol {
     protected static final int FILE_NUMBER_SINGLE = -1;
     private static final boolean HOLD_WHEN_SAVING_VIDEO = false;
     private static final int MILLIS_PER_MINUTE = 60000;
@@ -124,7 +114,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     protected long mOnResumeTime;
     protected int mOrientationCompensationAtRecordStart;
     protected int mOriginalMusicVolume;
-    protected int mOutputFormat = 2;
+    protected int mOutputFormat;
     protected final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         public void onCallStateChanged(int i, String str) {
             if (i == 2 && VideoBase.this.mMediaRecorderRecording) {
@@ -137,7 +127,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     protected boolean mPreviewing;
     protected long mRecordingStartTime;
     protected boolean mSavePowerMode;
-    protected SensorStateListener mSensorStateListener = new SensorStateListener() {
+    protected SensorStateManager.SensorStateListener mSensorStateListener = new SensorStateManager.SensorStateListener() {
         public boolean isWorking() {
             return VideoBase.this.isAlive() && VideoBase.this.mPreviewing;
         }
@@ -197,7 +187,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             VideoBase videoBase = (VideoBase) this.mModule.get();
             if (videoBase != null) {
                 if (!videoBase.isCreated()) {
-                    removeCallbacksAndMessages(null);
+                    removeCallbacksAndMessages((Object) null);
                 } else if (videoBase.getActivity() != null) {
                     int i = message.what;
                     if (i != 2) {
@@ -207,7 +197,9 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                             }
                             if (SystemClock.uptimeMillis() - videoBase.mOnResumeTime < 5000) {
                                 sendEmptyMessageDelayed(4, 100);
+                                return;
                             }
+                            return;
                         } else if (i != 17) {
                             boolean z = false;
                             if (i == 35) {
@@ -216,57 +208,62 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                                     z = true;
                                 }
                                 videoBase.handleUpdateFaceView(z2, z);
+                                return;
                             } else if (i != 40) {
                                 if (i == 55) {
                                     Log.e(VideoBase.TAG, "autoFocus timeout!");
                                     videoBase.mFocusManager.resetFocused();
                                     videoBase.onWaitingFocusFinished();
+                                    return;
                                 } else if (i == 9) {
                                     videoBase.onPreviewStart();
                                     videoBase.mStereoSwitchThread = null;
+                                    return;
                                 } else if (i == 10) {
                                     videoBase.stopVideoRecording(true, false);
                                     videoBase.mOpenCameraFail = true;
                                     videoBase.onCameraException();
+                                    return;
                                 } else if (i == 42) {
                                     videoBase.updateRecordingTime();
+                                    return;
                                 } else if (i == 43) {
                                     videoBase.restoreMusicSound();
+                                    return;
                                 } else if (i == 45) {
-                                    videoBase.setActivity(null);
+                                    videoBase.setActivity((Camera) null);
+                                    return;
                                 } else if (i == 46) {
                                     videoBase.onWaitStopCallbackTimeout();
+                                    return;
                                 } else if (i == 51) {
                                     videoBase.stopVideoRecording(true, false);
                                     if (!videoBase.mActivity.isActivityPaused()) {
                                         videoBase.mOpenCameraFail = true;
                                         videoBase.onCameraException();
+                                        return;
                                     }
-                                } else if (i != 52) {
-                                    String str = "no consumer for this message: ";
-                                    if (!BaseModule.DEBUG) {
-                                        String str2 = VideoBase.TAG;
-                                        StringBuilder sb = new StringBuilder();
-                                        sb.append(str);
-                                        sb.append(message.what);
-                                        Log.e(str2, sb.toString());
-                                    } else {
-                                        StringBuilder sb2 = new StringBuilder();
-                                        sb2.append(str);
-                                        sb2.append(message.what);
-                                        throw new RuntimeException(sb2.toString());
-                                    }
-                                } else {
+                                    return;
+                                } else if (i == 52) {
                                     videoBase.enterSavePowerMode();
+                                    return;
+                                } else if (!BaseModule.DEBUG) {
+                                    Log.e(VideoBase.TAG, "no consumer for this message: " + message.what);
+                                } else {
+                                    throw new RuntimeException("no consumer for this message: " + message.what);
                                 }
                             } else if (CameraSettings.isStereoModeOn()) {
                                 videoBase.updateTipMessage(6, R.string.dual_camera_use_hint, 2);
+                                return;
+                            } else {
+                                return;
                             }
                         } else {
                             removeMessages(17);
                             removeMessages(2);
                             videoBase.getWindow().addFlags(128);
                             sendEmptyMessageDelayed(2, (long) videoBase.getScreenDelay());
+                            return;
                         }
                     }
                     videoBase.getWindow().clearFlags(128);
@@ -327,7 +324,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             this.mCurrentVideoFilename = null;
             Uri uri = this.mCurrentVideoUri;
             if (uri != null) {
-                Util.safeDelete(uri, null, null);
+                Util.safeDelete(uri, (String) null, (String[]) null);
                 this.mCurrentVideoUri = null;
             }
         }
@@ -367,13 +364,13 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
         }
         this.mMainProtocol.hideReviewViews();
         enableCameraControls(true);
-        ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(6);
+        ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(6);
     }
 
     private void initMetaParser() {
         this.mMetaDataDisposable = Flowable.create(new FlowableOnSubscribe<CaptureResult>() {
             public void subscribe(FlowableEmitter<CaptureResult> flowableEmitter) throws Exception {
-                VideoBase.this.mMetaDataFlowableEmitter = flowableEmitter;
+                FlowableEmitter unused = VideoBase.this.mMetaDataFlowableEmitter = flowableEmitter;
             }
         }, BackpressureStrategy.DROP).map(new FunctionParseAsdFace(this, isFrontCamera())).subscribe();
     }
@@ -394,12 +391,12 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     }
 
     private void setOrientationParameter() {
-        if (!(isDeparted() || this.mCamera2Device == null || this.mOrientation == -1)) {
+        if (!isDeparted() && this.mCamera2Device != null && this.mOrientation != -1) {
             if (this.mPreviewing) {
                 updatePreferenceInWorkThread(35);
-            } else {
-                GlobalConstant.sCameraSetupScheduler.scheduleDirect(new w(this));
+                return;
             }
+            GlobalConstant.sCameraSetupScheduler.scheduleDirect(new w(this));
         }
     }
 
@@ -411,10 +408,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             this.mActivity.startActivity(intent);
         } catch (ActivityNotFoundException e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("failed to view video ");
-            sb.append(this.mCurrentVideoUri);
-            Log.e(str, sb.toString(), e2);
+            Log.e(str, "failed to view video " + this.mCurrentVideoUri, e2);
         }
     }
 
@@ -444,10 +438,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                 return;
             }
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("cancelFocus: ");
-            sb.append(z);
-            Log.v(str, sb.toString());
+            Log.v(str, "cancelFocus: " + z);
             if (z) {
                 setVideoFocusMode(AutoFocus.LEGACY_CONTINUOUS_VIDEO, true);
             }
@@ -486,10 +477,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             File file = new File(str);
             if (!file.exists()) {
                 String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("no video file: ");
-                sb.append(this.mCurrentVideoFilename);
-                Log.d(str2, sb.toString());
+                Log.d(str2, "no video file: " + this.mCurrentVideoFilename);
                 this.mCurrentVideoFilename = null;
             } else if (file.length() == 0) {
                 if (!Storage.isUseDocumentMode()) {
@@ -498,10 +486,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                     FileCompat.deleteFile(this.mCurrentVideoFilename);
                 }
                 String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("delete empty video file: ");
-                sb2.append(this.mCurrentVideoFilename);
-                Log.d(str3, sb2.toString());
+                Log.d(str3, "delete empty video file: " + this.mCurrentVideoFilename);
                 this.mCurrentVideoFilename = null;
             }
         }
@@ -521,9 +506,9 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
         }
         Camera2Proxy camera2Proxy = this.mCamera2Device;
         if (camera2Proxy != null) {
-            camera2Proxy.setMetaDataCallback(null);
-            this.mCamera2Device.setFocusCallback(null);
-            this.mCamera2Device.setErrorCallback(null);
+            camera2Proxy.setMetaDataCallback((Camera2Proxy.CameraMetaDataCallback) null);
+            this.mCamera2Device.setFocusCallback((Camera2Proxy.FocusCallback) null);
+            this.mCamera2Device.setErrorCallback((Camera2Proxy.CameraErrorCallback) null);
             unlockAEAF();
             this.mCamera2Device = null;
         }
@@ -550,16 +535,10 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     /* access modifiers changed from: protected */
     public void deleteVideoFile(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("delete invalid video ");
-        sb.append(str);
-        Log.v(str2, sb.toString());
+        Log.v(str2, "delete invalid video " + str);
         if (!new File(str).delete()) {
             String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("fail to delete ");
-            sb2.append(str);
-            Log.v(str3, sb2.toString());
+            Log.v(str3, "fail to delete " + str);
         }
     }
 
@@ -602,10 +581,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     /* access modifiers changed from: protected */
     public void enterSavePowerMode() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("currentBrightness: ");
-        sb.append(this.mActivity.getCurrentBrightness());
-        Log.d(str, sb.toString());
+        Log.d(str, "currentBrightness: " + this.mActivity.getCurrentBrightness());
         Camera camera = this.mActivity;
         if (camera != null && camera.getCurrentBrightness() == 255) {
             Log.d(TAG, "enterSavePowerMode");
@@ -645,7 +621,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
 
     /* access modifiers changed from: protected */
     public ContentValues genContentValues(int i, int i2) {
-        return genContentValues(i, i2, null, true);
+        return genContentValues(i, i2, (String) null, true);
     }
 
     /* access modifiers changed from: protected */
@@ -661,10 +637,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
         boolean z2 = false;
         if (i2 > 0) {
             String format = String.format(Locale.ENGLISH, "_%d", new Object[]{Integer.valueOf(i2)});
-            StringBuilder sb = new StringBuilder();
-            sb.append(createName);
-            sb.append(format);
-            createName = sb.toString();
+            createName = createName + format;
         }
         if (!TextUtils.isEmpty(str)) {
             int hashCode = str.hashCode();
@@ -672,15 +645,9 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                 if (hashCode == -1150306525 && str.equals(ComponentConfigSlowMotion.DATA_CONFIG_NEW_SLOW_MOTION_240)) {
                     z2 = true;
                     if (z2) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append(createName);
-                        sb2.append(Storage.HSR_120_SUFFIX);
-                        createName = sb2.toString();
+                        createName = createName + Storage.HSR_120_SUFFIX;
                     } else if (z2) {
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append(createName);
-                        sb3.append(Storage.HSR_240_SUFFIX);
-                        createName = sb3.toString();
+                        createName = createName + Storage.HSR_240_SUFFIX;
                     }
                 }
             }
@@ -688,54 +655,31 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             if (z2) {
             }
         }
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(createName);
-        sb4.append(Util.convertOutputFormatToFileExt(i));
-        String sb5 = sb4.toString();
+        String str4 = createName + Util.convertOutputFormatToFileExt(i);
         String convertOutputFormatToMimeType = Util.convertOutputFormatToMimeType(i);
         if (!TextUtils.isEmpty(str) && str.equals(ComponentConfigSlowMotion.DATA_CONFIG_NEW_SLOW_MOTION_960)) {
             String generatePrimaryTempFile = Storage.isUseDocumentMode() ? Storage.generatePrimaryTempFile() : Storage.generateTempFilepath();
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append(generatePrimaryTempFile);
-            sb6.append('/');
-            sb6.append(sb5);
-            str2 = sb6.toString();
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append(generatePrimaryTempFile);
-            sb7.append(File.separator);
-            sb7.append(Storage.AVOID_SCAN_FILE_NAME);
-            Util.createFile(new File(sb7.toString()));
+            str2 = generatePrimaryTempFile + '/' + str4;
+            Util.createFile(new File(generatePrimaryTempFile + File.separator + Storage.AVOID_SCAN_FILE_NAME));
         } else if (z) {
-            str2 = Storage.generateFilepath(sb5);
+            str2 = Storage.generateFilepath(str4);
         } else {
             String generatePrimaryDirectoryPath = Storage.generatePrimaryDirectoryPath();
             Util.mkdirs(new File(generatePrimaryDirectoryPath), FrameMetricsAggregator.EVERY_DURATION, -1, -1);
             if (Util.isPathExist(generatePrimaryDirectoryPath)) {
-                str3 = Storage.generatePrimaryFilepath(sb5);
+                str3 = Storage.generatePrimaryFilepath(str4);
             } else {
-                StringBuilder sb8 = new StringBuilder();
-                sb8.append(Storage.DIRECTORY);
-                sb8.append('/');
-                sb8.append(sb5);
-                str3 = sb8.toString();
+                str3 = Storage.DIRECTORY + '/' + str4;
             }
             str2 = str3;
         }
-        String str4 = TAG;
-        StringBuilder sb9 = new StringBuilder();
-        sb9.append("genContentValues: path=");
-        sb9.append(str2);
-        Log.d(str4, sb9.toString());
+        Log.d(TAG, "genContentValues: path=" + str2);
         ContentValues contentValues = new ContentValues(8);
         contentValues.put("title", createName);
-        contentValues.put("_display_name", sb5);
+        contentValues.put("_display_name", str4);
         contentValues.put("mime_type", convertOutputFormatToMimeType);
         contentValues.put("_data", str2);
-        StringBuilder sb10 = new StringBuilder();
-        sb10.append(Integer.toString(this.mVideoSize.width));
-        sb10.append("x");
-        sb10.append(Integer.toString(this.mVideoSize.height));
-        contentValues.put("resolution", sb10.toString());
+        contentValues.put("resolution", Integer.toString(this.mVideoSize.width) + "x" + Integer.toString(this.mVideoSize.height));
         Location currentLocation = LocationManager.instance().getCurrentLocation();
         if (!(currentLocation == null || (currentLocation.getLatitude() == 0.0d && currentLocation.getLongitude() == 0.0d))) {
             contentValues.put("latitude", Double.valueOf(currentLocation.getLatitude()));
@@ -746,7 +690,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
 
     /* access modifiers changed from: protected */
     public int getCameraRotation() {
-        return ((this.mOrientationCompensation - this.mDisplayRotation) + ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
+        return ((this.mOrientationCompensation - this.mDisplayRotation) + MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT) % MiuiSettings.ScreenEffect.SCREEN_PAPER_MODE_TWILIGHT_START_DEAULT;
     }
 
     public CameraSize getVideoSize() {
@@ -821,7 +765,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     }
 
     public boolean isSelectingCapturedResult() {
-        return isCaptureIntent() && ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getActiveFragment(R.id.bottom_action) == 4083;
+        return isCaptureIntent() && ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getActiveFragment(R.id.bottom_action) == 4083;
     }
 
     /* access modifiers changed from: protected */
@@ -838,17 +782,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             return false;
         }
         long uptimeMillis = (SystemClock.uptimeMillis() - this.mRecordingStartTime) / 60000;
-        boolean z = true;
-        if (isFrontCamera()) {
-            if (uptimeMillis < 10) {
-                z = false;
-            }
-            return z;
-        }
-        if (uptimeMillis < 20) {
-            z = false;
-        }
-        return z;
+        return isFrontCamera() ? uptimeMillis >= 10 : uptimeMillis >= 20;
     }
 
     public boolean isUnInterruptable() {
@@ -942,10 +876,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
         if (this.mIsBeautyFrontOn != isFaceBeautyOn) {
             boolean isVideoBokehOn = CameraSettings.isVideoBokehOn();
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onBeautyParameterChanged: isVideoBokehOn = ");
-            sb.append(isVideoBokehOn);
-            Log.d(str, sb.toString());
+            Log.d(str, "onBeautyParameterChanged: isVideoBokehOn = " + isVideoBokehOn);
             restartModule();
         } else {
             updatePreferenceInWorkThread(13);
@@ -988,14 +919,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             int focusTrigger = focusTask.getFocusTrigger();
             if (focusTrigger == 1) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("focusTime=");
-                sb.append(focusTask.getElapsedTime());
-                sb.append("ms focused=");
-                sb.append(focusTask.isSuccess());
-                sb.append(" waitForRecording=");
-                sb.append(this.mFocusManager.isFocusingSnapOnFinish());
-                Log.v(str, sb.toString());
+                Log.v(str, "focusTime=" + focusTask.getElapsedTime() + "ms focused=" + focusTask.isSuccess() + " waitForRecording=" + this.mFocusManager.isFocusingSnapOnFinish());
                 this.mMainProtocol.setFocusViewType(true);
                 this.mFocusManager.onFocusResult(focusTask);
                 this.mActivity.getSensorStateManager().reset();
@@ -1011,7 +935,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     public void onHostStopAndNotifyActionStop() {
         if (this.mInStartingFocusRecording) {
             this.mInStartingFocusRecording = false;
-            RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
             if (recordState != null) {
                 recordState.onFinish();
             }
@@ -1077,7 +1001,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             if (i == 27 || i == 66) {
                 return true;
             }
-        } else if (((BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
+        } else if (((ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
             return true;
         }
         return super.onKeyUp(i, keyEvent);
@@ -1130,10 +1054,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
 
     public void onPreviewSessionClosed(CameraCaptureSession cameraCaptureSession) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onPreviewSessionClosed: ");
-        sb.append(cameraCaptureSession);
-        Log.d(str, sb.toString());
+        Log.d(str, "onPreviewSessionClosed: " + cameraCaptureSession);
         CameraCaptureSession cameraCaptureSession2 = this.mCurrentSession;
         if (cameraCaptureSession2 != null && cameraCaptureSession2.equals(cameraCaptureSession)) {
             this.mCurrentSession = null;
@@ -1144,10 +1065,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     public void onPreviewSessionFailed(CameraCaptureSession cameraCaptureSession) {
         if (!isTextureExpired() || !retryOnceIfCameraError(this.mHandler)) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("onPreviewSessionFailed: ");
-            sb.append(cameraCaptureSession);
-            Log.d(str, sb.toString());
+            Log.d(str, "onPreviewSessionFailed: " + cameraCaptureSession);
             CameraCaptureSession cameraCaptureSession2 = this.mCurrentSession;
             if (cameraCaptureSession2 != null && cameraCaptureSession2.equals(cameraCaptureSession)) {
                 this.mCurrentSession = null;
@@ -1161,10 +1079,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
 
     public void onPreviewSessionSuccess(CameraCaptureSession cameraCaptureSession) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onPreviewSessionSuccess: ");
-        sb.append(cameraCaptureSession);
-        Log.d(str, sb.toString());
+        Log.d(str, "onPreviewSessionSuccess: " + cameraCaptureSession);
         if (cameraCaptureSession != null && isAlive()) {
             this.mCurrentSession = cameraCaptureSession;
             setSessionReady(true);
@@ -1214,7 +1129,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     @OnClickAttr
     public void onReviewDoneClicked() {
         this.mMainProtocol.hideReviewViews();
-        BaseDelegate baseDelegate = (BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
         if (baseDelegate != null) {
             baseDelegate.delegateEvent(6);
         }
@@ -1288,10 +1203,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     public void onWindowFocusChanged(boolean z) {
         super.onWindowFocusChanged(z);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onWindowFocusChanged: ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "onWindowFocusChanged: " + z);
         if (!this.mMediaRecorderRecording) {
             return;
         }
@@ -1326,10 +1238,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                     this.mVideoFileDescriptor = CameraAppImpl.getAndroidContext().getContentResolver().openFileDescriptor(extraSavedUri, "rw");
                     this.mCurrentVideoUri = extraSavedUri;
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("parseIntent: outputUri=");
-                    sb.append(extraSavedUri);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "parseIntent: outputUri=" + extraSavedUri);
                 } catch (FileNotFoundException e2) {
                     Log.e(TAG, e2.getMessage());
                 }
@@ -1344,13 +1253,13 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                 Log.w(TAG, "ignore volume key");
                 return;
             }
-            LiveVVChooser liveVVChooser = (LiveVVChooser) ModeCoordinatorImpl.getInstance().getAttachProtocol(229);
+            ModeProtocol.LiveVVChooser liveVVChooser = (ModeProtocol.LiveVVChooser) ModeCoordinatorImpl.getInstance().getAttachProtocol(229);
             if (liveVVChooser == null || !liveVVChooser.isShow()) {
                 restoreBottom();
                 onShutterButtonClick(i);
-            } else {
-                liveVVChooser.startShot();
+                return;
             }
+            liveVVChooser.startShot();
         }
     }
 
@@ -1432,7 +1341,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
         pausePreview();
         this.mMainProtocol.showReviewViews(getReviewBitmap());
         enableCameraControls(false);
-        ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(6);
+        ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).delegateEvent(6);
     }
 
     /* access modifiers changed from: protected */
@@ -1448,15 +1357,15 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
         this.mTitleId = i;
         this.mMessageId = i2;
         Camera camera = this.mActivity;
-        this.mDialog = RotateDialogController.showSystemAlertDialog(camera, camera.getString(i), this.mActivity.getString(i2), this.mActivity.getString(17039370), null, null, null);
+        this.mDialog = RotateDialogController.showSystemAlertDialog(camera, camera.getString(i), this.mActivity.getString(i2), this.mActivity.getString(17039370), (Runnable) null, (String) null, (Runnable) null);
     }
 
     /* access modifiers changed from: protected */
     public void silenceSounds() {
         if (this.mAudioManager == null) {
-            this.mAudioManager = (AudioManager) this.mActivity.getSystemService(MVConsts.TYPE_AUDIO);
+            this.mAudioManager = (AudioManager) this.mActivity.getSystemService(VEEditor.MVConsts.TYPE_AUDIO);
         }
-        this.mAudioManager.requestAudioFocus(null, 3, 2);
+        this.mAudioManager.requestAudioFocus((AudioManager.OnAudioFocusChangeListener) null, 3, 2);
         this.mOriginalMusicVolume = this.mAudioManager.getStreamVolume(3);
         if (this.mOriginalMusicVolume != 0) {
             this.mAudioManager.setStreamMute(3, true);
@@ -1480,9 +1389,9 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             if (this.mFocusOrAELockSupported) {
                 setVideoFocusMode("auto", true);
                 this.mCamera2Device.startFocus(FocusTask.create(1), this.mModuleIndex);
-            } else {
-                this.mCamera2Device.resumePreview();
+                return;
             }
+            this.mCamera2Device.resumePreview();
         }
     }
 
@@ -1544,10 +1453,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
                 }
                 CameraSettings.initBeautyValues(this.mBeautyValues, this.mModuleIndex);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("updateBeauty(): ");
-                sb.append(this.mBeautyValues);
-                Log.d(str, sb.toString());
+                Log.d(str, "updateBeauty(): " + this.mBeautyValues);
                 this.mCamera2Device.setBeautyValues(this.mBeautyValues);
                 this.mIsBeautyFrontOn = isFaceBeautyOn(this.mBeautyValues);
                 return;
@@ -1564,7 +1470,7 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
     /* access modifiers changed from: protected */
     public void updateFace() {
         boolean enableFaceDetection = enableFaceDetection();
-        MainContentProtocol mainContentProtocol = this.mMainProtocol;
+        ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
         if (mainContentProtocol != null) {
             mainContentProtocol.setSkipDrawFace(!enableFaceDetection);
         }
@@ -1615,10 +1521,8 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
             if (AutoFocus.LEGACY_CONTINUOUS_VIDEO.equals(this.mVideoFocusMode)) {
                 this.mCamera2Device.setFocusCallback(this);
             }
-        } else {
-            if (this.mAELockOnlySupported) {
-                camera2Proxy.setFocusCallback(this);
-            }
+        } else if (this.mAELockOnlySupported) {
+            camera2Proxy.setFocusCallback(this);
         }
     }
 
@@ -1629,10 +1533,8 @@ public abstract class VideoBase extends BaseModule implements FaceDetectionCallb
 
     /* access modifiers changed from: protected */
     public void updateRecordingTime() {
-        if (isThermalThreshold()) {
-            if (!"0".equals(CameraSettings.getFlashMode(this.mModuleIndex))) {
-                ThermalDetector.getInstance().onThermalNotification();
-            }
+        if (isThermalThreshold() && !"0".equals(CameraSettings.getFlashMode(this.mModuleIndex))) {
+            ThermalDetector.getInstance().onThermalNotification();
         }
     }
 

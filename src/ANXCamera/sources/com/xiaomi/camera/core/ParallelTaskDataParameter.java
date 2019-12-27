@@ -78,122 +78,122 @@ public class ParallelTaskDataParameter {
         }
 
         public Builder setAgeGenderAndMagicMirrorWater(boolean z) {
-            this.mParameter.mAgeGenderAndMagicMirrorWater = z;
+            boolean unused = this.mParameter.mAgeGenderAndMagicMirrorWater = z;
             return this;
         }
 
         public Builder setAlgorithmName(String str) {
-            this.mParameter.mAlgorithmName = str;
+            String unused = this.mParameter.mAlgorithmName = str;
             return this;
         }
 
         public Builder setBokehFrontCamera(boolean z) {
-            this.mParameter.mBokehFrontCamera = z;
+            boolean unused = this.mParameter.mBokehFrontCamera = z;
             return this;
         }
 
         public Builder setDeviceWatermarkParam(DeviceWatermarkParam deviceWatermarkParam) {
-            this.mParameter.mDeviceWatermarkParam = deviceWatermarkParam;
+            DeviceWatermarkParam unused = this.mParameter.mDeviceWatermarkParam = deviceWatermarkParam;
             return this;
         }
 
         public Builder setFaceWaterMarkList(List<WaterMarkData> list) {
-            this.mParameter.mFaceWaterMarkList = list;
+            List unused = this.mParameter.mFaceWaterMarkList = list;
             return this;
         }
 
         public Builder setFilterId(int i) {
-            this.mParameter.mFilterId = i;
+            int unused = this.mParameter.mFilterId = i;
             return this;
         }
 
         public Builder setFrontCamera(boolean z) {
-            this.mParameter.mIsFrontCamera = z;
+            boolean unused = this.mParameter.mIsFrontCamera = z;
             return this;
         }
 
         public Builder setGradienterOn(boolean z) {
-            this.mParameter.mIsGradienterOn = z;
+            boolean unused = this.mParameter.mIsGradienterOn = z;
             return this;
         }
 
         public Builder setHasDualWaterMark(boolean z) {
-            this.mParameter.mHasDualWaterMark = z;
+            boolean unused = this.mParameter.mHasDualWaterMark = z;
             return this;
         }
 
         public Builder setJpegQuality(int i) {
-            this.mParameter.mJpegQuality = i;
+            int unused = this.mParameter.mJpegQuality = i;
             return this;
         }
 
         public Builder setJpegRotation(int i) {
-            this.mParameter.mJpegRotation = i;
+            int unused = this.mParameter.mJpegRotation = i;
             return this;
         }
 
         public Builder setLightingPattern(int i) {
-            this.mParameter.mLightingPattern = i;
+            int unused = this.mParameter.mLightingPattern = i;
             return this;
         }
 
         public Builder setLocation(Location location) {
-            this.mParameter.mLocation = location;
+            Location unused = this.mParameter.mLocation = location;
             return this;
         }
 
         public Builder setMirror(boolean z) {
-            this.mParameter.mMirror = z;
+            boolean unused = this.mParameter.mMirror = z;
             return this;
         }
 
         public Builder setOrientation(int i) {
-            this.mParameter.mOrientation = i;
+            int unused = this.mParameter.mOrientation = i;
             return this;
         }
 
         public Builder setPictureInfo(PictureInfo pictureInfo) {
-            this.mParameter.mPictureInfo = pictureInfo;
+            PictureInfo unused = this.mParameter.mPictureInfo = pictureInfo;
             return this;
         }
 
         public Builder setPrefix(String str) {
-            this.mParameter.mPrefix = str;
+            String unused = this.mParameter.mPrefix = str;
             return this;
         }
 
         public Builder setRawSize(int i, int i2) {
-            this.mParameter.mRawSize = new Size(i, i2);
+            Size unused = this.mParameter.mRawSize = new Size(i, i2);
             return this;
         }
 
         public Builder setSaveGroupshotPrimitive(boolean z) {
-            this.mParameter.mSaveGroupshotPrimitive = z;
+            boolean unused = this.mParameter.mSaveGroupshotPrimitive = z;
             return this;
         }
 
         public Builder setShootOrientation(int i) {
-            this.mParameter.mShootOrientation = i;
+            int unused = this.mParameter.mShootOrientation = i;
             return this;
         }
 
         public Builder setShootRotation(float f2) {
-            this.mParameter.mShootRotation = f2;
+            float unused = this.mParameter.mShootRotation = f2;
             return this;
         }
 
         public Builder setSuffix(String str) {
-            this.mParameter.mSuffix = str;
+            String unused = this.mParameter.mSuffix = str;
             return this;
         }
 
         public Builder setTiltShiftMode(String str) {
-            this.mParameter.mTiltShiftMode = str;
+            String unused = this.mParameter.mTiltShiftMode = str;
             return this;
         }
 
         public Builder setTimeWaterMarkString(String str) {
-            this.mParameter.mTimeWaterMarkString = str;
+            String unused = this.mParameter.mTimeWaterMarkString = str;
             return this;
         }
     }

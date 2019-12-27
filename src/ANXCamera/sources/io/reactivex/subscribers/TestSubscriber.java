@@ -1,6 +1,6 @@
 package io.reactivex.subscribers;
 
-import com.android.camera.CameraIntentManager.ControlActions;
+import com.android.camera.CameraIntentManager;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -8,7 +8,6 @@ import io.reactivex.internal.fuseable.QueueSubscription;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.internal.util.ExceptionHelper;
 import io.reactivex.observers.BaseTestConsumer;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
@@ -73,7 +72,7 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
 
     static String fusionModeToString(int i) {
         if (i == 0) {
-            return ControlActions.CONTROL_ACTION_UNKNOWN;
+            return CameraIntentManager.ControlActions.CONTROL_ACTION_UNKNOWN;
         }
         if (i == 1) {
             return "SYNC";
@@ -81,14 +80,10 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
         if (i == 2) {
             return "ASYNC";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Unknown(");
-        sb.append(i);
-        sb.append(")");
-        return sb.toString();
+        return "Unknown(" + i + ")";
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final TestSubscriber<T> assertFuseable() {
         if (this.qs != null) {
             return this;
@@ -96,24 +91,19 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
         throw new AssertionError("Upstream is not fuseable.");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final TestSubscriber<T> assertFusionMode(int i) {
         int i2 = this.establishedFusionMode;
         if (i2 == i) {
             return this;
         }
         if (this.qs != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Fusion mode different. Expected: ");
-            sb.append(fusionModeToString(i));
-            sb.append(", actual: ");
-            sb.append(fusionModeToString(i2));
-            throw new AssertionError(sb.toString());
+            throw new AssertionError("Fusion mode different. Expected: " + fusionModeToString(i) + ", actual: " + fusionModeToString(i2));
         }
         throw fail("Upstream is not fuseable");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final TestSubscriber<T> assertNotFuseable() {
         if (this.qs == null) {
             return this;
@@ -216,23 +206,25 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
         if (this.establishedFusionMode == 2) {
             while (true) {
                 try {
-                    Object poll = this.qs.poll();
-                    if (poll == null) {
-                        break;
+                    T poll = this.qs.poll();
+                    if (poll != null) {
+                        this.values.add(poll);
+                    } else {
+                        return;
                     }
-                    this.values.add(poll);
                 } catch (Throwable th) {
                     this.errors.add(th);
                     this.qs.cancel();
+                    return;
                 }
             }
-            return;
+        } else {
+            this.values.add(t);
+            if (t == null) {
+                this.errors.add(new NullPointerException("onNext received a null value"));
+            }
+            this.actual.onNext(t);
         }
-        this.values.add(t);
-        if (t == null) {
-            this.errors.add(new NullPointerException("onNext received a null value"));
-        }
-        this.actual.onNext(t);
     }
 
     /* access modifiers changed from: protected */
@@ -243,14 +235,10 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
         this.lastThread = Thread.currentThread();
         if (subscription2 == null) {
             this.errors.add(new NullPointerException("onSubscribe received a null Subscription"));
-        } else if (!this.subscription.compareAndSet(null, subscription2)) {
+        } else if (!this.subscription.compareAndSet((Object) null, subscription2)) {
             subscription2.cancel();
             if (this.subscription.get() != SubscriptionHelper.CANCELLED) {
-                List<Throwable> list = this.errors;
-                StringBuilder sb = new StringBuilder();
-                sb.append("onSubscribe received multiple subscriptions: ");
-                sb.append(subscription2);
-                list.add(new IllegalStateException(sb.toString()));
+                this.errors.add(new IllegalStateException("onSubscribe received multiple subscriptions: " + subscription2));
             }
         } else {
             int i = this.initialFusionMode;
@@ -263,17 +251,18 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
                     this.lastThread = Thread.currentThread();
                     while (true) {
                         try {
-                            Object poll = this.qs.poll();
-                            if (poll == null) {
-                                break;
+                            T poll = this.qs.poll();
+                            if (poll != null) {
+                                this.values.add(poll);
+                            } else {
+                                this.completions++;
+                                return;
                             }
-                            this.values.add(poll);
                         } catch (Throwable th) {
                             this.errors.add(th);
+                            return;
                         }
                     }
-                    this.completions++;
-                    return;
                 }
             }
             this.actual.onSubscribe(subscription2);
@@ -294,7 +283,7 @@ public class TestSubscriber<T> extends BaseTestConsumer<T, TestSubscriber<T>> im
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final TestSubscriber<T> setInitialFusionMode(int i) {
         this.initialFusionMode = i;
         return this;

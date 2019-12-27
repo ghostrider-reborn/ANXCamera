@@ -17,7 +17,7 @@ public class GPUProcessor {
 
     public static void init() {
         MessageCenter.init();
-        MessageCenter.setListener(new com.bef.effectsdk.message.MessageCenter.Listener() {
+        MessageCenter.setListener(new MessageCenter.Listener() {
             public void onMessageReceived(int i, int i2, int i3, String str) {
                 if (GPUProcessor.sListener != null) {
                     GPUProcessor.sListener.onMessageReceived(i, i2, i3, str);

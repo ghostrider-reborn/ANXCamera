@@ -8,6 +8,7 @@ import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.BiPredicate;
 import io.reactivex.internal.fuseable.FuseToFlowable;
 import io.reactivex.internal.fuseable.SimpleQueue;
+import io.reactivex.internal.operators.flowable.FlowableSequenceEqual;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.internal.util.AtomicThrowable;
 import io.reactivex.plugins.RxJavaPlugins;
@@ -21,24 +22,24 @@ public final class FlowableSequenceEqualSingle<T> extends Single<Boolean> implem
     final int prefetch;
     final Publisher<? extends T> second;
 
-    static final class EqualCoordinator<T> extends AtomicInteger implements Disposable, EqualCoordinatorHelper {
+    static final class EqualCoordinator<T> extends AtomicInteger implements Disposable, FlowableSequenceEqual.EqualCoordinatorHelper {
         private static final long serialVersionUID = -6178010334400373240L;
         final SingleObserver<? super Boolean> actual;
         final BiPredicate<? super T, ? super T> comparer;
         final AtomicThrowable error = new AtomicThrowable();
-        final EqualSubscriber<T> first;
-        final EqualSubscriber<T> second;
+        final FlowableSequenceEqual.EqualSubscriber<T> first;
+        final FlowableSequenceEqual.EqualSubscriber<T> second;
         T v1;
         T v2;
 
         EqualCoordinator(SingleObserver<? super Boolean> singleObserver, int i, BiPredicate<? super T, ? super T> biPredicate) {
             this.actual = singleObserver;
             this.comparer = biPredicate;
-            this.first = new EqualSubscriber<>(this, i);
-            this.second = new EqualSubscriber<>(this, i);
+            this.first = new FlowableSequenceEqual.EqualSubscriber<>(this, i);
+            this.second = new FlowableSequenceEqual.EqualSubscriber<>(this, i);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAndClear() {
             this.first.cancel();
             this.first.clear();
@@ -99,17 +100,17 @@ public final class FlowableSequenceEqualSingle<T> extends Single<Boolean> implem
                             }
                             boolean z4 = t2 == null;
                             if (z && z3 && z2 && z4) {
-                                this.actual.onSuccess(Boolean.valueOf(true));
+                                this.actual.onSuccess(true);
                                 return;
                             } else if (z && z3 && z2 != z4) {
                                 cancelAndClear();
-                                this.actual.onSuccess(Boolean.valueOf(false));
+                                this.actual.onSuccess(false);
                                 return;
                             } else if (!z2 && !z4) {
                                 try {
                                     if (!this.comparer.test(t, t2)) {
                                         cancelAndClear();
-                                        this.actual.onSuccess(Boolean.valueOf(false));
+                                        this.actual.onSuccess(false);
                                         return;
                                     }
                                     this.v1 = null;
@@ -154,7 +155,7 @@ public final class FlowableSequenceEqualSingle<T> extends Single<Boolean> implem
             return SubscriptionHelper.isCancelled((Subscription) this.first.get());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(Publisher<? extends T> publisher, Publisher<? extends T> publisher2) {
             publisher.subscribe(this.first);
             publisher2.subscribe(this.second);
@@ -169,7 +170,7 @@ public final class FlowableSequenceEqualSingle<T> extends Single<Boolean> implem
     }
 
     public Flowable<Boolean> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableSequenceEqual<T>(this.first, this.second, this.comparer, this.prefetch));
+        return RxJavaPlugins.onAssembly(new FlowableSequenceEqual(this.first, this.second, this.comparer, this.prefetch));
     }
 
     public void subscribeActual(SingleObserver<? super Boolean> singleObserver) {

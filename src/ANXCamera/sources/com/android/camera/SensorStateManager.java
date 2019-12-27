@@ -117,10 +117,7 @@ public class SensorStateManager {
         }
 
         public void onAccuracyChanged(Sensor sensor, int i) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onAccuracyChanged accuracy=");
-            sb.append(i);
-            Log.v(SensorStateManager.TAG, sb.toString());
+            Log.v(SensorStateManager.TAG, "onAccuracyChanged accuracy=" + i);
         }
 
         public void onSensorChanged(SensorEvent sensorEvent) {
@@ -132,21 +129,16 @@ public class SensorStateManager {
                 float f3 = fArr[2];
                 float abs = Math.abs(f2);
                 float abs2 = Math.abs(f3);
-                boolean access$900 = SensorStateManager.this.mLieFlagEnabled;
-                String str = SensorStateManager.TAG;
                 int i2 = 5;
-                if (access$900) {
+                if (SensorStateManager.this.mLieFlagEnabled) {
                     int i3 = SensorStateManager.this.mIsLyingForLie ? 5 : 0;
                     int i4 = i3 + 10;
                     int i5 = 170 - i3;
                     float f4 = (float) i4;
                     boolean z = (abs <= f4 || abs >= ((float) i5)) && (abs2 <= f4 || abs2 >= ((float) i5));
                     if (z != SensorStateManager.this.mIsLyingForLie) {
-                        SensorStateManager.this.mIsLyingForLie = z;
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("SensorEventListenerImpl TYPE_ORIENTATION mIsLyingForLie=");
-                        sb.append(SensorStateManager.this.mIsLyingForLie);
-                        Log.v(str, sb.toString());
+                        boolean unused = SensorStateManager.this.mIsLyingForLie = z;
+                        Log.v(SensorStateManager.TAG, "SensorEventListenerImpl TYPE_ORIENTATION mIsLyingForLie=" + SensorStateManager.this.mIsLyingForLie);
                         access$000.onDeviceLieChanged(SensorStateManager.this.mIsLyingForLie);
                     }
                 }
@@ -159,13 +151,8 @@ public class SensorStateManager {
                     float f5 = (float) i6;
                     boolean z2 = (abs <= f5 || abs >= ((float) i7)) && (abs2 <= f5 || abs2 >= ((float) i7));
                     if (z2 != SensorStateManager.this.mIsLyingForGradienter) {
-                        SensorStateManager.this.mIsLyingForGradienter = z2;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("SensorEventListenerImpl TYPE_ORIENTATION mIsLyingForGradienter=");
-                        sb2.append(SensorStateManager.this.mIsLyingForGradienter);
-                        sb2.append("mOrientation=");
-                        sb2.append(SensorStateManager.this.mOrientation);
-                        Log.v(str, sb2.toString());
+                        boolean unused2 = SensorStateManager.this.mIsLyingForGradienter = z2;
+                        Log.v(SensorStateManager.TAG, "SensorEventListenerImpl TYPE_ORIENTATION mIsLyingForGradienter=" + SensorStateManager.this.mIsLyingForGradienter + "mOrientation=" + SensorStateManager.this.mOrientation);
                         access$000.onDeviceOrientationChanged(SensorStateManager.this.mOrientation, SensorStateManager.this.mIsLyingForGradienter);
                     }
                 }
@@ -175,9 +162,9 @@ public class SensorStateManager {
                         i = 2;
                     }
                     sensorStateManager.changeCapturePosture(i);
-                } else {
-                    SensorStateManager.this.changeCapturePosture(0);
+                    return;
                 }
+                SensorStateManager.this.changeCapturePosture(0);
             }
         }
     }
@@ -220,27 +207,27 @@ public class SensorStateManager {
                     long abs = Math.abs(sensorEvent.timestamp - SensorStateManager.this.mGyroscopeTimeStamp);
                     if (abs >= SensorStateManager.EVENT_PROCESS_INTERVAL) {
                         if (SensorStateManager.this.mGyroscopeTimeStamp == 0 || abs > SensorStateManager.EVENT_TIME_OUT) {
-                            SensorStateManager.this.mGyroscopeTimeStamp = sensorEvent.timestamp;
-                        } else {
-                            float f2 = ((float) abs) * SensorStateManager.NS2S;
-                            float[] fArr = sensorEvent.values;
-                            double sqrt = Math.sqrt((double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2])));
-                            SensorStateManager.this.mGyroscopeTimeStamp = sensorEvent.timestamp;
-                            if (SensorStateManager.GYROSCOPE_MOVING_THRESHOLD < sqrt) {
-                                SensorStateManager.this.deviceBeginMoving();
+                            long unused = SensorStateManager.this.mGyroscopeTimeStamp = sensorEvent.timestamp;
+                            return;
+                        }
+                        float f2 = ((float) abs) * SensorStateManager.NS2S;
+                        float[] fArr = sensorEvent.values;
+                        double sqrt = Math.sqrt((double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2])));
+                        long unused2 = SensorStateManager.this.mGyroscopeTimeStamp = sensorEvent.timestamp;
+                        if (SensorStateManager.GYROSCOPE_MOVING_THRESHOLD < sqrt) {
+                            SensorStateManager.this.deviceBeginMoving();
+                        }
+                        SensorStateManager sensorStateManager = SensorStateManager.this;
+                        int unused3 = sensorStateManager.mAngleSpeedIndex = SensorStateManager.access$404(sensorStateManager) % SensorStateManager.this.mAngleSpeed.length;
+                        SensorStateManager.this.mAngleSpeed[SensorStateManager.this.mAngleSpeedIndex] = sqrt;
+                        if (sqrt >= SensorStateManager.GYROSCOPE_IGNORE_THRESHOLD) {
+                            SensorStateManager.access$618(SensorStateManager.this, sqrt * ((double) f2));
+                            if (SensorStateManager.this.mAngleTotal > SensorStateManager.GYROSCOPE_FOCUS_THRESHOLD) {
+                                double unused4 = SensorStateManager.this.mAngleTotal = 0.0d;
+                                SensorStateManager.this.deviceKeepMoving(10000.0d);
                             }
-                            SensorStateManager sensorStateManager = SensorStateManager.this;
-                            sensorStateManager.mAngleSpeedIndex = SensorStateManager.access$404(sensorStateManager) % SensorStateManager.this.mAngleSpeed.length;
-                            SensorStateManager.this.mAngleSpeed[SensorStateManager.this.mAngleSpeedIndex] = sqrt;
-                            if (sqrt >= SensorStateManager.GYROSCOPE_IGNORE_THRESHOLD) {
-                                SensorStateManager.access$618(SensorStateManager.this, sqrt * ((double) f2));
-                                if (SensorStateManager.this.mAngleTotal > SensorStateManager.GYROSCOPE_FOCUS_THRESHOLD) {
-                                    SensorStateManager.this.mAngleTotal = 0.0d;
-                                    SensorStateManager.this.deviceKeepMoving(10000.0d);
-                                }
-                                if (access$000.isWorking()) {
-                                    access$000.onSensorChanged(sensorEvent);
-                                }
+                            if (access$000.isWorking()) {
+                                access$000.onSensorChanged(sensorEvent);
                             }
                         }
                     }
@@ -257,14 +244,14 @@ public class SensorStateManager {
                     long abs = Math.abs(sensorEvent.timestamp - SensorStateManager.this.mAccelerometerTimeStamp);
                     if (abs >= SensorStateManager.EVENT_PROCESS_INTERVAL) {
                         if (SensorStateManager.this.mAccelerometerTimeStamp == 0 || abs > SensorStateManager.EVENT_TIME_OUT) {
-                            SensorStateManager.this.mAccelerometerTimeStamp = sensorEvent.timestamp;
-                        } else {
-                            float[] fArr = sensorEvent.values;
-                            double sqrt = Math.sqrt((double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2])));
-                            SensorStateManager.this.mAccelerometerTimeStamp = sensorEvent.timestamp;
-                            if (sqrt > SensorStateManager.ACCELEROMETER_GAP_TOLERANCE) {
-                                SensorStateManager.this.deviceKeepMoving(sqrt);
-                            }
+                            long unused = SensorStateManager.this.mAccelerometerTimeStamp = sensorEvent.timestamp;
+                            return;
+                        }
+                        float[] fArr = sensorEvent.values;
+                        double sqrt = Math.sqrt((double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2])));
+                        long unused2 = SensorStateManager.this.mAccelerometerTimeStamp = sensorEvent.timestamp;
+                        if (sqrt > SensorStateManager.ACCELEROMETER_GAP_TOLERANCE) {
+                            SensorStateManager.this.deviceKeepMoving(sqrt);
                         }
                     }
                 }
@@ -295,10 +282,7 @@ public class SensorStateManager {
             }
 
             public void onAccuracyChanged(Sensor sensor, int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onAccuracyChanged accuracy=");
-                sb.append(i);
-                Log.v(SensorStateManager.TAG, sb.toString());
+                Log.v(SensorStateManager.TAG, "onAccuracyChanged accuracy=" + i);
             }
 
             public void onSensorChanged(SensorEvent sensorEvent) {
@@ -314,23 +298,7 @@ public class SensorStateManager {
                     fArr3[0] = (fArr3[0] * 0.7f) + (fArr[0] * 0.3f);
                     fArr3[1] = (fArr3[1] * 0.7f) + (fArr[1] * 0.3f);
                     fArr3[2] = (fArr3[2] * 0.7f) + (fArr[2] * 0.3f);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("finalFilter=");
-                    sb.append(this.finalFilter[0]);
-                    String str = " ";
-                    sb.append(str);
-                    sb.append(this.finalFilter[1]);
-                    sb.append(str);
-                    sb.append(this.finalFilter[2]);
-                    sb.append(" event.values=");
-                    sb.append(sensorEvent.values[0]);
-                    sb.append(str);
-                    sb.append(sensorEvent.values[1]);
-                    sb.append(str);
-                    sb.append(sensorEvent.values[2]);
-                    String sb2 = sb.toString();
-                    String str2 = SensorStateManager.TAG;
-                    Log.v(str2, sb2);
+                    Log.v(SensorStateManager.TAG, "finalFilter=" + this.finalFilter[0] + " " + this.finalFilter[1] + " " + this.finalFilter[2] + " event.values=" + sensorEvent.values[0] + " " + sensorEvent.values[1] + " " + sensorEvent.values[2]);
                     float f3 = -1.0f;
                     float[] fArr4 = this.finalFilter;
                     float f4 = -fArr4[0];
@@ -343,13 +311,8 @@ public class SensorStateManager {
                         if (Math.abs(SensorStateManager.this.mOrientation - f3) > 3.0f) {
                             clearFilter();
                         }
-                        SensorStateManager.this.mOrientation = f3;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("SensorEventListenerImpl TYPE_ACCELEROMETER mOrientation=");
-                        sb3.append(SensorStateManager.this.mOrientation);
-                        sb3.append(" mIsLyingForGradienter=");
-                        sb3.append(SensorStateManager.this.mIsLyingForGradienter);
-                        Log.v(str2, sb3.toString());
+                        float unused = SensorStateManager.this.mOrientation = f3;
+                        Log.v(SensorStateManager.TAG, "SensorEventListenerImpl TYPE_ACCELEROMETER mOrientation=" + SensorStateManager.this.mOrientation + " mIsLyingForGradienter=" + SensorStateManager.this.mIsLyingForGradienter);
                         access$000.onDeviceOrientationChanged(SensorStateManager.this.mOrientation, SensorStateManager.this.mIsLyingForGradienter);
                     }
                     if (access$000.isWorking()) {
@@ -534,38 +497,19 @@ public class SensorStateManager {
     }
 
     public boolean isStable() {
-        int i = this.mAngleSpeedIndex;
-        String str = " threshold=";
-        String str2 = TAG;
-        boolean z = true;
-        if (i >= 0) {
-            double d2 = 0.0d;
-            for (double d3 : this.mAngleSpeed) {
-                d2 += d3;
+        double length;
+        double d2;
+        if (this.mAngleSpeedIndex >= 0) {
+            double d3 = 0.0d;
+            for (double d4 : this.mAngleSpeed) {
+                d3 += d4;
             }
             double[] dArr = this.mAngleSpeed;
-            double length = d2 / ((double) dArr.length);
-            double d4 = dArr[Util.clamp(this.mAngleSpeedIndex, 0, dArr.length - 1)];
-            StringBuilder sb = new StringBuilder();
-            sb.append("isStable mAngleSpeed=");
-            sb.append(length);
-            sb.append(" lastSpeed=");
-            sb.append(d4);
-            sb.append(str);
-            sb.append(GYROSCOPE_STABLE_THRESHOLD);
-            Log.v(str2, sb.toString());
+            Log.v(TAG, "isStable mAngleSpeed=" + length + " lastSpeed=" + d2 + " threshold=" + GYROSCOPE_STABLE_THRESHOLD);
             double d5 = GYROSCOPE_STABLE_THRESHOLD;
-            if (length > d5 || d4 > d5) {
-                z = false;
-            }
-            return z;
+            return length <= d5 && d2 <= d5;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("isStable return true for mAngleSpeedIndex=");
-        sb2.append(this.mAngleSpeedIndex);
-        sb2.append(str);
-        sb2.append(GYROSCOPE_STABLE_THRESHOLD);
-        Log.v(str2, sb2.toString());
+        Log.v(TAG, "isStable return true for mAngleSpeedIndex=" + this.mAngleSpeedIndex + " threshold=" + GYROSCOPE_STABLE_THRESHOLD);
         return true;
     }
 

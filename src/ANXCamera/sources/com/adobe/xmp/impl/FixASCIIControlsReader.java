@@ -109,10 +109,9 @@ public class FixASCIIControlsReader extends PushbackReader {
                         if (Utils.isControlChar(processChar)) {
                             processChar = ' ';
                         }
-                        int i7 = i3 + 1;
                         cArr[i3] = processChar;
                         i4++;
-                        i3 = i7;
+                        i3++;
                     } else if (i6 == 5) {
                         unread(cArr2, 0, i5 + 1);
                     } else {

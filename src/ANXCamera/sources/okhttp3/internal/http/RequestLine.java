@@ -1,6 +1,6 @@
 package okhttp3.internal.http;
 
-import java.net.Proxy.Type;
+import java.net.Proxy;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 
@@ -8,7 +8,7 @@ public final class RequestLine {
     private RequestLine() {
     }
 
-    public static String get(Request request, Type type) {
+    public static String get(Request request, Proxy.Type type) {
         StringBuilder sb = new StringBuilder();
         sb.append(request.method());
         sb.append(' ');
@@ -21,8 +21,8 @@ public final class RequestLine {
         return sb.toString();
     }
 
-    private static boolean includeAuthorityInRequestLine(Request request, Type type) {
-        return !request.isHttps() && type == Type.HTTP;
+    private static boolean includeAuthorityInRequestLine(Request request, Proxy.Type type) {
+        return !request.isHttps() && type == Proxy.Type.HTTP;
     }
 
     public static String requestPath(HttpUrl httpUrl) {
@@ -31,10 +31,6 @@ public final class RequestLine {
         if (encodedQuery == null) {
             return encodedPath;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(encodedPath);
-        sb.append('?');
-        sb.append(encodedQuery);
-        return sb.toString();
+        return encodedPath + '?' + encodedQuery;
     }
 }

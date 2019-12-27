@@ -341,22 +341,17 @@ public final class Preconditions {
                     break;
                 }
                 sb.append(valueOf, i2, indexOf);
-                int i3 = i + 1;
                 sb.append(objArr[i]);
-                int i4 = i3;
                 i2 = indexOf + 2;
-                i = i4;
+                i++;
             }
             sb.append(valueOf, i2, valueOf.length());
             if (i < objArr.length) {
                 sb.append(" [");
-                int i5 = i + 1;
                 sb.append(objArr[i]);
-                while (i5 < objArr.length) {
+                for (int i3 = i + 1; i3 < objArr.length; i3++) {
                     sb.append(", ");
-                    int i6 = i5 + 1;
-                    sb.append(objArr[i5]);
-                    i5 = i6;
+                    sb.append(objArr[i3]);
                 }
                 sb.append(']');
             }

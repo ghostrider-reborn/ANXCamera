@@ -2,22 +2,21 @@ package com.android.camera;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
-import android.provider.Settings.SettingNotFoundException;
-import android.provider.Settings.System;
+import android.provider.Settings;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.lib.compatibility.util.CompatibilityUtils;
 import com.android.camera.log.Log;
-import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.Thread;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 import miui.external.Application;
 
-public class CrashHandler implements UncaughtExceptionHandler {
+public class CrashHandler implements Thread.UncaughtExceptionHandler {
     public static final String TAG = "CameraFCHandler";
     private static CrashHandler sInstance = new CrashHandler();
     private WeakReference<Application> mContextRef;
-    private UncaughtExceptionHandler mDefaultHandler;
+    private Thread.UncaughtExceptionHandler mDefaultHandler;
 
     private CrashHandler() {
     }
@@ -27,23 +26,15 @@ public class CrashHandler implements UncaughtExceptionHandler {
     }
 
     private void resetBrightnessInAutoMode(Context context) {
-        String str = "Meet exception when resetBrightnessInAutoMode(): ";
-        String str2 = TAG;
         DisplayManager displayManager = (DisplayManager) CameraAppImpl.getAndroidContext().getSystemService(DisplayManager.class);
         try {
-            if (1 == System.getInt(context.getContentResolver(), "screen_brightness_mode")) {
+            if (1 == Settings.System.getInt(context.getContentResolver(), "screen_brightness_mode")) {
                 CompatibilityUtils.setTemporaryAutoBrightnessAdjustment(displayManager, 0.0f);
             }
-        } catch (SettingNotFoundException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(e2);
-            Log.e(str2, sb.toString());
+        } catch (Settings.SettingNotFoundException e2) {
+            Log.e(TAG, "Meet exception when resetBrightnessInAutoMode(): " + e2);
         } catch (SecurityException e3) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(e3);
-            Log.e(str2, sb2.toString());
+            Log.e(TAG, "Meet exception when resetBrightnessInAutoMode(): " + e3);
         }
     }
 
@@ -58,13 +49,8 @@ public class CrashHandler implements UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable th) {
         LocationManager.instance().recordLocation(false);
         DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
-        String format = String.format(Locale.ENGLISH, "Camera FC, @Module = %d And @CameraId = %d", new Object[]{Integer.valueOf(dataItemGlobal.getCurrentMode()), Integer.valueOf(dataItemGlobal.getCurrentCameraId())});
-        String str = TAG;
-        Log.e(str, format);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Camera FC, msg=");
-        sb.append(th.getMessage());
-        Log.e(str, sb.toString(), th);
+        Log.e(TAG, String.format(Locale.ENGLISH, "Camera FC, @Module = %d And @CameraId = %d", new Object[]{Integer.valueOf(dataItemGlobal.getCurrentMode()), Integer.valueOf(dataItemGlobal.getCurrentCameraId())}));
+        Log.e(TAG, "Camera FC, msg=" + th.getMessage(), th);
         WeakReference<Application> weakReference = this.mContextRef;
         if (weakReference != null) {
             CameraSettings.setEdgeMode((Context) weakReference.get(), false);
@@ -74,10 +60,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
             this.mContextRef = null;
         }
         if (this.mDefaultHandler != null) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("mDefaultHandler=");
-            sb2.append(this.mDefaultHandler);
-            Log.e(str, sb2.toString());
+            Log.e(TAG, "mDefaultHandler=" + this.mDefaultHandler);
             this.mDefaultHandler.uncaughtException(thread, th);
             this.mDefaultHandler = null;
         }

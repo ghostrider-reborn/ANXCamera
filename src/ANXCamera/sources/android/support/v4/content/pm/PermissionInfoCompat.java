@@ -4,20 +4,19 @@ import android.annotation.SuppressLint;
 import android.content.pm.PermissionInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.os.BuildCompat;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public final class PermissionInfoCompat {
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Protection {
     }
 
     @SuppressLint({"UniqueConstants"})
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {
     }

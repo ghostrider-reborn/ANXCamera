@@ -1,13 +1,10 @@
 package com.android.camera;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import com.android.camera.log.Log;
@@ -17,7 +14,7 @@ import com.android.camera.ui.PreviewListPreference;
 import com.mi.config.b;
 import java.util.List;
 
-public abstract class BasePreferenceActivity extends PreferenceActivity implements OnPreferenceChangeListener, OnPreferenceClickListener {
+public abstract class BasePreferenceActivity extends PreferenceActivity implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
     private static final String TAG = "BasePreferenceActivity";
     protected CameraSettingPreferences mPreferences;
 
@@ -66,7 +63,7 @@ public abstract class BasePreferenceActivity extends PreferenceActivity implemen
 
     public boolean onPreferenceChange(Preference preference, Object obj) {
         onSettingChanged(1);
-        Editor edit = this.mPreferences.edit();
+        SharedPreferences.Editor edit = this.mPreferences.edit();
         String key = preference.getKey();
         if (obj instanceof String) {
             edit.putString(key, (String) obj);
@@ -79,10 +76,7 @@ public abstract class BasePreferenceActivity extends PreferenceActivity implemen
         } else if (obj instanceof Float) {
             edit.putFloat(key, ((Float) obj).floatValue());
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("unhandled new value with type=");
-            sb.append(obj.getClass().getName());
-            throw new IllegalStateException(sb.toString());
+            throw new IllegalStateException("unhandled new value with type=" + obj.getClass().getName());
         }
         edit.apply();
         CameraStatUtil.trackPreferenceChange(preference.getKey(), obj);
@@ -96,7 +90,7 @@ public abstract class BasePreferenceActivity extends PreferenceActivity implemen
     }
 
     /* access modifiers changed from: protected */
-    public void registerListener(PreferenceGroup preferenceGroup, OnPreferenceChangeListener onPreferenceChangeListener) {
+    public void registerListener(PreferenceGroup preferenceGroup, Preference.OnPreferenceChangeListener onPreferenceChangeListener) {
         int preferenceCount = preferenceGroup.getPreferenceCount();
         for (int i = 0; i < preferenceCount; i++) {
             Preference preference = preferenceGroup.getPreference(i);
@@ -156,11 +150,7 @@ public abstract class BasePreferenceActivity extends PreferenceActivity implemen
                 } else if (preference instanceof PreferenceGroup) {
                     updatePreferences((PreferenceGroup) preference, sharedPreferences);
                 } else {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("no need update preference for ");
-                    sb.append(preference.getKey());
-                    Log.v(str, sb.toString());
+                    Log.v(TAG, "no need update preference for " + preference.getKey());
                 }
             }
         }

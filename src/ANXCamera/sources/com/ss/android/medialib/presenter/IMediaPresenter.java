@@ -2,7 +2,7 @@ package com.ss.android.medialib.presenter;
 
 import android.graphics.SurfaceTexture;
 import com.ss.android.medialib.camera.ImageFrame;
-import com.ss.android.medialib.common.Common.IOnOpenGLCallback;
+import com.ss.android.medialib.common.Common;
 
 public interface IMediaPresenter {
     int initImageDrawer(int i);
@@ -11,7 +11,7 @@ public interface IMediaPresenter {
 
     int onDrawFrame(ImageFrame imageFrame);
 
-    void setOnOpenGLCallback(IOnOpenGLCallback iOnOpenGLCallback);
+    void setOnOpenGLCallback(Common.IOnOpenGLCallback iOnOpenGLCallback);
 
     void setSurfaceTexture(SurfaceTexture surfaceTexture);
 

@@ -2,7 +2,6 @@ package com.ss.android.vesdk.runtime.persistence;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.support.annotation.NonNull;
 import java.util.Map;
 
@@ -10,7 +9,7 @@ public class VESP {
     public static final String KEY_DEVICEID = "KEY_DEVICEID";
     public static final String KEY_MODELS_DIR_SP_KEY = "vesdk_models_dir_sp_key";
     public static final String KEY_SENSOR_REPORTED = "sensor_reported";
-    private Editor editor;
+    private SharedPreferences.Editor editor;
     private boolean mInited;
     private SharedPreferences sharedPreferences;
 
@@ -49,7 +48,7 @@ public class VESP {
     }
 
     public <T> T get(@NonNull String str, @NonNull T t) {
-        return t instanceof String ? this.sharedPreferences.getString(str, (String) t) : t instanceof Integer ? Integer.valueOf(this.sharedPreferences.getInt(str, ((Integer) t).intValue())) : t instanceof Boolean ? Boolean.valueOf(this.sharedPreferences.getBoolean(str, ((Boolean) t).booleanValue())) : t instanceof Float ? Float.valueOf(this.sharedPreferences.getFloat(str, ((Float) t).floatValue())) : t instanceof Long ? Long.valueOf(this.sharedPreferences.getLong(str, ((Long) t).longValue())) : this.sharedPreferences.getString(str, null);
+        return t instanceof String ? this.sharedPreferences.getString(str, (String) t) : t instanceof Integer ? Integer.valueOf(this.sharedPreferences.getInt(str, ((Integer) t).intValue())) : t instanceof Boolean ? Boolean.valueOf(this.sharedPreferences.getBoolean(str, ((Boolean) t).booleanValue())) : t instanceof Float ? Float.valueOf(this.sharedPreferences.getFloat(str, ((Float) t).floatValue())) : t instanceof Long ? Long.valueOf(this.sharedPreferences.getLong(str, ((Long) t).longValue())) : this.sharedPreferences.getString(str, (String) null);
     }
 
     public Map<String, ?> getAll() {

@@ -1,8 +1,6 @@
 package com.miui.extravideo.watermark.gles;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
 import android.opengl.EGL14;
 import android.opengl.EGLSurface;
 import android.opengl.GLES20;
@@ -84,20 +82,12 @@ public class EglSurfaceBase {
             try {
                 bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file2));
                 try {
-                    Bitmap createBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+                    Bitmap createBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                     createBitmap.copyPixelsFromBuffer(IntBuffer.wrap(allocate.array()));
-                    createBitmap.compress(CompressFormat.PNG, 90, bufferedOutputStream);
+                    createBitmap.compress(Bitmap.CompressFormat.PNG, 90, bufferedOutputStream);
                     createBitmap.recycle();
                     bufferedOutputStream.close();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Saved ");
-                    sb.append(width);
-                    sb.append("x");
-                    sb.append(height);
-                    sb.append(" frame as '");
-                    sb.append(file2);
-                    sb.append("'");
-                    Log.d(TAG, sb.toString());
+                    Log.d(TAG, "Saved " + width + "x" + height + " frame as '" + file2 + "'");
                 } catch (Throwable th) {
                     th = th;
                     if (bufferedOutputStream != null) {

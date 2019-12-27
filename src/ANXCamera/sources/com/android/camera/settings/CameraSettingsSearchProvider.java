@@ -9,7 +9,7 @@ import com.android.camera.CameraSettings;
 import com.android.camera.ProximitySensorLock;
 import com.android.camera.R;
 import com.android.camera.log.Log;
-import com.android.camera.settings.SearchContract.SearchResultColumn;
+import com.android.camera.settings.SearchContract;
 import com.mi.config.b;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -87,8 +87,7 @@ public class CameraSettingsSearchProvider extends ContentProvider {
         ArrayList arrayList2 = new ArrayList(arrayList.size());
         Iterator it = arrayList.iterator();
         while (it.hasNext()) {
-            String str = "miui.intent.action.CAMERA_SETTINGS";
-            RawData rawData = new RawData(getContext().getString(((Integer) it.next()).intValue()), str, getContext().getPackageName(), "com.android.camera.CameraPreferenceActivity");
+            RawData rawData = new RawData(getContext().getString(((Integer) it.next()).intValue()), "miui.intent.action.CAMERA_SETTINGS", getContext().getPackageName(), "com.android.camera.CameraPreferenceActivity");
             arrayList2.add(rawData);
         }
         return arrayList2;
@@ -96,8 +95,8 @@ public class CameraSettingsSearchProvider extends ContentProvider {
 
     public Cursor query(Uri uri, String[] strArr, String str, String[] strArr2, String str2) {
         MatrixCursor matrixCursor = new MatrixCursor(SearchContract.SEARCH_RESULT_COLUMNS);
-        for (RawData rawData : prepareData()) {
-            matrixCursor.newRow().add("title", rawData.title).add(SearchResultColumn.COLUMN_INTENT_ACTION, rawData.intentAction).add(SearchResultColumn.COLUMN_INTENT_TARGET_PACKAGE, rawData.intentTargetPackage).add(SearchResultColumn.COLUMN_INTENT_TARGET_CLASS, rawData.intentTargetClass);
+        for (RawData next : prepareData()) {
+            matrixCursor.newRow().add("title", next.title).add(SearchContract.SearchResultColumn.COLUMN_INTENT_ACTION, next.intentAction).add(SearchContract.SearchResultColumn.COLUMN_INTENT_TARGET_PACKAGE, next.intentTargetPackage).add(SearchContract.SearchResultColumn.COLUMN_INTENT_TARGET_CLASS, next.intentTargetClass);
         }
         return matrixCursor;
     }

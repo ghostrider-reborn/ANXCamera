@@ -77,12 +77,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         if (obj == null) {
             return TEDefine.FACE_BEAUTY_NULL;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(obj);
-        sb.append(" (class: ");
-        sb.append(obj.getClass().getSimpleName());
-        sb.append(")");
-        return sb.toString();
+        return obj + " (class: " + obj.getClass().getSimpleName() + ")";
     }
 
     public final U assertComplete() {
@@ -92,10 +87,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         } else if (j <= 1) {
             return this;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Multiple completions: ");
-            sb.append(j);
-            throw fail(sb.toString());
+            throw fail("Multiple completions: " + j);
         }
     }
 
@@ -107,13 +99,13 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         int size = this.errors.size();
         if (size != 0) {
             boolean z = false;
-            Iterator it = this.errors.iterator();
+            Iterator<Throwable> it = this.errors.iterator();
             while (true) {
                 if (!it.hasNext()) {
                     break;
                 }
                 try {
-                    if (predicate.test((Throwable) it.next())) {
+                    if (predicate.test(it.next())) {
                         z = true;
                         break;
                     }
@@ -134,11 +126,11 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
     }
 
     public final U assertError(Class<? extends Throwable> cls) {
-        return assertError(Functions.isInstanceOf(cls));
+        return assertError((Predicate<Throwable>) Functions.isInstanceOf(cls));
     }
 
     public final U assertError(Throwable th) {
-        return assertError(Functions.equalsWith(th));
+        return assertError((Predicate<Throwable>) Functions.equalsWith(th));
     }
 
     public final U assertErrorMessage(String str) {
@@ -146,16 +138,11 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         if (size == 0) {
             throw fail("No errors");
         } else if (size == 1) {
-            String message = ((Throwable) this.errors.get(0)).getMessage();
+            String message = this.errors.get(0).getMessage();
             if (ObjectHelper.equals(str, message)) {
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Error message differs; Expected: ");
-            sb.append(str);
-            sb.append(", Actual: ");
-            sb.append(message);
-            throw fail(sb.toString());
+            throw fail("Error message differs; Expected: " + str + ", Actual: " + message);
         } else {
             throw fail("Multiple errors");
         }
@@ -181,13 +168,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
                 if (!predicate.test(this.values.get(i))) {
                     i++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Value at position ");
-                    sb.append(i);
-                    sb.append(" matches predicate ");
-                    sb.append(predicate.toString());
-                    sb.append(", which was not expected.");
-                    throw fail(sb.toString());
+                    throw fail("Value at position " + i + " matches predicate " + predicate.toString() + ", which was not expected.");
                 }
             } catch (Exception e2) {
                 throw ExceptionHelper.wrapOrThrow(e2);
@@ -203,13 +184,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
             if (!ObjectHelper.equals(this.values.get(i), t)) {
                 i++;
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Value at position ");
-                sb.append(i);
-                sb.append(" is equal to ");
-                sb.append(valueAndClass(t));
-                sb.append("; Expected them to be different");
-                throw fail(sb.toString());
+                throw fail("Value at position " + i + " is equal to " + valueAndClass(t) + "; Expected them to be different");
             }
         }
         return this;
@@ -219,10 +194,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         if (this.errors.size() == 0) {
             return this;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Error(s) present: ");
-        sb.append(this.errors);
-        throw fail(sb.toString());
+        throw fail("Error(s) present: " + this.errors);
     }
 
     public final U assertNoTimeout() {
@@ -244,10 +216,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         } else if (i <= 0) {
             return this;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Multiple completions: ");
-            sb.append(j);
-            throw fail(sb.toString());
+            throw fail("Multiple completions: " + j);
         }
     }
 
@@ -272,23 +241,14 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
             if (j <= 1) {
                 int size = this.errors.size();
                 if (size > 1) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Terminated with multiple errors: ");
-                    sb.append(size);
-                    throw fail(sb.toString());
+                    throw fail("Terminated with multiple errors: " + size);
                 } else if (j == 0 || size == 0) {
                     return this;
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Terminated with multiple completions and errors: ");
-                    sb2.append(j);
-                    throw fail(sb2.toString());
+                    throw fail("Terminated with multiple completions and errors: " + j);
                 }
             } else {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Terminated with multiple completions: ");
-                sb3.append(j);
-                throw fail(sb3.toString());
+                throw fail("Terminated with multiple completions: " + j);
             }
         } else {
             throw fail("Subscriber still running!");
@@ -311,26 +271,14 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
     }
 
     public final U assertValue(T t) {
-        String str = ", Actual: ";
-        String str2 = "Expected: ";
         if (this.values.size() == 1) {
-            Object obj = this.values.get(0);
-            if (ObjectHelper.equals(t, obj)) {
+            T t2 = this.values.get(0);
+            if (ObjectHelper.equals(t, t2)) {
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(str2);
-            sb.append(valueAndClass(t));
-            sb.append(str);
-            sb.append(valueAndClass(obj));
-            throw fail(sb.toString());
+            throw fail("Expected: " + valueAndClass(t) + ", Actual: " + valueAndClass(t2));
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str2);
-        sb2.append(valueAndClass(t));
-        sb2.append(str);
-        sb2.append(this.values);
-        throw fail(sb2.toString());
+        throw fail("Expected: " + valueAndClass(t) + ", Actual: " + this.values);
     }
 
     public final U assertValueAt(int i, Predicate<T> predicate) {
@@ -346,10 +294,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
                 throw ExceptionHelper.wrapOrThrow(e2);
             }
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid index: ");
-            sb.append(i);
-            throw fail(sb.toString());
+            throw fail("Invalid index: " + i);
         }
     }
 
@@ -359,21 +304,13 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         if (size == 0) {
             throw fail("No values");
         } else if (i < size) {
-            Object obj = this.values.get(i);
-            if (ObjectHelper.equals(t, obj)) {
+            T t2 = this.values.get(i);
+            if (ObjectHelper.equals(t, t2)) {
                 return this;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Expected: ");
-            sb.append(valueAndClass(t));
-            sb.append(", Actual: ");
-            sb.append(valueAndClass(obj));
-            throw fail(sb.toString());
+            throw fail("Expected: " + valueAndClass(t) + ", Actual: " + valueAndClass(t2));
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Invalid index: ");
-            sb2.append(i);
-            throw fail(sb2.toString());
+            throw fail("Invalid index: " + i);
         }
     }
 
@@ -382,57 +319,34 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         if (size == i) {
             return this;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Value counts differ; Expected: ");
-        sb.append(i);
-        sb.append(", Actual: ");
-        sb.append(size);
-        throw fail(sb.toString());
+        throw fail("Value counts differ; Expected: " + i + ", Actual: " + size);
     }
 
     public final U assertValueSequence(Iterable<? extends T> iterable) {
         boolean hasNext;
         boolean hasNext2;
-        Iterator it = this.values.iterator();
-        Iterator it2 = iterable.iterator();
+        Iterator<T> it = this.values.iterator();
+        Iterator<? extends T> it2 = iterable.iterator();
         int i = 0;
         while (true) {
             hasNext = it2.hasNext();
             hasNext2 = it.hasNext();
-            if (!hasNext2 || !hasNext) {
-                String str = ")";
-            } else {
+            if (hasNext2 && hasNext) {
                 Object next = it2.next();
-                Object next2 = it.next();
+                T next2 = it.next();
                 if (ObjectHelper.equals(next, next2)) {
                     i++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Values at position ");
-                    sb.append(i);
-                    sb.append(" differ; Expected: ");
-                    sb.append(valueAndClass(next));
-                    sb.append(", Actual: ");
-                    sb.append(valueAndClass(next2));
-                    throw fail(sb.toString());
+                    throw fail("Values at position " + i + " differ; Expected: " + valueAndClass(next) + ", Actual: " + valueAndClass(next2));
                 }
             }
         }
-        String str2 = ")";
         if (hasNext2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("More values received than expected (");
-            sb2.append(i);
-            sb2.append(str2);
-            throw fail(sb2.toString());
+            throw fail("More values received than expected (" + i + ")");
         } else if (!hasNext) {
             return this;
         } else {
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Fewer values received than expected (");
-            sb3.append(i);
-            sb3.append(str2);
-            throw fail(sb3.toString());
+            throw fail("Fewer values received than expected (" + i + ")");
         }
     }
 
@@ -441,12 +355,9 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
             assertNoValues();
             return this;
         }
-        for (Object next : this.values) {
+        for (T next : this.values) {
             if (!collection.contains(next)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Value not in the expected collection: ");
-                sb.append(valueAndClass(next));
-                throw fail(sb.toString());
+                throw fail("Value not in the expected collection: " + valueAndClass(next));
             }
         }
         return this;
@@ -454,38 +365,20 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
 
     public final U assertValues(T... tArr) {
         int size = this.values.size();
-        String str = ", Actual: ";
         if (size == tArr.length) {
             int i = 0;
             while (i < size) {
-                Object obj = this.values.get(i);
-                T t = tArr[i];
-                if (ObjectHelper.equals(t, obj)) {
+                T t = this.values.get(i);
+                T t2 = tArr[i];
+                if (ObjectHelper.equals(t2, t)) {
                     i++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Values at position ");
-                    sb.append(i);
-                    sb.append(" differ; Expected: ");
-                    sb.append(valueAndClass(t));
-                    sb.append(str);
-                    sb.append(valueAndClass(obj));
-                    throw fail(sb.toString());
+                    throw fail("Values at position " + i + " differ; Expected: " + valueAndClass(t2) + ", Actual: " + valueAndClass(t));
                 }
             }
             return this;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Value count differs; Expected: ");
-        sb2.append(tArr.length);
-        String str2 = " ";
-        sb2.append(str2);
-        sb2.append(Arrays.toString(tArr));
-        sb2.append(str);
-        sb2.append(size);
-        sb2.append(str2);
-        sb2.append(this.values);
-        throw fail(sb2.toString());
+        throw fail("Value count differs; Expected: " + tArr.length + " " + Arrays.toString(tArr) + ", Actual: " + size + " " + this.values);
     }
 
     @Experimental
@@ -587,14 +480,13 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         sb.append(" (");
         sb.append("latch = ");
         sb.append(this.done.getCount());
-        String str2 = ", ";
-        sb.append(str2);
+        sb.append(", ");
         sb.append("values = ");
         sb.append(this.values.size());
-        sb.append(str2);
+        sb.append(", ");
         sb.append("errors = ");
         sb.append(this.errors.size());
-        sb.append(str2);
+        sb.append(", ");
         sb.append("completions = ");
         sb.append(this.completions);
         if (this.timeout) {
@@ -612,7 +504,7 @@ public abstract class BaseTestConsumer<T, U extends BaseTestConsumer<T, U>> impl
         AssertionError assertionError = new AssertionError(sb.toString());
         if (!this.errors.isEmpty()) {
             if (this.errors.size() == 1) {
-                assertionError.initCause((Throwable) this.errors.get(0));
+                assertionError.initCause(this.errors.get(0));
             } else {
                 assertionError.initCause(new CompositeException((Iterable<? extends Throwable>) this.errors));
             }

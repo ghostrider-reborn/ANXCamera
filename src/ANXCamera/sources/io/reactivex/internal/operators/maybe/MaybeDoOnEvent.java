@@ -14,7 +14,7 @@ public final class MaybeDoOnEvent<T> extends AbstractMaybeWithUpstream<T, T> {
     static final class DoOnEventMaybeObserver<T> implements MaybeObserver<T>, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f284d;
         final BiConsumer<? super T, ? super Throwable> onEvent;
 

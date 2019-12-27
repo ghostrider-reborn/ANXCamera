@@ -1,14 +1,6 @@
 package com.arcsoft.avatar;
 
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigValue;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarProcessInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarProfileInfo;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarProfileResult;
-import com.arcsoft.avatar.AvatarConfig.GetConfigCallback;
-import com.arcsoft.avatar.AvatarConfig.GetSupportConfigTypeCallback;
-import com.arcsoft.avatar.AvatarConfig.UpdateProgressCallback;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.util.ASVLOFFSCREEN;
 import com.arcsoft.avatar.util.LOG;
 import com.arcsoft.avatar.util.d;
@@ -20,21 +12,21 @@ import java.util.TreeMap;
 
 public class AvatarEngine implements AvatarConfig {
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private static final String f31a = "AvatarEngine";
     /* access modifiers changed from: private */
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     public int f32b = -1;
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private int f33c = -1;
     /* access modifiers changed from: private */
 
-    /* renamed from: d reason: collision with root package name */
-    public TreeMap<String, ASAvatarConfigInfo> f34d = new TreeMap<>();
+    /* renamed from: d  reason: collision with root package name */
+    public TreeMap<String, AvatarConfig.ASAvatarConfigInfo> f34d = new TreeMap<>();
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private long f35e = 0;
 
     static {
@@ -48,7 +40,7 @@ public class AvatarEngine implements AvatarConfig {
 
     private native int nativeAvatarProcessEx2(long j, ASVLOFFSCREEN asvloffscreen, byte[] bArr, int i, boolean z, int i2);
 
-    private native int nativeAvatarProfile(long j, String str, int i, int i2, int i3, byte[] bArr, int i4, boolean z, ASAvatarProfileResult aSAvatarProfileResult, ASAvatarProfileInfo aSAvatarProfileInfo, UpdateProgressCallback updateProgressCallback);
+    private native int nativeAvatarProfile(long j, String str, int i, int i2, int i3, byte[] bArr, int i4, boolean z, AvatarConfig.ASAvatarProfileResult aSAvatarProfileResult, AvatarConfig.ASAvatarProfileInfo aSAvatarProfileInfo, AvatarConfig.UpdateProgressCallback updateProgressCallback);
 
     private native int nativeAvatarRender(long j, int i, int i2, int i3, int i4, boolean z, int[] iArr);
 
@@ -56,11 +48,11 @@ public class AvatarEngine implements AvatarConfig {
 
     private native int nativeDestroy(long j);
 
-    private native int nativeGetConfig(long j, int i, int i2, GetConfigCallback getConfigCallback);
+    private native int nativeGetConfig(long j, int i, int i2, AvatarConfig.GetConfigCallback getConfigCallback);
 
-    private native int nativeGetConfigValue(long j, ASAvatarConfigValue aSAvatarConfigValue);
+    private native int nativeGetConfigValue(long j, AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue);
 
-    private native int nativeGetSupportConfigType(long j, int i, GetSupportConfigTypeCallback getSupportConfigTypeCallback);
+    private native int nativeGetSupportConfigType(long j, int i, AvatarConfig.GetSupportConfigTypeCallback getSupportConfigTypeCallback);
 
     private native int nativeInit(long j, String str, String str2);
 
@@ -74,15 +66,15 @@ public class AvatarEngine implements AvatarConfig {
 
     private native int nativeOutlineDestroyEngine(long j);
 
-    private native int nativeOutlineProcess(long j, byte[] bArr, int i, int i2, int i3, int i4, ASAvatarProcessInfo aSAvatarProcessInfo);
+    private native int nativeOutlineProcess(long j, byte[] bArr, int i, int i2, int i3, int i4, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo);
 
-    private native int nativeOutlineProcessEx(long j, ASVLOFFSCREEN asvloffscreen, int i, ASAvatarProcessInfo aSAvatarProcessInfo);
+    private native int nativeOutlineProcessEx(long j, ASVLOFFSCREEN asvloffscreen, int i, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo);
 
-    private native int nativeProcessOutlineExpression(long j, byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, ASAvatarProcessInfo aSAvatarProcessInfo);
+    private native int nativeProcessOutlineExpression(long j, byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo);
 
-    private native int nativeProcessWithInfo(long j, byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, ASAvatarProcessInfo aSAvatarProcessInfo);
+    private native int nativeProcessWithInfo(long j, byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo);
 
-    private native int nativeProcessWithInfoEx(long j, ASVLOFFSCREEN asvloffscreen, int i, boolean z, int i2, ASAvatarProcessInfo aSAvatarProcessInfo, boolean z2);
+    private native int nativeProcessWithInfoEx(long j, ASVLOFFSCREEN asvloffscreen, int i, boolean z, int i2, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo, boolean z2);
 
     private native int nativeReleaseRender(long j);
 
@@ -96,7 +88,7 @@ public class AvatarEngine implements AvatarConfig {
 
     private native int nativeSaveConfig(long j, String str);
 
-    private native int nativeSetConfig(long j, ASAvatarConfigInfo aSAvatarConfigInfo);
+    private native int nativeSetConfig(long j, AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo);
 
     private native int nativeSetRenderScene(long j, boolean z, float f2);
 
@@ -126,19 +118,18 @@ public class AvatarEngine implements AvatarConfig {
         return nativeAvatarProcessEx2(this.f35e, asvloffscreen, bArr, i, z, i2);
     }
 
-    public int avatarProcessWithInfo(byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, ASAvatarProcessInfo aSAvatarProcessInfo) {
-        String str = "avatarProcessWithInfo";
-        d.a(str);
+    public int avatarProcessWithInfo(byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo) {
+        d.a("avatarProcessWithInfo");
         int nativeProcessWithInfo = nativeProcessWithInfo(this.f35e, bArr, i, i2, i3, i4, z, i5, aSAvatarProcessInfo);
-        d.a("performance", str);
+        d.a("performance", "avatarProcessWithInfo");
         return nativeProcessWithInfo;
     }
 
-    public int avatarProcessWithInfoEx(ASVLOFFSCREEN asvloffscreen, int i, boolean z, int i2, ASAvatarProcessInfo aSAvatarProcessInfo, boolean z2) {
+    public int avatarProcessWithInfoEx(ASVLOFFSCREEN asvloffscreen, int i, boolean z, int i2, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo, boolean z2) {
         return nativeProcessWithInfoEx(this.f35e, asvloffscreen, i, z, i2, aSAvatarProcessInfo, z2);
     }
 
-    public synchronized int avatarProfile(String str, int i, int i2, int i3, byte[] bArr, int i4, boolean z, ASAvatarProfileResult aSAvatarProfileResult, ASAvatarProfileInfo aSAvatarProfileInfo, UpdateProgressCallback updateProgressCallback) {
+    public synchronized int avatarProfile(String str, int i, int i2, int i3, byte[] bArr, int i4, boolean z, AvatarConfig.ASAvatarProfileResult aSAvatarProfileResult, AvatarConfig.ASAvatarProfileInfo aSAvatarProfileInfo, AvatarConfig.UpdateProgressCallback updateProgressCallback) {
         int nativeAvatarProfile;
         synchronized (this) {
             nativeAvatarProfile = nativeAvatarProfile(this.f35e, str, i, i2, i3, bArr, i4, z, aSAvatarProfileResult, aSAvatarProfileInfo, updateProgressCallback);
@@ -150,21 +141,17 @@ public class AvatarEngine implements AvatarConfig {
         nativeAvatarRender(this.f35e, i, i2, i3, i4, z, iArr);
     }
 
-    public int checkOutlineInfo(ASAvatarProcessInfo aSAvatarProcessInfo) {
-        String str = "CheckOutLine";
+    public int checkOutlineInfo(AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo) {
         if (aSAvatarProcessInfo == null) {
-            LOG.d(str, TEDefine.FACE_BEAUTY_NULL);
+            LOG.d("CheckOutLine", TEDefine.FACE_BEAUTY_NULL);
             return 1;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("faceCount = ");
-        sb.append(aSAvatarProcessInfo.getFaceCount());
-        LOG.d(str, sb.toString());
+        LOG.d("CheckOutLine", "faceCount = " + aSAvatarProcessInfo.getFaceCount());
         if (aSAvatarProcessInfo.getFaceCount() > 1) {
             return 10;
         }
         if (aSAvatarProcessInfo.shelterIsNull()) {
-            LOG.d(str, "shelterFlags == null");
+            LOG.d("CheckOutLine", "shelterFlags == null");
             return 1;
         } else if (aSAvatarProcessInfo.getFaceCount() <= 0) {
             return 1;
@@ -188,12 +175,12 @@ public class AvatarEngine implements AvatarConfig {
         return nativeOutlineDestroyEngine(this.f35e);
     }
 
-    public synchronized ArrayList<ASAvatarConfigInfo> getConfig(final int i, int i2) {
-        final ArrayList<ASAvatarConfigInfo> arrayList;
+    public synchronized ArrayList<AvatarConfig.ASAvatarConfigInfo> getConfig(final int i, int i2) {
+        final ArrayList<AvatarConfig.ASAvatarConfigInfo> arrayList;
         arrayList = new ArrayList<>();
-        nativeGetConfig(this.f35e, i, i2, new GetConfigCallback() {
+        nativeGetConfig(this.f35e, i, i2, new AvatarConfig.GetConfigCallback() {
             public void onGetConfig(int i, int i2, int i3, int i4, String str, String str2, int i5, int i6, boolean z, boolean z2, boolean z3, float f2) {
-                ASAvatarConfigInfo aSAvatarConfigInfo = new ASAvatarConfigInfo();
+                AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo = new AvatarConfig.ASAvatarConfigInfo();
                 aSAvatarConfigInfo.configID = i;
                 aSAvatarConfigInfo.configType = i3;
                 aSAvatarConfigInfo.gender = i4;
@@ -215,29 +202,24 @@ public class AvatarEngine implements AvatarConfig {
                     }
                 }
                 arrayList.add(aSAvatarConfigInfo);
-                StringBuilder sb = new StringBuilder();
-                sb.append("type = ");
-                sb.append(i);
-                sb.append(" info = ");
-                sb.append(aSAvatarConfigInfo.toString());
-                LOG.d(AvatarEngine.f31a, sb.toString());
+                LOG.d(AvatarEngine.f31a, "type = " + i + " info = " + aSAvatarConfigInfo.toString());
             }
         });
         return arrayList;
     }
 
-    public synchronized void getConfigValue(ASAvatarConfigValue aSAvatarConfigValue) {
+    public synchronized void getConfigValue(AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue) {
         nativeGetConfigValue(this.f35e, aSAvatarConfigValue);
         this.f32b = aSAvatarConfigValue.configFaceColorID;
         this.f33c = aSAvatarConfigValue.configLipColorID;
     }
 
-    public synchronized ArrayList<ASAvatarConfigType> getSupportConfigType(int i) {
-        final ArrayList<ASAvatarConfigType> arrayList;
+    public synchronized ArrayList<AvatarConfig.ASAvatarConfigType> getSupportConfigType(int i) {
+        final ArrayList<AvatarConfig.ASAvatarConfigType> arrayList;
         arrayList = new ArrayList<>();
-        nativeGetSupportConfigType(this.f35e, i, new GetSupportConfigTypeCallback() {
+        nativeGetSupportConfigType(this.f35e, i, new AvatarConfig.GetSupportConfigTypeCallback() {
             public void onGetSupportConfigType(String str, int i) {
-                ASAvatarConfigType aSAvatarConfigType = new ASAvatarConfigType();
+                AvatarConfig.ASAvatarConfigType aSAvatarConfigType = new AvatarConfig.ASAvatarConfigType();
                 aSAvatarConfigType.configType = i;
                 aSAvatarConfigType.configTypeDesc = str;
                 arrayList.add(aSAvatarConfigType);
@@ -250,11 +232,7 @@ public class AvatarEngine implements AvatarConfig {
         d.a("init");
         this.f35e = nativeCreate();
         int nativeInit = nativeInit(this.f35e, str, str2);
-        String str3 = f31a;
-        StringBuilder sb = new StringBuilder();
-        sb.append("init res = ");
-        sb.append(nativeInit);
-        LOG.d(str3, sb.toString());
+        LOG.d(f31a, "init res = " + nativeInit);
         d.a("performance", "init");
     }
 
@@ -273,32 +251,26 @@ public class AvatarEngine implements AvatarConfig {
     }
 
     public synchronized int outlineProcess(byte[] bArr, int i, int i2, int i3, int i4) {
-        ASAvatarProcessInfo aSAvatarProcessInfo;
-        aSAvatarProcessInfo = new ASAvatarProcessInfo();
+        AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo;
+        aSAvatarProcessInfo = new AvatarConfig.ASAvatarProcessInfo();
         d.a("outlineProcess");
         int nativeOutlineProcess = nativeOutlineProcess(this.f35e, bArr, i, i2, i3, i4, aSAvatarProcessInfo);
         d.a("performance", "outlineProcess");
-        StringBuilder sb = new StringBuilder();
-        sb.append("nativeOutlineProcess = ");
-        sb.append(nativeOutlineProcess);
-        LOG.d("CheckOutLine", sb.toString());
+        LOG.d("CheckOutLine", "nativeOutlineProcess = " + nativeOutlineProcess);
         return checkOutlineInfo(aSAvatarProcessInfo);
     }
 
     public synchronized int outlineProcessEx(ASVLOFFSCREEN asvloffscreen, int i) {
-        ASAvatarProcessInfo aSAvatarProcessInfo;
-        aSAvatarProcessInfo = new ASAvatarProcessInfo();
+        AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo;
+        aSAvatarProcessInfo = new AvatarConfig.ASAvatarProcessInfo();
         d.a("outlineProcessEx");
         int nativeOutlineProcessEx = nativeOutlineProcessEx(this.f35e, asvloffscreen, i, aSAvatarProcessInfo);
         d.a("performance", "outlineProcessEx");
-        StringBuilder sb = new StringBuilder();
-        sb.append("nativeOutlineProcess = ");
-        sb.append(nativeOutlineProcessEx);
-        LOG.d("CheckOutLine", sb.toString());
+        LOG.d("CheckOutLine", "nativeOutlineProcess = " + nativeOutlineProcessEx);
         return checkOutlineInfo(aSAvatarProcessInfo);
     }
 
-    public synchronized int processOutlineExpression(byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, ASAvatarProcessInfo aSAvatarProcessInfo) {
+    public synchronized int processOutlineExpression(byte[] bArr, int i, int i2, int i3, int i4, boolean z, int i5, AvatarConfig.ASAvatarProcessInfo aSAvatarProcessInfo) {
         int nativeProcessOutlineExpression;
         synchronized (this) {
             nativeProcessOutlineExpression = nativeProcessOutlineExpression(this.f35e, bArr, i, i2, i3, i4, z, i5, aSAvatarProcessInfo);
@@ -338,16 +310,16 @@ public class AvatarEngine implements AvatarConfig {
         return nativeSaveConfig(this.f35e, str);
     }
 
-    public synchronized int setConfig(ASAvatarConfigInfo aSAvatarConfigInfo) {
+    public synchronized int setConfig(AvatarConfig.ASAvatarConfigInfo aSAvatarConfigInfo) {
         if (aSAvatarConfigInfo.configType == 3) {
             this.f32b = aSAvatarConfigInfo.configID;
             String num = new Integer(this.f32b).toString();
             if (this.f34d.size() > 0 && this.f34d.containsKey(num)) {
                 boolean z = false;
-                Iterator it = this.f34d.values().iterator();
+                Iterator<AvatarConfig.ASAvatarConfigInfo> it = this.f34d.values().iterator();
                 while (true) {
                     if (it.hasNext()) {
-                        if (((ASAvatarConfigInfo) it.next()).configID == this.f33c) {
+                        if (it.next().configID == this.f33c) {
                             z = true;
                             break;
                         }
@@ -356,7 +328,7 @@ public class AvatarEngine implements AvatarConfig {
                     }
                 }
                 if (z) {
-                    nativeSetConfig(this.f35e, (ASAvatarConfigInfo) this.f34d.get(num));
+                    nativeSetConfig(this.f35e, this.f34d.get(num));
                 }
             }
         } else if (aSAvatarConfigInfo.configType == 5) {
@@ -383,10 +355,6 @@ public class AvatarEngine implements AvatarConfig {
         d.a("unInit");
         int nativeUnInit = nativeUnInit(this.f35e);
         d.a("performance", "unInit");
-        String str = f31a;
-        StringBuilder sb = new StringBuilder();
-        sb.append("uninit res = ");
-        sb.append(nativeUnInit);
-        LOG.d(str, sb.toString());
+        LOG.d(f31a, "uninit res = " + nativeUnInit);
     }
 }

@@ -1,7 +1,6 @@
 package com.android.camera.ui.drawable.snap;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -16,8 +15,7 @@ import android.view.animation.LinearInterpolator;
 import com.android.camera.Util;
 import com.android.camera.fragment.bottom.BottomAnimationConfig;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BeautyRecording;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.drawable.CameraPaintBase;
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
@@ -135,7 +133,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
     }
 
     private void updateLiveAnimationConfig() {
-        LiveConfigChanges liveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+        ModeProtocol.LiveConfigChanges liveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
         if (liveConfigChanges != null) {
             this.mLiveSpeed = liveConfigChanges.getRecordSpeed();
             this.mLiveTotalTime = liveConfigChanges.getTotalRecordingTime();
@@ -212,9 +210,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
     public void finishRecord(BottomAnimationConfig bottomAnimationConfig) {
         if (this.mRecordingPaint == null || bottomAnimationConfig.mIsInMimojiCreate) {
             invalidateSelf();
-            return;
-        }
-        if (bottomAnimationConfig.mNeedFinishRecord) {
+        } else if (bottomAnimationConfig.mNeedFinishRecord) {
             cancelAnimation();
             this.mRecordingPaint.resetRecordingState();
             this.mRecordingPaint.setTargetAlpha(255);
@@ -232,7 +228,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                 }
             });
             this.mTimeAnimator.removeAllListeners();
-            this.mTimeAnimator.addListener(new AnimatorListener() {
+            this.mTimeAnimator.addListener(new Animator.AnimatorListener() {
                 public void onAnimationCancel(Animator animator) {
                 }
 
@@ -577,19 +573,19 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                 return interpolation;
             }
         });
-        this.mReboundAnimator.addListener(new AnimatorListener() {
+        this.mReboundAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
             public void onAnimationEnd(Animator animator) {
-                ((BeautyRecording) ModeCoordinatorImpl.getInstance().getAttachProtocol(173)).handleBeautyRecordingStop();
+                ((ModeProtocol.BeautyRecording) ModeCoordinatorImpl.getInstance().getAttachProtocol(173)).handleBeautyRecordingStop();
             }
 
             public void onAnimationRepeat(Animator animator) {
             }
 
             public void onAnimationStart(Animator animator) {
-                ((BeautyRecording) ModeCoordinatorImpl.getInstance().getAttachProtocol(173)).handleBeautyRecordingStart();
+                ((ModeProtocol.BeautyRecording) ModeCoordinatorImpl.getInstance().getAttachProtocol(173)).handleBeautyRecordingStart();
             }
         });
         this.mReboundAnimator.start();
@@ -619,7 +615,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                 }
             });
             this.mTimeAnimator.removeAllListeners();
-            this.mTimeAnimator.addListener(new AnimatorListener() {
+            this.mTimeAnimator.addListener(new Animator.AnimatorListener() {
                 public void onAnimationCancel(Animator animator) {
                 }
 
@@ -691,7 +687,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
         ofFloat.start();
     }
 
-    public void startScaleUpAnimation(long j, AnimatorListener animatorListener) {
+    public void startScaleUpAnimation(long j, Animator.AnimatorListener animatorListener) {
         ValueAnimator ofFloat = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         ofFloat.setStartDelay(j);
         ofFloat.setDuration(200);
@@ -703,7 +699,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                 return interpolation;
             }
         });
-        ofFloat.addListener(new AnimatorListener() {
+        ofFloat.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -752,7 +748,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                             CameraSnapPaintCenterVV cameraSnapPaintCenterVV = this.mCenterVVPaintItem;
                             cameraSnapPaintCenterVV.isRecording = false;
                             cameraSnapPaintCenterVV.setTargetAlpha(255);
-                            this.mCenterVVPaintItem.setDurationText(null);
+                            this.mCenterVVPaintItem.setDurationText((String) null);
                             CameraPaintBase cameraPaintBase3 = this.mRecordingPaint;
                             cameraPaintBase3.setTargetValues(0.75f, cameraPaintBase3.mCurrentColor, CameraPaintBase.ALPHA_OPAQUE, (float) Util.dpToPixel(3.0f));
                         }
@@ -771,7 +767,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                             }
                         });
                         this.mTimeAnimator.removeAllListeners();
-                        this.mTimeAnimator.addListener(new AnimatorListener() {
+                        this.mTimeAnimator.addListener(new Animator.AnimatorListener() {
                             public void onAnimationCancel(Animator animator) {
                             }
 
@@ -824,7 +820,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                     }
                 });
                 this.mTimeAnimator.removeAllListeners();
-                this.mTimeAnimator.addListener(new AnimatorListener() {
+                this.mTimeAnimator.addListener(new Animator.AnimatorListener() {
                     public void onAnimationCancel(Animator animator) {
                     }
 
@@ -873,7 +869,7 @@ public class CameraSnapAnimateDrawable extends Drawable implements Animatable {
                 }
             });
             this.mTimeAnimator.removeAllListeners();
-            this.mTimeAnimator.addListener(new AnimatorListener() {
+            this.mTimeAnimator.addListener(new Animator.AnimatorListener() {
                 public void onAnimationCancel(Animator animator) {
                 }
 

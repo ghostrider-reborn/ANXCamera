@@ -96,6 +96,6 @@ public final class FlowableLimit<T> extends AbstractFlowableWithUpstream<T, T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new LimitSubscriber<Object>(subscriber, this.n));
+        this.source.subscribe(new LimitSubscriber(subscriber, this.n));
     }
 }

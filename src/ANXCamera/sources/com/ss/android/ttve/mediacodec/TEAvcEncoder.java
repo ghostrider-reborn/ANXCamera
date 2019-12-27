@@ -3,14 +3,11 @@ package com.ss.android.ttve.mediacodec;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecInfo.CodecCapabilities;
-import android.media.MediaCodecInfo.CodecProfileLevel;
-import android.media.MediaCodecInfo.EncoderCapabilities;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.opengl.GLES20;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Keep;
 import android.support.v4.math.MathUtils;
@@ -86,34 +83,20 @@ public class TEAvcEncoder {
         public long pts = 0;
     }
 
-    private void addOutputData(byte[] bArr, BufferInfo bufferInfo) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("encode: pts queue size = ");
-        sb.append(this.m_PTSQueue.size());
-        VELogUtil.d(str, sb.toString());
+    private void addOutputData(byte[] bArr, MediaCodec.BufferInfo bufferInfo) {
+        VELogUtil.d(TAG, "encode: pts queue size = " + this.m_PTSQueue.size());
         if (this.m_PTSQueue.size() <= 0 && this.m_profile >= 8) {
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("encode: no available pts!!! profile ");
-            sb2.append(this.m_profile);
-            VELogUtil.w(str2, sb2.toString());
+            VELogUtil.w(TAG, "encode: no available pts!!! profile " + this.m_profile);
         } else if (this.m_PTSQueue.size() <= 0) {
             VELogUtil.w(TAG, "encode: no available pts!!!");
         } else {
-            long longValue = ((Long) this.m_PTSQueue.poll()).longValue();
+            long longValue = this.m_PTSQueue.poll().longValue();
             long j = bufferInfo.presentationTimeUs;
             if (j <= 0) {
                 j = 0;
             }
             long j2 = this.m_profile >= 8 ? longValue - 200000 : j;
-            String str3 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("dts = ");
-            sb3.append(j2);
-            sb3.append(", pts = ");
-            sb3.append(j);
-            VELogUtil.d(str3, sb3.toString());
+            VELogUtil.d(TAG, "dts = " + j2 + ", pts = " + j);
             CodecData codecData = new CodecData();
             codecData.data = bArr;
             codecData.pts = j;
@@ -145,11 +128,12 @@ public class TEAvcEncoder {
             if (reconfigureMediaFormat(codecInfo) != 0) {
                 return -3;
             }
-            this.m_mediaCodec.configure(this.m_codecFormat, null, null, 1);
-            if (this.m_useInputSurface) {
-                VELogUtil.d(TAG, "m_mediaCodec.createInputSurface()");
-                this.m_surface = this.m_mediaCodec.createInputSurface();
+            this.m_mediaCodec.configure(this.m_codecFormat, (Surface) null, (MediaCrypto) null, 1);
+            if (!this.m_useInputSurface) {
+                return 0;
             }
+            VELogUtil.d(TAG, "m_mediaCodec.createInputSurface()");
+            this.m_surface = this.m_mediaCodec.createInputSurface();
             return 0;
         } catch (Exception e2) {
             e2.printStackTrace();
@@ -164,7 +148,7 @@ public class TEAvcEncoder {
     @SuppressLint({"WrongConstant"})
     @TargetApi(16)
     private int drainOutputBuffer(long j) {
-        BufferInfo bufferInfo = new BufferInfo();
+        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
         this.mBufferIndex = -1;
         try {
             this.mBufferIndex = this.m_mediaCodec.dequeueOutputBuffer(bufferInfo, j);
@@ -228,7 +212,7 @@ public class TEAvcEncoder {
 
     @TargetApi(16)
     private ByteBuffer getOutputBufferByIdx(int i) {
-        return VERSION.SDK_INT >= 21 ? this.m_mediaCodec.getOutputBuffer(i) : this.m_mediaCodec.getOutputBuffers()[i];
+        return Build.VERSION.SDK_INT >= 21 ? this.m_mediaCodec.getOutputBuffer(i) : this.m_mediaCodec.getOutputBuffers()[i];
     }
 
     @TargetApi(18)
@@ -236,36 +220,25 @@ public class TEAvcEncoder {
         String[] supportedTypes = mediaCodecInfo.getSupportedTypes();
         VELogUtil.d(TAG, "CodecNames:");
         for (String str : supportedTypes) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Codec: ");
-            sb.append(str);
-            VELogUtil.d(str2, sb.toString());
+            VELogUtil.d(TAG, "Codec: " + str);
         }
-        int i = this.m_width;
-        int i2 = this.m_height;
-        String str3 = VIDEO_MIME_TYPE;
-        this.m_codecFormat = MediaFormat.createVideoFormat(str3, i, i2);
+        this.m_codecFormat = MediaFormat.createVideoFormat(VIDEO_MIME_TYPE, this.m_width, this.m_height);
         this.m_codecFormat.setInteger("color-format", this.m_colorFormat);
         this.m_codecFormat.setInteger("bitrate", this.m_bitRate);
         this.m_codecFormat.setInteger("frame-rate", this.m_frameRate);
         this.m_codecFormat.setInteger("i-frame-interval", this.m_iFrameInternal);
-        setProfile(mediaCodecInfo.getCapabilitiesForType(str3));
+        setProfile(mediaCodecInfo.getCapabilitiesForType(VIDEO_MIME_TYPE));
         Log.i(TAG, String.format("width:[%d] height:[%d] frameRate:[%d] iFrameInternal:[%d] bitRate:[%d] colorFormat:[%d]", new Object[]{Integer.valueOf(this.m_width), Integer.valueOf(this.m_height), Integer.valueOf(this.m_frameRate), Integer.valueOf(this.m_iFrameInternal), Integer.valueOf(this.m_bitRate), Integer.valueOf(this.m_colorFormat)}));
         return 0;
     }
 
-    private void setBitRateMode(CodecCapabilities codecCapabilities) {
-        if (VERSION.SDK_INT >= 21) {
+    private void setBitRateMode(MediaCodecInfo.CodecCapabilities codecCapabilities) {
+        if (Build.VERSION.SDK_INT >= 21) {
             String[] strArr = {"BITRATE_MODE_CQ", "BITRATE_MODE_VBR", "BITRATE_MODE_CBR"};
-            EncoderCapabilities encoderCapabilities = codecCapabilities.getEncoderCapabilities();
+            MediaCodecInfo.EncoderCapabilities encoderCapabilities = codecCapabilities.getEncoderCapabilities();
             for (int i = 0; i < 3; i++) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append(strArr[i]);
-                sb.append(": ");
-                sb.append(encoderCapabilities.isBitrateModeSupported(i));
-                VELogUtil.d(str, sb.toString());
+                VELogUtil.d(str, strArr[i] + ": " + encoderCapabilities.isBitrateModeSupported(i));
             }
             this.m_codecFormat.setInteger("bitrate-mode", 1);
         }
@@ -314,17 +287,12 @@ public class TEAvcEncoder {
         this.m_profile = MathUtils.clamp(i7, 1, 64);
     }
 
-    private void setProfile(CodecCapabilities codecCapabilities) {
-        if (VERSION.SDK_INT >= 24) {
-            CodecProfileLevel findBestMatchedProfile = MediaCodecUtils.findBestMatchedProfile(codecCapabilities, this.m_profile);
+    private void setProfile(MediaCodecInfo.CodecCapabilities codecCapabilities) {
+        if (Build.VERSION.SDK_INT >= 24) {
+            MediaCodecInfo.CodecProfileLevel findBestMatchedProfile = MediaCodecUtils.findBestMatchedProfile(codecCapabilities, this.m_profile);
             if (findBestMatchedProfile != null) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Set Profile: ");
-                sb.append(findBestMatchedProfile.profile);
-                sb.append(", Level = ");
-                sb.append(findBestMatchedProfile.level);
-                VELogUtil.d(str, sb.toString());
+                VELogUtil.d(str, "Set Profile: " + findBestMatchedProfile.profile + ", Level = " + findBestMatchedProfile.level);
                 this.m_codecFormat.setInteger("profile", findBestMatchedProfile.profile);
                 this.m_codecFormat.setInteger("level", findBestMatchedProfile.level);
                 int i = findBestMatchedProfile.profile;
@@ -346,22 +314,17 @@ public class TEAvcEncoder {
     public int encodeVideoFromTexture(int i, long j, boolean z) {
         Throwable th;
         long j2 = j;
-        int i2 = 0;
         if (!this.m_bSuccessInit) {
             return 0;
         }
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("encodeVideoFromTexture:: pts = ");
-        sb.append(j2);
-        VELogUtil.d(str, sb.toString());
+        VELogUtil.d(TAG, "encodeVideoFromTexture:: pts = " + j2);
         this.m_PTSQueue.offer(Long.valueOf(j));
         if (this.m_eglStateSaver == null) {
             this.m_eglStateSaver = new TEEglStateSaver();
             this.m_eglStateSaver.saveEGLState();
         }
         if (this.m_isNeedReconfigure || (this.m_configStatus & 4) != 0) {
-            if (this.m_mediaCodec == null || this.m_configStatus != 1 || VERSION.SDK_INT < 19) {
+            if (this.m_mediaCodec == null || this.m_configStatus != 1 || Build.VERSION.SDK_INT < 19) {
                 restartEncoder();
             } else {
                 Bundle bundle = new Bundle();
@@ -378,15 +341,15 @@ public class TEAvcEncoder {
         if (drainOutputBuffer != 0) {
             return drainOutputBuffer;
         }
-        int i3 = i & -1;
-        int i4 = 30;
-        if (i3 != 0) {
+        int i2 = i & -1;
+        int i3 = 30;
+        if (i2 != 0) {
             FileOutputStream fileOutputStream = null;
             try {
                 if (this.m_textureDrawer != null) {
                     this.m_sharedContext.makeCurrent();
                     GLES20.glViewport(0, 0, this.m_width, this.m_height);
-                    this.m_textureDrawer.drawTexture(i3);
+                    this.m_textureDrawer.drawTexture(i2);
                     if (this.mFirstFrame) {
                         if (DEBUG) {
                             ByteBuffer allocateDirect = ByteBuffer.allocateDirect(3686400);
@@ -441,15 +404,11 @@ public class TEAvcEncoder {
                         }
                         return drainOutputBuffer2;
                     } else if (this.configByte == null) {
-                        int i5 = 0;
+                        int i4 = 0;
                         do {
-                            String str2 = TAG;
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Encoder first frame, count = ");
-                            sb2.append(i5);
-                            VELogUtil.d(str2, sb2.toString());
+                            VELogUtil.d(TAG, "Encoder first frame, count = " + i4);
                             GLES20.glViewport(0, 0, this.m_width, this.m_height);
-                            this.m_textureDrawer.drawTexture(i3);
+                            this.m_textureDrawer.drawTexture(i2);
                             this.m_sharedContext.setPresentationTime(j3);
                             this.m_sharedContext.swapBuffers();
                             int drainOutputBuffer3 = drainOutputBuffer(0);
@@ -463,31 +422,23 @@ public class TEAvcEncoder {
                                 }
                                 return drainOutputBuffer3;
                             }
-                            i5++;
-                            if (i5 > 30) {
+                            i4++;
+                            if (i4 > 30) {
                                 break;
                             }
                             Thread.sleep(10, 0);
                         } while (this.configByte == null);
                         if (this.configByte == null) {
-                            String str3 = TAG;
-                            StringBuilder sb3 = new StringBuilder();
-                            sb3.append("Generate configData failed!!!");
-                            sb3.append(i5);
-                            Log.e(str3, sb3.toString());
+                            Log.e(TAG, "Generate configData failed!!!" + i4);
                         } else {
-                            String str4 = TAG;
-                            StringBuilder sb4 = new StringBuilder();
-                            sb4.append("Generate configData succeed!!!");
-                            sb4.append(i5);
-                            Log.e(str4, sb4.toString());
+                            Log.e(TAG, "Generate configData succeed!!!" + i4);
                         }
                         this.AVCQueue.clear();
                         restartEncoder();
                         this.m_getnerateIndex = 0;
                         this.m_sharedContext.makeCurrent();
                         GLES20.glViewport(0, 0, this.m_width, this.m_height);
-                        this.m_textureDrawer.drawTexture(i3);
+                        this.m_textureDrawer.drawTexture(i2);
                         this.m_sharedContext.setPresentationTime(j3);
                         this.m_sharedContext.swapBuffers();
                     }
@@ -529,8 +480,8 @@ public class TEAvcEncoder {
                 int drainOutputBuffer4 = drainOutputBuffer(FunctionParseBeautyBodySlimCount.TIP_INTERVAL_TIME);
                 if (drainOutputBuffer4 == 0) {
                     if (this.mBufferIndex < 0) {
-                        i4--;
-                        if (i4 <= 0) {
+                        i3--;
+                        if (i3 <= 0) {
                             break;
                         }
                     } else {
@@ -546,12 +497,12 @@ public class TEAvcEncoder {
                 return drainOutputBuffer5;
             }
         }
-        this.m_lastCodecData = (CodecData) this.AVCQueue.poll();
+        this.m_lastCodecData = this.AVCQueue.poll();
         CodecData codecData = this.m_lastCodecData;
         if (codecData != null) {
-            i2 = codecData.data.length;
+            return codecData.data.length;
         }
-        return i2;
+        return 0;
     }
 
     public byte[] getCodecData(int i) {
@@ -588,7 +539,7 @@ public class TEAvcEncoder {
     @TargetApi(18)
     public int initEncoder(int i, int i2, int i3, int i4, int i5, int i6, int i7, boolean z) {
         boolean z2 = z;
-        if (z2 && VERSION.SDK_INT < 18) {
+        if (z2 && Build.VERSION.SDK_INT < 18) {
             return -1;
         }
         this.m_useInputSurface = z2;
@@ -623,15 +574,14 @@ public class TEAvcEncoder {
     @TargetApi(16)
     public void releaseEncoder() {
         stopEncoder();
-        String str = TAG;
-        VELogUtil.d(str, "releaseEncoder");
+        VELogUtil.d(TAG, "releaseEncoder");
         if (this.m_surface != null) {
-            VELogUtil.d(str, "release surface");
+            VELogUtil.d(TAG, "release surface");
             this.m_surface.release();
             this.m_surface = null;
         }
         if (this.m_mediaCodec != null) {
-            VELogUtil.d(str, "release mediaCodec");
+            VELogUtil.d(TAG, "release mediaCodec");
             this.m_mediaCodec.release();
             this.m_mediaCodec = null;
         }
@@ -662,7 +612,7 @@ public class TEAvcEncoder {
     public int startEncoder() {
         VELogUtil.d(TAG, "startEncoder...");
         try {
-            if (VERSION.SDK_INT >= 18 && this.m_useInputSurface) {
+            if (Build.VERSION.SDK_INT >= 18 && this.m_useInputSurface) {
                 if (this.m_sharedContext == null) {
                     this.m_sharedContext = TESharedContext.create(this.m_eglStateSaver.getSavedEGLContext(), 64, 64, 12610, this.m_surface);
                     if (this.m_sharedContext == null) {

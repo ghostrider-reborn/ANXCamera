@@ -8,7 +8,7 @@ import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
-import okhttp3.Headers.Builder;
+import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,9 +26,9 @@ public abstract class Internal {
         new OkHttpClient();
     }
 
-    public abstract void addLenient(Builder builder, String str);
+    public abstract void addLenient(Headers.Builder builder, String str);
 
-    public abstract void addLenient(Builder builder, String str, String str2);
+    public abstract void addLenient(Headers.Builder builder, String str, String str2);
 
     public abstract void apply(ConnectionSpec connectionSpec, SSLSocket sSLSocket, boolean z);
 

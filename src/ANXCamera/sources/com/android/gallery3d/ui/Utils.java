@@ -2,10 +2,9 @@ package com.android.gallery3d.ui;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 import com.android.camera.log.Log;
@@ -169,7 +168,6 @@ public class Utils {
     }
 
     public static byte[] getBytes(String str) {
-        char[] charArray;
         byte[] bArr = new byte[(str.length() * 2)];
         int i = 0;
         for (char c2 : str.toCharArray()) {
@@ -184,8 +182,8 @@ public class Utils {
     public static String getUserAgent(Context context) {
         try {
             PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return String.format("%s/%s; %s/%s/%s/%s; %s/%s/%s", new Object[]{packageInfo.packageName, packageInfo.versionName, Build.BRAND, Build.DEVICE, Build.MODEL, Build.ID, VERSION.SDK, VERSION.RELEASE, VERSION.INCREMENTAL});
-        } catch (NameNotFoundException unused) {
+            return String.format("%s/%s; %s/%s/%s/%s; %s/%s/%s", new Object[]{packageInfo.packageName, packageInfo.versionName, Build.BRAND, Build.DEVICE, Build.MODEL, Build.ID, Build.VERSION.SDK, Build.VERSION.RELEASE, Build.VERSION.INCREMENTAL});
+        } catch (PackageManager.NameNotFoundException unused) {
             throw new IllegalStateException("getPackageInfo failed");
         }
     }
@@ -227,11 +225,7 @@ public class Utils {
             return null;
         }
         String obj2 = obj.toString();
-        int min = Math.min(obj2.length(), 32);
-        if (!IS_DEBUG_BUILD) {
-            obj2 = MASK_STRING.substring(0, min);
-        }
-        return obj2;
+        return IS_DEBUG_BUILD ? obj2 : MASK_STRING.substring(0, Math.min(obj2.length(), 32));
     }
 
     public static int nextPowerOf2(int i) {
@@ -285,10 +279,7 @@ public class Utils {
         try {
             obj.wait();
         } catch (InterruptedException unused) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("unexpected interrupt: ");
-            sb.append(obj);
-            Log.w(TAG, sb.toString());
+            Log.w(TAG, "unexpected interrupt: " + obj);
         }
     }
 }

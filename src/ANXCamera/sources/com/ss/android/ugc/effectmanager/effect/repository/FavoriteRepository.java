@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.Message;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import com.ss.android.ugc.effectmanager.common.WeakHandler;
-import com.ss.android.ugc.effectmanager.common.WeakHandler.IHandler;
 import com.ss.android.ugc.effectmanager.common.utils.LogUtils;
 import com.ss.android.ugc.effectmanager.context.EffectContext;
 import com.ss.android.ugc.effectmanager.effect.listener.IFetchFavoriteList;
@@ -15,7 +14,7 @@ import com.ss.android.ugc.effectmanager.effect.task.task.FavoriteTask;
 import com.ss.android.ugc.effectmanager.effect.task.task.FetchFavoriteListTask;
 import java.util.List;
 
-public class FavoriteRepository implements IHandler {
+public class FavoriteRepository implements WeakHandler.IHandler {
     private String TAG = "FavoriteRepository";
     private EffectConfiguration mConfiguration;
     private EffectContext mEffectContext;

@@ -1,6 +1,6 @@
 package android.support.v4.os;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 
 public final class CancellationSignal {
     private boolean mCancelInProgress;
@@ -75,7 +75,7 @@ public final class CancellationSignal {
 
     public Object getCancellationSignalObject() {
         Object obj;
-        if (VERSION.SDK_INT < 16) {
+        if (Build.VERSION.SDK_INT < 16) {
             return null;
         }
         synchronized (this) {

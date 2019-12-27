@@ -21,7 +21,7 @@ public final class FormBody extends RequestBody {
         private final List<String> values;
 
         public Builder() {
-            this(null);
+            this((Charset) null);
         }
 
         public Builder(Charset charset2) {
@@ -31,18 +31,14 @@ public final class FormBody extends RequestBody {
         }
 
         public Builder add(String str, String str2) {
-            String str3 = str;
-            this.names.add(HttpUrl.canonicalize(str3, " \"':;<=>@[]^`{}|/\\?#&!$(),~", false, false, true, true, this.charset));
-            String str4 = str2;
-            this.values.add(HttpUrl.canonicalize(str4, " \"':;<=>@[]^`{}|/\\?#&!$(),~", false, false, true, true, this.charset));
+            this.names.add(HttpUrl.canonicalize(str, " \"':;<=>@[]^`{}|/\\?#&!$(),~", false, false, true, true, this.charset));
+            this.values.add(HttpUrl.canonicalize(str2, " \"':;<=>@[]^`{}|/\\?#&!$(),~", false, false, true, true, this.charset));
             return this;
         }
 
         public Builder addEncoded(String str, String str2) {
-            String str3 = str;
-            this.names.add(HttpUrl.canonicalize(str3, " \"':;<=>@[]^`{}|/\\?#&!$(),~", true, false, true, true, this.charset));
-            String str4 = str2;
-            this.values.add(HttpUrl.canonicalize(str4, " \"':;<=>@[]^`{}|/\\?#&!$(),~", true, false, true, true, this.charset));
+            this.names.add(HttpUrl.canonicalize(str, " \"':;<=>@[]^`{}|/\\?#&!$(),~", true, false, true, true, this.charset));
+            this.values.add(HttpUrl.canonicalize(str2, " \"':;<=>@[]^`{}|/\\?#&!$(),~", true, false, true, true, this.charset));
             return this;
         }
 
@@ -63,9 +59,9 @@ public final class FormBody extends RequestBody {
             if (i > 0) {
                 buffer.writeByte(38);
             }
-            buffer.writeUtf8((String) this.encodedNames.get(i));
+            buffer.writeUtf8(this.encodedNames.get(i));
             buffer.writeByte(61);
-            buffer.writeUtf8((String) this.encodedValues.get(i));
+            buffer.writeUtf8(this.encodedValues.get(i));
         }
         if (!z) {
             return 0;
@@ -76,7 +72,7 @@ public final class FormBody extends RequestBody {
     }
 
     public long contentLength() {
-        return writeOrCountBytes(null, true);
+        return writeOrCountBytes((BufferedSink) null, true);
     }
 
     public MediaType contentType() {
@@ -84,11 +80,11 @@ public final class FormBody extends RequestBody {
     }
 
     public String encodedName(int i) {
-        return (String) this.encodedNames.get(i);
+        return this.encodedNames.get(i);
     }
 
     public String encodedValue(int i) {
-        return (String) this.encodedValues.get(i);
+        return this.encodedValues.get(i);
     }
 
     public String name(int i) {

@@ -248,7 +248,7 @@ public class Player {
 
     public void destructPlayer() {
         Log.d(TAG, "destructPlayer");
-        setVideoSurface(null);
+        setVideoSurface((Surface) null);
         destructPlayerJni();
         this.pc = null;
         this.playerInst = 0;
@@ -341,10 +341,7 @@ public class Player {
 
     public void onOpenStreamFailed(int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("callback:onOpenStreamFailed");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "callback:onOpenStreamFailed" + i);
         this.pc.onOpenStreamFailed(AVErrorState.int2enum(i));
     }
 
@@ -385,11 +382,7 @@ public class Player {
 
     public void onStartWithTimeInvalid(long j) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("debug::onStartWithTimeInvalid, the file duration is ");
-        sb.append(j);
-        sb.append("ms");
-        Log.d(str, sb.toString());
+        Log.d(str, "debug::onStartWithTimeInvalid, the file duration is " + j + "ms");
         this.pc.onStartWithTimeInvalid(j);
     }
 

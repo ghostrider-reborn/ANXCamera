@@ -21,10 +21,7 @@ public class TELog2Client {
     public static void logToLocal(int i, String str) {
         VELogProtocol vELogProtocol = mLogger;
         if (vELogProtocol != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(TAG);
-            sb.append(str);
-            vELogProtocol.logToLocal(i, sb.toString());
+            vELogProtocol.logToLocal(i, TAG + str);
         }
     }
 

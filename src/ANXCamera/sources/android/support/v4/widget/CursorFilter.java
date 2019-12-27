@@ -2,7 +2,6 @@ package android.support.v4.widget;
 
 import android.database.Cursor;
 import android.widget.Filter;
-import android.widget.Filter.FilterResults;
 
 class CursorFilter extends Filter {
     CursorFilterClient mClient;
@@ -26,9 +25,9 @@ class CursorFilter extends Filter {
     }
 
     /* access modifiers changed from: protected */
-    public FilterResults performFiltering(CharSequence charSequence) {
+    public Filter.FilterResults performFiltering(CharSequence charSequence) {
         Cursor runQueryOnBackgroundThread = this.mClient.runQueryOnBackgroundThread(charSequence);
-        FilterResults filterResults = new FilterResults();
+        Filter.FilterResults filterResults = new Filter.FilterResults();
         if (runQueryOnBackgroundThread != null) {
             filterResults.count = runQueryOnBackgroundThread.getCount();
             filterResults.values = runQueryOnBackgroundThread;
@@ -40,7 +39,7 @@ class CursorFilter extends Filter {
     }
 
     /* access modifiers changed from: protected */
-    public void publishResults(CharSequence charSequence, FilterResults filterResults) {
+    public void publishResults(CharSequence charSequence, Filter.FilterResults filterResults) {
         Cursor cursor = this.mClient.getCursor();
         Object obj = filterResults.values;
         if (obj != null && obj != cursor) {

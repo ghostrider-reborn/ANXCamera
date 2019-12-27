@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -30,7 +31,7 @@ public class TETextureUtils {
         int[] iArr = new int[1];
         GLES20.glGenTextures(1, iArr, 0);
         GLES20.glBindTexture(3553, iArr[0]);
-        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, null);
+        GLES20.glTexImage2D(3553, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         int i5 = i3;
         _texParamHelper(3553, i3, i4);
         return iArr[0];

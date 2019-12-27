@@ -30,7 +30,7 @@ public final class c implements e<Drawable, byte[]> {
 
     @Nullable
     public A<byte[]> a(@NonNull A<Drawable> a2, @NonNull g gVar) {
-        Drawable drawable = (Drawable) a2.get();
+        Drawable drawable = a2.get();
         if (drawable instanceof BitmapDrawable) {
             return this.Zj.a(f.a(((BitmapDrawable) drawable).getBitmap(), this.Bb), gVar);
         }

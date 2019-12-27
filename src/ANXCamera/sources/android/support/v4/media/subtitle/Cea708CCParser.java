@@ -371,10 +371,10 @@ class Cea708CCParser {
                 emitCaptionEvent(new CaptionEvent(9, Integer.valueOf(bArr[i] & 255)));
                 return i9;
             case 142:
-                emitCaptionEvent(new CaptionEvent(10, null));
+                emitCaptionEvent(new CaptionEvent(10, (Object) null));
                 break;
             case 143:
-                emitCaptionEvent(new CaptionEvent(11, null));
+                emitCaptionEvent(new CaptionEvent(11, (Object) null));
                 break;
             case 144:
                 int i10 = (bArr[i] & 240) >> 4;
@@ -383,34 +383,35 @@ class Cea708CCParser {
                 int i12 = i + 1;
                 boolean z = (bArr[i12] & 128) != 0;
                 boolean z2 = (bArr[i12] & 64) != 0;
-                int i13 = (bArr[i12] & 56) >> 3;
                 byte b3 = bArr[i12] & 7;
                 i2 = i + 2;
-                CaptionPenAttr captionPenAttr = new CaptionPenAttr(b2, i11, i10, b3, i13, z2, z);
+                CaptionPenAttr captionPenAttr = new CaptionPenAttr(b2, i11, i10, b3, (bArr[i12] & 56) >> 3, z2, z);
                 emitCaptionEvent(new CaptionEvent(12, captionPenAttr));
                 break;
             case 145:
-                int i14 = i + 1;
-                int i15 = i14 + 1;
-                i2 = i15 + 1;
-                emitCaptionEvent(new CaptionEvent(13, new CaptionPenColor(new CaptionColor((bArr[i] & 192) >> 6, (bArr[i] & 48) >> 4, (bArr[i] & 12) >> 2, bArr[i] & 3), new CaptionColor((bArr[i14] & 192) >> 6, (bArr[i14] & 48) >> 4, (bArr[i14] & 12) >> 2, bArr[i14] & 3), new CaptionColor(0, (bArr[i15] & 48) >> 4, (bArr[i15] & 12) >> 2, bArr[i15] & 3))));
+                int i13 = i + 1;
+                int i14 = i13 + 1;
+                i2 = i14 + 1;
+                emitCaptionEvent(new CaptionEvent(13, new CaptionPenColor(new CaptionColor((bArr[i] & 192) >> 6, (bArr[i] & 48) >> 4, (bArr[i] & 12) >> 2, bArr[i] & 3), new CaptionColor((bArr[i13] & 192) >> 6, (bArr[i13] & 48) >> 4, (bArr[i13] & 12) >> 2, bArr[i13] & 3), new CaptionColor(0, (bArr[i14] & 48) >> 4, (bArr[i14] & 12) >> 2, bArr[i14] & 3))));
                 break;
             case 146:
-                int i16 = i + 2;
                 emitCaptionEvent(new CaptionEvent(14, new CaptionPenLocation(bArr[i] & 15, bArr[i + 1] & 63)));
-                return i16;
+                return i + 2;
             case 151:
                 CaptionColor captionColor = new CaptionColor((bArr[i] & 192) >> 6, (bArr[i] & 48) >> 4, (bArr[i] & 12) >> 2, bArr[i] & 3);
-                int i17 = i + 1;
-                int i18 = i + 2;
-                int i19 = ((bArr[i17] & 192) >> 6) | ((bArr[i18] & 128) >> 5);
-                CaptionColor captionColor2 = new CaptionColor(0, (bArr[i17] & 48) >> 4, (bArr[i17] & 12) >> 2, bArr[i17] & 3);
+                int i15 = i + 1;
+                int i16 = i + 2;
+                int i17 = ((bArr[i15] & 192) >> 6) | ((bArr[i16] & 128) >> 5);
+                CaptionColor captionColor2 = new CaptionColor(0, (bArr[i15] & 48) >> 4, (bArr[i15] & 12) >> 2, bArr[i15] & 3);
+                boolean z3 = (bArr[i16] & 64) != 0;
+                int i18 = (bArr[i16] & 48) >> 4;
+                int i19 = (bArr[i16] & 12) >> 2;
+                byte b4 = bArr[i16] & 3;
                 int i20 = i + 3;
                 int i21 = (bArr[i20] & 240) >> 4;
-                int i22 = (bArr[i20] & 12) >> 2;
-                byte b4 = bArr[i20] & 3;
+                byte b5 = bArr[i20] & 3;
                 i2 = i + 4;
-                CaptionWindowAttr captionWindowAttr = new CaptionWindowAttr(captionColor, captionColor2, i19, (bArr[i18] & 64) != 0, (bArr[i18] & 48) >> 4, (bArr[i18] & 12) >> 2, bArr[i18] & 3, i22, i21, b4);
+                CaptionWindowAttr captionWindowAttr = new CaptionWindowAttr(captionColor, captionColor2, i17, z3, i18, i19, b4, (bArr[i20] & 12) >> 2, i21, b5);
                 emitCaptionEvent(new CaptionEvent(15, captionWindowAttr));
                 break;
             case 152:
@@ -421,16 +422,22 @@ class Cea708CCParser {
             case 157:
             case 158:
             case 159:
-                int i23 = i3 - 152;
-                int i24 = i + 1;
-                int i25 = i + 3;
-                int i26 = i + 5;
-                int i27 = (bArr[i26] & 56) >> 3;
-                byte b5 = bArr[i26] & 7;
-                int i28 = i + 6;
-                CaptionWindow captionWindow = new CaptionWindow(i23, (bArr[i] & 32) != 0, (bArr[i] & 16) != 0, (bArr[i] & 8) != 0, bArr[i] & 7, (bArr[i24] & 128) != 0, bArr[i24] & Byte.MAX_VALUE, bArr[i + 2] & 255, (bArr[i25] & 240) >> 4, bArr[i25] & 15, bArr[i + 4] & 63, b5, i27);
+                int i22 = i3 - 152;
+                boolean z4 = (bArr[i] & 32) != 0;
+                boolean z5 = (bArr[i] & 16) != 0;
+                boolean z6 = (bArr[i] & 8) != 0;
+                byte b6 = bArr[i] & 7;
+                int i23 = i + 1;
+                boolean z7 = (bArr[i23] & 128) != 0;
+                byte b7 = bArr[i23] & Byte.MAX_VALUE;
+                int i24 = i + 3;
+                byte b8 = bArr[i + 4] & 63;
+                int i25 = i + 5;
+                byte b9 = bArr[i25] & 7;
+                int i26 = i + 6;
+                CaptionWindow captionWindow = new CaptionWindow(i22, z4, z5, z6, b6, z7, b7, bArr[i + 2] & 255, (bArr[i24] & 240) >> 4, bArr[i24] & 15, b8, b9, (bArr[i25] & 56) >> 3);
                 emitCaptionEvent(new CaptionEvent(16, captionWindow));
-                return i28;
+                return i26;
         }
     }
 

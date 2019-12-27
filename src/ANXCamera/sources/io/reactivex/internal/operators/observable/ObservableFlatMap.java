@@ -120,7 +120,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             this.observers = new AtomicReference<>(EMPTY);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean addInner(InnerObserver<T, U> innerObserver) {
             InnerObserver<?, ?>[] innerObserverArr;
             InnerObserver[] innerObserverArr2;
@@ -138,7 +138,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             return true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminate() {
             if (this.cancelled) {
                 return true;
@@ -167,7 +167,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean disposeAll() {
             this.s.dispose();
             InnerObserver<?, ?>[] innerObserverArr = (InnerObserver[]) this.observers.get();
@@ -184,15 +184,15 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
-        /* JADX WARNING: Code restructure failed: missing block: B:56:0x00a2, code lost:
+        /* access modifiers changed from: package-private */
+        /* JADX WARNING: Code restructure failed: missing block: B:55:0x00a2, code lost:
             if (r11 != null) goto L_0x0090;
          */
         public void drainLoop() {
@@ -202,7 +202,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
                 SimplePlainQueue<U> simplePlainQueue = this.queue;
                 if (simplePlainQueue != null) {
                     while (!checkTerminate()) {
-                        Object poll = simplePlainQueue.poll();
+                        U poll = simplePlainQueue.poll();
                         if (poll != null) {
                             observer.onNext(poll);
                         } else if (poll == null) {
@@ -245,7 +245,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
                                     if (simpleQueue != null) {
                                         while (true) {
                                             try {
-                                                Object poll2 = simpleQueue.poll();
+                                                U poll2 = simpleQueue.poll();
                                                 if (poll2 == null) {
                                                     break;
                                                 }
@@ -298,11 +298,11 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
                         }
                     } else if (this.maxConcurrency != Integer.MAX_VALUE) {
                         synchronized (this) {
-                            ObservableSource observableSource = (ObservableSource) this.sources.poll();
-                            if (observableSource == null) {
+                            ObservableSource poll3 = this.sources.poll();
+                            if (poll3 == null) {
                                 this.wip--;
                             } else {
-                                subscribeInner(observableSource);
+                                subscribeInner(poll3);
                             }
                         }
                     } else {
@@ -310,14 +310,16 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
                     }
                 } else {
                     Throwable terminate = this.errors.terminate();
-                    if (terminate != ExceptionHelper.TERMINATED) {
-                        if (terminate == null) {
-                            observer.onComplete();
-                        } else {
-                            observer.onError(terminate);
-                        }
+                    if (terminate == ExceptionHelper.TERMINATED) {
+                        return;
                     }
-                    return;
+                    if (terminate == null) {
+                        observer.onComplete();
+                        return;
+                    } else {
+                        observer.onError(terminate);
+                        return;
+                    }
                 }
             }
         }
@@ -336,9 +338,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
         public void onError(Throwable th) {
             if (this.done) {
                 RxJavaPlugins.onError(th);
-                return;
-            }
-            if (this.errors.addThrowable(th)) {
+            } else if (this.errors.addThrowable(th)) {
                 this.done = true;
                 drain();
             } else {
@@ -377,10 +377,10 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void removeInner(InnerObserver<T, U> innerObserver) {
             InnerObserver<T, U>[] innerObserverArr;
-            Object obj;
+            InnerObserver<?, ?>[] innerObserverArr2;
             do {
                 innerObserverArr = (InnerObserver[]) this.observers.get();
                 int length = innerObserverArr.length;
@@ -399,12 +399,12 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
                     }
                     if (i >= 0) {
                         if (length == 1) {
-                            obj = EMPTY;
+                            innerObserverArr2 = EMPTY;
                         } else {
-                            InnerObserver[] innerObserverArr2 = new InnerObserver[(length - 1)];
-                            System.arraycopy(innerObserverArr, 0, innerObserverArr2, 0, i);
-                            System.arraycopy(innerObserverArr, i + 1, innerObserverArr2, i, (length - i) - 1);
-                            obj = innerObserverArr2;
+                            InnerObserver<?, ?>[] innerObserverArr3 = new InnerObserver[(length - 1)];
+                            System.arraycopy(innerObserverArr, 0, innerObserverArr3, 0, i);
+                            System.arraycopy(innerObserverArr, i + 1, innerObserverArr3, i, (length - i) - 1);
+                            innerObserverArr2 = innerObserverArr3;
                         }
                     } else {
                         return;
@@ -412,16 +412,16 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
                 } else {
                     return;
                 }
-            } while (!this.observers.compareAndSet(innerObserverArr, obj));
+            } while (!this.observers.compareAndSet(innerObserverArr, innerObserverArr2));
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeInner(ObservableSource<? extends U> observableSource) {
             while (observableSource instanceof Callable) {
                 tryEmitScalar((Callable) observableSource);
                 if (this.maxConcurrency != Integer.MAX_VALUE) {
                     synchronized (this) {
-                        observableSource = (ObservableSource) this.sources.poll();
+                        observableSource = this.sources.poll();
                         if (observableSource == null) {
                             this.wip--;
                             return;
@@ -439,7 +439,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void tryEmit(U u, InnerObserver<T, U> innerObserver) {
             if (get() != 0 || !compareAndSet(0, 1)) {
                 SimpleQueue simpleQueue = innerObserver.queue;
@@ -460,7 +460,7 @@ public final class ObservableFlatMap<T, U> extends AbstractObservableWithUpstrea
             drainLoop();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void tryEmitScalar(Callable<? extends U> callable) {
             try {
                 Object call = callable.call();

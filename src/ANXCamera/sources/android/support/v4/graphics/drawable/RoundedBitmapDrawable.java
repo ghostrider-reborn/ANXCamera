@@ -9,7 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader.TileMode;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -39,7 +39,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
         if (this.mBitmap != null) {
             computeBitmapSize();
             Bitmap bitmap2 = this.mBitmap;
-            TileMode tileMode = TileMode.CLAMP;
+            Shader.TileMode tileMode = Shader.TileMode.CLAMP;
             this.mBitmapShader = new BitmapShader(bitmap2, tileMode, tileMode);
             return;
         }
@@ -66,12 +66,12 @@ public abstract class RoundedBitmapDrawable extends Drawable {
         if (bitmap != null) {
             updateDstRect();
             if (this.mPaint.getShader() == null) {
-                canvas.drawBitmap(bitmap, null, this.mDstRect, this.mPaint);
-            } else {
-                RectF rectF = this.mDstRectF;
-                float f2 = this.mCornerRadius;
-                canvas.drawRoundRect(rectF, f2, f2, this.mPaint);
+                canvas.drawBitmap(bitmap, (Rect) null, this.mDstRect, this.mPaint);
+                return;
             }
+            RectF rectF = this.mDstRectF;
+            float f2 = this.mCornerRadius;
+            canvas.drawRoundRect(rectF, f2, f2, this.mPaint);
         }
     }
 
@@ -117,7 +117,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
         return this.mPaint;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void gravityCompatApply(int i, int i2, int i3, Rect rect, Rect rect2) {
         throw new UnsupportedOperationException();
     }
@@ -178,7 +178,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
             if (isGreaterThanZero(f2)) {
                 this.mPaint.setShader(this.mBitmapShader);
             } else {
-                this.mPaint.setShader(null);
+                this.mPaint.setShader((Shader) null);
             }
             this.mCornerRadius = f2;
             invalidateSelf();
@@ -228,7 +228,7 @@ public abstract class RoundedBitmapDrawable extends Drawable {
         setTargetDensity(displayMetrics.densityDpi);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void updateDstRect() {
         if (this.mApplyGravity) {
             if (this.mIsCircular) {

@@ -11,16 +11,15 @@ class SdkEntranceHelper implements SdkConstants {
     }
 
     public static Class<?> getSdkEntrance() throws ClassNotFoundException {
-        String str = SdkConstants.LOG_TAG;
         try {
             return Class.forName(SDK_ENTRANCE_CLASS);
         } catch (ClassNotFoundException unused) {
             try {
-                Class cls = Class.forName(SDK_ENTRANCE_FALLBACK_CLASS);
-                Log.w(str, "using legacy sdk");
+                Class<?> cls = Class.forName(SDK_ENTRANCE_FALLBACK_CLASS);
+                Log.w(SdkConstants.LOG_TAG, "using legacy sdk");
                 return cls;
             } catch (ClassNotFoundException e2) {
-                Log.e(str, "no sdk found");
+                Log.e(SdkConstants.LOG_TAG, "no sdk found");
                 throw e2;
             }
         }

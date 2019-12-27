@@ -42,7 +42,7 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
         final Observer<? super R> actual;
         final Function<? super Object[], R> combiner;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         final AtomicReference<Disposable> f327d;
         volatile boolean done;
         final AtomicThrowable error;
@@ -62,7 +62,7 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
             this.error = new AtomicThrowable();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAllBut(int i) {
             WithLatestInnerObserver[] withLatestInnerObserverArr = this.observers;
             for (int i2 = 0; i2 < withLatestInnerObserverArr.length; i2++) {
@@ -79,37 +79,37 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerComplete(int i, boolean z) {
             if (!z) {
                 this.done = true;
                 cancelAllBut(i);
-                HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+                HalfSerializer.onComplete((Observer<?>) this.actual, (AtomicInteger) this, this.error);
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerError(int i, Throwable th) {
             this.done = true;
             DisposableHelper.dispose(this.f327d);
             cancelAllBut(i);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Observer<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void innerNext(int i, Object obj) {
             this.values.set(i, obj);
         }
 
         public boolean isDisposed() {
-            return DisposableHelper.isDisposed((Disposable) this.f327d.get());
+            return DisposableHelper.isDisposed(this.f327d.get());
         }
 
         public void onComplete() {
             if (!this.done) {
                 this.done = true;
                 cancelAllBut(-1);
-                HalfSerializer.onComplete(this.actual, (AtomicInteger) this, this.error);
+                HalfSerializer.onComplete((Observer<?>) this.actual, (AtomicInteger) this, this.error);
             }
         }
 
@@ -120,7 +120,7 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
             }
             this.done = true;
             cancelAllBut(-1);
-            HalfSerializer.onError(this.actual, th, (AtomicInteger) this, this.error);
+            HalfSerializer.onError((Observer<?>) this.actual, th, (AtomicInteger) this, this.error);
         }
 
         public void onNext(T t) {
@@ -140,7 +140,7 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
                     }
                 }
                 try {
-                    Object apply = this.combiner.apply(objArr);
+                    R apply = this.combiner.apply(objArr);
                     ObjectHelper.requireNonNull(apply, "combiner returned a null value");
                     HalfSerializer.onNext(this.actual, apply, (AtomicInteger) this, this.error);
                 } catch (Throwable th) {
@@ -155,11 +155,11 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
             DisposableHelper.setOnce(this.f327d, disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribe(ObservableSource<?>[] observableSourceArr, int i) {
             WithLatestInnerObserver[] withLatestInnerObserverArr = this.observers;
             AtomicReference<Disposable> atomicReference = this.f327d;
-            for (int i2 = 0; i2 < i && !DisposableHelper.isDisposed((Disposable) atomicReference.get()) && !this.done; i2++) {
+            for (int i2 = 0; i2 < i && !DisposableHelper.isDisposed(atomicReference.get()) && !this.done; i2++) {
                 observableSourceArr[i2].subscribe(withLatestInnerObserverArr[i2]);
             }
         }
@@ -232,7 +232,7 @@ public final class ObservableWithLatestFromMany<T, R> extends AbstractObservable
                 }
             } catch (Throwable th) {
                 Exceptions.throwIfFatal(th);
-                EmptyDisposable.error(th, observer);
+                EmptyDisposable.error(th, (Observer<?>) observer);
                 return;
             }
         } else {

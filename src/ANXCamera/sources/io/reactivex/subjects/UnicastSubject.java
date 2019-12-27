@@ -42,9 +42,9 @@ public final class UnicastSubject<T> extends Subject<T> {
                 UnicastSubject unicastSubject = UnicastSubject.this;
                 unicastSubject.disposed = true;
                 unicastSubject.doTerminate();
-                UnicastSubject.this.actual.lazySet(null);
+                UnicastSubject.this.actual.lazySet((Object) null);
                 if (UnicastSubject.this.wip.getAndIncrement() == 0) {
-                    UnicastSubject.this.actual.lazySet(null);
+                    UnicastSubject.this.actual.lazySet((Object) null);
                     UnicastSubject.this.queue.clear();
                 }
             }
@@ -124,23 +124,23 @@ public final class UnicastSubject<T> extends Subject<T> {
         return new UnicastSubject<>(Observable.bufferSize(), z);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void doTerminate() {
-        Runnable runnable = (Runnable) this.onTerminate.get();
-        if (runnable != null && this.onTerminate.compareAndSet(runnable, null)) {
+        Runnable runnable = this.onTerminate.get();
+        if (runnable != null && this.onTerminate.compareAndSet(runnable, (Object) null)) {
             runnable.run();
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drain() {
         if (this.wip.getAndIncrement() == 0) {
-            Observer observer = (Observer) this.actual.get();
+            Observer observer = this.actual.get();
             int i = 1;
             while (observer == null) {
                 i = this.wip.addAndGet(-i);
                 if (i != 0) {
-                    observer = (Observer) this.actual.get();
+                    observer = this.actual.get();
                 } else {
                     return;
                 }
@@ -153,7 +153,7 @@ public final class UnicastSubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drainFused(Observer<? super T> observer) {
         SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
         int i = 1;
@@ -174,11 +174,11 @@ public final class UnicastSubject<T> extends Subject<T> {
                 return;
             }
         }
-        this.actual.lazySet(null);
+        this.actual.lazySet((Object) null);
         spscLinkedArrayQueue.clear();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void drainNormal(Observer<? super T> observer) {
         SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
         boolean z = !this.delayError;
@@ -186,7 +186,7 @@ public final class UnicastSubject<T> extends Subject<T> {
         int i = 1;
         while (!this.disposed) {
             boolean z3 = this.done;
-            Object poll = this.queue.poll();
+            T poll = this.queue.poll();
             boolean z4 = poll == null;
             if (z3) {
                 if (z && z2) {
@@ -210,13 +210,13 @@ public final class UnicastSubject<T> extends Subject<T> {
                 observer.onNext(poll);
             }
         }
-        this.actual.lazySet(null);
+        this.actual.lazySet((Object) null);
         spscLinkedArrayQueue.clear();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void errorOrComplete(Observer<? super T> observer) {
-        this.actual.lazySet(null);
+        this.actual.lazySet((Object) null);
         Throwable th = this.error;
         if (th != null) {
             observer.onError(th);
@@ -225,13 +225,13 @@ public final class UnicastSubject<T> extends Subject<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean failedFast(SimpleQueue<T> simpleQueue, Observer<? super T> observer) {
         Throwable th = this.error;
         if (th == null) {
             return false;
         }
-        this.actual.lazySet(null);
+        this.actual.lazySet((Object) null);
         simpleQueue.clear();
         observer.onError(th);
         return true;
@@ -293,14 +293,14 @@ public final class UnicastSubject<T> extends Subject<T> {
     /* access modifiers changed from: protected */
     public void subscribeActual(Observer<? super T> observer) {
         if (this.once.get() || !this.once.compareAndSet(false, true)) {
-            EmptyDisposable.error((Throwable) new IllegalStateException("Only a single observer allowed."), observer);
+            EmptyDisposable.error((Throwable) new IllegalStateException("Only a single observer allowed."), (Observer<?>) observer);
+            return;
+        }
+        observer.onSubscribe(this.wip);
+        this.actual.lazySet(observer);
+        if (this.disposed) {
+            this.actual.lazySet((Object) null);
         } else {
-            observer.onSubscribe(this.wip);
-            this.actual.lazySet(observer);
-            if (this.disposed) {
-                this.actual.lazySet(null);
-                return;
-            }
             drain();
         }
     }

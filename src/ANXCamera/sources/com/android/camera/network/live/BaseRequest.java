@@ -1,6 +1,6 @@
 package com.android.camera.network.live;
 
-import com.android.camera.fragment.CtaNoticeFragment.CTA;
+import com.android.camera.fragment.CtaNoticeFragment;
 import com.android.camera.log.Log;
 import com.android.camera.network.net.base.ErrorCode;
 import com.android.camera.network.net.base.ResponseListener;
@@ -9,17 +9,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public abstract class BaseRequest<T> {
-    protected static final OkHttpClient CLIENT = new Builder().connectTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
+    protected static final OkHttpClient CLIENT = new OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).writeTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
     protected static final String TAG = "BaseRequest";
     protected Map<String, String> mParams = new HashMap();
     protected String mUrl;
@@ -33,20 +31,15 @@ public abstract class BaseRequest<T> {
             Map<String, String> map = this.mParams;
             if (map != null && !map.isEmpty()) {
                 StringBuilder sb = new StringBuilder(this.mUrl);
-                String str = "UTF-8";
-                String str2 = "?";
                 if (this.mUrl.indexOf(63) > 0) {
-                    if (!this.mUrl.endsWith(str2)) {
-                        String str3 = "&";
-                        if (!this.mUrl.endsWith(str3)) {
-                            sb.append(str3);
-                        }
+                    if (!this.mUrl.endsWith("?") && !this.mUrl.endsWith("&")) {
+                        sb.append("&");
                     }
-                    sb.append(encodeParameters(this.mParams, str));
+                    sb.append(encodeParameters(this.mParams, "UTF-8"));
                     return sb.toString();
                 }
-                sb.append(str2);
-                sb.append(encodeParameters(this.mParams, str));
+                sb.append("?");
+                sb.append(encodeParameters(this.mParams, "UTF-8"));
                 return sb.toString();
             }
         }
@@ -56,18 +49,15 @@ public abstract class BaseRequest<T> {
     private String encodeParameters(Map<String, String> map, String str) {
         StringBuilder sb = new StringBuilder();
         try {
-            for (Entry entry : map.entrySet()) {
-                sb.append(URLEncoder.encode((String) entry.getKey(), str));
+            for (Map.Entry next : map.entrySet()) {
+                sb.append(URLEncoder.encode((String) next.getKey(), str));
                 sb.append('=');
-                sb.append(URLEncoder.encode((String) entry.getValue(), str));
+                sb.append(URLEncoder.encode((String) next.getValue(), str));
                 sb.append('&');
             }
             return sb.toString();
         } catch (UnsupportedEncodingException e2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Encoding not supported: ");
-            sb2.append(str);
-            throw new RuntimeException(sb2.toString(), e2);
+            throw new RuntimeException("Encoding not supported: " + str, e2);
         }
     }
 
@@ -77,8 +67,8 @@ public abstract class BaseRequest<T> {
     }
 
     public void execute(final ResponseListener responseListener) {
-        if (!CTA.canConnectNetwork()) {
-            responseListener.onResponseError(ErrorCode.NETWORK_NOT_CONNECTED, "CTA not confirmed.", null);
+        if (!CtaNoticeFragment.CTA.canConnectNetwork()) {
+            responseListener.onResponseError(ErrorCode.NETWORK_NOT_CONNECTED, "CTA not confirmed.", (Object) null);
             return;
         }
         CLIENT.newCall(new Request.Builder().get().url(appendUrlParams()).build()).enqueue(new Callback() {
@@ -88,8 +78,6 @@ public abstract class BaseRequest<T> {
             }
 
             public void onResponse(Call call, Response response) {
-                String str = "execute process failed";
-                String str2 = BaseRequest.TAG;
                 if (!response.isSuccessful()) {
                     responseListener.onResponseError(ErrorCode.SERVER_ERROR, response.message(), response);
                 } else {
@@ -97,10 +85,10 @@ public abstract class BaseRequest<T> {
                         Object process = BaseRequest.this.process(response.body().string());
                         responseListener.onResponse(process);
                     } catch (BaseRequestException e2) {
-                        Log.e(str2, str, e2);
+                        Log.e(BaseRequest.TAG, "execute process failed", e2);
                         responseListener.onResponseError(e2.getErrorCode(), e2.getMessage(), response);
                     } catch (IOException e3) {
-                        Log.e(str2, str, e3);
+                        Log.e(BaseRequest.TAG, "execute process failed", e3);
                         responseListener.onResponseError(ErrorCode.NET_ERROR, e3.getMessage(), response);
                     }
                 }

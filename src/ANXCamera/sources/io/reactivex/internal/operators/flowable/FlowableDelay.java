@@ -3,7 +3,6 @@ package io.reactivex.internal.operators.flowable;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Scheduler;
-import io.reactivex.Scheduler.Worker;
 import io.reactivex.internal.subscriptions.SubscriptionHelper;
 import io.reactivex.subscribers.SerializedSubscriber;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +21,7 @@ public final class FlowableDelay<T> extends AbstractFlowableWithUpstream<T, T> {
         final boolean delayError;
         Subscription s;
         final TimeUnit unit;
-        final Worker w;
+        final Scheduler.Worker w;
 
         final class OnComplete implements Runnable {
             OnComplete() {
@@ -65,7 +64,7 @@ public final class FlowableDelay<T> extends AbstractFlowableWithUpstream<T, T> {
             }
         }
 
-        DelaySubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Worker worker, boolean z) {
+        DelaySubscriber(Subscriber<? super T> subscriber, long j, TimeUnit timeUnit, Scheduler.Worker worker, boolean z) {
             this.actual = subscriber;
             this.delay = j;
             this.unit = timeUnit;
@@ -112,8 +111,8 @@ public final class FlowableDelay<T> extends AbstractFlowableWithUpstream<T, T> {
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        Subscriber<? super T> serializedSubscriber = this.delayError ? subscriber : new SerializedSubscriber<>(subscriber);
-        Worker createWorker = this.scheduler.createWorker();
+        SerializedSubscriber serializedSubscriber = this.delayError ? subscriber : new SerializedSubscriber(subscriber);
+        Scheduler.Worker createWorker = this.scheduler.createWorker();
         Flowable<T> flowable = this.source;
         DelaySubscriber delaySubscriber = new DelaySubscriber(serializedSubscriber, this.delay, this.unit, createWorker, this.delayError);
         flowable.subscribe((FlowableSubscriber<? super T>) delaySubscriber);

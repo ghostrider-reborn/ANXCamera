@@ -1,14 +1,12 @@
 package com.android.camera;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.support.v4.view.ViewCompat;
-import com.android.camera.SurfaceTextureScreenNail.ExternalFrameProcessor;
-import com.android.camera.SurfaceTextureScreenNail.SurfaceTextureScreenNailCallback;
+import com.android.camera.SurfaceTextureScreenNail;
 import com.android.camera.effect.FrameBuffer;
 import com.android.camera.effect.draw_mode.DrawBasicTexAttribute;
 import com.android.camera.effect.draw_mode.DrawBlurTexAttribute;
@@ -53,7 +51,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
     private int mAnimState = 0;
     private CaptureAnimManager mCaptureAnimManager = new CaptureAnimManager();
     private boolean mDisableSwitchAnimationOnce;
-    private ExternalFrameProcessor mExternalFrameProcessorCopy;
+    private SurfaceTextureScreenNail.ExternalFrameProcessor mExternalFrameProcessorCopy;
     private boolean mFirstFrameArrived;
     private AtomicBoolean mFrameAvailableNotified = new AtomicBoolean(false);
     private int mFrameNumber = 0;
@@ -75,7 +73,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
     public @interface ArrivedType {
     }
 
-    public interface NailListener extends SurfaceTextureScreenNailCallback {
+    public interface NailListener extends SurfaceTextureScreenNail.SurfaceTextureScreenNailCallback {
         int getOrientation();
 
         boolean isKeptBitmapTexture();
@@ -120,7 +118,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
         if (frameBuffer == null) {
             frameBuffer = new FrameBuffer(gLCanvas, rawTexture, 0);
         }
-        ExternalFrameProcessor externalFrameProcessor = this.mExternalFrameProcessorCopy;
+        SurfaceTextureScreenNail.ExternalFrameProcessor externalFrameProcessor = this.mExternalFrameProcessorCopy;
         if (externalFrameProcessor == null) {
             externalFrameProcessor = this.mExternalFrameProcessor;
         }
@@ -227,10 +225,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
     public void animateCapture(int i) {
         synchronized (this.mLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("animateCapture: state=");
-            sb.append(this.mAnimState);
-            Log.v(str, sb.toString());
+            Log.v(str, "animateCapture: state=" + this.mAnimState);
             if (this.mAnimState == 0) {
                 this.mCaptureAnimManager.animateHoldAndSlide();
                 postRequestListener();
@@ -242,10 +237,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
     public void animateHold(int i) {
         synchronized (this.mLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("animateHold: state=");
-            sb.append(this.mAnimState);
-            Log.v(str, sb.toString());
+            Log.v(str, "animateHold: state=" + this.mAnimState);
             if (this.mAnimState == 0) {
                 this.mCaptureAnimManager.animateHold();
                 postRequestListener();
@@ -274,10 +266,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
         synchronized (this.mLock) {
             if (this.mAnimState != 12) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Cannot animateSlide outside of animateCapture! Animation state = ");
-                sb.append(this.mAnimState);
-                Log.w(str, sb.toString());
+                Log.w(str, "Cannot animateSlide outside of animateCapture! Animation state = " + this.mAnimState);
             }
             this.mCaptureAnimManager.animateSlide();
             postRequestListener();
@@ -287,10 +276,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
     public void animateSwitchCameraBefore() {
         synchronized (this.mLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("switchBefore: state=");
-            sb.append(this.mAnimState);
-            Log.v(str, sb.toString());
+            Log.v(str, "switchBefore: state=" + this.mAnimState);
             if (this.mAnimState == 22) {
                 this.mAnimState = 23;
                 this.mSwitchAnimManager.startAnimation(false);
@@ -401,11 +387,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
                                     }
                                     byte[] readPreviewPixels = readPreviewPixels(gLCanvas2, width, height);
                                     this.mReadPixelsNum--;
-                                    String str = TAG;
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append("draw: state=STATE_READ_PIXELS mReadPixelsNum=");
-                                    sb.append(this.mReadPixelsNum);
-                                    Log.d(str, sb.toString());
+                                    Log.d(TAG, "draw: state=STATE_READ_PIXELS mReadPixelsNum=" + this.mReadPixelsNum);
                                     if (this.mReadPixelsNum < 1) {
                                         this.mAnimState = 0;
                                     }
@@ -499,13 +481,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
                         postRequestListener();
                     }
                 }
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("draw: firstFrame=");
-                sb2.append(this.mFirstFrameArrived);
-                sb2.append(" surface=");
-                sb2.append(surfaceTexture);
-                Log.w(str2, sb2.toString());
+                Log.w(TAG, "draw: firstFrame=" + this.mFirstFrameArrived + " surface=" + surfaceTexture);
                 if (surfaceTexture != null) {
                     surfaceTexture.updateTexImage();
                 }
@@ -540,24 +516,17 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
         GLES20.glReadPixels(0, 0, width, height, 6408, 5121, allocate);
         gLCanvas.endBindFrameBuffer();
         byte[] array = allocate.array();
-        Bitmap createBitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        Bitmap createBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         createBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(array));
         this.mLastFrameGaussianBitmap = createBitmap;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("readLastFrameGaussian end... bitmap = ");
-        sb.append(this.mLastFrameGaussianBitmap);
-        sb.append(", cost time = ");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        sb.append("ms");
-        Log.d(str, sb.toString());
+        Log.d(TAG, "readLastFrameGaussian end... bitmap = " + this.mLastFrameGaussianBitmap + ", cost time = " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
     }
 
     public Rect getDisplayRect() {
         return this.mDisplayRect;
     }
 
-    public ExternalFrameProcessor getExternalFrameProcessor() {
+    public SurfaceTextureScreenNail.ExternalFrameProcessor getExternalFrameProcessor() {
         return this.mExternalFrameProcessor;
     }
 
@@ -723,11 +692,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
 
     public void requestReadPixels() {
         synchronized (this.mLock) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("requestReadPixels state=");
-            sb.append(this.mAnimState);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "requestReadPixels state=" + this.mAnimState);
             if (this.mAnimState == 0 || this.mAnimState == 13 || 12 == this.mAnimState || 11 == this.mAnimState) {
                 this.mAnimState = 13;
                 this.mReadPixelsNum++;
@@ -746,7 +711,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
         }
     }
 
-    public void setExternalFrameProcessor(ExternalFrameProcessor externalFrameProcessor) {
+    public void setExternalFrameProcessor(SurfaceTextureScreenNail.ExternalFrameProcessor externalFrameProcessor) {
         this.mExternalFrameProcessor = externalFrameProcessor;
     }
 
@@ -766,10 +731,7 @@ public class CameraScreenNail extends SurfaceTextureScreenNail {
     public void switchCameraDone() {
         synchronized (this.mLock) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("switchDone: state=");
-            sb.append(this.mAnimState);
-            Log.v(str, sb.toString());
+            Log.v(str, "switchDone: state=" + this.mAnimState);
             if (this.mAnimState == 23) {
                 this.mAnimState = 24;
             }

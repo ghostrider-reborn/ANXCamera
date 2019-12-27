@@ -61,7 +61,7 @@ public final class Functions {
 
     static final class Array2Func<T1, T2, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final BiFunction<? super T1, ? super T2, ? extends R> f259f;
 
         Array2Func(BiFunction<? super T1, ? super T2, ? extends R> biFunction) {
@@ -72,16 +72,13 @@ public final class Functions {
             if (objArr.length == 2) {
                 return this.f259f.apply(objArr[0], objArr[1]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 2 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 2 expected but got " + objArr.length);
         }
     }
 
     static final class Array3Func<T1, T2, T3, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final Function3<T1, T2, T3, R> f260f;
 
         Array3Func(Function3<T1, T2, T3, R> function3) {
@@ -92,16 +89,13 @@ public final class Functions {
             if (objArr.length == 3) {
                 return this.f260f.apply(objArr[0], objArr[1], objArr[2]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 3 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 3 expected but got " + objArr.length);
         }
     }
 
     static final class Array4Func<T1, T2, T3, T4, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final Function4<T1, T2, T3, T4, R> f261f;
 
         Array4Func(Function4<T1, T2, T3, T4, R> function4) {
@@ -112,16 +106,13 @@ public final class Functions {
             if (objArr.length == 4) {
                 return this.f261f.apply(objArr[0], objArr[1], objArr[2], objArr[3]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 4 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 4 expected but got " + objArr.length);
         }
     }
 
     static final class Array5Func<T1, T2, T3, T4, T5, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         private final Function5<T1, T2, T3, T4, T5, R> f262f;
 
         Array5Func(Function5<T1, T2, T3, T4, T5, R> function5) {
@@ -132,16 +123,13 @@ public final class Functions {
             if (objArr.length == 5) {
                 return this.f262f.apply(objArr[0], objArr[1], objArr[2], objArr[3], objArr[4]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 5 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 5 expected but got " + objArr.length);
         }
     }
 
     static final class Array6Func<T1, T2, T3, T4, T5, T6, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final Function6<T1, T2, T3, T4, T5, T6, R> f263f;
 
         Array6Func(Function6<T1, T2, T3, T4, T5, T6, R> function6) {
@@ -152,16 +140,13 @@ public final class Functions {
             if (objArr.length == 6) {
                 return this.f263f.apply(objArr[0], objArr[1], objArr[2], objArr[3], objArr[4], objArr[5]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 6 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 6 expected but got " + objArr.length);
         }
     }
 
     static final class Array7Func<T1, T2, T3, T4, T5, T6, T7, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final Function7<T1, T2, T3, T4, T5, T6, T7, R> f264f;
 
         Array7Func(Function7<T1, T2, T3, T4, T5, T6, T7, R> function7) {
@@ -172,16 +157,13 @@ public final class Functions {
             if (objArr.length == 7) {
                 return this.f264f.apply(objArr[0], objArr[1], objArr[2], objArr[3], objArr[4], objArr[5], objArr[6]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 7 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 7 expected but got " + objArr.length);
         }
     }
 
     static final class Array8Func<T1, T2, T3, T4, T5, T6, T7, T8, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final Function8<T1, T2, T3, T4, T5, T6, T7, T8, R> f265f;
 
         Array8Func(Function8<T1, T2, T3, T4, T5, T6, T7, T8, R> function8) {
@@ -192,16 +174,13 @@ public final class Functions {
             if (objArr.length == 8) {
                 return this.f265f.apply(objArr[0], objArr[1], objArr[2], objArr[3], objArr[4], objArr[5], objArr[6], objArr[7]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 8 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 8 expected but got " + objArr.length);
         }
     }
 
     static final class Array9Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> implements Function<Object[], R> {
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         final Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> f266f;
 
         Array9Func(Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> function9) {
@@ -212,10 +191,7 @@ public final class Functions {
             if (objArr.length == 9) {
                 return this.f266f.apply(objArr[0], objArr[1], objArr[2], objArr[3], objArr[4], objArr[5], objArr[6], objArr[7], objArr[8]);
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Array of size 9 expected but got ");
-            sb.append(objArr.length);
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Array of size 9 expected but got " + objArr.length);
         }
     }
 
@@ -536,7 +512,7 @@ public final class Functions {
 
         public void accept(Map<K, Collection<V>> map, T t) throws Exception {
             Object apply = this.keySelector.apply(t);
-            Collection collection = (Collection) map.get(apply);
+            Collection collection = map.get(apply);
             if (collection == null) {
                 collection = (Collection) this.collectionFactory.apply(apply);
                 map.put(apply, collection);

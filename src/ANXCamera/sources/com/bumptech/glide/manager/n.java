@@ -6,10 +6,9 @@ import android.app.Application;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -29,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /* compiled from: RequestManagerRetriever */
-public class n implements Callback {
+public class n implements Handler.Callback {
     @VisibleForTesting
     static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
     private static final a Sd = new m();
@@ -55,10 +54,7 @@ public class n implements Callback {
     }
 
     public n(@Nullable a aVar) {
-        if (aVar == null) {
-            aVar = Sd;
-        }
-        this.factory = aVar;
+        this.factory = aVar == null ? Sd : aVar;
         this.handler = new Handler(Looper.getMainLooper(), this);
     }
 
@@ -70,7 +66,7 @@ public class n implements Callback {
         View findViewById = activity.findViewById(16908290);
         android.app.Fragment fragment = null;
         while (!view.equals(findViewById)) {
-            fragment = (android.app.Fragment) this.kk.get(view);
+            fragment = this.kk.get(view);
             if (fragment != null || !(view.getParent() instanceof View)) {
                 break;
             }
@@ -87,7 +83,7 @@ public class n implements Callback {
         View findViewById = fragmentActivity.findViewById(16908290);
         Fragment fragment = null;
         while (!view.equals(findViewById)) {
-            fragment = (Fragment) this.jk.get(view);
+            fragment = this.jk.get(view);
             if (fragment != null || !(view.getParent() instanceof View)) {
                 break;
             }
@@ -124,10 +120,9 @@ public class n implements Callback {
 
     @NonNull
     private SupportRequestManagerFragment a(@NonNull android.support.v4.app.FragmentManager fragmentManager, @Nullable Fragment fragment, boolean z) {
-        String str = FRAGMENT_TAG;
-        SupportRequestManagerFragment supportRequestManagerFragment = (SupportRequestManagerFragment) fragmentManager.findFragmentByTag(str);
+        SupportRequestManagerFragment supportRequestManagerFragment = (SupportRequestManagerFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if (supportRequestManagerFragment == null) {
-            supportRequestManagerFragment = (SupportRequestManagerFragment) this.pendingSupportRequestManagerFragments.get(fragmentManager);
+            supportRequestManagerFragment = this.pendingSupportRequestManagerFragments.get(fragmentManager);
             if (supportRequestManagerFragment == null) {
                 supportRequestManagerFragment = new SupportRequestManagerFragment();
                 supportRequestManagerFragment.a(fragment);
@@ -135,7 +130,7 @@ public class n implements Callback {
                     supportRequestManagerFragment.P().onStart();
                 }
                 this.pendingSupportRequestManagerFragments.put(fragmentManager, supportRequestManagerFragment);
-                fragmentManager.beginTransaction().add((Fragment) supportRequestManagerFragment, str).commitAllowingStateLoss();
+                fragmentManager.beginTransaction().add((Fragment) supportRequestManagerFragment, FRAGMENT_TAG).commitAllowingStateLoss();
                 this.handler.obtainMessage(2, fragmentManager).sendToTarget();
             }
         }
@@ -144,10 +139,9 @@ public class n implements Callback {
 
     @NonNull
     private l a(@NonNull FragmentManager fragmentManager, @Nullable android.app.Fragment fragment, boolean z) {
-        String str = FRAGMENT_TAG;
-        l lVar = (l) fragmentManager.findFragmentByTag(str);
+        l lVar = (l) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if (lVar == null) {
-            lVar = (l) this.pendingRequestManagerFragments.get(fragmentManager);
+            lVar = this.pendingRequestManagerFragments.get(fragmentManager);
             if (lVar == null) {
                 lVar = new l();
                 lVar.a(fragment);
@@ -155,7 +149,7 @@ public class n implements Callback {
                     lVar.P().onStart();
                 }
                 this.pendingRequestManagerFragments.put(fragmentManager, lVar);
-                fragmentManager.beginTransaction().add(lVar, str).commitAllowingStateLoss();
+                fragmentManager.beginTransaction().add(lVar, FRAGMENT_TAG).commitAllowingStateLoss();
                 this.handler.obtainMessage(1, fragmentManager).sendToTarget();
             }
         }
@@ -165,11 +159,11 @@ public class n implements Callback {
     @TargetApi(26)
     @Deprecated
     private void a(@NonNull FragmentManager fragmentManager, @NonNull ArrayMap<View, android.app.Fragment> arrayMap) {
-        if (VERSION.SDK_INT >= 26) {
-            for (android.app.Fragment fragment : fragmentManager.getFragments()) {
-                if (fragment.getView() != null) {
-                    arrayMap.put(fragment.getView(), fragment);
-                    a(fragment.getChildFragmentManager(), arrayMap);
+        if (Build.VERSION.SDK_INT >= 26) {
+            for (android.app.Fragment next : fragmentManager.getFragments()) {
+                if (next.getView() != null) {
+                    arrayMap.put(next.getView(), next);
+                    a(next.getChildFragmentManager(), arrayMap);
                 }
             }
             return;
@@ -179,10 +173,10 @@ public class n implements Callback {
 
     private static void a(@Nullable Collection<Fragment> collection, @NonNull Map<View, Fragment> map) {
         if (collection != null) {
-            for (Fragment fragment : collection) {
-                if (!(fragment == null || fragment.getView() == null)) {
-                    map.put(fragment.getView(), fragment);
-                    a((Collection<Fragment>) fragment.getChildFragmentManager().getFragments(), map);
+            for (Fragment next : collection) {
+                if (!(next == null || next.getView() == null)) {
+                    map.put(next.getView(), next);
+                    a((Collection<Fragment>) next.getChildFragmentManager().getFragments(), map);
                 }
             }
         }
@@ -192,19 +186,17 @@ public class n implements Callback {
     private void b(@NonNull FragmentManager fragmentManager, @NonNull ArrayMap<View, android.app.Fragment> arrayMap) {
         int i = 0;
         while (true) {
-            Bundle bundle = this.lk;
             int i2 = i + 1;
-            String str = pk;
-            bundle.putInt(str, i);
+            this.lk.putInt(pk, i);
             android.app.Fragment fragment = null;
             try {
-                fragment = fragmentManager.getFragment(this.lk, str);
+                fragment = fragmentManager.getFragment(this.lk, pk);
             } catch (Exception unused) {
             }
             if (fragment != null) {
                 if (fragment.getView() != null) {
                     arrayMap.put(fragment.getView(), fragment);
-                    if (VERSION.SDK_INT >= 17) {
+                    if (Build.VERSION.SDK_INT >= 17) {
                         a(fragment.getChildFragmentManager(), arrayMap);
                     }
                 }
@@ -217,7 +209,7 @@ public class n implements Callback {
 
     @TargetApi(17)
     private static void g(@NonNull Activity activity) {
-        if (VERSION.SDK_INT >= 17 && activity.isDestroyed()) {
+        if (Build.VERSION.SDK_INT >= 17 && activity.isDestroyed()) {
             throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
         }
     }
@@ -264,7 +256,7 @@ public class n implements Callback {
     public m c(@NonNull android.app.Fragment fragment) {
         if (fragment.getActivity() == null) {
             throw new IllegalArgumentException("You cannot start a load on a fragment before it is attached");
-        } else if (l.Jh() || VERSION.SDK_INT < 17) {
+        } else if (l.Jh() || Build.VERSION.SDK_INT < 17) {
             return get(fragment.getActivity().getApplicationContext());
         } else {
             return a((Context) fragment.getActivity(), fragment.getChildFragmentManager(), fragment, fragment.isVisible());
@@ -280,13 +272,13 @@ public class n implements Callback {
         return a((Context) fragment.getActivity(), fragment.getChildFragmentManager(), fragment, fragment.isVisible());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public SupportRequestManagerFragment c(FragmentActivity fragmentActivity) {
         return a(fragmentActivity.getSupportFragmentManager(), (Fragment) null, h(fragmentActivity));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @Deprecated
     @NonNull
     public l e(Activity activity) {
@@ -355,14 +347,8 @@ public class n implements Callback {
             obj2 = (android.support.v4.app.FragmentManager) message.obj;
             obj = this.pendingSupportRequestManagerFragments.remove(obj2);
         }
-        if (z && obj == null) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to remove expected request manager fragment, manager: ");
-                sb.append(obj2);
-                Log.w(str, sb.toString());
-            }
+        if (z && obj == null && Log.isLoggable(TAG, 5)) {
+            Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + obj2);
         }
         return z;
     }

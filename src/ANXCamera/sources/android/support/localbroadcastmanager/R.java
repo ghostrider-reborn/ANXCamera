@@ -835,7 +835,7 @@ public final class R {
         public static final int effect_item_selected_bg = 2131230802;
         public static final int empty_tall_divider = 2131230803;
 
-        /* renamed from: f reason: collision with root package name */
+        /* renamed from: f  reason: collision with root package name */
         public static final int f19f = 2131230804;
         public static final int f1 = 2131230805;
         public static final int f2 = 2131230806;

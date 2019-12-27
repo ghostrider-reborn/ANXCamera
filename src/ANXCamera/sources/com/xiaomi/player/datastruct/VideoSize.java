@@ -10,12 +10,6 @@ public class VideoSize {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("video_height=");
-        sb.append(this.video_height);
-        sb.append(",");
-        sb.append("video_width=");
-        sb.append(this.video_width);
-        return sb.toString();
+        return "video_height=" + this.video_height + "," + "video_width=" + this.video_width;
     }
 }

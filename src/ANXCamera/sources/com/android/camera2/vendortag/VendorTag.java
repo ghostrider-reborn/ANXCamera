@@ -9,16 +9,16 @@ public abstract class VendorTag<K> {
     /* access modifiers changed from: protected */
     public abstract K create();
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public final K getKey() {
-        if (!((Optional) this.mCachedValue.get()).isPresent()) {
+        if (!this.mCachedValue.get().isPresent()) {
             synchronized (this.mCachedValue) {
-                if (!((Optional) this.mCachedValue.get()).isPresent()) {
+                if (!this.mCachedValue.get().isPresent()) {
                     this.mCachedValue.set(Optional.ofNullable(create()));
                 }
             }
         }
-        return ((Optional) this.mCachedValue.get()).get();
+        return this.mCachedValue.get().get();
     }
 
     public abstract String getName();

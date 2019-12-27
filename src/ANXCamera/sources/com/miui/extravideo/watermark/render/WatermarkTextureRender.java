@@ -2,7 +2,7 @@ package com.miui.extravideo.watermark.render;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import com.arcsoft.camera.wideselfie.ArcWideSelfieDef.MAsvlOffScreen;
+import com.arcsoft.camera.wideselfie.ArcWideSelfieDef;
 import com.miui.extravideo.watermark.gles.ShaderProgram;
 import java.nio.ByteBuffer;
 
@@ -31,7 +31,7 @@ public class WatermarkTextureRender {
         GLES20.glVertexAttribPointer(i, 2, 5120, false, 0, this.fullQuadVertices);
         GLES20.glEnableVertexAttribArray(i);
         GLES20.glEnable(3042);
-        GLES20.glBlendFunc(768, MAsvlOffScreen.ASVL_PAF_RGB32_A8R8G8B8);
+        GLES20.glBlendFunc(768, ArcWideSelfieDef.MAsvlOffScreen.ASVL_PAF_RGB32_A8R8G8B8);
         GLES20.glDrawArrays(5, 0, 4);
         GLES20.glDisable(3042);
     }

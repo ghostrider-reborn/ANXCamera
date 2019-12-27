@@ -27,7 +27,7 @@ public final class MaybeSubject<T> extends Maybe<T> implements MaybeObserver<T> 
         }
 
         public void dispose() {
-            MaybeSubject maybeSubject = (MaybeSubject) getAndSet(null);
+            MaybeSubject maybeSubject = (MaybeSubject) getAndSet((Object) null);
             if (maybeSubject != null) {
                 maybeSubject.remove(this);
             }
@@ -46,7 +46,7 @@ public final class MaybeSubject<T> extends Maybe<T> implements MaybeObserver<T> 
         return new MaybeSubject<>();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(MaybeDisposable<T> maybeDisposable) {
         MaybeDisposable[] maybeDisposableArr;
         MaybeDisposable[] maybeDisposableArr2;
@@ -93,7 +93,7 @@ public final class MaybeSubject<T> extends Maybe<T> implements MaybeObserver<T> 
         return this.observers.get() == TERMINATED && this.value != null;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int observerCount() {
         return ((MaybeDisposable[]) this.observers.get()).length;
     }
@@ -134,7 +134,7 @@ public final class MaybeSubject<T> extends Maybe<T> implements MaybeObserver<T> 
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(MaybeDisposable<T> maybeDisposable) {
         MaybeDisposable<T>[] maybeDisposableArr;
         MaybeDisposable[] maybeDisposableArr2;

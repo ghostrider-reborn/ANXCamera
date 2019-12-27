@@ -8,7 +8,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
-import java.util.Map.Entry;
+import java.util.Map;
 
 public final class CodedOutputByteBufferNano {
     public static final int LITTLE_ENDIAN_32_SIZE = 4;
@@ -21,14 +21,15 @@ public final class CodedOutputByteBufferNano {
     public static class OutOfSpaceException extends IOException {
         private static final long serialVersionUID = -6947486886997889499L;
 
+        /* JADX WARNING: Illegal instructions before constructor call */
         OutOfSpaceException(int i, int i2) {
+            super(r0.toString());
             StringBuilder sb = new StringBuilder(108);
             sb.append("CodedOutputStream was writing to a flat byte array and ran out of space (pos ");
             sb.append(i);
             sb.append(" limit ");
             sb.append(i2);
             sb.append(").");
-            super(sb.toString());
         }
     }
 
@@ -302,10 +303,9 @@ public final class CodedOutputByteBufferNano {
                         i5 = i11;
                     }
                 }
-                int i15 = i5 - 1;
                 StringBuilder sb = new StringBuilder(39);
                 sb.append("Unpaired surrogate at index ");
-                sb.append(i15);
+                sb.append(i5 - 1);
                 throw new IllegalArgumentException(sb.toString());
             } else {
                 StringBuilder sb2 = new StringBuilder(37);
@@ -366,10 +366,9 @@ public final class CodedOutputByteBufferNano {
                         i = i2;
                     }
                 }
-                int i3 = i - 1;
                 StringBuilder sb = new StringBuilder(39);
                 sb.append("Unpaired surrogate at index ");
-                sb.append(i3);
+                sb.append(i - 1);
                 throw new IllegalArgumentException(sb.toString());
             }
             i++;
@@ -406,10 +405,9 @@ public final class CodedOutputByteBufferNano {
         if (i2 >= length) {
             return i2;
         }
-        long j = ((long) i2) + 4294967296L;
         StringBuilder sb = new StringBuilder(54);
         sb.append("UTF-8 length does not fit in int: ");
-        sb.append(j);
+        sb.append(((long) i2) + 4294967296L);
         throw new IllegalArgumentException(sb.toString());
     }
 
@@ -585,7 +583,7 @@ public final class CodedOutputByteBufferNano {
         writeRawVarint64(j);
     }
 
-    public <K, V> void writeMapEntry(int i, MapEntryLite<K, V> mapEntryLite, Entry<K, V> entry) throws IOException {
+    public <K, V> void writeMapEntry(int i, MapEntryLite<K, V> mapEntryLite, Map.Entry<K, V> entry) throws IOException {
         CodedOutputStream codedOutputStream2 = getCodedOutputStream();
         mapEntryLite.serializeTo(codedOutputStream2, i, entry.getKey(), entry.getValue());
         codedOutputStream2.flush();

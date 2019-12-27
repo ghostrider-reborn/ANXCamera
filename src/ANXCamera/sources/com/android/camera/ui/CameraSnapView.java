@@ -1,5 +1,6 @@
 package com.android.camera.ui;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,11 +12,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MiuiSettings.System;
+import android.provider.MiuiSettings;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.fragment.bottom.BottomAnimationConfig;
@@ -176,7 +176,7 @@ public class CameraSnapView extends View {
         CameraSnapAnimateDrawable cameraSnapAnimateDrawable2 = this.cameraSnapAnimateDrawable;
         if (cameraSnapAnimateDrawable2 != null) {
             cameraSnapAnimateDrawable2.cancelAnimation();
-            this.cameraSnapAnimateDrawable.setCallback(null);
+            this.cameraSnapAnimateDrawable.setCallback((Drawable.Callback) null);
         }
         recycleBitmap();
     }
@@ -196,12 +196,12 @@ public class CameraSnapView extends View {
 
     /* access modifiers changed from: protected */
     public void onMeasure(int i, int i2) {
-        if (MeasureSpec.getMode(i) != 1073741824) {
+        if (View.MeasureSpec.getMode(i) != 1073741824) {
             super.onMeasure(i, i2);
             return;
         }
-        this.mWidth = MeasureSpec.getSize(i);
-        this.mHeight = MeasureSpec.getSize(i2);
+        this.mWidth = View.MeasureSpec.getSize(i);
+        this.mHeight = View.MeasureSpec.getSize(i2);
         setMeasuredDimension(this.mWidth, this.mHeight);
         CameraSnapAnimateDrawable cameraSnapAnimateDrawable2 = this.cameraSnapAnimateDrawable;
         if (cameraSnapAnimateDrawable2 != null) {
@@ -215,10 +215,7 @@ public class CameraSnapView extends View {
     public boolean onTouchEvent(MotionEvent motionEvent) {
         if (!isSnapEnableClick()) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("this view is disabled. action=");
-            sb.append(motionEvent.getAction());
-            Log.d(str, sb.toString());
+            Log.d(str, "this view is disabled. action=" + motionEvent.getAction());
             return super.onTouchEvent(motionEvent);
         }
         int action = motionEvent.getAction();
@@ -230,7 +227,7 @@ public class CameraSnapView extends View {
                 if (action != 3) {
                 }
             }
-            this.mHandler.removeCallbacksAndMessages(null);
+            this.mHandler.removeCallbacksAndMessages((Object) null);
             this.mPressUpTime = System.currentTimeMillis();
             if (this.mPressUpTime - this.mPressDownTime < ((long) this.mLongPressTime)) {
                 if (inRegion((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) {
@@ -259,7 +256,7 @@ public class CameraSnapView extends View {
                         break;
                     default:
                         ViberatorContext.getInstance(getContext().getApplicationContext()).performSnapClick();
-                        this.cameraSnapAnimateDrawable.startScaleUpAnimation(j2, null);
+                        this.cameraSnapAnimateDrawable.startScaleUpAnimation(j2, (Animator.AnimatorListener) null);
                         break;
                 }
             }
@@ -310,7 +307,7 @@ public class CameraSnapView extends View {
             return super.performClick();
         }
         super.performClick();
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         this.mHandler.sendEmptyMessage(1);
         return true;
     }
@@ -350,16 +347,13 @@ public class CameraSnapView extends View {
             }
         }
         if (i == 177) {
-            this.mLongPressTime = System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT;
+            this.mLongPressTime = MiuiSettings.System.SCREEN_KEY_LONG_PRESS_TIMEOUT_DEFAULT;
         }
     }
 
     public void setSnapClickEnable(boolean z) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setClickEnable: ");
-        sb.append(z);
-        Log.d(str, sb.toString());
+        Log.d(str, "setClickEnable: " + z);
         this.mEnableSnapClick = z;
     }
 

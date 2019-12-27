@@ -1,7 +1,6 @@
 package com.android.camera.data.observeable;
 
-import android.arch.lifecycle.Lifecycle.Event;
-import android.arch.lifecycle.Lifecycle.State;
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
@@ -29,7 +28,7 @@ public class RxData<T> {
         public LifecycleOwner owner;
         private final Predicate<T> predicateCheck = new Predicate<T>() {
             public boolean test(T t) {
-                return !RxData.isLifecycleState(DataCheck.this.owner, State.DESTROYED);
+                return !RxData.isLifecycleState(DataCheck.this.owner, Lifecycle.State.DESTROYED);
             }
         };
 
@@ -37,7 +36,7 @@ public class RxData<T> {
             this.owner = lifecycleOwner;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public Predicate<T> getPredicateCheck() {
             return this.predicateCheck;
         }
@@ -51,22 +50,15 @@ public class RxData<T> {
         DataObservable(Observable<T> observable2, DataCheck dataCheck2) {
             this.observable = observable2;
             this.dataCheck = dataCheck2;
-            if (dataCheck2.owner != null) {
-                boolean access$100 = RxData.isLifecycleState(dataCheck2.owner, State.DESTROYED);
-                String str = RxData.TAG;
-                if (!access$100) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("DataObservable add:");
-                    sb.append(dataCheck2.owner.getClass().getSimpleName());
-                    Log.d(str, sb.toString());
-                    dataCheck2.owner.getLifecycle().addObserver(this);
-                    return;
-                }
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("DataObservable skip:");
-                sb2.append(dataCheck2.owner.getClass().getSimpleName());
-                Log.d(str, sb2.toString());
+            if (dataCheck2.owner == null) {
+                return;
             }
+            if (!RxData.isLifecycleState(dataCheck2.owner, Lifecycle.State.DESTROYED)) {
+                Log.d(RxData.TAG, "DataObservable add:" + dataCheck2.owner.getClass().getSimpleName());
+                dataCheck2.owner.getLifecycle().addObserver(this);
+                return;
+            }
+            Log.d(RxData.TAG, "DataObservable skip:" + dataCheck2.owner.getClass().getSimpleName());
         }
 
         static <T> Function<Observable<T>, DataObservable<T>> toFunction(final DataCheck dataCheck2) {
@@ -77,17 +69,14 @@ public class RxData<T> {
             };
         }
 
-        @OnLifecycleEvent(Event.ON_DESTROY)
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         public void onLifecycleDestroy() {
             DataObserver<T> dataObserver2 = this.dataObserver;
             if (dataObserver2 != null && !dataObserver2.isDisposed()) {
                 this.dataObserver.dispose();
             }
             if (this.dataCheck.owner != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("removeObserver: ");
-                sb.append(this.dataCheck.owner.getClass().getSimpleName());
-                Log.d(RxData.TAG, sb.toString());
+                Log.d(RxData.TAG, "removeObserver: " + this.dataCheck.owner.getClass().getSimpleName());
                 this.dataCheck.owner.getLifecycle().removeObserver(this);
             }
         }
@@ -95,8 +84,8 @@ public class RxData<T> {
         /* access modifiers changed from: protected */
         public void subscribeActual(Observer<? super T> observer) {
             this.dataObserver = new DataObserver<>(observer);
-            this.observable.subscribe((Observer<? super T>) this.dataObserver);
-            if (RxData.isLifecycleState(this.dataCheck.owner, State.DESTROYED)) {
+            this.observable.subscribe(this.dataObserver);
+            if (RxData.isLifecycleState(this.dataCheck.owner, Lifecycle.State.DESTROYED)) {
                 DataObserver<T> dataObserver2 = this.dataObserver;
                 if (dataObserver2 != null && !dataObserver2.isDisposed()) {
                     this.dataObserver.dispose();
@@ -134,7 +123,7 @@ public class RxData<T> {
         }
 
         public final void onSubscribe(@NonNull Disposable disposable) {
-            EndConsumerHelper.setOnce(this.s, disposable, DataObserver.class);
+            EndConsumerHelper.setOnce(this.s, disposable, (Class<?>) DataObserver.class);
             this.observer.onSubscribe(disposable);
         }
     }
@@ -166,7 +155,7 @@ public class RxData<T> {
     }
 
     /* access modifiers changed from: private */
-    public static boolean isLifecycleState(LifecycleOwner lifecycleOwner, @NonNull State state) {
+    public static boolean isLifecycleState(LifecycleOwner lifecycleOwner, @NonNull Lifecycle.State state) {
         return lifecycleOwner != null && lifecycleOwner.getLifecycle().getCurrentState() == state;
     }
 
@@ -190,7 +179,7 @@ public class RxData<T> {
     }
 
     public DataObservable<DataWrap<T>> observableNullLife() {
-        return observable(null);
+        return observable((LifecycleOwner) null);
     }
 
     public void set(T t) {

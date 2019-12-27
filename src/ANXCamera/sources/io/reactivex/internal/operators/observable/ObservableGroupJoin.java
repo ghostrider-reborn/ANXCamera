@@ -26,10 +26,10 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
     final Function<? super TRight, ? extends ObservableSource<TRightEnd>> rightEnd;
 
     static final class GroupJoinDisposable<TLeft, TRight, TLeftEnd, TRightEnd, R> extends AtomicInteger implements Disposable, JoinSupport {
-        static final Integer LEFT_CLOSE = Integer.valueOf(3);
-        static final Integer LEFT_VALUE = Integer.valueOf(1);
-        static final Integer RIGHT_CLOSE = Integer.valueOf(4);
-        static final Integer RIGHT_VALUE = Integer.valueOf(2);
+        static final Integer LEFT_CLOSE = 3;
+        static final Integer LEFT_VALUE = 1;
+        static final Integer RIGHT_CLOSE = 4;
+        static final Integer RIGHT_VALUE = 2;
         private static final long serialVersionUID = -6071216598687999801L;
         final AtomicInteger active;
         final Observer<? super R> actual;
@@ -53,7 +53,7 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
             this.active = new AtomicInteger(2);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void cancelAll() {
             this.disposables.dispose();
         }
@@ -68,14 +68,14 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 SpscLinkedArrayQueue<Object> spscLinkedArrayQueue = this.queue;
                 Observer<? super R> observer = this.actual;
                 int i = 1;
                 while (!this.cancelled) {
-                    if (((Throwable) this.error.get()) != null) {
+                    if (this.error.get() != null) {
                         spscLinkedArrayQueue.clear();
                         cancelAll();
                         errorAll(observer);
@@ -85,7 +85,7 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
                     Integer num = (Integer) spscLinkedArrayQueue.poll();
                     boolean z2 = num == null;
                     if (z && z2) {
-                        for (UnicastSubject onComplete : this.lefts.values()) {
+                        for (UnicastSubject<TRight> onComplete : this.lefts.values()) {
                             onComplete.onComplete();
                         }
                         this.lefts.clear();
@@ -112,7 +112,7 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
                                 LeftRightEndObserver leftRightEndObserver = new LeftRightEndObserver(this, true, i2);
                                 this.disposables.add(leftRightEndObserver);
                                 observableSource.subscribe(leftRightEndObserver);
-                                if (((Throwable) this.error.get()) != null) {
+                                if (this.error.get() != null) {
                                     spscLinkedArrayQueue.clear();
                                     cancelAll();
                                     errorAll(observer);
@@ -122,7 +122,7 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
                                     Object apply2 = this.resultSelector.apply(poll, create);
                                     ObjectHelper.requireNonNull(apply2, "The resultSelector returned a null value");
                                     observer.onNext(apply2);
-                                    for (Object onNext : this.rights.values()) {
+                                    for (TRight onNext : this.rights.values()) {
                                         create.onNext(onNext);
                                     }
                                 } catch (Throwable th) {
@@ -144,13 +144,13 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
                                 LeftRightEndObserver leftRightEndObserver2 = new LeftRightEndObserver(this, false, i3);
                                 this.disposables.add(leftRightEndObserver2);
                                 observableSource2.subscribe(leftRightEndObserver2);
-                                if (((Throwable) this.error.get()) != null) {
+                                if (this.error.get() != null) {
                                     spscLinkedArrayQueue.clear();
                                     cancelAll();
                                     errorAll(observer);
                                     return;
                                 }
-                                for (UnicastSubject onNext2 : this.lefts.values()) {
+                                for (UnicastSubject<TRight> onNext2 : this.lefts.values()) {
                                     onNext2.onNext(poll);
                                 }
                             } catch (Throwable th3) {
@@ -159,10 +159,10 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
                             }
                         } else if (num == LEFT_CLOSE) {
                             LeftRightEndObserver leftRightEndObserver3 = (LeftRightEndObserver) poll;
-                            UnicastSubject unicastSubject = (UnicastSubject) this.lefts.remove(Integer.valueOf(leftRightEndObserver3.index));
+                            UnicastSubject remove = this.lefts.remove(Integer.valueOf(leftRightEndObserver3.index));
                             this.disposables.remove(leftRightEndObserver3);
-                            if (unicastSubject != null) {
-                                unicastSubject.onComplete();
+                            if (remove != null) {
+                                remove.onComplete();
                             }
                         } else if (num == RIGHT_CLOSE) {
                             LeftRightEndObserver leftRightEndObserver4 = (LeftRightEndObserver) poll;
@@ -175,10 +175,10 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void errorAll(Observer<?> observer) {
             Throwable terminate = ExceptionHelper.terminate(this.error);
-            for (UnicastSubject onError : this.lefts.values()) {
+            for (UnicastSubject<TRight> onError : this.lefts.values()) {
                 onError.onError(terminate);
             }
             this.lefts.clear();
@@ -186,7 +186,7 @@ public final class ObservableGroupJoin<TLeft, TRight, TLeftEnd, TRightEnd, R> ex
             observer.onError(terminate);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fail(Throwable th, Observer<?> observer, SpscLinkedArrayQueue<?> spscLinkedArrayQueue) {
             Exceptions.throwIfFatal(th);
             ExceptionHelper.addThrowable(this.error, th);

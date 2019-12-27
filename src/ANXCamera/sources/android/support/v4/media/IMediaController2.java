@@ -8,6 +8,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.support.v4.media.IMediaSession2;
 import java.util.List;
 
 public interface IMediaController2 extends IInterface {
@@ -63,7 +64,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(16, obtain, null, 1);
+                    this.mRemote.transact(16, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -81,7 +82,7 @@ public interface IMediaController2 extends IInterface {
                     }
                     obtain.writeInt(i);
                     obtain.writeLong(j);
-                    this.mRemote.transact(4, obtain, null, 1);
+                    this.mRemote.transact(4, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -99,7 +100,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(20, obtain, null, 1);
+                    this.mRemote.transact(20, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -148,7 +149,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(13, obtain, null, 1);
+                    this.mRemote.transact(13, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -164,7 +165,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(1, obtain, null, 1);
+                    this.mRemote.transact(1, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -192,7 +193,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(17, obtain, null, 1);
+                    this.mRemote.transact(17, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -203,7 +204,7 @@ public interface IMediaController2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeTypedList(list);
-                    this.mRemote.transact(15, obtain, null, 1);
+                    this.mRemote.transact(15, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -213,7 +214,7 @@ public interface IMediaController2 extends IInterface {
                 Parcel obtain = Parcel.obtain();
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
-                    this.mRemote.transact(14, obtain, null, 1);
+                    this.mRemote.transact(14, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -230,7 +231,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(11, obtain, null, 1);
+                    this.mRemote.transact(11, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -250,7 +251,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(21, obtain, null, 1);
+                    this.mRemote.transact(21, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -267,7 +268,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(19, obtain, null, 1);
+                    this.mRemote.transact(19, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -290,7 +291,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(18, obtain, null, 1);
+                    this.mRemote.transact(18, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -310,7 +311,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(23, obtain, null, 1);
+                    this.mRemote.transact(23, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -326,7 +327,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(7, obtain, null, 1);
+                    this.mRemote.transact(7, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -339,7 +340,7 @@ public interface IMediaController2 extends IInterface {
                     obtain.writeLong(j);
                     obtain.writeLong(j2);
                     obtain.writeFloat(f2);
-                    this.mRemote.transact(3, obtain, null, 1);
+                    this.mRemote.transact(3, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -352,7 +353,7 @@ public interface IMediaController2 extends IInterface {
                     obtain.writeLong(j);
                     obtain.writeLong(j2);
                     obtain.writeInt(i);
-                    this.mRemote.transact(2, obtain, null, 1);
+                    this.mRemote.transact(2, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -369,7 +370,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(5, obtain, null, 1);
+                    this.mRemote.transact(5, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -385,7 +386,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(6, obtain, null, 1);
+                    this.mRemote.transact(6, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -396,7 +397,7 @@ public interface IMediaController2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(i);
-                    this.mRemote.transact(8, obtain, null, 1);
+                    this.mRemote.transact(8, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -407,7 +408,7 @@ public interface IMediaController2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeTypedList(list);
-                    this.mRemote.transact(12, obtain, null, 1);
+                    this.mRemote.transact(12, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -425,7 +426,7 @@ public interface IMediaController2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(22, obtain, null, 1);
+                    this.mRemote.transact(22, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -438,7 +439,7 @@ public interface IMediaController2 extends IInterface {
                     obtain.writeLong(j);
                     obtain.writeLong(j2);
                     obtain.writeLong(j3);
-                    this.mRemote.transact(10, obtain, null, 1);
+                    this.mRemote.transact(10, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -449,7 +450,7 @@ public interface IMediaController2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeInt(i);
-                    this.mRemote.transact(9, obtain, null, 1);
+                    this.mRemote.transact(9, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -472,109 +473,133 @@ public interface IMediaController2 extends IInterface {
             return this;
         }
 
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v3, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v3, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v9, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v11, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v1, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v17, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v14, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v21, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v17, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v25, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v33, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v30, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v41, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v6, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v46, resolved type: android.os.ResultReceiver} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v7, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v51, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v8, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v56, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v9, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v61, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v13, resolved type: java.lang.Object} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r3v68, resolved type: android.os.Bundle} */
+        /* JADX WARNING: Multi-variable type inference failed */
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
             int i3 = i;
             Parcel parcel3 = parcel;
-            String str = DESCRIPTOR;
             if (i3 != 1598968902) {
                 switch (i3) {
                     case 1:
-                        parcel3.enforceInterface(str);
-                        onCurrentMediaItemChanged(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onCurrentMediaItemChanged(parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 2:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onPlayerStateChanged(parcel.readLong(), parcel.readLong(), parcel.readInt());
                         return true;
                     case 3:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onPlaybackSpeedChanged(parcel.readLong(), parcel.readLong(), parcel.readFloat());
                         return true;
                     case 4:
-                        parcel3.enforceInterface(str);
-                        onBufferingStateChanged(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onBufferingStateChanged(parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readLong());
                         return true;
                     case 5:
-                        parcel3.enforceInterface(str);
-                        onPlaylistChanged(parcel3.createTypedArrayList(Bundle.CREATOR), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onPlaylistChanged(parcel3.createTypedArrayList(Bundle.CREATOR), parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 6:
-                        parcel3.enforceInterface(str);
-                        onPlaylistMetadataChanged(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onPlaylistMetadataChanged(parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 7:
-                        parcel3.enforceInterface(str);
-                        onPlaybackInfoChanged(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onPlaybackInfoChanged(parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 8:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onRepeatModeChanged(parcel.readInt());
                         return true;
                     case 9:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onShuffleModeChanged(parcel.readInt());
                         return true;
                     case 10:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onSeekCompleted(parcel.readLong(), parcel.readLong(), parcel.readLong());
                         return true;
                     case 11:
-                        parcel3.enforceInterface(str);
-                        onError(parcel.readInt(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onError(parcel.readInt(), parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 12:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onRoutesInfoChanged(parcel3.createTypedArrayList(Bundle.CREATOR));
                         return true;
                     case 13:
-                        parcel3.enforceInterface(str);
-                        onConnected(android.support.v4.media.IMediaSession2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readLong(), parcel.readLong(), parcel.readFloat(), parcel.readLong(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readInt(), parcel3.createTypedArrayList(Bundle.CREATOR), parcel.readInt() != 0 ? (PendingIntent) PendingIntent.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onConnected(IMediaSession2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readLong(), parcel.readLong(), parcel.readFloat(), parcel.readLong(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt(), parcel.readInt(), parcel3.createTypedArrayList(Bundle.CREATOR), parcel.readInt() != 0 ? (PendingIntent) PendingIntent.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 14:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onDisconnected();
                         return true;
                     case 15:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onCustomLayoutChanged(parcel3.createTypedArrayList(Bundle.CREATOR));
                         return true;
                     case 16:
-                        parcel3.enforceInterface(str);
-                        onAllowedCommandsChanged(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onAllowedCommandsChanged(parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 17:
-                        parcel3.enforceInterface(str);
-                        onCustomCommand(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? (ResultReceiver) ResultReceiver.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onCustomCommand(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readInt() != 0 ? ResultReceiver.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 18:
-                        parcel3.enforceInterface(str);
-                        onGetLibraryRootDone(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onGetLibraryRootDone(parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null, parcel.readString(), parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 19:
-                        parcel3.enforceInterface(str);
-                        onGetItemDone(parcel.readString(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onGetItemDone(parcel.readString(), parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 20:
-                        parcel3.enforceInterface(str);
-                        onChildrenChanged(parcel.readString(), parcel.readInt(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onChildrenChanged(parcel.readString(), parcel.readInt(), parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 21:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onGetChildrenDone(parcel.readString(), parcel.readInt(), parcel.readInt(), parcel3.createTypedArrayList(Bundle.CREATOR), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 22:
-                        parcel3.enforceInterface(str);
-                        onSearchResultChanged(parcel.readString(), parcel.readInt(), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
+                        parcel3.enforceInterface(DESCRIPTOR);
+                        onSearchResultChanged(parcel.readString(), parcel.readInt(), parcel.readInt() != 0 ? Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     case 23:
-                        parcel3.enforceInterface(str);
+                        parcel3.enforceInterface(DESCRIPTOR);
                         onGetSearchResultDone(parcel.readString(), parcel.readInt(), parcel.readInt(), parcel3.createTypedArrayList(Bundle.CREATOR), parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel3) : null);
                         return true;
                     default:
                         return super.onTransact(i, parcel, parcel2, i2);
                 }
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

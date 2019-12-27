@@ -3,7 +3,7 @@ package com.bumptech.glide.load.b.b;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.n;
-import com.bumptech.glide.request.a.c.a;
+import com.bumptech.glide.request.a.c;
 import com.bumptech.glide.request.a.g;
 
 /* compiled from: DrawableTransitionOptions */
@@ -14,7 +14,7 @@ public final class c extends n<c, Drawable> {
     }
 
     @NonNull
-    public static c b(@NonNull a aVar) {
+    public static c b(@NonNull c.a aVar) {
         return new c().a(aVar);
     }
 
@@ -35,21 +35,21 @@ public final class c extends n<c, Drawable> {
 
     @NonNull
     public c Xf() {
-        return a(new a());
+        return a(new c.a());
     }
 
     @NonNull
-    public c a(@NonNull a aVar) {
+    public c a(@NonNull c.a aVar) {
         return a(aVar.build());
     }
 
     @NonNull
     public c a(@NonNull com.bumptech.glide.request.a.c cVar) {
-        return (c) a((g<? super TranscodeType>) cVar);
+        return (c) a(cVar);
     }
 
     @NonNull
     public c m(int i) {
-        return a(new a(i));
+        return a(new c.a(i));
     }
 }

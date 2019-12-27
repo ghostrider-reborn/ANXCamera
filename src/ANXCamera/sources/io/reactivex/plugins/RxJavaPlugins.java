@@ -117,9 +117,9 @@ public final class RxJavaPlugins {
     @NonNull
     static Scheduler callRequireNonNull(@NonNull Callable<Scheduler> callable) {
         try {
-            Object call = callable.call();
+            Scheduler call = callable.call();
             ObjectHelper.requireNonNull(call, "Scheduler Callable result can't be null");
-            return (Scheduler) call;
+            return call;
         } catch (Throwable th) {
             throw ExceptionHelper.wrapOrThrow(th);
         }
@@ -457,31 +457,31 @@ public final class RxJavaPlugins {
     }
 
     public static void reset() {
-        setErrorHandler(null);
-        setScheduleHandler(null);
-        setComputationSchedulerHandler(null);
-        setInitComputationSchedulerHandler(null);
-        setIoSchedulerHandler(null);
-        setInitIoSchedulerHandler(null);
-        setSingleSchedulerHandler(null);
-        setInitSingleSchedulerHandler(null);
-        setNewThreadSchedulerHandler(null);
-        setInitNewThreadSchedulerHandler(null);
-        setOnFlowableAssembly(null);
-        setOnFlowableSubscribe(null);
-        setOnObservableAssembly(null);
-        setOnObservableSubscribe(null);
-        setOnSingleAssembly(null);
-        setOnSingleSubscribe(null);
-        setOnCompletableAssembly(null);
-        setOnCompletableSubscribe(null);
-        setOnConnectableFlowableAssembly(null);
-        setOnConnectableObservableAssembly(null);
-        setOnMaybeAssembly(null);
-        setOnMaybeSubscribe(null);
-        setOnParallelAssembly(null);
+        setErrorHandler((Consumer<? super Throwable>) null);
+        setScheduleHandler((Function<? super Runnable, ? extends Runnable>) null);
+        setComputationSchedulerHandler((Function<? super Scheduler, ? extends Scheduler>) null);
+        setInitComputationSchedulerHandler((Function<? super Callable<Scheduler>, ? extends Scheduler>) null);
+        setIoSchedulerHandler((Function<? super Scheduler, ? extends Scheduler>) null);
+        setInitIoSchedulerHandler((Function<? super Callable<Scheduler>, ? extends Scheduler>) null);
+        setSingleSchedulerHandler((Function<? super Scheduler, ? extends Scheduler>) null);
+        setInitSingleSchedulerHandler((Function<? super Callable<Scheduler>, ? extends Scheduler>) null);
+        setNewThreadSchedulerHandler((Function<? super Scheduler, ? extends Scheduler>) null);
+        setInitNewThreadSchedulerHandler((Function<? super Callable<Scheduler>, ? extends Scheduler>) null);
+        setOnFlowableAssembly((Function<? super Flowable, ? extends Flowable>) null);
+        setOnFlowableSubscribe((BiFunction<? super Flowable, ? super Subscriber, ? extends Subscriber>) null);
+        setOnObservableAssembly((Function<? super Observable, ? extends Observable>) null);
+        setOnObservableSubscribe((BiFunction<? super Observable, ? super Observer, ? extends Observer>) null);
+        setOnSingleAssembly((Function<? super Single, ? extends Single>) null);
+        setOnSingleSubscribe((BiFunction<? super Single, ? super SingleObserver, ? extends SingleObserver>) null);
+        setOnCompletableAssembly((Function<? super Completable, ? extends Completable>) null);
+        setOnCompletableSubscribe((BiFunction<? super Completable, ? super CompletableObserver, ? extends CompletableObserver>) null);
+        setOnConnectableFlowableAssembly((Function<? super ConnectableFlowable, ? extends ConnectableFlowable>) null);
+        setOnConnectableObservableAssembly((Function<? super ConnectableObservable, ? extends ConnectableObservable>) null);
+        setOnMaybeAssembly((Function<? super Maybe, ? extends Maybe>) null);
+        setOnMaybeSubscribe((BiFunction<? super Maybe, MaybeObserver, ? extends MaybeObserver>) null);
+        setOnParallelAssembly((Function<? super ParallelFlowable, ? extends ParallelFlowable>) null);
         setFailOnNonBlockingScheduler(false);
-        setOnBeforeBlocking(null);
+        setOnBeforeBlocking((BooleanSupplier) null);
     }
 
     public static void setComputationSchedulerHandler(@Nullable Function<? super Scheduler, ? extends Scheduler> function) {

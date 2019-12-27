@@ -9,7 +9,6 @@ import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import java.io.Closeable;
 import java.io.File;
@@ -20,9 +19,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class TypefaceCompatUtil {
     private static final String CACHE_FILE_PREFIX = ".font";
     private static final String TAG = "TypefaceCompatUtil";
@@ -97,12 +95,8 @@ public class TypefaceCompatUtil {
             } catch (IOException e2) {
                 e = e2;
                 fileOutputStream = fileOutputStream2;
-                String str = TAG;
                 try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Error copying resource contents to temp file: ");
-                    sb.append(e.getMessage());
-                    Log.e(str, sb.toString());
+                    Log.e(TAG, "Error copying resource contents to temp file: " + e.getMessage());
                     closeQuietly(fileOutputStream);
                     return false;
                 } catch (Throwable th) {
@@ -118,11 +112,7 @@ public class TypefaceCompatUtil {
             }
         } catch (IOException e3) {
             e = e3;
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Error copying resource contents to temp file: ");
-            sb2.append(e.getMessage());
-            Log.e(str2, sb2.toString());
+            Log.e(TAG, "Error copying resource contents to temp file: " + e.getMessage());
             closeQuietly(fileOutputStream);
             return false;
         }
@@ -130,21 +120,10 @@ public class TypefaceCompatUtil {
 
     @Nullable
     public static File getTempFile(Context context) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(CACHE_FILE_PREFIX);
-        sb.append(Process.myPid());
-        String str = "-";
-        sb.append(str);
-        sb.append(Process.myTid());
-        sb.append(str);
-        String sb2 = sb.toString();
+        String str = CACHE_FILE_PREFIX + Process.myPid() + "-" + Process.myTid() + "-";
         int i = 0;
         while (i < 100) {
-            File cacheDir = context.getCacheDir();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(sb2);
-            sb3.append(i);
-            File file = new File(cacheDir, sb3.toString());
+            File file = new File(context.getCacheDir(), str + i);
             try {
                 if (file.createNewFile()) {
                     return file;
@@ -196,7 +175,7 @@ public class TypefaceCompatUtil {
             }
             FileInputStream fileInputStream = new FileInputStream(openFileDescriptor.getFileDescriptor());
             FileChannel channel = fileInputStream.getChannel();
-            MappedByteBuffer map = channel.map(MapMode.READ_ONLY, 0, channel.size());
+            MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
             fileInputStream.close();
             if (openFileDescriptor != null) {
                 openFileDescriptor.close();
@@ -224,7 +203,7 @@ public class TypefaceCompatUtil {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             FileChannel channel = fileInputStream.getChannel();
-            MappedByteBuffer map = channel.map(MapMode.READ_ONLY, 0, channel.size());
+            MappedByteBuffer map = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
             fileInputStream.close();
             return map;
         } catch (IOException unused) {

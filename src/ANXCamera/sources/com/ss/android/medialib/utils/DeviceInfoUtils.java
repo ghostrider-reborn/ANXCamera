@@ -5,7 +5,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -53,7 +53,7 @@ public class DeviceInfoUtils {
         }
         try {
             StatFs statFs = new StatFs(str);
-            return VERSION.SDK_INT >= 18 ? (statFs.getBlockCountLong() * statFs.getBlockSizeLong()) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED : (((long) statFs.getBlockCount()) * ((long) statFs.getBlockSize())) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED;
+            return Build.VERSION.SDK_INT >= 18 ? (statFs.getBlockCountLong() * statFs.getBlockSizeLong()) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED : (((long) statFs.getBlockCount()) * ((long) statFs.getBlockSize())) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED;
         } catch (Exception unused2) {
             return -1;
         }
@@ -61,7 +61,7 @@ public class DeviceInfoUtils {
 
     public static long getInternalStorage() {
         StatFs statFs = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-        return VERSION.SDK_INT >= 18 ? (statFs.getBlockCountLong() * statFs.getBlockSizeLong()) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED : (((long) statFs.getBlockCount()) * ((long) statFs.getBlockSize())) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED;
+        return Build.VERSION.SDK_INT >= 18 ? (statFs.getBlockCountLong() * statFs.getBlockSizeLong()) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED : (((long) statFs.getBlockCount()) * ((long) statFs.getBlockSize())) / PlaybackStateCompat.ACTION_SET_CAPTIONING_ENABLED;
     }
 
     public static String getMaxCpuFreq() {
@@ -69,13 +69,9 @@ public class DeviceInfoUtils {
         InputStream inputStream = null;
         try {
             inputStream = new ProcessBuilder(new String[]{"/system/bin/cat", "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"}).start().getInputStream();
-            byte[] bArr = new byte[24];
             str = "";
-            while (inputStream.read(bArr) != -1) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(new String(bArr));
-                str = sb.toString();
+            while (inputStream.read(new byte[24]) != -1) {
+                str = str + new String(r1);
             }
             if (inputStream != null) {
                 try {
@@ -90,7 +86,7 @@ public class DeviceInfoUtils {
             if (inputStream != null) {
                 inputStream.close();
             }
-        } finally {
+        } catch (Throwable th) {
             if (inputStream != null) {
                 try {
                     inputStream.close();
@@ -98,6 +94,7 @@ public class DeviceInfoUtils {
                     e4.printStackTrace();
                 }
             }
+            throw th;
         }
         return str.trim();
     }
@@ -116,38 +113,38 @@ public class DeviceInfoUtils {
     }
 
     public static int getRealScreenHeight(Context context) {
-        int i = 0;
         if (context == null) {
             return 0;
         }
         Display defaultDisplay = ((WindowManager) context.getSystemService("window")).getDefaultDisplay();
-        if (VERSION.SDK_INT >= 17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             Point point = new Point();
             defaultDisplay.getRealSize(point);
-            i = point.y;
-        } else {
-            try {
-                i = ((Integer) Display.class.getMethod("getRawHeight", new Class[0]).invoke(defaultDisplay, new Object[0])).intValue();
-            } catch (IllegalArgumentException e2) {
-                e2.printStackTrace();
-            } catch (IllegalAccessException e3) {
-                e3.printStackTrace();
-            } catch (InvocationTargetException e4) {
-                e4.printStackTrace();
-            } catch (NoSuchMethodException e5) {
-                e5.printStackTrace();
-            }
+            return point.y;
         }
-        return i;
+        try {
+            return ((Integer) Display.class.getMethod("getRawHeight", new Class[0]).invoke(defaultDisplay, new Object[0])).intValue();
+        } catch (IllegalArgumentException e2) {
+            e2.printStackTrace();
+            return 0;
+        } catch (IllegalAccessException e3) {
+            e3.printStackTrace();
+            return 0;
+        } catch (InvocationTargetException e4) {
+            e4.printStackTrace();
+            return 0;
+        } catch (NoSuchMethodException e5) {
+            e5.printStackTrace();
+            return 0;
+        }
     }
 
     public static int getScreenHeight(Context context) {
         if (context == null) {
             return 0;
         }
-        WindowManager windowManager = (WindowManager) context.getSystemService("window");
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        ((WindowManager) context.getSystemService("window")).getDefaultDisplay().getMetrics(displayMetrics);
         return displayMetrics.heightPixels;
     }
 
@@ -155,9 +152,8 @@ public class DeviceInfoUtils {
         if (context == null) {
             return 0;
         }
-        WindowManager windowManager = (WindowManager) context.getSystemService("window");
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        ((WindowManager) context.getSystemService("window")).getDefaultDisplay().getMetrics(displayMetrics);
         return displayMetrics.widthPixels;
     }
 
@@ -202,10 +198,7 @@ public class DeviceInfoUtils {
                     String readLine = bufferedReader.readLine();
                     String[] split = readLine.split("\\s+");
                     for (String str : split) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(str);
-                        sb.append("/t");
-                        Log.i(readLine, sb.toString());
+                        Log.i(readLine, str + "/t");
                     }
                     j = (long) Integer.valueOf(split[1]).intValue();
                     try {
@@ -303,23 +296,22 @@ public class DeviceInfoUtils {
     @SuppressLint({"infer"})
     public static String readCpuHardware() {
         BufferedReader bufferedReader;
-        Reader reader;
-        String str = ":";
+        FileReader fileReader;
         if (!TextUtils.isEmpty(sCpuHardware)) {
             return sCpuHardware;
         }
         try {
-            reader = new FileReader(CPU_FILE);
+            fileReader = new FileReader(CPU_FILE);
             try {
-                bufferedReader = new BufferedReader(reader);
+                bufferedReader = new BufferedReader(fileReader);
                 try {
                     String readLine = bufferedReader.readLine();
                     while (true) {
                         if (readLine == null) {
                             break;
                         }
-                        if (readLine.startsWith(HARDWARE_PATTERN) && readLine.contains(str)) {
-                            String substring = readLine.substring(readLine.indexOf(str) + 1);
+                        if (readLine.startsWith(HARDWARE_PATTERN) && readLine.contains(":")) {
+                            String substring = readLine.substring(readLine.indexOf(":") + 1);
                             if (!TextUtils.isEmpty(substring)) {
                                 sCpuHardware = substring.trim();
                                 break;
@@ -327,44 +319,44 @@ public class DeviceInfoUtils {
                         }
                         readLine = bufferedReader.readLine();
                     }
-                    String str2 = sCpuHardware;
+                    String str = sCpuHardware;
                     closeQuietly(bufferedReader);
-                    closeQuietly(reader);
-                    return str2;
+                    closeQuietly(fileReader);
+                    return str;
                 } catch (IOException unused) {
                     closeQuietly(bufferedReader);
-                    closeQuietly(reader);
+                    closeQuietly(fileReader);
                     return null;
                 } catch (Throwable th) {
                     th = th;
                     closeQuietly(bufferedReader);
-                    closeQuietly(reader);
+                    closeQuietly(fileReader);
                     throw th;
                 }
             } catch (IOException unused2) {
                 bufferedReader = null;
                 closeQuietly(bufferedReader);
-                closeQuietly(reader);
+                closeQuietly(fileReader);
                 return null;
             } catch (Throwable th2) {
                 th = th2;
                 bufferedReader = null;
                 closeQuietly(bufferedReader);
-                closeQuietly(reader);
+                closeQuietly(fileReader);
                 throw th;
             }
         } catch (IOException unused3) {
-            reader = null;
+            fileReader = null;
             bufferedReader = null;
             closeQuietly(bufferedReader);
-            closeQuietly(reader);
+            closeQuietly(fileReader);
             return null;
         } catch (Throwable th3) {
             th = th3;
-            reader = null;
+            fileReader = null;
             bufferedReader = null;
             closeQuietly(bufferedReader);
-            closeQuietly(reader);
+            closeQuietly(fileReader);
             throw th;
         }
     }

@@ -25,7 +25,7 @@ public final class SingleFlatMapIterableFlowable<T, R> extends Flowable<R> {
         final Subscriber<? super R> actual;
         volatile boolean cancelled;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f334d;
         volatile Iterator<? extends R> it;
         final Function<? super T, ? extends Iterable<? extends R>> mapper;
@@ -47,7 +47,7 @@ public final class SingleFlatMapIterableFlowable<T, R> extends Flowable<R> {
             this.it = null;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 Subscriber<? super R> subscriber = this.actual;
@@ -172,7 +172,7 @@ public final class SingleFlatMapIterableFlowable<T, R> extends Flowable<R> {
             return 2;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(Subscriber<? super R> subscriber, Iterator<? extends R> it2) {
             while (!this.cancelled) {
                 try {

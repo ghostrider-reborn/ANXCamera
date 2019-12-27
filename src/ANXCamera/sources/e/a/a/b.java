@@ -37,7 +37,6 @@ public class b {
 
         public void run() {
             boolean z;
-            String str = b.TAG;
             b bVar = b.this;
             byte[] bArr = new byte[bVar.bufferSizeInBytes];
             bVar.Dq = false;
@@ -61,35 +60,33 @@ public class b {
                     int i = 0;
                     while (true) {
                         b bVar3 = b.this;
-                        if (!bVar3.isRecording) {
-                            break;
-                        }
-                        AudioRecord audioRecord = bVar3.audio;
-                        if (audioRecord != null) {
-                            i = audioRecord.read(bArr, 0, bVar3.bufferSizeInBytes);
-                        }
-                        if (-3 == i) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("bad audio buffer len ");
-                            sb.append(i);
-                            VELogUtil.e(str, sb.toString());
-                        } else if (i > 0) {
-                            try {
-                                if (b.this.isRecording) {
-                                    b.this.Cq.addPCMData(bArr, i);
+                        if (bVar3.isRecording) {
+                            AudioRecord audioRecord = bVar3.audio;
+                            if (audioRecord != null) {
+                                i = audioRecord.read(bArr, 0, bVar3.bufferSizeInBytes);
+                            }
+                            if (-3 == i) {
+                                VELogUtil.e(b.TAG, "bad audio buffer len " + i);
+                            } else if (i > 0) {
+                                try {
+                                    if (b.this.isRecording) {
+                                        b.this.Cq.addPCMData(bArr, i);
+                                    }
+                                    if (b.this.Bq.isProcessing() && !b.this.Dq) {
+                                        b.this.Bq.feed(bArr, i);
+                                    }
+                                } catch (Exception unused) {
                                 }
-                                if (b.this.Bq.isProcessing() && !b.this.Dq) {
-                                    b.this.Bq.feed(bArr, i);
+                            } else {
+                                AudioRecord audioRecord2 = b.this.audio;
+                                if (!(audioRecord2 == null || audioRecord2.getRecordingState() == 3 || z2)) {
+                                    b.this.Cq.recordStatus(false);
+                                    z2 = true;
                                 }
-                            } catch (Exception unused) {
+                                Thread.sleep(50);
                             }
                         } else {
-                            AudioRecord audioRecord2 = b.this.audio;
-                            if (!(audioRecord2 == null || audioRecord2.getRecordingState() == 3 || z2)) {
-                                b.this.Cq.recordStatus(false);
-                                z2 = true;
-                            }
-                            Thread.sleep(50);
+                            return;
                         }
                     }
                 }
@@ -101,10 +98,7 @@ public class b {
                 } catch (Exception unused2) {
                 }
                 b.this.audio = null;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("audio recording failed!");
-                sb2.append(e2);
-                VELogUtil.e(str, sb2.toString());
+                VELogUtil.e(b.TAG, "audio recording failed!" + e2);
             }
         }
     }
@@ -123,19 +117,6 @@ public class b {
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:20:?, code lost:
-        new java.lang.Thread(new e.a.a.b.a(r2, r3, r5)).start();
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:21:0x0042, code lost:
-        java.lang.Runtime.getRuntime().gc();
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:24:?, code lost:
-        java.lang.Thread.sleep(100);
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:25:0x004e, code lost:
-        java.lang.System.runFinalization();
-        new java.lang.Thread(new e.a.a.b.a(r2, r3, r5)).start();
-     */
     /* JADX WARNING: Code restructure failed: missing block: B:9:0x0019, code lost:
         return;
      */
@@ -156,23 +137,28 @@ public class b {
                     }
                 }
                 this.isRecording = true;
+                try {
+                    new Thread(new a(d2, z)).start();
+                } catch (OutOfMemoryError unused) {
+                    Runtime.getRuntime().gc();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException unused2) {
+                    }
+                    System.runFinalization();
+                    new Thread(new a(d2, z)).start();
+                }
             }
         }
     }
 
     public boolean a(double d2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("startFeeding() called with: speed = [");
-        sb.append(d2);
-        sb.append("]");
-        String sb2 = sb.toString();
-        String str = TAG;
-        VELogUtil.i(str, sb2);
+        VELogUtil.i(TAG, "startFeeding() called with: speed = [" + d2 + "]");
         if (this.isRecording) {
             AudioDataProcessThread audioDataProcessThread = this.Bq;
             if (audioDataProcessThread != null) {
                 if (audioDataProcessThread.isProcessing()) {
-                    VELogUtil.w(str, "startFeeding 失败，已经调用过一次了");
+                    VELogUtil.w(TAG, "startFeeding 失败，已经调用过一次了");
                     return false;
                 }
                 this.Dq = false;
@@ -180,7 +166,7 @@ public class b {
                 return true;
             }
         }
-        VELogUtil.w(str, "startFeeding 录音未启动，将先启动startRecording");
+        VELogUtil.w(TAG, "startFeeding 录音未启动，将先启动startRecording");
         a(d2, true);
         return true;
     }
@@ -221,10 +207,8 @@ public class b {
         int i7;
         String str2 = " ";
         this.Eq = i;
-        AudioRecord audioRecord = this.audio;
-        String str3 = TAG;
-        if (audioRecord != null) {
-            VELogUtil.e(str3, "second time audio init(), skip");
+        if (this.audio != null) {
+            VELogUtil.e(TAG, "second time audio init(), skip");
             return;
         }
         int i8 = -1;
@@ -233,18 +217,11 @@ public class b {
                 this.channelConfig = channelConfigSuggested[channelConfigOffset];
                 this.sampleRateInHz = sampleRateSuggested[sampleRateOffset];
                 this.bufferSizeInBytes = AudioRecord.getMinBufferSize(this.sampleRateInHz, this.channelConfig, this.audioFormat);
-                AudioRecord audioRecord2 = new AudioRecord(i, this.sampleRateInHz, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
-                this.audio = audioRecord2;
+                AudioRecord audioRecord = new AudioRecord(i, this.sampleRateInHz, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
+                this.audio = audioRecord;
             }
         } catch (Exception e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("使用预设配置");
-            sb.append(channelConfigOffset);
-            sb.append(",");
-            sb.append(sampleRateOffset);
-            sb.append("实例化audio recorder失败，重新测试配置。");
-            sb.append(e2);
-            VELogUtil.e(str3, sb.toString());
+            VELogUtil.e(TAG, "使用预设配置" + channelConfigOffset + "," + sampleRateOffset + "实例化audio recorder失败，重新测试配置。" + e2);
             this.Cq.lackPermission();
         }
         int i9 = 1;
@@ -275,31 +252,22 @@ public class b {
                     sampleRateOffset += i9;
                     try {
                         this.bufferSizeInBytes = AudioRecord.getMinBufferSize(i12, this.channelConfig, this.audioFormat);
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("试用hz ");
-                        sb2.append(i12);
-                        sb2.append(str2);
-                        sb2.append(this.channelConfig);
-                        sb2.append(str2);
-                        sb2.append(this.audioFormat);
-                        VELogUtil.e(str3, sb2.toString());
+                        VELogUtil.e(TAG, "试用hz " + i12 + str2 + this.channelConfig + str2 + this.audioFormat);
                         if (this.bufferSizeInBytes > 0) {
                             this.sampleRateInHz = i12;
                             int i13 = this.sampleRateInHz;
-                            int i14 = this.channelConfig;
-                            int i15 = i13;
+                            int i14 = i13;
                             r3 = r3;
                             str = str2;
                             i7 = i12;
                             i4 = i11;
-                            int i16 = i15;
+                            int i15 = i14;
                             i5 = length2;
-                            int i17 = i14;
                             iArr = iArr3;
                             i3 = i10;
                             try {
-                                AudioRecord audioRecord3 = new AudioRecord(i, i16, i17, this.audioFormat, this.bufferSizeInBytes);
-                                this.audio = audioRecord3;
+                                AudioRecord audioRecord2 = new AudioRecord(i, i15, this.channelConfig, this.audioFormat, this.bufferSizeInBytes);
+                                this.audio = audioRecord2;
                                 i2 = 1;
                                 z = true;
                                 break;
@@ -307,14 +275,9 @@ public class b {
                                 e = e3;
                                 this.sampleRateInHz = 0;
                                 this.audio = null;
-                                StringBuilder sb3 = new StringBuilder();
-                                sb3.append("apply audio record sample rate ");
-                                sb3.append(i7);
-                                sb3.append(" failed: ");
-                                sb3.append(e.getMessage());
-                                VELogUtil.e(str3, sb3.toString());
+                                VELogUtil.e(TAG, "apply audio record sample rate " + i7 + " failed: " + e.getMessage());
                                 i6 = 1;
-                                sampleRateOffset++;
+                                sampleRateOffset = sampleRateOffset + 1;
                                 i11 = i4 + 1;
                                 i9 = i6;
                                 iArr3 = iArr;
@@ -324,7 +287,7 @@ public class b {
                             }
                         } else {
                             str = str2;
-                            int i18 = i12;
+                            int i16 = i12;
                             i4 = i11;
                             i5 = length2;
                             iArr = iArr3;
@@ -348,14 +311,9 @@ public class b {
                         i3 = i10;
                         this.sampleRateInHz = 0;
                         this.audio = null;
-                        StringBuilder sb32 = new StringBuilder();
-                        sb32.append("apply audio record sample rate ");
-                        sb32.append(i7);
-                        sb32.append(" failed: ");
-                        sb32.append(e.getMessage());
-                        VELogUtil.e(str3, sb32.toString());
+                        VELogUtil.e(TAG, "apply audio record sample rate " + i7 + " failed: " + e.getMessage());
                         i6 = 1;
-                        sampleRateOffset++;
+                        sampleRateOffset = sampleRateOffset + 1;
                         i11 = i4 + 1;
                         i9 = i6;
                         iArr3 = iArr;
@@ -373,24 +331,14 @@ public class b {
                 i8 = -1;
             }
             if (this.sampleRateInHz > 0) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append("!Init audio recorder failed, hz ");
-                sb4.append(this.sampleRateInHz);
-                VELogUtil.e(str3, sb4.toString());
+                VELogUtil.e(TAG, "!Init audio recorder failed, hz " + this.sampleRateInHz);
                 return;
             }
             if (this.channelConfig != 16) {
                 i2 = 2;
             }
             this.Cq.initAudioConfig(this.sampleRateInHz, i2);
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("Init audio recorder succeed, apply audio record sample rate ");
-            sb5.append(this.sampleRateInHz);
-            sb5.append(" buffer ");
-            sb5.append(this.bufferSizeInBytes);
-            sb5.append(" state ");
-            sb5.append(this.audio.getState());
-            VELogUtil.e(str3, sb5.toString());
+            VELogUtil.e(TAG, "Init audio recorder succeed, apply audio record sample rate " + this.sampleRateInHz + " buffer " + this.bufferSizeInBytes + " state " + this.audio.getState());
             return;
         }
         i2 = i9;
@@ -403,24 +351,23 @@ public class b {
     }
 
     public boolean stopFeeding() {
-        String str = TAG;
-        VELogUtil.i(str, "stopFeeding() called");
+        VELogUtil.i(TAG, "stopFeeding() called");
         if (!this.isRecording || this.audio != null) {
             if (this.isRecording) {
                 AudioDataProcessThread audioDataProcessThread = this.Bq;
                 if (audioDataProcessThread != null) {
                     if (!audioDataProcessThread.isProcessing()) {
-                        VELogUtil.e(str, "stopFeeding 失败，请先startFeeding再stopFeeding");
+                        VELogUtil.e(TAG, "stopFeeding 失败，请先startFeeding再stopFeeding");
                         return false;
                     }
                     this.Bq.stopFeeding();
                     return true;
                 }
             }
-            VELogUtil.e(str, "stopFeeding 失败，请先调用startRecording");
+            VELogUtil.e(TAG, "stopFeeding 失败，请先调用startRecording");
             return false;
         }
-        VELogUtil.e(str, "stopFeeding: 状态异常，重置状态");
+        VELogUtil.e(TAG, "stopFeeding: 状态异常，重置状态");
         this.isRecording = false;
         this.Dq = true;
         AudioDataProcessThread audioDataProcessThread2 = this.Bq;
@@ -430,7 +377,7 @@ public class b {
         return false;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:18:0x0035, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:17:0x0034, code lost:
         return true;
      */
     public boolean stopRecording() {

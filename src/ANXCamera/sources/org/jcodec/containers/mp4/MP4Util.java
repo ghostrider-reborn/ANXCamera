@@ -92,10 +92,7 @@ public class MP4Util {
         try {
             fileChannelWrapper = NIOUtils.readableChannel(file);
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append("file://");
-                sb.append(file.getCanonicalPath());
-                Movie createRefFullMovie = createRefFullMovie(fileChannelWrapper, sb.toString());
+                Movie createRefFullMovie = createRefFullMovie(fileChannelWrapper, "file://" + file.getCanonicalPath());
                 if (fileChannelWrapper != null) {
                     fileChannelWrapper.close();
                 }
@@ -131,10 +128,7 @@ public class MP4Util {
         try {
             fileChannelWrapper = NIOUtils.readableChannel(file);
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append("file://");
-                sb.append(file.getCanonicalPath());
-                MovieBox createRefMovie = createRefMovie(fileChannelWrapper, sb.toString());
+                MovieBox createRefMovie = createRefMovie(fileChannelWrapper, "file://" + file.getCanonicalPath());
                 if (fileChannelWrapper != null) {
                     fileChannelWrapper.close();
                 }
@@ -175,9 +169,9 @@ public class MP4Util {
     }
 
     public static Atom findFirstAtom(String str, SeekableByteChannel seekableByteChannel) throws IOException {
-        for (Atom atom : getRootAtoms(seekableByteChannel)) {
-            if (str.equals(atom.getHeader().getFourcc())) {
-                return atom;
+        for (Atom next : getRootAtoms(seekableByteChannel)) {
+            if (str.equals(next.getHeader().getFourcc())) {
+                return next;
             }
         }
         return null;
@@ -228,13 +222,11 @@ public class MP4Util {
 
     public static Movie parseFullMovieChannel(SeekableByteChannel seekableByteChannel) throws IOException {
         FileTypeBox fileTypeBox = null;
-        for (Atom atom : getRootAtoms(seekableByteChannel)) {
-            if ("ftyp".equals(atom.getHeader().getFourcc())) {
-                fileTypeBox = (FileTypeBox) atom.parseBox(seekableByteChannel);
-            } else {
-                if ("moov".equals(atom.getHeader().getFourcc())) {
-                    return new Movie(fileTypeBox, (MovieBox) atom.parseBox(seekableByteChannel));
-                }
+        for (Atom next : getRootAtoms(seekableByteChannel)) {
+            if ("ftyp".equals(next.getHeader().getFourcc())) {
+                fileTypeBox = (FileTypeBox) next.parseBox(seekableByteChannel);
+            } else if ("moov".equals(next.getHeader().getFourcc())) {
+                return new Movie(fileTypeBox, (MovieBox) next.parseBox(seekableByteChannel));
             }
         }
         return null;
@@ -268,9 +260,9 @@ public class MP4Util {
     }
 
     public static MovieBox parseMovieChannel(SeekableByteChannel seekableByteChannel) throws IOException {
-        for (Atom atom : getRootAtoms(seekableByteChannel)) {
-            if ("moov".equals(atom.getHeader().getFourcc())) {
-                return (MovieBox) atom.parseBox(seekableByteChannel);
+        for (Atom next : getRootAtoms(seekableByteChannel)) {
+            if ("moov".equals(next.getHeader().getFourcc())) {
+                return (MovieBox) next.parseBox(seekableByteChannel);
             }
         }
         return null;
@@ -279,13 +271,11 @@ public class MP4Util {
     public static List<MovieFragmentBox> parseMovieFragments(SeekableByteChannel seekableByteChannel) throws IOException {
         LinkedList linkedList = new LinkedList();
         MovieBox movieBox = null;
-        for (Atom atom : getRootAtoms(seekableByteChannel)) {
-            if ("moov".equals(atom.getHeader().getFourcc())) {
-                movieBox = (MovieBox) atom.parseBox(seekableByteChannel);
-            } else {
-                if ("moof".equalsIgnoreCase(atom.getHeader().getFourcc())) {
-                    linkedList.add((MovieFragmentBox) atom.parseBox(seekableByteChannel));
-                }
+        for (Atom next : getRootAtoms(seekableByteChannel)) {
+            if ("moov".equals(next.getHeader().getFourcc())) {
+                movieBox = (MovieBox) next.parseBox(seekableByteChannel);
+            } else if ("moof".equalsIgnoreCase(next.getHeader().getFourcc())) {
+                linkedList.add((MovieFragmentBox) next.parseBox(seekableByteChannel));
             }
         }
         Iterator it = linkedList.iterator();

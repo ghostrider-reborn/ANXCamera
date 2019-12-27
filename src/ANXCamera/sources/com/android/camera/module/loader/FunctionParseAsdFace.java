@@ -3,7 +3,7 @@ package com.android.camera.module.loader;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.params.Face;
 import com.android.camera.effect.FaceAnalyzeInfo;
-import com.android.camera2.Camera2Proxy.FaceDetectionCallback;
+import com.android.camera2.Camera2Proxy;
 import com.android.camera2.CameraHardwareFace;
 import com.android.camera2.vendortag.CaptureResultVendorTags;
 import com.android.camera2.vendortag.VendorTagHelper;
@@ -11,18 +11,18 @@ import io.reactivex.functions.Function;
 import java.lang.ref.WeakReference;
 
 public class FunctionParseAsdFace implements Function<CaptureResult, CaptureResult> {
-    private WeakReference<FaceDetectionCallback> mFaceCallbackReference;
+    private WeakReference<Camera2Proxy.FaceDetectionCallback> mFaceCallbackReference;
     private FaceAnalyzeInfo mFaceInfo;
     private boolean mNeedFaceInfo;
 
-    public FunctionParseAsdFace(FaceDetectionCallback faceDetectionCallback, boolean z) {
+    public FunctionParseAsdFace(Camera2Proxy.FaceDetectionCallback faceDetectionCallback, boolean z) {
         this.mFaceCallbackReference = new WeakReference<>(faceDetectionCallback);
         this.mNeedFaceInfo = z;
     }
 
     public CaptureResult apply(CaptureResult captureResult) throws Exception {
         CameraHardwareFace[] cameraHardwareFaceArr;
-        FaceDetectionCallback faceDetectionCallback = (FaceDetectionCallback) this.mFaceCallbackReference.get();
+        Camera2Proxy.FaceDetectionCallback faceDetectionCallback = (Camera2Proxy.FaceDetectionCallback) this.mFaceCallbackReference.get();
         if (faceDetectionCallback == null || !faceDetectionCallback.isFaceDetectStarted()) {
             return captureResult;
         }

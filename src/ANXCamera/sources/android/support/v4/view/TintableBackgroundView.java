@@ -1,7 +1,7 @@
 package android.support.v4.view;
 
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.support.annotation.Nullable;
 
 public interface TintableBackgroundView {
@@ -9,9 +9,9 @@ public interface TintableBackgroundView {
     ColorStateList getSupportBackgroundTintList();
 
     @Nullable
-    Mode getSupportBackgroundTintMode();
+    PorterDuff.Mode getSupportBackgroundTintMode();
 
     void setSupportBackgroundTintList(@Nullable ColorStateList colorStateList);
 
-    void setSupportBackgroundTintMode(@Nullable Mode mode);
+    void setSupportBackgroundTintMode(@Nullable PorterDuff.Mode mode);
 }

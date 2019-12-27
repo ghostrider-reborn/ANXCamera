@@ -23,6 +23,7 @@ public class ComponentConfigHdr extends ComponentData {
 
     public ComponentConfigHdr(DataItemConfig dataItemConfig) {
         super(dataItemConfig);
+        this.mItems = new ArrayList();
         this.mItems.add(new ComponentDataItem(getConfigHDROffRes(), getConfigHDROffRes(), (int) R.string.pref_camera_hdr_entry_off, "off"));
     }
 
@@ -47,50 +48,43 @@ public class ComponentConfigHdr extends ComponentData {
     }
 
     public String getComponentValue(int i) {
-        String str = "off";
-        return (!isClosed() && !isEmpty()) ? super.getComponentValue(i) : str;
+        return (!isClosed() && !isEmpty()) ? super.getComponentValue(i) : "off";
     }
 
     public String getDefaultValue(int i) {
-        String str = "off";
         if (isClosed() || isEmpty() || CameraSettings.isFrontCamera()) {
-            return str;
+            return "off";
         }
         String Ea = DataRepository.dataItemFeature().Ea();
         String string = CameraAppImpl.getAndroidContext().getResources().getString(R.string.pref_hdr_value_default);
         if (TextUtils.isEmpty(Ea)) {
             Ea = string;
         }
-        String str2 = "auto";
         if (!TextUtils.isEmpty(Ea)) {
             char c2 = 65535;
             int hashCode = Ea.hashCode();
-            String str3 = "on";
             if (hashCode != 3551) {
                 if (hashCode != 109935) {
-                    if (hashCode == 3005871 && Ea.equals(str2)) {
+                    if (hashCode == 3005871 && Ea.equals("auto")) {
                         c2 = 0;
                     }
-                } else if (Ea.equals(str)) {
+                } else if (Ea.equals("off")) {
                     c2 = 2;
                 }
-            } else if (Ea.equals(str3)) {
+            } else if (Ea.equals("on")) {
                 c2 = 1;
             }
             if (c2 == 0) {
-                if (this.mAutoSupported) {
-                    str = str2;
-                }
-                return str;
-            } else if (c2 == 1) {
-                return str3;
-            } else {
-                if (c2 == 2) {
-                    return str;
-                }
+                return this.mAutoSupported ? "auto" : "off";
+            }
+            if (c2 == 1) {
+                return "on";
+            }
+            if (c2 == 2) {
+                return "off";
             }
         }
-        return this.mAutoSupported ? str2 : str;
+        return this.mAutoSupported ? "auto" : "off";
     }
 
     public int getDisplayTitleString() {
@@ -177,12 +171,11 @@ public class ComponentConfigHdr extends ComponentData {
                 this.mAutoSupported = true;
                 this.mItems.add(new ComponentDataItem(getConfigHDRAutoRes(), getConfigHDRAutoRes(), (int) R.string.pref_camera_hdr_entry_auto, "auto"));
             }
-            String str = "normal";
             if (b.tm || !b.Yi()) {
-                this.mItems.add(new ComponentDataItem(getConfigHDRNormalRes(), getConfigHDRNormalRes(), (int) R.string.pref_simple_hdr_entry_on, str));
+                this.mItems.add(new ComponentDataItem(getConfigHDRNormalRes(), getConfigHDRNormalRes(), (int) R.string.pref_simple_hdr_entry_on, "normal"));
             } else {
                 if (!b.IS_MI2A) {
-                    this.mItems.add(new ComponentDataItem(getConfigHDRNormalRes(), getConfigHDRNormalRes(), (int) R.string.pref_camera_hdr_entry_normal, str));
+                    this.mItems.add(new ComponentDataItem(getConfigHDRNormalRes(), getConfigHDRNormalRes(), (int) R.string.pref_camera_hdr_entry_normal, "normal"));
                 }
                 this.mItems.add(new ComponentDataItem(getConfigHDRLiveRes(), getConfigHDRLiveRes(), (int) R.string.pref_camera_hdr_entry_live, "live"));
             }

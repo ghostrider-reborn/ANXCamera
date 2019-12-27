@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,13 +35,9 @@ public final class SessionCommandGroup2 {
             for (int i = 0; i < fields.length; i++) {
                 if (fields[i].getName().startsWith(str) && !fields[i].getName().equals("COMMAND_CODE_CUSTOM")) {
                     try {
-                        this.mCommands.add(new SessionCommand2(fields[i].getInt(null)));
+                        this.mCommands.add(new SessionCommand2(fields[i].getInt((Object) null)));
                     } catch (IllegalAccessException unused) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Unexpected ");
-                        sb.append(fields[i]);
-                        sb.append(" in MediaSession2");
-                        Log.w(TAG, sb.toString());
+                        Log.w(TAG, "Unexpected " + fields[i] + " in MediaSession2");
                     }
                 }
             }
@@ -50,7 +45,7 @@ public final class SessionCommandGroup2 {
     }
 
     @Nullable
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public static SessionCommandGroup2 fromBundle(Bundle bundle) {
         if (bundle == null) {
             return null;
@@ -72,12 +67,12 @@ public final class SessionCommandGroup2 {
         return sessionCommandGroup2;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addAllPlaybackCommands() {
         addCommandsWithPrefix(PREFIX_COMMAND_CODE_PLAYBACK);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addAllPlaylistCommands() {
         addCommandsWithPrefix(PREFIX_COMMAND_CODE_PLAYLIST);
     }
@@ -86,7 +81,7 @@ public final class SessionCommandGroup2 {
         addCommandsWithPrefix(PREFIX_COMMAND_CODE);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addAllVolumeCommands() {
         addCommandsWithPrefix(PREFIX_COMMAND_CODE_VOLUME);
     }
@@ -147,7 +142,7 @@ public final class SessionCommandGroup2 {
         throw new IllegalArgumentException("command shouldn't be null");
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @NonNull
     public Bundle toBundle() {
         ArrayList arrayList = new ArrayList();

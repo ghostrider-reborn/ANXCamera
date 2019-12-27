@@ -41,12 +41,7 @@ public class LensliteUiController {
     }
 
     public boolean onFocusChange(@FocusType int i, PointF pointF) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onFocusChange: type = ");
-        sb.append(i);
-        sb.append(", focusLocation = ");
-        sb.append(pointF);
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "onFocusChange: type = " + i + ", focusLocation = " + pointF);
         return false;
     }
 

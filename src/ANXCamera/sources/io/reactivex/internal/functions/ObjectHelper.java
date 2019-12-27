@@ -59,21 +59,13 @@ public final class ObjectHelper {
         if (i > 0) {
             return i;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" > 0 required but it was ");
-        sb.append(i);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(str + " > 0 required but it was " + i);
     }
 
     public static long verifyPositive(long j, String str) {
         if (j > 0) {
             return j;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" > 0 required but it was ");
-        sb.append(j);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(str + " > 0 required but it was " + j);
     }
 }

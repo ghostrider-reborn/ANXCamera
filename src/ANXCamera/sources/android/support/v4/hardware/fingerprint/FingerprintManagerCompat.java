@@ -2,7 +2,7 @@ package android.support.v4.hardware.fingerprint;
 
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -100,8 +100,7 @@ public final class FingerprintManagerCompat {
     }
 
     @RequiresApi(23)
-    static CryptoObject unwrapCryptoObject(android.hardware.fingerprint.FingerprintManager.CryptoObject cryptoObject) {
-        CryptoObject cryptoObject2 = null;
+    static CryptoObject unwrapCryptoObject(FingerprintManager.CryptoObject cryptoObject) {
         if (cryptoObject == null) {
             return null;
         }
@@ -112,14 +111,14 @@ public final class FingerprintManagerCompat {
             return new CryptoObject(cryptoObject.getSignature());
         }
         if (cryptoObject.getMac() != null) {
-            cryptoObject2 = new CryptoObject(cryptoObject.getMac());
+            return new CryptoObject(cryptoObject.getMac());
         }
-        return cryptoObject2;
+        return null;
     }
 
     @RequiresApi(23)
-    private static android.hardware.fingerprint.FingerprintManager.AuthenticationCallback wrapCallback(final AuthenticationCallback authenticationCallback) {
-        return new android.hardware.fingerprint.FingerprintManager.AuthenticationCallback() {
+    private static FingerprintManager.AuthenticationCallback wrapCallback(final AuthenticationCallback authenticationCallback) {
+        return new FingerprintManager.AuthenticationCallback() {
             public void onAuthenticationError(int i, CharSequence charSequence) {
                 authenticationCallback.onAuthenticationError(i, charSequence);
             }
@@ -132,33 +131,32 @@ public final class FingerprintManagerCompat {
                 authenticationCallback.onAuthenticationHelp(i, charSequence);
             }
 
-            public void onAuthenticationSucceeded(android.hardware.fingerprint.FingerprintManager.AuthenticationResult authenticationResult) {
+            public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult authenticationResult) {
                 authenticationCallback.onAuthenticationSucceeded(new AuthenticationResult(FingerprintManagerCompat.unwrapCryptoObject(authenticationResult.getCryptoObject())));
             }
         };
     }
 
     @RequiresApi(23)
-    private static android.hardware.fingerprint.FingerprintManager.CryptoObject wrapCryptoObject(CryptoObject cryptoObject) {
-        android.hardware.fingerprint.FingerprintManager.CryptoObject cryptoObject2 = null;
+    private static FingerprintManager.CryptoObject wrapCryptoObject(CryptoObject cryptoObject) {
         if (cryptoObject == null) {
             return null;
         }
         if (cryptoObject.getCipher() != null) {
-            return new android.hardware.fingerprint.FingerprintManager.CryptoObject(cryptoObject.getCipher());
+            return new FingerprintManager.CryptoObject(cryptoObject.getCipher());
         }
         if (cryptoObject.getSignature() != null) {
-            return new android.hardware.fingerprint.FingerprintManager.CryptoObject(cryptoObject.getSignature());
+            return new FingerprintManager.CryptoObject(cryptoObject.getSignature());
         }
         if (cryptoObject.getMac() != null) {
-            cryptoObject2 = new android.hardware.fingerprint.FingerprintManager.CryptoObject(cryptoObject.getMac());
+            return new FingerprintManager.CryptoObject(cryptoObject.getMac());
         }
-        return cryptoObject2;
+        return null;
     }
 
     @RequiresPermission("android.permission.USE_FINGERPRINT")
     public void authenticate(@Nullable CryptoObject cryptoObject, int i, @Nullable CancellationSignal cancellationSignal, @NonNull AuthenticationCallback authenticationCallback, @Nullable Handler handler) {
-        if (VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             FingerprintManager fingerprintManagerOrNull = getFingerprintManagerOrNull(this.mContext);
             if (fingerprintManagerOrNull != null) {
                 fingerprintManagerOrNull.authenticate(wrapCryptoObject(cryptoObject), cancellationSignal != null ? (android.os.CancellationSignal) cancellationSignal.getCancellationSignalObject() : null, i, wrapCallback(authenticationCallback), handler);
@@ -168,7 +166,7 @@ public final class FingerprintManagerCompat {
 
     @RequiresPermission("android.permission.USE_FINGERPRINT")
     public boolean hasEnrolledFingerprints() {
-        if (VERSION.SDK_INT < 23) {
+        if (Build.VERSION.SDK_INT < 23) {
             return false;
         }
         FingerprintManager fingerprintManagerOrNull = getFingerprintManagerOrNull(this.mContext);
@@ -177,7 +175,7 @@ public final class FingerprintManagerCompat {
 
     @RequiresPermission("android.permission.USE_FINGERPRINT")
     public boolean isHardwareDetected() {
-        if (VERSION.SDK_INT < 23) {
+        if (Build.VERSION.SDK_INT < 23) {
             return false;
         }
         FingerprintManager fingerprintManagerOrNull = getFingerprintManagerOrNull(this.mContext);

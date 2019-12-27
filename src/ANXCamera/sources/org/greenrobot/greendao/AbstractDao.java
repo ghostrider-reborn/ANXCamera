@@ -30,7 +30,7 @@ public abstract class AbstractDao<T, K> {
     protected final TableStatements statements;
 
     public AbstractDao(DaoConfig daoConfig) {
-        this(daoConfig, null);
+        this(daoConfig, (AbstractDaoSession) null);
     }
 
     public AbstractDao(DaoConfig daoConfig, AbstractDaoSession abstractDaoSession) {
@@ -90,7 +90,7 @@ public abstract class AbstractDao<T, K> {
                     }
                 }
                 if (iterable2 != null) {
-                    for (Object next : iterable2) {
+                    for (K next : iterable2) {
                         deleteByKeyInsideSynchronized(next, deleteStatement);
                         if (arrayList != null) {
                             arrayList.add(next);
@@ -103,7 +103,7 @@ public abstract class AbstractDao<T, K> {
             }
             this.db.setTransactionSuccessful();
             if (!(arrayList == null || this.identityScope == null)) {
-                this.identityScope.remove((Iterable<K>) arrayList);
+                this.identityScope.remove(arrayList);
             }
         } finally {
             this.db.endTransaction();
@@ -139,8 +139,8 @@ public abstract class AbstractDao<T, K> {
                 try {
                     if (this.isStandardSQLite) {
                         SQLiteStatement sQLiteStatement = (SQLiteStatement) databaseStatement.getRawStatement();
-                        for (Object next : iterable) {
-                            bindValues(sQLiteStatement, (T) next);
+                        for (T next : iterable) {
+                            bindValues(sQLiteStatement, next);
                             if (z) {
                                 updateKeyAfterInsertAndAttach(next, sQLiteStatement.executeInsert(), false);
                             } else {
@@ -148,8 +148,8 @@ public abstract class AbstractDao<T, K> {
                             }
                         }
                     } else {
-                        for (Object next2 : iterable) {
-                            bindValues(databaseStatement, (T) next2);
+                        for (T next2 : iterable) {
+                            bindValues(databaseStatement, next2);
                             if (z) {
                                 updateKeyAfterInsertAndAttach(next2, databaseStatement.executeInsert(), false);
                             } else {
@@ -215,12 +215,7 @@ public abstract class AbstractDao<T, K> {
     /* access modifiers changed from: protected */
     public void assertSinglePk() {
         if (this.config.pkColumns.length != 1) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(this);
-            sb.append(" (");
-            sb.append(this.config.tablename);
-            sb.append(") does not have a single-column primary key");
-            throw new DaoException(sb.toString());
+            throw new DaoException(this + " (" + this.config.tablename + ") does not have a single-column primary key");
         }
     }
 
@@ -258,11 +253,7 @@ public abstract class AbstractDao<T, K> {
 
     public void deleteAll() {
         Database database = this.db;
-        StringBuilder sb = new StringBuilder();
-        sb.append("DELETE FROM '");
-        sb.append(this.config.tablename);
-        sb.append("'");
-        database.execSQL(sb.toString());
+        database.execSQL("DELETE FROM '" + this.config.tablename + "'");
         IdentityScope<K, T> identityScope2 = this.identityScope;
         if (identityScope2 != null) {
             identityScope2.clear();
@@ -296,19 +287,19 @@ public abstract class AbstractDao<T, K> {
     }
 
     public void deleteByKeyInTx(Iterable<K> iterable) {
-        deleteInTxInternal(null, iterable);
+        deleteInTxInternal((Iterable) null, iterable);
     }
 
     public void deleteByKeyInTx(K... kArr) {
-        deleteInTxInternal(null, Arrays.asList(kArr));
+        deleteInTxInternal((Iterable) null, Arrays.asList(kArr));
     }
 
     public void deleteInTx(Iterable<T> iterable) {
-        deleteInTxInternal(iterable, null);
+        deleteInTxInternal(iterable, (Iterable) null);
     }
 
     public void deleteInTx(T... tArr) {
-        deleteInTxInternal(Arrays.asList(tArr), null);
+        deleteInTxInternal(Arrays.asList(tArr), (Iterable) null);
     }
 
     public boolean detach(T t) {
@@ -368,7 +359,7 @@ public abstract class AbstractDao<T, K> {
         return this.session;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public TableStatements getStatements() {
         return this.config.statements;
     }
@@ -435,7 +426,7 @@ public abstract class AbstractDao<T, K> {
     }
 
     public List<T> loadAll() {
-        return loadAllAndCloseCursor(this.db.rawQuery(this.statements.getSelectAll(), null));
+        return loadAllAndCloseCursor(this.db.rawQuery(this.statements.getSelectAll(), (String[]) null));
     }
 
     /* access modifiers changed from: protected */
@@ -497,12 +488,7 @@ public abstract class AbstractDao<T, K> {
                     }
                     return arrayList;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("Window vs. result size: ");
-                sb.append(cursorWindow.getNumRows());
-                sb.append("/");
-                sb.append(count);
-                DaoLog.d(sb.toString());
+                DaoLog.d("Window vs. result size: " + cursorWindow.getNumRows() + "/" + count);
             }
         }
         z = false;
@@ -570,10 +556,7 @@ public abstract class AbstractDao<T, K> {
         if (cursor.isLast()) {
             return loadCurrent(cursor, 0, true);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Expected unique result, but count was ");
-        sb.append(cursor.getCount());
-        throw new DaoException(sb.toString());
+        throw new DaoException("Expected unique result, but count was " + cursor.getCount());
     }
 
     /* access modifiers changed from: protected */
@@ -591,10 +574,7 @@ public abstract class AbstractDao<T, K> {
 
     public List<T> queryRaw(String str, String... strArr) {
         Database database = this.db;
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.statements.getSelectAll());
-        sb.append(str);
-        return loadAllAndCloseCursor(database.rawQuery(sb.toString(), strArr));
+        return loadAllAndCloseCursor(database.rawQuery(this.statements.getSelectAll() + str, strArr));
     }
 
     public Query<T> queryRawCreate(String str, Object... objArr) {
@@ -602,10 +582,7 @@ public abstract class AbstractDao<T, K> {
     }
 
     public Query<T> queryRawCreateListArgs(String str, Collection<Object> collection) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.statements.getSelectAll());
-        sb.append(str);
-        return Query.internalCreate(this, sb.toString(), collection.toArray());
+        return Query.internalCreate(this, this.statements.getSelectAll() + str, collection.toArray());
     }
 
     /* access modifiers changed from: protected */
@@ -623,20 +600,12 @@ public abstract class AbstractDao<T, K> {
         Cursor rawQuery = this.db.rawQuery(this.statements.getSelectByKey(), new String[]{keyVerified.toString()});
         try {
             if (!rawQuery.moveToFirst()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Entity does not exist in the database anymore: ");
-                sb.append(t.getClass());
-                sb.append(" with key ");
-                sb.append(keyVerified);
-                throw new DaoException(sb.toString());
+                throw new DaoException("Entity does not exist in the database anymore: " + t.getClass() + " with key " + keyVerified);
             } else if (rawQuery.isLast()) {
                 readEntity(rawQuery, t, 0);
                 attachEntity(keyVerified, t, true);
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Expected unique result, but count was ");
-                sb2.append(rawQuery.getCount());
-                throw new DaoException(sb2.toString());
+                throw new DaoException("Expected unique result, but count was " + rawQuery.getCount());
             }
         } finally {
             rawQuery.close();
@@ -664,7 +633,7 @@ public abstract class AbstractDao<T, K> {
         if (i > 0 && i2 > 0) {
             ArrayList arrayList = new ArrayList(i);
             ArrayList arrayList2 = new ArrayList(i2);
-            for (Object next : iterable) {
+            for (T next : iterable) {
                 if (hasKey(next)) {
                     arrayList.add(next);
                 } else {
@@ -673,8 +642,8 @@ public abstract class AbstractDao<T, K> {
             }
             this.db.beginTransaction();
             try {
-                updateInTx((Iterable<T>) arrayList);
-                insertInTx((Iterable<T>) arrayList2);
+                updateInTx(arrayList);
+                insertInTx(arrayList2);
                 this.db.setTransactionSuccessful();
             } finally {
                 this.db.endTransaction();
@@ -687,7 +656,7 @@ public abstract class AbstractDao<T, K> {
     }
 
     public void saveInTx(T... tArr) {
-        saveInTx((Iterable<T>) Arrays.asList(tArr));
+        saveInTx(Arrays.asList(tArr));
     }
 
     public void update(T t) {
@@ -717,7 +686,7 @@ public abstract class AbstractDao<T, K> {
     }
 
     public void updateInTx(Iterable<T> iterable) {
-        Throwable th;
+        RuntimeException runtimeException;
         DatabaseStatement updateStatement = this.statements.getUpdateStatement();
         this.db.beginTransaction();
         try {
@@ -744,23 +713,26 @@ public abstract class AbstractDao<T, K> {
             }
             this.db.setTransactionSuccessful();
             try {
-                th = null;
-                if (th != null) {
-                    throw th;
+                this.db.endTransaction();
+                runtimeException = null;
+                if (runtimeException != null) {
+                    throw runtimeException;
                 }
             } catch (RuntimeException e2) {
                 throw e2;
             }
         } catch (RuntimeException e3) {
             try {
-                th = e3;
+                this.db.endTransaction();
+                runtimeException = e3;
             } catch (RuntimeException e4) {
                 DaoLog.w("Could not end transaction (rethrowing initial exception)", e4);
                 throw e3;
             }
-        } finally {
+        } catch (Throwable th) {
             try {
                 this.db.endTransaction();
+                throw th;
             } catch (RuntimeException e5) {
                 throw e5;
             }
@@ -768,7 +740,7 @@ public abstract class AbstractDao<T, K> {
     }
 
     public void updateInTx(T... tArr) {
-        updateInTx((Iterable<T>) Arrays.asList(tArr));
+        updateInTx(Arrays.asList(tArr));
     }
 
     /* access modifiers changed from: protected */

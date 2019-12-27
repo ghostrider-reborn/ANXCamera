@@ -5,14 +5,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -30,7 +29,7 @@ public class ListFragment extends Fragment {
     ListView mList;
     View mListContainer;
     boolean mListShown;
-    private final OnItemClickListener mOnClickListener = new OnItemClickListener() {
+    private final AdapterView.OnItemClickListener mOnClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
             ListFragment.this.onListItemClick((ListView) adapterView, view, i, j);
         }
@@ -112,17 +111,17 @@ public class ListFragment extends Fragment {
                 }
                 this.mProgressContainer.setVisibility(8);
                 this.mListContainer.setVisibility(0);
-            } else {
-                if (z2) {
-                    view.startAnimation(AnimationUtils.loadAnimation(getContext(), 17432576));
-                    this.mListContainer.startAnimation(AnimationUtils.loadAnimation(getContext(), 17432577));
-                } else {
-                    view.clearAnimation();
-                    this.mListContainer.clearAnimation();
-                }
-                this.mProgressContainer.setVisibility(0);
-                this.mListContainer.setVisibility(8);
+                return;
             }
+            if (z2) {
+                view.startAnimation(AnimationUtils.loadAnimation(getContext(), 17432576));
+                this.mListContainer.startAnimation(AnimationUtils.loadAnimation(getContext(), 17432577));
+            } else {
+                view.clearAnimation();
+                this.mListContainer.clearAnimation();
+            }
+            this.mProgressContainer.setVisibility(0);
+            this.mListContainer.setVisibility(8);
         }
     }
 
@@ -153,20 +152,20 @@ public class ListFragment extends Fragment {
         linearLayout.setOrientation(1);
         linearLayout.setVisibility(8);
         linearLayout.setGravity(17);
-        linearLayout.addView(new ProgressBar(context, null, 16842874), new LayoutParams(-2, -2));
-        frameLayout.addView(linearLayout, new LayoutParams(-1, -1));
+        linearLayout.addView(new ProgressBar(context, (AttributeSet) null, 16842874), new FrameLayout.LayoutParams(-2, -2));
+        frameLayout.addView(linearLayout, new FrameLayout.LayoutParams(-1, -1));
         FrameLayout frameLayout2 = new FrameLayout(context);
         frameLayout2.setId(INTERNAL_LIST_CONTAINER_ID);
         TextView textView = new TextView(context);
         textView.setId(INTERNAL_EMPTY_ID);
         textView.setGravity(17);
-        frameLayout2.addView(textView, new LayoutParams(-1, -1));
+        frameLayout2.addView(textView, new FrameLayout.LayoutParams(-1, -1));
         ListView listView = new ListView(context);
         listView.setId(16908298);
         listView.setDrawSelectorOnTop(false);
-        frameLayout2.addView(listView, new LayoutParams(-1, -1));
-        frameLayout.addView(frameLayout2, new LayoutParams(-1, -1));
-        frameLayout.setLayoutParams(new LayoutParams(-1, -1));
+        frameLayout2.addView(listView, new FrameLayout.LayoutParams(-1, -1));
+        frameLayout.addView(frameLayout2, new FrameLayout.LayoutParams(-1, -1));
+        frameLayout.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
         return frameLayout;
     }
 

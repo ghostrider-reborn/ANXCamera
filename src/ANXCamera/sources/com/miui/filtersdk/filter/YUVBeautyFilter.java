@@ -26,7 +26,7 @@ public class YUVBeautyFilter extends BaseBeautyFilter {
     }
 
     public void genYUVTextures(byte[] bArr, final int i, final int i2) {
-        this.mBeautyProcessor.beautify(bArr, 0, i, i2, null, 0);
+        this.mBeautyProcessor.beautify(bArr, 0, i, i2, (byte[]) null, 0);
         int i3 = i * i2;
         if (this.mYBuffer == null) {
             this.mYBuffer = ByteBuffer.allocateDirect(i3);

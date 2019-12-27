@@ -1,6 +1,5 @@
 package miui.util;
 
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.util.Log;
 import java.io.File;
@@ -42,17 +41,17 @@ public class FeatureParser {
     }
 
     public static boolean getBoolean(String str, boolean z) {
-        Boolean bool = (Boolean) sBooleanMap.get(str);
+        Boolean bool = sBooleanMap.get(str);
         return bool != null ? bool.booleanValue() : z;
     }
 
     public static Float getFloat(String str, float f2) {
-        Float f3 = (Float) sFloatMap.get(str);
+        Float f3 = sFloatMap.get(str);
         return Float.valueOf(f3 != null ? f3.floatValue() : f2);
     }
 
     public static int[] getIntArray(String str) {
-        ArrayList arrayList = (ArrayList) sIntArrMap.get(str);
+        ArrayList arrayList = sIntArrMap.get(str);
         if (arrayList == null) {
             return null;
         }
@@ -65,16 +64,16 @@ public class FeatureParser {
     }
 
     public static int getInteger(String str, int i) {
-        Integer num = (Integer) sIntMap.get(str);
+        Integer num = sIntMap.get(str);
         return num != null ? num.intValue() : i;
     }
 
     public static String getString(String str) {
-        return (String) sStrMap.get(str);
+        return sStrMap.get(str);
     }
 
     public static String[] getStringArray(String str) {
-        ArrayList arrayList = (ArrayList) sStrArrMap.get(str);
+        ArrayList arrayList = sStrArrMap.get(str);
         if (arrayList != null) {
             return (String[]) arrayList.toArray(new String[0]);
         }
@@ -101,99 +100,87 @@ public class FeatureParser {
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:17:?, code lost:
-        r6 = new java.lang.StringBuilder();
-        r6.append("can't find ");
-        r6.append(r4);
-        r6.append(" in assets/");
-        r6.append(r1);
-        r6.append(",it may be in ");
-        r6.append(r0);
-        android.util.Log.i(r2, r6.toString());
+        android.util.Log.i(TAG, "can't find " + r4 + " in assets/" + ASSET_DIR + ",it may be in " + SYSTEM_DIR);
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:76:0x01ab, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:75:0x01ab, code lost:
         r0 = move-exception;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:77:0x01ac, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:76:0x01ac, code lost:
         if (r3 != null) goto L_0x01ae;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:79:?, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:78:?, code lost:
         r3.close();
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:85:?, code lost:
+    /* JADX WARNING: Code restructure failed: missing block: B:82:0x01b5, code lost:
+        if (r3 != null) goto L_0x01b7;
+     */
+    /* JADX WARNING: Code restructure failed: missing block: B:84:?, code lost:
         r3.close();
+     */
+    /* JADX WARNING: Code restructure failed: missing block: B:91:?, code lost:
+        return;
+     */
+    /* JADX WARNING: Code restructure failed: missing block: B:94:?, code lost:
+        return;
      */
     /* JADX WARNING: Failed to process nested try/catch */
-    /* JADX WARNING: Removed duplicated region for block: B:76:0x01ab A[ExcHandler:  FINALLY, PHI: r3 
-  PHI: (r3v3 java.io.InputStream) = (r3v0 java.io.InputStream), (r3v0 java.io.InputStream), (r3v5 java.io.InputStream), (r3v5 java.io.InputStream), (r3v0 java.io.InputStream) binds: [B:1:0x000a, B:12:0x0042, B:28:0x00b5, B:37:0x00d9, B:16:0x0060] A[DONT_GENERATE, DONT_INLINE], Splitter:B:12:0x0042] */
-    /* JADX WARNING: Removed duplicated region for block: B:82:0x01b4 A[ExcHandler: XmlPullParserException (e org.xmlpull.v1.XmlPullParserException), PHI: r3 
-  PHI: (r3v2 java.io.InputStream) = (r3v0 java.io.InputStream), (r3v0 java.io.InputStream), (r3v5 java.io.InputStream), (r3v5 java.io.InputStream), (r3v0 java.io.InputStream) binds: [B:1:0x000a, B:12:0x0042, B:28:0x00b5, B:37:0x00d9, B:16:0x0060] A[DONT_GENERATE, DONT_INLINE], Splitter:B:1:0x000a] */
+    /* JADX WARNING: Removed duplicated region for block: B:75:0x01ab A[ExcHandler: all (r0v3 'th' java.lang.Throwable A[CUSTOM_DECLARE]), PHI: r3 
+  PHI: (r3v3 java.io.FileInputStream) = (r3v0 java.io.FileInputStream), (r3v0 java.io.FileInputStream), (r3v5 java.io.FileInputStream), (r3v5 java.io.FileInputStream), (r3v0 java.io.FileInputStream) binds: [B:1:0x000a, B:12:0x0042, B:27:0x00b5, B:36:0x00d9, B:16:0x0060] A[DONT_GENERATE, DONT_INLINE], Splitter:B:12:0x0042] */
+    /* JADX WARNING: Removed duplicated region for block: B:81:0x01b4 A[ExcHandler: XmlPullParserException (e org.xmlpull.v1.XmlPullParserException), PHI: r3 
+  PHI: (r3v2 java.io.FileInputStream) = (r3v0 java.io.FileInputStream), (r3v0 java.io.FileInputStream), (r3v5 java.io.FileInputStream), (r3v5 java.io.FileInputStream), (r3v0 java.io.FileInputStream) binds: [B:1:0x000a, B:12:0x0042, B:27:0x00b5, B:36:0x00d9, B:16:0x0060] A[DONT_GENERATE, DONT_INLINE], Splitter:B:1:0x000a] */
     private static void read() {
-        String str = SYSTEM_DIR;
-        String str2 = ASSET_DIR;
-        String str3 = TAG;
-        boolean z = null;
-        String str4 = null;
+        FileInputStream fileInputStream = null;
+        String str = null;
         try {
-            z = "cancro".equals(Build.DEVICE);
-            if (!z) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(Build.DEVICE);
-                sb.append(".xml");
-                str4 = sb.toString();
+            if (!"cancro".equals(Build.DEVICE)) {
+                str = Build.DEVICE + ".xml";
             } else if (Build.MODEL.startsWith("MI 3")) {
-                str4 = "cancro_MI3.xml";
+                str = "cancro_MI3.xml";
             } else if (Build.MODEL.startsWith("MI 4")) {
-                str4 = "cancro_MI4.xml";
+                str = "cancro_MI4.xml";
             }
-            AssetManager assets = Resources.getSystem().getAssets();
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str2);
-            sb2.append(str4);
-            z = assets.open(sb2.toString());
-            if (z == null) {
-                File file = new File(str, str4);
-                z = file.exists();
-                if (z) {
-                    z = new FileInputStream(file);
+            fileInputStream = Resources.getSystem().getAssets().open(ASSET_DIR + str);
+            if (fileInputStream == null) {
+                File file = new File(SYSTEM_DIR, str);
+                if (file.exists()) {
+                    fileInputStream = new FileInputStream(file);
                 } else {
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("both assets/device_features/ and /system/etc/device_features don't exist ");
-                    sb3.append(str4);
-                    Log.e(str3, sb3.toString());
-                    if (z != null) {
+                    Log.e(TAG, "both assets/device_features/ and /system/etc/device_features don't exist " + str);
+                    if (fileInputStream != null) {
                         try {
-                            z.close();
+                            fileInputStream.close();
+                            return;
                         } catch (IOException e2) {
+                            return;
                         }
+                    } else {
+                        return;
                     }
-                    return;
                 }
             }
             XmlPullParser newPullParser = XmlPullParserFactory.newInstance().newPullParser();
-            newPullParser.setInput(z, "UTF-8");
-            Object obj = null;
+            newPullParser.setInput(fileInputStream, "UTF-8");
+            String str2 = null;
             ArrayList arrayList = null;
             ArrayList arrayList2 = null;
             for (int eventType = newPullParser.getEventType(); 1 != eventType; eventType = newPullParser.next()) {
-                String str5 = TAG_STRING_ARRAY;
-                String str6 = TAG_INTEGER_ARRAY;
                 if (eventType == 2) {
                     String name = newPullParser.getName();
                     if (newPullParser.getAttributeCount() > 0) {
-                        obj = newPullParser.getAttributeValue(0);
+                        str2 = newPullParser.getAttributeValue(0);
                     }
-                    if (str6.equals(name)) {
+                    if (TAG_INTEGER_ARRAY.equals(name)) {
                         arrayList = new ArrayList();
-                    } else if (str5.equals(name)) {
+                    } else if (TAG_STRING_ARRAY.equals(name)) {
                         arrayList2 = new ArrayList();
                     } else if (TAG_BOOL.equals(name)) {
-                        sBooleanMap.put(obj, Boolean.valueOf(newPullParser.nextText()));
+                        sBooleanMap.put(str2, Boolean.valueOf(newPullParser.nextText()));
                     } else if (TAG_INTEGER.equals(name)) {
-                        sIntMap.put(obj, Integer.valueOf(newPullParser.nextText()));
+                        sIntMap.put(str2, Integer.valueOf(newPullParser.nextText()));
                     } else if (TAG_STRING.equals(name)) {
-                        sStrMap.put(obj, newPullParser.nextText());
+                        sStrMap.put(str2, newPullParser.nextText());
                     } else if (TAG_FLOAT.equals(name)) {
-                        sFloatMap.put(obj, Float.valueOf(Float.parseFloat(newPullParser.nextText())));
+                        sFloatMap.put(str2, Float.valueOf(Float.parseFloat(newPullParser.nextText())));
                     } else if (TAG_ITEM.equals(name)) {
                         if (arrayList != null) {
                             arrayList.add(Integer.valueOf(newPullParser.nextText()));
@@ -203,26 +190,30 @@ public class FeatureParser {
                     }
                 } else if (eventType == 3) {
                     String name2 = newPullParser.getName();
-                    if (str6.equals(name2)) {
-                        sIntArrMap.put(obj, arrayList);
+                    if (TAG_INTEGER_ARRAY.equals(name2)) {
+                        sIntArrMap.put(str2, arrayList);
                         arrayList = null;
-                    } else if (str5.equals(name2)) {
-                        sStrArrMap.put(obj, arrayList2);
+                    } else if (TAG_STRING_ARRAY.equals(name2)) {
+                        sStrArrMap.put(str2, arrayList2);
                         arrayList2 = null;
                     }
                 }
             }
             try {
-                z.close();
+                fileInputStream.close();
+                return;
             } catch (IOException e3) {
+                return;
             }
         } catch (IOException e4) {
-            if (z != null) {
-                z.close();
+            if (fileInputStream != null) {
+                fileInputStream.close();
+                return;
             }
+            return;
         } catch (XmlPullParserException e5) {
-        } finally {
+        } catch (Throwable th) {
         }
-        return;
+        throw th;
     }
 }

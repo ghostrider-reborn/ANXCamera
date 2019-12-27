@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
+import okhttp3.Headers;
 import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -35,7 +36,7 @@ public final class Response implements Closeable {
         int code;
         @Nullable
         Handshake handshake;
-        okhttp3.Headers.Builder headers;
+        Headers.Builder headers;
         String message;
         Response networkResponse;
         Response priorResponse;
@@ -46,7 +47,7 @@ public final class Response implements Closeable {
 
         public Builder() {
             this.code = -1;
-            this.headers = new okhttp3.Headers.Builder();
+            this.headers = new Headers.Builder();
         }
 
         Builder(Response response) {
@@ -73,25 +74,13 @@ public final class Response implements Closeable {
 
         private void checkSupportResponse(String str, Response response) {
             if (response.body != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(".body != null");
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException(str + ".body != null");
             } else if (response.networkResponse != null) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(".networkResponse != null");
-                throw new IllegalArgumentException(sb2.toString());
+                throw new IllegalArgumentException(str + ".networkResponse != null");
             } else if (response.cacheResponse != null) {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str);
-                sb3.append(".cacheResponse != null");
-                throw new IllegalArgumentException(sb3.toString());
+                throw new IllegalArgumentException(str + ".cacheResponse != null");
             } else if (response.priorResponse != null) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str);
-                sb4.append(".priorResponse != null");
-                throw new IllegalArgumentException(sb4.toString());
+                throw new IllegalArgumentException(str + ".priorResponse != null");
             }
         }
 
@@ -111,10 +100,7 @@ public final class Response implements Closeable {
             } else if (this.protocol == null) {
                 throw new IllegalStateException("protocol == null");
             } else if (this.code < 0) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("code < 0: ");
-                sb.append(this.code);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("code < 0: " + this.code);
             } else if (this.message != null) {
                 return new Response(this);
             } else {
@@ -264,7 +250,7 @@ public final class Response implements Closeable {
 
     @Nullable
     public String header(String str) {
-        return header(str, null);
+        return header(str, (String) null);
     }
 
     @Nullable
@@ -283,18 +269,18 @@ public final class Response implements Closeable {
 
     public boolean isRedirect() {
         int i = this.code;
-        if (!(i == 307 || i == 308)) {
-            switch (i) {
-                case 300:
-                case 301:
-                case 302:
-                case 303:
-                    break;
-                default:
-                    return false;
-            }
+        if (i == 307 || i == 308) {
+            return true;
         }
-        return true;
+        switch (i) {
+            case 300:
+            case 301:
+            case 302:
+            case 303:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public boolean isSuccessful() {
@@ -350,16 +336,6 @@ public final class Response implements Closeable {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Response{protocol=");
-        sb.append(this.protocol);
-        sb.append(", code=");
-        sb.append(this.code);
-        sb.append(", message=");
-        sb.append(this.message);
-        sb.append(", url=");
-        sb.append(this.request.url());
-        sb.append('}');
-        return sb.toString();
+        return "Response{protocol=" + this.protocol + ", code=" + this.code + ", message=" + this.message + ", url=" + this.request.url() + '}';
     }
 }

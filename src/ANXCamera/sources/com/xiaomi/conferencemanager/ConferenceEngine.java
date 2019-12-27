@@ -4,13 +4,10 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import com.android.camera.module.BaseModule;
-import com.xiaomi.conferencemanager.ConferenceManager.DynamicViewPolicyT;
-import com.xiaomi.conferencemanager.ConferenceManager.EngineErrorTypeT;
-import com.xiaomi.conferencemanager.ConferenceManager.VideoContentTypeT;
+import com.xiaomi.conferencemanager.ConferenceManager;
 import com.xiaomi.conferencemanager.Model.ConnectionData;
 import com.xiaomi.conferencemanager.Model.MonitorData;
 import com.xiaomi.conferencemanager.callback.ConferenceCallback;
-import com.xiaomi.conferencemanager.callback.ConferenceCallback.ParticipantVolume;
 import com.xiaomi.utils.Logger;
 
 public class ConferenceEngine {
@@ -65,41 +62,7 @@ public class ConferenceEngine {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("\nVideo Recv{\nmBitrate = ");
-            sb.append(this.mBitrate / BaseModule.LENS_DIRTY_DETECT_HINT_DURATION);
-            sb.append("\nmPacketsReceived = ");
-            sb.append(this.mPacketsReceived);
-            sb.append("\nmPacketsLost = ");
-            sb.append(this.mPacketsLost);
-            sb.append("\nmFrameRate = ");
-            sb.append(this.mFrameRate);
-            sb.append("\nmFramesDecoded = ");
-            sb.append(this.mFramesDecoded);
-            sb.append("\nmFramesDisplay = ");
-            sb.append(this.mFramesDisplay);
-            sb.append("\nmWidth = ");
-            sb.append(this.mWidth);
-            sb.append(", mHeight = ");
-            sb.append(this.mHeight);
-            sb.append("\nmFecSuccessRate = ");
-            sb.append(this.mFecSuccessRate);
-            sb.append("\nmNacksSent = ");
-            sb.append(this.mNacksSent);
-            sb.append("\nNacksRequested = ");
-            sb.append(this.mDistinctNacksRequested);
-            sb.append("\nNacksTransmitted = ");
-            sb.append(this.mDistinctNacksTransmitted);
-            sb.append("\nmRecBW = ");
-            sb.append(this.mRecvBandwidth);
-            sb.append("\nmRecVideoBW = ");
-            sb.append(this.mRecvBitRateVideo);
-            sb.append("\nmRecAudioBW = ");
-            sb.append(this.mRecvBitRateAudio);
-            sb.append("\nmRecTotalBW = ");
-            sb.append(this.mRecvBitRateTotal);
-            sb.append("}\n");
-            return sb.toString();
+            return "\nVideo Recv{\nmBitrate = " + (this.mBitrate / BaseModule.LENS_DIRTY_DETECT_HINT_DURATION) + "\nmPacketsReceived = " + this.mPacketsReceived + "\nmPacketsLost = " + this.mPacketsLost + "\nmFrameRate = " + this.mFrameRate + "\nmFramesDecoded = " + this.mFramesDecoded + "\nmFramesDisplay = " + this.mFramesDisplay + "\nmWidth = " + this.mWidth + ", mHeight = " + this.mHeight + "\nmFecSuccessRate = " + this.mFecSuccessRate + "\nmNacksSent = " + this.mNacksSent + "\nNacksRequested = " + this.mDistinctNacksRequested + "\nNacksTransmitted = " + this.mDistinctNacksTransmitted + "\nmRecBW = " + this.mRecvBandwidth + "\nmRecVideoBW = " + this.mRecvBitRateVideo + "\nmRecAudioBW = " + this.mRecvBitRateAudio + "\nmRecTotalBW = " + this.mRecvBitRateTotal + "}\n";
         }
     }
 
@@ -143,37 +106,7 @@ public class ConferenceEngine {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("\nVideo Send{\nmBitrate = ");
-            sb.append(this.mBitrate / BaseModule.LENS_DIRTY_DETECT_HINT_DURATION);
-            sb.append("\nmCaptureFrameRate = ");
-            sb.append(this.mCaptureFrameRate);
-            sb.append("\nmEncodeFrameRate = ");
-            sb.append(this.mEncodeFrameRate);
-            sb.append("\nmIFramesSent = ");
-            sb.append(this.mIFramesSent);
-            sb.append("\nmWidth = ");
-            sb.append(this.mWidth);
-            sb.append(", mHeight = ");
-            sb.append(this.mHeight);
-            sb.append("\nmRTT = ");
-            sb.append(this.mRTT);
-            sb.append(", mNacksRcvd = ");
-            sb.append(this.mNacksRcvd);
-            sb.append("\nmDistinctNacksRcvd = ");
-            sb.append(this.mDistinctNacksRcvd);
-            sb.append("\nPacketsRetransmitted = ");
-            sb.append(this.mDistinctPacketsRetransmitted);
-            sb.append("\nmSendBandwidth = ");
-            sb.append(this.mSendBandwidth);
-            sb.append("\nmSendBitRateVideo = ");
-            sb.append(this.mSendBitRateVideo);
-            sb.append("\nmSendBitRateAudio = ");
-            sb.append(this.mSendBitRateAudio);
-            sb.append("\nmSendBitRateTotal = ");
-            sb.append(this.mSendBitRateTotal);
-            sb.append("}");
-            return sb.toString();
+            return "\nVideo Send{\nmBitrate = " + (this.mBitrate / BaseModule.LENS_DIRTY_DETECT_HINT_DURATION) + "\nmCaptureFrameRate = " + this.mCaptureFrameRate + "\nmEncodeFrameRate = " + this.mEncodeFrameRate + "\nmIFramesSent = " + this.mIFramesSent + "\nmWidth = " + this.mWidth + ", mHeight = " + this.mHeight + "\nmRTT = " + this.mRTT + ", mNacksRcvd = " + this.mNacksRcvd + "\nmDistinctNacksRcvd = " + this.mDistinctNacksRcvd + "\nPacketsRetransmitted = " + this.mDistinctPacketsRetransmitted + "\nmSendBandwidth = " + this.mSendBandwidth + "\nmSendBitRateVideo = " + this.mSendBitRateVideo + "\nmSendBitRateAudio = " + this.mSendBitRateAudio + "\nmSendBitRateTotal = " + this.mSendBitRateTotal + "}";
         }
     }
 
@@ -234,10 +167,9 @@ public class ConferenceEngine {
         return this.address;
     }
 
-    public EngineErrorTypeT getEngineError(int i) {
-        EngineErrorTypeT[] values;
-        EngineErrorTypeT engineErrorTypeT = EngineErrorTypeT.ENGINE_UNKNOWN_ERROR;
-        for (EngineErrorTypeT engineErrorTypeT2 : EngineErrorTypeT.values()) {
+    public ConferenceManager.EngineErrorTypeT getEngineError(int i) {
+        ConferenceManager.EngineErrorTypeT engineErrorTypeT = ConferenceManager.EngineErrorTypeT.ENGINE_UNKNOWN_ERROR;
+        for (ConferenceManager.EngineErrorTypeT engineErrorTypeT2 : ConferenceManager.EngineErrorTypeT.values()) {
             if (engineErrorTypeT2.ordinal() == i) {
                 engineErrorTypeT = engineErrorTypeT2;
             }
@@ -259,9 +191,8 @@ public class ConferenceEngine {
         if (activeNetworkInfo.getType() == 1) {
             return "WIFI";
         }
-        String str = "Unknown";
         if (activeNetworkInfo.getType() != 0) {
-            return str;
+            return "Unknown";
         }
         switch (activeNetworkInfo.getSubtype()) {
             case 1:
@@ -283,7 +214,7 @@ public class ConferenceEngine {
             case 13:
                 return "4G";
             default:
-                return str;
+                return "Unknown";
         }
     }
 
@@ -298,16 +229,9 @@ public class ConferenceEngine {
     public boolean initialize(Context context, long j, String str, byte[] bArr, ConferenceCallback conferenceCallback, String str2) {
         this.cc = conferenceCallback;
         if (bArr != null) {
-            StringBuilder sb = new StringBuilder();
-            String str3 = "Java gslb_config_str.length. ";
-            sb.append(str3);
-            sb.append(String.valueOf(bArr.length));
-            Logger.LogI(sb.toString());
-            String str4 = new String(bArr);
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str3);
-            sb2.append(str4);
-            Logger.LogI(sb2.toString());
+            Logger.LogI("Java gslb_config_str.length. " + String.valueOf(bArr.length));
+            new String(bArr);
+            Logger.LogI("Java gslb_config_str.length. " + r13);
         }
         this.address = Construct(context, j, str, bArr, str2);
         return this.address != 0;
@@ -315,17 +239,12 @@ public class ConferenceEngine {
 
     public native boolean isInConference();
 
-    public native void localParticipantSetDynamicViewPolicy(DynamicViewPolicyT dynamicViewPolicyT);
+    public native void localParticipantSetDynamicViewPolicy(ConferenceManager.DynamicViewPolicyT dynamicViewPolicyT);
 
     public native void muteUserAudio(String str, boolean z);
 
     public void onError(String str, int i) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Java onError: ");
-        sb.append(i);
-        sb.append(" ");
-        sb.append(getEngineError(i));
-        Logger.LogI(sb.toString());
+        Logger.LogI("Java onError: " + i + " " + getEngineError(i));
         this.cc.onError(str, getEngineError(i));
     }
 
@@ -356,9 +275,9 @@ public class ConferenceEngine {
     }
 
     public void onParticipantsVolumeChanged(String[] strArr, int[] iArr) {
-        ParticipantVolume[] participantVolumeArr = new ParticipantVolume[strArr.length];
+        ConferenceCallback.ParticipantVolume[] participantVolumeArr = new ConferenceCallback.ParticipantVolume[strArr.length];
         for (int i = 0; i < participantVolumeArr.length; i++) {
-            ParticipantVolume participantVolume = new ParticipantVolume();
+            ConferenceCallback.ParticipantVolume participantVolume = new ConferenceCallback.ParticipantVolume();
             participantVolume.mUid = strArr[i];
             participantVolume.mVolume = iArr[i];
             participantVolumeArr[i] = participantVolume;
@@ -448,7 +367,7 @@ public class ConferenceEngine {
 
     public native void stopVolumeMonitor();
 
-    public native boolean switchVideoContent(VideoContentTypeT videoContentTypeT);
+    public native boolean switchVideoContent(ConferenceManager.VideoContentTypeT videoContentTypeT);
 
     public void uninitialize() {
         Dispose();

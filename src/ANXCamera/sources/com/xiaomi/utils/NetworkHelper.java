@@ -20,39 +20,38 @@ public class NetworkHelper {
             return 1;
         }
         int type = activeNetworkInfo.getType();
-        if (type == 0) {
-            switch (networkType) {
-                case 0:
-                case 1:
-                case 2:
-                    return 2;
-                case 3:
-                    return 3;
-                case 4:
-                    return 2;
-                case 5:
-                case 6:
-                    return 3;
-                case 7:
-                    return 2;
-                case 8:
-                case 9:
-                case 10:
-                    return 3;
-                case 11:
-                    return 2;
-                case 12:
-                    return 3;
-                case 13:
-                    return 4;
-                case 14:
-                case 15:
-                    return 3;
-                default:
-                    return 2;
-            }
-        } else {
+        if (type != 0) {
             return type == 1 ? 5 : 0;
+        }
+        switch (networkType) {
+            case 0:
+            case 1:
+            case 2:
+                return 2;
+            case 3:
+                return 3;
+            case 4:
+                return 2;
+            case 5:
+            case 6:
+                return 3;
+            case 7:
+                return 2;
+            case 8:
+            case 9:
+            case 10:
+                return 3;
+            case 11:
+                return 2;
+            case 12:
+                return 3;
+            case 13:
+                return 4;
+            case 14:
+            case 15:
+                return 3;
+            default:
+                return 2;
         }
     }
 }

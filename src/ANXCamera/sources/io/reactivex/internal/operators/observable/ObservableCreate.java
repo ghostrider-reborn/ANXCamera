@@ -53,9 +53,7 @@ public final class ObservableCreate<T> extends Observable<T> {
         public void onNext(T t) {
             if (t == null) {
                 onError(new NullPointerException("onNext called with null. Null values are generally not allowed in 2.x operators and sources."));
-                return;
-            }
-            if (!isDisposed()) {
+            } else if (!isDisposed()) {
                 this.observer.onNext(t);
             }
         }
@@ -102,14 +100,14 @@ public final class ObservableCreate<T> extends Observable<T> {
             this.emitter = observableEmitter;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             ObservableEmitter<T> observableEmitter = this.emitter;
             SpscLinkedArrayQueue<T> spscLinkedArrayQueue = this.queue;
@@ -122,7 +120,7 @@ public final class ObservableCreate<T> extends Observable<T> {
                     return;
                 }
                 boolean z = this.done;
-                Object poll = spscLinkedArrayQueue.poll();
+                T poll = spscLinkedArrayQueue.poll();
                 boolean z2 = poll == null;
                 if (z && z2) {
                     observableEmitter.onComplete();

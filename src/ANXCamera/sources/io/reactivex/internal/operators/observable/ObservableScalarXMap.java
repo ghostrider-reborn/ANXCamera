@@ -99,7 +99,7 @@ public final class ObservableScalarXMap {
                     try {
                         Object call = ((Callable) observableSource).call();
                         if (call == null) {
-                            EmptyDisposable.complete(observer);
+                            EmptyDisposable.complete((Observer<?>) observer);
                             return;
                         }
                         ScalarDisposable scalarDisposable = new ScalarDisposable(observer, call);
@@ -107,13 +107,13 @@ public final class ObservableScalarXMap {
                         scalarDisposable.run();
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
-                        EmptyDisposable.error(th, observer);
+                        EmptyDisposable.error(th, (Observer<?>) observer);
                     }
                 } else {
                     observableSource.subscribe(observer);
                 }
             } catch (Throwable th2) {
-                EmptyDisposable.error(th2, observer);
+                EmptyDisposable.error(th2, (Observer<?>) observer);
             }
         }
     }
@@ -123,7 +123,7 @@ public final class ObservableScalarXMap {
     }
 
     public static <T, U> Observable<U> scalarXMap(T t, Function<? super T, ? extends ObservableSource<? extends U>> function) {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ScalarXMapObservable<T>(t, function));
+        return RxJavaPlugins.onAssembly(new ScalarXMapObservable(t, function));
     }
 
     public static <T, R> boolean tryScalarXMapSubscribe(ObservableSource<T> observableSource, Observer<? super R> observer, Function<? super T, ? extends ObservableSource<? extends R>> function) {
@@ -133,7 +133,7 @@ public final class ObservableScalarXMap {
         try {
             Object call = ((Callable) observableSource).call();
             if (call == null) {
-                EmptyDisposable.complete(observer);
+                EmptyDisposable.complete((Observer<?>) observer);
                 return true;
             }
             try {
@@ -144,7 +144,7 @@ public final class ObservableScalarXMap {
                     try {
                         Object call2 = ((Callable) observableSource2).call();
                         if (call2 == null) {
-                            EmptyDisposable.complete(observer);
+                            EmptyDisposable.complete((Observer<?>) observer);
                             return true;
                         }
                         ScalarDisposable scalarDisposable = new ScalarDisposable(observer, call2);
@@ -152,7 +152,7 @@ public final class ObservableScalarXMap {
                         scalarDisposable.run();
                     } catch (Throwable th) {
                         Exceptions.throwIfFatal(th);
-                        EmptyDisposable.error(th, observer);
+                        EmptyDisposable.error(th, (Observer<?>) observer);
                         return true;
                     }
                 } else {
@@ -161,12 +161,12 @@ public final class ObservableScalarXMap {
                 return true;
             } catch (Throwable th2) {
                 Exceptions.throwIfFatal(th2);
-                EmptyDisposable.error(th2, observer);
+                EmptyDisposable.error(th2, (Observer<?>) observer);
                 return true;
             }
         } catch (Throwable th3) {
             Exceptions.throwIfFatal(th3);
-            EmptyDisposable.error(th3, observer);
+            EmptyDisposable.error(th3, (Observer<?>) observer);
             return true;
         }
     }

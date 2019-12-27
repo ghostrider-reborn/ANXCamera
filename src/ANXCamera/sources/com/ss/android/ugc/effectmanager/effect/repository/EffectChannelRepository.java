@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.ss.android.ugc.effectmanager.EffectConfiguration;
 import com.ss.android.ugc.effectmanager.common.WeakHandler;
-import com.ss.android.ugc.effectmanager.common.WeakHandler.IHandler;
 import com.ss.android.ugc.effectmanager.common.task.ExceptionResult;
 import com.ss.android.ugc.effectmanager.context.EffectContext;
 import com.ss.android.ugc.effectmanager.effect.listener.ICheckChannelListener;
@@ -30,7 +29,7 @@ import com.ss.android.ugc.effectmanager.effect.task.task.FetchPanelInfoTask;
 import com.ss.android.ugc.effectmanager.effect.task.task.FetchProviderEffectTask;
 import com.ss.android.ugc.effectmanager.effect.task.task.SearchProviderEffectTask;
 
-public class EffectChannelRepository implements IHandler {
+public class EffectChannelRepository implements WeakHandler.IHandler {
     private EffectConfiguration mConfiguration = this.mEffectContext.getEffectConfiguration();
     private EffectContext mEffectContext;
     private EffectListListener mEffectListListener;
@@ -49,6 +48,11 @@ public class EffectChannelRepository implements IHandler {
         this.mConfiguration.getTaskManager().commit(checkUpdateTask);
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v0, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchCategoryEffectCacheTask} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r12v0, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchCategoryEffectTask} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r11v1, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchCategoryEffectCacheTask} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v2, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchCategoryEffectCacheTask} */
+    /* JADX WARNING: Multi-variable type inference failed */
     public void fetchCategoryEffect(String str, String str2, String str3, int i, int i2, int i3, String str4, boolean z) {
         FetchCategoryEffectCacheTask fetchCategoryEffectCacheTask;
         if (z) {
@@ -65,9 +69,11 @@ public class EffectChannelRepository implements IHandler {
         this.mConfiguration.getTaskManager().commit(new FetchExistEffectListTask(str, str2, this.mEffectContext, this.mHandler));
     }
 
-    /* JADX WARNING: type inference failed for: r9v2, types: [com.ss.android.ugc.effectmanager.effect.task.task.FetchEffectChannelTask] */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r9v1, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchEffectChannelCacheTask} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r9v2, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchEffectChannelTask} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r9v4, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchEffectChannelCacheTask} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v2, resolved type: com.ss.android.ugc.effectmanager.effect.task.task.FetchEffectChannelCacheTask} */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 1 */
     public void fetchList(String str, String str2, boolean z) {
         FetchEffectChannelCacheTask fetchEffectChannelCacheTask;
         if (z) {
@@ -79,10 +85,8 @@ public class EffectChannelRepository implements IHandler {
         this.mConfiguration.getTaskManager().commit(fetchEffectChannelCacheTask);
     }
 
-    /* JADX WARNING: type inference failed for: r1v0, types: [com.ss.android.ugc.effectmanager.common.task.BaseTask] */
     /* JADX WARNING: type inference failed for: r1v2, types: [com.ss.android.ugc.effectmanager.effect.task.task.FetchPanelInfoCacheTask] */
     /* JADX WARNING: Multi-variable type inference failed */
-    /* JADX WARNING: Unknown variable types count: 1 */
     public void fetchPanelInfo(String str, String str2, boolean z, String str3, int i, int i2, boolean z2, IFetchPanelInfoListener iFetchPanelInfoListener) {
         FetchPanelInfoTask fetchPanelInfoTask;
         if (z2) {
@@ -109,7 +113,7 @@ public class EffectChannelRepository implements IHandler {
                     EffectChannelTaskResult effectChannelTaskResult = (EffectChannelTaskResult) obj;
                     ExceptionResult exception = effectChannelTaskResult.getException();
                     if (exception == null) {
-                        this.mEffectListListener.updateEffectChannel(effectChannelTaskResult.getTaskID(), effectChannelTaskResult.getEffectChannels(), 23, null);
+                        this.mEffectListListener.updateEffectChannel(effectChannelTaskResult.getTaskID(), effectChannelTaskResult.getEffectChannels(), 23, (ExceptionResult) null);
                     } else {
                         this.mEffectListListener.updateEffectChannel(effectChannelTaskResult.getTaskID(), effectChannelTaskResult.getEffectChannels(), 27, exception);
                     }
@@ -164,12 +168,13 @@ public class EffectChannelRepository implements IHandler {
                     EffectCheckUpdateResult effectCheckUpdateResult = (EffectCheckUpdateResult) obj5;
                     ExceptionResult exception5 = effectCheckUpdateResult.getException();
                     ICheckChannelListener checkChannelListener = this.mConfiguration.getListenerManger().getCheckChannelListener(effectCheckUpdateResult.getTaskID());
-                    if (checkChannelListener != null) {
-                        if (exception5 == null) {
-                            checkChannelListener.checkChannelSuccess(effectCheckUpdateResult.isUpdate());
-                        } else {
-                            checkChannelListener.checkChannelFailed(exception5);
-                        }
+                    if (checkChannelListener == null) {
+                        return;
+                    }
+                    if (exception5 == null) {
+                        checkChannelListener.checkChannelSuccess(effectCheckUpdateResult.isUpdate());
+                    } else {
+                        checkChannelListener.checkChannelFailed(exception5);
                     }
                 }
             }

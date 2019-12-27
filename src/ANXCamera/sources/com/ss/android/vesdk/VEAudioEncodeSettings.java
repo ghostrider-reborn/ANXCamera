@@ -2,11 +2,10 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.NonNull;
 
 public class VEAudioEncodeSettings implements Parcelable {
-    public static final Creator<VEAudioEncodeSettings> CREATOR = new Creator<VEAudioEncodeSettings>() {
+    public static final Parcelable.Creator<VEAudioEncodeSettings> CREATOR = new Parcelable.Creator<VEAudioEncodeSettings>() {
         public VEAudioEncodeSettings createFromParcel(Parcel parcel) {
             return new VEAudioEncodeSettings(parcel);
         }
@@ -68,10 +67,10 @@ public class VEAudioEncodeSettings implements Parcelable {
         ENCODE_STANDARD_PCM,
         ENCODE_STANDARD_AAC;
         
-        public static final Creator<ENCODE_STANDARD> CREATOR = null;
+        public static final Parcelable.Creator<ENCODE_STANDARD> CREATOR = null;
 
         static {
-            CREATOR = new Creator<ENCODE_STANDARD>() {
+            CREATOR = new Parcelable.Creator<ENCODE_STANDARD>() {
                 public ENCODE_STANDARD createFromParcel(Parcel parcel) {
                     return ENCODE_STANDARD.values()[parcel.readInt()];
                 }
@@ -113,10 +112,7 @@ public class VEAudioEncodeSettings implements Parcelable {
         this.mSampleRate = parcel.readInt();
         this.mBps = parcel.readInt();
         this.mChannelCount = parcel.readInt();
-        if (parcel.readByte() != 0) {
-            z = true;
-        }
-        this.mHwEnc = z;
+        this.mHwEnc = parcel.readByte() != 0 ? true : z;
     }
 
     private VEAudioEncodeSettings(Builder builder) {

@@ -76,33 +76,7 @@ public interface AvatarConfig {
         public Bitmap thum;
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("configID = ");
-            sb.append(this.configID);
-            sb.append(" configType = ");
-            sb.append(this.configType);
-            sb.append(" gender = ");
-            sb.append(this.gender);
-            sb.append(" name = ");
-            sb.append(this.name);
-            sb.append(" configThumbPath = ");
-            sb.append(this.configThumbPath);
-            sb.append(" isDefault = ");
-            sb.append(this.isDefault);
-            sb.append(" isValid = ");
-            sb.append(this.isValid);
-            sb.append(" isSupportContinuous = ");
-            sb.append(this.isSupportContinuous);
-            sb.append(" continuousValue = ");
-            sb.append(this.continuousValue);
-            sb.append(" startColorValue = ");
-            sb.append(this.startColorValue);
-            sb.append(" endColorValue = ");
-            sb.append(this.endColorValue);
-            sb.append("thum = ");
-            sb.append(this.thum);
-            sb.append("\n");
-            return sb.toString();
+            return "configID = " + this.configID + " configType = " + this.configType + " gender = " + this.gender + " name = " + this.name + " configThumbPath = " + this.configThumbPath + " isDefault = " + this.isDefault + " isValid = " + this.isValid + " isSupportContinuous = " + this.isSupportContinuous + " continuousValue = " + this.continuousValue + " startColorValue = " + this.startColorValue + " endColorValue = " + this.endColorValue + "thum = " + this.thum + "\n";
         }
     }
 
@@ -112,14 +86,7 @@ public interface AvatarConfig {
         public boolean refreshThum = true;
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("configTypeDesc = ");
-            sb.append(this.configTypeDesc);
-            sb.append(" configType = ");
-            sb.append(this.configType);
-            sb.append(" refreshThum = ");
-            sb.append(this.refreshThum);
-            return sb.toString();
+            return "configTypeDesc = " + this.configTypeDesc + " configType = " + this.configType + " refreshThum = " + this.refreshThum;
         }
     }
 
@@ -181,97 +148,7 @@ public interface AvatarConfig {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("gender = ");
-            sb.append(this.gender);
-            sb.append(" hairStyleID = ");
-            sb.append(this.configHairStyleID);
-            sb.append(" hairColorID = ");
-            sb.append(this.configHairColorID);
-            sb.append(" hairColorValue = ");
-            sb.append(this.configHairColorValue);
-            sb.append(" faceColorID = ");
-            sb.append(this.configFaceColorID);
-            sb.append(" faceColorValue = ");
-            sb.append(this.configFaceColorValue);
-            sb.append(" eyeColorID = ");
-            sb.append(this.configEyeColorID);
-            sb.append(" eyeColorValue = ");
-            sb.append(this.configEyeColorValue);
-            sb.append(" lipColorID = ");
-            sb.append(this.configLipColorID);
-            sb.append(" lipColorValue = ");
-            sb.append(this.configLipColorValue);
-            sb.append(" hairHighlightColorID = ");
-            sb.append(this.configHairHighlightColorID);
-            sb.append(" hairHighlightColorValue = ");
-            sb.append(this.configHairHighlightColorValue);
-            sb.append(" frecklesID = ");
-            sb.append(this.configFrecklesID);
-            sb.append(" nevusID = ");
-            sb.append(this.configNevusID);
-            sb.append(" eyewearStyleID = ");
-            sb.append(this.configEyewearStyleID);
-            sb.append(" eyewearFrameID = ");
-            sb.append(this.configEyewearFrameID);
-            sb.append(" eyewearFrameValue = ");
-            sb.append(this.configEyewearFrameValue);
-            sb.append(" eyewearLensesID = ");
-            sb.append(this.configEyewearLensesID);
-            sb.append(" eyewearLensesValue = ");
-            sb.append(this.configEyewearLensesValue);
-            sb.append(" headwearStyleID = ");
-            sb.append(this.configHeadwearStyleID);
-            sb.append(" headwearColorID = ");
-            sb.append(this.configHeadwearColorID);
-            sb.append(" headwearColorValue = ");
-            sb.append(this.configHeadwearColorValue);
-            sb.append(" hatStyleID = ");
-            sb.append(this.configHatStyleID);
-            sb.append(" hatColorID = ");
-            sb.append(this.configHatColorID);
-            sb.append(" hatColorValue = ");
-            sb.append(this.configHatColorValue);
-            sb.append(" beardStyleID = ");
-            sb.append(this.configBeardStyleID);
-            sb.append(" beardColorID = ");
-            sb.append(this.configBeardColorID);
-            sb.append(" beardColorValue = ");
-            sb.append(this.configBeardColorValue);
-            sb.append(" earringStyleID = ");
-            sb.append(this.configEarringStyleID);
-            sb.append(" eyelashStyleID = ");
-            sb.append(this.configEyelashStyleID);
-            sb.append(" eyebrowColorID = ");
-            sb.append(this.configEyebrowColorID);
-            sb.append(" eyebrowColorValue = ");
-            sb.append(this.configEyebrowColorValue);
-            sb.append(" faceShapeID = ");
-            sb.append(this.configFaceShapeID);
-            sb.append(" faceShapeValue = ");
-            sb.append(this.configFaceShapeValue);
-            sb.append(" eyeShapeID = ");
-            sb.append(this.configEyeShapeID);
-            sb.append(" eyeShapeValue = ");
-            sb.append(this.configEyeShapeValue);
-            sb.append(" mouthShapeID = ");
-            sb.append(this.configMouthShapeID);
-            sb.append(" mouthShapeValue = ");
-            sb.append(this.configMouthShapeValue);
-            sb.append(" noseShapeID = ");
-            sb.append(this.configNoseShapeID);
-            sb.append(" noseShapeValue = ");
-            sb.append(this.configNoseShapeValue);
-            sb.append(" earShapeID = ");
-            sb.append(this.configEarShapeID);
-            sb.append(" earShapeValue = ");
-            sb.append(this.configEarShapeValue);
-            sb.append(" eyebrowShapeID = ");
-            sb.append(this.configEyebrowShapeID);
-            sb.append(" eyebrowShapeValue = ");
-            sb.append(this.configEyebrowShapeValue);
-            sb.append("\n");
-            return sb.toString();
+            return "gender = " + this.gender + " hairStyleID = " + this.configHairStyleID + " hairColorID = " + this.configHairColorID + " hairColorValue = " + this.configHairColorValue + " faceColorID = " + this.configFaceColorID + " faceColorValue = " + this.configFaceColorValue + " eyeColorID = " + this.configEyeColorID + " eyeColorValue = " + this.configEyeColorValue + " lipColorID = " + this.configLipColorID + " lipColorValue = " + this.configLipColorValue + " hairHighlightColorID = " + this.configHairHighlightColorID + " hairHighlightColorValue = " + this.configHairHighlightColorValue + " frecklesID = " + this.configFrecklesID + " nevusID = " + this.configNevusID + " eyewearStyleID = " + this.configEyewearStyleID + " eyewearFrameID = " + this.configEyewearFrameID + " eyewearFrameValue = " + this.configEyewearFrameValue + " eyewearLensesID = " + this.configEyewearLensesID + " eyewearLensesValue = " + this.configEyewearLensesValue + " headwearStyleID = " + this.configHeadwearStyleID + " headwearColorID = " + this.configHeadwearColorID + " headwearColorValue = " + this.configHeadwearColorValue + " hatStyleID = " + this.configHatStyleID + " hatColorID = " + this.configHatColorID + " hatColorValue = " + this.configHatColorValue + " beardStyleID = " + this.configBeardStyleID + " beardColorID = " + this.configBeardColorID + " beardColorValue = " + this.configBeardColorValue + " earringStyleID = " + this.configEarringStyleID + " eyelashStyleID = " + this.configEyelashStyleID + " eyebrowColorID = " + this.configEyebrowColorID + " eyebrowColorValue = " + this.configEyebrowColorValue + " faceShapeID = " + this.configFaceShapeID + " faceShapeValue = " + this.configFaceShapeValue + " eyeShapeID = " + this.configEyeShapeID + " eyeShapeValue = " + this.configEyeShapeValue + " mouthShapeID = " + this.configMouthShapeID + " mouthShapeValue = " + this.configMouthShapeValue + " noseShapeID = " + this.configNoseShapeID + " noseShapeValue = " + this.configNoseShapeValue + " earShapeID = " + this.configEarShapeID + " earShapeValue = " + this.configEarShapeValue + " eyebrowShapeID = " + this.configEyebrowShapeID + " eyebrowShapeValue = " + this.configEyebrowShapeValue + "\n";
         }
     }
 
@@ -311,134 +188,102 @@ public interface AvatarConfig {
         private float zoomInScale;
 
         public boolean checkFaceBlocking() {
-            float f2 = 0.0f;
-            int i = 0;
-            float f3 = 0.0f;
-            float f4 = 0.0f;
+            float f2;
+            float f3;
+            float f4;
             float f5 = 0.0f;
+            int i = 0;
             float f6 = 0.0f;
             float f7 = 0.0f;
             float f8 = 0.0f;
             float f9 = 0.0f;
             float f10 = 0.0f;
+            float f11 = 0.0f;
+            float f12 = 0.0f;
+            float f13 = 0.0f;
             while (true) {
                 float[] fArr = this.shelterFlags;
                 if (i >= fArr.length) {
                     break;
                 }
                 if (i >= 0 && i <= 18) {
-                    f7 += fArr[i];
+                    f10 += fArr[i];
                 } else if (i >= 19 && i <= 36) {
-                    f8 += this.shelterFlags[i];
+                    f11 += this.shelterFlags[i];
                 } else if (i >= 37 && i <= 46) {
-                    f9 += this.shelterFlags[i];
+                    f12 += this.shelterFlags[i];
                 } else if (i >= 47 && i <= 56) {
-                    f10 += this.shelterFlags[i];
+                    f13 += this.shelterFlags[i];
                 } else if (i >= 57 && i <= 68) {
-                    f3 += this.shelterFlags[i];
-                } else if (i >= 69 && i <= 80) {
-                    f4 += this.shelterFlags[i];
-                } else if (i >= 81 && i <= 92) {
-                    f5 += this.shelterFlags[i];
-                } else if (i >= 93 && i <= 112) {
                     f6 += this.shelterFlags[i];
+                } else if (i >= 69 && i <= 80) {
+                    f7 += this.shelterFlags[i];
+                } else if (i >= 81 && i <= 92) {
+                    f8 += this.shelterFlags[i];
+                } else if (i >= 93 && i <= 112) {
+                    f9 += this.shelterFlags[i];
                 }
                 i++;
             }
             for (int i2 = 7; i2 <= 29; i2++) {
-                f2 += this.shelterFlags[i2];
+                f5 += this.shelterFlags[i2];
             }
-            float f11 = f7 / 19.0f;
-            float f12 = f8 / 18.0f;
-            float f13 = f9 / 10.0f;
-            float f14 = f10 / 10.0f;
-            float f15 = f3 / 12.0f;
-            float f16 = f4 / 12.0f;
-            float f17 = f5 / 12.0f;
-            float f18 = f6 / 20.0f;
-            float f19 = f2 / 23.0f;
-            StringBuilder sb = new StringBuilder();
-            sb.append("leftFace = ");
-            sb.append(f11);
-            String str = "CheckOutLine";
-            LOG.d(str, sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("rightFace = ");
-            sb2.append(f12);
-            LOG.d(str, sb2.toString());
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("leftEyeBrow = ");
-            sb3.append(f13);
-            LOG.d(str, sb3.toString());
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("rightEyeBrow = ");
-            sb4.append(f14);
-            LOG.d(str, sb4.toString());
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("leftEye = ");
-            sb5.append(f15);
-            LOG.d(str, sb5.toString());
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append("rightEye = ");
-            sb6.append(f16);
-            LOG.d(str, sb6.toString());
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append("nose = ");
-            sb7.append(f17);
-            LOG.d(str, sb7.toString());
-            StringBuilder sb8 = new StringBuilder();
-            sb8.append("mouth = ");
-            sb8.append(f18);
-            LOG.d(str, sb8.toString());
-            StringBuilder sb9 = new StringBuilder();
-            sb9.append("chin = ");
-            sb9.append(f19);
-            LOG.d(str, sb9.toString());
-            if (f11 > 0.5f && f13 > 0.5f && f15 > 0.5f) {
-                LOG.d(str, "--- > left is blocking <---");
+            float f14 = f10 / 19.0f;
+            float f15 = f11 / 18.0f;
+            float f16 = f12 / 10.0f;
+            float f17 = f13 / 10.0f;
+            float f18 = f6 / 12.0f;
+            float f19 = f7 / 12.0f;
+            LOG.d("CheckOutLine", "leftFace = " + f14);
+            LOG.d("CheckOutLine", "rightFace = " + f15);
+            LOG.d("CheckOutLine", "leftEyeBrow = " + f16);
+            LOG.d("CheckOutLine", "rightEyeBrow = " + f17);
+            LOG.d("CheckOutLine", "leftEye = " + f18);
+            LOG.d("CheckOutLine", "rightEye = " + f19);
+            LOG.d("CheckOutLine", "nose = " + f2);
+            LOG.d("CheckOutLine", "mouth = " + f3);
+            LOG.d("CheckOutLine", "chin = " + f4);
+            if (f14 > 0.5f && f16 > 0.5f && f18 > 0.5f) {
+                LOG.d("CheckOutLine", "--- > left is blocking <---");
                 return true;
-            } else if (f12 > 0.5f && f14 > 0.5f && f16 > 0.5f) {
-                LOG.d(str, "--- > right is blocking <---");
+            } else if (f15 > 0.5f && f17 > 0.5f && f19 > 0.5f) {
+                LOG.d("CheckOutLine", "--- > right is blocking <---");
                 return true;
-            } else if (f13 <= 0.4f || f14 <= 0.4f || f16 <= 0.4f || f15 <= 0.4f) {
-                int i3 = (f19 > 0.4f ? 1 : (f19 == 0.4f ? 0 : -1));
-                if (i3 > 0 && f18 > 0.4f && f17 > 0.4f) {
-                    LOG.d(str, "--- > central is blocking <---");
+            } else if (f16 <= 0.4f || f17 <= 0.4f || f19 <= 0.4f || f18 <= 0.4f) {
+                int i3 = (f4 > 0.4f ? 1 : (f4 == 0.4f ? 0 : -1));
+                if (i3 > 0 && f3 > 0.4f && f2 > 0.4f) {
+                    LOG.d("CheckOutLine", "--- > central is blocking <---");
                     return true;
-                } else if (f11 <= 0.4f || f12 <= 0.4f || i3 <= 0) {
+                } else if (f14 <= 0.4f || f15 <= 0.4f || i3 <= 0) {
                     return false;
                 } else {
-                    LOG.d(str, "--- > left & right is blocking <---");
+                    LOG.d("CheckOutLine", "--- > left & right is blocking <---");
                     return true;
                 }
             } else {
-                LOG.d(str, "--- > top is blocking <---");
+                LOG.d("CheckOutLine", "--- > top is blocking <---");
                 return true;
             }
         }
 
         public int checkOutLineInfo() {
+            float f2;
             int i;
             float[] fArr = this.faceOrientations;
-            float f2 = fArr[0];
-            float f3 = fArr[1];
+            float f3 = fArr[0];
+            float f4 = fArr[1];
             int i2 = 2;
-            float f4 = fArr[2];
-            if (((f2 < -110.0f || f2 > -70.0f) && ((f2 < -20.0f || f2 > 20.0f) && ((f2 < 160.0f || f2 > 180.0f) && ((f2 < -180.0f || f2 > -160.0f) && (f2 < 70.0f || f2 > 110.0f))))) || -20.0f > f3 || f3 > 20.0f || -20.0f > f4 || f4 > 20.0f) {
+            float f5 = fArr[2];
+            if (((f3 < -110.0f || f3 > -70.0f) && ((f3 < -20.0f || f3 > 20.0f) && ((f3 < 160.0f || f3 > 180.0f) && ((f3 < -180.0f || f3 > -160.0f) && (f3 < 70.0f || f3 > 110.0f))))) || -20.0f > f4 || f4 > 20.0f || -20.0f > f5 || f5 > 20.0f) {
                 return 9;
             }
-            float f5 = 0.0f;
             float f6 = 0.0f;
+            float f7 = 0.0f;
             for (int i3 = 0; i3 <= 36; i3++) {
-                f6 += this.shelterFlags[i3];
+                f7 += this.shelterFlags[i3];
             }
-            float f7 = f6 / 36.0f;
-            StringBuilder sb = new StringBuilder();
-            sb.append("fFaceValue = ");
-            sb.append(f7);
-            String str = "CheckOutLine";
-            LOG.d(str, sb.toString());
-            if (f7 > OUTLINE_THRESHOLD_VALUE) {
+            LOG.d("CheckOutLine", "fFaceValue = " + f2);
+            if (f2 > OUTLINE_THRESHOLD_VALUE) {
                 return 6;
             }
             float f8 = 0.0f;
@@ -446,19 +291,13 @@ public interface AvatarConfig {
                 f8 += this.shelterFlags[i4];
             }
             float f9 = f8 / 12.0f;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("fLeftEyeValue = ");
-            sb2.append(f9);
-            LOG.d(str, sb2.toString());
+            LOG.d("CheckOutLine", "fLeftEyeValue = " + f9);
             float f10 = 0.0f;
             for (int i5 = 57; i5 <= 68; i5++) {
                 f10 += this.shelterFlags[i5];
             }
             float f11 = f10 / 12.0f;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("fRightEyeValue = ");
-            sb3.append(f11);
-            LOG.d(str, sb3.toString());
+            LOG.d("CheckOutLine", "fRightEyeValue = " + f11);
             if (f11 > f9) {
                 i2 = 3;
             } else {
@@ -469,38 +308,27 @@ public interface AvatarConfig {
                 f12 += this.shelterFlags[i6];
             }
             float f13 = f12 / 20.0f;
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("fMouthEyeValue = ");
-            sb4.append(f13);
-            LOG.d(str, sb4.toString());
+            LOG.d("CheckOutLine", "fMouthEyeValue = " + f13);
             if (f13 > f11) {
                 i2 = 4;
                 f11 = f13;
             }
             for (int i7 = 81; i7 <= 119; i7++) {
-                f5 += this.shelterFlags[i7];
+                f6 += this.shelterFlags[i7];
             }
-            float f14 = f5 / 39.0f;
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("fNOSEEyeValue = ");
-            sb5.append(f14);
-            LOG.d(str, sb5.toString());
+            float f14 = f6 / 39.0f;
+            LOG.d("CheckOutLine", "fNOSEEyeValue = " + f14);
             if (f14 > f11) {
                 i = 5;
             } else {
                 f14 = f11;
                 i = i2;
             }
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append("fMax = ");
-            sb6.append(f14);
-            sb6.append(" res = ");
-            sb6.append(i);
-            LOG.d(str, sb6.toString());
-            if (f14 <= OUTLINE_THRESHOLD_VALUE) {
-                i = 0;
+            LOG.d("CheckOutLine", "fMax = " + f14 + " res = " + i);
+            if (f14 > OUTLINE_THRESHOLD_VALUE) {
+                return i;
             }
-            return i;
+            return 0;
         }
 
         public int getFaceCount() {
@@ -508,7 +336,6 @@ public interface AvatarConfig {
         }
 
         public void setEmpty() {
-            ASPointF[] aSPointFArr;
             this.processHeight = 0;
             this.processWidth = 0;
             this.orientation = 0;
@@ -596,10 +423,7 @@ public interface AvatarConfig {
                     str = "unknow";
                     break;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("Hair Type = ");
-            sb.append(str);
-            return sb.toString();
+            return "Hair Type = " + str;
         }
 
         public String getHasFringe() {
@@ -607,30 +431,7 @@ public interface AvatarConfig {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("gender = ");
-            sb.append(this.gender);
-            sb.append("\nfaceShape = ");
-            sb.append(this.faceShape);
-            sb.append("\neyeShape = ");
-            sb.append(this.eyeShape);
-            sb.append("\nmouthShape = ");
-            sb.append(this.mouthShape);
-            sb.append("\nnoseShape = ");
-            sb.append(this.noseShape);
-            sb.append("\nhairType = ");
-            sb.append(this.hairType);
-            sb.append("\nhasFringe = ");
-            sb.append(this.hasFringe);
-            sb.append("\nhairColor = ");
-            sb.append(Arrays.toString(this.hairColor));
-            sb.append("\nskinColor = ");
-            sb.append(Arrays.toString(this.skinColor));
-            sb.append("\nskinColorScale = ");
-            sb.append(this.skinColorScale);
-            sb.append("\nglassType = ");
-            sb.append(this.glassType);
-            return sb.toString();
+            return "gender = " + this.gender + "\nfaceShape = " + this.faceShape + "\neyeShape = " + this.eyeShape + "\nmouthShape = " + this.mouthShape + "\nnoseShape = " + this.noseShape + "\nhairType = " + this.hairType + "\nhasFringe = " + this.hasFringe + "\nhairColor = " + Arrays.toString(this.hairColor) + "\nskinColor = " + Arrays.toString(this.skinColor) + "\nskinColorScale = " + this.skinColorScale + "\nglassType = " + this.glassType;
         }
     }
 

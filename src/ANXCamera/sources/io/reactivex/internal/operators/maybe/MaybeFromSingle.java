@@ -14,7 +14,7 @@ public final class MaybeFromSingle<T> extends Maybe<T> implements HasUpstreamSin
     static final class FromSingleObserver<T> implements SingleObserver<T>, Disposable {
         final MaybeObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f292d;
 
         FromSingleObserver(MaybeObserver<? super T> maybeObserver) {

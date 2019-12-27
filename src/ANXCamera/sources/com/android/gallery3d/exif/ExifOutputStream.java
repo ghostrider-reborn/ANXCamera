@@ -1,6 +1,6 @@
 package com.android.gallery3d.exif;
 
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.io.BufferedOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -75,7 +75,6 @@ class ExifOutputStream extends FilterOutputStream {
     }
 
     private int calculateOffsetOfIfd(IfdData ifdData, int i) {
-        ExifTag[] allTags;
         int tagCount = i + (ifdData.getTagCount() * 12) + 2 + 4;
         for (ExifTag exifTag : ifdData.getAllTags()) {
             if (exifTag.getDataSize() > 4) {
@@ -93,7 +92,6 @@ class ExifOutputStream extends FilterOutputStream {
             this.mExifData.addIfdData(ifdData);
         }
         ExifTag buildUninitializedTag = this.mInterface.buildUninitializedTag(ExifInterface.TAG_EXIF_IFD);
-        String str = "No definition for crucial exif tag: ";
         if (buildUninitializedTag != null) {
             ifdData.setTag(buildUninitializedTag);
             IfdData ifdData2 = this.mExifData.getIfdData(2);
@@ -106,10 +104,7 @@ class ExifOutputStream extends FilterOutputStream {
                 if (buildUninitializedTag2 != null) {
                     ifdData.setTag(buildUninitializedTag2);
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(ExifInterface.TAG_GPS_IFD);
-                    throw new IOException(sb.toString());
+                    throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_GPS_IFD);
                 }
             }
             if (this.mExifData.getIfdData(3) != null) {
@@ -117,10 +112,7 @@ class ExifOutputStream extends FilterOutputStream {
                 if (buildUninitializedTag3 != null) {
                     ifdData2.setTag(buildUninitializedTag3);
                 } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str);
-                    sb2.append(ExifInterface.TAG_INTEROPERABILITY_IFD);
-                    throw new IOException(sb2.toString());
+                    throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_INTEROPERABILITY_IFD);
                 }
             }
             IfdData ifdData3 = this.mExifData.getIfdData(1);
@@ -140,15 +132,9 @@ class ExifOutputStream extends FilterOutputStream {
                         ifdData3.removeTag(ExifInterface.getTrueTagKey(ExifInterface.TAG_STRIP_BYTE_COUNTS));
                         return;
                     }
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append(str);
-                    sb3.append(ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
-                    throw new IOException(sb3.toString());
+                    throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);
                 }
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(str);
-                sb4.append(ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT);
-                throw new IOException(sb4.toString());
+                throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT);
             } else if (this.mExifData.hasUncompressedStrip()) {
                 if (ifdData3 == null) {
                     ifdData3 = new IfdData(1);
@@ -170,15 +156,9 @@ class ExifOutputStream extends FilterOutputStream {
                         ifdData3.removeTag(ExifInterface.getTrueTagKey(ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT_LENGTH));
                         return;
                     }
-                    StringBuilder sb5 = new StringBuilder();
-                    sb5.append(str);
-                    sb5.append(ExifInterface.TAG_STRIP_BYTE_COUNTS);
-                    throw new IOException(sb5.toString());
+                    throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_STRIP_BYTE_COUNTS);
                 }
-                StringBuilder sb6 = new StringBuilder();
-                sb6.append(str);
-                sb6.append(ExifInterface.TAG_STRIP_OFFSETS);
-                throw new IOException(sb6.toString());
+                throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_STRIP_OFFSETS);
             } else if (ifdData3 != null) {
                 ifdData3.removeTag(ExifInterface.getTrueTagKey(ExifInterface.TAG_STRIP_OFFSETS));
                 ifdData3.removeTag(ExifInterface.getTrueTagKey(ExifInterface.TAG_STRIP_BYTE_COUNTS));
@@ -186,10 +166,7 @@ class ExifOutputStream extends FilterOutputStream {
                 ifdData3.removeTag(ExifInterface.getTrueTagKey(ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT_LENGTH));
             }
         } else {
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append(str);
-            sb7.append(ExifInterface.TAG_EXIF_IFD);
-            throw new IOException(sb7.toString());
+            throw new IOException("No definition for crucial exif tag: " + ExifInterface.TAG_EXIF_IFD);
         }
     }
 
@@ -205,10 +182,10 @@ class ExifOutputStream extends FilterOutputStream {
     private ArrayList<ExifTag> stripNullValueTags(ExifData exifData) {
         ArrayList<ExifTag> arrayList = new ArrayList<>();
         if (exifData.getAllTags() != null) {
-            for (ExifTag exifTag : exifData.getAllTags()) {
-                if (exifTag.getValue() == null && !ExifInterface.isOffsetTag(exifTag.getTagId())) {
-                    exifData.removeTag(exifTag.getTagId(), exifTag.getIfd());
-                    arrayList.add(exifTag);
+            for (ExifTag next : exifData.getAllTags()) {
+                if (next.getValue() == null && !ExifInterface.isOffsetTag(next.getTagId())) {
+                    exifData.removeTag(next.getTagId(), next.getIfd());
+                    arrayList.add(next);
                 }
             }
         }
@@ -234,7 +211,7 @@ class ExifOutputStream extends FilterOutputStream {
     private void writeExifData() throws IOException {
         ExifData exifData = this.mExifData;
         if (exifData != null) {
-            ArrayList stripNullValueTags = stripNullValueTags(exifData);
+            ArrayList<ExifTag> stripNullValueTags = stripNullValueTags(exifData);
             createRequiredIfdAndTag();
             int calculateAllOffset = calculateAllOffset() + 8;
             if (calculateAllOffset <= 65535) {
@@ -254,9 +231,9 @@ class ExifOutputStream extends FilterOutputStream {
                 orderedDataOutputStream.writeInt(8);
                 writeAllTags(orderedDataOutputStream);
                 writeThumbnail(orderedDataOutputStream);
-                Iterator it = stripNullValueTags.iterator();
+                Iterator<ExifTag> it = stripNullValueTags.iterator();
                 while (it.hasNext()) {
-                    this.mExifData.addTag((ExifTag) it.next());
+                    this.mExifData.addTag(it.next());
                 }
                 return;
             }
@@ -421,11 +398,11 @@ class ExifOutputStream extends FilterOutputStream {
                             this.mBuffer.rewind();
                             short s = this.mBuffer.getShort();
                             if (s == -31) {
-                                this.mByteToSkip = (this.mBuffer.getShort() & ColorSpace.UNCALIBRATED) - 2;
+                                this.mByteToSkip = (this.mBuffer.getShort() & ExifInterface.ColorSpace.UNCALIBRATED) - 2;
                                 this.mState = 2;
                             } else if (!JpegHeader.isSofMarker(s)) {
                                 this.out.write(this.mBuffer.array(), 0, 4);
-                                this.mByteToCopy = (this.mBuffer.getShort() & ColorSpace.UNCALIBRATED) - 2;
+                                this.mByteToCopy = (this.mBuffer.getShort() & ExifInterface.ColorSpace.UNCALIBRATED) - 2;
                             } else {
                                 this.out.write(this.mBuffer.array(), 0, 4);
                                 this.mState = 2;

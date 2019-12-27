@@ -1,7 +1,7 @@
 package com.xiaomi.camera.imagecodec;
 
 import android.content.Context;
-import android.content.res.Resources.NotFoundException;
+import android.content.res.Resources;
 import android.util.Log;
 import com.xiaomi.camera.imagecodec.impl.HardwareCodecReprocessor;
 import com.xiaomi.camera.imagecodec.impl.SoftwareCodecReprocessor;
@@ -11,7 +11,7 @@ public class ReprocessorFactory {
     private static final String TAG = "ReprocessorFactory";
     private static ReprocessingType sReprocessorType;
 
-    /* renamed from: com.xiaomi.camera.imagecodec.ReprocessorFactory$1 reason: invalid class name */
+    /* renamed from: com.xiaomi.camera.imagecodec.ReprocessorFactory$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$xiaomi$camera$imagecodec$ReprocessorFactory$ReprocessingType = new int[ReprocessingType.values().length];
 
@@ -41,13 +41,13 @@ public class ReprocessorFactory {
             if (sReprocessorType != null) {
                 int i = AnonymousClass1.$SwitchMap$com$xiaomi$camera$imagecodec$ReprocessorFactory$ReprocessingType[sReprocessorType.ordinal()];
                 if (i == 1) {
-                    Reprocessor reprocessor = (Reprocessor) HardwareCodecReprocessor.sInstance.get();
+                    Reprocessor reprocessor = HardwareCodecReprocessor.sInstance.get();
                     return reprocessor;
                 } else if (i != 2) {
-                    Reprocessor reprocessor2 = (Reprocessor) VirtualCameraReprocessor.sInstance.get();
+                    Reprocessor reprocessor2 = VirtualCameraReprocessor.sInstance.get();
                     return reprocessor2;
                 } else {
-                    Reprocessor reprocessor3 = (Reprocessor) SoftwareCodecReprocessor.sInstance.get();
+                    Reprocessor reprocessor3 = SoftwareCodecReprocessor.sInstance.get();
                     return reprocessor3;
                 }
             } else {
@@ -62,7 +62,7 @@ public class ReprocessorFactory {
             ReprocessingType reprocessingType2 = ReprocessingType.VIRTUAL_CAMERA;
             try {
                 reprocessingType = ReprocessingType.values()[context.getResources().getInteger(R.integer.preferred_image_reprocessor_type)];
-            } catch (NotFoundException | ArrayIndexOutOfBoundsException e2) {
+            } catch (Resources.NotFoundException | ArrayIndexOutOfBoundsException e2) {
                 Log.d(TAG, "Failed to find the preferred reprocessor, use default (VIRTUAL_CAMERA) instead", e2);
             }
             if (sReprocessorType == null) {

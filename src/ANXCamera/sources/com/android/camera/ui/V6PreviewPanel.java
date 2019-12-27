@@ -4,15 +4,14 @@ import android.content.Context;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import com.android.camera.ActivityBase;
 import com.android.camera.R;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.PlayVideoProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera2.autozoom.AutoZoomView;
 
-public class V6PreviewPanel extends V6RelativeLayout implements OnClickListener {
+public class V6PreviewPanel extends V6RelativeLayout implements View.OnClickListener {
     public AutoZoomView mAutoZoomView;
     public V6EffectCropView mCropView;
     public FaceView mFaceView;
@@ -46,7 +45,7 @@ public class V6PreviewPanel extends V6RelativeLayout implements OnClickListener 
 
     public void onClick(View view) {
         if (view.getId() == R.id.v6_video_btn_play) {
-            ((PlayVideoProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(167)).playVideo();
+            ((ModeProtocol.PlayVideoProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(167)).playVideo();
         }
     }
 

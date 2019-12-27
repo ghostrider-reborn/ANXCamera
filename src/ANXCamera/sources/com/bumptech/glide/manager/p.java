@@ -38,20 +38,20 @@ public class p {
     }
 
     public void Ig() {
-        for (c a2 : l.b(this.requests)) {
+        for (T a2 : l.b(this.requests)) {
             a(a2, false);
         }
         this.qk.clear();
     }
 
     public void Jg() {
-        for (c cVar : l.b(this.requests)) {
-            if (!cVar.isComplete() && !cVar.isCancelled()) {
-                cVar.pause();
+        for (T t : l.b(this.requests)) {
+            if (!t.isComplete() && !t.isCancelled()) {
+                t.pause();
                 if (!this.rk) {
-                    cVar.begin();
+                    t.begin();
                 } else {
-                    this.qk.add(cVar);
+                    this.qk.add(t);
                 }
             }
         }
@@ -59,35 +59,35 @@ public class p {
 
     public void Pf() {
         this.rk = true;
-        for (c cVar : l.b(this.requests)) {
-            if (cVar.isRunning() || cVar.isComplete()) {
-                cVar.pause();
-                this.qk.add(cVar);
+        for (T t : l.b(this.requests)) {
+            if (t.isRunning() || t.isComplete()) {
+                t.pause();
+                this.qk.add(t);
             }
         }
     }
 
     public void Qf() {
         this.rk = true;
-        for (c cVar : l.b(this.requests)) {
-            if (cVar.isRunning()) {
-                cVar.pause();
-                this.qk.add(cVar);
+        for (T t : l.b(this.requests)) {
+            if (t.isRunning()) {
+                t.pause();
+                this.qk.add(t);
             }
         }
     }
 
     public void Sf() {
         this.rk = false;
-        for (c cVar : l.b(this.requests)) {
-            if (!cVar.isComplete() && !cVar.isCancelled() && !cVar.isRunning()) {
-                cVar.begin();
+        for (T t : l.b(this.requests)) {
+            if (!t.isComplete() && !t.isCancelled() && !t.isRunning()) {
+                t.begin();
             }
         }
         this.qk.clear();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
     public void addRequest(c cVar) {
         this.requests.add(cVar);
@@ -103,9 +103,8 @@ public class p {
             cVar.begin();
             return;
         }
-        String str = TAG;
-        if (Log.isLoggable(str, 2)) {
-            Log.v(str, "Paused, delaying request");
+        if (Log.isLoggable(TAG, 2)) {
+            Log.v(TAG, "Paused, delaying request");
         }
         this.qk.add(cVar);
     }
@@ -115,13 +114,6 @@ public class p {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
-        sb.append("{numRequests=");
-        sb.append(this.requests.size());
-        sb.append(", isPaused=");
-        sb.append(this.rk);
-        sb.append("}");
-        return sb.toString();
+        return super.toString() + "{numRequests=" + this.requests.size() + ", isPaused=" + this.rk + "}";
     }
 }

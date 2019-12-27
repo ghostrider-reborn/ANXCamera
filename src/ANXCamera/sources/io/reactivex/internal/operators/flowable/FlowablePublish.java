@@ -45,7 +45,7 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
             InnerSubscriber innerSubscriber = new InnerSubscriber(subscriber);
             subscriber.onSubscribe(innerSubscriber);
             while (true) {
-                publishSubscriber = (PublishSubscriber) this.curr.get();
+                publishSubscriber = this.curr.get();
                 if (publishSubscriber == null || publishSubscriber.isDisposed()) {
                     PublishSubscriber<T> publishSubscriber2 = new PublishSubscriber<>(this.curr, this.bufferSize);
                     if (!this.curr.compareAndSet(publishSubscriber, publishSubscriber2)) {
@@ -120,12 +120,12 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
             this.bufferSize = i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean add(InnerSubscriber<T> innerSubscriber) {
             InnerSubscriber[] innerSubscriberArr;
             InnerSubscriber[] innerSubscriberArr2;
             do {
-                innerSubscriberArr = (InnerSubscriber[]) this.subscribers.get();
+                innerSubscriberArr = this.subscribers.get();
                 if (innerSubscriberArr == TERMINATED) {
                     return false;
                 }
@@ -137,18 +137,18 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
             return true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(Object obj, boolean z) {
             int i = 0;
             if (obj != null) {
                 if (!NotificationLite.isComplete(obj)) {
                     Throwable error = NotificationLite.getError(obj);
-                    this.current.compareAndSet(this, null);
-                    InnerSubscriber[] innerSubscriberArr = (InnerSubscriber[]) this.subscribers.getAndSet(TERMINATED);
-                    if (innerSubscriberArr.length != 0) {
-                        int length = innerSubscriberArr.length;
+                    this.current.compareAndSet(this, (Object) null);
+                    InnerSubscriber[] andSet = this.subscribers.getAndSet(TERMINATED);
+                    if (andSet.length != 0) {
+                        int length = andSet.length;
                         while (i < length) {
-                            innerSubscriberArr[i].child.onError(error);
+                            andSet[i].child.onError(error);
                             i++;
                         }
                     } else {
@@ -156,11 +156,11 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
                     }
                     return true;
                 } else if (z) {
-                    this.current.compareAndSet(this, null);
-                    InnerSubscriber[] innerSubscriberArr2 = (InnerSubscriber[]) this.subscribers.getAndSet(TERMINATED);
-                    int length2 = innerSubscriberArr2.length;
+                    this.current.compareAndSet(this, (Object) null);
+                    InnerSubscriber[] andSet2 = this.subscribers.getAndSet(TERMINATED);
+                    int length2 = andSet2.length;
                     while (i < length2) {
-                        innerSubscriberArr2[i].child.onComplete();
+                        andSet2[i].child.onComplete();
                         i++;
                     }
                     return true;
@@ -169,7 +169,7 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
             return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:72:0x0117, code lost:
             if (r16 == false) goto L_0x0119;
          */
@@ -179,18 +179,18 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
             long j;
             long j2;
             Object obj;
-            Object obj2;
-            Object obj3;
+            T t;
+            T t2;
             if (getAndIncrement() == 0) {
                 boolean z2 = true;
                 int i2 = 1;
                 while (true) {
-                    Object obj4 = this.terminalEvent;
+                    Object obj2 = this.terminalEvent;
                     SimpleQueue<T> simpleQueue = this.queue;
                     boolean z3 = (simpleQueue == null || simpleQueue.isEmpty()) ? z2 : false;
-                    if (!checkTerminated(obj4, z3)) {
+                    if (!checkTerminated(obj2, z3)) {
                         if (!z3) {
-                            InnerSubscriber[] innerSubscriberArr = (InnerSubscriber[]) this.subscribers.get();
+                            InnerSubscriber[] innerSubscriberArr = this.subscribers.get();
                             int length = innerSubscriberArr.length;
                             int length2 = innerSubscriberArr.length;
                             long j3 = Long.MAX_VALUE;
@@ -213,20 +213,20 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
                             }
                             boolean z5 = z3;
                             if (length == i4) {
-                                Object obj5 = this.terminalEvent;
+                                Object obj3 = this.terminalEvent;
                                 try {
-                                    obj3 = simpleQueue.poll();
+                                    t2 = simpleQueue.poll();
                                 } catch (Throwable th) {
                                     Throwable th2 = th;
                                     Exceptions.throwIfFatal(th2);
-                                    ((Subscription) this.s.get()).cancel();
-                                    obj5 = NotificationLite.error(th2);
-                                    this.terminalEvent = obj5;
-                                    obj3 = null;
+                                    this.s.get().cancel();
+                                    obj3 = NotificationLite.error(th2);
+                                    this.terminalEvent = obj3;
+                                    t2 = null;
                                 }
-                                if (!checkTerminated(obj5, obj3 == null ? z2 : false)) {
+                                if (!checkTerminated(obj3, t2 == null ? z2 : false)) {
                                     if (this.sourceMode != z2) {
-                                        ((Subscription) this.s.get()).request(1);
+                                        this.s.get().request(1);
                                     }
                                     z = z2;
                                     i = i2;
@@ -243,29 +243,29 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
                                     }
                                     try {
                                         obj = this.terminalEvent;
-                                        obj2 = simpleQueue.poll();
+                                        t = simpleQueue.poll();
                                     } catch (Throwable th3) {
                                         Throwable th4 = th3;
                                         Exceptions.throwIfFatal(th4);
-                                        ((Subscription) this.s.get()).cancel();
+                                        this.s.get().cancel();
                                         Object error = NotificationLite.error(th4);
                                         this.terminalEvent = error;
                                         obj = error;
-                                        obj2 = null;
+                                        t = null;
                                     }
-                                    boolean z6 = obj2 == null;
+                                    boolean z6 = t == null;
                                     if (!checkTerminated(obj, z6)) {
                                         if (z6) {
                                             z5 = z6;
                                             break;
                                         }
-                                        NotificationLite.getValue(obj2);
+                                        NotificationLite.getValue(t);
                                         int length3 = innerSubscriberArr.length;
                                         int i6 = 0;
                                         while (i6 < length3) {
                                             InnerSubscriber innerSubscriber = innerSubscriberArr[i6];
                                             if (innerSubscriber.get() > j) {
-                                                innerSubscriber.child.onNext(obj2);
+                                                innerSubscriber.child.onNext(t);
                                                 innerSubscriber.produced(1);
                                             }
                                             i6++;
@@ -281,7 +281,7 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
                                 if (i5 > 0) {
                                     z = true;
                                     if (this.sourceMode != 1) {
-                                        ((Subscription) this.s.get()).request(j2);
+                                        this.s.get().request(j2);
                                     }
                                 } else {
                                     z = true;
@@ -309,10 +309,10 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
         }
 
         public void dispose() {
-            Object obj = this.subscribers.get();
-            Object obj2 = TERMINATED;
-            if (obj != obj2 && ((InnerSubscriber[]) this.subscribers.getAndSet(obj2)) != TERMINATED) {
-                this.current.compareAndSet(this, null);
+            InnerSubscriber[] innerSubscriberArr = this.subscribers.get();
+            InnerSubscriber[] innerSubscriberArr2 = TERMINATED;
+            if (innerSubscriberArr != innerSubscriberArr2 && this.subscribers.getAndSet(innerSubscriberArr2) != TERMINATED) {
+                this.current.compareAndSet(this, (Object) null);
                 SubscriptionHelper.cancel(this.s);
             }
         }
@@ -368,36 +368,37 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void remove(InnerSubscriber<T> innerSubscriber) {
             InnerSubscriber[] innerSubscriberArr;
             InnerSubscriber[] innerSubscriberArr2;
             do {
-                innerSubscriberArr = (InnerSubscriber[]) this.subscribers.get();
+                innerSubscriberArr = this.subscribers.get();
                 int length = innerSubscriberArr.length;
-                if (length == 0) {
-                    break;
-                }
-                int i = -1;
-                int i2 = 0;
-                while (true) {
-                    if (i2 >= length) {
-                        break;
-                    } else if (innerSubscriberArr[i2].equals(innerSubscriber)) {
-                        i = i2;
-                        break;
-                    } else {
-                        i2++;
+                if (length != 0) {
+                    int i = -1;
+                    int i2 = 0;
+                    while (true) {
+                        if (i2 >= length) {
+                            break;
+                        } else if (innerSubscriberArr[i2].equals(innerSubscriber)) {
+                            i = i2;
+                            break;
+                        } else {
+                            i2++;
+                        }
                     }
-                }
-                if (i >= 0) {
-                    if (length == 1) {
-                        innerSubscriberArr2 = EMPTY;
+                    if (i >= 0) {
+                        if (length == 1) {
+                            innerSubscriberArr2 = EMPTY;
+                        } else {
+                            InnerSubscriber[] innerSubscriberArr3 = new InnerSubscriber[(length - 1)];
+                            System.arraycopy(innerSubscriberArr, 0, innerSubscriberArr3, 0, i);
+                            System.arraycopy(innerSubscriberArr, i + 1, innerSubscriberArr3, i, (length - i) - 1);
+                            innerSubscriberArr2 = innerSubscriberArr3;
+                        }
                     } else {
-                        InnerSubscriber[] innerSubscriberArr3 = new InnerSubscriber[(length - 1)];
-                        System.arraycopy(innerSubscriberArr, 0, innerSubscriberArr3, 0, i);
-                        System.arraycopy(innerSubscriberArr, i + 1, innerSubscriberArr3, i, (length - i) - 1);
-                        innerSubscriberArr2 = innerSubscriberArr3;
+                        return;
                     }
                 } else {
                     return;
@@ -415,14 +416,14 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
 
     public static <T> ConnectableFlowable<T> create(Flowable<T> flowable, int i) {
         AtomicReference atomicReference = new AtomicReference();
-        return RxJavaPlugins.onAssembly((ConnectableFlowable<T>) new FlowablePublish<T>(new FlowablePublisher(atomicReference, i), flowable, atomicReference, i));
+        return RxJavaPlugins.onAssembly(new FlowablePublish(new FlowablePublisher(atomicReference, i), flowable, atomicReference, i));
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START] */
+    /* JADX WARNING: Removed duplicated region for block: B:0:0x0000 A[LOOP_START, MTH_ENTER_BLOCK] */
     public void connect(Consumer<? super Disposable> consumer) {
         PublishSubscriber publishSubscriber;
         while (true) {
-            publishSubscriber = (PublishSubscriber) this.current.get();
+            publishSubscriber = this.current.get();
             if (publishSubscriber != null && !publishSubscriber.isDisposed()) {
                 break;
             }
@@ -439,7 +440,7 @@ public final class FlowablePublish<T> extends ConnectableFlowable<T> implements 
         try {
             consumer.accept(publishSubscriber);
             if (z) {
-                this.source.subscribe((FlowableSubscriber<? super T>) publishSubscriber);
+                this.source.subscribe(publishSubscriber);
             }
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);

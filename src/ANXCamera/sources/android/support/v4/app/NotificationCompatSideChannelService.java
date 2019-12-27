@@ -4,14 +4,14 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.v4.app.INotificationSideChannel.Stub;
+import android.support.v4.app.INotificationSideChannel;
 
 public abstract class NotificationCompatSideChannelService extends Service {
 
-    private class NotificationSideChannelStub extends Stub {
+    private class NotificationSideChannelStub extends INotificationSideChannel.Stub {
         NotificationSideChannelStub() {
         }
 
@@ -50,7 +50,7 @@ public abstract class NotificationCompatSideChannelService extends Service {
 
     public abstract void cancelAll(String str);
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void checkPermission(int i, String str) {
         String[] packagesForUid = getPackageManager().getPackagesForUid(i);
         int length = packagesForUid.length;
@@ -62,18 +62,13 @@ public abstract class NotificationCompatSideChannelService extends Service {
                 return;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("NotificationSideChannelService: Uid ");
-        sb.append(i);
-        sb.append(" is not authorized for package ");
-        sb.append(str);
-        throw new SecurityException(sb.toString());
+        throw new SecurityException("NotificationSideChannelService: Uid " + i + " is not authorized for package " + str);
     }
 
     public abstract void notify(String str, int i, String str2, Notification notification);
 
     public IBinder onBind(Intent intent) {
-        if (!intent.getAction().equals(NotificationManagerCompat.ACTION_BIND_SIDE_CHANNEL) || VERSION.SDK_INT > 19) {
+        if (!intent.getAction().equals(NotificationManagerCompat.ACTION_BIND_SIDE_CHANNEL) || Build.VERSION.SDK_INT > 19) {
             return null;
         }
         return new NotificationSideChannelStub();

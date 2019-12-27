@@ -41,7 +41,7 @@ public class IdentityScopeLong<T> implements IdentityScope<Long, T> {
     public T get2(long j) {
         this.lock.lock();
         try {
-            Reference reference = (Reference) this.map.get(j);
+            Reference reference = this.map.get(j);
             if (reference != null) {
                 return reference.get();
             }
@@ -52,7 +52,7 @@ public class IdentityScopeLong<T> implements IdentityScope<Long, T> {
     }
 
     public T get2NoLock(long j) {
-        Reference reference = (Reference) this.map.get(j);
+        Reference reference = this.map.get(j);
         if (reference != null) {
             return reference.get();
         }

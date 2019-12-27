@@ -1,22 +1,21 @@
 package android.support.v4.view;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.accessibility.AccessibilityNodeInfoCompat;
 import android.support.v4.view.accessibility.AccessibilityNodeProviderCompat;
 import android.view.View;
-import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 
 public class AccessibilityDelegateCompat {
-    private static final AccessibilityDelegate DEFAULT_DELEGATE = new AccessibilityDelegate();
-    private final AccessibilityDelegate mBridge = new AccessibilityDelegateAdapter(this);
+    private static final View.AccessibilityDelegate DEFAULT_DELEGATE = new View.AccessibilityDelegate();
+    private final View.AccessibilityDelegate mBridge = new AccessibilityDelegateAdapter(this);
 
-    private static final class AccessibilityDelegateAdapter extends AccessibilityDelegate {
+    private static final class AccessibilityDelegateAdapter extends View.AccessibilityDelegate {
         private final AccessibilityDelegateCompat mCompat;
 
         AccessibilityDelegateAdapter(AccessibilityDelegateCompat accessibilityDelegateCompat) {
@@ -70,17 +69,18 @@ public class AccessibilityDelegateCompat {
     }
 
     public AccessibilityNodeProviderCompat getAccessibilityNodeProvider(View view) {
-        if (VERSION.SDK_INT >= 16) {
-            AccessibilityNodeProvider accessibilityNodeProvider = DEFAULT_DELEGATE.getAccessibilityNodeProvider(view);
-            if (accessibilityNodeProvider != null) {
-                return new AccessibilityNodeProviderCompat(accessibilityNodeProvider);
-            }
+        if (Build.VERSION.SDK_INT < 16) {
+            return null;
+        }
+        AccessibilityNodeProvider accessibilityNodeProvider = DEFAULT_DELEGATE.getAccessibilityNodeProvider(view);
+        if (accessibilityNodeProvider != null) {
+            return new AccessibilityNodeProviderCompat(accessibilityNodeProvider);
         }
         return null;
     }
 
-    /* access modifiers changed from: 0000 */
-    public AccessibilityDelegate getBridge() {
+    /* access modifiers changed from: package-private */
+    public View.AccessibilityDelegate getBridge() {
         return this.mBridge;
     }
 
@@ -101,7 +101,7 @@ public class AccessibilityDelegateCompat {
     }
 
     public boolean performAccessibilityAction(View view, int i, Bundle bundle) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             return DEFAULT_DELEGATE.performAccessibilityAction(view, i, bundle);
         }
         return false;

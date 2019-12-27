@@ -33,7 +33,7 @@ public class ExceptionResult {
     }
 
     public ExceptionResult(Exception exc) {
-        this(exc, null, null, null);
+        this(exc, (String) null, (String) null, (String) null);
     }
 
     public ExceptionResult(Exception exc, String str, String str2, String str3) {
@@ -110,47 +110,9 @@ public class ExceptionResult {
     }
 
     public String toString() {
-        String str = ", remoteIp='";
-        String str2 = ", selectedHost='";
-        String str3 = ", requestUrl='";
-        String str4 = ", msg='";
-        String str5 = "ExceptionResult{errorCode=";
         if (this.exception != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(str5);
-            sb.append(this.errorCode);
-            sb.append(str4);
-            sb.append(this.msg);
-            sb.append('\'');
-            sb.append(str3);
-            sb.append(this.requestUrl);
-            sb.append('\'');
-            sb.append(str2);
-            sb.append(this.selectedHost);
-            sb.append('\'');
-            sb.append(str);
-            sb.append(this.remoteIp);
-            sb.append('\'');
-            sb.append(", exception=");
-            sb.append(this.exception.getMessage());
-            sb.append('}');
-            return sb.toString();
+            return "ExceptionResult{errorCode=" + this.errorCode + ", msg='" + this.msg + '\'' + ", requestUrl='" + this.requestUrl + '\'' + ", selectedHost='" + this.selectedHost + '\'' + ", remoteIp='" + this.remoteIp + '\'' + ", exception=" + this.exception.getMessage() + '}';
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str5);
-        sb2.append(this.errorCode);
-        sb2.append(str4);
-        sb2.append(this.msg);
-        sb2.append(str3);
-        sb2.append(this.requestUrl);
-        sb2.append('\'');
-        sb2.append(str2);
-        sb2.append(this.selectedHost);
-        sb2.append('\'');
-        sb2.append(str);
-        sb2.append(this.remoteIp);
-        sb2.append('\'');
-        sb2.append('}');
-        return sb2.toString();
+        return "ExceptionResult{errorCode=" + this.errorCode + ", msg='" + this.msg + ", requestUrl='" + this.requestUrl + '\'' + ", selectedHost='" + this.selectedHost + '\'' + ", remoteIp='" + this.remoteIp + '\'' + '}';
     }
 }

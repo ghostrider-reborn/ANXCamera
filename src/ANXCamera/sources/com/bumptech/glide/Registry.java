@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import com.bumptech.glide.d.a;
 import com.bumptech.glide.d.b;
 import com.bumptech.glide.d.c;
@@ -10,6 +10,7 @@ import com.bumptech.glide.d.d;
 import com.bumptech.glide.d.e;
 import com.bumptech.glide.d.f;
 import com.bumptech.glide.load.ImageHeaderParser;
+import com.bumptech.glide.load.a.e;
 import com.bumptech.glide.load.a.g;
 import com.bumptech.glide.load.engine.A;
 import com.bumptech.glide.load.engine.i;
@@ -38,7 +39,7 @@ public class Registry {
     private final b ic = new b();
     private final d jc = new d();
     private final c kc = new c();
-    private final Pool<List<Throwable>> lc = com.bumptech.glide.util.a.d.Lh();
+    private final Pools.Pool<List<Throwable>> lc = com.bumptech.glide.util.a.d.Lh();
 
     public static class MissingComponentException extends RuntimeException {
         public MissingComponentException(@NonNull String str) {
@@ -54,38 +55,23 @@ public class Registry {
 
     public static class NoModelLoaderAvailableException extends MissingComponentException {
         public NoModelLoaderAvailableException(@NonNull Class<?> cls, @NonNull Class<?> cls2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to find any ModelLoaders for model: ");
-            sb.append(cls);
-            sb.append(" and data: ");
-            sb.append(cls2);
-            super(sb.toString());
+            super("Failed to find any ModelLoaders for model: " + cls + " and data: " + cls2);
         }
 
         public NoModelLoaderAvailableException(@NonNull Object obj) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to find any ModelLoaders for model: ");
-            sb.append(obj);
-            super(sb.toString());
+            super("Failed to find any ModelLoaders for model: " + obj);
         }
     }
 
     public static class NoResultEncoderAvailableException extends MissingComponentException {
         public NoResultEncoderAvailableException(@NonNull Class<?> cls) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to find result encoder for resource class: ");
-            sb.append(cls);
-            sb.append(", you may need to consider registering a new Encoder for the requested type or DiskCacheStrategy.DATA/DiskCacheStrategy.NONE if caching your transformed resource is unnecessary.");
-            super(sb.toString());
+            super("Failed to find result encoder for resource class: " + cls + ", you may need to consider registering a new Encoder for the requested type or DiskCacheStrategy.DATA/DiskCacheStrategy.NONE if caching your transformed resource is unnecessary.");
         }
     }
 
     public static class NoSourceEncoderAvailableException extends MissingComponentException {
         public NoSourceEncoderAvailableException(@NonNull Class<?> cls) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to find source encoder for data class: ");
-            sb.append(cls);
-            super(sb.toString());
+            super("Failed to find source encoder for data class: " + cls);
         }
     }
 
@@ -96,9 +82,9 @@ public class Registry {
     @NonNull
     private <Data, TResource, Transcode> List<i<Data, TResource, Transcode>> e(@NonNull Class<Data> cls, @NonNull Class<TResource> cls2, @NonNull Class<Transcode> cls3) {
         ArrayList arrayList = new ArrayList();
-        for (Class cls4 : this.ec.g(cls, cls2)) {
-            for (Class cls5 : this.hc.e(cls4, cls3)) {
-                i iVar = new i(cls, cls4, cls5, this.ec.f(cls, cls4), this.hc.d(cls4, cls5), this.lc);
+        for (Class next : this.ec.g(cls, cls2)) {
+            for (Class next2 : this.hc.e(next, cls3)) {
+                i iVar = new i(cls, next, next2, this.ec.f(cls, next), this.hc.d(next, next2), this.lc);
                 arrayList.add(iVar);
             }
         }
@@ -121,7 +107,7 @@ public class Registry {
     }
 
     @NonNull
-    public Registry a(@NonNull com.bumptech.glide.load.a.e.a<?> aVar) {
+    public Registry a(@NonNull e.a<?> aVar) {
         this.gc.a(aVar);
         return this;
     }
@@ -169,7 +155,7 @@ public class Registry {
             return null;
         }
         if (c2 == null) {
-            List e2 = e(cls, cls2, cls3);
+            List<i<Data, TResource, Transcode>> e2 = e(cls, cls2, cls3);
             if (e2.isEmpty()) {
                 c2 = null;
             } else {
@@ -224,10 +210,10 @@ public class Registry {
         List<Class<?>> d2 = this.jc.d(cls, cls2);
         if (d2 == null) {
             d2 = new ArrayList<>();
-            for (Class g : this.bc.f(cls)) {
-                for (Class cls4 : this.ec.g(g, cls2)) {
-                    if (!this.hc.e(cls4, cls3).isEmpty() && !d2.contains(cls4)) {
-                        d2.add(cls4);
+            for (Class<?> g : this.bc.f((Class<?>) cls)) {
+                for (Class next : this.ec.g(g, cls2)) {
+                    if (!this.hc.e(next, cls3).isEmpty() && !d2.contains(next)) {
+                        d2.add(next);
                     }
                 }
             }

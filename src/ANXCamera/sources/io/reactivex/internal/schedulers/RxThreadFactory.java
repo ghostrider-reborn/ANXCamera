@@ -30,21 +30,14 @@ public final class RxThreadFactory extends AtomicLong implements ThreadFactory {
     }
 
     public Thread newThread(Runnable runnable) {
-        StringBuilder sb = new StringBuilder(this.prefix);
-        sb.append('-');
-        sb.append(incrementAndGet());
-        String sb2 = sb.toString();
-        Thread rxCustomThread = this.nonBlocking ? new RxCustomThread(runnable, sb2) : new Thread(runnable, sb2);
+        String str = this.prefix + '-' + incrementAndGet();
+        Thread rxCustomThread = this.nonBlocking ? new RxCustomThread(runnable, str) : new Thread(runnable, str);
         rxCustomThread.setPriority(this.priority);
         rxCustomThread.setDaemon(true);
         return rxCustomThread;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RxThreadFactory[");
-        sb.append(this.prefix);
-        sb.append("]");
-        return sb.toString();
+        return "RxThreadFactory[" + this.prefix + "]";
     }
 }

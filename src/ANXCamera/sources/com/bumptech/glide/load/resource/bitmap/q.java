@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
@@ -41,15 +40,9 @@ final class q {
 
     @Nullable
     private static Bitmap b(d dVar, Drawable drawable, int i, int i2) {
-        String str = "Unable to draw ";
-        String str2 = TAG;
         if (i == Integer.MIN_VALUE && drawable.getIntrinsicWidth() <= 0) {
-            if (Log.isLoggable(str2, 5)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(drawable);
-                sb.append(" to Bitmap with Target.SIZE_ORIGINAL because the Drawable has no intrinsic width");
-                Log.w(str2, sb.toString());
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Unable to draw " + drawable + " to Bitmap with Target.SIZE_ORIGINAL because the Drawable has no intrinsic width");
             }
             return null;
         } else if (i2 != Integer.MIN_VALUE || drawable.getIntrinsicHeight() > 0) {
@@ -61,23 +54,19 @@ final class q {
             }
             Lock Fg = y.Fg();
             Fg.lock();
-            Bitmap d2 = dVar.d(i, i2, Config.ARGB_8888);
+            Bitmap d2 = dVar.d(i, i2, Bitmap.Config.ARGB_8888);
             try {
                 Canvas canvas = new Canvas(d2);
                 drawable.setBounds(0, 0, i, i2);
                 drawable.draw(canvas);
-                canvas.setBitmap(null);
+                canvas.setBitmap((Bitmap) null);
                 return d2;
             } finally {
                 Fg.unlock();
             }
         } else {
-            if (Log.isLoggable(str2, 5)) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(drawable);
-                sb2.append(" to Bitmap with Target.SIZE_ORIGINAL because the Drawable has no intrinsic height");
-                Log.w(str2, sb2.toString());
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Unable to draw " + drawable + " to Bitmap with Target.SIZE_ORIGINAL because the Drawable has no intrinsic height");
             }
             return null;
         }

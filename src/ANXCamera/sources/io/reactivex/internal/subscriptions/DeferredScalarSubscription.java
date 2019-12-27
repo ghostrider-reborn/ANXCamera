@@ -40,6 +40,7 @@ public class DeferredScalarSubscription<T> extends BasicIntQueueSubscription<T> 
                     subscriber.onNext(t);
                     if (get() != 4) {
                         subscriber.onComplete();
+                        return;
                     }
                     return;
                 }
@@ -99,8 +100,11 @@ public class DeferredScalarSubscription<T> extends BasicIntQueueSubscription<T> 
                                 subscriber.onNext(t);
                                 if (get() != 4) {
                                     subscriber.onComplete();
+                                    return;
                                 }
+                                return;
                             }
+                            return;
                         }
                         return;
                     }

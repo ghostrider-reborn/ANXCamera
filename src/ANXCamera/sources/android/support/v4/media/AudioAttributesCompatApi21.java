@@ -40,7 +40,7 @@ class AudioAttributesCompatApi21 {
             if (sAudioAttributesToLegacyStreamType == null) {
                 sAudioAttributesToLegacyStreamType = AudioAttributes.class.getMethod("toLegacyStreamType", new Class[]{AudioAttributes.class});
             }
-            return ((Integer) sAudioAttributesToLegacyStreamType.invoke(null, new Object[]{unwrap})).intValue();
+            return ((Integer) sAudioAttributesToLegacyStreamType.invoke((Object) null, new Object[]{unwrap})).intValue();
         } catch (ClassCastException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e2) {
             Log.w(TAG, "getLegacyStreamType() failed on API21+", e2);
             return -1;

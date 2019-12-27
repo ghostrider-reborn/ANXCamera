@@ -1,7 +1,7 @@
 package com.miui.extravideo.interpolation;
 
 import android.graphics.Bitmap;
-import android.media.MediaCodec.BufferInfo;
+import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,7 +39,7 @@ class VideoInterpolatorAsyncImp {
     private static final int INTERPOLATOR_ACCURACY = 1;
     private static final int MAX_BUFFER_SIZE = 15;
     private static final int TOTAL_FRAME_SIZE = 300;
-    private static Boolean bInitWatemarkPipeline = Boolean.valueOf(false);
+    private static Boolean bInitWatemarkPipeline = false;
     /* access modifiers changed from: private */
     public MediaCodecHandlerThread mDecodeThread;
     /* access modifiers changed from: private */
@@ -63,7 +63,7 @@ class VideoInterpolatorAsyncImp {
     private final boolean mSupportWatermark;
     private WatermarkRenderPipeline mWatermarkPipeline;
 
-    private class DecodeUpdateListener implements com.miui.extravideo.common.MediaDecoderAsync.DecodeUpdateListener {
+    private class DecodeUpdateListener implements MediaDecoderAsync.DecodeUpdateListener {
         private boolean mBeginInterpolator = false;
         private DeFlickerJni mDeFlickerJni;
         private int mDecodeIndex = 0;
@@ -86,7 +86,7 @@ class VideoInterpolatorAsyncImp {
             }
         }
 
-        private void initEncodeBuffer(BufferInfo bufferInfo) {
+        private void initEncodeBuffer(MediaCodec.BufferInfo bufferInfo) {
             byte[] bArr = this.mEncodeBuffer;
             if (!(bArr == null || bArr.length == bufferInfo.size)) {
                 this.mEncodeBuffer = null;
@@ -117,7 +117,7 @@ class VideoInterpolatorAsyncImp {
             VideoInterpolatorAsyncImp.this.mDecodeThread.quitSafely();
         }
 
-        public void onDecodeBuffer(ByteBuffer byteBuffer, BufferInfo bufferInfo) {
+        public void onDecodeBuffer(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo) {
             initEncodeBuffer(bufferInfo);
             initYuvBuffer();
             byteBuffer.get(this.mEncodeBuffer);
@@ -178,7 +178,7 @@ class VideoInterpolatorAsyncImp {
         }
     }
 
-    private class EncodeUpdateListener implements com.miui.extravideo.common.MediaEncoderAsync.EncodeUpdateListener {
+    private class EncodeUpdateListener implements MediaEncoderAsync.EncodeUpdateListener {
         private int mEncodeIndex;
         private boolean mIsEnd;
 
@@ -283,22 +283,18 @@ class VideoInterpolatorAsyncImp {
     }
 
     private void addMetaData() {
-        String str = "jcodec";
         try {
             MetadataEditor createFrom = MetadataEditor.createFrom(new File(this.mDstPath));
-            Map keyedMeta = createFrom.getKeyedMeta();
+            Map<String, MetaValue> keyedMeta = createFrom.getKeyedMeta();
             long currentTimeMillis = System.currentTimeMillis();
             keyedMeta.put("com.xiaomi.capture_framerate", MetaValue.createInt(FRAME_RATE_TARGET));
             if (this.mSupportEditor && this.mOriginVideoTrack != -1) {
                 keyedMeta.put("com.xiaomi.capture_origin_track", MetaValue.createInt(this.mOriginVideoTrack));
             }
             createFrom.save(true);
-            StringBuilder sb = new StringBuilder();
-            sb.append("cost: ");
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            Log.d(str, sb.toString());
+            Log.d("jcodec", "cost: " + (System.currentTimeMillis() - currentTimeMillis));
         } catch (Exception e2) {
-            Log.w(str, "error \n", e2);
+            Log.w("jcodec", "error \n", e2);
         }
     }
 
@@ -311,10 +307,10 @@ class VideoInterpolatorAsyncImp {
             this.mOriginVideoTrack = MediaUtils.mixVideo(file.getAbsolutePath(), file2.getAbsolutePath(), this.mSrcPath, this.mDegree);
             if (this.mOriginVideoTrack != -1) {
                 file2.delete();
-            } else {
-                file.delete();
-                file2.renameTo(file);
+                return;
             }
+            file.delete();
+            file2.renameTo(file);
         }
     }
 
@@ -340,7 +336,7 @@ class VideoInterpolatorAsyncImp {
     /* access modifiers changed from: private */
     public EncodeBufferHolder getBufferFromQueue() {
         try {
-            return (EncodeBufferHolder) this.mQueue.take();
+            return this.mQueue.take();
         } catch (InterruptedException e2) {
             e2.printStackTrace();
             return null;
@@ -383,6 +379,7 @@ class VideoInterpolatorAsyncImp {
             if (encodeListener != null) {
                 encodeListener.onError();
                 this.mEncodeListener = null;
+                return;
             }
             return;
         }
@@ -425,7 +422,7 @@ class VideoInterpolatorAsyncImp {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void doDecodeAndEncode() {
         this.mDecoder.setSkipFrameTimes(8);
         try {

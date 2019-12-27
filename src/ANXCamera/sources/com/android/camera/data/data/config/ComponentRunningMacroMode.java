@@ -27,11 +27,7 @@ public class ComponentRunningMacroMode extends ComponentData {
         if (169 == i) {
             i = 162;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.valueOf(i));
-        sb.append("_");
-        sb.append(i2);
-        return sb.toString();
+        return String.valueOf(i) + "_" + i2;
     }
 
     public void clearArrayMap() {
@@ -64,7 +60,7 @@ public class ComponentRunningMacroMode extends ComponentData {
     }
 
     public boolean isCacheSwitchOn(int i, int i2) {
-        Boolean bool = (Boolean) this.mCacheValues.get(getMode(i, i2));
+        Boolean bool = this.mCacheValues.get(getMode(i, i2));
         if (bool == null) {
             return false;
         }
@@ -84,10 +80,10 @@ public class ComponentRunningMacroMode extends ComponentData {
     }
 
     public void setSwitchOff(int i) {
-        this.mCacheValues.put(getMode(i, this.mCameraId), Boolean.valueOf(false));
+        this.mCacheValues.put(getMode(i, this.mCameraId), false);
     }
 
     public void setSwitchOn(int i) {
-        this.mCacheValues.put(getMode(i, this.mCameraId), Boolean.valueOf(true));
+        this.mCacheValues.put(getMode(i, this.mCameraId), true);
     }
 }

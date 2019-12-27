@@ -1,7 +1,6 @@
 package com.android.camera2.autozoom;
 
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.CaptureResult.Key;
 import android.util.Log;
 import com.android.camera2.vendortag.CaptureResultVendorTags;
 import com.android.camera2.vendortag.VendorTag;
@@ -26,28 +25,13 @@ public class AutoZoomCaptureResult {
                 Integer num = (Integer) getAutoZoomResult(CaptureResultVendorTags.AUTOZOOM_STATUS, captureResult);
                 this.mAutoZoomStatus = num == null ? 0 : num.intValue();
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("autozoom status is ");
-                sb.append(this.mAutoZoomStatus);
-                Log.i(str, sb.toString());
+                Log.i(str, "autozoom status is " + this.mAutoZoomStatus);
                 this.mAutoZoomBounds = (float[]) getAutoZoomResult(CaptureResultVendorTags.AUTOZOOM_BOUNDS, captureResult);
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("autoZoomBound is ");
-                sb2.append(this.mAutoZoomBounds);
-                Log.i(str2, sb2.toString());
+                Log.i(str2, "autoZoomBound is " + this.mAutoZoomBounds);
                 if (this.mAutoZoomBounds != null) {
                     String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("bounds left ");
-                    sb3.append(this.mAutoZoomBounds[0]);
-                    sb3.append(" top ");
-                    sb3.append(this.mAutoZoomBounds[1]);
-                    sb3.append(" right ");
-                    sb3.append(this.mAutoZoomBounds[2]);
-                    sb3.append(" bottom ");
-                    sb3.append(this.mAutoZoomBounds[3]);
-                    Log.i(str3, sb3.toString());
+                    Log.i(str3, "bounds left " + this.mAutoZoomBounds[0] + " top " + this.mAutoZoomBounds[1] + " right " + this.mAutoZoomBounds[2] + " bottom " + this.mAutoZoomBounds[3]);
                 }
                 this.mAutoZoomTargetBoundsStabilized = (float[]) getAutoZoomResult(CaptureResultVendorTags.AUTOZOOM_TARGET_BOUNDS_STABILIZED, captureResult);
                 this.mAutoZoomTargetBoundsZoomed = (float[]) getAutoZoomResult(CaptureResultVendorTags.AUTOZOOM_TARGET_BOUNDS_ZOOMED, captureResult);
@@ -63,7 +47,7 @@ public class AutoZoomCaptureResult {
         }
     }
 
-    private <T> T getAutoZoomResult(VendorTag<Key<T>> vendorTag, CaptureResult captureResult) {
+    private <T> T getAutoZoomResult(VendorTag<CaptureResult.Key<T>> vendorTag, CaptureResult captureResult) {
         return VendorTagHelper.getValueSafely(captureResult, vendorTag);
     }
 

@@ -15,7 +15,6 @@ public enum ErrorCode {
     }
 
     public static ErrorCode fromHttp2(int i) {
-        ErrorCode[] values;
         for (ErrorCode errorCode : values()) {
             if (errorCode.httpCode == i) {
                 return errorCode;

@@ -2,15 +2,16 @@ package com.bumptech.glide.load.engine;
 
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.a.d.a;
+import com.bumptech.glide.load.a.d;
 import com.bumptech.glide.load.c;
+import com.bumptech.glide.load.engine.f;
 import com.bumptech.glide.load.model.t;
 import java.io.File;
 import java.util.List;
 
-/* renamed from: com.bumptech.glide.load.engine.c reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.engine.c  reason: case insensitive filesystem */
 /* compiled from: DataCacheGenerator */
-class C0097c implements f, a<Object> {
+class C0097c implements f, d.a<Object> {
     private File Ae;
     private final f.a cb;
     private final List<c> te;
@@ -59,7 +60,7 @@ class C0097c implements f, a<Object> {
                 if (this.ve >= this.te.size()) {
                     return false;
                 }
-                c cVar = (c) this.te.get(this.ve);
+                c cVar = this.te.get(this.ve);
                 this.Ae = this.ue.n().b(new C0098d(cVar, this.ue.getSignature()));
                 File file = this.Ae;
                 if (file != null) {
@@ -73,8 +74,8 @@ class C0097c implements f, a<Object> {
                     List<t<File, ?>> list = this.xe;
                     int i = this.ye;
                     this.ye = i + 1;
-                    this.ze = ((t) list.get(i)).a(this.Ae, this.ue.getWidth(), this.ue.getHeight(), this.ue.getOptions());
-                    if (this.ze != null && this.ue.e(this.ze.bi.M())) {
+                    this.ze = list.get(i).a(this.Ae, this.ue.getWidth(), this.ue.getHeight(), this.ue.getOptions());
+                    if (this.ze != null && this.ue.e((Class<?>) this.ze.bi.M())) {
                         this.ze.bi.a(this.ue.getPriority(), this);
                         z = true;
                     }

@@ -1,10 +1,9 @@
 package com.android.camera.fragment.top;
 
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 
 /* compiled from: lambda */
-public final /* synthetic */ class f implements OnClickListener {
+public final /* synthetic */ class f implements DialogInterface.OnClickListener {
     private final /* synthetic */ FragmentTopAlert ub;
 
     public /* synthetic */ f(FragmentTopAlert fragmentTopAlert) {

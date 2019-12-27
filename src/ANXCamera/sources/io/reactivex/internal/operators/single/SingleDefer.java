@@ -23,7 +23,7 @@ public final class SingleDefer<T> extends Single<T> {
             ((SingleSource) call).subscribe(singleObserver);
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

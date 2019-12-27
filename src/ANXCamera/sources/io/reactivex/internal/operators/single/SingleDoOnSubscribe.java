@@ -39,7 +39,7 @@ public final class SingleDoOnSubscribe<T> extends Single<T> {
                 Exceptions.throwIfFatal(th);
                 this.done = true;
                 disposable.dispose();
-                EmptyDisposable.error(th, this.actual);
+                EmptyDisposable.error(th, (SingleObserver<?>) this.actual);
             }
         }
 

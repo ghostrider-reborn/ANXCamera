@@ -1,13 +1,12 @@
 package com.ss.android.medialib;
 
 import com.bef.effectsdk.message.MessageCenter;
-import com.bef.effectsdk.message.MessageCenter.Listener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageCenterWrapper implements Listener {
+public class MessageCenterWrapper implements MessageCenter.Listener {
     private static MessageCenterWrapper INSTANCE;
-    private List<Listener> listeners = new ArrayList();
+    private List<MessageCenter.Listener> listeners = new ArrayList();
     private int mCount = 0;
 
     private MessageCenterWrapper() {
@@ -24,7 +23,7 @@ public class MessageCenterWrapper implements Listener {
         return INSTANCE;
     }
 
-    public synchronized void addListener(Listener listener) {
+    public synchronized void addListener(MessageCenter.Listener listener) {
         if (listener != null) {
             this.listeners.add(listener);
         }
@@ -52,13 +51,13 @@ public class MessageCenterWrapper implements Listener {
 
     public void onMessageReceived(int i, int i2, int i3, String str) {
         synchronized (this) {
-            for (Listener onMessageReceived : this.listeners) {
+            for (MessageCenter.Listener onMessageReceived : this.listeners) {
                 onMessageReceived.onMessageReceived(i, i2, i3, str);
             }
         }
     }
 
-    public synchronized void removeListener(Listener listener) {
+    public synchronized void removeListener(MessageCenter.Listener listener) {
         this.listeners.remove(listener);
     }
 }

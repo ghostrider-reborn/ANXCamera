@@ -1,5 +1,6 @@
 package com.android.camera.network.download;
 
+import com.android.camera.network.download.DownloadTask;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -23,32 +24,29 @@ public class GalleryDownloadManager {
         private final AtomicInteger mCount = new AtomicInteger();
 
         public Thread newThread(Runnable runnable) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("DownloadTask #");
-            sb.append(this.mCount.getAndIncrement());
-            return new Thread(runnable, sb.toString());
+            return new Thread(runnable, "DownloadTask #" + this.mCount.getAndIncrement());
         }
     };
 
-    public interface OnCompleteListener extends OnCompleteListener {
+    public interface OnCompleteListener extends DownloadTask.OnCompleteListener {
         void onRequestComplete(Request request, int i);
     }
 
-    public interface OnProgressListener extends OnProgressListener {
+    public interface OnProgressListener extends DownloadTask.OnProgressListener {
         void onProgressUpdate(Request request, int i);
     }
 
-    private class TaskMonitor implements OnCompleteListener {
-        private OnCompleteListener mWrapped;
+    private class TaskMonitor implements DownloadTask.OnCompleteListener {
+        private DownloadTask.OnCompleteListener mWrapped;
 
-        TaskMonitor(OnCompleteListener onCompleteListener) {
+        TaskMonitor(DownloadTask.OnCompleteListener onCompleteListener) {
             this.mWrapped = onCompleteListener;
         }
 
         public void onRequestComplete(Request request, int i) {
             DownloadTask downloadTask = (DownloadTask) GalleryDownloadManager.this.mTasks.remove(request.getTag());
             if (downloadTask != null) {
-                downloadTask.setOnProgressListener(null);
+                downloadTask.setOnProgressListener((DownloadTask.OnProgressListener) null);
             }
             this.mWrapped.onRequestComplete(request, i);
         }
@@ -61,7 +59,7 @@ public class GalleryDownloadManager {
     }
 
     public void cancel(String str) {
-        DownloadTask downloadTask = (DownloadTask) this.mTasks.get(str);
+        DownloadTask downloadTask = this.mTasks.get(str);
         if (downloadTask != null) {
             downloadTask.cancel(false);
         }
@@ -74,7 +72,7 @@ public class GalleryDownloadManager {
         try {
             return downloadTask.execute();
         } finally {
-            downloadTask.setOnProgressListener(null);
+            downloadTask.setOnProgressListener((DownloadTask.OnProgressListener) null);
             this.mTasks.remove(request.getTag());
         }
     }
@@ -86,16 +84,16 @@ public class GalleryDownloadManager {
     }
 
     public void registerOnProgressListener(String str, OnProgressListener onProgressListener) {
-        DownloadTask downloadTask = (DownloadTask) this.mTasks.get(str);
+        DownloadTask downloadTask = this.mTasks.get(str);
         if (downloadTask != null) {
             downloadTask.setOnProgressListener(onProgressListener);
         }
     }
 
     public void unregisterOnProgressListener(String str) {
-        DownloadTask downloadTask = (DownloadTask) this.mTasks.get(str);
+        DownloadTask downloadTask = this.mTasks.get(str);
         if (downloadTask != null) {
-            downloadTask.setOnProgressListener(null);
+            downloadTask.setOnProgressListener((DownloadTask.OnProgressListener) null);
         }
     }
 }

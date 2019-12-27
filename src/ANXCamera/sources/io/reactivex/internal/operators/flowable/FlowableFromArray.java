@@ -21,7 +21,7 @@ public final class FlowableFromArray<T> extends Flowable<T> {
             this.actual = conditionalSubscriber;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fastPath() {
             T[] tArr = this.array;
             int length = tArr.length;
@@ -46,7 +46,7 @@ public final class FlowableFromArray<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(long j) {
             T[] tArr = this.array;
             int length = tArr.length;
@@ -57,16 +57,17 @@ public final class FlowableFromArray<T> extends Flowable<T> {
                 long j3 = 0;
                 while (true) {
                     if (j3 == j2 || i == length) {
-                        if (i == length) {
-                            if (!this.cancelled) {
-                                conditionalSubscriber.onComplete();
+                        if (i != length) {
+                            j2 = get();
+                            if (j3 == j2) {
+                                this.index = i;
+                                j2 = addAndGet(-j3);
                             }
+                        } else if (!this.cancelled) {
+                            conditionalSubscriber.onComplete();
                             return;
-                        }
-                        j2 = get();
-                        if (j3 == j2) {
-                            this.index = i;
-                            j2 = addAndGet(-j3);
+                        } else {
+                            return;
                         }
                     } else if (!this.cancelled) {
                         T t = tArr[i];
@@ -95,7 +96,7 @@ public final class FlowableFromArray<T> extends Flowable<T> {
             this.actual = subscriber;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void fastPath() {
             T[] tArr = this.array;
             int length = tArr.length;
@@ -120,7 +121,7 @@ public final class FlowableFromArray<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void slowPath(long j) {
             T[] tArr = this.array;
             int length = tArr.length;
@@ -131,16 +132,17 @@ public final class FlowableFromArray<T> extends Flowable<T> {
                 long j3 = 0;
                 while (true) {
                     if (j3 == j2 || i == length) {
-                        if (i == length) {
-                            if (!this.cancelled) {
-                                subscriber.onComplete();
+                        if (i != length) {
+                            j2 = get();
+                            if (j3 == j2) {
+                                this.index = i;
+                                j2 = addAndGet(-j3);
                             }
+                        } else if (!this.cancelled) {
+                            subscriber.onComplete();
                             return;
-                        }
-                        j2 = get();
-                        if (j3 == j2) {
-                            this.index = i;
-                            j2 = addAndGet(-j3);
+                        } else {
+                            return;
                         }
                     } else if (!this.cancelled) {
                         T t = tArr[i];
@@ -177,7 +179,7 @@ public final class FlowableFromArray<T> extends Flowable<T> {
             this.index = this.array.length;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void fastPath();
 
         public final boolean isEmpty() {
@@ -211,7 +213,7 @@ public final class FlowableFromArray<T> extends Flowable<T> {
             return i & 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void slowPath(long j);
     }
 

@@ -18,7 +18,7 @@ public final class SingleDoOnDispose<T> extends Single<T> {
         private static final long serialVersionUID = -8583764624474935784L;
         final SingleObserver<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f333d;
 
         DoOnDisposeObserver(SingleObserver<? super T> singleObserver, Action action) {
@@ -27,7 +27,7 @@ public final class SingleDoOnDispose<T> extends Single<T> {
         }
 
         public void dispose() {
-            Action action = (Action) getAndSet(null);
+            Action action = (Action) getAndSet((Object) null);
             if (action != null) {
                 try {
                     action.run();

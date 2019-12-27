@@ -66,6 +66,6 @@ public final class FlowableTimeInterval<T> extends AbstractFlowableWithUpstream<
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super Timed<T>> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new TimeIntervalSubscriber<Object>(subscriber, this.unit, this.scheduler));
+        this.source.subscribe(new TimeIntervalSubscriber(subscriber, this.unit, this.scheduler));
     }
 }

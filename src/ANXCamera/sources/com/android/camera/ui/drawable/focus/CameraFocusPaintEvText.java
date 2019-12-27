@@ -3,8 +3,7 @@ package com.android.camera.ui.drawable.focus;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.Style;
+import android.graphics.Paint;
 import com.android.camera.R;
 import com.android.camera.ui.drawable.CameraPaintBase;
 import java.util.Locale;
@@ -38,15 +37,15 @@ public class CameraFocusPaintEvText extends CameraPaintBase {
     /* access modifiers changed from: protected */
     public void initPaint(Context context) {
         this.mPaint.setColor(this.mDefaultPaintColor);
-        this.mPaint.setStyle(Style.FILL);
+        this.mPaint.setStyle(Paint.Style.FILL);
         this.mPaint.setTextSize((float) this.mDefaultTextSize);
-        this.mPaint.setTextAlign(Align.LEFT);
+        this.mPaint.setTextAlign(Paint.Align.LEFT);
         this.mPaint.setAntiAlias(true);
         this.mPaint.setAlpha(192);
     }
 
     public void resetPaint() {
-        initPaint(null);
+        initPaint((Context) null);
     }
 
     public void setEvValue(float f2) {

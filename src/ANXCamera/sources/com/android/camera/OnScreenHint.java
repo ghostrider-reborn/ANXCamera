@@ -28,16 +28,15 @@ public class OnScreenHint {
 
     public void setText(CharSequence charSequence) {
         ViewGroup viewGroup = this.mHintView;
-        String str = "This OnScreenHint was not created with OnScreenHint.makeText()";
         if (viewGroup != null) {
             TextView textView = (TextView) viewGroup.findViewById(R.id.message);
             if (textView != null) {
                 textView.setText(charSequence);
                 return;
             }
-            throw new RuntimeException(str);
+            throw new RuntimeException("This OnScreenHint was not created with OnScreenHint.makeText()");
         }
-        throw new RuntimeException(str);
+        throw new RuntimeException("This OnScreenHint was not created with OnScreenHint.makeText()");
     }
 
     public void show() {

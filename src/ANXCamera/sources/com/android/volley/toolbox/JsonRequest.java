@@ -5,8 +5,6 @@ import android.support.annotation.Nullable;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
 import com.android.volley.VolleyLog;
 import java.io.UnsupportedEncodingException;
 
@@ -15,12 +13,12 @@ public abstract class JsonRequest<T> extends Request<T> {
     private static final String PROTOCOL_CONTENT_TYPE = String.format("application/json; charset=%s", new Object[]{PROTOCOL_CHARSET});
     @Nullable
     @GuardedBy("mLock")
-    private Listener<T> mListener;
+    private Response.Listener<T> mListener;
     private final Object mLock;
     @Nullable
     private final String mRequestBody;
 
-    public JsonRequest(int i, String str, @Nullable String str2, Listener<T> listener, @Nullable ErrorListener errorListener) {
+    public JsonRequest(int i, String str, @Nullable String str2, Response.Listener<T> listener, @Nullable Response.ErrorListener errorListener) {
         super(i, str, errorListener);
         this.mLock = new Object();
         this.mListener = listener;
@@ -28,7 +26,7 @@ public abstract class JsonRequest<T> extends Request<T> {
     }
 
     @Deprecated
-    public JsonRequest(String str, String str2, Listener<T> listener, ErrorListener errorListener) {
+    public JsonRequest(String str, String str2, Response.Listener<T> listener, Response.ErrorListener errorListener) {
         this(-1, str, str2, listener, errorListener);
     }
 
@@ -41,7 +39,7 @@ public abstract class JsonRequest<T> extends Request<T> {
 
     /* access modifiers changed from: protected */
     public void deliverResponse(T t) {
-        Listener<T> listener;
+        Response.Listener<T> listener;
         synchronized (this.mLock) {
             listener = this.mListener;
         }
@@ -51,15 +49,13 @@ public abstract class JsonRequest<T> extends Request<T> {
     }
 
     public byte[] getBody() {
-        String str = PROTOCOL_CHARSET;
-        byte[] bArr = null;
         try {
-            if (this.mRequestBody != null) {
-                bArr = this.mRequestBody.getBytes(str);
+            if (this.mRequestBody == null) {
+                return null;
             }
-            return bArr;
+            return this.mRequestBody.getBytes(PROTOCOL_CHARSET);
         } catch (UnsupportedEncodingException unused) {
-            VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", this.mRequestBody, str);
+            VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", this.mRequestBody, PROTOCOL_CHARSET);
             return null;
         }
     }

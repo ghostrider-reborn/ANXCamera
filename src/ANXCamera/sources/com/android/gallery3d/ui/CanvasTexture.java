@@ -1,12 +1,11 @@
 package com.android.gallery3d.ui;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 
 abstract class CanvasTexture extends UploadedTexture {
     protected Canvas mCanvas;
-    private final Config mConfig = Config.ARGB_8888;
+    private final Bitmap.Config mConfig = Bitmap.Config.ARGB_8888;
 
     public CanvasTexture(int i, int i2) {
         setSize(i, i2);

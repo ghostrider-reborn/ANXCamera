@@ -39,10 +39,9 @@ public class TEMonitor {
     }
 
     private static int getIsComplete(JSONObject jSONObject) {
-        String str = "completed";
         try {
-            if (jSONObject.has(str)) {
-                return jSONObject.getInt(str);
+            if (jSONObject.has("completed")) {
+                return jSONObject.getInt("completed");
             }
             return 0;
         } catch (JSONException e2) {
@@ -57,7 +56,7 @@ public class TEMonitor {
     }
 
     public static void init(@NonNull Context context, String str) {
-        MonitorUtils.init(context.getApplicationContext(), str, null, null);
+        MonitorUtils.init(context.getApplicationContext(), str, (String) null, (String) null);
         TEMonitorInvoker.nativeInit();
     }
 
@@ -133,27 +132,25 @@ public class TEMonitor {
     }
 
     private static void monitorVELog(JSONObject jSONObject) {
-        String str = NotificationCompat.CATEGORY_SERVICE;
-        String str2 = TAG;
         if (jSONObject == null) {
-            VELogUtil.e(str2, "monitorVELog error, param is null");
+            VELogUtil.e(TAG, "monitorVELog error, param is null");
             return;
         }
-        String str3 = "";
+        String str = "";
         try {
-            if (jSONObject.has(str)) {
-                str3 = jSONObject.getString(str);
+            if (jSONObject.has(NotificationCompat.CATEGORY_SERVICE)) {
+                str = jSONObject.getString(NotificationCompat.CATEGORY_SERVICE);
             }
         } catch (JSONException e2) {
             e2.printStackTrace();
         }
-        if (!"iesve_veeditor_record_finish".equals(str3) && !"iesve_veeditor_composition_finish".equals(str3)) {
-            Map nativeGetMap = TEMonitorInvoker.nativeGetMap();
+        if (!"iesve_veeditor_record_finish".equals(str) && !"iesve_veeditor_composition_finish".equals(str)) {
+            Map<String, String> nativeGetMap = TEMonitorInvoker.nativeGetMap();
             if (nativeGetMap != null) {
                 try {
                     putAll(nativeGetMap, jSONObject);
                 } catch (JSONException e3) {
-                    VELogUtil.e(str2, "merge monitor logs error");
+                    VELogUtil.e(TAG, "merge monitor logs error");
                     e3.printStackTrace();
                 }
             }
@@ -227,22 +224,17 @@ public class TEMonitor {
     private static void putAll(String str, Map map, JSONObject jSONObject) throws JSONException {
         for (String str2 : map.keySet()) {
             int type = (str.equals("iesve_veeditor_record_finish") || str.equals("iesve_veeditor_composition_finish")) ? TEMonitorNewKeys.getType(str2) : TEMonitorKeys.getType(str2);
-            int i = TEMonitorKeys.TYPE_INT;
-            String str3 = TAG;
-            if (type == i) {
+            if (type == TEMonitorKeys.TYPE_INT) {
                 try {
                     jSONObject.put(str2, Integer.parseInt((String) map.get(str2)));
                 } catch (Exception unused) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Parse int error:");
-                    sb.append(map.get(str2));
-                    VELogUtil.d(str3, sb.toString());
+                    VELogUtil.d(TAG, "Parse int error:" + map.get(str2));
                 }
             } else if (type == TEMonitorKeys.TYPE_DOUBLE) {
                 try {
                     jSONObject.put(str2, (double) Float.parseFloat((String) map.get(str2)));
                 } catch (Exception unused2) {
-                    VELogUtil.d(str3, "Parse float error");
+                    VELogUtil.d(TAG, "Parse float error");
                 }
             } else {
                 jSONObject.put(str2, map.get(str2));
@@ -253,22 +245,17 @@ public class TEMonitor {
     private static void putAll(Map map, JSONObject jSONObject) throws JSONException {
         for (String str : map.keySet()) {
             int type = str.startsWith("iesve_") ? VEMonitorKeys.getType(str) : TEMonitorKeys.getType(str);
-            int i = TEMonitorKeys.TYPE_INT;
-            String str2 = TAG;
-            if (type == i) {
+            if (type == TEMonitorKeys.TYPE_INT) {
                 try {
                     jSONObject.put(str, Integer.parseInt((String) map.get(str)));
                 } catch (Exception unused) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Parse int error:");
-                    sb.append(map.get(str));
-                    VELogUtil.d(str2, sb.toString());
+                    VELogUtil.d(TAG, "Parse int error:" + map.get(str));
                 }
             } else if (type == TEMonitorKeys.TYPE_DOUBLE) {
                 try {
                     jSONObject.put(str, (double) Float.parseFloat((String) map.get(str)));
                 } catch (Exception unused2) {
-                    VELogUtil.d(str2, "Parse float error");
+                    VELogUtil.d(TAG, "Parse float error");
                 }
             } else {
                 jSONObject.put(str, map.get(str));
@@ -285,32 +272,25 @@ public class TEMonitor {
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:12:0x0024, code lost:
-        if (r1.equals(r3) != false) goto L_0x0026;
+        if (r1.equals("iesve_veeditor_composition_finish") != false) goto L_0x0026;
      */
     private static void reportMonitor(WeakReference<IMonitor> weakReference, String str, JSONObject jSONObject) {
         int i;
-        String str2 = NotificationCompat.CATEGORY_SERVICE;
-        String str3 = "sdk_video_edit_compose";
+        String str2 = "sdk_video_edit_compose";
         if (jSONObject != null) {
             i = getIsComplete(jSONObject);
             try {
-                if (jSONObject.has(str2)) {
-                    str3 = jSONObject.getString(str2);
+                if (jSONObject.has(NotificationCompat.CATEGORY_SERVICE)) {
+                    str2 = jSONObject.getString(NotificationCompat.CATEGORY_SERVICE);
                 }
-                String str4 = "iesve_veeditor_composition_finish";
-                String str5 = "";
-                if (!str3.equals("iesve_veeditor_record_finish")) {
+                if (!str2.equals("iesve_veeditor_record_finish")) {
                 }
-                if (str5.equals(sVid)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(getDeviceId());
-                    sb.append("_");
-                    sb.append(System.currentTimeMillis());
-                    sVid = sb.toString();
+                if ("".equals(sVid)) {
+                    sVid = getDeviceId() + "_" + System.currentTimeMillis();
                 }
                 jSONObject.put(TEMonitorNewKeys.TE_RECORD_COMPOSE_VID, sVid);
-                if (str3.equals(str4)) {
-                    sVid = str5;
+                if (str2.equals("iesve_veeditor_composition_finish")) {
+                    sVid = "";
                 }
             } catch (JSONException e2) {
                 e2.printStackTrace();
@@ -318,7 +298,7 @@ public class TEMonitor {
         } else {
             i = 0;
         }
-        MonitorUtils.monitorStatusRate(str3, i, jSONObject);
+        MonitorUtils.monitorStatusRate(str2, i, jSONObject);
         if (weakReference != null && weakReference.get() != null) {
             try {
                 ((IMonitor) weakReference.get()).monitorLog(str, jSONObject);

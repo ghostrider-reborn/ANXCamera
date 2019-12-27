@@ -1,7 +1,7 @@
 package com.android.camera;
 
 import android.app.IntentService;
-import android.app.Notification.Builder;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,7 +45,7 @@ public class EmptyService extends IntentService {
             Log.e(TAG, "onHandleIntent: but intent is null");
             return;
         }
-        startForeground(0, new Builder(this).setTicker("camera service").setContentIntent(PendingIntent.getActivity(this, 0, intent, 0)).setWhen(System.currentTimeMillis()).build());
+        startForeground(0, new Notification.Builder(this).setTicker("camera service").setContentIntent(PendingIntent.getActivity(this, 0, intent, 0)).setWhen(System.currentTimeMillis()).build());
         CompatibilityUtils.allocGraphicBuffers();
     }
 }

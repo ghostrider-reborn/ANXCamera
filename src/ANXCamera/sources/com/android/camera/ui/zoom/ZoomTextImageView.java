@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.view.View;
 import com.android.camera.R;
@@ -56,7 +55,7 @@ public class ZoomTextImageView extends View {
         this.mImagePaint = new Paint();
         this.mXTextPaint = new Paint();
         this.mImagePaint.setAntiAlias(true);
-        this.mImagePaint.setStyle(Style.STROKE);
+        this.mImagePaint.setStyle(Paint.Style.STROKE);
         int[] iArr = {16842901, 16842904};
         TypedArray obtainStyledAttributes = context.obtainStyledAttributes(R.style.ZoomButtonDigitsTextStyle, iArr);
         this.mNormalTextSize = obtainStyledAttributes.getDimensionPixelSize(obtainStyledAttributes.getIndex(0), this.mNormalTextSize);
@@ -98,18 +97,17 @@ public class ZoomTextImageView extends View {
         } else if (this.mCurrentText != null) {
             this.mTextPaint.setColor(this.mNormalTextColor.getColorForState(mTextActivatedColorState, 0));
             this.mTextPaint.setTextSize((float) this.mNormalTextSize);
-            String str = "X";
-            String replaceAll = this.mCurrentText.replaceAll(str, "");
+            String replaceAll = this.mCurrentText.replaceAll("X", "");
             float measureText2 = this.mTextPaint.measureText(replaceAll);
             float ascent2 = this.mTextPaint.ascent() + this.mTextPaint.descent();
             this.mXTextPaint.setColor(this.mXTextColor.getColorForState(mTextActivatedColorState, 0));
             this.mXTextPaint.setTextSize((float) this.mXTextSize);
-            float measureText3 = this.mXTextPaint.measureText(str);
+            float measureText3 = this.mXTextPaint.measureText("X");
             float ascent3 = this.mXTextPaint.ascent() + this.mXTextPaint.descent();
             canvas.save();
             canvas.translate(0.0f, (float) (getHeight() / 2));
             canvas.drawText(replaceAll, ((float) (getWidth() / 2)) - ((measureText2 + measureText3) / 2.0f), ((-ascent2) / 2.0f) + 1.0f, this.mTextPaint);
-            canvas.drawText(str, ((((float) getWidth()) + measureText2) - measureText3) / 2.0f, ((-ascent3) / 2.0f) + 1.0f, this.mXTextPaint);
+            canvas.drawText("X", ((((float) getWidth()) + measureText2) - measureText3) / 2.0f, ((-ascent3) / 2.0f) + 1.0f, this.mXTextPaint);
             canvas.restore();
         }
     }

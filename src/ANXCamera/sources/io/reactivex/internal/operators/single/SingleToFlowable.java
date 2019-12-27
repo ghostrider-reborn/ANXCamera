@@ -14,7 +14,7 @@ public final class SingleToFlowable<T> extends Flowable<T> {
     static final class SingleToFlowableObserver<T> extends DeferredScalarSubscription<T> implements SingleObserver<T> {
         private static final long serialVersionUID = 187782011903685568L;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f337d;
 
         SingleToFlowableObserver(Subscriber<? super T> subscriber) {

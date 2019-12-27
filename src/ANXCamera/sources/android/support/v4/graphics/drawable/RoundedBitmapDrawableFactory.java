@@ -4,7 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.BitmapCompat;
@@ -20,7 +20,7 @@ public final class RoundedBitmapDrawableFactory {
             super(resources, bitmap);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void gravityCompatApply(int i, int i2, int i3, Rect rect, Rect rect2) {
             GravityCompat.apply(i, i2, i3, rect, rect2, 0);
         }
@@ -44,17 +44,14 @@ public final class RoundedBitmapDrawableFactory {
 
     @NonNull
     public static RoundedBitmapDrawable create(@NonNull Resources resources, @Nullable Bitmap bitmap) {
-        return VERSION.SDK_INT >= 21 ? new RoundedBitmapDrawable21(resources, bitmap) : new DefaultRoundedBitmapDrawable(resources, bitmap);
+        return Build.VERSION.SDK_INT >= 21 ? new RoundedBitmapDrawable21(resources, bitmap) : new DefaultRoundedBitmapDrawable(resources, bitmap);
     }
 
     @NonNull
     public static RoundedBitmapDrawable create(@NonNull Resources resources, @NonNull InputStream inputStream) {
         RoundedBitmapDrawable create = create(resources, BitmapFactory.decodeStream(inputStream));
         if (create.getBitmap() == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("RoundedBitmapDrawable cannot decode ");
-            sb.append(inputStream);
-            Log.w(TAG, sb.toString());
+            Log.w(TAG, "RoundedBitmapDrawable cannot decode " + inputStream);
         }
         return create;
     }
@@ -63,10 +60,7 @@ public final class RoundedBitmapDrawableFactory {
     public static RoundedBitmapDrawable create(@NonNull Resources resources, @NonNull String str) {
         RoundedBitmapDrawable create = create(resources, BitmapFactory.decodeFile(str));
         if (create.getBitmap() == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("RoundedBitmapDrawable cannot decode ");
-            sb.append(str);
-            Log.w(TAG, sb.toString());
+            Log.w(TAG, "RoundedBitmapDrawable cannot decode " + str);
         }
         return create;
     }

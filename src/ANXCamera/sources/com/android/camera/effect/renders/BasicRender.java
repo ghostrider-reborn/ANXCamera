@@ -260,21 +260,18 @@ public class BasicRender extends ShaderRender {
             this.mAttributeTexCoorH = GLES20.glGetAttribLocation(this.mProgram, "aTexCoord");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(BasicRender.class);
-        sb.append(": mProgram = 0");
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException(BasicRender.class + ": mProgram = 0");
     }
 
     /* access modifiers changed from: protected */
     public void initSupportAttriList() {
-        this.mAttriSupportedList.add(Integer.valueOf(0));
-        this.mAttriSupportedList.add(Integer.valueOf(1));
-        this.mAttriSupportedList.add(Integer.valueOf(2));
-        this.mAttriSupportedList.add(Integer.valueOf(3));
-        this.mAttriSupportedList.add(Integer.valueOf(4));
-        this.mAttriSupportedList.add(Integer.valueOf(5));
-        this.mAttriSupportedList.add(Integer.valueOf(7));
+        this.mAttriSupportedList.add(0);
+        this.mAttriSupportedList.add(1);
+        this.mAttriSupportedList.add(2);
+        this.mAttriSupportedList.add(3);
+        this.mAttriSupportedList.add(4);
+        this.mAttriSupportedList.add(5);
+        this.mAttriSupportedList.add(7);
     }
 
     /* access modifiers changed from: protected */

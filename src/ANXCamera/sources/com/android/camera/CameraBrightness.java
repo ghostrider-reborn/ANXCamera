@@ -4,19 +4,16 @@ import android.app.Activity;
 import android.hardware.display.DisplayManager;
 import android.miui.R;
 import android.os.AsyncTask;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.PowerManager;
-import android.provider.Settings.SettingNotFoundException;
-import android.provider.Settings.System;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Spline;
-import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager;
 import com.android.camera.lib.compatibility.util.CompatibilityUtils;
 import com.android.camera.log.Log;
-import com.android.internal.R.array;
-import com.android.internal.R.bool;
-import com.android.internal.R.integer;
+import com.android.internal.R;
 import com.mi.config.b;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -88,116 +85,102 @@ public class CameraBrightness implements CameraBrightnessCallback {
         }
 
         private String execCommand(String str) {
-            String str2 = CameraBrightness.TAG;
             long currentTimeMillis = System.currentTimeMillis();
-            String str3 = "";
             try {
                 Process exec = Runtime.getRuntime().exec(str);
                 if (exec.waitFor() != 0) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("exit value = ");
-                    sb.append(exec.exitValue());
-                    Log.e(str2, sb.toString());
-                    return str3;
+                    Log.e(CameraBrightness.TAG, "exit value = " + exec.exitValue());
+                    return "";
                 }
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
                 StringBuffer stringBuffer = new StringBuffer();
                 while (true) {
                     String readLine = bufferedReader.readLine();
-                    if (readLine == null) {
-                        break;
+                    if (readLine != null) {
+                        stringBuffer.append(readLine);
+                    } else {
+                        bufferedReader.close();
+                        String stringBuffer2 = stringBuffer.toString();
+                        Log.v(CameraBrightness.TAG, "execCommand lcd value=" + stringBuffer2 + " cost=" + (System.currentTimeMillis() - currentTimeMillis));
+                        return stringBuffer2;
                     }
-                    stringBuffer.append(readLine);
                 }
-                bufferedReader.close();
-                str3 = stringBuffer.toString();
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("execCommand lcd value=");
-                sb2.append(str3);
-                sb2.append(" cost=");
-                sb2.append(System.currentTimeMillis() - currentTimeMillis);
-                Log.v(str2, sb2.toString());
-                return str3;
             } catch (InterruptedException e2) {
-                Log.e(str2, "execCommand InterruptedException");
+                Log.e(CameraBrightness.TAG, "execCommand InterruptedException");
                 e2.printStackTrace();
+                return "";
             } catch (IOException e3) {
-                Log.e(str2, "execCommand IOException");
+                Log.e(CameraBrightness.TAG, "execCommand IOException");
                 e3.printStackTrace();
+                return "";
             }
         }
 
         private int[] getAndroidArrayRes(String str) {
-            String str2 = Field.INT_SIGNATURE_PRIMITIVE;
-            String str3 = CameraBrightness.TAG;
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getIntArray(Field.of(array.class, str, str2).getInt(null));
+                return CameraAppImpl.getAndroidContext().getResources().getIntArray(Field.of((Class<?>) R.array.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e2) {
-                Log.e(str3, e2.getMessage());
+                Log.e(CameraBrightness.TAG, e2.getMessage());
                 try {
-                    return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, str2).getInt(null));
+                    return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
                 } catch (NoSuchFieldException e3) {
-                    Log.e(str3, e3.getMessage());
+                    Log.e(CameraBrightness.TAG, e3.getMessage());
                     return new int[]{0, 255};
                 } catch (IllegalArgumentException e4) {
-                    Log.e(str3, e4.getMessage());
+                    Log.e(CameraBrightness.TAG, e4.getMessage());
                     return new int[]{0, 255};
                 }
             } catch (IllegalArgumentException e5) {
-                Log.e(str3, e5.getMessage());
-                return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, str2).getInt(null));
+                Log.e(CameraBrightness.TAG, e5.getMessage());
+                return CameraAppImpl.getAndroidContext().getResources().getIntArray(GeneralUtils.miuiResArrayField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             }
         }
 
         private boolean getAndroidBoolRes(String str, boolean z) {
-            String str2 = Field.INT_SIGNATURE_PRIMITIVE;
-            String str3 = CameraBrightness.TAG;
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getBoolean(Field.of(bool.class, str, str2).getInt(null));
+                return CameraAppImpl.getAndroidContext().getResources().getBoolean(Field.of((Class<?>) R.bool.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e2) {
-                Log.e(str3, e2.getMessage());
+                Log.e(CameraBrightness.TAG, e2.getMessage());
                 try {
-                    return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, str2).getInt(null));
+                    return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
                 } catch (NoSuchFieldException e3) {
-                    Log.e(str3, e3.getMessage());
+                    Log.e(CameraBrightness.TAG, e3.getMessage());
                     return z;
                 } catch (IllegalArgumentException e4) {
-                    Log.e(str3, e4.getMessage());
+                    Log.e(CameraBrightness.TAG, e4.getMessage());
                     return z;
                 }
             } catch (IllegalArgumentException e5) {
-                Log.e(str3, e5.getMessage());
-                return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, str2).getInt(null));
+                Log.e(CameraBrightness.TAG, e5.getMessage());
+                return CameraAppImpl.getAndroidContext().getResources().getBoolean(GeneralUtils.miuiResBoolField(str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             }
         }
 
         private int getAndroidIntResource(String str) {
-            String str2 = CameraBrightness.TAG;
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt(null));
+                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of((Class<?>) R.integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e2) {
-                Log.e(str2, e2.getMessage());
+                Log.e(CameraBrightness.TAG, e2.getMessage());
                 return 0;
             } catch (IllegalArgumentException e3) {
-                Log.e(str2, e3.getMessage());
+                Log.e(CameraBrightness.TAG, e3.getMessage());
                 return 0;
             }
         }
 
         @Nullable
-        private Integer getBrightIsAndroidP(LayoutParams layoutParams, Activity activity) {
+        private Integer getBrightIsAndroidP(WindowManager.LayoutParams layoutParams, Activity activity) {
             try {
-                this.mBrightnessMode = System.getInt(activity.getContentResolver(), "screen_brightness_mode");
-            } catch (SettingNotFoundException unused) {
+                this.mBrightnessMode = Settings.System.getInt(activity.getContentResolver(), "screen_brightness_mode");
+            } catch (Settings.SettingNotFoundException unused) {
             }
             CameraBrightnessCallback cameraBrightnessCallback = (CameraBrightnessCallback) this.mCallbackWeakReference.get();
-            String str = CameraBrightness.TAG;
             if (cameraBrightnessCallback != null && this.mBrightnessMode == 1) {
                 if (!this.mUseDefaultValue && !this.mPaused && this.mScreenAutoBrightnessRatioInner == 0.0f) {
-                    Log.d(str, "adjustBrightnessInAutoMode(0.5)");
+                    Log.d(CameraBrightness.TAG, "adjustBrightnessInAutoMode(0.5)");
                     cameraBrightnessCallback.adjustBrightnessInAutoMode(0.5f);
                 } else if (this.mScreenAutoBrightnessRatioInner == 0.5f) {
-                    Log.d(str, "adjustBrightnessInAutoMode(0)");
+                    Log.d(CameraBrightness.TAG, "adjustBrightnessInAutoMode(0)");
                     cameraBrightnessCallback.adjustBrightnessInAutoMode(0.0f);
                 }
                 return null;
@@ -205,38 +188,30 @@ public class CameraBrightness implements CameraBrightnessCallback {
                 return null;
             } else {
                 if (this.mUseDefaultValue || this.mPaused) {
-                    return Integer.valueOf(-1);
+                    return -1;
                 }
                 try {
                     int i = ReflectionUtils.findField(PowerManager.class, "BRIGHTNESS_ON").getInt(PowerManager.class);
-                    int i2 = System.getInt(activity.getContentResolver(), "screen_brightness");
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("android P -> current back light -> ");
-                    sb.append(i2);
-                    Log.d(str, sb.toString());
+                    int i2 = Settings.System.getInt(activity.getContentResolver(), "screen_brightness");
+                    Log.d(CameraBrightness.TAG, "android P -> current back light -> " + i2);
                     float enLargeBrightness = (float) toEnLargeBrightness((int) Math.ceil((double) (((float) (i2 * 256)) / ((float) (i + 1)))));
                     float f2 = layoutParams.screenBrightness;
                     if (f2 <= 0.0f || enLargeBrightness != ((float) ((int) (f2 * 255.0f)))) {
                         return Integer.valueOf((int) enLargeBrightness);
                     }
-                    Log.v(str, "android P -> doInBackground brightness unchanged");
+                    Log.v(CameraBrightness.TAG, "android P -> doInBackground brightness unchanged");
                     return null;
                 } catch (Exception e2) {
-                    Log.e(str, e2.toString());
+                    Log.e(CameraBrightness.TAG, e2.toString());
                     return null;
                 }
             }
         }
 
         @Nullable
-        private Integer getBrightNotAndroidP(LayoutParams layoutParams) {
+        private Integer getBrightNotAndroidP(WindowManager.LayoutParams layoutParams) {
             int currentBackLight = getCurrentBackLight();
-            StringBuilder sb = new StringBuilder();
-            sb.append("current back light -> ");
-            sb.append(currentBackLight);
-            String sb2 = sb.toString();
-            String str = CameraBrightness.TAG;
-            Log.d(str, sb2);
+            Log.d(CameraBrightness.TAG, "current back light -> " + currentBackLight);
             if (currentBackLight <= 0) {
                 return null;
             }
@@ -246,7 +221,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
                 float f3 = f2 * 255.0f;
                 Spline spline = this.mPositiveScreenManualBrightnessSpline;
                 if (Math.abs((spline != null ? Math.round(spline.interpolate(f3)) : Math.round(f3)) - currentBackLight) <= 1) {
-                    Log.v(str, "doInBackground brightness unchanged");
+                    Log.v(CameraBrightness.TAG, "doInBackground brightness unchanged");
                     return null;
                 }
             }
@@ -258,45 +233,35 @@ public class CameraBrightness implements CameraBrightnessCallback {
         }
 
         private int getCurrentBackLight() {
-            String str;
-            String str2 = null;
+            String str = null;
             int i = 0;
             while (true) {
-                String str3 = "0";
-                boolean equals = str3.equals(str2);
-                str = CameraBrightness.TAG;
-                if ((equals || str2 == null) && i < 3 && !isCancelled()) {
-                    str2 = execCommand("cat sys/class/backlight/panel0-backlight/brightness");
-                    if (str3.equals(str2) || str2 == null) {
+                if (("0".equals(str) || str == null) && i < 3 && !isCancelled()) {
+                    str = execCommand("cat sys/class/backlight/panel0-backlight/brightness");
+                    if ("0".equals(str) || str == null) {
                         try {
                             Thread.sleep(300);
                         } catch (InterruptedException e2) {
-                            Log.e(str, e2.getMessage());
+                            Log.e(CameraBrightness.TAG, e2.getMessage());
                         }
                         i++;
                     }
                 }
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("getCurrentBackLight currentSetting=");
-            sb.append(str2);
-            Log.v(str, sb.toString());
-            if (!TextUtils.isEmpty(str2)) {
+            Log.v(CameraBrightness.TAG, "getCurrentBackLight currentSetting=" + str);
+            if (!TextUtils.isEmpty(str)) {
                 int androidIntResource = getAndroidIntResource("config_backlightBits");
                 if (androidIntResource <= 0) {
                     androidIntResource = getMiuiIntResource("config_backlightBit");
                 }
-                int parseFloat = (int) Float.parseFloat(str2);
+                int parseFloat = (int) Float.parseFloat(str);
                 if (androidIntResource > 8) {
                     int i2 = androidIntResource - 8;
                     int i3 = 1;
                     if (parseFloat >= (1 << i2)) {
                         i3 = parseFloat >> i2;
                     }
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("getCurrentBackLight convert to ");
-                    sb2.append(i3);
-                    Log.v(str, sb2.toString());
+                    Log.v(CameraBrightness.TAG, "getCurrentBackLight convert to " + i3);
                     return i3;
                 }
             }
@@ -304,14 +269,13 @@ public class CameraBrightness implements CameraBrightnessCallback {
         }
 
         private int getMiuiIntResource(String str) {
-            String str2 = CameraBrightness.TAG;
             try {
-                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of(R.integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt(null));
+                return CameraAppImpl.getAndroidContext().getResources().getInteger(Field.of((Class<?>) R.integer.class, str, Field.INT_SIGNATURE_PRIMITIVE).getInt((Object) null));
             } catch (NoSuchFieldException e2) {
-                Log.e(str2, e2.getMessage());
+                Log.e(CameraBrightness.TAG, e2.getMessage());
                 return 0;
             } catch (IllegalArgumentException e3) {
-                Log.e(str2, e3.getMessage());
+                Log.e(CameraBrightness.TAG, e3.getMessage());
                 return 0;
             }
         }
@@ -323,20 +287,13 @@ public class CameraBrightness implements CameraBrightnessCallback {
         private void updateBrightness(int i) {
             Activity activity = (Activity) this.mActivityWeakReference.get();
             if (activity != null) {
-                LayoutParams attributes = activity.getWindow().getAttributes();
+                WindowManager.LayoutParams attributes = activity.getWindow().getAttributes();
                 if (this.mUseDefaultValue || this.mPaused) {
                     attributes.screenBrightness = -1.0f;
                 } else {
                     attributes.screenBrightness = ((float) i) / 255.0f;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("updateBrightness setting=");
-                sb.append(i);
-                sb.append(" useDefaultValue=");
-                sb.append(this.mUseDefaultValue);
-                sb.append(" screenBrightness=");
-                sb.append(attributes.screenBrightness);
-                Log.v(CameraBrightness.TAG, sb.toString());
+                Log.v(CameraBrightness.TAG, "updateBrightness setting=" + i + " useDefaultValue=" + this.mUseDefaultValue + " screenBrightness=" + attributes.screenBrightness);
                 activity.getWindow().setAttributes(attributes);
                 CameraBrightnessCallback cameraBrightnessCallback = (CameraBrightnessCallback) this.mCallbackWeakReference.get();
                 if (cameraBrightnessCallback != null) {
@@ -347,15 +304,10 @@ public class CameraBrightness implements CameraBrightnessCallback {
 
         /* access modifiers changed from: protected */
         public Integer doInBackground(Void... voidArr) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("doInBackground useDefaultValue=");
-            sb.append(this.mUseDefaultValue);
-            sb.append(" paused=");
-            sb.append(this.mPaused);
-            Log.v(CameraBrightness.TAG, sb.toString());
+            Log.v(CameraBrightness.TAG, "doInBackground useDefaultValue=" + this.mUseDefaultValue + " paused=" + this.mPaused);
             Activity activity = (Activity) this.mActivityWeakReference.get();
-            LayoutParams attributes = activity.getWindow().getAttributes();
-            if (VERSION.SDK_INT >= 28) {
+            WindowManager.LayoutParams attributes = activity.getWindow().getAttributes();
+            if (Build.VERSION.SDK_INT >= 28) {
                 return getBrightIsAndroidP(attributes, activity);
             }
             if (activity != null) {
@@ -447,11 +399,10 @@ public class CameraBrightness implements CameraBrightnessCallback {
                     float f4 = (f2 - fArr2[i]) / f3;
                     float[] fArr3 = this.mY;
                     float f5 = 2.0f * f4;
-                    float f6 = fArr3[i] * (f5 + 1.0f);
                     float[] fArr4 = this.mM;
-                    float f7 = f6 + (fArr4[i] * f3 * f4);
-                    float f8 = 1.0f - f4;
-                    return (f7 * f8 * f8) + (((fArr3[i3] * (3.0f - f5)) + (f3 * fArr4[i3] * (f4 - 1.0f))) * f4 * f4);
+                    float f6 = (fArr3[i] * (f5 + 1.0f)) + (fArr4[i] * f3 * f4);
+                    float f7 = 1.0f - f4;
+                    return (f6 * f7 * f7) + (((fArr3[i3] * (3.0f - f5)) + (f3 * fArr4[i3] * (f4 - 1.0f))) * f4 * f4);
                 } else if (f2 == fArr2[i3]) {
                     return this.mY[i3];
                 } else {
@@ -465,13 +416,12 @@ public class CameraBrightness implements CameraBrightnessCallback {
             int length = this.mX.length;
             sb.append("MonotoneCubicSpline{[");
             for (int i = 0; i < length; i++) {
-                String str = ", ";
                 if (i != 0) {
-                    sb.append(str);
+                    sb.append(", ");
                 }
                 sb.append("(");
                 sb.append(this.mX[i]);
-                sb.append(str);
+                sb.append(", ");
                 sb.append(this.mY[i]);
                 sb.append(": ");
                 sb.append(this.mM[i]);
@@ -510,10 +460,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
             CompatibilityUtils.setTemporaryAutoBrightnessAdjustment(this.mDisplayManager, f2);
             this.mScreenAutoBrightnessRatio = f2;
         } catch (SecurityException e2) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Meet exception when adjustBrightnessInAutoMode(): ");
-            sb.append(e2);
-            Log.e(TAG, sb.toString());
+            Log.e(TAG, "Meet exception when adjustBrightnessInAutoMode(): " + e2);
         }
     }
 
@@ -543,12 +490,7 @@ public class CameraBrightness implements CameraBrightnessCallback {
     }
 
     public void onWindowFocusChanged(boolean z) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onWindowFocusChanged hasFocus=");
-        sb.append(z);
-        sb.append(" mFirstFocusChanged=");
-        sb.append(this.mFirstFocusChanged);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, "onWindowFocusChanged hasFocus=" + z + " mFirstFocusChanged=" + this.mFirstFocusChanged);
         boolean z2 = true;
         if (this.mFirstFocusChanged || !z) {
             if (!(this.mCurrentActivity instanceof BasePreferenceActivity) && z) {

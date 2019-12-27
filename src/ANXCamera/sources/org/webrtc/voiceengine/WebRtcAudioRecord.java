@@ -67,10 +67,7 @@ class WebRtcAudioRecord {
                     try {
                         Process.setThreadPriority(-19);
                     } catch (Exception e2) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Set rec thread priority failed: ");
-                        sb.append(e2.getMessage());
-                        DoLog(sb.toString());
+                        DoLog("Set rec thread priority failed: " + e2.getMessage());
                     }
                     this._doRecInit = false;
                 }
@@ -86,10 +83,7 @@ class WebRtcAudioRecord {
             this._recLock.unlock();
             return i2;
         } catch (Exception e3) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("RecordAudio try failed: ");
-            sb2.append(e3.getMessage());
-            DoLogErr(sb2.toString());
+            DoLogErr("RecordAudio try failed: " + e3.getMessage());
         } catch (Throwable th) {
             this._recLock.unlock();
             throw th;

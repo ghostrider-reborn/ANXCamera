@@ -1,21 +1,17 @@
 package com.android.camera;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
-import android.provider.MiuiSettings.Key;
-import android.provider.Settings.Secure;
+import android.provider.MiuiSettings;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -23,7 +19,7 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.config.ComponentConfigSlowMotion;
 import com.android.camera.data.data.config.DataItemConfig;
 import com.android.camera.data.data.global.DataItemGlobal;
-import com.android.camera.lib.compatibility.util.CompatibilityUtils.PackageInstallerListener;
+import com.android.camera.lib.compatibility.util.CompatibilityUtils;
 import com.android.camera.log.Log;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.PriorityStorageBroadcastReceiver;
@@ -46,7 +42,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     public static final String REMOVE_KEYS = "remove_keys";
     public static final String TAG = "CameraPreferenceActivity";
     /* access modifiers changed from: private */
-    public PackageInstallerListener mAppInstalledListener = new PackageInstallerListener() {
+    public CompatibilityUtils.PackageInstallerListener mAppInstalledListener = new CompatibilityUtils.PackageInstallerListener() {
         public void onPackageInstalled(String str, boolean z) {
             if (z && TextUtils.equals(str, "com.xiaomi.scanner")) {
                 final CheckBoxPreference checkBoxPreference = (CheckBoxPreference) CameraPreferenceActivity.this.mPreferenceGroup.findPreference(CameraSettings.KEY_SCAN_QRCODE);
@@ -73,10 +69,10 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     private void bringUpDoubleConfirmDlg(final Preference preference, final String str) {
         if (this.mDoubleConfirmActionChooseDialog == null) {
             final boolean snapBoolValue = getSnapBoolValue(str);
-            DetachableClickListener wrap = DetachableClickListener.wrap(new OnClickListener() {
+            DetachableClickListener wrap = DetachableClickListener.wrap(new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (i == -1) {
-                        CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog = null;
+                        AlertDialog unused = CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog = null;
                         CameraStatUtil.trackPreferenceChange(CameraSettings.KEY_CAMERA_SNAP, str);
                         Preference preference = preference;
                         if (preference instanceof CheckBoxPreference) {
@@ -84,14 +80,14 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                         } else if (preference instanceof PreviewListPreference) {
                             ((PreviewListPreference) preference).setValue(str);
                         }
-                        Secure.putString(CameraPreferenceActivity.this.getContentResolver(), Key.LONG_PRESS_VOLUME_DOWN, CameraSettings.getMiuiSettingsKeyForStreetSnap(str));
+                        Settings.Secure.putString(CameraPreferenceActivity.this.getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN, CameraSettings.getMiuiSettingsKeyForStreetSnap(str));
                     } else if (i == -2) {
                         CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog.dismiss();
-                        CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog = null;
+                        AlertDialog unused2 = CameraPreferenceActivity.this.mDoubleConfirmActionChooseDialog = null;
                     }
                 }
             });
-            this.mDoubleConfirmActionChooseDialog = new Builder(this).setTitle(R.string.title_snap_double_confirm).setMessage(R.string.message_snap_double_confirm).setPositiveButton(R.string.snap_confirmed, wrap).setNegativeButton(R.string.snap_cancel, wrap).setCancelable(false).create();
+            this.mDoubleConfirmActionChooseDialog = new AlertDialog.Builder(this).setTitle(R.string.title_snap_double_confirm).setMessage(R.string.message_snap_double_confirm).setPositiveButton(R.string.snap_confirmed, wrap).setNegativeButton(R.string.snap_cancel, wrap).setCancelable(false).create();
             wrap.clearOnDetach(this.mDoubleConfirmActionChooseDialog);
             this.mDoubleConfirmActionChooseDialog.show();
         }
@@ -111,32 +107,26 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             removeFromGroup(findPreference2, "pref_camera_focus_shoot_key");
             removeFromGroup(this.mPreferenceGroup, CameraSettings.KEY_MOVIE_SOLID);
             removeFromGroup(this.mPreferenceGroup, CameraSettings.KEY_VIDEO_TIME_LAPSE_FRAME_INTERVAL);
-            PreferenceScreen preferenceScreen = this.mPreferenceGroup;
-            String str = CameraSettings.KEY_LONG_PRESS_SHUTTER;
-            removeFromGroup(preferenceScreen, str);
+            removeFromGroup(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_SHUTTER);
             removeFromGroup(this.mPreferenceGroup, CameraSettings.KEY_FINGERPRINT_CAPTURE);
-            removeFromGroup(this.mPreferenceGroup, str);
+            removeFromGroup(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_SHUTTER);
         }
         int i = this.mFromWhere;
-        String str2 = CameraSettings.KEY_FRONT_MIRROR;
         if (i == 161 || i == 174 || i == 179 || i == 169 || i == 172 || i == 177) {
-            removeFromGroup(findPreference, str2);
-            removeFromGroup(findPreference2, str2);
+            removeFromGroup(findPreference, CameraSettings.KEY_FRONT_MIRROR);
+            removeFromGroup(findPreference2, CameraSettings.KEY_FRONT_MIRROR);
             return;
         }
         boolean vc = DataRepository.dataItemFeature().vc();
-        String str3 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("filterByConfig: isSupportVideoFrontMirror = ");
-        sb.append(vc);
-        Log.d(str3, sb.toString());
+        String str = TAG;
+        Log.d(str, "filterByConfig: isSupportVideoFrontMirror = " + vc);
         if (vc) {
-            removeFromGroup(findPreference2, str2);
+            removeFromGroup(findPreference2, CameraSettings.KEY_FRONT_MIRROR);
         } else {
-            removeFromGroup(findPreference, str2);
+            removeFromGroup(findPreference, CameraSettings.KEY_FRONT_MIRROR);
         }
         if (b.hi() && this.mFromWhere == 162) {
-            removeFromGroup(findPreference, str2);
+            removeFromGroup(findPreference, CameraSettings.KEY_FRONT_MIRROR);
         }
     }
 
@@ -149,38 +139,29 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     private void filterByDeviceID() {
         DataRepository.dataItemFeature();
         removePreference(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_SHUTTER);
-        boolean z = b.Ln;
-        String str = CameraSettings.KEY_SCAN_QRCODE;
-        String str2 = CameraSettings.KEY_LONG_PRESS_SHUTTER_FEATURE;
-        String str3 = CameraSettings.KEY_CAMERA_SNAP;
-        String str4 = CameraSettings.KEY_CAMERA_PROXIMITY_LOCK;
-        if (z) {
-            removePreference(this.mPreferenceGroup, str4);
+        if (b.Ln) {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_PROXIMITY_LOCK);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_RETAIN_CAMERA_MODE);
-            removePreference(this.mPreferenceGroup, str3);
-            removePreference(this.mPreferenceGroup, str2);
-            removePreference(this.mPreferenceGroup, str);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_SNAP);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_SHUTTER_FEATURE);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_SCAN_QRCODE);
         }
         if (!b.mj()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_MOVIE_SOLID);
         }
-        boolean yj = b.yj();
-        String str5 = "pref_time_watermark_key";
-        String str6 = "pref_dualcamera_watermark_key";
-        String str7 = CameraSettings.KEY_WATERMARK;
-        if (!yj && !CameraSettings.isSupportedDualCameraWaterMark()) {
-            removePreference(this.mPreferenceGroup, str7);
-            removePreference(this.mPreferenceGroup, str6);
-            removePreference(this.mPreferenceGroup, str5);
+        if (!b.yj() && !CameraSettings.isSupportedDualCameraWaterMark()) {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_WATERMARK);
+            removePreference(this.mPreferenceGroup, "pref_dualcamera_watermark_key");
+            removePreference(this.mPreferenceGroup, "pref_time_watermark_key");
         } else if (b.yj() && !CameraSettings.isSupportedDualCameraWaterMark()) {
-            removePreference(this.mPreferenceGroup, str7);
-            removePreference(this.mPreferenceGroup, str6);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_WATERMARK);
+            removePreference(this.mPreferenceGroup, "pref_dualcamera_watermark_key");
         } else if (b.yj() || !CameraSettings.isSupportedDualCameraWaterMark() || DataRepository.dataItemFeature().Db()) {
-            removePreference(this.mPreferenceGroup, str6);
-            removePreference(this.mPreferenceGroup, str5);
+            removePreference(this.mPreferenceGroup, "pref_dualcamera_watermark_key");
+            removePreference(this.mPreferenceGroup, "pref_time_watermark_key");
         } else {
-            removePreference(this.mPreferenceGroup, str7);
-            removePreference(this.mPreferenceGroup, str5);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_WATERMARK);
+            removePreference(this.mPreferenceGroup, "pref_time_watermark_key");
         }
         if (!b.nj()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_SOUND);
@@ -195,7 +176,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_AUTO_CHROMA_FLASH);
         }
         if (!b.jj()) {
-            removePreference(this.mPreferenceGroup, str2);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_LONG_PRESS_SHUTTER_FEATURE);
         }
         if (!b.pj()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAPTURE_WHEN_STABLE);
@@ -204,7 +185,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_ASD_NIGHT);
         }
         if (!b.rj()) {
-            removePreference(this.mPreferenceGroup, str3);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_SNAP);
         }
         if (!b.Ni()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_GROUPSHOT_PRIMITIVE);
@@ -212,38 +193,30 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         if (!CameraSettings.isSupportedPortrait()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_PORTRAIT_WITH_FACEBEAUTY);
         }
-        boolean isSupportedOpticalZoom = b.isSupportedOpticalZoom();
-        String str8 = CameraSettings.KEY_CAMERA_DUAL_ENABLE;
-        if (!isSupportedOpticalZoom && !DataRepository.dataItemFeature().nc()) {
-            removePreference(this.mPreferenceGroup, str8);
+        if (!b.isSupportedOpticalZoom() && !DataRepository.dataItemFeature().nc()) {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_DUAL_ENABLE);
         }
-        boolean isSupportedOpticalZoom2 = b.isSupportedOpticalZoom();
-        String str9 = CameraSettings.KEY_CAMERA_DUAL_SAT_ENABLE;
-        if (!isSupportedOpticalZoom2) {
-            removePreference(this.mPreferenceGroup, str9);
+        if (!b.isSupportedOpticalZoom()) {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_DUAL_SAT_ENABLE);
         }
         if (!b.isSupportSuperResolution()) {
             removePreference(this.mPreferenceGroup, "pref_camera_super_resolution_key");
         }
-        boolean Jc = DataRepository.dataItemFeature().Jc();
-        String str10 = CameraSettings.KEY_CAMERA_PARALLEL_PROCESS_ENABLE;
-        if (!Jc) {
-            removePreference(this.mPreferenceGroup, str10);
+        if (!DataRepository.dataItemFeature().Jc()) {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_PARALLEL_PROCESS_ENABLE);
         }
-        boolean isSupportQuickShot = CameraSettings.isSupportQuickShot();
-        String str11 = CameraSettings.KEY_CAMERA_QUICK_SHOT_ENABLE;
-        if (!isSupportQuickShot) {
-            removePreference(this.mPreferenceGroup, str11);
+        if (!CameraSettings.isSupportQuickShot()) {
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_QUICK_SHOT_ENABLE);
         }
         if (b.Ej()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_FACE_DETECTION);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_FACE_DETECTION_AUTO_HIDDEN);
-            removePreference(this.mPreferenceGroup, str10);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_PARALLEL_PROCESS_ENABLE);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_QUICK_SHOT_ANIM_ENABLE);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_TOUCH_FOCUS_DELAY_ENABLE);
-            removePreference(this.mPreferenceGroup, str11);
-            removePreference(this.mPreferenceGroup, str8);
-            removePreference(this.mPreferenceGroup, str9);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_QUICK_SHOT_ENABLE);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_DUAL_ENABLE);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_DUAL_SAT_ENABLE);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_FRONT_MIRROR);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_QC_SHARPNESS);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_QC_CONTRAST);
@@ -251,7 +224,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_AUTOEXPOSURE);
         }
         if (!ProximitySensorLock.supported()) {
-            removePreference(this.mPreferenceGroup, str4);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_PROXIMITY_LOCK);
         }
         if (!b.Wh()) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_FINGERPRINT_CAPTURE);
@@ -266,7 +239,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_ULTRA_WIDE_VIDEO_LDC);
         }
         if (DataRepository.dataItemFeature().Sa()) {
-            removePreference(this.mPreferenceGroup, str);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_SCAN_QRCODE);
         }
         removeIncompatibleAdvancePreference();
         int i = 0;
@@ -279,69 +252,58 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         if (DataRepository.dataItemFeature().Pb()) {
             i++;
         }
-        String str12 = CameraSettings.KEY_CAMERA_LYING_TIP_SWITCH;
-        String str13 = CameraSettings.KEY_LENS_DIRTY_TIP;
-        String str14 = CameraSettings.KEY_PICTURE_FLAW_TIP;
         if (i <= 1) {
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_PHOTO_ASSISTANCE_TIPS);
             if (!DataRepository.dataItemFeature().Zb()) {
-                removePreference(this.mPreferenceGroup, str14);
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_PICTURE_FLAW_TIP);
             }
             if (!DataRepository.dataItemFeature().Pb()) {
-                removePreference(this.mPreferenceGroup, str13);
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_LENS_DIRTY_TIP);
             }
             if (!DataRepository.dataItemFeature().Rc()) {
-                removePreference(this.mPreferenceGroup, str12);
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_LYING_TIP_SWITCH);
                 return;
             }
             return;
         }
-        removePreference(this.mPreferenceGroup, str14);
-        removePreference(this.mPreferenceGroup, str13);
-        removePreference(this.mPreferenceGroup, str12);
+        removePreference(this.mPreferenceGroup, CameraSettings.KEY_PICTURE_FLAW_TIP);
+        removePreference(this.mPreferenceGroup, CameraSettings.KEY_LENS_DIRTY_TIP);
+        removePreference(this.mPreferenceGroup, CameraSettings.KEY_CAMERA_LYING_TIP_SWITCH);
     }
 
     private void filterByFrom() {
-        PreferenceScreen preferenceScreen = this.mPreferenceGroup;
-        String str = CameraSettings.KEY_AUTOEXPOSURE;
-        removePreference(preferenceScreen, str);
-        PreferenceScreen preferenceScreen2 = this.mPreferenceGroup;
-        String str2 = CameraSettings.KEY_VIDEO_AUTOEXPOSURE;
-        removePreference(preferenceScreen2, str2);
+        removePreference(this.mPreferenceGroup, CameraSettings.KEY_AUTOEXPOSURE);
+        removePreference(this.mPreferenceGroup, CameraSettings.KEY_VIDEO_AUTOEXPOSURE);
         int i = this.mFromWhere;
-        String str3 = CameraSettings.KEY_VOLUME_LIVE_FUNCTION;
-        String str4 = CameraSettings.KEY_VOLUME_VIDEO_FUNCTION;
         if (i == 163 || i == 165 || i == 166 || i == 176 || i == 167 || i == 173 || i == 175 || i == 171) {
-            removePreference(this.mPreferenceGroup, str4);
-            removePreference(this.mPreferenceGroup, str3);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_VIDEO_FUNCTION);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_LIVE_FUNCTION);
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_CATEGORY_CAMCORDER_SETTING);
-            removePreference(this.mPreferenceGroup, str2);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_VIDEO_AUTOEXPOSURE);
         } else if (i == 161 || i == 174 || i == 179 || i == 162 || i == 169 || i == 172) {
             int i2 = this.mFromWhere;
             if (i2 == 174 || i2 == 179) {
-                removePreference(this.mPreferenceGroup, str4);
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_VIDEO_FUNCTION);
             } else {
-                removePreference(this.mPreferenceGroup, str3);
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_LIVE_FUNCTION);
             }
             removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_CAMERA_FUNCTION);
             removeNonVideoPreference();
-            removePreference(this.mPreferenceGroup, str);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_AUTOEXPOSURE);
         } else {
-            removePreference(this.mPreferenceGroup, str4);
-            removePreference(this.mPreferenceGroup, str3);
-            removePreference(this.mPreferenceGroup, str2);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_VIDEO_FUNCTION);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_LIVE_FUNCTION);
+            removePreference(this.mPreferenceGroup, CameraSettings.KEY_VIDEO_AUTOEXPOSURE);
         }
-        boolean nd = DataRepository.dataItemFeature().nd();
-        String str5 = CameraSettings.KEY_6MW_STATUS;
-        if (nd) {
+        if (DataRepository.dataItemFeature().nd()) {
             String componentValue = DataRepository.dataItemConfig().getComponentConfigSlowMotion().getComponentValue(172);
             if (!DataRepository.dataItemFeature().xb() || !ComponentConfigSlowMotion.DATA_CONFIG_NEW_SLOW_MOTION_960.equals(componentValue) || this.mFromWhere != 172) {
-                removePreference(this.mPreferenceGroup, str5);
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_6MW_STATUS);
                 return;
             }
             return;
         }
-        removePreference(this.mPreferenceGroup, str5);
+        removePreference(this.mPreferenceGroup, CameraSettings.KEY_6MW_STATUS);
     }
 
     private void filterByPreference() {
@@ -390,13 +352,12 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             return value;
         }
         String string = sharedPreferences.getString(previewListPreference.getKey(), value);
-        if (!Util.isStringValueContained((Object) string, previewListPreference.getEntryValues())) {
-            Editor edit = sharedPreferences.edit();
-            edit.putString(previewListPreference.getKey(), value);
-            edit.apply();
-        } else {
-            value = string;
+        if (Util.isStringValueContained((Object) string, previewListPreference.getEntryValues())) {
+            return string;
         }
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putString(previewListPreference.getKey(), value);
+        edit.apply();
         return value;
     }
 
@@ -431,7 +392,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         filterGroup();
         updateEntries();
         updatePreferences(this.mPreferenceGroup, this.mPreferences);
-        updateConflictPreference(null);
+        updateConflictPreference((Preference) null);
     }
 
     /* access modifiers changed from: private */
@@ -449,13 +410,11 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
 
     private static HashMap<String, Boolean> readKeptValues(boolean z) {
         HashMap<String, Boolean> hashMap = new HashMap<>(6);
-        DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
-        String str = CameraSettings.KEY_CAMERA_FIRST_USE_PERMISSION_SHOWN;
-        hashMap.put(str, Boolean.valueOf(dataItemGlobal.getBoolean(str, true)));
+        hashMap.put(CameraSettings.KEY_CAMERA_FIRST_USE_PERMISSION_SHOWN, Boolean.valueOf(DataRepository.dataItemGlobal().getBoolean(CameraSettings.KEY_CAMERA_FIRST_USE_PERMISSION_SHOWN, true)));
         if (z) {
-            for (String str2 : DataItemGlobal.sUseHints) {
-                if (DataRepository.dataItemGlobal().contains(str2)) {
-                    hashMap.put(str2, Boolean.valueOf(DataRepository.dataItemGlobal().getBoolean(str2, false)));
+            for (String next : DataItemGlobal.sUseHints) {
+                if (DataRepository.dataItemGlobal().contains(next)) {
+                    hashMap.put(next, Boolean.valueOf(DataRepository.dataItemGlobal().getBoolean(next, false)));
                 }
             }
         }
@@ -519,7 +478,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     }
 
     public static void resetPreferences(boolean z) {
-        HashMap readKeptValues = readKeptValues(z);
+        HashMap<String, Boolean> readKeptValues = readKeptValues(z);
         DataItemGlobal dataItemGlobal = DataRepository.dataItemGlobal();
         int intentType = dataItemGlobal.getIntentType();
         dataItemGlobal.resetAll();
@@ -532,11 +491,9 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     }
 
     private void resetSnapSetting() {
-        ContentResolver contentResolver = getContentResolver();
-        String str = Key.LONG_PRESS_VOLUME_DOWN;
-        String string = Secure.getString(contentResolver, str);
-        if (Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string) || Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string)) {
-            Secure.putString(getContentResolver(), str, "none");
+        String string = Settings.Secure.getString(getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN);
+        if (MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string) || MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string)) {
+            Settings.Secure.putString(getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN, "none");
         }
     }
 
@@ -557,17 +514,15 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     }
 
     private static void rewriteKeptValues(HashMap<String, Boolean> hashMap) {
-        for (String str : hashMap.keySet()) {
-            DataRepository.dataItemGlobal().putBoolean(str, ((Boolean) hashMap.get(str)).booleanValue());
+        for (String next : hashMap.keySet()) {
+            DataRepository.dataItemGlobal().putBoolean(next, hashMap.get(next).booleanValue());
         }
     }
 
     private void updateEntries() {
         PreviewListPreference previewListPreference = (PreviewListPreference) this.mPreferenceGroup.findPreference(CameraSettings.KEY_ANTIBANDING);
         CheckBoxPreference checkBoxPreference = (CheckBoxPreference) this.mPreferenceGroup.findPreference(CameraSettings.KEY_AUTO_CHROMA_FLASH);
-        PreferenceScreen preferenceScreen = this.mPreferenceGroup;
-        String str = CameraSettings.KEY_CAMERA_SNAP;
-        PreviewListPreference previewListPreference2 = (PreviewListPreference) preferenceScreen.findPreference(str);
+        PreviewListPreference previewListPreference2 = (PreviewListPreference) this.mPreferenceGroup.findPreference(CameraSettings.KEY_CAMERA_SNAP);
         PreviewListPreference previewListPreference3 = (PreviewListPreference) this.mPreferenceGroup.findPreference(CameraSettings.KEY_VOLUME_CAMERA_FUNCTION);
         if (previewListPreference != null && Util.isAntibanding60()) {
             String string = getString(R.string.pref_camera_antibanding_entryvalue_60hz);
@@ -581,20 +536,18 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
             String string2 = getString(R.string.pref_camera_snap_default);
             previewListPreference2.setDefaultValue(string2);
             previewListPreference2.setValue(string2);
-            ContentResolver contentResolver = getContentResolver();
-            String str2 = Key.LONG_PRESS_VOLUME_DOWN;
-            String string3 = Secure.getString(contentResolver, str2);
-            if (Key.LONG_PRESS_VOLUME_DOWN_PAY.equals(string3) || "none".equals(string3)) {
+            String string3 = Settings.Secure.getString(getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN);
+            if (MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_PAY.equals(string3) || "none".equals(string3)) {
                 previewListPreference2.setValue(getString(R.string.pref_camera_snap_value_off));
             } else {
-                String string4 = DataRepository.dataItemGlobal().getString(str, null);
+                String string4 = DataRepository.dataItemGlobal().getString(CameraSettings.KEY_CAMERA_SNAP, (String) null);
                 if (string4 != null) {
-                    Secure.putString(getContentResolver(), str2, CameraSettings.getMiuiSettingsKeyForStreetSnap(string4));
-                    DataRepository.dataItemGlobal().editor().remove(str).apply();
+                    Settings.Secure.putString(getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN, CameraSettings.getMiuiSettingsKeyForStreetSnap(string4));
+                    DataRepository.dataItemGlobal().editor().remove(CameraSettings.KEY_CAMERA_SNAP).apply();
                     previewListPreference2.setValue(string4);
-                } else if (Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string3)) {
+                } else if (MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_PICTURE.equals(string3)) {
                     previewListPreference2.setValue(getString(R.string.pref_camera_snap_value_take_picture));
-                } else if (Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string3)) {
+                } else if (MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_STREET_SNAP_MOVIE.equals(string3)) {
                     previewListPreference2.setValue(getString(R.string.pref_camera_snap_value_take_movie));
                 }
             }
@@ -619,49 +572,40 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
 
     private void updatePhotoAssistanceTips(SharedPreferences sharedPreferences, ValuePreference valuePreference) {
         if (sharedPreferences != null && valuePreference != null) {
-            if (!sharedPreferences.getBoolean(CameraSettings.KEY_CAMERA_LYING_TIP_SWITCH, true)) {
-                if (!sharedPreferences.getBoolean(CameraSettings.KEY_PICTURE_FLAW_TIP, getResources().getBoolean(R.bool.pref_pic_flaw_tip_default))) {
-                    valuePreference.setValue(getString(R.string.pref_photo_assistance_tips_off));
-                    return;
-                }
+            if (sharedPreferences.getBoolean(CameraSettings.KEY_CAMERA_LYING_TIP_SWITCH, true) || sharedPreferences.getBoolean(CameraSettings.KEY_PICTURE_FLAW_TIP, getResources().getBoolean(R.bool.pref_pic_flaw_tip_default))) {
+                valuePreference.setValue(getString(R.string.pref_photo_assistance_tips_on));
+            } else {
+                valuePreference.setValue(getString(R.string.pref_photo_assistance_tips_off));
             }
-            valuePreference.setValue(getString(R.string.pref_photo_assistance_tips_on));
         }
     }
 
     private void updateQRCodeEntry() {
-        PreferenceScreen preferenceScreen = this.mPreferenceGroup;
-        String str = CameraSettings.KEY_SCAN_QRCODE;
-        CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preferenceScreen.findPreference(str);
-        if (checkBoxPreference != null && this.mPreferences.getBoolean(str, checkBoxPreference.isChecked()) && !CameraSettings.isQRCodeReceiverAvailable(this)) {
+        CheckBoxPreference checkBoxPreference = (CheckBoxPreference) this.mPreferenceGroup.findPreference(CameraSettings.KEY_SCAN_QRCODE);
+        if (checkBoxPreference != null && this.mPreferences.getBoolean(CameraSettings.KEY_SCAN_QRCODE, checkBoxPreference.isChecked()) && !CameraSettings.isQRCodeReceiverAvailable(this)) {
             Log.v(TAG, "disable QRCodeScan");
-            Editor edit = this.mPreferences.edit();
-            edit.putBoolean(str, false);
+            SharedPreferences.Editor edit = this.mPreferences.edit();
+            edit.putBoolean(CameraSettings.KEY_SCAN_QRCODE, false);
             edit.apply();
             checkBoxPreference.setChecked(false);
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:3:0x0017, code lost:
-        if (r3.getBoolean("pref_dualcamera_watermark_key", com.mi.config.b.v(com.android.camera.CameraSettings.getBool(com.android.camera.R.bool.pref_device_watermark_default))) == false) goto L_0x0019;
-     */
     private void updateWaterMark(SharedPreferences sharedPreferences, ValuePreference valuePreference) {
-        if (CameraSettings.isSupportedDualCameraWaterMark()) {
-        }
-        if (!sharedPreferences.getBoolean("pref_time_watermark_key", false)) {
+        if ((!CameraSettings.isSupportedDualCameraWaterMark() || !sharedPreferences.getBoolean("pref_dualcamera_watermark_key", b.v(CameraSettings.getBool(R.bool.pref_device_watermark_default)))) && !sharedPreferences.getBoolean("pref_time_watermark_key", false)) {
             valuePreference.setValue(getString(R.string.pref_watermark_off));
-            return;
+        } else {
+            valuePreference.setValue(getString(R.string.pref_watermark_on));
         }
-        valuePreference.setValue(getString(R.string.pref_watermark_on));
     }
 
     /* access modifiers changed from: protected */
     public void filterByIntent() {
-        ArrayList stringArrayListExtra = getIntent().getStringArrayListExtra(REMOVE_KEYS);
+        ArrayList<String> stringArrayListExtra = getIntent().getStringArrayListExtra(REMOVE_KEYS);
         if (stringArrayListExtra != null) {
-            Iterator it = stringArrayListExtra.iterator();
+            Iterator<String> it = stringArrayListExtra.iterator();
             while (it.hasNext()) {
-                removePreference(this.mPreferenceGroup, (String) it.next());
+                removePreference(this.mPreferenceGroup, it.next());
             }
         }
     }
@@ -697,9 +641,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
     }
 
     public boolean onPreferenceChange(Preference preference, Object obj) {
-        String key = preference.getKey();
-        String str = CameraSettings.KEY_CAMERA_SNAP;
-        if (!key.equals(str) || obj == null) {
+        if (!preference.getKey().equals(CameraSettings.KEY_CAMERA_SNAP) || obj == null) {
             return super.onPreferenceChange(preference, obj);
         }
         String string = getString(R.string.pref_camera_snap_value_off);
@@ -708,16 +650,12 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         } else if (obj instanceof String) {
             string = (String) obj;
         }
-        boolean equals = string.equals(getString(R.string.pref_camera_snap_value_take_picture));
-        String str2 = Key.LONG_PRESS_VOLUME_DOWN;
-        if (equals || string.equals(getString(R.string.pref_camera_snap_value_take_movie))) {
-            if (Key.LONG_PRESS_VOLUME_DOWN_PAY.equals(Secure.getString(getContentResolver(), str2))) {
-                bringUpDoubleConfirmDlg(preference, string);
-                return false;
-            }
+        if ((string.equals(getString(R.string.pref_camera_snap_value_take_picture)) || string.equals(getString(R.string.pref_camera_snap_value_take_movie))) && MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN_PAY.equals(Settings.Secure.getString(getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN))) {
+            bringUpDoubleConfirmDlg(preference, string);
+            return false;
         }
-        Secure.putString(getContentResolver(), str2, CameraSettings.getMiuiSettingsKeyForStreetSnap(string));
-        CameraStatUtil.trackPreferenceChange(str, string);
+        Settings.Secure.putString(getContentResolver(), MiuiSettings.Key.LONG_PRESS_VOLUME_DOWN, CameraSettings.getMiuiSettingsKeyForStreetSnap(string));
+        CameraStatUtil.trackPreferenceChange(CameraSettings.KEY_CAMERA_SNAP, string);
         return true;
     }
 
@@ -727,7 +665,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                 public void run() {
                     CameraPreferenceActivity.this.restorePreferences();
                 }
-            }, getString(17039360), null);
+            }, getString(17039360), (Runnable) null);
             return true;
         } else if (preference.getKey().equals(PREF_KEY_PRIVACY)) {
             ActivityLauncher.launchPrivacyPolicyWebpage(this);
@@ -741,43 +679,37 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
         } else if (preference.getKey().equals(PREF_KEY_ANXCAMERA)) {
             ActivityLauncher.launchANXCameraChat(this);
             return true;
-        } else {
-            boolean equals = preference.getKey().equals(CameraSettings.KEY_WATERMARK);
-            String str = CameraIntentManager.EXTRA_START_WHEN_LOCKED;
-            if (equals) {
-                Intent intent = new Intent(this, WatermarkActivity.class);
-                if (getIntent().getBooleanExtra(str, false)) {
-                    intent.putExtra(str, true);
+        } else if (preference.getKey().equals(CameraSettings.KEY_WATERMARK)) {
+            Intent intent = new Intent(this, WatermarkActivity.class);
+            if (getIntent().getBooleanExtra(CameraIntentManager.EXTRA_START_WHEN_LOCKED, false)) {
+                intent.putExtra(CameraIntentManager.EXTRA_START_WHEN_LOCKED, true);
+            }
+            this.mGoToActivity = true;
+            startActivity(intent);
+            return true;
+        } else if (preference.getKey().equals(CameraSettings.KEY_PHOTO_ASSISTANCE_TIPS)) {
+            Intent intent2 = new Intent(this, PhotoAssistanceTipsActivity.class);
+            try {
+                if (getIntent().getBooleanExtra(CameraIntentManager.EXTRA_START_WHEN_LOCKED, false)) {
+                    intent2.putExtra(CameraIntentManager.EXTRA_START_WHEN_LOCKED, true);
                 }
                 this.mGoToActivity = true;
-                startActivity(intent);
-                return true;
-            } else if (preference.getKey().equals(CameraSettings.KEY_PHOTO_ASSISTANCE_TIPS)) {
-                Intent intent2 = new Intent(this, PhotoAssistanceTipsActivity.class);
-                try {
-                    if (getIntent().getBooleanExtra(str, false)) {
-                        intent2.putExtra(str, true);
-                    }
-                    this.mGoToActivity = true;
-                    startActivity(intent2);
-                } catch (Exception unused) {
-                }
-                return true;
-            } else {
-                if (CameraSettings.KEY_PRIORITY_STORAGE.equals(preference.getKey())) {
-                    PriorityStorageBroadcastReceiver.setPriorityStorage(((CheckBoxPreference) preference).isChecked());
-                } else {
-                    if (CameraSettings.KEY_SCAN_QRCODE.equals(preference.getKey()) && !CameraSettings.isQRCodeReceiverAvailable(this)) {
-                        RotateDialogController.showSystemAlertDialog(this, getString(R.string.confirm_install_scanner_title), getString(R.string.confirm_install_scanner_message), getString(R.string.install_confirmed), new Runnable() {
-                            public void run() {
-                                CameraPreferenceActivity.this.installQRCodeReceiver();
-                            }
-                        }, getString(17039360), null);
-                        return true;
-                    }
-                }
-                return false;
+                startActivity(intent2);
+            } catch (Exception unused) {
             }
+            return true;
+        } else {
+            if (CameraSettings.KEY_PRIORITY_STORAGE.equals(preference.getKey())) {
+                PriorityStorageBroadcastReceiver.setPriorityStorage(((CheckBoxPreference) preference).isChecked());
+            } else if (CameraSettings.KEY_SCAN_QRCODE.equals(preference.getKey()) && !CameraSettings.isQRCodeReceiverAvailable(this)) {
+                RotateDialogController.showSystemAlertDialog(this, getString(R.string.confirm_install_scanner_title), getString(R.string.confirm_install_scanner_message), getString(R.string.install_confirmed), new Runnable() {
+                    public void run() {
+                        CameraPreferenceActivity.this.installQRCodeReceiver();
+                    }
+                }, getString(17039360), (Runnable) null);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -814,10 +746,8 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                     checkBoxPreference.setEnabled(true);
                 }
             }
-            PreferenceScreen preferenceScreen = this.mPreferenceGroup;
-            String str = CameraSettings.KEY_VOLUME_VIDEO_FUNCTION;
-            if (preferenceScreen.findPreference(str) != null && isAutoZoomEnabled) {
-                removePreference(this.mPreferenceGroup, str);
+            if (this.mPreferenceGroup.findPreference(CameraSettings.KEY_VOLUME_VIDEO_FUNCTION) != null && isAutoZoomEnabled) {
+                removePreference(this.mPreferenceGroup, CameraSettings.KEY_VOLUME_VIDEO_FUNCTION);
             }
         }
     }
@@ -836,17 +766,13 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                     }
                 } else if (preference instanceof PreviewListPreference) {
                     PreviewListPreference previewListPreference = (PreviewListPreference) preference;
-                    if (b.hi()) {
-                        String key = previewListPreference.getKey();
-                        String str = CameraSettings.KEY_FRONT_MIRROR;
-                        if (str.equals(key) && sharedPreferences.getString(str, null) == null) {
-                            String string = getString(R.string.pref_front_mirror_entryvalue_off);
-                            previewListPreference.setValue(string);
-                            previewListPreference.setDefaultValue(string);
-                            preference.setPersistent(false);
-                        }
+                    if (!b.hi() || !CameraSettings.KEY_FRONT_MIRROR.equals(previewListPreference.getKey()) || sharedPreferences.getString(CameraSettings.KEY_FRONT_MIRROR, (String) null) != null) {
+                        previewListPreference.setValue(getFilterValue(previewListPreference, sharedPreferences));
+                    } else {
+                        String string = getString(R.string.pref_front_mirror_entryvalue_off);
+                        previewListPreference.setValue(string);
+                        previewListPreference.setDefaultValue(string);
                     }
-                    previewListPreference.setValue(getFilterValue(previewListPreference, sharedPreferences));
                     preference.setPersistent(false);
                 } else if (preference instanceof CheckBoxPreference) {
                     CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
@@ -855,11 +781,7 @@ public class CameraPreferenceActivity extends BasePreferenceActivity {
                 } else if (preference instanceof PreferenceGroup) {
                     updatePreferences((PreferenceGroup) preference, sharedPreferences);
                 } else {
-                    String str2 = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("no need update preference for ");
-                    sb.append(preference.getKey());
-                    Log.v(str2, sb.toString());
+                    Log.v(TAG, "no need update preference for " + preference.getKey());
                 }
             }
         }

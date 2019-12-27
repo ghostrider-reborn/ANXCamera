@@ -84,7 +84,7 @@ public class FilterFactory {
     private static final String LOOKUP_TABLE_PATH_VIDEO_YEARS = "filter/video/S-YEARS.png";
     private static final String TAG = "FilterFactory";
 
-    /* renamed from: com.miui.filtersdk.filter.helper.FilterFactory$1 reason: invalid class name */
+    /* renamed from: com.miui.filtersdk.filter.helper.FilterFactory$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$filter$helper$FilterType = new int[FilterType.values().length];
 
@@ -269,12 +269,7 @@ public class FilterFactory {
 
     public static BaseOriginalFilter getFilterByType(FilterType filterType) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getFilterByType: ");
-        sb.append(filterType);
-        sb.append("; ordinal = ");
-        sb.append(filterType.ordinal());
-        Log.d(str, sb.toString());
+        Log.d(str, "getFilterByType: " + filterType + "; ordinal = " + filterType.ordinal());
         switch (AnonymousClass1.$SwitchMap$com$miui$filtersdk$filter$helper$FilterType[filterType.ordinal()]) {
             case 1:
                 return new ColorLookupFilter4x4(LOOKUP_TABLE_PATH_AI_SCENE_DOC);
@@ -433,7 +428,6 @@ public class FilterFactory {
     }
 
     public static FilterType[] getFiltersByScene(FilterScene filterScene) {
-        FilterType[] values;
         ArrayList arrayList = new ArrayList();
         for (FilterType filterType : FilterType.values()) {
             if (filterType.getFilterScene() == filterScene) {

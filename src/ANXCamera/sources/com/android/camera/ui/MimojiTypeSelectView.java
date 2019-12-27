@@ -7,10 +7,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.LinearLayout;
 import com.android.camera.R;
 import com.android.camera.Util;
@@ -19,14 +16,14 @@ import com.android.camera.fragment.mimoji.AvatarEngineManager;
 import com.android.camera.fragment.mimoji.FragmentMimojiEdit;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.MimojiEditor;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
+import com.android.camera.protocol.ModeProtocol;
+import com.arcsoft.avatar.AvatarConfig;
 import io.reactivex.Completable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MimojiTypeSelectView extends LinearLayout implements OnClickListener {
+public class MimojiTypeSelectView extends LinearLayout implements View.OnClickListener {
     private Context mContext;
     private ColorActivateTextView mLastActivateTextView;
     private OnMimojiTypeClickedListener mOnMimojiTypeClickedListener;
@@ -54,13 +51,13 @@ public class MimojiTypeSelectView extends LinearLayout implements OnClickListene
     }
 
     private static final int getChildMeasureWidth(View view) {
-        MarginLayoutParams marginLayoutParams = (MarginLayoutParams) view.getLayoutParams();
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
         int i = marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
         int measuredWidth = view.getMeasuredWidth();
         if (measuredWidth > 0) {
             return measuredWidth + i;
         }
-        int makeMeasureSpec = MeasureSpec.makeMeasureSpec(0, 0);
+        int makeMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, 0);
         view.measure(makeMeasureSpec, makeMeasureSpec);
         return view.getMeasuredWidth() + i;
     }
@@ -82,10 +79,7 @@ public class MimojiTypeSelectView extends LinearLayout implements OnClickListene
         ColorActivateTextView colorActivateTextView2 = (ColorActivateTextView) viewGroup.findViewById(R.id.text_item_title);
         colorActivateTextView2.setActivated(true);
         if (Util.isAccessible()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(colorActivateTextView2.getText().toString());
-            sb.append(getContext().getString(R.string.accessibility_selected));
-            colorActivateTextView2.setContentDescription(sb.toString());
+            colorActivateTextView2.setContentDescription(colorActivateTextView2.getText().toString() + getContext().getString(R.string.accessibility_selected));
             colorActivateTextView2.sendAccessibilityEvent(128);
         }
         this.mLastActivateTextView = colorActivateTextView2;
@@ -101,20 +95,14 @@ public class MimojiTypeSelectView extends LinearLayout implements OnClickListene
     }
 
     public void init() {
-        Iterator it = AvatarEngineManager.getInstance().getConfigTypeList().iterator();
+        Iterator<AvatarConfig.ASAvatarConfigType> it = AvatarEngineManager.getInstance().getConfigTypeList().iterator();
         int i = 0;
         while (it.hasNext()) {
-            ASAvatarConfigType aSAvatarConfigType = (ASAvatarConfigType) it.next();
-            ArrayList config = AvatarEngineManager.getInstance().queryAvatar().getConfig(aSAvatarConfigType.configType, AvatarEngineManager.getInstance().getASAvatarConfigValue().gender);
-            String str = FragmentMimojiEdit.TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("putConfigList:");
-            sb.append(aSAvatarConfigType.configTypeDesc);
-            sb.append(":");
-            sb.append(aSAvatarConfigType.configType);
-            Log.i(str, sb.toString());
-            AvatarEngineManager.getInstance().putConfigList(aSAvatarConfigType.configType, config);
-            if (!AvatarEngineManager.filterTypeTitle(aSAvatarConfigType.configType)) {
+            AvatarConfig.ASAvatarConfigType next = it.next();
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> config = AvatarEngineManager.getInstance().queryAvatar().getConfig(next.configType, AvatarEngineManager.getInstance().getASAvatarConfigValue().gender);
+            Log.i(FragmentMimojiEdit.TAG, "putConfigList:" + next.configTypeDesc + ":" + next.configType);
+            AvatarEngineManager.getInstance().putConfigList(next.configType, config);
+            if (!AvatarEngineManager.filterTypeTitle(next.configType)) {
                 ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.mimoji_type_select_view, this, false);
                 ColorActivateTextView colorActivateTextView = (ColorActivateTextView) viewGroup.findViewById(R.id.text_item_title);
                 colorActivateTextView.setActivateColor(ColorConstant.COLOR_COMMON_SELECTED);
@@ -122,22 +110,21 @@ public class MimojiTypeSelectView extends LinearLayout implements OnClickListene
                 colorActivateTextView.setNormalCor(-1);
                 colorActivateTextView.setTypeface(Typeface.defaultFromStyle(1));
                 colorActivateTextView.setTextSize(17.5f);
-                colorActivateTextView.setText(AvatarEngineManager.replaceTabTitle(this.mContext, aSAvatarConfigType.configType));
+                colorActivateTextView.setText(AvatarEngineManager.replaceTabTitle(this.mContext, next.configType));
                 Message obtain = Message.obtain();
-                int i2 = i + 1;
                 obtain.arg1 = i;
-                obtain.arg2 = aSAvatarConfigType.configType;
+                obtain.arg2 = next.configType;
                 viewGroup.setTag(obtain);
                 addView(viewGroup);
-                i = i2;
+                i++;
             }
         }
-        for (int i3 = 0; i3 < getChildCount(); i3++) {
-            if (i3 == 0 || i3 == getChildCount() - 1) {
-                View childAt = getChildAt(i3);
+        for (int i2 = 0; i2 < getChildCount(); i2++) {
+            if (i2 == 0 || i2 == getChildCount() - 1) {
+                View childAt = getChildAt(i2);
                 int childMeasureWidth = (getResources().getDisplayMetrics().widthPixels - getChildMeasureWidth(childAt)) / 2;
-                MarginLayoutParams marginLayoutParams = (MarginLayoutParams) childAt.getLayoutParams();
-                if (i3 == 0) {
+                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) childAt.getLayoutParams();
+                if (i2 == 0) {
                     marginLayoutParams.setMarginStart(childMeasureWidth);
                 } else {
                     marginLayoutParams.setMarginEnd(childMeasureWidth);
@@ -145,11 +132,11 @@ public class MimojiTypeSelectView extends LinearLayout implements OnClickListene
                 childAt.setLayoutParams(marginLayoutParams);
             }
         }
-        MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+        ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
         if (mimojiEditor != null) {
             mimojiEditor.onTypeConfigSelect(1);
         }
-        setSelection(0, null);
+        setSelection(0, (List<Completable>) null);
     }
 
     public void initView() {
@@ -159,8 +146,8 @@ public class MimojiTypeSelectView extends LinearLayout implements OnClickListene
         Message message = (Message) view.getTag();
         int i = message.arg1;
         int i2 = message.arg2;
-        setSelection(i, null);
-        MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+        setSelection(i, (List<Completable>) null);
+        ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
         if (mimojiEditor != null && i2 != AvatarEngineManager.getInstance().getSelectType()) {
             mimojiEditor.onTypeConfigSelect(i2);
         }

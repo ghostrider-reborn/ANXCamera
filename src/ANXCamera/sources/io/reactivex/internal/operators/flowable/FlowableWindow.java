@@ -137,27 +137,29 @@ public final class FlowableWindow<T> extends AbstractFlowableWithUpstream<T, Flo
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean checkTerminated(boolean z, boolean z2, Subscriber<?> subscriber, SpscLinkedArrayQueue<?> spscLinkedArrayQueue) {
             if (this.cancelled) {
                 spscLinkedArrayQueue.clear();
                 return true;
-            }
-            if (z) {
+            } else if (!z) {
+                return false;
+            } else {
                 Throwable th = this.error;
                 if (th != null) {
                     spscLinkedArrayQueue.clear();
                     subscriber.onError(th);
                     return true;
-                } else if (z2) {
+                } else if (!z2) {
+                    return false;
+                } else {
                     subscriber.onComplete();
                     return true;
                 }
             }
-            return false;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             int i;
             if (this.wip.getAndIncrement() == 0) {
@@ -173,13 +175,13 @@ public final class FlowableWindow<T> extends AbstractFlowableWithUpstream<T, Flo
                             break;
                         }
                         boolean z = this.done;
-                        UnicastProcessor unicastProcessor = (UnicastProcessor) spscLinkedArrayQueue.poll();
-                        boolean z2 = unicastProcessor == null;
+                        UnicastProcessor poll = spscLinkedArrayQueue.poll();
+                        boolean z2 = poll == null;
                         if (!checkTerminated(z, z2, subscriber, spscLinkedArrayQueue)) {
                             if (z2) {
                                 break;
                             }
-                            subscriber.onNext(unicastProcessor);
+                            subscriber.onNext(poll);
                             j2++;
                         } else {
                             return;
@@ -199,9 +201,9 @@ public final class FlowableWindow<T> extends AbstractFlowableWithUpstream<T, Flo
 
         public void onComplete() {
             if (!this.done) {
-                Iterator it = this.windows.iterator();
+                Iterator<UnicastProcessor<T>> it = this.windows.iterator();
                 while (it.hasNext()) {
-                    ((Processor) it.next()).onComplete();
+                    it.next().onComplete();
                 }
                 this.windows.clear();
                 this.done = true;
@@ -214,9 +216,9 @@ public final class FlowableWindow<T> extends AbstractFlowableWithUpstream<T, Flo
                 RxJavaPlugins.onError(th);
                 return;
             }
-            Iterator it = this.windows.iterator();
+            Iterator<UnicastProcessor<T>> it = this.windows.iterator();
             while (it.hasNext()) {
-                ((Processor) it.next()).onError(th);
+                it.next().onError(th);
             }
             this.windows.clear();
             this.error = th;
@@ -235,16 +237,16 @@ public final class FlowableWindow<T> extends AbstractFlowableWithUpstream<T, Flo
                     drain();
                 }
                 long j2 = j + 1;
-                Iterator it = this.windows.iterator();
+                Iterator<UnicastProcessor<T>> it = this.windows.iterator();
                 while (it.hasNext()) {
-                    ((Processor) it.next()).onNext(t);
+                    it.next().onNext(t);
                 }
                 long j3 = this.produced + 1;
                 if (j3 == this.size) {
                     this.produced = j3 - this.skip;
-                    Processor processor = (Processor) this.windows.poll();
-                    if (processor != null) {
-                        processor.onComplete();
+                    Processor poll = this.windows.poll();
+                    if (poll != null) {
+                        poll.onComplete();
                     }
                 } else {
                     this.produced = j3;
@@ -387,7 +389,7 @@ public final class FlowableWindow<T> extends AbstractFlowableWithUpstream<T, Flo
         long j = this.skip;
         long j2 = this.size;
         if (j == j2) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new WindowExactSubscriber<Object>(subscriber, j2, this.bufferSize));
+            this.source.subscribe(new WindowExactSubscriber(subscriber, j2, this.bufferSize));
         } else if (j > j2) {
             Flowable<T> flowable = this.source;
             WindowSkipSubscriber windowSkipSubscriber = new WindowSkipSubscriber(subscriber, j2, j, this.bufferSize);

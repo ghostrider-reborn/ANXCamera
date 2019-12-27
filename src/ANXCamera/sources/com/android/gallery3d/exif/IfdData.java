@@ -23,7 +23,6 @@ class IfdData {
     }
 
     public boolean equals(Object obj) {
-        ExifTag[] allTags;
         if (this == obj) {
             return true;
         }
@@ -31,7 +30,7 @@ class IfdData {
             IfdData ifdData = (IfdData) obj;
             if (ifdData.getId() == this.mIfdId && ifdData.getTagCount() == getTagCount()) {
                 for (ExifTag exifTag : ifdData.getAllTags()) {
-                    if (!ExifInterface.isOffsetTag(exifTag.getTagId()) && !exifTag.equals((ExifTag) this.mExifTags.get(Short.valueOf(exifTag.getTagId())))) {
+                    if (!ExifInterface.isOffsetTag(exifTag.getTagId()) && !exifTag.equals(this.mExifTags.get(Short.valueOf(exifTag.getTagId())))) {
                         return false;
                     }
                 }
@@ -58,7 +57,7 @@ class IfdData {
 
     /* access modifiers changed from: protected */
     public ExifTag getTag(short s) {
-        return (ExifTag) this.mExifTags.get(Short.valueOf(s));
+        return this.mExifTags.get(Short.valueOf(s));
     }
 
     /* access modifiers changed from: protected */
@@ -79,6 +78,6 @@ class IfdData {
     /* access modifiers changed from: protected */
     public ExifTag setTag(ExifTag exifTag) {
         exifTag.setIfd(this.mIfdId);
-        return (ExifTag) this.mExifTags.put(Short.valueOf(exifTag.getTagId()), exifTag);
+        return this.mExifTags.put(Short.valueOf(exifTag.getTagId()), exifTag);
     }
 }

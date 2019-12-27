@@ -6,7 +6,6 @@ import com.miui.filtersdk.beauty.BeautyParameterType;
 import com.miui.filtersdk.beauty.IntelligentBeautyProcessor;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
     private static final float CAMERA_BEAUTY_PARAM_MAX = 10.0f;
@@ -17,7 +16,7 @@ public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
     private int mSmoothStrength;
     private int mWhiteStrength;
 
-    /* renamed from: com.android.camera.effect.ArcsoftBeautyProcessor$1 reason: invalid class name */
+    /* renamed from: com.android.camera.effect.ArcsoftBeautyProcessor$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$beauty$BeautyParameterType = new int[BeautyParameterType.values().length];
 
@@ -40,6 +39,7 @@ public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
 
     public ArcsoftBeautyProcessor() {
         setExtraSpan(2.0f);
+        this.mLevelParameters = new float[][]{new float[]{0.0f, 0.0f, 0.0f, 0.0f}, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, new float[]{3.0f, 3.0f, 3.0f, 3.0f}, new float[]{5.0f, 5.0f, 5.0f, 5.0f}, new float[]{7.0f, 7.0f, 7.0f, 7.0f}, new float[]{8.0f, 8.0f, 8.0f, 8.0f}};
     }
 
     private void dumpParams() {
@@ -109,8 +109,8 @@ public class ArcsoftBeautyProcessor extends IntelligentBeautyProcessor {
     }
 
     public void setBeautyParamsDegree(Map<BeautyParameterType, Float> map) {
-        for (Entry entry : map.entrySet()) {
-            updateBeautyParameter((BeautyParameterType) entry.getKey(), (Float) entry.getValue());
+        for (Map.Entry next : map.entrySet()) {
+            updateBeautyParameter((BeautyParameterType) next.getKey(), (Float) next.getValue());
         }
         dumpParams();
     }

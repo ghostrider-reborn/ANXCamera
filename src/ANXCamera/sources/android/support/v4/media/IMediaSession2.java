@@ -8,6 +8,7 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.support.v4.media.IMediaController2;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(23, obtain, null, 1);
+                    this.mRemote.transact(23, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -88,7 +89,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeInt(i);
                     obtain.writeInt(i2);
-                    this.mRemote.transact(4, obtain, null, 1);
+                    this.mRemote.transact(4, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -104,7 +105,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeString(str);
-                    this.mRemote.transact(1, obtain, null, 1);
+                    this.mRemote.transact(1, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -115,7 +116,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(9, obtain, null, 1);
+                    this.mRemote.transact(9, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -135,7 +136,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(36, obtain, null, 1);
+                    this.mRemote.transact(36, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -151,7 +152,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeString(str);
-                    this.mRemote.transact(35, obtain, null, 1);
+                    this.mRemote.transact(35, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -168,7 +169,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(34, obtain, null, 1);
+                    this.mRemote.transact(34, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -188,7 +189,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(38, obtain, null, 1);
+                    this.mRemote.transact(38, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -199,7 +200,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(6, obtain, null, 1);
+                    this.mRemote.transact(6, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -210,7 +211,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(5, obtain, null, 1);
+                    this.mRemote.transact(5, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -228,7 +229,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(18, obtain, null, 1);
+                    this.mRemote.transact(18, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -246,7 +247,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(17, obtain, null, 1);
+                    this.mRemote.transact(17, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -269,7 +270,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(16, obtain, null, 1);
+                    this.mRemote.transact(16, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -280,7 +281,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(8, obtain, null, 1);
+                    this.mRemote.transact(8, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -298,7 +299,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(15, obtain, null, 1);
+                    this.mRemote.transact(15, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -316,7 +317,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(14, obtain, null, 1);
+                    this.mRemote.transact(14, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -339,7 +340,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(13, obtain, null, 1);
+                    this.mRemote.transact(13, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -350,7 +351,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(2, obtain, null, 1);
+                    this.mRemote.transact(2, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -367,7 +368,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(24, obtain, null, 1);
+                    this.mRemote.transact(24, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -385,7 +386,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(25, obtain, null, 1);
+                    this.mRemote.transact(25, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -396,7 +397,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(7, obtain, null, 1);
+                    this.mRemote.transact(7, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -407,7 +408,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(10, obtain, null, 1);
+                    this.mRemote.transact(10, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -425,7 +426,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(37, obtain, null, 1);
+                    this.mRemote.transact(37, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -437,7 +438,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeLong(j);
-                    this.mRemote.transact(11, obtain, null, 1);
+                    this.mRemote.transact(11, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -454,7 +455,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(33, obtain, null, 1);
+                    this.mRemote.transact(33, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -483,7 +484,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(12, obtain, null, 1);
+                    this.mRemote.transact(12, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -495,7 +496,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeFloat(f2);
-                    this.mRemote.transact(20, obtain, null, 1);
+                    this.mRemote.transact(20, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -513,7 +514,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(21, obtain, null, 1);
+                    this.mRemote.transact(21, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -531,7 +532,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(19, obtain, null, 1);
+                    this.mRemote.transact(19, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -543,7 +544,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeInt(i);
-                    this.mRemote.transact(29, obtain, null, 1);
+                    this.mRemote.transact(29, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -555,7 +556,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeInt(i);
-                    this.mRemote.transact(30, obtain, null, 1);
+                    this.mRemote.transact(30, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -568,7 +569,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeInt(i);
                     obtain.writeInt(i2);
-                    this.mRemote.transact(3, obtain, null, 1);
+                    this.mRemote.transact(3, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -579,7 +580,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(28, obtain, null, 1);
+                    this.mRemote.transact(28, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -596,7 +597,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(26, obtain, null, 1);
+                    this.mRemote.transact(26, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -607,7 +608,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(27, obtain, null, 1);
+                    this.mRemote.transact(27, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -625,7 +626,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(39, obtain, null, 1);
+                    this.mRemote.transact(39, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -636,7 +637,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(31, obtain, null, 1);
+                    this.mRemote.transact(31, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -648,7 +649,7 @@ public interface IMediaSession2 extends IInterface {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
                     obtain.writeString(str);
-                    this.mRemote.transact(40, obtain, null, 1);
+                    this.mRemote.transact(40, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -659,7 +660,7 @@ public interface IMediaSession2 extends IInterface {
                 try {
                     obtain.writeInterfaceToken(Stub.DESCRIPTOR);
                     obtain.writeStrongBinder(iMediaController2 != null ? iMediaController2.asBinder() : null);
-                    this.mRemote.transact(32, obtain, null, 1);
+                    this.mRemote.transact(32, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -676,7 +677,7 @@ public interface IMediaSession2 extends IInterface {
                     } else {
                         obtain.writeInt(0);
                     }
-                    this.mRemote.transact(22, obtain, null, 1);
+                    this.mRemote.transact(22, obtain, (Parcel) null, 1);
                 } finally {
                     obtain.recycle();
                 }
@@ -699,49 +700,27 @@ public interface IMediaSession2 extends IInterface {
             return this;
         }
 
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v6, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v9, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v12, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v15, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v18, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v21, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v24, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v27, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v30, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v33, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v36, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v39, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v42, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v45, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v48, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v54, resolved type: android.os.Bundle} */
+        /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r0v60, resolved type: android.os.Bundle} */
         /* JADX WARNING: type inference failed for: r0v1 */
         /* JADX WARNING: type inference failed for: r0v2, types: [android.os.ResultReceiver] */
-        /* JADX WARNING: type inference failed for: r0v5, types: [android.os.ResultReceiver] */
-        /* JADX WARNING: type inference failed for: r0v6, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v8, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v9, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v11, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v12, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v14, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v15, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v17, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v18, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v20, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v21, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v23, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v24, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v26, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v27, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v29, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v30, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v32, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v33, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v35, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v36, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v38, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v39, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v41, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v42, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v44, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v45, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v47, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v48, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v50, types: [android.os.Bundle] */
         /* JADX WARNING: type inference failed for: r0v51 */
-        /* JADX WARNING: type inference failed for: r7v0, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v53, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v54, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v56, types: [android.os.Bundle] */
         /* JADX WARNING: type inference failed for: r0v57 */
-        /* JADX WARNING: type inference failed for: r7v1, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v59, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v60, types: [android.os.Bundle] */
-        /* JADX WARNING: type inference failed for: r0v62, types: [android.os.Bundle] */
         /* JADX WARNING: type inference failed for: r0v63 */
         /* JADX WARNING: type inference failed for: r0v64 */
         /* JADX WARNING: type inference failed for: r0v65 */
@@ -762,80 +741,58 @@ public interface IMediaSession2 extends IInterface {
         /* JADX WARNING: type inference failed for: r0v80 */
         /* JADX WARNING: type inference failed for: r0v81 */
         /* JADX WARNING: type inference failed for: r0v82 */
-        /* JADX WARNING: Multi-variable type inference failed. Error: jadx.core.utils.exceptions.JadxRuntimeException: No candidate types for var: r0v1
-  assigns: [?[int, float, boolean, short, byte, char, OBJECT, ARRAY], android.os.Bundle, android.os.ResultReceiver]
-  uses: [android.os.ResultReceiver, android.os.Bundle, ?[OBJECT, ARRAY]]
-  mth insns count: 404
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.fillTypeCandidates(TypeSearch.java:237)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.typeinference.TypeSearch.run(TypeSearch.java:53)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.runMultiVariableSearch(TypeInferenceVisitor.java:99)
-        	at jadx.core.dex.visitors.typeinference.TypeInferenceVisitor.visit(TypeInferenceVisitor.java:92)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:27)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$1(DepthTraversal.java:14)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:14)
-        	at jadx.core.dex.visitors.DepthTraversal.lambda$visit$0(DepthTraversal.java:13)
-        	at java.util.ArrayList.forEach(Unknown Source)
-        	at jadx.core.dex.visitors.DepthTraversal.visit(DepthTraversal.java:13)
-        	at jadx.core.ProcessClass.process(ProcessClass.java:30)
-        	at jadx.api.JadxDecompiler.processClass(JadxDecompiler.java:311)
-        	at jadx.api.JavaClass.decompile(JavaClass.java:62)
-        	at jadx.api.JadxDecompiler.lambda$appendSourcesSave$0(JadxDecompiler.java:217)
-         */
-        /* JADX WARNING: Unknown variable types count: 23 */
+        /* JADX WARNING: Multi-variable type inference failed */
         public boolean onTransact(int i, Parcel parcel, Parcel parcel2, int i2) throws RemoteException {
-            String str = DESCRIPTOR;
             if (i != 1598968902) {
                 ? r0 = 0;
                 switch (i) {
                     case 1:
-                        parcel.enforceInterface(str);
-                        connect(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readString());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        connect(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readString());
                         return true;
                     case 2:
-                        parcel.enforceInterface(str);
-                        release(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        release(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 3:
-                        parcel.enforceInterface(str);
-                        setVolumeTo(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt(), parcel.readInt());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        setVolumeTo(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt(), parcel.readInt());
                         return true;
                     case 4:
-                        parcel.enforceInterface(str);
-                        adjustVolume(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt(), parcel.readInt());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        adjustVolume(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt(), parcel.readInt());
                         return true;
                     case 5:
-                        parcel.enforceInterface(str);
-                        play(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        play(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 6:
-                        parcel.enforceInterface(str);
-                        pause(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        pause(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 7:
-                        parcel.enforceInterface(str);
-                        reset(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        reset(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 8:
-                        parcel.enforceInterface(str);
-                        prepare(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        prepare(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 9:
-                        parcel.enforceInterface(str);
-                        fastForward(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        fastForward(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 10:
-                        parcel.enforceInterface(str);
-                        rewind(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        rewind(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 11:
-                        parcel.enforceInterface(str);
-                        seekTo(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readLong());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        seekTo(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readLong());
                         return true;
                     case 12:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         Bundle bundle = parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel) : null;
                         Bundle bundle2 = parcel.readInt() != 0 ? (Bundle) Bundle.CREATOR.createFromParcel(parcel) : null;
                         if (parcel.readInt() != 0) {
@@ -844,8 +801,8 @@ public interface IMediaSession2 extends IInterface {
                         sendCustomCommand(asInterface, bundle, bundle2, r0);
                         return true;
                     case 13:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface2 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface2 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         Uri uri = parcel.readInt() != 0 ? (Uri) Uri.CREATOR.createFromParcel(parcel) : null;
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -853,8 +810,8 @@ public interface IMediaSession2 extends IInterface {
                         prepareFromUri(asInterface2, uri, r0);
                         return true;
                     case 14:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface3 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface3 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -862,8 +819,8 @@ public interface IMediaSession2 extends IInterface {
                         prepareFromSearch(asInterface3, readString, r0);
                         return true;
                     case 15:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface4 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface4 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString2 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -871,8 +828,8 @@ public interface IMediaSession2 extends IInterface {
                         prepareFromMediaId(asInterface4, readString2, r0);
                         return true;
                     case 16:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface5 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface5 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         Uri uri2 = parcel.readInt() != 0 ? (Uri) Uri.CREATOR.createFromParcel(parcel) : null;
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -880,8 +837,8 @@ public interface IMediaSession2 extends IInterface {
                         playFromUri(asInterface5, uri2, r0);
                         return true;
                     case 17:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface6 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface6 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString3 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -889,8 +846,8 @@ public interface IMediaSession2 extends IInterface {
                         playFromSearch(asInterface6, readString3, r0);
                         return true;
                     case 18:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface7 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface7 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString4 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -898,8 +855,8 @@ public interface IMediaSession2 extends IInterface {
                         playFromMediaId(asInterface7, readString4, r0);
                         return true;
                     case 19:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface8 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface8 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString5 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -907,12 +864,12 @@ public interface IMediaSession2 extends IInterface {
                         setRating(asInterface8, readString5, r0);
                         return true;
                     case 20:
-                        parcel.enforceInterface(str);
-                        setPlaybackSpeed(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readFloat());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        setPlaybackSpeed(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readFloat());
                         return true;
                     case 21:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface9 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface9 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         ArrayList createTypedArrayList = parcel.createTypedArrayList(Bundle.CREATOR);
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -920,16 +877,16 @@ public interface IMediaSession2 extends IInterface {
                         setPlaylist(asInterface9, createTypedArrayList, r0);
                         return true;
                     case 22:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface10 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface10 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                         }
                         updatePlaylistMetadata(asInterface10, r0);
                         return true;
                     case 23:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface11 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface11 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         int readInt = parcel.readInt();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -937,16 +894,16 @@ public interface IMediaSession2 extends IInterface {
                         addPlaylistItem(asInterface11, readInt, r0);
                         return true;
                     case 24:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface12 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface12 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                         }
                         removePlaylistItem(asInterface12, r0);
                         return true;
                     case 25:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface13 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface13 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         int readInt2 = parcel.readInt();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -954,60 +911,60 @@ public interface IMediaSession2 extends IInterface {
                         replacePlaylistItem(asInterface13, readInt2, r0);
                         return true;
                     case 26:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface14 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface14 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                         }
                         skipToPlaylistItem(asInterface14, r0);
                         return true;
                     case 27:
-                        parcel.enforceInterface(str);
-                        skipToPreviousItem(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        skipToPreviousItem(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 28:
-                        parcel.enforceInterface(str);
-                        skipToNextItem(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        skipToNextItem(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 29:
-                        parcel.enforceInterface(str);
-                        setRepeatMode(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        setRepeatMode(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt());
                         return true;
                     case 30:
-                        parcel.enforceInterface(str);
-                        setShuffleMode(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        setShuffleMode(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readInt());
                         return true;
                     case 31:
-                        parcel.enforceInterface(str);
-                        subscribeRoutesInfo(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        subscribeRoutesInfo(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 32:
-                        parcel.enforceInterface(str);
-                        unsubscribeRoutesInfo(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
+                        parcel.enforceInterface(DESCRIPTOR);
+                        unsubscribeRoutesInfo(IMediaController2.Stub.asInterface(parcel.readStrongBinder()));
                         return true;
                     case 33:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface15 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface15 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                         }
                         selectRoute(asInterface15, r0);
                         return true;
                     case 34:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface16 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface16 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
                         }
                         getLibraryRoot(asInterface16, r0);
                         return true;
                     case 35:
-                        parcel.enforceInterface(str);
-                        getItem(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readString());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        getItem(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readString());
                         return true;
                     case 36:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface17 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface17 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString6 = parcel.readString();
                         int readInt3 = parcel.readInt();
                         int readInt4 = parcel.readInt();
@@ -1017,8 +974,8 @@ public interface IMediaSession2 extends IInterface {
                         getChildren(asInterface17, readString6, readInt3, readInt4, r0);
                         return true;
                     case 37:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface18 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface18 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString7 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1026,8 +983,8 @@ public interface IMediaSession2 extends IInterface {
                         search(asInterface18, readString7, r0);
                         return true;
                     case 38:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface19 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface19 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString8 = parcel.readString();
                         int readInt5 = parcel.readInt();
                         int readInt6 = parcel.readInt();
@@ -1037,8 +994,8 @@ public interface IMediaSession2 extends IInterface {
                         getSearchResult(asInterface19, readString8, readInt5, readInt6, r0);
                         return true;
                     case 39:
-                        parcel.enforceInterface(str);
-                        IMediaController2 asInterface20 = android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        IMediaController2 asInterface20 = IMediaController2.Stub.asInterface(parcel.readStrongBinder());
                         String readString9 = parcel.readString();
                         if (parcel.readInt() != 0) {
                             r0 = (Bundle) Bundle.CREATOR.createFromParcel(parcel);
@@ -1046,14 +1003,14 @@ public interface IMediaSession2 extends IInterface {
                         subscribe(asInterface20, readString9, r0);
                         return true;
                     case 40:
-                        parcel.enforceInterface(str);
-                        unsubscribe(android.support.v4.media.IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readString());
+                        parcel.enforceInterface(DESCRIPTOR);
+                        unsubscribe(IMediaController2.Stub.asInterface(parcel.readStrongBinder()), parcel.readString());
                         return true;
                     default:
                         return super.onTransact(i, parcel, parcel2, i2);
                 }
             } else {
-                parcel2.writeString(str);
+                parcel2.writeString(DESCRIPTOR);
                 return true;
             }
         }

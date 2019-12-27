@@ -6,18 +6,14 @@ import android.os.Bundle;
 import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.media.MediaBrowser2.BrowserCallback;
-import android.support.v4.media.MediaBrowserCompat.ConnectionCallback;
-import android.support.v4.media.MediaBrowserCompat.ItemCallback;
-import android.support.v4.media.MediaBrowserCompat.MediaItem;
-import android.support.v4.media.MediaBrowserCompat.SearchCallback;
-import android.support.v4.media.MediaBrowserCompat.SubscriptionCallback;
+import android.support.v4.media.MediaBrowser2;
+import android.support.v4.media.MediaBrowserCompat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements SupportLibraryImpl {
+class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements MediaBrowser2.SupportLibraryImpl {
     public static final String EXTRA_ITEM_COUNT = "android.media.browse.extra.ITEM_COUNT";
     /* access modifiers changed from: private */
     @GuardedBy("mLock")
@@ -25,7 +21,7 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
     @GuardedBy("mLock")
     private final HashMap<String, List<SubscribeCallback>> mSubscribeCallbacks = new HashMap<>();
 
-    private class GetChildrenCallback extends SubscriptionCallback {
+    private class GetChildrenCallback extends MediaBrowserCompat.SubscriptionCallback {
         /* access modifiers changed from: private */
         public final int mPage;
         /* access modifiers changed from: private */
@@ -39,27 +35,27 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
             this.mPageSize = i2;
         }
 
-        public void onChildrenLoaded(String str, List<MediaItem> list) {
-            onChildrenLoaded(str, list, null);
+        public void onChildrenLoaded(String str, List<MediaBrowserCompat.MediaItem> list) {
+            onChildrenLoaded(str, list, (Bundle) null);
         }
 
-        public void onChildrenLoaded(final String str, List<MediaItem> list, Bundle bundle) {
-            final List list2;
+        public void onChildrenLoaded(final String str, List<MediaBrowserCompat.MediaItem> list, Bundle bundle) {
+            final ArrayList arrayList;
             if (list == null) {
-                list2 = null;
+                arrayList = null;
             } else {
-                ArrayList arrayList = new ArrayList();
+                ArrayList arrayList2 = new ArrayList();
                 for (int i = 0; i < list.size(); i++) {
-                    arrayList.add(MediaUtils2.convertToMediaItem2((MediaItem) list.get(i)));
+                    arrayList2.add(MediaUtils2.convertToMediaItem2(list.get(i)));
                 }
-                list2 = arrayList;
+                arrayList = arrayList2;
             }
             final Bundle access$300 = MediaBrowser2ImplLegacy.this.getExtrasWithoutPagination(bundle);
             MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
                 public void run() {
                     MediaBrowserCompat browserCompat = MediaBrowser2ImplLegacy.this.getBrowserCompat();
                     if (browserCompat != null) {
-                        MediaBrowser2ImplLegacy.this.getCallback().onGetChildrenDone(MediaBrowser2ImplLegacy.this.getInstance(), str, GetChildrenCallback.this.mPage, GetChildrenCallback.this.mPageSize, list2, access$300);
+                        MediaBrowser2ImplLegacy.this.getCallback().onGetChildrenDone(MediaBrowser2ImplLegacy.this.getInstance(), str, GetChildrenCallback.this.mPage, GetChildrenCallback.this.mPageSize, arrayList, access$300);
                         browserCompat.unsubscribe(GetChildrenCallback.this.mParentId, GetChildrenCallback.this);
                     }
                 }
@@ -67,15 +63,15 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
         }
 
         public void onError(String str) {
-            onChildrenLoaded(str, null, null);
+            onChildrenLoaded(str, (List<MediaBrowserCompat.MediaItem>) null, (Bundle) null);
         }
 
         public void onError(String str, Bundle bundle) {
-            onChildrenLoaded(str, null, bundle);
+            onChildrenLoaded(str, (List<MediaBrowserCompat.MediaItem>) null, bundle);
         }
     }
 
-    private class GetLibraryRootCallback extends ConnectionCallback {
+    private class GetLibraryRootCallback extends MediaBrowserCompat.ConnectionCallback {
         /* access modifiers changed from: private */
         public final Bundle mExtras;
 
@@ -106,56 +102,48 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
         }
     }
 
-    private class SubscribeCallback extends SubscriptionCallback {
+    private class SubscribeCallback extends MediaBrowserCompat.SubscriptionCallback {
         private SubscribeCallback() {
         }
 
-        public void onChildrenLoaded(String str, List<MediaItem> list) {
-            onChildrenLoaded(str, list, null);
+        public void onChildrenLoaded(String str, List<MediaBrowserCompat.MediaItem> list) {
+            onChildrenLoaded(str, list, (Bundle) null);
         }
 
-        public void onChildrenLoaded(final String str, List<MediaItem> list, Bundle bundle) {
+        public void onChildrenLoaded(final String str, List<MediaBrowserCompat.MediaItem> list, Bundle bundle) {
             final int i;
-            if (bundle != null) {
-                String str2 = MediaBrowser2ImplLegacy.EXTRA_ITEM_COUNT;
-                if (bundle.containsKey(str2)) {
-                    i = bundle.getInt(str2);
-                    final Bundle notifyChildrenChangedOptions = MediaBrowser2ImplLegacy.this.getBrowserCompat().getNotifyChildrenChangedOptions();
-                    MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
-                        public void run() {
-                            MediaBrowser2ImplLegacy.this.getCallback().onChildrenChanged(MediaBrowser2ImplLegacy.this.getInstance(), str, i, notifyChildrenChangedOptions);
-                        }
-                    });
-                }
-            }
-            if (list != null) {
+            if (bundle != null && bundle.containsKey(MediaBrowser2ImplLegacy.EXTRA_ITEM_COUNT)) {
+                i = bundle.getInt(MediaBrowser2ImplLegacy.EXTRA_ITEM_COUNT);
+            } else if (list != null) {
                 i = list.size();
-                final Bundle notifyChildrenChangedOptions2 = MediaBrowser2ImplLegacy.this.getBrowserCompat().getNotifyChildrenChangedOptions();
-                MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
-                    public void run() {
-                        MediaBrowser2ImplLegacy.this.getCallback().onChildrenChanged(MediaBrowser2ImplLegacy.this.getInstance(), str, i, notifyChildrenChangedOptions2);
-                    }
-                });
+            } else {
+                return;
             }
+            final Bundle notifyChildrenChangedOptions = MediaBrowser2ImplLegacy.this.getBrowserCompat().getNotifyChildrenChangedOptions();
+            MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
+                public void run() {
+                    MediaBrowser2ImplLegacy.this.getCallback().onChildrenChanged(MediaBrowser2ImplLegacy.this.getInstance(), str, i, notifyChildrenChangedOptions);
+                }
+            });
         }
 
         public void onError(String str) {
-            onChildrenLoaded(str, null, null);
+            onChildrenLoaded(str, (List<MediaBrowserCompat.MediaItem>) null, (Bundle) null);
         }
 
         public void onError(String str, Bundle bundle) {
-            onChildrenLoaded(str, null, bundle);
+            onChildrenLoaded(str, (List<MediaBrowserCompat.MediaItem>) null, bundle);
         }
     }
 
-    MediaBrowser2ImplLegacy(@NonNull Context context, MediaBrowser2 mediaBrowser2, @NonNull SessionToken2 sessionToken2, @NonNull Executor executor, @NonNull BrowserCallback browserCallback) {
+    MediaBrowser2ImplLegacy(@NonNull Context context, MediaBrowser2 mediaBrowser2, @NonNull SessionToken2 sessionToken2, @NonNull Executor executor, @NonNull MediaBrowser2.BrowserCallback browserCallback) {
         super(context, mediaBrowser2, sessionToken2, executor, browserCallback);
     }
 
     private MediaBrowserCompat getBrowserCompat(Bundle bundle) {
         MediaBrowserCompat mediaBrowserCompat;
         synchronized (this.mLock) {
-            mediaBrowserCompat = (MediaBrowserCompat) this.mBrowserCompats.get(bundle);
+            mediaBrowserCompat = this.mBrowserCompats.get(bundle);
         }
         return mediaBrowserCompat;
     }
@@ -184,8 +172,8 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
         }
     }
 
-    public BrowserCallback getCallback() {
-        return (BrowserCallback) super.getCallback();
+    public MediaBrowser2.BrowserCallback getCallback() {
+        return (MediaBrowser2.BrowserCallback) super.getCallback();
     }
 
     public void getChildren(@NonNull String str, int i, int i2, @Nullable Bundle bundle) {
@@ -211,16 +199,16 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
     public void getItem(@NonNull final String str) {
         MediaBrowserCompat browserCompat = getBrowserCompat();
         if (browserCompat != null) {
-            browserCompat.getItem(str, new ItemCallback() {
+            browserCompat.getItem(str, new MediaBrowserCompat.ItemCallback() {
                 public void onError(String str) {
                     MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
                         public void run() {
-                            MediaBrowser2ImplLegacy.this.getCallback().onGetItemDone(MediaBrowser2ImplLegacy.this.getInstance(), str, null);
+                            MediaBrowser2ImplLegacy.this.getCallback().onGetItemDone(MediaBrowser2ImplLegacy.this.getInstance(), str, (MediaItem2) null);
                         }
                     });
                 }
 
-                public void onItemLoaded(final MediaItem mediaItem) {
+                public void onItemLoaded(final MediaBrowserCompat.MediaItem mediaItem) {
                     MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
                         public void run() {
                             MediaBrowser2ImplLegacy.this.getCallback().onGetItemDone(MediaBrowser2ImplLegacy.this.getInstance(), str, MediaUtils2.convertToMediaItem2(mediaItem));
@@ -258,24 +246,24 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
             Bundle createBundle = MediaUtils2.createBundle(bundle);
             createBundle.putInt(MediaBrowserCompat.EXTRA_PAGE, i);
             createBundle.putInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, i2);
-            browserCompat.search(str, createBundle, new SearchCallback() {
+            browserCompat.search(str, createBundle, new MediaBrowserCompat.SearchCallback() {
                 public void onError(final String str, Bundle bundle) {
                     MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
                         public void run() {
-                            BrowserCallback callback = MediaBrowser2ImplLegacy.this.getCallback();
+                            MediaBrowser2.BrowserCallback callback = MediaBrowser2ImplLegacy.this.getCallback();
                             MediaBrowser2 instance = MediaBrowser2ImplLegacy.this.getInstance();
                             String str = str;
                             AnonymousClass5 r8 = AnonymousClass5.this;
-                            callback.onGetSearchResultDone(instance, str, i, i2, null, bundle);
+                            callback.onGetSearchResultDone(instance, str, i, i2, (List<MediaItem2>) null, bundle);
                         }
                     });
                 }
 
-                public void onSearchResult(final String str, Bundle bundle, final List<MediaItem> list) {
+                public void onSearchResult(final String str, Bundle bundle, final List<MediaBrowserCompat.MediaItem> list) {
                     MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
                         public void run() {
-                            List convertMediaItemListToMediaItem2List = MediaUtils2.convertMediaItemListToMediaItem2List(list);
-                            BrowserCallback callback = MediaBrowser2ImplLegacy.this.getCallback();
+                            List<MediaItem2> convertMediaItemListToMediaItem2List = MediaUtils2.convertMediaItemListToMediaItem2List(list);
+                            MediaBrowser2.BrowserCallback callback = MediaBrowser2ImplLegacy.this.getCallback();
                             MediaBrowser2 instance = MediaBrowser2ImplLegacy.this.getInstance();
                             String str = str;
                             AnonymousClass5 r8 = AnonymousClass5.this;
@@ -290,11 +278,11 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
     public void search(@NonNull String str, @Nullable Bundle bundle) {
         MediaBrowserCompat browserCompat = getBrowserCompat();
         if (browserCompat != null) {
-            browserCompat.search(str, bundle, new SearchCallback() {
+            browserCompat.search(str, bundle, new MediaBrowserCompat.SearchCallback() {
                 public void onError(String str, Bundle bundle) {
                 }
 
-                public void onSearchResult(final String str, final Bundle bundle, final List<MediaItem> list) {
+                public void onSearchResult(final String str, final Bundle bundle, final List<MediaBrowserCompat.MediaItem> list) {
                     MediaBrowser2ImplLegacy.this.getCallbackExecutor().execute(new Runnable() {
                         public void run() {
                             MediaBrowser2ImplLegacy.this.getCallback().onSearchResultChanged(MediaBrowser2ImplLegacy.this.getInstance(), str, list.size(), bundle);
@@ -311,7 +299,7 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
             if (browserCompat != null) {
                 SubscribeCallback subscribeCallback = new SubscribeCallback();
                 synchronized (this.mLock) {
-                    List list = (List) this.mSubscribeCallbacks.get(str);
+                    List list = this.mSubscribeCallbacks.get(str);
                     if (list == null) {
                         list = new ArrayList();
                         this.mSubscribeCallbacks.put(str, list);
@@ -333,10 +321,10 @@ class MediaBrowser2ImplLegacy extends MediaController2ImplLegacy implements Supp
             MediaBrowserCompat browserCompat = getBrowserCompat();
             if (browserCompat != null) {
                 synchronized (this.mLock) {
-                    List list = (List) this.mSubscribeCallbacks.get(str);
+                    List list = this.mSubscribeCallbacks.get(str);
                     if (list != null) {
                         for (int i = 0; i < list.size(); i++) {
-                            browserCompat.unsubscribe(str, (SubscriptionCallback) list.get(i));
+                            browserCompat.unsubscribe(str, (MediaBrowserCompat.SubscriptionCallback) list.get(i));
                         }
                         return;
                     }

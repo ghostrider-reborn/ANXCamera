@@ -15,10 +15,7 @@ public class AtomicFile {
 
     public AtomicFile(@NonNull File file) {
         this.mBaseName = file;
-        StringBuilder sb = new StringBuilder();
-        sb.append(file.getPath());
-        sb.append(".bak");
-        this.mBackupName = new File(sb.toString());
+        this.mBackupName = new File(file.getPath() + ".bak");
     }
 
     private static boolean sync(@NonNull FileOutputStream fileOutputStream) {
@@ -104,12 +101,7 @@ public class AtomicFile {
             if (this.mBackupName.exists()) {
                 this.mBaseName.delete();
             } else if (!this.mBaseName.renameTo(this.mBackupName)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Couldn't rename file ");
-                sb.append(this.mBaseName);
-                sb.append(" to backup file ");
-                sb.append(this.mBackupName);
-                Log.w("AtomicFile", sb.toString());
+                Log.w("AtomicFile", "Couldn't rename file " + this.mBaseName + " to backup file " + this.mBackupName);
             }
         }
         try {
@@ -119,16 +111,10 @@ public class AtomicFile {
                 try {
                     return new FileOutputStream(this.mBaseName);
                 } catch (FileNotFoundException unused2) {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Couldn't create ");
-                    sb2.append(this.mBaseName);
-                    throw new IOException(sb2.toString());
+                    throw new IOException("Couldn't create " + this.mBaseName);
                 }
             } else {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Couldn't create directory ");
-                sb3.append(this.mBaseName);
-                throw new IOException(sb3.toString());
+                throw new IOException("Couldn't create directory " + this.mBaseName);
             }
         }
     }

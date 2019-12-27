@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 import com.miui.filtersdk.beauty.BeautyParameterType;
 import com.miui.filtersdk.beauty.IntelligentBeautyProcessor;
 import com.sensetime.stmobile.STBeautifyNative;
+import com.sensetime.stmobile.model.STMobile106;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class StickerBeautyProcessor extends IntelligentBeautyProcessor {
     private static final int ST_BEAUTIFY_CONTRAST_STRENGTH = 1;
@@ -17,7 +17,7 @@ public class StickerBeautyProcessor extends IntelligentBeautyProcessor {
     private static final int ST_BEAUTIFY_WHITEN_STRENGTH = 4;
     private STBeautifyNative mStBeautifyNative;
 
-    /* renamed from: com.android.camera.sticker.beautyprocessor.StickerBeautyProcessor$1 reason: invalid class name */
+    /* renamed from: com.android.camera.sticker.beautyprocessor.StickerBeautyProcessor$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$beauty$BeautyParameterType = new int[BeautyParameterType.values().length];
 
@@ -43,6 +43,7 @@ public class StickerBeautyProcessor extends IntelligentBeautyProcessor {
 
     public StickerBeautyProcessor(STBeautifyNative sTBeautifyNative) {
         this.mStBeautifyNative = sTBeautifyNative;
+        this.mLevelParameters = new float[][]{new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, new float[]{0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f}, new float[]{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}, new float[]{0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f}, new float[]{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}, new float[]{0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f}};
     }
 
     public int beautify(byte[] bArr, int i, int i2) {
@@ -50,14 +51,14 @@ public class StickerBeautyProcessor extends IntelligentBeautyProcessor {
     }
 
     public void beautify(int i, int i2, int i3, int i4) {
-        this.mStBeautifyNative.processTexture(i, i2, i3, null, i4, null);
+        this.mStBeautifyNative.processTexture(i, i2, i3, (STMobile106[]) null, i4, (STMobile106[]) null);
     }
 
     public void beautify(Bitmap bitmap, int i, int i2) {
     }
 
     public void beautify(byte[] bArr, int i, int i2, int i3, byte[] bArr2, int i4) {
-        this.mStBeautifyNative.processBufferNotInGLContext(bArr, i, i2, i3, null, bArr2, i4, null);
+        this.mStBeautifyNative.processBufferNotInGLContext(bArr, i, i2, i3, (STMobile106[]) null, bArr2, i4, (STMobile106[]) null);
     }
 
     public void clearBeautyParameters() {
@@ -123,8 +124,8 @@ public class StickerBeautyProcessor extends IntelligentBeautyProcessor {
     }
 
     public void setBeautyParamsDegree(Map<BeautyParameterType, Float> map) {
-        for (Entry entry : map.entrySet()) {
-            setBeautyParamDegree((BeautyParameterType) entry.getKey(), (Float) entry.getValue());
+        for (Map.Entry next : map.entrySet()) {
+            setBeautyParamDegree((BeautyParameterType) next.getKey(), (Float) next.getValue());
         }
     }
 }

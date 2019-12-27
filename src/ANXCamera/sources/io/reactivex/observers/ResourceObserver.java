@@ -25,7 +25,7 @@ public abstract class ResourceObserver<T> implements Observer<T>, Disposable {
     }
 
     public final boolean isDisposed() {
-        return DisposableHelper.isDisposed((Disposable) this.s.get());
+        return DisposableHelper.isDisposed(this.s.get());
     }
 
     /* access modifiers changed from: protected */
@@ -33,7 +33,7 @@ public abstract class ResourceObserver<T> implements Observer<T>, Disposable {
     }
 
     public final void onSubscribe(Disposable disposable) {
-        if (EndConsumerHelper.setOnce(this.s, disposable, ResourceObserver.class)) {
+        if (EndConsumerHelper.setOnce(this.s, disposable, (Class<?>) ResourceObserver.class)) {
             onStart();
         }
     }

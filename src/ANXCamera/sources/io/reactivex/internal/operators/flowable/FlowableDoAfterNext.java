@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.annotations.Experimental;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.functions.Consumer;
@@ -100,9 +99,9 @@ public final class FlowableDoAfterNext<T> extends AbstractFlowableWithUpstream<T
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
         if (subscriber instanceof ConditionalSubscriber) {
-            this.source.subscribe((FlowableSubscriber<? super T>) new DoAfterConditionalSubscriber<Object>((ConditionalSubscriber) subscriber, this.onAfterNext));
+            this.source.subscribe(new DoAfterConditionalSubscriber((ConditionalSubscriber) subscriber, this.onAfterNext));
         } else {
-            this.source.subscribe((FlowableSubscriber<? super T>) new DoAfterSubscriber<Object>(subscriber, this.onAfterNext));
+            this.source.subscribe(new DoAfterSubscriber(subscriber, this.onAfterNext));
         }
     }
 }

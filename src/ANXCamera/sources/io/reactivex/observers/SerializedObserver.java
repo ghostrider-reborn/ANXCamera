@@ -30,7 +30,7 @@ public final class SerializedObserver<T> implements Observer<T>, Disposable {
         this.s.dispose();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void emitLoop() {
         AppendOnlyLinkedArrayList<Object> appendOnlyLinkedArrayList;
         do {
@@ -42,7 +42,7 @@ public final class SerializedObserver<T> implements Observer<T>, Disposable {
                 }
                 this.queue = null;
             }
-        } while (!appendOnlyLinkedArrayList.accept(this.actual));
+        } while (!appendOnlyLinkedArrayList.accept((Observer<? super U>) this.actual));
     }
 
     public boolean isDisposed() {

@@ -5,25 +5,23 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.e;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.b.b.a;
 import com.bumptech.glide.load.engine.A;
 import com.bumptech.glide.load.engine.Engine;
-import com.bumptech.glide.load.engine.Engine.b;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.n;
 import com.bumptech.glide.request.target.o;
 import com.bumptech.glide.util.a.d;
-import com.bumptech.glide.util.a.d.a;
-import com.bumptech.glide.util.a.d.c;
 import com.bumptech.glide.util.a.g;
 import com.bumptech.glide.util.l;
 
-public final class SingleRequest<R> implements c, n, g, c {
-    private static final Pool<SingleRequest<?>> Rf = d.a(150, (a<T>) new h<T>());
+public final class SingleRequest<R> implements c, n, g, d.c {
+    private static final Pools.Pool<SingleRequest<?>> Rf = d.a(150, new h());
     private static final String TAG = "Request";
     private static final String sl = "Glide";
     private static final boolean tl = Log.isLoggable(TAG, 2);
@@ -43,7 +41,7 @@ public final class SingleRequest<R> implements c, n, g, c {
     private d ol;
     private com.bumptech.glide.request.a.g<? super R> pl;
     private Priority priority;
-    private b ql;
+    private Engine.b ql;
     private A<R> resource;
     private Drawable rl;
     private long startTime;
@@ -74,11 +72,7 @@ public final class SingleRequest<R> implements c, n, g, c {
     }
 
     private void E(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(str);
-        sb.append(" this: ");
-        sb.append(this.tag);
-        Log.v(TAG, sb.toString());
+        Log.v(TAG, str + " this: " + this.tag);
     }
 
     private void Rk() {
@@ -93,7 +87,7 @@ public final class SingleRequest<R> implements c, n, g, c {
     }
 
     private Drawable T(@DrawableRes int i) {
-        return com.bumptech.glide.load.b.b.a.a((Context) this.Eb, i, this.vc.getTheme() != null ? this.vc.getTheme() : this.context.getTheme());
+        return a.a((Context) this.Eb, i, this.vc.getTheme() != null ? this.vc.getTheme() : this.context.getTheme());
     }
 
     private boolean Tk() {
@@ -156,12 +150,12 @@ public final class SingleRequest<R> implements c, n, g, c {
     }
 
     public static <R> SingleRequest<R> a(Context context2, e eVar, Object obj, Class<R> cls, f fVar, int i, int i2, Priority priority2, o<R> oVar, e<R> eVar2, e<R> eVar3, d dVar, Engine engine, com.bumptech.glide.request.a.g<? super R> gVar) {
-        SingleRequest<R> singleRequest = (SingleRequest) Rf.acquire();
-        if (singleRequest == null) {
-            singleRequest = new SingleRequest<>();
+        SingleRequest<R> acquire = Rf.acquire();
+        if (acquire == null) {
+            acquire = new SingleRequest<>();
         }
-        singleRequest.b(context2, eVar, obj, cls, fVar, i, i2, priority2, oVar, eVar2, eVar3, dVar, engine, gVar);
-        return singleRequest;
+        acquire.b(context2, eVar, obj, cls, fVar, i, i2, priority2, oVar, eVar2, eVar3, dVar, engine, gVar);
+        return acquire;
     }
 
     /* JADX INFO: finally extract failed */
@@ -176,21 +170,7 @@ public final class SingleRequest<R> implements c, n, g, c {
         this.status = Status.COMPLETE;
         this.resource = a2;
         if (this.Eb.getLogLevel() <= 3) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Finished loading ");
-            sb.append(r.getClass().getSimpleName());
-            sb.append(" from ");
-            sb.append(dataSource);
-            sb.append(" for ");
-            sb.append(this.model);
-            sb.append(" with size [");
-            sb.append(this.width);
-            sb.append("x");
-            sb.append(this.height);
-            sb.append("] in ");
-            sb.append(com.bumptech.glide.util.e.g(this.startTime));
-            sb.append(" ms");
-            Log.d(sl, sb.toString());
+            Log.d(sl, "Finished loading " + r.getClass().getSimpleName() + " from " + dataSource + " for " + this.model + " with size [" + this.width + "x" + this.height + "] in " + com.bumptech.glide.util.e.g(this.startTime) + " ms");
         }
         this.ml = true;
         try {
@@ -212,19 +192,9 @@ public final class SingleRequest<R> implements c, n, g, c {
         this.Re.Mh();
         int logLevel = this.Eb.getLogLevel();
         if (logLevel <= i) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Load failed for ");
-            sb.append(this.model);
-            sb.append(" with size [");
-            sb.append(this.width);
-            sb.append("x");
-            sb.append(this.height);
-            sb.append("]");
-            String sb2 = sb.toString();
-            String str = sl;
-            Log.w(str, sb2, glideException);
+            Log.w(sl, "Load failed for " + this.model + " with size [" + this.width + "x" + this.height + "]", glideException);
             if (logLevel <= 4) {
-                glideException.x(str);
+                glideException.x(sl);
             }
         }
         this.ql = null;
@@ -289,32 +259,28 @@ public final class SingleRequest<R> implements c, n, g, c {
         this.Re.Mh();
         this.ql = null;
         if (a2 == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Expected to receive a Resource<R> with an object of ");
-            sb.append(this.uc);
-            sb.append(" inside, but instead got null.");
-            a(new GlideException(sb.toString()));
+            a(new GlideException("Expected to receive a Resource<R> with an object of " + this.uc + " inside, but instead got null."));
             return;
         }
         Object obj = a2.get();
         if (obj == null || !this.uc.isAssignableFrom(obj.getClass())) {
             m(a2);
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Expected to receive an object of ");
-            sb2.append(this.uc);
-            sb2.append(" but instead got ");
+            StringBuilder sb = new StringBuilder();
+            sb.append("Expected to receive an object of ");
+            sb.append(this.uc);
+            sb.append(" but instead got ");
             String str = "";
-            sb2.append(obj != null ? obj.getClass() : str);
-            sb2.append("{");
-            sb2.append(obj);
-            sb2.append("} inside Resource{");
-            sb2.append(a2);
-            sb2.append("}.");
+            sb.append(obj != null ? obj.getClass() : str);
+            sb.append("{");
+            sb.append(obj);
+            sb.append("} inside Resource{");
+            sb.append(a2);
+            sb.append("}.");
             if (obj == null) {
                 str = " To indicate failure return a null Resource object, rather than a Resource object containing null data.";
             }
-            sb2.append(str);
-            a(new GlideException(sb2.toString()));
+            sb.append(str);
+            a(new GlideException(sb.toString()));
         } else if (!Uk()) {
             m(a2);
             this.status = Status.COMPLETE;
@@ -327,6 +293,7 @@ public final class SingleRequest<R> implements c, n, g, c {
         a(glideException, 5);
     }
 
+    /* JADX WARNING: Removed duplicated region for block: B:20:0x0044 A[ORIG_RETURN, RETURN, SYNTHETIC] */
     public boolean a(c cVar) {
         if (!(cVar instanceof SingleRequest)) {
             return false;
@@ -336,22 +303,17 @@ public final class SingleRequest<R> implements c, n, g, c {
             return false;
         }
         if (this.xc != null) {
-            if (singleRequest.xc == null) {
-                return false;
-            }
-        } else if (singleRequest.xc != null) {
+            return singleRequest.xc != null;
+        }
+        if (singleRequest.xc != null) {
             return false;
         }
-        return true;
     }
 
     public void b(int i, int i2) {
         this.Re.Mh();
         if (tl) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Got onSizeReady in ");
-            sb.append(com.bumptech.glide.util.e.g(this.startTime));
-            E(sb.toString());
+            E("Got onSizeReady in " + com.bumptech.glide.util.e.g(this.startTime));
         }
         if (this.status == Status.WAITING_FOR_SIZE) {
             this.status = Status.RUNNING;
@@ -359,23 +321,17 @@ public final class SingleRequest<R> implements c, n, g, c {
             this.width = a(i, ih);
             this.height = a(i2, ih);
             if (tl) {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("finished setup for calling load in ");
-                sb2.append(com.bumptech.glide.util.e.g(this.startTime));
-                E(sb2.toString());
+                E("finished setup for calling load in " + com.bumptech.glide.util.e.g(this.startTime));
             }
             Engine engine = this.va;
             e eVar = this.Eb;
-            b a2 = engine.a(eVar, this.model, this.vc.getSignature(), this.width, this.height, this.vc.z(), this.uc, this.priority, this.vc.eg(), this.vc.getTransformations(), this.vc.rh(), this.vc.jg(), this.vc.getOptions(), this.vc.nh(), this.vc.kh(), this.vc.jh(), this.vc.dh(), this);
+            Engine.b a2 = engine.a(eVar, this.model, this.vc.getSignature(), this.width, this.height, this.vc.z(), this.uc, this.priority, this.vc.eg(), this.vc.getTransformations(), this.vc.rh(), this.vc.jg(), this.vc.getOptions(), this.vc.nh(), this.vc.kh(), this.vc.jh(), this.vc.dh(), this);
             this.ql = a2;
             if (this.status != Status.RUNNING) {
                 this.ql = null;
             }
             if (tl) {
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("finished onSizeReady in ");
-                sb3.append(com.bumptech.glide.util.e.g(this.startTime));
-                E(sb3.toString());
+                E("finished onSizeReady in " + com.bumptech.glide.util.e.g(this.startTime));
             }
         }
     }
@@ -396,7 +352,7 @@ public final class SingleRequest<R> implements c, n, g, c {
         if (status2 == Status.RUNNING) {
             throw new IllegalArgumentException("Cannot restart a running request");
         } else if (status2 == Status.COMPLETE) {
-            a(this.resource, DataSource.MEMORY_CACHE);
+            a((A<?>) this.resource, DataSource.MEMORY_CACHE);
         } else {
             this.status = Status.WAITING_FOR_SIZE;
             if (l.o(this.Kk, this.Jk)) {
@@ -409,21 +365,18 @@ public final class SingleRequest<R> implements c, n, g, c {
                 this.target.c(gh());
             }
             if (tl) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("finished run method in ");
-                sb.append(com.bumptech.glide.util.e.g(this.startTime));
-                E(sb.toString());
+                E("finished run method in " + com.bumptech.glide.util.e.g(this.startTime));
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void cancel() {
         Rk();
         this.Re.Mh();
         this.target.a(this);
         this.status = Status.CANCELLED;
-        b bVar = this.ql;
+        Engine.b bVar = this.ql;
         if (bVar != null) {
             bVar.cancel();
             this.ql = null;

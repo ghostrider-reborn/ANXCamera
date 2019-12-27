@@ -105,7 +105,7 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
         public void accept(Observer<? super Observable<T>> observer, Object obj) {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void close(OperatorWindowBoundaryCloseObserver<T, V> operatorWindowBoundaryCloseObserver) {
             this.resources.delete(operatorWindowBoundaryCloseObserver);
             this.queue.offer(new WindowOperation(operatorWindowBoundaryCloseObserver.w, null));
@@ -118,13 +118,13 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
             this.cancelled = true;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void disposeBoundary() {
             this.resources.dispose();
             DisposableHelper.dispose(this.boundary);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             MpscLinkedQueue mpscLinkedQueue = (MpscLinkedQueue) this.queue;
             Observer<? super V> observer = this.actual;
@@ -138,11 +138,11 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
                     disposeBoundary();
                     Throwable th = this.error;
                     if (th != null) {
-                        for (UnicastSubject onError : list) {
+                        for (UnicastSubject<T> onError : list) {
                             onError.onError(th);
                         }
                     } else {
-                        for (UnicastSubject onComplete : list) {
+                        for (UnicastSubject<T> onComplete : list) {
                             onComplete.onComplete();
                         }
                     }
@@ -186,15 +186,15 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
                         }
                     }
                 } else {
-                    for (UnicastSubject unicastSubject2 : list) {
+                    for (UnicastSubject<T> onNext : list) {
                         NotificationLite.getValue(poll);
-                        unicastSubject2.onNext(poll);
+                        onNext.onNext(poll);
                     }
                 }
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void error(Throwable th) {
             this.s.dispose();
             this.resources.dispose();
@@ -236,7 +236,7 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
 
         public void onNext(T t) {
             if (fastEnter()) {
-                for (UnicastSubject onNext : this.ws) {
+                for (UnicastSubject<T> onNext : this.ws) {
                     onNext.onNext(t);
                 }
                 if (leave(-1) == 0) {
@@ -259,7 +259,7 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
                 this.actual.onSubscribe(this);
                 if (!this.cancelled) {
                     OperatorWindowBoundaryOpenObserver operatorWindowBoundaryOpenObserver = new OperatorWindowBoundaryOpenObserver(this);
-                    if (this.boundary.compareAndSet(null, operatorWindowBoundaryOpenObserver)) {
+                    if (this.boundary.compareAndSet((Object) null, operatorWindowBoundaryOpenObserver)) {
                         this.windows.getAndIncrement();
                         this.open.subscribe(operatorWindowBoundaryOpenObserver);
                     }
@@ -267,9 +267,9 @@ public final class ObservableWindowBoundarySelector<T, B, V> extends AbstractObs
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void open(B b2) {
-            this.queue.offer(new WindowOperation(null, b2));
+            this.queue.offer(new WindowOperation((UnicastSubject) null, b2));
             if (enter()) {
                 drainLoop();
             }

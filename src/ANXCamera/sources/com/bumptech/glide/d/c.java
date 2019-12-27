@@ -2,11 +2,13 @@ package com.bumptech.glide.d;
 
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
+import android.support.v4.util.Pools;
 import com.bumptech.glide.load.b.d.g;
 import com.bumptech.glide.load.engine.i;
 import com.bumptech.glide.load.engine.x;
 import com.bumptech.glide.util.h;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /* compiled from: LoadPathCache */
@@ -16,18 +18,18 @@ public class c {
     private final AtomicReference<h> uk = new AtomicReference<>();
 
     static {
-        i iVar = new i(Object.class, Object.class, Object.class, Collections.emptyList(), new g(), null);
-        x xVar = new x(Object.class, Object.class, Object.class, Collections.singletonList(iVar), null);
+        i iVar = new i(Object.class, Object.class, Object.class, Collections.emptyList(), new g(), (Pools.Pool<List<Throwable>>) null);
+        x xVar = new x(Object.class, Object.class, Object.class, Collections.singletonList(iVar), (Pools.Pool<List<Throwable>>) null);
         vk = xVar;
     }
 
     private h f(Class<?> cls, Class<?> cls2, Class<?> cls3) {
-        h hVar = (h) this.uk.getAndSet(null);
-        if (hVar == null) {
-            hVar = new h();
+        h andSet = this.uk.getAndSet((Object) null);
+        if (andSet == null) {
+            andSet = new h();
         }
-        hVar.d(cls, cls2, cls3);
-        return hVar;
+        andSet.d(cls, cls2, cls3);
+        return andSet;
     }
 
     public void a(Class<?> cls, Class<?> cls2, Class<?> cls3, @Nullable x<?, ?, ?> xVar) {
@@ -50,7 +52,7 @@ public class c {
         x<Data, TResource, Transcode> xVar;
         h f2 = f(cls, cls2, cls3);
         synchronized (this.cache) {
-            xVar = (x) this.cache.get(f2);
+            xVar = this.cache.get(f2);
         }
         this.uk.set(f2);
         return xVar;

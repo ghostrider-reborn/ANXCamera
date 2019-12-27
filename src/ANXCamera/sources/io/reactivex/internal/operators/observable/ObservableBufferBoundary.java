@@ -81,14 +81,14 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
             this.bufferClose = function;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void boundaryError(Disposable disposable, Throwable th) {
             DisposableHelper.dispose(this.upstream);
             this.observers.delete(disposable);
             onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:12:0x002d, code lost:
             if (r4 == false) goto L_0x0031;
          */
@@ -130,7 +130,7 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 Observer<? super C> observer = this.actual;
@@ -163,7 +163,7 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
         }
 
         public boolean isDisposed() {
-            return DisposableHelper.isDisposed((Disposable) this.upstream.get());
+            return DisposableHelper.isDisposed(this.upstream.get());
         }
 
         public void onComplete() {
@@ -171,7 +171,7 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
             synchronized (this) {
                 Map<Long, C> map = this.buffers;
                 if (map != null) {
-                    for (Collection offer : map.values()) {
+                    for (C offer : map.values()) {
                         this.queue.offer(offer);
                     }
                     this.buffers = null;
@@ -198,7 +198,7 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
             synchronized (this) {
                 Map<Long, C> map = this.buffers;
                 if (map != null) {
-                    for (Collection add : map.values()) {
+                    for (C add : map.values()) {
                         add.add(t);
                     }
                 }
@@ -213,10 +213,10 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void open(Open open) {
             try {
-                Object call = this.bufferSupplier.call();
+                C call = this.bufferSupplier.call();
                 ObjectHelper.requireNonNull(call, "The bufferSupplier returned a null Collection");
                 Collection collection = (Collection) call;
                 Object apply = this.bufferClose.apply(open);
@@ -240,7 +240,7 @@ public final class ObservableBufferBoundary<T, U extends Collection<? super T>, 
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void openComplete(BufferOpenObserver<Open> bufferOpenObserver) {
             this.observers.delete(bufferOpenObserver);
             if (this.observers.size() == 0) {

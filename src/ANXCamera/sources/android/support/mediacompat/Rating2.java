@@ -3,7 +3,6 @@ package android.support.mediacompat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.util.ObjectsCompat;
 import android.util.Log;
 import java.lang.annotation.Retention;
@@ -24,12 +23,12 @@ public final class Rating2 {
     private final int mRatingStyle;
     private final float mRatingValue;
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface StarStyle {
     }
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Style {
     }
@@ -63,17 +62,12 @@ public final class Rating2 {
     @Nullable
     public static Rating2 newStarRating(int i, float f2) {
         float f3;
-        String str = TAG;
         if (i == 3) {
             f3 = 3.0f;
         } else if (i == 4) {
             f3 = 4.0f;
         } else if (i != 5) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid rating style (");
-            sb.append(i);
-            sb.append(") for a star rating");
-            Log.e(str, sb.toString());
+            Log.e(TAG, "Invalid rating style (" + i + ") for a star rating");
             return null;
         } else {
             f3 = 5.0f;
@@ -81,7 +75,7 @@ public final class Rating2 {
         if (f2 >= 0.0f && f2 <= f3) {
             return new Rating2(i, f2);
         }
-        Log.e(str, "Trying to set out of range star-based rating");
+        Log.e(TAG, "Trying to set out of range star-based rating");
         return null;
     }
 
@@ -106,15 +100,11 @@ public final class Rating2 {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (!(obj instanceof Rating2)) {
             return false;
         }
         Rating2 rating2 = (Rating2) obj;
-        if (this.mRatingStyle == rating2.mRatingStyle && this.mRatingValue == rating2.mRatingValue) {
-            z = true;
-        }
-        return z;
+        return this.mRatingStyle == rating2.mRatingStyle && this.mRatingValue == rating2.mRatingValue;
     }
 
     public float getPercentRating() {

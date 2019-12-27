@@ -43,10 +43,7 @@ public class MimojiStatusManager {
             return FragmentMimoji.CLOSE_STATE;
         }
         String str = this.mCurrentMimojiInfo.mConfigPath;
-        if (str != null && !str.isEmpty()) {
-            return str;
-        }
-        return FragmentMimoji.CLOSE_STATE;
+        return (str == null || str.isEmpty()) ? FragmentMimoji.CLOSE_STATE : str;
     }
 
     public boolean getMimojiPannelState() {
@@ -67,17 +64,13 @@ public class MimojiStatusManager {
     }
 
     public void setCurrentMimojiState(String str) {
-        String str2 = FragmentMimoji.CLOSE_STATE;
-        if (str2.equals(str)) {
+        if (FragmentMimoji.CLOSE_STATE.equals(str)) {
             MimojiInfo mimojiInfo = new MimojiInfo();
-            mimojiInfo.mConfigPath = str2;
+            mimojiInfo.mConfigPath = FragmentMimoji.CLOSE_STATE;
             this.mCurrentMimojiInfo = mimojiInfo;
-            return;
-        }
-        String str3 = FragmentMimoji.ADD_STATE;
-        if (str3.equals(str)) {
+        } else if (FragmentMimoji.ADD_STATE.equals(str)) {
             MimojiInfo mimojiInfo2 = new MimojiInfo();
-            mimojiInfo2.mConfigPath = str3;
+            mimojiInfo2.mConfigPath = FragmentMimoji.ADD_STATE;
             mimojiInfo2.mDirectoryName = Long.MAX_VALUE;
             this.mCurrentMimojiInfo = mimojiInfo2;
         }

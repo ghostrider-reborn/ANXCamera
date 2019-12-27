@@ -1,6 +1,6 @@
 package android.support.v4.view.accessibility;
 
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -16,14 +16,14 @@ public class AccessibilityRecordCompat {
     }
 
     public static int getMaxScrollX(AccessibilityRecord accessibilityRecord) {
-        if (VERSION.SDK_INT >= 15) {
+        if (Build.VERSION.SDK_INT >= 15) {
             return accessibilityRecord.getMaxScrollX();
         }
         return 0;
     }
 
     public static int getMaxScrollY(AccessibilityRecord accessibilityRecord) {
-        if (VERSION.SDK_INT >= 15) {
+        if (Build.VERSION.SDK_INT >= 15) {
             return accessibilityRecord.getMaxScrollY();
         }
         return 0;
@@ -40,19 +40,19 @@ public class AccessibilityRecordCompat {
     }
 
     public static void setMaxScrollX(AccessibilityRecord accessibilityRecord, int i) {
-        if (VERSION.SDK_INT >= 15) {
+        if (Build.VERSION.SDK_INT >= 15) {
             accessibilityRecord.setMaxScrollX(i);
         }
     }
 
     public static void setMaxScrollY(AccessibilityRecord accessibilityRecord, int i) {
-        if (VERSION.SDK_INT >= 15) {
+        if (Build.VERSION.SDK_INT >= 15) {
             accessibilityRecord.setMaxScrollY(i);
         }
     }
 
     public static void setSource(@NonNull AccessibilityRecord accessibilityRecord, View view, int i) {
-        if (VERSION.SDK_INT >= 16) {
+        if (Build.VERSION.SDK_INT >= 16) {
             accessibilityRecord.setSource(view, i);
         }
     }

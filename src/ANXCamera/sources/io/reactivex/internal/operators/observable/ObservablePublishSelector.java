@@ -45,7 +45,7 @@ public final class ObservablePublishSelector<T, R> extends AbstractObservableWit
         private static final long serialVersionUID = 854110278590336484L;
         final Observer<? super R> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f320d;
 
         TargetObserver(Observer<? super R> observer) {
@@ -100,7 +100,7 @@ public final class ObservablePublishSelector<T, R> extends AbstractObservableWit
             this.source.subscribe(new SourceObserver(create, targetObserver));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
-            EmptyDisposable.error(th, observer);
+            EmptyDisposable.error(th, (Observer<?>) observer);
         }
     }
 }

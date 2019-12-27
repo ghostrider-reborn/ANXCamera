@@ -1,10 +1,8 @@
 package com.android.camera.module;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -38,7 +36,8 @@ import com.android.camera.HybridZoomingSystem;
 import com.android.camera.LocationManager;
 import com.android.camera.R;
 import com.android.camera.RotateDialogController;
-import com.android.camera.SensorStateManager.SensorStateListener;
+import com.android.camera.SensorStateManager;
+import com.android.camera.SurfaceTextureScreenNail;
 import com.android.camera.Util;
 import com.android.camera.constant.GlobalConstant;
 import com.android.camera.constant.UpdateConstant;
@@ -47,33 +46,20 @@ import com.android.camera.effect.EffectController;
 import com.android.camera.effect.FaceAnalyzeInfo;
 import com.android.camera.fragment.CtaNoticeFragment;
 import com.android.camera.fragment.beauty.BeautyValues;
-import com.android.camera.fragment.beauty.LiveBeautyFilterFragment.LiveFilterItem;
+import com.android.camera.fragment.beauty.LiveBeautyFilterFragment;
 import com.android.camera.log.Log;
 import com.android.camera.module.impl.component.MimojiAvatarEngineImpl;
 import com.android.camera.module.loader.FunctionParseAsdFace;
 import com.android.camera.module.loader.FunctionParseAsdScene;
 import com.android.camera.module.loader.camera2.Camera2DataContainer;
 import com.android.camera.module.loader.camera2.FocusManager2;
-import com.android.camera.module.loader.camera2.FocusManager2.Listener;
 import com.android.camera.module.loader.camera2.FocusTask;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BackStack;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.FullScreenProtocol;
-import com.android.camera.protocol.ModeProtocol.LiveConfigChanges;
-import com.android.camera.protocol.ModeProtocol.LiveVideoEditor;
-import com.android.camera.protocol.ModeProtocol.MainContentProtocol;
-import com.android.camera.protocol.ModeProtocol.RecordState;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.storage.Storage;
 import com.android.camera2.Camera2Proxy;
-import com.android.camera2.Camera2Proxy.CameraPreviewCallback;
-import com.android.camera2.Camera2Proxy.FaceDetectionCallback;
-import com.android.camera2.Camera2Proxy.FocusCallback;
-import com.android.camera2.Camera2Proxy.PictureCallback;
 import com.android.camera2.CameraCapabilities;
 import com.android.camera2.CameraHardwareFace;
 import com.mi.config.b;
@@ -90,7 +76,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class LiveModule extends BaseModule implements CameraPreviewCallback, FocusCallback, FaceDetectionCallback, CameraAction, PictureCallback, Listener {
+public class LiveModule extends BaseModule implements Camera2Proxy.CameraPreviewCallback, Camera2Proxy.FocusCallback, Camera2Proxy.FaceDetectionCallback, ModeProtocol.CameraAction, Camera2Proxy.PictureCallback, FocusManager2.Listener {
     private static final int BEAUTY_SWITCH = 8;
     private static final int FILTER_SWITCH = 2;
     private static final int FRAME_RATE = 30;
@@ -112,8 +98,8 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     private boolean mIsLowLight;
     private boolean mIsPreviewing = false;
     /* access modifiers changed from: private */
-    public LiveConfigChanges mLiveConfigChanges;
-    private LiveVideoEditor mLiveVideoEditor;
+    public ModeProtocol.LiveConfigChanges mLiveConfigChanges;
+    private ModeProtocol.LiveVideoEditor mLiveVideoEditor;
     private int mMessageId;
     private Disposable mMetaDataDisposable;
     /* access modifiers changed from: private */
@@ -134,7 +120,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     };
     private int mQuality = 5;
     private boolean mSaved;
-    protected SensorStateListener mSensorStateListener = new SensorStateListener() {
+    protected SensorStateManager.SensorStateListener mSensorStateListener = new SensorStateManager.SensorStateListener() {
         public boolean isWorking() {
             return LiveModule.this.isAlive() && LiveModule.this.getCameraState() != 0;
         }
@@ -255,49 +241,23 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         String createName = createName(System.currentTimeMillis(), i2);
         if (i2 > 0) {
             String format = String.format(Locale.ENGLISH, "_%d", new Object[]{Integer.valueOf(i2)});
-            StringBuilder sb = new StringBuilder();
-            sb.append(createName);
-            sb.append(format);
-            createName = sb.toString();
+            createName = createName + format;
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(createName);
-        sb2.append(Util.convertOutputFormatToFileExt(i));
-        String sb3 = sb2.toString();
+        String str2 = createName + Util.convertOutputFormatToFileExt(i);
         String convertOutputFormatToMimeType = Util.convertOutputFormatToMimeType(i);
         if (z) {
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(Storage.CAMERA_TEMP_DIRECTORY);
-            sb4.append('/');
-            sb4.append(sb3);
-            str = sb4.toString();
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append(Storage.CAMERA_TEMP_DIRECTORY);
-            sb5.append(File.separator);
-            sb5.append(Storage.AVOID_SCAN_FILE_NAME);
-            Util.createFile(new File(sb5.toString()));
+            str = Storage.CAMERA_TEMP_DIRECTORY + '/' + str2;
+            Util.createFile(new File(Storage.CAMERA_TEMP_DIRECTORY + File.separator + Storage.AVOID_SCAN_FILE_NAME));
         } else {
-            StringBuilder sb6 = new StringBuilder();
-            sb6.append(Storage.DIRECTORY);
-            sb6.append('/');
-            sb6.append(sb3);
-            str = sb6.toString();
+            str = Storage.DIRECTORY + '/' + str2;
         }
-        String str2 = TAG;
-        StringBuilder sb7 = new StringBuilder();
-        sb7.append("genContentValues: path=");
-        sb7.append(str);
-        Log.v(str2, sb7.toString());
+        Log.v(TAG, "genContentValues: path=" + str);
         ContentValues contentValues = new ContentValues(8);
         contentValues.put("title", createName);
-        contentValues.put("_display_name", sb3);
+        contentValues.put("_display_name", str2);
         contentValues.put("mime_type", convertOutputFormatToMimeType);
         contentValues.put("_data", str);
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append(Integer.toString(this.mPreviewSize.width));
-        sb8.append("x");
-        sb8.append(Integer.toString(this.mPreviewSize.height));
-        contentValues.put("resolution", sb8.toString());
+        contentValues.put("resolution", Integer.toString(this.mPreviewSize.width) + "x" + Integer.toString(this.mPreviewSize.height));
         Location currentLocation = LocationManager.instance().getCurrentLocation();
         if (!(currentLocation == null || (currentLocation.getLatitude() == 0.0d && currentLocation.getLongitude() == 0.0d))) {
             contentValues.put("latitude", Double.valueOf(currentLocation.getLatitude()));
@@ -317,12 +277,12 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     private int initLiveConfig() {
-        this.mLiveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
-        this.mLiveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+        this.mLiveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+        this.mLiveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
         if (this.mLiveConfigChanges == null) {
             getActivity().getImplFactory().initModulePersistent(getActivity(), 201, 209);
-            this.mLiveConfigChanges = (LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
-            this.mLiveVideoEditor = (LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
+            this.mLiveConfigChanges = (ModeProtocol.LiveConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(201);
+            this.mLiveVideoEditor = (ModeProtocol.LiveVideoEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(209);
             this.mLiveConfigChanges.initResource();
         }
         return this.mLiveConfigChanges.getAuthResult();
@@ -331,9 +291,9 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     private void initMetaParser() {
         this.mMetaDataDisposable = Flowable.create(new FlowableOnSubscribe<CaptureResult>() {
             public void subscribe(FlowableEmitter<CaptureResult> flowableEmitter) throws Exception {
-                LiveModule.this.mMetaDataFlowableEmitter = flowableEmitter;
+                FlowableEmitter unused = LiveModule.this.mMetaDataFlowableEmitter = flowableEmitter;
             }
-        }, BackpressureStrategy.DROP).map(new FunctionParseAsdFace(this, isFrontCamera())).map(new FunctionParseAsdScene(this)).subscribe((Consumer<? super T>) new LiveAsdConsumer<Object>());
+        }, BackpressureStrategy.DROP).map(new FunctionParseAsdFace(this, isFrontCamera())).map(new FunctionParseAsdScene(this)).subscribe(new LiveAsdConsumer());
     }
 
     private void initMimojiEngine() {
@@ -366,29 +326,31 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         MimojiAvatarEngineImpl mimojiAvatarEngineImpl = this.mMimojiAvatarEngine;
         if (mimojiAvatarEngineImpl != null && mimojiAvatarEngineImpl.isOnCreateMimoji()) {
             if (!this.misFaceLocationOk) {
-                MainContentProtocol mainContentProtocol = this.mMainProtocol;
+                ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
                 if (mainContentProtocol != null) {
                     mainContentProtocol.updateMimojiFaceDetectResultTip(false);
+                    return;
                 }
                 return;
             }
-            MainContentProtocol mainContentProtocol2 = this.mMainProtocol;
+            ModeProtocol.MainContentProtocol mainContentProtocol2 = this.mMainProtocol;
             if (mainContentProtocol2 != null) {
                 mainContentProtocol2.setMimojiDetectTipType(162);
             }
             int intValue = num.intValue();
             if (intValue == 6 || intValue == 9) {
                 this.mIsLowLight = true;
-                MainContentProtocol mainContentProtocol3 = this.mMainProtocol;
+                ModeProtocol.MainContentProtocol mainContentProtocol3 = this.mMainProtocol;
                 if (mainContentProtocol3 != null) {
                     mainContentProtocol3.updateMimojiFaceDetectResultTip(true);
+                    return;
                 }
-            } else {
-                this.mIsLowLight = false;
-                MainContentProtocol mainContentProtocol4 = this.mMainProtocol;
-                if (mainContentProtocol4 != null) {
-                    mainContentProtocol4.updateMimojiFaceDetectResultTip(false);
-                }
+                return;
+            }
+            this.mIsLowLight = false;
+            ModeProtocol.MainContentProtocol mainContentProtocol4 = this.mMainProtocol;
+            if (mainContentProtocol4 != null) {
+                mainContentProtocol4.updateMimojiFaceDetectResultTip(false);
             }
         }
     }
@@ -416,12 +378,12 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     /* access modifiers changed from: private */
     public void setOrientationParameter() {
-        if (!(isDeparted() || this.mCamera2Device == null || this.mOrientation == -1)) {
+        if (!isDeparted() && this.mCamera2Device != null && this.mOrientation != -1) {
             if (!isFrameAvailable() || getCameraState() != 1) {
                 GlobalConstant.sCameraSetupScheduler.scheduleDirect(new s(this));
-            } else {
-                updatePreferenceInWorkThread(35);
+                return;
             }
+            updatePreferenceInWorkThread(35);
         }
     }
 
@@ -436,40 +398,36 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                 this.mCamera2Device.setTimeWaterMarkEnable(true);
                 this.mCaptureWaterMarkStr = Util.getTimeWatermark();
                 this.mCamera2Device.setTimeWatermarkValue(this.mCaptureWaterMarkStr);
-            } else {
-                this.mCaptureWaterMarkStr = null;
-                this.mCamera2Device.setTimeWaterMarkEnable(false);
+                return;
             }
+            this.mCaptureWaterMarkStr = null;
+            this.mCamera2Device.setTimeWaterMarkEnable(false);
         }
     }
 
     private boolean shouldApplyUltraWideLDC() {
-        boolean z = false;
         if (b.isMTKPlatform()) {
-            if (this.mModuleIndex == 174 && this.mActualCameraId == Camera2DataContainer.getInstance().getUltraWideCameraId()) {
-                z = true;
-            }
-            return z;
-        } else if (CameraSettings.shouldUltraWideVideoLDCBeVisibleInMode(this.mModuleIndex) && this.mActualCameraId == Camera2DataContainer.getInstance().getUltraWideCameraId()) {
-            return CameraSettings.isUltraWideVideoLDCEnabled();
-        } else {
-            return false;
+            return this.mModuleIndex == 174 && this.mActualCameraId == Camera2DataContainer.getInstance().getUltraWideCameraId();
         }
+        if (CameraSettings.shouldUltraWideVideoLDCBeVisibleInMode(this.mModuleIndex) && this.mActualCameraId == Camera2DataContainer.getInstance().getUltraWideCameraId()) {
+            return CameraSettings.isUltraWideVideoLDCEnabled();
+        }
+        return false;
     }
 
     private void showAuthError() {
         this.mHandler.post(new Runnable() {
             public void run() {
-                Builder builder = new Builder(LiveModule.this.mActivity);
+                AlertDialog.Builder builder = new AlertDialog.Builder(LiveModule.this.mActivity);
                 builder.setTitle(R.string.live_error_title);
                 builder.setMessage(R.string.live_error_message);
                 builder.setCancelable(false);
-                builder.setPositiveButton(R.string.live_error_confirm, new OnClickListener() {
+                builder.setPositiveButton(R.string.live_error_confirm, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         LiveModule.this.mActivity.startActivity(new Intent("android.settings.DATE_SETTINGS"));
                     }
                 });
-                builder.setNegativeButton(R.string.snap_cancel, new OnClickListener() {
+                builder.setNegativeButton(R.string.snap_cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
                     }
                 });
@@ -481,7 +439,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     private void showPreview() {
         pausePreview();
         this.mSaved = false;
-        ((FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196)).startLiveRecordPreview(genContentValues(2, 0, false));
+        ((ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196)).startLiveRecordPreview(genContentValues(2, 0, false));
         this.mIsPreviewing = true;
     }
 
@@ -493,7 +451,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                     if (camera != null) {
                         camera.setWindowBrightness(i2);
                     }
-                    FullScreenProtocol fullScreenProtocol = (FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
+                    ModeProtocol.FullScreenProtocol fullScreenProtocol = (ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
                     if (fullScreenProtocol != null) {
                         fullScreenProtocol.setScreenLightColor(i);
                         fullScreenProtocol.showScreenLight();
@@ -506,9 +464,9 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     @MainThread
     private void startVideoRecording() {
         keepScreenOn();
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         recordState.onPrepare();
-        LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+        ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
         if (liveConfigChanges != null) {
             liveConfigChanges.onRecordStart();
             DataRepository.dataItemLive().setLiveStartOrientation(this.mOrientation);
@@ -546,14 +504,9 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                 if (camera != null) {
                     camera.restoreWindowBrightness();
                 }
-                FullScreenProtocol fullScreenProtocol = (FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
+                ModeProtocol.FullScreenProtocol fullScreenProtocol = (ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
                 String access$300 = LiveModule.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("stopScreenLight: protocol = ");
-                sb.append(fullScreenProtocol);
-                sb.append(", mHandler = ");
-                sb.append(LiveModule.this.mHandler);
-                Log.d(access$300, sb.toString());
+                Log.d(access$300, "stopScreenLight: protocol = " + fullScreenProtocol + ", mHandler = " + LiveModule.this.mHandler);
                 if (fullScreenProtocol != null) {
                     fullScreenProtocol.hideScreenLight();
                 }
@@ -568,7 +521,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         int liveAllSwitchAllValue = CameraSettings.getLiveAllSwitchAllValue();
         String str = CameraSettings.getCurrentLiveMusic()[1];
         boolean z4 = !str.isEmpty();
-        LiveFilterItem findLiveFilter = EffectController.getInstance().findLiveFilter(CameraAppImpl.getAndroidContext(), DataRepository.dataItemLive().getLiveFilter());
+        LiveBeautyFilterFragment.LiveFilterItem findLiveFilter = EffectController.getInstance().findLiveFilter(CameraAppImpl.getAndroidContext(), DataRepository.dataItemLive().getLiveFilter());
         if (!findLiveFilter.directoryName.isEmpty()) {
             if ((liveAllSwitchAllValue & 2) == 0) {
                 liveAllSwitchAllValue += 2;
@@ -624,10 +577,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             }
             CameraSettings.initBeautyValues(this.mBeautyValues, this.mModuleIndex);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("updateBeauty(): ");
-            sb.append(this.mBeautyValues);
-            Log.d(str, sb.toString());
+            Log.d(str, "updateBeauty(): " + this.mBeautyValues);
             this.mCamera2Device.setBeautyValues(this.mBeautyValues);
             return;
         }
@@ -636,28 +586,21 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         float faceBeautyRatio3 = ((float) CameraSettings.getFaceBeautyRatio("key_live_smooth_strength")) / 100.0f;
         if (faceBeautyRatio > 0.0f || faceBeautyRatio2 > 0.0f || faceBeautyRatio3 > 0.0f) {
             CameraSettings.setLiveBeautyStatus(true);
-            LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+            ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
             if (liveConfigChanges != null) {
                 liveConfigChanges.setBeautyFaceReshape(true, faceBeautyRatio2, faceBeautyRatio);
                 this.mLiveConfigChanges.setBeautify(true, faceBeautyRatio3);
             }
         } else {
             CameraSettings.setLiveBeautyStatus(false);
-            LiveConfigChanges liveConfigChanges2 = this.mLiveConfigChanges;
+            ModeProtocol.LiveConfigChanges liveConfigChanges2 = this.mLiveConfigChanges;
             if (liveConfigChanges2 != null) {
                 liveConfigChanges2.setBeautyFaceReshape(false, faceBeautyRatio2, faceBeautyRatio);
                 this.mLiveConfigChanges.setBeautify(false, faceBeautyRatio3);
             }
         }
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("shrinkFaceRatio->");
-        sb2.append(faceBeautyRatio);
-        sb2.append(",enlargEyeRatio->");
-        sb2.append(faceBeautyRatio2);
-        sb2.append(",smoothStrengthRatio->");
-        sb2.append(faceBeautyRatio3);
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "shrinkFaceRatio->" + faceBeautyRatio + ",enlargEyeRatio->" + faceBeautyRatio2 + ",smoothStrengthRatio->" + faceBeautyRatio3);
     }
 
     private void updateDeviceOrientation() {
@@ -674,10 +617,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     private void updateFilter() {
         int shaderEffect = CameraSettings.getShaderEffect();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("updateFilter: 0x");
-        sb.append(Integer.toHexString(shaderEffect));
-        Log.v(str, sb.toString());
+        Log.v(str, "updateFilter: 0x" + Integer.toHexString(shaderEffect));
         EffectController.getInstance().setEffect(shaderEffect);
     }
 
@@ -686,9 +626,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     private void updateFpsRange() {
-        Camera2Proxy camera2Proxy = this.mCamera2Device;
-        Integer valueOf = Integer.valueOf(30);
-        camera2Proxy.setFpsRange(new Range(valueOf, valueOf));
+        this.mCamera2Device.setFpsRange(new Range(30, 30));
     }
 
     private void updateLiveRelated() {
@@ -703,21 +641,15 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     private void updatePictureAndPreviewSize() {
-        List supportedOutputSize = this.mCameraCapabilities.getSupportedOutputSize(SurfaceTexture.class);
+        List<CameraSize> supportedOutputSize = this.mCameraCapabilities.getSupportedOutputSize(SurfaceTexture.class);
         CameraSize optimalPreviewSize = Util.getOptimalPreviewSize(false, this.mBogusCameraId, supportedOutputSize, (double) (this.mModuleIndex == 177 ? Util.getRatio(CameraSettings.getPictureSizeRatioString()) : 1.7777777f), new CameraSize(1280, Util.LIMIT_SURFACE_WIDTH));
         this.mPreviewSize = optimalPreviewSize;
         this.mPictureSize = this.mPreviewSize;
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("previewSize: ");
-        sb.append(this.mPreviewSize.toString());
-        Log.d(str, sb.toString());
+        Log.d(str, "previewSize: " + this.mPreviewSize.toString());
         CameraSize optimalVideoSnapshotPictureSize = Util.getOptimalVideoSnapshotPictureSize(supportedOutputSize, (double) CameraSettings.getPreviewAspectRatio(16, 9), Util.sWindowHeight, Util.sWindowWidth);
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("displaySize: ");
-        sb2.append(optimalVideoSnapshotPictureSize.toString());
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "displaySize: " + optimalVideoSnapshotPictureSize.toString());
         int i = this.mModuleIndex;
         if (i == 177) {
             this.mCamera2Device.setAlgorithmPreviewSize(optimalPreviewSize);
@@ -739,19 +671,19 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                 this.mCamera2Device.setEnableEIS(true);
                 this.mCamera2Device.setEnableOIS(false);
                 this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
-            } else {
-                Log.d(TAG, "videoStabilization: OIS");
-                this.mCamera2Device.setEnableEIS(false);
-                this.mCamera2Device.setEnableOIS(true);
-                this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
+                return;
             }
+            Log.d(TAG, "videoStabilization: OIS");
+            this.mCamera2Device.setEnableEIS(false);
+            this.mCamera2Device.setEnableOIS(true);
+            this.mActivity.getCameraScreenNail().setVideoStabilizationCropped(false);
         }
     }
 
     static /* synthetic */ void xd() {
-        MainContentProtocol mainContentProtocol = (MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
+        ModeProtocol.MainContentProtocol mainContentProtocol = (ModeProtocol.MainContentProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(166);
         if (mainContentProtocol != null) {
-            mainContentProtocol.setCenterHint(8, null, null, 0);
+            mainContentProtocol.setCenterHint(8, (String) null, (String) null, 0);
         }
     }
 
@@ -782,7 +714,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     public void checkDisplayOrientation() {
         if (isCreated()) {
             super.checkDisplayOrientation();
-            MainContentProtocol mainContentProtocol = this.mMainProtocol;
+            ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
             if (mainContentProtocol != null) {
                 mainContentProtocol.setCameraDisplayOrientation(this.mCameraDisplayOrientation);
             }
@@ -804,13 +736,13 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         }
         Camera camera = this.mActivity;
         if (camera != null) {
-            camera.getCameraScreenNail().setExternalFrameProcessor(null);
+            camera.getCameraScreenNail().setExternalFrameProcessor((SurfaceTextureScreenNail.ExternalFrameProcessor) null);
         }
         Camera2Proxy camera2Proxy = this.mCamera2Device;
         if (camera2Proxy != null) {
-            camera2Proxy.releaseCameraPreviewCallback(null);
-            this.mCamera2Device.setFocusCallback(null);
-            this.mCamera2Device.setErrorCallback(null);
+            camera2Proxy.releaseCameraPreviewCallback((Camera2Proxy.CameraPreviewCallback) null);
+            this.mCamera2Device.setFocusCallback((Camera2Proxy.FocusCallback) null);
+            this.mCamera2Device.setErrorCallback((Camera2Proxy.CameraErrorCallback) null);
             if (this.mModuleIndex == 177) {
                 this.mCamera2Device.stopPreviewCallback(true);
             }
@@ -885,10 +817,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                                     updateVideoStabilization();
                                     break;
                                 default:
-                                    StringBuilder sb = new StringBuilder();
-                                    sb.append("no consumer for this updateType: ");
-                                    sb.append(i);
-                                    throw new RuntimeException(sb.toString());
+                                    throw new RuntimeException("no consumer for this updateType: " + i);
                             }
                     }
                 } else {
@@ -899,7 +828,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     public void doReverse() {
-        LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+        ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
         if (liveConfigChanges != null && !liveConfigChanges.isRecording()) {
             this.mLiveConfigChanges.onRecordReverse();
             if (!this.mLiveConfigChanges.canRecordingStop()) {
@@ -915,8 +844,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     /* access modifiers changed from: protected */
     public int getOperatingMode() {
-        int i = isPreviewEisOn() ? 32772 : DataRepository.dataItemFeature().ob() ? CameraCapabilities.SESSION_OPERATION_MODE_MCTF : 0;
-        return this.mModuleIndex == 177 ? CameraCapabilities.SESSION_OPERATION_MODE_MIMOJI : i;
+        return this.mModuleIndex == 177 ? CameraCapabilities.SESSION_OPERATION_MODE_MIMOJI : isPreviewEisOn() ? 32772 : DataRepository.dataItemFeature().ob() ? CameraCapabilities.SESSION_OPERATION_MODE_MCTF : 0;
     }
 
     public void initializeCapabilities() {
@@ -940,17 +868,14 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
             int i = this.mModuleIndex;
             if (i == 174 && !CameraSettings.isMacroModeEnabled(i) && isBackCamera()) {
-                LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
-                if (liveConfigChanges != null && !liveConfigChanges.isRecording()) {
-                    return true;
-                }
+                ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+                return liveConfigChanges != null && !liveConfigChanges.isRecording();
             }
         }
-        return false;
     }
 
     public boolean isDoingAction() {
-        FullScreenProtocol fullScreenProtocol = (FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
+        ModeProtocol.FullScreenProtocol fullScreenProtocol = (ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
         return isRecording() || getCameraState() == 3 || (fullScreenProtocol != null && fullScreenProtocol.isLiveRecordPreviewShown()) || this.mOpenFlash;
     }
 
@@ -963,7 +888,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     public boolean isRecording() {
-        LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+        ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
         if (liveConfigChanges == null || !liveConfigChanges.isRecording()) {
             MimojiAvatarEngineImpl mimojiAvatarEngineImpl = this.mMimojiAvatarEngine;
             if (mimojiAvatarEngineImpl == null || !mimojiAvatarEngineImpl.isRecording()) {
@@ -974,7 +899,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     public boolean isSelectingCapturedResult() {
-        FullScreenProtocol fullScreenProtocol = (FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
+        ModeProtocol.FullScreenProtocol fullScreenProtocol = (ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
         return fullScreenProtocol != null && fullScreenProtocol.isLiveRecordPreviewShown();
     }
 
@@ -1000,7 +925,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     /* access modifiers changed from: protected */
     public boolean isZoomEnabled() {
         boolean z = getCameraState() != 3 && !isFrontCamera() && !DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiCreate();
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (!z || dualController == null || !dualController.isZoomVisible() || !dualController.isSlideVisible()) {
             return z;
         }
@@ -1050,7 +975,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             return false;
         }
         if (this.mMimojiAvatarEngine == null || !DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiCreate()) {
-            LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+            ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
             if (liveConfigChanges == null) {
                 return false;
             }
@@ -1072,7 +997,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                 return true;
             }
         } else {
-            ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onMimojiCreateBack();
+            ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onMimojiCreateBack();
             CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_CREATE_SOFT_BACK);
             return true;
         }
@@ -1099,7 +1024,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         }
         startPreview();
         if (DataRepository.dataItemGlobal().isFirstShowCTAConCollect() && this.mModuleIndex == 174) {
-            this.mCtaNoticeFragment = CtaNoticeFragment.showCta(getActivity().getFragmentManager(), false, null);
+            this.mCtaNoticeFragment = CtaNoticeFragment.showCta(getActivity().getFragmentManager(), false, (CtaNoticeFragment.OnCtaNoticeClickListener) null);
         }
         this.mOnResumeTime = SystemClock.uptimeMillis();
         this.mHandler.sendEmptyMessage(4);
@@ -1208,7 +1133,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             if (i == 27 || i == 66) {
                 if (keyEvent.getRepeatCount() == 0) {
                     if (this.mIsPreviewing) {
-                        ((FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196)).startLiveRecordSaving();
+                        ((ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196)).startLiveRecordSaving();
                     } else if (!Util.isFingerPrintKeyEvent(keyEvent)) {
                         performKeyClicked(40, getString(R.string.pref_camera_volumekey_function_entryvalue_shutter), keyEvent.getRepeatCount(), true);
                     } else if (CameraSettings.isFingerprintCaptureEnable()) {
@@ -1250,7 +1175,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             if (i == 27 || i == 66) {
                 return true;
             }
-        } else if (((BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
+        } else if (((ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171)).handleBackStackFromKeyBack()) {
             return true;
         }
         return super.onKeyUp(i, keyEvent);
@@ -1279,18 +1204,13 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         if (isAlive()) {
             this.mHandler.post(new Runnable() {
                 public void run() {
-                    FullScreenProtocol fullScreenProtocol = (FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
+                    ModeProtocol.FullScreenProtocol fullScreenProtocol = (ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196);
                     if (fullScreenProtocol != null) {
                         ContentValues saveContentValues = fullScreenProtocol.getSaveContentValues();
                         if (saveContentValues != null) {
                             String asString = saveContentValues.getAsString("title");
                             String access$300 = LiveModule.TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("newUri: ");
-                            sb.append(str);
-                            sb.append(" | ");
-                            sb.append(asString);
-                            Log.d(access$300, sb.toString());
+                            Log.d(access$300, "newUri: " + str + " | " + asString);
                             if (asString.equals(str)) {
                                 fullScreenProtocol.onLiveSaveToLocalFinished(uri);
                             }
@@ -1339,29 +1259,26 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         closeCamera();
         Handler handler = this.mHandler;
         if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+            handler.removeCallbacksAndMessages((Object) null);
         }
     }
 
     public void onPauseButtonClick() {
-        if (this.mModuleIndex == 177) {
-            if (isRecording()) {
-                stopVideoRecording(true, true);
+        if (this.mModuleIndex != 177) {
+            ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+            if (this.mLiveConfigChanges.isRecording()) {
+                this.mLiveConfigChanges.onRecordPause();
+                if (HybridZoomingSystem.IS_3_OR_MORE_SAT && isBackCamera()) {
+                    updateZoomRatioToggleButtonState(false);
+                    setMinZoomRatio(0.6f);
+                    setMaxZoomRatio(this.mCameraCapabilities.getMaxZoomRatio());
+                }
+                if (recordState != null) {
+                    recordState.onPause();
+                    return;
+                }
+                return;
             }
-            return;
-        }
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
-        if (this.mLiveConfigChanges.isRecording()) {
-            this.mLiveConfigChanges.onRecordPause();
-            if (HybridZoomingSystem.IS_3_OR_MORE_SAT && isBackCamera()) {
-                updateZoomRatioToggleButtonState(false);
-                setMinZoomRatio(0.6f);
-                setMaxZoomRatio(this.mCameraCapabilities.getMaxZoomRatio());
-            }
-            if (recordState != null) {
-                recordState.onPause();
-            }
-        } else {
             if (HybridZoomingSystem.IS_3_OR_MORE_SAT && isBackCamera()) {
                 updateZoomRatioToggleButtonState(true);
                 if (isUltraWideBackCamera()) {
@@ -1380,6 +1297,8 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             if (recordState != null) {
                 recordState.onResume();
             }
+        } else if (isRecording()) {
+            stopVideoRecording(true, true);
         }
     }
 
@@ -1443,7 +1362,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     public void onReviewCancelClicked() {
         this.mLiveConfigChanges.onRecordStop();
-        ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFinish();
+        ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFinish();
         getActivity().setVolumeControlStream(this.mOldOriginVolumeStream);
         this.mIsPreviewing = false;
         if (HybridZoomingSystem.IS_3_OR_MORE_SAT && isBackCamera()) {
@@ -1465,7 +1384,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     public void onReviewDoneClicked() {
         this.mLiveConfigChanges.onRecordStop();
-        ((RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFinish();
+        ((ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212)).onFinish();
         getActivity().setVolumeControlStream(this.mOldOriginVolumeStream);
         this.mIsPreviewing = false;
         startSaveToLocal();
@@ -1488,36 +1407,41 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     public void onShutterButtonClick(int i) {
         if (!isRecording()) {
-            LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+            ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
             if (liveConfigChanges == null || !liveConfigChanges.isRecordingPaused()) {
                 if (!checkCallingState()) {
                     Log.d(TAG, "ignore in calling state");
-                    RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+                    ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
                     recordState.onPrepare();
                     recordState.onFailed();
                     return;
-                } else if (this.mMimojiAvatarEngine != null) {
-                    if (DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiPreview()) {
-                        turnOnFlashIfNeed();
-                        onMimojiCapture();
-                        trackGeneralInfo(1, false);
-                    } else if (DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiCreate()) {
-                        Log.d(TAG, "start create mimoji");
-                        if (this.mIsLowLight) {
-                            Log.d(TAG, "mimoji create low light!");
-                            return;
-                        } else if (this.mMimojiAvatarEngine.onCreateCapture()) {
-                            Log.d(TAG, "create mimoji success");
-                            setCameraState(3);
-                        }
-                    }
-                    return;
-                } else {
+                } else if (this.mMimojiAvatarEngine == null) {
                     startVideoRecording();
-                    BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+                    ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
                     if (backStack != null) {
                         backStack.handleBackStackFromShutter();
+                        return;
                     }
+                    return;
+                } else if (DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiPreview()) {
+                    turnOnFlashIfNeed();
+                    onMimojiCapture();
+                    trackGeneralInfo(1, false);
+                    return;
+                } else if (DataRepository.dataItemLive().getMimojiStatusManager().IsInMimojiCreate()) {
+                    Log.d(TAG, "start create mimoji");
+                    if (this.mIsLowLight) {
+                        Log.d(TAG, "mimoji create low light!");
+                        return;
+                    } else if (this.mMimojiAvatarEngine.onCreateCapture()) {
+                        Log.d(TAG, "create mimoji success");
+                        setCameraState(3);
+                        return;
+                    } else {
+                        return;
+                    }
+                } else {
+                    return;
                 }
             }
         }
@@ -1553,7 +1477,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             if (!isFrameAvailable()) {
                 Log.w(TAG, "onSingleTapUp: frame not available");
             } else if (!isFrontCamera() || !this.mActivity.isScreenSlideOff()) {
-                BackStack backStack = (BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
+                ModeProtocol.BackStack backStack = (ModeProtocol.BackStack) ModeCoordinatorImpl.getInstance().getAttachProtocol(171);
                 if (backStack != null && !backStack.handleBackStackFromTapDown(i, i2)) {
                     this.mMainProtocol.setFocusViewType(true);
                     this.mTouchFocusStartingTime = System.currentTimeMillis();
@@ -1570,7 +1494,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         super.onStop();
         Handler handler = this.mHandler;
         if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+            handler.removeCallbacksAndMessages((Object) null);
         }
     }
 
@@ -1585,10 +1509,10 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     public void onZoomingActionEnd(int i) {
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController != null && !dualController.isSlideVisible()) {
             if (i == 2 || i == 1) {
-                LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+                ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
                 if ((liveConfigChanges == null || (!liveConfigChanges.isRecording() && !this.mLiveConfigChanges.isRecordingPaused())) && !CameraSettings.isMacroModeEnabled(this.mModuleIndex)) {
                     dualController.setImmersiveModeEnabled(false);
                 }
@@ -1597,11 +1521,11 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     }
 
     public void onZoomingActionStart(int i) {
-        TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+        ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
         if (topAlert != null && topAlert.isExtraMenuShowing()) {
             topAlert.hideExtraMenu();
         }
-        DualController dualController = (DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
+        ModeProtocol.DualController dualController = (ModeProtocol.DualController) ModeCoordinatorImpl.getInstance().getAttachProtocol(182);
         if (dualController == null) {
             return;
         }
@@ -1630,7 +1554,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         } else {
             this.mCamera2Device.pausePreview();
         }
-        LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+        ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
         if (liveConfigChanges != null) {
             liveConfigChanges.setEffectAudio(false);
         }
@@ -1642,9 +1566,9 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         if (i2 == 0 && z) {
             if (isIgnoreTouchEvent()) {
                 Log.w(TAG, "ignore volume key");
-                return;
+            } else {
+                onShutterButtonClick(i);
             }
-            onShutterButtonClick(i);
         }
     }
 
@@ -1679,7 +1603,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     public void resumePreview() {
         previewWhenSessionSuccess();
-        LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+        ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
         if (liveConfigChanges != null) {
             liveConfigChanges.setEffectAudio(true);
         }
@@ -1714,7 +1638,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
         this.mTitleId = i;
         this.mMessageId = i2;
         Camera camera = this.mActivity;
-        this.mDialog = RotateDialogController.showSystemAlertDialog(camera, camera.getString(i), this.mActivity.getString(i2), this.mActivity.getString(17039370), null, null, null);
+        this.mDialog = RotateDialogController.showSystemAlertDialog(camera, camera.getString(i), this.mActivity.getString(i2), this.mActivity.getString(17039370), (Runnable) null, (String) null, (Runnable) null);
     }
 
     public void startFaceDetection() {
@@ -1757,10 +1681,10 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             int i2 = this.mModuleIndex;
             if (i2 == 174) {
                 surface2 = new Surface(this.mLiveConfigChanges.getInputSurfaceTexture());
-                LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
+                ModeProtocol.LiveConfigChanges liveConfigChanges = this.mLiveConfigChanges;
                 CameraSize cameraSize = this.mPreviewSize;
                 liveConfigChanges.initPreview(cameraSize.height, cameraSize.width, isFrontCamera(), i);
-                LiveVideoEditor liveVideoEditor = this.mLiveVideoEditor;
+                ModeProtocol.LiveVideoEditor liveVideoEditor = this.mLiveVideoEditor;
                 CameraSize cameraSize2 = this.mPreviewSize;
                 liveVideoEditor.setRecordParameter(cameraSize2.height, cameraSize2.width, DataRepository.dataItemLive().getLiveStartOrientation());
                 this.mLiveConfigChanges.startPreview(surface);
@@ -1777,7 +1701,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     public void startSaveToLocal() {
         if (!this.mSaved) {
-            ContentValues saveContentValues = ((FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196)).getSaveContentValues();
+            ContentValues saveContentValues = ((ModeProtocol.FullScreenProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(196)).getSaveContentValues();
             if (saveContentValues != null) {
                 this.mSaved = true;
                 saveContentValues.put("datetaken", Long.valueOf(System.currentTimeMillis()));
@@ -1803,7 +1727,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
 
     public void stopVideoRecording(boolean z, boolean z2) {
         boolean z3 = z2;
-        RecordState recordState = (RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
+        ModeProtocol.RecordState recordState = (ModeProtocol.RecordState) ModeCoordinatorImpl.getInstance().getAttachProtocol(212);
         if (isAlive() && recordState != null) {
             keepScreenOnAwhile();
             if (this.mMimojiAvatarEngine != null) {
@@ -1813,7 +1737,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
             }
             this.mLiveConfigChanges.onRecordPause();
             int liveStartOrientation = DataRepository.dataItemLive().getLiveStartOrientation();
-            LiveVideoEditor liveVideoEditor = this.mLiveVideoEditor;
+            ModeProtocol.LiveVideoEditor liveVideoEditor = this.mLiveVideoEditor;
             CameraSize cameraSize = this.mPreviewSize;
             liveVideoEditor.setRecordParameter(cameraSize.height, cameraSize.width, liveStartOrientation);
             boolean canRecordingStop = this.mLiveConfigChanges.canRecordingStop();
@@ -1826,7 +1750,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                 this.mTelephonyManager.listen(this.mPhoneStateListener, 0);
                 Log.v(TAG, "listen none");
                 trackLiveVideoParams();
-                CameraStatUtil.trackVideoRecorded(isFrontCamera(), getModuleIndex(), false, false, CameraSettings.isUltraWideConfigOpen(getModuleIndex()), "live", this.mQuality, this.mCamera2Device.getFlashMode(), 30, 0, null, this.mLiveConfigChanges.getTotalRecordingTime() / 1000);
+                CameraStatUtil.trackVideoRecorded(isFrontCamera(), getModuleIndex(), false, false, CameraSettings.isUltraWideConfigOpen(getModuleIndex()), "live", this.mQuality, this.mCamera2Device.getFlashMode(), 30, 0, (BeautyValues) null, this.mLiveConfigChanges.getTotalRecordingTime() / 1000);
                 if (!z3) {
                     showPreview();
                 }
@@ -1836,10 +1760,10 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
                 if (isUltraWideBackCamera()) {
                     setMinZoomRatio(0.6f);
                     setMaxZoomRatio(this.mCameraCapabilities.getMaxZoomRatio() * 0.6f);
-                } else {
-                    setMinZoomRatio(0.6f);
-                    setMaxZoomRatio(Math.min(6.0f, this.mCameraCapabilities.getMaxZoomRatio()));
+                    return;
                 }
+                setMinZoomRatio(0.6f);
+                setMaxZoomRatio(Math.min(6.0f, this.mCameraCapabilities.getMaxZoomRatio()));
             }
         }
     }
@@ -1881,7 +1805,7 @@ public class LiveModule extends BaseModule implements CameraPreviewCallback, Foc
     /* access modifiers changed from: protected */
     public void updateFace() {
         boolean enableFaceDetection = enableFaceDetection();
-        MainContentProtocol mainContentProtocol = this.mMainProtocol;
+        ModeProtocol.MainContentProtocol mainContentProtocol = this.mMainProtocol;
         if (mainContentProtocol != null) {
             mainContentProtocol.setSkipDrawFace(!enableFaceDetection || !this.mShowFace);
         }

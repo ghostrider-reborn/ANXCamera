@@ -33,7 +33,7 @@ public final class a {
         hwBlob.putBool(12, false);
         HwBlob hwBlob2 = new HwBlob(size * 24);
         for (int i = 0; i < size; i++) {
-            ((a) arrayList.get(i)).writeEmbeddedToBlob(hwBlob2, (long) (i * 24));
+            arrayList.get(i).writeEmbeddedToBlob(hwBlob2, (long) (i * 24));
         }
         hwBlob.putBlob(0, hwBlob2);
         hwParcel.writeBuffer(hwBlob);
@@ -71,14 +71,7 @@ public final class a {
     }
 
     public final String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append(".value = ");
-        sb.append(e.toString(this.value));
-        sb.append(", .data = ");
-        sb.append(this.data);
-        sb.append("}");
-        return sb.toString();
+        return "{" + ".value = " + e.toString(this.value) + ", .data = " + this.data + "}";
     }
 
     public final void writeEmbeddedToBlob(HwBlob hwBlob, long j) {
@@ -89,7 +82,7 @@ public final class a {
         hwBlob.putBool(12 + j2, false);
         HwBlob hwBlob2 = new HwBlob(size * 1);
         for (int i = 0; i < size; i++) {
-            hwBlob2.putInt8((long) (i * 1), ((Byte) this.data.get(i)).byteValue());
+            hwBlob2.putInt8((long) (i * 1), this.data.get(i).byteValue());
         }
         hwBlob.putBlob(j2 + 0, hwBlob2);
     }

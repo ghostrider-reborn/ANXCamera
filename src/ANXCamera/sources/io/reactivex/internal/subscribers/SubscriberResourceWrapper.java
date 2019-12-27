@@ -52,7 +52,7 @@ public final class SubscriberResourceWrapper<T> extends AtomicReference<Disposab
 
     public void request(long j) {
         if (SubscriptionHelper.validate(j)) {
-            ((Subscription) this.subscription.get()).request(j);
+            this.subscription.get().request(j);
         }
     }
 

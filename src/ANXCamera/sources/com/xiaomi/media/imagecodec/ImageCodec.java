@@ -39,16 +39,10 @@ public final class ImageCodec {
 
     private ImageCodec(ImageSpec imageSpec) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("ctor(): E ");
-        sb.append(hashCode());
-        Log.d(str, sb.toString());
+        Log.d(str, "ctor(): E " + hashCode());
         this.mInputSpec = imageSpec;
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("ctor(): X ");
-        sb2.append(hashCode());
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "ctor(): X " + hashCode());
     }
 
     public static ImageCodec create(int i, int i2, int i3) {
@@ -68,7 +62,7 @@ public final class ImageCodec {
             return declaredMethod.invoke(image, new Object[0]);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e2) {
             Log.w(TAG, "Failed to get the owner of the given image", e2);
-            return Boolean.valueOf(false);
+            return false;
         }
     }
 
@@ -108,17 +102,9 @@ public final class ImageCodec {
         if (image == null) {
             throw new IllegalArgumentException("The input image must not be null");
         } else if (image.getWidth() != this.mInputSpec.width || image.getHeight() != this.mInputSpec.height) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Invalid input image dimensions: ");
-            sb.append(image.getWidth());
-            sb.append("x");
-            sb.append(image.getHeight());
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalArgumentException("Invalid input image dimensions: " + image.getWidth() + "x" + image.getHeight());
         } else if (image.getFormat() != this.mInputSpec.format) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Invalid input image format: ");
-            sb2.append(image.getFormat());
-            throw new IllegalArgumentException(sb2.toString());
+            throw new IllegalArgumentException("Invalid input image format: " + image.getFormat());
         } else if (!image.getClass().getName().equals("android.media.ImageReader$SurfaceImage")) {
             throw new IllegalArgumentException("Only images from ImageReader can be fed to ImageCodec, other image source is not supported yet!");
         } else if (isImageValid(image)) {
@@ -158,19 +144,13 @@ public final class ImageCodec {
 
     public void release() {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("release(): E ");
-        sb.append(hashCode());
-        Log.d(str, sb.toString());
+        Log.d(str, "release(): E " + hashCode());
         synchronized (this.mContextLock) {
             nativeDestroy(this.mNativeContext);
             this.mNativeContext = 0;
         }
         String str2 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("release(): X ");
-        sb2.append(hashCode());
-        Log.d(str2, sb2.toString());
+        Log.d(str2, "release(): X " + hashCode());
     }
 
     public void setFlip(boolean z) {

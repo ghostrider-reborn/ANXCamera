@@ -18,7 +18,7 @@ public final class ParallelMapTry<T, R> extends ParallelFlowable<R> {
     final Function<? super T, ? extends R> mapper;
     final ParallelFlowable<T> source;
 
-    /* renamed from: io.reactivex.internal.operators.parallel.ParallelMapTry$1 reason: invalid class name */
+    /* renamed from: io.reactivex.internal.operators.parallel.ParallelMapTry$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$io$reactivex$parallel$ParallelFailureHandling = new int[ParallelFailureHandling.values().length];
 

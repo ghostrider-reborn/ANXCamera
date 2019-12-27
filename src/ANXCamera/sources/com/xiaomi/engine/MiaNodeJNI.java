@@ -34,10 +34,7 @@ public class MiaNodeJNI {
             Log.d(TAG, "static initializer: loadLibrary com.xiaomi.camera.mianodejni");
         } catch (UnsatisfiedLinkError e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("can not load library:com.xiaomi.camera.mianodejni : ");
-            sb.append(Log.getStackTraceString(e2));
-            Log.e(str, sb.toString());
+            Log.e(str, "can not load library:com.xiaomi.camera.mianodejni : " + Log.getStackTraceString(e2));
         }
         this.mHandlerThread.start();
         this.mHandler = new Handler(this.mHandlerThread.getLooper());
@@ -51,11 +48,7 @@ public class MiaNodeJNI {
             if (sInitialized) {
                 deInit(i);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MiaNode: ");
-                sb.append(i);
-                sb.append(" has been deInitialized");
-                Log.i(str, sb.toString());
+                Log.i(str, "MiaNode: " + i + " has been deInitialized");
                 sInitialized = false;
             }
         }
@@ -77,12 +70,7 @@ public class MiaNodeJNI {
                 sType = i;
                 init(i);
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("MiaNode: ");
-                sb.append(i);
-                sb.append(" has been initialized, cost :");
-                sb.append(System.currentTimeMillis() - currentTimeMillis);
-                Log.i(str, sb.toString());
+                Log.i(str, "MiaNode: " + i + " has been initialized, cost :" + (System.currentTimeMillis() - currentTimeMillis));
                 sInitialized = true;
             }
         }
@@ -91,7 +79,7 @@ public class MiaNodeJNI {
     private static native int processRequest(@NonNull List<FrameData> list, @NonNull Image image, int i, boolean z);
 
     private void tryToCloseNode() {
-        this.mHandler.removeCallbacksAndMessages(null);
+        this.mHandler.removeCallbacksAndMessages((Object) null);
         this.mHandler.postDelayed(new Runnable() {
             public void run() {
                 MiaNodeJNI.this.deInitialize(MiaNodeJNI.sType);
@@ -109,10 +97,7 @@ public class MiaNodeJNI {
             Log.d(TAG, "processRequest: start");
             processRequest = processRequest(list, image, i, z);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("processRequest: end, cost: ");
-            sb.append(System.currentTimeMillis() - currentTimeMillis);
-            Log.d(str, sb.toString());
+            Log.d(str, "processRequest: end, cost: " + (System.currentTimeMillis() - currentTimeMillis));
             tryToCloseNode();
         }
         return processRequest;

@@ -1,7 +1,6 @@
 package io.reactivex.internal.operators.flowable;
 
 import io.reactivex.Flowable;
-import io.reactivex.FlowableSubscriber;
 import io.reactivex.annotations.Nullable;
 import io.reactivex.exceptions.Exceptions;
 import io.reactivex.functions.Function;
@@ -54,7 +53,7 @@ public final class FlowableDistinct<T, K> extends AbstractFlowableWithUpstream<T
             if (!this.done) {
                 if (this.sourceMode == 0) {
                     try {
-                        Object apply = this.keySelector.apply(t);
+                        K apply = this.keySelector.apply(t);
                         ObjectHelper.requireNonNull(apply, "The keySelector returned a null key");
                         if (this.collection.add(apply)) {
                             this.actual.onNext(t);
@@ -79,7 +78,7 @@ public final class FlowableDistinct<T, K> extends AbstractFlowableWithUpstream<T
                     break;
                 }
                 Collection<? super K> collection2 = this.collection;
-                Object apply = this.keySelector.apply(poll);
+                K apply = this.keySelector.apply(poll);
                 ObjectHelper.requireNonNull(apply, "The keySelector returned a null key");
                 if (collection2.add(apply)) {
                     break;
@@ -106,7 +105,7 @@ public final class FlowableDistinct<T, K> extends AbstractFlowableWithUpstream<T
         try {
             Object call = this.collectionSupplier.call();
             ObjectHelper.requireNonNull(call, "The collectionSupplier returned a null collection. Null values are generally not allowed in 2.x operators and sources.");
-            this.source.subscribe((FlowableSubscriber<? super T>) new DistinctSubscriber<Object>(subscriber, this.keySelector, (Collection) call));
+            this.source.subscribe(new DistinctSubscriber(subscriber, this.keySelector, (Collection) call));
         } catch (Throwable th) {
             Exceptions.throwIfFatal(th);
             EmptySubscription.error(th, subscriber);

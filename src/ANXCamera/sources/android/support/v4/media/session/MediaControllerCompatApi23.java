@@ -1,5 +1,6 @@
 package android.support.v4.media.session;
 
+import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -12,7 +13,7 @@ class MediaControllerCompatApi23 {
         }
 
         public static void playFromUri(Object obj, Uri uri, Bundle bundle) {
-            ((android.media.session.MediaController.TransportControls) obj).playFromUri(uri, bundle);
+            ((MediaController.TransportControls) obj).playFromUri(uri, bundle);
         }
     }
 

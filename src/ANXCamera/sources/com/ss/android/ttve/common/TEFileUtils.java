@@ -9,11 +9,7 @@ public class TEFileUtils {
 
     public static String getPath() {
         if (msFolderPath == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(Environment.getExternalStorageDirectory().getAbsolutePath());
-            sb.append(File.separator);
-            sb.append(DEFAULT_FOLDER_NAME);
-            msFolderPath = sb.toString();
+            msFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + DEFAULT_FOLDER_NAME;
             File file = new File(msFolderPath);
             if (!file.exists() && !file.mkdirs()) {
                 return null;

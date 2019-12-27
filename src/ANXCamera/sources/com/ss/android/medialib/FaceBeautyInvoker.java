@@ -3,21 +3,17 @@ package com.ss.android.medialib;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.media.Image.Plane;
+import android.media.Image;
 import android.opengl.EGLContext;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.support.annotation.Keep;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.Surface;
-import com.bef.effectsdk.message.MessageCenter.Listener;
+import com.bef.effectsdk.message.MessageCenter;
 import com.ss.android.medialib.camera.ImageFrame;
-import com.ss.android.medialib.common.Common.IGetTimestampCallback;
-import com.ss.android.medialib.common.Common.IOnOpenGLCallback;
-import com.ss.android.medialib.common.Common.IShotScreenCallback;
+import com.ss.android.medialib.common.Common;
 import com.ss.android.medialib.common.LogUtil;
 import com.ss.android.medialib.listener.FaceDetectListener;
 import com.ss.android.medialib.listener.NativeInitListener;
@@ -42,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Keep
-public class FaceBeautyInvoker implements Listener {
+public class FaceBeautyInvoker implements MessageCenter.Listener {
     public static final int INVALID_ENV = -100001;
     public static final int INVALID_HANDLE = -100000;
     private static final String TAG = "FaceBeautyInvoker";
@@ -52,7 +48,7 @@ public class FaceBeautyInvoker implements Listener {
     private static Runnable sDuetCompleteRunable = null;
     @Deprecated
     private static FaceDetectListener sFaceDetectListener;
-    private static Listener sMessageListener;
+    private static MessageCenter.Listener sMessageListener;
     @Deprecated
     private static NativeInitListener sNativeInitListener;
     private static List<SlamDetectListener> sSlamDetectListeners = new ArrayList();
@@ -76,17 +72,15 @@ public class FaceBeautyInvoker implements Listener {
         }
 
         public void onEncoderData(byte[] bArr, int i, boolean z) {
-            String str = FaceBeautyInvoker.TAG;
-            VELogUtil.d(str, "FaceBeautyManager onEncoderData == enter");
+            VELogUtil.d(FaceBeautyInvoker.TAG, "FaceBeautyManager onEncoderData == enter");
             if (FaceBeautyInvoker.this.mAVCEncoder != null) {
                 FaceBeautyInvoker.this.mAVCEncoder.encode(bArr, i, z);
             }
-            VELogUtil.d(str, "FaceBeautyManager onEncoderData == exit");
+            VELogUtil.d(FaceBeautyInvoker.TAG, "FaceBeautyManager onEncoderData == exit");
         }
 
         public Surface onInitHardEncoder(int i, int i2, int i3, int i4, int i5, int i6, boolean z) {
-            String str = FaceBeautyInvoker.TAG;
-            VELogUtil.i(str, "FaceBeautyManager onInitHardEncoder == enter");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "FaceBeautyManager onInitHardEncoder == enter");
             StringBuilder sb = new StringBuilder();
             sb.append("width = ");
             int i7 = i;
@@ -94,58 +88,49 @@ public class FaceBeautyInvoker implements Listener {
             sb.append("\theight = ");
             int i8 = i2;
             sb.append(i2);
-            VELogUtil.i(str, sb.toString());
+            VELogUtil.i(FaceBeautyInvoker.TAG, sb.toString());
             if (FaceBeautyInvoker.this.mAVCEncoder == null) {
-                FaceBeautyInvoker.this.mAVCEncoder = new AVCEncoder();
+                AVCEncoder unused = FaceBeautyInvoker.this.mAVCEncoder = new AVCEncoder();
             }
             FaceBeautyInvoker.this.mAVCEncoder.setEncoderCaller(this);
             Surface initAVCEncoder = FaceBeautyInvoker.this.mAVCEncoder.initAVCEncoder(i, i2, i3, i4, i5, i6, z);
             if (initAVCEncoder == null) {
                 FaceBeautyInvoker.this.mAVCEncoder.uninitAVCEncoder();
-                FaceBeautyInvoker.this.mAVCEncoder = null;
+                AVCEncoder unused2 = FaceBeautyInvoker.this.mAVCEncoder = null;
                 FaceBeautyInvoker.this.setHardEncoderStatus(false);
                 return null;
             }
-            VELogUtil.e(str, "====== initAVCEncoder succeed ======");
+            VELogUtil.e(FaceBeautyInvoker.TAG, "====== initAVCEncoder succeed ======");
             FaceBeautyInvoker.this.setHardEncoderStatus(true);
-            VELogUtil.i(str, "FaceBeautyManager onInitHardEncoder == exit");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "FaceBeautyManager onInitHardEncoder == exit");
             return initAVCEncoder;
         }
 
         public Surface onInitHardEncoder(int i, int i2, int i3, int i4, boolean z) {
-            String str = FaceBeautyInvoker.TAG;
-            VELogUtil.i(str, "FaceBeautyManager onInitHardEncoder == enter");
-            StringBuilder sb = new StringBuilder();
-            sb.append("width = ");
-            sb.append(i);
-            sb.append("\theight = ");
-            sb.append(i2);
-            VELogUtil.i(str, sb.toString());
+            VELogUtil.i(FaceBeautyInvoker.TAG, "FaceBeautyManager onInitHardEncoder == enter");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "width = " + i + "\theight = " + i2);
             if (FaceBeautyInvoker.this.mAVCEncoder == null) {
-                FaceBeautyInvoker.this.mAVCEncoder = new AVCEncoder();
+                AVCEncoder unused = FaceBeautyInvoker.this.mAVCEncoder = new AVCEncoder();
             }
             FaceBeautyInvoker.this.mAVCEncoder.setEncoderCaller(this);
             Surface initAVCEncoder = FaceBeautyInvoker.this.mAVCEncoder.initAVCEncoder(i, i2, i3, i4, z);
             if (initAVCEncoder == null) {
                 FaceBeautyInvoker.this.mAVCEncoder.uninitAVCEncoder();
-                FaceBeautyInvoker.this.mAVCEncoder = null;
+                AVCEncoder unused2 = FaceBeautyInvoker.this.mAVCEncoder = null;
                 FaceBeautyInvoker.this.setHardEncoderStatus(false);
                 return null;
             }
-            VELogUtil.i(str, "====== initAVCEncoder succeed ======");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "====== initAVCEncoder succeed ======");
             FaceBeautyInvoker.this.setHardEncoderStatus(true);
-            VELogUtil.i(str, "FaceBeautyManager onInitHardEncoder == exit");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "FaceBeautyManager onInitHardEncoder == exit");
             return initAVCEncoder;
         }
 
         public void onSetCodecConfig(ByteBuffer byteBuffer) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onSetCodecConfig: data size = ");
-            sb.append(byteBuffer.remaining());
-            VELogUtil.d(FaceBeautyInvoker.TAG, sb.toString());
+            VELogUtil.d(FaceBeautyInvoker.TAG, "onSetCodecConfig: data size = " + byteBuffer.remaining());
             if (FaceBeautyInvoker.this.mHandler != 0) {
                 FaceBeautyInvoker faceBeautyInvoker = FaceBeautyInvoker.this;
-                faceBeautyInvoker.nativeSetCodecConfig(faceBeautyInvoker.mHandler, byteBuffer, byteBuffer.remaining());
+                int unused = faceBeautyInvoker.nativeSetCodecConfig(faceBeautyInvoker.mHandler, byteBuffer, byteBuffer.remaining());
             }
         }
 
@@ -157,47 +142,46 @@ public class FaceBeautyInvoker implements Listener {
         }
 
         public void onUninitHardEncoder() {
-            String str = FaceBeautyInvoker.TAG;
-            VELogUtil.i(str, "FaceBeautyManager onUninitHardEncoder == enter");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "FaceBeautyManager onUninitHardEncoder == enter");
             if (FaceBeautyInvoker.this.mAVCEncoder != null) {
                 FaceBeautyInvoker.this.mAVCEncoder.uninitAVCEncoder();
-                FaceBeautyInvoker.this.mAVCEncoder = null;
-                VELogUtil.i(str, "====== uninitAVCEncoder ======");
+                AVCEncoder unused = FaceBeautyInvoker.this.mAVCEncoder = null;
+                VELogUtil.i(FaceBeautyInvoker.TAG, "====== uninitAVCEncoder ======");
             }
-            VELogUtil.i(str, "FaceBeautyManager onUninitHardEncoder == exit");
+            VELogUtil.i(FaceBeautyInvoker.TAG, "FaceBeautyManager onUninitHardEncoder == exit");
         }
 
         public void onWriteFile(ByteBuffer byteBuffer, int i, int i2, int i3) {
             if (FaceBeautyInvoker.this.mHandler != 0) {
                 FaceBeautyInvoker faceBeautyInvoker = FaceBeautyInvoker.this;
-                faceBeautyInvoker.nativeWriteFile(faceBeautyInvoker.mHandler, byteBuffer, byteBuffer.remaining(), i, i3);
+                int unused = faceBeautyInvoker.nativeWriteFile(faceBeautyInvoker.mHandler, byteBuffer, byteBuffer.remaining(), i, i3);
             }
         }
 
         public void onWriteFile(ByteBuffer byteBuffer, long j, long j2, int i, int i2) {
             if (FaceBeautyInvoker.this.mHandler != 0) {
                 FaceBeautyInvoker faceBeautyInvoker = FaceBeautyInvoker.this;
-                faceBeautyInvoker.nativeWriteFile2(faceBeautyInvoker.mHandler, byteBuffer, byteBuffer.remaining(), j, j2, i2);
+                int unused = faceBeautyInvoker.nativeWriteFile2(faceBeautyInvoker.mHandler, byteBuffer, byteBuffer.remaining(), j, j2, i2);
             }
         }
 
         public void setColorFormat(int i) {
             if (FaceBeautyInvoker.this.mHandler != 0) {
                 FaceBeautyInvoker faceBeautyInvoker = FaceBeautyInvoker.this;
-                faceBeautyInvoker.nativeSetColorFormat(faceBeautyInvoker.mHandler, i);
+                int unused = faceBeautyInvoker.nativeSetColorFormat(faceBeautyInvoker.mHandler, i);
             }
         }
     };
     private Runnable mDuetCompleteRunable;
     private FaceDetectListener mFaceDetectListener;
-    private IGetTimestampCallback mGetTimestampCallback = null;
+    private Common.IGetTimestampCallback mGetTimestampCallback = null;
     /* access modifiers changed from: private */
     public long mHandler = 0;
     private boolean mIsDuringScreenshot = false;
     private boolean mIsRenderRady = false;
     private NativeInitListener mNativeInitListener;
-    private IOnOpenGLCallback mOpenGLCallback = null;
-    private IShotScreenCallback mShotScreenCallback = null;
+    private Common.IOnOpenGLCallback mOpenGLCallback = null;
+    private Common.IShotScreenCallback mShotScreenCallback = null;
     private TextureTimeListener mTextureTimeListener;
 
     @Keep
@@ -593,17 +577,10 @@ public class FaceBeautyInvoker implements Listener {
     }
 
     private void onNativeCallback_Init(int i) {
-        String str = TAG;
         if (i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("onNativeCallback_Init error = ");
-            sb.append(i);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(TAG, "onNativeCallback_Init error = " + i);
         } else {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("onNativeCallback_Init success = ");
-            sb2.append(i);
-            VELogUtil.i(str, sb2.toString());
+            VELogUtil.i(TAG, "onNativeCallback_Init success = " + i);
             this.mIsRenderRady = true;
         }
         NativeInitListener nativeInitListener = this.mNativeInitListener;
@@ -642,7 +619,7 @@ public class FaceBeautyInvoker implements Listener {
         sFaceDetectListener = faceDetectListener;
     }
 
-    public static synchronized void setMessageListener(Listener listener) {
+    public static synchronized void setMessageListener(MessageCenter.Listener listener) {
         synchronized (FaceBeautyInvoker.class) {
             sMessageListener = listener;
         }
@@ -664,7 +641,7 @@ public class FaceBeautyInvoker implements Listener {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public int addPCMData(byte[] bArr, int i) {
         long j = this.mHandler;
         return j == 0 ? INVALID_HANDLE : nativeAddPCMData(j, bArr, i);
@@ -723,7 +700,7 @@ public class FaceBeautyInvoker implements Listener {
         return j == 0 ? INVALID_HANDLE : nativeClearFragFile(j);
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public int closeWavFile(boolean z) {
         long j = this.mHandler;
         if (j == 0) {
@@ -904,7 +881,7 @@ public class FaceBeautyInvoker implements Listener {
         return 0;
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public int initAudioConfig(int i, int i2) {
         long j = this.mHandler;
         return j == 0 ? INVALID_HANDLE : nativeInitAudioConfig(j, i, i2);
@@ -917,21 +894,12 @@ public class FaceBeautyInvoker implements Listener {
     public int initAudioPlayer(Context context, String str, long j, boolean z, boolean z2) {
         PackageManager packageManager = context.getPackageManager();
         boolean z3 = false;
-        Integer valueOf = Integer.valueOf(0);
         if (packageManager != null) {
             z3 = packageManager.hasSystemFeature("android.hardware.audio.low_latency");
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("has low latency ? ");
-        sb.append(z3);
-        VELogUtil.d(TAG, sb.toString());
-        Pair pair = z2 ? new Pair(valueOf, valueOf) : Utils.getSystemAudioInfo(context);
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("nativeSampleRate ? ");
-        sb2.append(pair.first);
-        sb2.append(" nativeSamleBufferSize? ");
-        sb2.append(pair.second);
-        VELogUtil.d(TAG, sb2.toString());
+        VELogUtil.d(TAG, "has low latency ? " + z3);
+        Pair<Integer, Integer> pair = z2 ? new Pair<>(0, 0) : Utils.getSystemAudioInfo(context);
+        VELogUtil.d(TAG, "nativeSampleRate ? " + pair.first + " nativeSamleBufferSize? " + pair.second);
         synchronized (this) {
             if (this.mHandler == 0) {
                 return INVALID_HANDLE;
@@ -1013,7 +981,7 @@ public class FaceBeautyInvoker implements Listener {
         }
     }
 
-    @RestrictTo({Scope.LIBRARY})
+    @RestrictTo({RestrictTo.Scope.LIBRARY})
     public int initWavFile(int i, int i2, double d2) {
         long j = this.mHandler;
         return j == 0 ? INVALID_HANDLE : nativeInitWavFile(j, i, i2, d2);
@@ -1059,8 +1027,8 @@ public class FaceBeautyInvoker implements Listener {
         }
         if (imageFrame.getBuf() != null) {
             nativeOnDrawFrameBuffer(this.mHandler, imageFrame.getBuf(), imageFrame.getBuf().length, imageFrame.getWidth(), imageFrame.getHeight());
-        } else if (VERSION.SDK_INT >= 19) {
-            Plane[] plans = imageFrame.getPlans();
+        } else if (Build.VERSION.SDK_INT >= 19) {
+            Image.Plane[] plans = imageFrame.getPlans();
             if (plans == null) {
                 return -1;
             }
@@ -1092,19 +1060,12 @@ public class FaceBeautyInvoker implements Listener {
     }
 
     public void onFirstFrameRenderInfo(int i, double d2) {
-        String str = TAG;
         if (i == 0) {
             TEMonitor.perfDouble(0, TEMonitorNewKeys.TE_PREVIEW_FIRST_FRAME_SCREEN_TIME, d2 - ((double) VEMonitorUtils.sbeforeCameraOpenTimeStamp));
-            StringBuilder sb = new StringBuilder();
-            sb.append("Camera Preview First Frame Cost: ");
-            sb.append(d2 - ((double) VEMonitorUtils.sbeforeCameraOpenTimeStamp));
-            LogUtil.w(str, sb.toString());
+            LogUtil.w(TAG, "Camera Preview First Frame Cost: " + (d2 - ((double) VEMonitorUtils.sbeforeCameraOpenTimeStamp)));
         } else if (i == 1) {
             TEMonitor.perfDouble(0, TEMonitorNewKeys.TE_PREVIEW_SWITCH_CAMERA_SCREEN_TIME, d2 - ((double) VEMonitorUtils.sbeforeSwitchCameraTimeStamp));
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Camera Change Cost: ");
-            sb2.append(d2 - ((double) VEMonitorUtils.sbeforeSwitchCameraTimeStamp));
-            LogUtil.w(str, sb2.toString());
+            LogUtil.w(TAG, "Camera Change Cost: " + (d2 - ((double) VEMonitorUtils.sbeforeSwitchCameraTimeStamp)));
         }
     }
 
@@ -1125,12 +1086,8 @@ public class FaceBeautyInvoker implements Listener {
     }
 
     public void onNativeCallback_InitHardEncoderRet(int i, int i2) {
-        String str = TAG;
-        VELogUtil.i(str, "onInitHardEncoderRet");
-        StringBuilder sb = new StringBuilder();
-        sb.append("isCPUEncode = ");
-        sb.append(i);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "onInitHardEncoderRet");
+        VELogUtil.i(TAG, "isCPUEncode = " + i);
         NativeInitListener nativeInitListener = this.mNativeInitListener;
         if (nativeInitListener != null) {
             nativeInitListener.onNativeInitHardEncoderRetCallback(i, i2);
@@ -1142,13 +1099,12 @@ public class FaceBeautyInvoker implements Listener {
     }
 
     public void onNativeCallback_UninitHardEncoder() {
-        String str = TAG;
-        VELogUtil.i(str, " onUninitHardEncoder == enter");
+        VELogUtil.i(TAG, " onUninitHardEncoder == enter");
         AVCEncoderInterface aVCEncoderInterface = mEncoderCaller;
         if (aVCEncoderInterface != null) {
             aVCEncoderInterface.onUninitHardEncoder();
         }
-        VELogUtil.i(str, " onUninitHardEncoder == exit");
+        VELogUtil.i(TAG, " onUninitHardEncoder == exit");
     }
 
     public void onNativeCallback_encodeData(byte[] bArr, int i, boolean z) {
@@ -1167,10 +1123,7 @@ public class FaceBeautyInvoker implements Listener {
     }
 
     public void onNativeCallback_onFaceDetect(int i, int i2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("FaceBeautyInvoker onFaceDetect ");
-        sb.append(i2);
-        VELogUtil.d(TAG, sb.toString());
+        VELogUtil.d(TAG, "FaceBeautyInvoker onFaceDetect " + i2);
         FaceDetectListener faceDetectListener = sFaceDetectListener;
         if (faceDetectListener != null) {
             faceDetectListener.onResult(i, i2);
@@ -1183,7 +1136,7 @@ public class FaceBeautyInvoker implements Listener {
 
     public void onNativeCallback_onOpenGLCreate() {
         VELogUtil.i(TAG, "onNativeCallback_onOpenGLCreate");
-        IOnOpenGLCallback iOnOpenGLCallback = this.mOpenGLCallback;
+        Common.IOnOpenGLCallback iOnOpenGLCallback = this.mOpenGLCallback;
         if (iOnOpenGLCallback != null) {
             iOnOpenGLCallback.onOpenGLCreate();
         }
@@ -1191,20 +1144,17 @@ public class FaceBeautyInvoker implements Listener {
 
     public void onNativeCallback_onOpenGLDestroy() {
         VELogUtil.i(TAG, "onNativeCallback_onOpenGLDestroy");
-        IOnOpenGLCallback iOnOpenGLCallback = this.mOpenGLCallback;
+        Common.IOnOpenGLCallback iOnOpenGLCallback = this.mOpenGLCallback;
         if (iOnOpenGLCallback != null) {
             iOnOpenGLCallback.onOpenGLDestroy();
         }
     }
 
     public int onNativeCallback_onOpenGLRunning(double d2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("onNativeCallback_onOpenGLRunning, timestamp = ");
-        sb.append(d2);
-        VELogUtil.d(TAG, sb.toString());
-        IOnOpenGLCallback iOnOpenGLCallback = this.mOpenGLCallback;
+        VELogUtil.d(TAG, "onNativeCallback_onOpenGLRunning, timestamp = " + d2);
+        Common.IOnOpenGLCallback iOnOpenGLCallback = this.mOpenGLCallback;
         int onOpenGLRunning = iOnOpenGLCallback != null ? iOnOpenGLCallback.onOpenGLRunning() : 0;
-        IGetTimestampCallback iGetTimestampCallback = this.mGetTimestampCallback;
+        Common.IGetTimestampCallback iGetTimestampCallback = this.mGetTimestampCallback;
         if (iGetTimestampCallback != null) {
             iGetTimestampCallback.getTimestamp(d2);
         }
@@ -1212,11 +1162,7 @@ public class FaceBeautyInvoker implements Listener {
     }
 
     public synchronized void onNativeCallback_onShotScreen(int i) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("onNativeCallback_onShotScreen: ret = ");
-        sb.append(i);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "onNativeCallback_onShotScreen: ret = " + i);
         this.mIsDuringScreenshot = false;
         if (this.mShotScreenCallback != null) {
             this.mShotScreenCallback.onShotScreen(i);
@@ -1334,8 +1280,8 @@ public class FaceBeautyInvoker implements Listener {
         }
         if (imageFrame.getBuf() != null) {
             return nativeRenderPicture(this.mHandler, imageFrame.getBuf(), imageFrame.getBuf().length, i, i2, onPictureCallbackV2);
-        } else if (VERSION.SDK_INT >= 19 && imageFrame.getPlans() != null) {
-            Plane[] plans = imageFrame.getPlans();
+        } else if (Build.VERSION.SDK_INT >= 19 && imageFrame.getPlans() != null) {
+            Image.Plane[] plans = imageFrame.getPlans();
             if (plans == null) {
                 return -1;
             }
@@ -1349,7 +1295,7 @@ public class FaceBeautyInvoker implements Listener {
         } else if (imageFrame.getBitmap() != null) {
             return nativeRenderPicture3(this.mHandler, imageFrame.getBitmap(), i, i2, onPictureCallbackV2);
         } else {
-            return nativeRenderPicture(this.mHandler, null, 0, 0, 0, null);
+            return nativeRenderPicture(this.mHandler, (byte[]) null, 0, 0, 0, (OnPictureCallbackV2) null);
         }
     }
 
@@ -1427,17 +1373,10 @@ public class FaceBeautyInvoker implements Listener {
 
     public void setBeautyFace(int i, String str, float f2, float f3) {
         if (isRenderReady()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("nativeSetBeautyFace: ");
-            sb.append(i);
-            String sb2 = sb.toString();
-            String str2 = TAG;
-            VELogUtil.d(str2, sb2);
+            VELogUtil.d(TAG, "nativeSetBeautyFace: " + i);
             if (this.mHandler == 0) {
-                VELogUtil.e(str2, "invalid handle");
-                return;
-            }
-            if (i != 3 || FileUtils.checkFileExists(str)) {
+                VELogUtil.e(TAG, "invalid handle");
+            } else if (i != 3 || FileUtils.checkFileExists(str)) {
                 nativeSetBeautyFace(this.mHandler, i, str);
                 nativeSetBeautyFaceIntensity(this.mHandler, f2, f3);
             } else {
@@ -1609,7 +1548,7 @@ public class FaceBeautyInvoker implements Listener {
         return j == 0 ? INVALID_HANDLE : nativeSetFrameCallback(j, onFrameCallback, z);
     }
 
-    public void setGetTimestampCallback(IGetTimestampCallback iGetTimestampCallback) {
+    public void setGetTimestampCallback(Common.IGetTimestampCallback iGetTimestampCallback) {
         this.mGetTimestampCallback = iGetTimestampCallback;
     }
 
@@ -1677,7 +1616,7 @@ public class FaceBeautyInvoker implements Listener {
         }
     }
 
-    public void setOnOpenGLCallback(IOnOpenGLCallback iOnOpenGLCallback) {
+    public void setOnOpenGLCallback(Common.IOnOpenGLCallback iOnOpenGLCallback) {
         this.mOpenGLCallback = iOnOpenGLCallback;
     }
 
@@ -1829,7 +1768,7 @@ public class FaceBeautyInvoker implements Listener {
         return j == 0 ? INVALID_HANDLE : nativeSetVideoQuality(j, i, i2);
     }
 
-    public synchronized int shotScreen(String str, int[] iArr, boolean z, int i, OnPictureCallback onPictureCallback, IShotScreenCallback iShotScreenCallback) {
+    public synchronized int shotScreen(String str, int[] iArr, boolean z, int i, OnPictureCallback onPictureCallback, Common.IShotScreenCallback iShotScreenCallback) {
         if (!this.mIsDuringScreenshot) {
             this.mIsDuringScreenshot = true;
             this.mShotScreenCallback = iShotScreenCallback;

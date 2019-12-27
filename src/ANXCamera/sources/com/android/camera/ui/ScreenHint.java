@@ -9,7 +9,7 @@ import com.android.camera.R;
 import com.android.camera.RotateDialogController;
 import com.android.camera.data.DataRepository;
 import com.android.camera.data.data.global.DataItemGlobal;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.permission.PermissionManager;
 import com.android.camera.storage.Storage;
 import com.mi.config.b;
@@ -26,7 +26,7 @@ public class ScreenHint {
 
     /* access modifiers changed from: private */
     public void recordLocation(boolean z) {
-        ProviderEditor editor = DataRepository.dataItemGlobal().editor();
+        DataProvider.ProviderEditor editor = DataRepository.dataItemGlobal().editor();
         editor.putBoolean(CameraSettings.KEY_RECORD_LOCATION, z);
         editor.apply();
         LocationManager.instance().recordLocation(z);
@@ -61,7 +61,7 @@ public class ScreenHint {
     }
 
     public void recordFirstUse(boolean z) {
-        ProviderEditor editor = DataRepository.dataItemGlobal().editor();
+        DataProvider.ProviderEditor editor = DataRepository.dataItemGlobal().editor();
         editor.putBoolean("pref_camera_first_use_hint_shown_key", z);
         editor.putBoolean(CameraSettings.KEY_CAMERA_CONFIRM_LOCATION_SHOWN, z);
         editor.apply();
@@ -69,7 +69,7 @@ public class ScreenHint {
 
     public void showConfirmMessage(int i, int i2) {
         Activity activity = this.mActivity;
-        RotateDialogController.showSystemAlertDialog(activity, activity.getString(i), this.mActivity.getString(i2), this.mActivity.getString(17039370), null, null, null);
+        RotateDialogController.showSystemAlertDialog(activity, activity.getString(i), this.mActivity.getString(i2), this.mActivity.getString(17039370), (Runnable) null, (String) null, (Runnable) null);
     }
 
     public void showFirstUseHint() {
@@ -110,7 +110,7 @@ public class ScreenHint {
     }
 
     public void showObjectTrackHint() {
-        ProviderEditor editor = DataRepository.dataItemGlobal().editor();
+        DataProvider.ProviderEditor editor = DataRepository.dataItemGlobal().editor();
         editor.putBoolean(CameraSettings.KEY_CAMERA_OBJECT_TRACK_HINT_SHOWN, false);
         editor.apply();
         RotateTextToast.getInstance(this.mActivity).show(R.string.object_track_enable_toast, 0);
@@ -123,13 +123,13 @@ public class ScreenHint {
             Storage.getAvailableSpace(Storage.RAW_DIRECTORY);
         }
         long j = this.mStorageSpace;
-        CharSequence charSequence = j == -1 ? this.mActivity.getString(R.string.no_storage) : j == -2 ? this.mActivity.getString(R.string.preparing_sd) : j == -3 ? this.mActivity.getString(R.string.access_sd_fail) : j < Storage.LOW_STORAGE_THRESHOLD ? Storage.isPhoneStoragePriority() ? this.mActivity.getString(R.string.spaceIsLow_content_primary_storage_priority) : this.mActivity.getString(R.string.spaceIsLow_content_external_storage_priority) : null;
-        if (charSequence != null) {
+        String string = j == -1 ? this.mActivity.getString(R.string.no_storage) : j == -2 ? this.mActivity.getString(R.string.preparing_sd) : j == -3 ? this.mActivity.getString(R.string.access_sd_fail) : j < Storage.LOW_STORAGE_THRESHOLD ? Storage.isPhoneStoragePriority() ? this.mActivity.getString(R.string.spaceIsLow_content_primary_storage_priority) : this.mActivity.getString(R.string.spaceIsLow_content_external_storage_priority) : null;
+        if (string != null) {
             OnScreenHint onScreenHint = this.mStorageHint;
             if (onScreenHint == null) {
-                this.mStorageHint = OnScreenHint.makeText(this.mActivity, charSequence);
+                this.mStorageHint = OnScreenHint.makeText(this.mActivity, string);
             } else {
-                onScreenHint.setText(charSequence);
+                onScreenHint.setText(string);
             }
             this.mStorageHint.show();
             return;

@@ -7,38 +7,28 @@ import android.support.annotation.StringRes;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ItemDecoration;
-import android.support.v7.widget.RecyclerView.State;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.constant.EyeLightConstant;
 import com.android.camera.data.DataRepository;
 import com.android.camera.fragment.DefaultItemAnimator;
-import com.android.camera.fragment.beauty.EyeLightSingleCheckAdapter.EyeLightItem;
+import com.android.camera.fragment.beauty.EyeLightSingleCheckAdapter;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.BottomPopupTips;
-import com.android.camera.protocol.ModeProtocol.CameraAction;
-import com.android.camera.protocol.ModeProtocol.ConfigChanges;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.Arrays;
 import java.util.List;
 import miui.view.animation.QuinticEaseInInterpolator;
 import miui.view.animation.QuinticEaseOutInterpolator;
 
-public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClickListener {
+public class BeautyEyeLightFragment extends BaseBeautyFragment implements View.OnClickListener {
     private static final String DEFAULT_TYPE = "1";
-    private static List<EyeLightItem> EYE_LIGHT_TYPE_LIST = null;
+    private static List<EyeLightSingleCheckAdapter.EyeLightItem> EYE_LIGHT_TYPE_LIST = Arrays.asList(new EyeLightSingleCheckAdapter.EyeLightItem[]{new EyeLightSingleCheckAdapter.EyeLightItem("-1", EyeLightConstant.getDrawable("-1"), EyeLightConstant.getString("-1")), new EyeLightSingleCheckAdapter.EyeLightItem("1", EyeLightConstant.getDrawable("1"), EyeLightConstant.getString("1")), new EyeLightSingleCheckAdapter.EyeLightItem("4", EyeLightConstant.getDrawable("4"), EyeLightConstant.getString("4")), new EyeLightSingleCheckAdapter.EyeLightItem("0", EyeLightConstant.getDrawable("0"), EyeLightConstant.getString("0")), new EyeLightSingleCheckAdapter.EyeLightItem("5", EyeLightConstant.getDrawable("5"), EyeLightConstant.getString("5")), new EyeLightSingleCheckAdapter.EyeLightItem("6", EyeLightConstant.getDrawable("6"), EyeLightConstant.getString("6")), new EyeLightSingleCheckAdapter.EyeLightItem("3", EyeLightConstant.getDrawable("3"), EyeLightConstant.getString("3")), new EyeLightSingleCheckAdapter.EyeLightItem("2", EyeLightConstant.getDrawable("2"), EyeLightConstant.getString("2"))});
     private static final String TAG = "BeautyEyeLightFragment";
     private EyeLightSingleCheckAdapter mAdapter;
     private int mBackButtonWidth;
@@ -49,21 +39,9 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
     private int mSelectPosition;
     private int mTotalWidth;
 
-    static {
-        String str = "-1";
-        String str2 = "1";
-        String str3 = "4";
-        String str4 = "0";
-        String str5 = "5";
-        String str6 = "6";
-        String str7 = "3";
-        String str8 = "2";
-        EYE_LIGHT_TYPE_LIST = Arrays.asList(new EyeLightItem[]{new EyeLightItem(str, EyeLightConstant.getDrawable(str), EyeLightConstant.getString(str)), new EyeLightItem(str2, EyeLightConstant.getDrawable(str2), EyeLightConstant.getString(str2)), new EyeLightItem(str3, EyeLightConstant.getDrawable(str3), EyeLightConstant.getString(str3)), new EyeLightItem(str4, EyeLightConstant.getDrawable(str4), EyeLightConstant.getString(str4)), new EyeLightItem(str5, EyeLightConstant.getDrawable(str5), EyeLightConstant.getString(str5)), new EyeLightItem(str6, EyeLightConstant.getDrawable(str6), EyeLightConstant.getString(str6)), new EyeLightItem(str7, EyeLightConstant.getDrawable(str7), EyeLightConstant.getString(str7)), new EyeLightItem(str8, EyeLightConstant.getDrawable(str8), EyeLightConstant.getString(str8))});
-    }
-
-    private void eyeLightMutexGroup(String str, ConfigChanges configChanges) {
+    private void eyeLightMutexGroup(String str, ModeProtocol.ConfigChanges configChanges) {
         if (configChanges != null && !"-1".equals(str)) {
-            TopAlert topAlert = (TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
+            ModeProtocol.TopAlert topAlert = (ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172);
             if (topAlert != null && DataRepository.dataItemRunning().isSwitchOn("pref_camera_groupshot_mode_key")) {
                 configChanges.onConfigChanged(235);
                 topAlert.refreshExtraMenu();
@@ -73,7 +51,7 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
 
     public static int getEyeLightHintText(String str) {
         for (int i = 0; i < EYE_LIGHT_TYPE_LIST.size(); i++) {
-            EyeLightItem eyeLightItem = (EyeLightItem) EYE_LIGHT_TYPE_LIST.get(i);
+            EyeLightSingleCheckAdapter.EyeLightItem eyeLightItem = EYE_LIGHT_TYPE_LIST.get(i);
             if (str.equals(eyeLightItem.getType())) {
                 return eyeLightItem.getTextResource();
             }
@@ -86,7 +64,7 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
     }
 
     private void hideTipMessage(@StringRes int i) {
-        BottomPopupTips bottomPopupTips = (BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
+        ModeProtocol.BottomPopupTips bottomPopupTips = (ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175);
         if (i <= 0 || bottomPopupTips.containTips(i)) {
             bottomPopupTips.directlyHideTips();
         }
@@ -105,8 +83,8 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
     public void onItemSelected(int i) {
         int i2 = this.mSelectPosition;
         this.mSelectPosition = i;
-        String type = ((EyeLightItem) EYE_LIGHT_TYPE_LIST.get(i)).getType();
-        ConfigChanges configChanges = (ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
+        String type = EYE_LIGHT_TYPE_LIST.get(i).getType();
+        ModeProtocol.ConfigChanges configChanges = (ModeProtocol.ConfigChanges) ModeCoordinatorImpl.getInstance().getAttachProtocol(164);
         if (configChanges != null) {
             configChanges.setEyeLight(type);
         }
@@ -125,7 +103,7 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
         while (true) {
             if (i >= EYE_LIGHT_TYPE_LIST.size()) {
                 break;
-            } else if (eyeLightType.equals(((EyeLightItem) EYE_LIGHT_TYPE_LIST.get(i)).getType())) {
+            } else if (eyeLightType.equals(EYE_LIGHT_TYPE_LIST.get(i).getType())) {
                 onItemSelected(i);
                 break;
             } else {
@@ -141,17 +119,14 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
         LinearLayoutManagerWrapper linearLayoutManagerWrapper = this.mLayoutManager;
         if (linearLayoutManagerWrapper == null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("LinearLayoutManager is NULL!! current fragment isAdd:");
-            sb.append(isAdded());
-            Log.e(str, sb.toString(), new Exception());
+            Log.e(str, "LinearLayoutManager is NULL!! current fragment isAdd:" + isAdded(), new Exception());
             return false;
         }
-        int i2 = (i == linearLayoutManagerWrapper.findFirstVisibleItemPosition() || i == this.mLayoutManager.findFirstCompletelyVisibleItemPosition()) ? Math.max(0, i - 1) : (i == this.mLayoutManager.findLastVisibleItemPosition() || i == this.mLayoutManager.findLastCompletelyVisibleItemPosition()) ? Math.min(i + 1, this.mLayoutManager.getItemCount() - 1) : i;
-        if (i2 == i) {
+        int max = (i == linearLayoutManagerWrapper.findFirstVisibleItemPosition() || i == this.mLayoutManager.findFirstCompletelyVisibleItemPosition()) ? Math.max(0, i - 1) : (i == this.mLayoutManager.findLastVisibleItemPosition() || i == this.mLayoutManager.findLastCompletelyVisibleItemPosition()) ? Math.min(i + 1, this.mLayoutManager.getItemCount() - 1) : i;
+        if (max == i) {
             return false;
         }
-        this.mLayoutManager.scrollToPosition(i2);
+        this.mLayoutManager.scrollToPosition(max);
         return true;
     }
 
@@ -160,7 +135,7 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
     }
 
     private void updateTipMessage(int i, @StringRes int i2, int i3) {
-        ((BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).showTips(i, i2, i3);
+        ((ModeProtocol.BottomPopupTips) ModeCoordinatorImpl.getInstance().getAttachProtocol(175)).showTips(i, i2, i3);
     }
 
     public void enterAnim(View view, ViewPropertyAnimatorListener viewPropertyAnimatorListener) {
@@ -207,11 +182,11 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
         defaultItemAnimator.setMoveDuration(150);
         defaultItemAnimator.setAddDuration(150);
         this.mRecyclerView.setItemAnimator(defaultItemAnimator);
-        this.mRecyclerView.addItemDecoration(new ItemDecoration() {
+        this.mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             final int mLeftMargin = BeautyEyeLightFragment.this.getResources().getDimensionPixelSize(R.dimen.eye_light_item_margin_left);
             final int mRightMargin = BeautyEyeLightFragment.this.getResources().getDimensionPixelSize(R.dimen.eye_light_item_margin_right);
 
-            public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, State state) {
+            public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
                 int childAdapterPosition = recyclerView.getChildAdapterPosition(view);
                 if (isLayoutRTL) {
                     if (childAdapterPosition == 0) {
@@ -226,7 +201,7 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
                 }
             }
         });
-        this.mAdapter.setOnItemClickListener(new OnItemClickListener() {
+        this.mAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
                 BeautyEyeLightFragment.this.onItemSelected(i);
             }
@@ -235,9 +210,9 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
     }
 
     public void onClick(View view) {
-        CameraAction cameraAction = (CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
+        ModeProtocol.CameraAction cameraAction = (ModeProtocol.CameraAction) ModeCoordinatorImpl.getInstance().getAttachProtocol(161);
         if ((cameraAction == null || !cameraAction.isDoingAction()) && view.getId() == R.id.eye_light_back_button) {
-            MakeupProtocol makeupProtocol = (MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
+            ModeProtocol.MakeupProtocol makeupProtocol = (ModeProtocol.MakeupProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(180);
             if (makeupProtocol != null) {
                 makeupProtocol.onMakeupItemSelected("pref_eye_light_type_key", true);
             }
@@ -260,8 +235,9 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
         if (hasFrontFlash()) {
             hideTipMessage(R.string.hint_eye_light);
         }
-        MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
-        if (((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)) == null || miBeautyProtocol == null) {
+        ModeProtocol.BaseDelegate baseDelegate = (ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160);
+        ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+        if (baseDelegate == null || miBeautyProtocol == null) {
         }
     }
 
@@ -269,7 +245,7 @@ public class BeautyEyeLightFragment extends BaseBeautyFragment implements OnClic
         if (hasFrontFlash()) {
             updateTipMessage(10, R.string.hint_eye_light, 2);
         }
-        if (((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)) == null) {
+        if (((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)) == null) {
         }
     }
 }

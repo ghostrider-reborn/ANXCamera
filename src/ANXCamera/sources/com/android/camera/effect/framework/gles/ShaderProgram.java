@@ -19,10 +19,7 @@ public class ShaderProgram implements IShaderProgram {
         }
         String glGetShaderInfoLog = GLES20.glGetShaderInfoLog(glCreateShader);
         GLES20.glDeleteShader(glCreateShader);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Shader compilation failed with: ");
-        sb.append(glGetShaderInfoLog);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("Shader compilation failed with: " + glGetShaderInfoLog);
     }
 
     public void create(String str, String str2) {
@@ -50,7 +47,7 @@ public class ShaderProgram implements IShaderProgram {
 
     public int getAttributeLocation(String str) {
         if (this.attributes.containsKey(str)) {
-            return ((Integer) this.attributes.get(str)).intValue();
+            return this.attributes.get(str).intValue();
         }
         int glGetAttribLocation = GLES20.glGetAttribLocation(this.programHandle, str);
         if (glGetAttribLocation == -1) {
@@ -60,10 +57,7 @@ public class ShaderProgram implements IShaderProgram {
             this.attributes.put(str, Integer.valueOf(glGetAttribLocation));
             return glGetAttribLocation;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Can't find a location for attribute ");
-        sb.append(str);
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Can't find a location for attribute " + str);
     }
 
     public int getProgramHandle() {

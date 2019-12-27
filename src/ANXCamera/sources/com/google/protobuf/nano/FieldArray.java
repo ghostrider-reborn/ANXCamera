@@ -102,7 +102,7 @@ public final class FieldArray implements Cloneable {
         return fieldArray;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public FieldData dataAt(int i) {
         if (this.mGarbage) {
             gc();
@@ -111,7 +111,6 @@ public final class FieldArray implements Cloneable {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
@@ -122,22 +121,20 @@ public final class FieldArray implements Cloneable {
         if (size() != fieldArray.size()) {
             return false;
         }
-        if (!arrayEquals(this.mFieldNumbers, fieldArray.mFieldNumbers, this.mSize) || !arrayEquals(this.mData, fieldArray.mData, this.mSize)) {
-            z = false;
-        }
-        return z;
+        return arrayEquals(this.mFieldNumbers, fieldArray.mFieldNumbers, this.mSize) && arrayEquals(this.mData, fieldArray.mData, this.mSize);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public FieldData get(int i) {
         int binarySearch = binarySearch(i);
-        if (binarySearch >= 0) {
-            FieldData[] fieldDataArr = this.mData;
-            if (fieldDataArr[binarySearch] != DELETED) {
-                return fieldDataArr[binarySearch];
-            }
+        if (binarySearch < 0) {
+            return null;
         }
-        return null;
+        FieldData[] fieldDataArr = this.mData;
+        if (fieldDataArr[binarySearch] == DELETED) {
+            return null;
+        }
+        return fieldDataArr[binarySearch];
     }
 
     public final int getFieldNumberAt(int i) {
@@ -163,52 +160,52 @@ public final class FieldArray implements Cloneable {
         return size() == 0;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void put(int i, FieldData fieldData) {
         int binarySearch = binarySearch(i);
         if (binarySearch >= 0) {
             this.mData[binarySearch] = fieldData;
-        } else {
-            int i2 = ~binarySearch;
-            if (i2 < this.mSize) {
-                FieldData[] fieldDataArr = this.mData;
-                if (fieldDataArr[i2] == DELETED) {
-                    this.mFieldNumbers[i2] = i;
-                    fieldDataArr[i2] = fieldData;
-                    return;
-                }
-            }
-            if (this.mGarbage && this.mSize >= this.mFieldNumbers.length) {
-                gc();
-                i2 = ~binarySearch(i);
-            }
-            int i3 = this.mSize;
-            if (i3 >= this.mFieldNumbers.length) {
-                int idealIntArraySize = idealIntArraySize(i3 + 1);
-                int[] iArr = new int[idealIntArraySize];
-                FieldData[] fieldDataArr2 = new FieldData[idealIntArraySize];
-                int[] iArr2 = this.mFieldNumbers;
-                System.arraycopy(iArr2, 0, iArr, 0, iArr2.length);
-                FieldData[] fieldDataArr3 = this.mData;
-                System.arraycopy(fieldDataArr3, 0, fieldDataArr2, 0, fieldDataArr3.length);
-                this.mFieldNumbers = iArr;
-                this.mData = fieldDataArr2;
-            }
-            int i4 = this.mSize;
-            if (i4 - i2 != 0) {
-                int[] iArr3 = this.mFieldNumbers;
-                int i5 = i2 + 1;
-                System.arraycopy(iArr3, i2, iArr3, i5, i4 - i2);
-                FieldData[] fieldDataArr4 = this.mData;
-                System.arraycopy(fieldDataArr4, i2, fieldDataArr4, i5, this.mSize - i2);
-            }
-            this.mFieldNumbers[i2] = i;
-            this.mData[i2] = fieldData;
-            this.mSize++;
+            return;
         }
+        int i2 = ~binarySearch;
+        if (i2 < this.mSize) {
+            FieldData[] fieldDataArr = this.mData;
+            if (fieldDataArr[i2] == DELETED) {
+                this.mFieldNumbers[i2] = i;
+                fieldDataArr[i2] = fieldData;
+                return;
+            }
+        }
+        if (this.mGarbage && this.mSize >= this.mFieldNumbers.length) {
+            gc();
+            i2 = ~binarySearch(i);
+        }
+        int i3 = this.mSize;
+        if (i3 >= this.mFieldNumbers.length) {
+            int idealIntArraySize = idealIntArraySize(i3 + 1);
+            int[] iArr = new int[idealIntArraySize];
+            FieldData[] fieldDataArr2 = new FieldData[idealIntArraySize];
+            int[] iArr2 = this.mFieldNumbers;
+            System.arraycopy(iArr2, 0, iArr, 0, iArr2.length);
+            FieldData[] fieldDataArr3 = this.mData;
+            System.arraycopy(fieldDataArr3, 0, fieldDataArr2, 0, fieldDataArr3.length);
+            this.mFieldNumbers = iArr;
+            this.mData = fieldDataArr2;
+        }
+        int i4 = this.mSize;
+        if (i4 - i2 != 0) {
+            int[] iArr3 = this.mFieldNumbers;
+            int i5 = i2 + 1;
+            System.arraycopy(iArr3, i2, iArr3, i5, i4 - i2);
+            FieldData[] fieldDataArr4 = this.mData;
+            System.arraycopy(fieldDataArr4, i2, fieldDataArr4, i5, this.mSize - i2);
+        }
+        this.mFieldNumbers[i2] = i;
+        this.mData[i2] = fieldData;
+        this.mSize++;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(int i) {
         int binarySearch = binarySearch(i);
         if (binarySearch >= 0) {
@@ -222,7 +219,7 @@ public final class FieldArray implements Cloneable {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int size() {
         if (this.mGarbage) {
             gc();

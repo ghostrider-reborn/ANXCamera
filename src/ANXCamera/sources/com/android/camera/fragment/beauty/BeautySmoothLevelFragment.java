@@ -11,10 +11,8 @@ import com.android.camera.CameraSettings;
 import com.android.camera.R;
 import com.android.camera.Util;
 import com.android.camera.constant.BeautyConstant;
-import com.android.camera.fragment.beauty.SingleCheckAdapter.LevelItem;
+import com.android.camera.fragment.beauty.SingleCheckAdapter;
 import com.android.camera.ui.SeekBarCompat;
-import com.android.camera.ui.SeekBarCompat.OnSeekBarCompatChangeListener;
-import com.android.camera.ui.SeekBarCompat.OnSeekBarCompatTouchListener;
 import java.util.List;
 
 public class BeautySmoothLevelFragment extends BaseBeautyFragment {
@@ -31,14 +29,13 @@ public class BeautySmoothLevelFragment extends BaseBeautyFragment {
         this.mAdjustSeekBar = (SeekBarCompat) view.findViewById(R.id.beauty_level_adjust_seekbar);
         initBeautyItems();
         this.mSeekBarMaxProgress = 100;
-        String str = "pref_beautify_skin_smooth_ratio_key";
-        int faceBeautyRatio = CameraSettings.getFaceBeautyRatio(str);
-        int defaultValueByKey = BeautyConstant.getDefaultValueByKey(str);
+        int faceBeautyRatio = CameraSettings.getFaceBeautyRatio("pref_beautify_skin_smooth_ratio_key");
+        int defaultValueByKey = BeautyConstant.getDefaultValueByKey("pref_beautify_skin_smooth_ratio_key");
         this.mAdjustSeekBar.setProgressDrawable(getResources().getDrawable(R.drawable.seekbar_style));
         this.mAdjustSeekBar.setMax(this.mSeekBarMaxProgress);
         this.mAdjustSeekBar.setSeekBarPinProgress(defaultValueByKey);
         this.mAdjustSeekBar.setProgress(faceBeautyRatio);
-        this.mAdjustSeekBar.setOnSeekBarChangeListener(new OnSeekBarCompatChangeListener() {
+        this.mAdjustSeekBar.setOnSeekBarChangeListener(new SeekBarCompat.OnSeekBarCompatChangeListener() {
             public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
                 BeautySmoothLevelFragment.this.onLevelSelected(i);
             }
@@ -49,7 +46,7 @@ public class BeautySmoothLevelFragment extends BaseBeautyFragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        this.mAdjustSeekBar.setOnSeekBarCompatTouchListener(new OnSeekBarCompatTouchListener() {
+        this.mAdjustSeekBar.setOnSeekBarCompatTouchListener(new SeekBarCompat.OnSeekBarCompatTouchListener() {
             private int getNextProgress(MotionEvent motionEvent) {
                 int width = BeautySmoothLevelFragment.this.mAdjustSeekBar.getWidth();
                 int x = (int) (((BeautySmoothLevelFragment.this.mIsRTL ? ((float) width) - motionEvent.getX() : motionEvent.getX()) / ((float) width)) * ((float) BeautySmoothLevelFragment.this.mSeekBarMaxProgress));
@@ -98,7 +95,7 @@ public class BeautySmoothLevelFragment extends BaseBeautyFragment {
     }
 
     /* access modifiers changed from: protected */
-    public List<LevelItem> initBeautyItems() {
+    public List<SingleCheckAdapter.LevelItem> initBeautyItems() {
         return null;
     }
 

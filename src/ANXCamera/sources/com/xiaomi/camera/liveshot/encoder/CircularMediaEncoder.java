@@ -1,16 +1,13 @@
 package com.xiaomi.camera.liveshot.encoder;
 
 import android.media.MediaCodec;
-import android.media.MediaCodec.BufferInfo;
-import android.media.MediaCodec.Callback;
-import android.media.MediaCodec.CodecException;
 import android.media.MediaFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import com.android.camera.effect.FilterInfo;
 import com.android.camera.log.Log;
-import com.ss.android.vesdk.VEEditor.MVConsts;
+import com.ss.android.vesdk.VEEditor;
 import com.xiaomi.camera.liveshot.LivePhotoResult;
 import com.xiaomi.camera.liveshot.MediaCodecCapability;
 import com.xiaomi.camera.liveshot.util.BackgroundWorker;
@@ -24,14 +21,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public abstract class CircularMediaEncoder extends Callback {
+public abstract class CircularMediaEncoder extends MediaCodec.Callback {
     private static final boolean DEBUG = true;
     private static final int MSG_RELEASE_ENCODER = 2;
     private static final int MSG_START_ENCODING = 0;
     private static final int MSG_STOP_ENCODING = 1;
     /* access modifiers changed from: private */
     public static final String TAG = "CircularMediaEncoder";
-    protected final BufferInfo mBufferInfo;
+    protected final MediaCodec.BufferInfo mBufferInfo;
     protected final long mBufferingDurationUs;
     protected final long mCaptureDurationUs;
     protected volatile long mCurrentPresentationTimeUs;
@@ -68,7 +65,7 @@ public abstract class CircularMediaEncoder extends Callback {
                     int integer = mediaFormat.getInteger("bitrate");
                     int i = (int) ((((long) integer) * j) / 8000);
                     this.mDataBuffer = new byte[i];
-                    int integer2 = (int) ((((double) i) / ((((double) integer) / (string.contains(MVConsts.TYPE_VIDEO) ? (double) mediaFormat.getInteger("frame-rate") : ((double) mediaFormat.getInteger("sample-rate")) / 1024.0d)) / 8.0d)) + 1.0d);
+                    int integer2 = (int) ((((double) i) / ((((double) integer) / (string.contains(VEEditor.MVConsts.TYPE_VIDEO) ? (double) mediaFormat.getInteger("frame-rate") : ((double) mediaFormat.getInteger("sample-rate")) / 1024.0d)) / 8.0d)) + 1.0d);
                     int i2 = integer2 * 2;
                     this.mPacketFlags = new int[i2];
                     this.mPacketPtsUs = new long[i2];
@@ -76,16 +73,7 @@ public abstract class CircularMediaEncoder extends Callback {
                     this.mPacketLength = new int[i2];
                     this.mLivePhotoResults = new LivePhotoResult[i2];
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("DesiredSpan = ");
-                    sb.append(j);
-                    sb.append(", dataBufferSize = ");
-                    sb.append(i);
-                    sb.append(", metaBufferCount = ");
-                    sb.append(i2);
-                    sb.append(", estimatedPacketCount = ");
-                    sb.append(integer2);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "DesiredSpan = " + j + ", dataBufferSize = " + i + ", metaBufferCount = " + i2 + ", estimatedPacketCount = " + integer2);
                     return;
                 }
                 throw new IllegalArgumentException("The desired mimeType is not specified");
@@ -102,54 +90,24 @@ public abstract class CircularMediaEncoder extends Callback {
                 if (i2 == i3) {
                     return true;
                 }
-                String str = ")";
                 if ((i2 + 1) % length2 == i3) {
-                    String str2 = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Ran out of metadata (head=");
-                    sb.append(this.mMetaHead);
-                    sb.append(" tail=");
-                    sb.append(this.mMetaTail);
-                    sb.append(str);
-                    Log.v(str2, sb.toString());
+                    String str = TAG;
+                    Log.v(str, "Ran out of metadata (head=" + this.mMetaHead + " tail=" + this.mMetaTail + ")");
                     return false;
                 }
                 int headStart = getHeadStart();
                 int i4 = this.mPacketStart[this.mMetaTail];
                 int i5 = ((i4 + length) - headStart) % length;
-                String str3 = " free=";
                 if (i > i5) {
-                    String str4 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Ran out of data (tailStart=");
-                    sb2.append(i4);
-                    sb2.append(" headStart=");
-                    sb2.append(headStart);
-                    sb2.append(" req=");
-                    sb2.append(i);
-                    sb2.append(str3);
-                    sb2.append(i5);
-                    sb2.append(str);
-                    Log.v(str4, sb2.toString());
+                    String str2 = TAG;
+                    Log.v(str2, "Ran out of data (tailStart=" + i4 + " headStart=" + headStart + " req=" + i + " free=" + i5 + ")");
                     return false;
                 }
-                String str5 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("Okay: size=");
-                sb3.append(i);
-                sb3.append(str3);
-                sb3.append(i5);
-                sb3.append(" metaFree=");
-                sb3.append((((this.mMetaTail + length2) - this.mMetaHead) % length2) - 1);
-                Log.v(str5, sb3.toString());
+                String str3 = TAG;
+                Log.v(str3, "Okay: size=" + i + " free=" + i5 + " metaFree=" + ((((this.mMetaTail + length2) - this.mMetaHead) % length2) - 1));
                 return true;
             }
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("Enormous packet: ");
-            sb4.append(i);
-            sb4.append(" vs. buffer ");
-            sb4.append(length);
-            throw new RuntimeException(sb4.toString());
+            throw new RuntimeException("Enormous packet: " + i + " vs. buffer " + length);
         }
 
         private int getHeadStart() {
@@ -177,14 +135,7 @@ public abstract class CircularMediaEncoder extends Callback {
         public void add(ByteBuffer byteBuffer, int i, long j, LivePhotoResult livePhotoResult) {
             int limit = byteBuffer.limit() - byteBuffer.position();
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Add size=");
-            sb.append(limit);
-            sb.append(" flags=0x");
-            sb.append(Integer.toHexString(i));
-            sb.append(" pts=");
-            sb.append(j);
-            Log.d(str, sb.toString());
+            Log.d(str, "Add size=" + limit + " flags=0x" + Integer.toHexString(i) + " pts=" + j);
             while (!canAdd(limit)) {
                 Log.d(TAG, "Cached buffer removed from tail");
                 removeTail();
@@ -204,12 +155,7 @@ public abstract class CircularMediaEncoder extends Callback {
             } else {
                 int i3 = length - headStart;
                 String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Split, firstsize=");
-                sb2.append(i3);
-                sb2.append(" size=");
-                sb2.append(limit);
-                Log.v(str2, sb2.toString());
+                Log.v(str2, "Split, firstsize=" + i3 + " size=" + limit);
                 byteBuffer.get(this.mDataBuffer, headStart, i3);
                 byteBuffer.get(this.mDataBuffer, 0, limit - i3);
             }
@@ -217,12 +163,12 @@ public abstract class CircularMediaEncoder extends Callback {
         }
 
         public void clear() {
-            Arrays.fill(this.mDataBuffer, 0);
+            Arrays.fill(this.mDataBuffer, (byte) 0);
             Arrays.fill(this.mPacketFlags, 0);
             Arrays.fill(this.mPacketPtsUs, 0);
             Arrays.fill(this.mPacketStart, 0);
             Arrays.fill(this.mPacketLength, 0);
-            Arrays.fill(this.mLivePhotoResults, null);
+            Arrays.fill(this.mLivePhotoResults, (Object) null);
             this.mMetaHead = 0;
             this.mMetaTail = 0;
         }
@@ -234,12 +180,11 @@ public abstract class CircularMediaEncoder extends Callback {
             if (i == i2) {
                 return 0;
             }
-            int i3 = ((i + length) - 1) % length;
             long[] jArr = this.mPacketPtsUs;
-            return jArr[i3] - jArr[i2];
+            return jArr[((i + length) - 1) % length] - jArr[i2];
         }
 
-        public ByteBuffer getChunk(int i, BufferInfo bufferInfo) {
+        public ByteBuffer getChunk(int i, MediaCodec.BufferInfo bufferInfo) {
             int length = this.mDataBuffer.length;
             int i2 = this.mPacketStart[i];
             int i3 = this.mPacketLength[i];
@@ -301,10 +246,7 @@ public abstract class CircularMediaEncoder extends Callback {
                 obtainMessage2.sendToTarget();
             } else if (i != 2) {
                 String access$000 = CircularMediaEncoder.TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unknown message ");
-                sb.append(message.what);
-                Log.w(access$000, sb.toString());
+                Log.w(access$000, "Unknown message " + message.what);
             } else {
                 CircularMediaEncoder.this.doRelease();
                 Message obtainMessage3 = ((Handler) message.obj).obtainMessage();
@@ -317,32 +259,32 @@ public abstract class CircularMediaEncoder extends Callback {
     public static final class Sample {
         public static final Sample EOS_SAMPLE_ENTRY;
         public final ByteBuffer data;
-        public final BufferInfo info;
+        public final MediaCodec.BufferInfo info;
         public final LivePhotoResult livePhotoResult;
 
         static {
-            BufferInfo bufferInfo = new BufferInfo();
+            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             bufferInfo.set(0, 0, 0, 4);
             EOS_SAMPLE_ENTRY = create(ByteBuffer.allocate(0), bufferInfo);
         }
 
-        private Sample(ByteBuffer byteBuffer, BufferInfo bufferInfo) {
-            this(byteBuffer, bufferInfo, null);
+        private Sample(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo) {
+            this(byteBuffer, bufferInfo, (LivePhotoResult) null);
         }
 
-        private Sample(ByteBuffer byteBuffer, BufferInfo bufferInfo, LivePhotoResult livePhotoResult2) {
+        private Sample(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo, LivePhotoResult livePhotoResult2) {
             this.data = byteBuffer;
-            BufferInfo bufferInfo2 = new BufferInfo();
+            MediaCodec.BufferInfo bufferInfo2 = new MediaCodec.BufferInfo();
             bufferInfo2.set(bufferInfo.offset, bufferInfo.size, bufferInfo.presentationTimeUs, bufferInfo.flags);
             this.info = bufferInfo2;
             this.livePhotoResult = livePhotoResult2;
         }
 
-        public static Sample create(ByteBuffer byteBuffer, BufferInfo bufferInfo) {
+        public static Sample create(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo) {
             return new Sample(byteBuffer, bufferInfo);
         }
 
-        public static Sample create(ByteBuffer byteBuffer, BufferInfo bufferInfo, LivePhotoResult livePhotoResult2) {
+        public static Sample create(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo, LivePhotoResult livePhotoResult2) {
             return new Sample(byteBuffer, bufferInfo, livePhotoResult2);
         }
     }
@@ -376,22 +318,13 @@ public abstract class CircularMediaEncoder extends Callback {
             return this.forceEos || this.position >= this.tail;
         }
 
-        public void put(ByteBuffer byteBuffer, BufferInfo bufferInfo, LivePhotoResult livePhotoResult) throws InterruptedException {
+        public void put(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo, LivePhotoResult livePhotoResult) throws InterruptedException {
             if (!eos()) {
                 this.samples.put(Sample.create(byteBuffer, bufferInfo, livePhotoResult));
                 this.position = bufferInfo.presentationTimeUs;
                 if (eos()) {
                     String str = this.format.getString("mime").split("/")[0];
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(": max range has reached: ");
-                    sb.append(this.head);
-                    String str2 = ":";
-                    sb.append(str2);
-                    sb.append(this.tail);
-                    sb.append(str2);
-                    sb.append(this.position);
-                    Log.d("Snapshot", sb.toString());
+                    Log.d("Snapshot", str + ": max range has reached: " + this.head + ":" + this.tail + ":" + this.position);
                     putEos();
                 }
             }
@@ -422,9 +355,9 @@ public abstract class CircularMediaEncoder extends Callback {
                 this.mPostCaptureDurationUs = j - j2;
                 this.mBufferingDurationUs = j * 2;
                 this.mCyclicBuffer = new CyclicBuffer(this.mDesiredMediaFormat, TimeUnit.MICROSECONDS.toMillis(this.mBufferingDurationUs));
-                this.mBufferInfo = new BufferInfo();
+                this.mBufferInfo = new MediaCodec.BufferInfo();
                 this.mSnapshots = new ArrayList();
-                this.mEncodingThread = new BackgroundWorker(string.contains(MVConsts.TYPE_VIDEO) ? "VideoEncodingThread" : "AudioEncodingThread");
+                this.mEncodingThread = new BackgroundWorker(string.contains(VEEditor.MVConsts.TYPE_VIDEO) ? "VideoEncodingThread" : "AudioEncodingThread");
                 this.mEventHandler = new EventHandler(this.mEncodingThread.getLooper());
                 this.mHandlerHelper = new HandlerHelper();
                 this.mIsBuffering = false;
@@ -447,10 +380,7 @@ public abstract class CircularMediaEncoder extends Callback {
                 backgroundWorker.quit();
             } catch (InterruptedException e2) {
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to stop encoding thread: ");
-                sb.append(e2);
-                Log.d(str, sb.toString());
+                Log.d(str, "Failed to stop encoding thread: " + e2);
             }
         }
     }
@@ -479,12 +409,9 @@ public abstract class CircularMediaEncoder extends Callback {
         return j;
     }
 
-    public void onError(MediaCodec mediaCodec, CodecException codecException) {
+    public void onError(MediaCodec mediaCodec, MediaCodec.CodecException codecException) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("MediaCodec Exception occurred: ");
-        sb.append(codecException);
-        Log.e(str, sb.toString());
+        Log.e(str, "MediaCodec Exception occurred: " + codecException);
     }
 
     public void onInputBufferAvailable(MediaCodec mediaCodec, int i) {
@@ -492,11 +419,11 @@ public abstract class CircularMediaEncoder extends Callback {
 
     /* JADX WARNING: Removed duplicated region for block: B:59:0x01d4  */
     /* JADX WARNING: Removed duplicated region for block: B:78:0x01b1 A[SYNTHETIC] */
-    public void onOutputBufferAvailable(MediaCodec mediaCodec, int i, BufferInfo bufferInfo) {
+    public void onOutputBufferAvailable(MediaCodec mediaCodec, int i, MediaCodec.BufferInfo bufferInfo) {
         String str;
         String str2;
         StringBuilder sb;
-        BufferInfo bufferInfo2 = bufferInfo;
+        MediaCodec.BufferInfo bufferInfo2 = bufferInfo;
         ByteBuffer outputBuffer = mediaCodec.getOutputBuffer(i);
         boolean z = false;
         String str3 = mediaCodec.getOutputFormat(i).getString("mime").split("/")[0];
@@ -507,23 +434,15 @@ public abstract class CircularMediaEncoder extends Callback {
             LivePhotoResult livePhotoResult = null;
             Queue<LivePhotoResult> queue = this.mLivePhotoQueue;
             if (queue != null) {
-                livePhotoResult = (LivePhotoResult) queue.poll();
+                livePhotoResult = queue.poll();
             }
             LivePhotoResult livePhotoResult2 = livePhotoResult;
             String str4 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str3);
-            sb2.append(": CyclicBuffer.add E ");
-            sb2.append(bufferInfo2.presentationTimeUs);
-            Log.d(str4, sb2.toString());
+            Log.d(str4, str3 + ": CyclicBuffer.add E " + bufferInfo2.presentationTimeUs);
             this.mCyclicBuffer.add(outputBuffer, bufferInfo2.flags, bufferInfo2.presentationTimeUs, livePhotoResult2);
             this.mCurrentPresentationTimeUs = bufferInfo2.presentationTimeUs;
             String str5 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append(str3);
-            sb3.append(": CyclicBuffer.add X ");
-            sb3.append(bufferInfo2.presentationTimeUs);
-            Log.d(str5, sb3.toString());
+            Log.d(str5, str3 + ": CyclicBuffer.add X " + bufferInfo2.presentationTimeUs);
             ArrayList<Snapshot> arrayList = new ArrayList<>();
             synchronized (this.mSnapshots) {
                 arrayList.addAll(this.mSnapshots);
@@ -536,26 +455,26 @@ public abstract class CircularMediaEncoder extends Callback {
                     while (true) {
                         ByteBuffer chunk = this.mCyclicBuffer.getChunk(firstIndex, this.mBufferInfo);
                         LivePhotoResult livePhotoResult3 = this.mCyclicBuffer.getLivePhotoResult(firstIndex);
-                        BufferInfo bufferInfo3 = this.mBufferInfo;
+                        MediaCodec.BufferInfo bufferInfo3 = this.mBufferInfo;
                         long j = bufferInfo3.presentationTimeUs;
                         boolean z4 = bufferInfo3.flags & z2 ? z2 : z;
                         if (z3) {
                             try {
                                 if (j >= snapshot.head) {
                                     String str6 = TAG;
-                                    StringBuilder sb4 = new StringBuilder();
-                                    sb4.append(str3);
-                                    sb4.append(": Snapshot.put oldcache E ");
+                                    StringBuilder sb2 = new StringBuilder();
+                                    sb2.append(str3);
+                                    sb2.append(": Snapshot.put oldcache E ");
                                     String str7 = str3;
                                     try {
-                                        sb4.append(snapshot.head);
-                                        sb4.append(":");
-                                        sb4.append(snapshot.tail);
-                                        sb4.append(":");
-                                        sb4.append(j);
-                                        sb4.append(":");
-                                        sb4.append(z4);
-                                        Log.d(str6, sb4.toString());
+                                        sb2.append(snapshot.head);
+                                        sb2.append(":");
+                                        sb2.append(snapshot.tail);
+                                        sb2.append(":");
+                                        sb2.append(j);
+                                        sb2.append(":");
+                                        sb2.append(z4);
+                                        Log.d(str6, sb2.toString());
                                         snapshot.put(chunk, this.mBufferInfo, livePhotoResult3);
                                         str2 = TAG;
                                         sb = new StringBuilder();
@@ -563,10 +482,7 @@ public abstract class CircularMediaEncoder extends Callback {
                                     } catch (InterruptedException unused) {
                                         str = str7;
                                         String str8 = TAG;
-                                        StringBuilder sb5 = new StringBuilder();
-                                        sb5.append(str);
-                                        sb5.append(": Snapshot.put: meet interrupted exception");
-                                        Log.e(str8, sb5.toString());
+                                        Log.e(str8, str + ": Snapshot.put: meet interrupted exception");
                                         if (snapshot.eos()) {
                                         }
                                         str3 = str;
@@ -578,10 +494,7 @@ public abstract class CircularMediaEncoder extends Callback {
                                         Log.d(str2, sb.toString());
                                     } catch (InterruptedException unused2) {
                                         String str82 = TAG;
-                                        StringBuilder sb52 = new StringBuilder();
-                                        sb52.append(str);
-                                        sb52.append(": Snapshot.put: meet interrupted exception");
-                                        Log.e(str82, sb52.toString());
+                                        Log.e(str82, str + ": Snapshot.put: meet interrupted exception");
                                         if (snapshot.eos()) {
                                         }
                                         str3 = str;
@@ -593,10 +506,7 @@ public abstract class CircularMediaEncoder extends Callback {
                             } catch (InterruptedException unused3) {
                                 str = str3;
                                 String str822 = TAG;
-                                StringBuilder sb522 = new StringBuilder();
-                                sb522.append(str);
-                                sb522.append(": Snapshot.put: meet interrupted exception");
-                                Log.e(str822, sb522.toString());
+                                Log.e(str822, str + ": Snapshot.put: meet interrupted exception");
                                 if (snapshot.eos()) {
                                 }
                                 str3 = str;
@@ -606,24 +516,13 @@ public abstract class CircularMediaEncoder extends Callback {
                             str = str3;
                             if (j > snapshot.position) {
                                 String str9 = TAG;
-                                StringBuilder sb6 = new StringBuilder();
-                                sb6.append(str);
-                                sb6.append(": Snapshot.put incoming E ");
-                                ByteBuffer byteBuffer = chunk;
-                                sb6.append(snapshot.head);
-                                sb6.append(":");
-                                sb6.append(snapshot.tail);
-                                sb6.append(":");
-                                sb6.append(j);
-                                sb6.append(":");
-                                sb6.append(z4);
-                                Log.d(str9, sb6.toString());
-                                snapshot.put(byteBuffer, this.mBufferInfo, livePhotoResult3);
+                                Log.d(str9, str + ": Snapshot.put incoming E " + snapshot.head + ":" + snapshot.tail + ":" + j + ":" + z4);
+                                snapshot.put(chunk, this.mBufferInfo, livePhotoResult3);
                                 String str10 = TAG;
-                                StringBuilder sb7 = new StringBuilder();
-                                sb7.append(str);
-                                sb7.append(": Snapshot.put incoming X");
-                                Log.d(str10, sb7.toString());
+                                StringBuilder sb3 = new StringBuilder();
+                                sb3.append(str);
+                                sb3.append(": Snapshot.put incoming X");
+                                Log.d(str10, sb3.toString());
                             }
                         }
                         if (snapshot.eos()) {
@@ -637,10 +536,7 @@ public abstract class CircularMediaEncoder extends Callback {
                         } else {
                             synchronized (this.mSnapshots) {
                                 String str11 = TAG;
-                                StringBuilder sb8 = new StringBuilder();
-                                sb8.append(str);
-                                sb8.append(": Snapshot.put: removed from queue");
-                                Log.e(str11, sb8.toString());
+                                Log.e(str11, str + ": Snapshot.put: removed from queue");
                                 this.mSnapshots.remove(snapshot);
                             }
                             break;
@@ -649,12 +545,8 @@ public abstract class CircularMediaEncoder extends Callback {
                     str3 = str;
                     z = false;
                 } else {
-                    String str12 = str3;
-                    String str13 = TAG;
-                    StringBuilder sb9 = new StringBuilder();
-                    sb9.append(str12);
-                    sb9.append(": Unable to get the first index");
-                    Log.w(str13, sb9.toString());
+                    String str12 = TAG;
+                    Log.w(str12, str3 + ": Unable to get the first index");
                     throw new IllegalStateException("Unable to get the first index");
                 }
             }
@@ -664,10 +556,7 @@ public abstract class CircularMediaEncoder extends Callback {
 
     public void onOutputFormatChanged(MediaCodec mediaCodec, MediaFormat mediaFormat) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("MediaCodec Output Format Changed: ");
-        sb.append(mediaFormat);
-        Log.e(str, sb.toString());
+        Log.e(str, "MediaCodec Output Format Changed: " + mediaFormat);
         synchronized (this) {
             this.mOutputFormatChanged = true;
             notifyAll();
@@ -689,15 +578,7 @@ public abstract class CircularMediaEncoder extends Callback {
             long j = this.mCurrentPresentationTimeUs + this.mPostCaptureDurationUs;
             long max = Math.max(0, j - this.mCaptureDurationUs);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Snapshot[");
-            sb.append(max);
-            sb.append(", ");
-            sb.append(this.mCurrentPresentationTimeUs);
-            sb.append(", ");
-            sb.append(j);
-            sb.append("]");
-            Log.d(str, sb.toString());
+            Log.d(str, "Snapshot[" + max + ", " + this.mCurrentPresentationTimeUs + ", " + j + "]");
             Snapshot snapshot = new Snapshot(max, j, this.mCurrentPresentationTimeUs, i, this.mMediaCodec.getOutputFormat());
             synchronized (this.mSnapshots) {
                 this.mSnapshots.add(snapshot);

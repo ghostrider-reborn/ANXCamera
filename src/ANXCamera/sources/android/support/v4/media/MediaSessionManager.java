@@ -1,9 +1,11 @@
 package android.support.v4.media;
 
 import android.content.Context;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.media.MediaSessionManagerImplApi28;
+import android.support.v4.media.MediaSessionManagerImplBase;
 import android.util.Log;
 
 public final class MediaSessionManager {
@@ -24,10 +26,10 @@ public final class MediaSessionManager {
         RemoteUserInfoImpl mImpl;
 
         public RemoteUserInfo(@NonNull String str, int i, int i2) {
-            if (VERSION.SDK_INT >= 28) {
-                this.mImpl = new RemoteUserInfo(str, i, i2);
+            if (Build.VERSION.SDK_INT >= 28) {
+                this.mImpl = new MediaSessionManagerImplApi28.RemoteUserInfo(str, i, i2);
             } else {
-                this.mImpl = new RemoteUserInfo(str, i, i2);
+                this.mImpl = new MediaSessionManagerImplBase.RemoteUserInfo(str, i, i2);
             }
         }
 
@@ -62,7 +64,7 @@ public final class MediaSessionManager {
     }
 
     private MediaSessionManager(Context context) {
-        int i = VERSION.SDK_INT;
+        int i = Build.VERSION.SDK_INT;
         if (i >= 28) {
             this.mImpl = new MediaSessionManagerImplApi28(context);
         } else if (i >= 21) {
@@ -87,7 +89,7 @@ public final class MediaSessionManager {
         return mediaSessionManager;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public Context getContext() {
         return this.mImpl.getContext();
     }

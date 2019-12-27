@@ -84,22 +84,22 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
             this.set.dispose();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void clear() {
-            SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) this.queue.get();
+            SpscLinkedArrayQueue spscLinkedArrayQueue = this.queue.get();
             if (spscLinkedArrayQueue != null) {
                 spscLinkedArrayQueue.clear();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drain() {
             if (getAndIncrement() == 0) {
                 drainLoop();
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void drainLoop() {
             int i;
             boolean z;
@@ -120,17 +120,18 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
                         return;
                     } else if (this.delayErrors || ((Throwable) this.errors.get()) == null) {
                         boolean z2 = atomicInteger.get() == 0;
-                        SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) atomicReference.get();
+                        SpscLinkedArrayQueue spscLinkedArrayQueue = atomicReference.get();
                         Object poll = spscLinkedArrayQueue != null ? spscLinkedArrayQueue.poll() : null;
                         boolean z3 = poll == null;
                         if (z2 && z3) {
                             Throwable terminate = this.errors.terminate();
                             if (terminate != null) {
                                 subscriber.onError(terminate);
+                                return;
                             } else {
                                 subscriber.onComplete();
+                                return;
                             }
-                            return;
                         } else if (z3) {
                             break;
                         } else {
@@ -150,7 +151,7 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
                         return;
                     } else if (this.delayErrors || ((Throwable) this.errors.get()) == null) {
                         boolean z4 = atomicInteger.get() == 0;
-                        SpscLinkedArrayQueue spscLinkedArrayQueue2 = (SpscLinkedArrayQueue) atomicReference.get();
+                        SpscLinkedArrayQueue spscLinkedArrayQueue2 = atomicReference.get();
                         if (spscLinkedArrayQueue2 == null || spscLinkedArrayQueue2.isEmpty()) {
                             z = true;
                         }
@@ -158,10 +159,11 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
                             Throwable terminate3 = this.errors.terminate();
                             if (terminate3 != null) {
                                 subscriber.onError(terminate3);
+                                return;
                             } else {
                                 subscriber.onComplete();
+                                return;
                             }
-                            return;
                         }
                     } else {
                         Throwable terminate4 = this.errors.terminate();
@@ -180,21 +182,21 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
             } while (i2 != 0);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public SpscLinkedArrayQueue<R> getOrCreateQueue() {
             SpscLinkedArrayQueue<R> spscLinkedArrayQueue;
             do {
-                SpscLinkedArrayQueue<R> spscLinkedArrayQueue2 = (SpscLinkedArrayQueue) this.queue.get();
+                SpscLinkedArrayQueue<R> spscLinkedArrayQueue2 = this.queue.get();
                 if (spscLinkedArrayQueue2 != null) {
                     return spscLinkedArrayQueue2;
                 }
                 spscLinkedArrayQueue = new SpscLinkedArrayQueue<>(Flowable.bufferSize());
-            } while (!this.queue.compareAndSet(null, spscLinkedArrayQueue));
+            } while (!this.queue.compareAndSet((Object) null, spscLinkedArrayQueue));
             return spscLinkedArrayQueue;
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerComplete(InnerObserver innerObserver) {
+        /* access modifiers changed from: package-private */
+        public void innerComplete(FlatMapMaybeSubscriber<T, R>.InnerObserver innerObserver) {
             this.set.delete(innerObserver);
             if (get() == 0) {
                 boolean z = true;
@@ -202,23 +204,25 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
                     if (this.active.decrementAndGet() != 0) {
                         z = false;
                     }
-                    SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) this.queue.get();
+                    SpscLinkedArrayQueue spscLinkedArrayQueue = this.queue.get();
                     if (!z || (spscLinkedArrayQueue != null && !spscLinkedArrayQueue.isEmpty())) {
                         if (this.maxConcurrency != Integer.MAX_VALUE) {
                             this.s.request(1);
                         }
                         if (decrementAndGet() != 0) {
                             drainLoop();
+                            return;
                         }
                         return;
                     }
                     Throwable terminate = this.errors.terminate();
                     if (terminate != null) {
                         this.actual.onError(terminate);
+                        return;
                     } else {
                         this.actual.onComplete();
+                        return;
                     }
-                    return;
                 }
             }
             this.active.decrementAndGet();
@@ -228,8 +232,8 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
             drain();
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerError(InnerObserver innerObserver, Throwable th) {
+        /* access modifiers changed from: package-private */
+        public void innerError(FlatMapMaybeSubscriber<T, R>.InnerObserver innerObserver, Throwable th) {
             this.set.delete(innerObserver);
             if (this.errors.addThrowable(th)) {
                 if (!this.delayErrors) {
@@ -245,8 +249,8 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
             RxJavaPlugins.onError(th);
         }
 
-        /* access modifiers changed from: 0000 */
-        public void innerSuccess(InnerObserver innerObserver, R r) {
+        /* access modifiers changed from: package-private */
+        public void innerSuccess(FlatMapMaybeSubscriber<T, R>.InnerObserver innerObserver, R r) {
             this.set.delete(innerObserver);
             if (get() == 0) {
                 boolean z = true;
@@ -256,7 +260,7 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
                     }
                     if (this.requested.get() != 0) {
                         this.actual.onNext(r);
-                        SpscLinkedArrayQueue spscLinkedArrayQueue = (SpscLinkedArrayQueue) this.queue.get();
+                        SpscLinkedArrayQueue spscLinkedArrayQueue = this.queue.get();
                         if (!z || (spscLinkedArrayQueue != null && !spscLinkedArrayQueue.isEmpty())) {
                             BackpressureHelper.produced(this.requested, 1);
                             if (this.maxConcurrency != Integer.MAX_VALUE) {
@@ -266,10 +270,11 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
                             Throwable terminate = this.errors.terminate();
                             if (terminate != null) {
                                 this.actual.onError(terminate);
+                                return;
                             } else {
                                 this.actual.onComplete();
+                                return;
                             }
-                            return;
                         }
                     } else {
                         SpscLinkedArrayQueue orCreateQueue = getOrCreateQueue();
@@ -358,6 +363,6 @@ public final class FlowableFlatMapMaybe<T, R> extends AbstractFlowableWithUpstre
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super R> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new FlatMapMaybeSubscriber<Object>(subscriber, this.mapper, this.delayErrors, this.maxConcurrency));
+        this.source.subscribe(new FlatMapMaybeSubscriber(subscriber, this.mapper, this.delayErrors, this.maxConcurrency));
     }
 }

@@ -27,31 +27,19 @@ public final class InternalNano {
     }
 
     public static boolean equals(double[] dArr, double[] dArr2) {
-        if (dArr != null && dArr.length != 0) {
-            return Arrays.equals(dArr, dArr2);
-        }
-        return dArr2 == null || dArr2.length == 0;
+        return (dArr == null || dArr.length == 0) ? dArr2 == null || dArr2.length == 0 : Arrays.equals(dArr, dArr2);
     }
 
     public static boolean equals(float[] fArr, float[] fArr2) {
-        if (fArr != null && fArr.length != 0) {
-            return Arrays.equals(fArr, fArr2);
-        }
-        return fArr2 == null || fArr2.length == 0;
+        return (fArr == null || fArr.length == 0) ? fArr2 == null || fArr2.length == 0 : Arrays.equals(fArr, fArr2);
     }
 
     public static boolean equals(int[] iArr, int[] iArr2) {
-        if (iArr != null && iArr.length != 0) {
-            return Arrays.equals(iArr, iArr2);
-        }
-        return iArr2 == null || iArr2.length == 0;
+        return (iArr == null || iArr.length == 0) ? iArr2 == null || iArr2.length == 0 : Arrays.equals(iArr, iArr2);
     }
 
     public static boolean equals(long[] jArr, long[] jArr2) {
-        if (jArr != null && jArr.length != 0) {
-            return Arrays.equals(jArr, jArr2);
-        }
-        return jArr2 == null || jArr2.length == 0;
+        return (jArr == null || jArr.length == 0) ? jArr2 == null || jArr2.length == 0 : Arrays.equals(jArr, jArr2);
     }
 
     public static boolean equals(Object[] objArr, Object[] objArr2) {
@@ -81,10 +69,7 @@ public final class InternalNano {
     }
 
     public static boolean equals(boolean[] zArr, boolean[] zArr2) {
-        if (zArr != null && zArr.length != 0) {
-            return Arrays.equals(zArr, zArr2);
-        }
-        return zArr2 == null || zArr2.length == 0;
+        return (zArr == null || zArr.length == 0) ? zArr2 == null || zArr2.length == 0 : Arrays.equals(zArr, zArr2);
     }
 
     public static boolean equals(byte[][] bArr, byte[][] bArr2) {

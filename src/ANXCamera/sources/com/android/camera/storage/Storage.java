@@ -11,21 +11,19 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.DngCreator;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.provider.MediaStore.Files;
-import android.provider.MediaStore.Images.Media;
+import android.provider.MediaStore;
 import android.support.v4.app.FrameMetricsAggregator;
 import android.text.TextUtils;
 import android.util.Size;
@@ -68,10 +66,10 @@ public class Storage {
     public static int BUCKET_ID = DIRECTORY.toLowerCase(Locale.ENGLISH).hashCode();
     private static final String CAMERA_STORAGE_PATH_SUFFIX = "/DCIM/Camera";
     private static final String CAMERA_STORAGE_PATH_TEMP = "/DCIM/Camera/.temp";
-    public static String CAMERA_TEMP_DIRECTORY = null;
-    public static String DIRECTORY = null;
+    public static String CAMERA_TEMP_DIRECTORY = (FIRST_CONSIDER_STORAGE_PATH + CAMERA_STORAGE_PATH_TEMP);
+    public static String DIRECTORY = (FIRST_CONSIDER_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX);
     public static String FIRST_CONSIDER_STORAGE_PATH = (b.xm ? SECONDARY_STORAGE_PATH : PRIMARY_STORAGE_PATH);
-    public static String HIDEDIRECTORY = null;
+    public static String HIDEDIRECTORY = (FIRST_CONSIDER_STORAGE_PATH + HIDE_CAMERA_STORAGE_PATH_SUFFIX);
     private static final String HIDE_CAMERA_STORAGE_PATH_SUFFIX = "/DCIM/Camera/.ubifocus";
     public static final String HSR_120_SUFFIX = "_HSR_120";
     public static final String HSR_240_SUFFIX = "_HSR_240";
@@ -82,11 +80,11 @@ public class Storage {
     private static final int MAX_WRITE_RETRY = (Build.IS_ALPHA_BUILD ? 1 : 3);
     protected static final String PARALLEL_PROCESS_EXIF_PROCESS_TAG = "processing";
     public static final long PREPARING = -2;
-    public static int PRIMARY_BUCKET_ID = 0;
-    public static int PRIMARY_RAW_BUCKET_ID = 0;
+    public static int PRIMARY_BUCKET_ID = (PRIMARY_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX).toLowerCase(Locale.ENGLISH).hashCode();
+    public static int PRIMARY_RAW_BUCKET_ID = (PRIMARY_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX + RAW_PATH_SUFFIX).toLowerCase(Locale.ENGLISH).hashCode();
     private static final String PRIMARY_STORAGE_PATH = Environment.getExternalStorageDirectory().toString();
     public static final float QUOTA_RATIO = 0.9f;
-    public static String RAW_DIRECTORY = null;
+    public static String RAW_DIRECTORY = (DIRECTORY + RAW_PATH_SUFFIX);
     private static final String RAW_PATH_SUFFIX = "/Raw";
     public static final String RAW_SUFFIX = ".dng";
     private static final String SAVE_TO_CLOUD_ALBUM_ACTION = "com.miui.gallery.SAVE_TO_CLOUD";
@@ -96,8 +94,8 @@ public class Storage {
     private static final String SAVE_TO_CLOUD_ALBUM_PATH_KAY = "extra_file_path";
     private static final String SAVE_TO_CLOUD_ALBUM_STORE_ID_KAY = "extra_media_store_id";
     private static final String SAVE_TO_CLOUD_ALBUM_TEMP_FILE_KAY = "extra_is_temp_file";
-    public static int SECONDARY_BUCKET_ID = 0;
-    public static int SECONDARY_RAW_BUCKET_ID = 0;
+    public static int SECONDARY_BUCKET_ID = (SECONDARY_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX).toLowerCase(Locale.ENGLISH).hashCode();
+    public static int SECONDARY_RAW_BUCKET_ID = (SECONDARY_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX + RAW_PATH_SUFFIX).toLowerCase(Locale.ENGLISH).hashCode();
     private static String SECONDARY_STORAGE_PATH = System.getenv("SECONDARY_STORAGE");
     private static final String TAG = "Storage";
     public static final String UBIFOCUS_SUFFIX = "_UBIFOCUS_";
@@ -126,47 +124,7 @@ public class Storage {
     }
 
     static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(FIRST_CONSIDER_STORAGE_PATH);
-        String str = CAMERA_STORAGE_PATH_SUFFIX;
-        sb.append(str);
-        DIRECTORY = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(DIRECTORY);
-        String str2 = RAW_PATH_SUFFIX;
-        sb2.append(str2);
-        RAW_DIRECTORY = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(FIRST_CONSIDER_STORAGE_PATH);
-        sb3.append(HIDE_CAMERA_STORAGE_PATH_SUFFIX);
-        HIDEDIRECTORY = sb3.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(FIRST_CONSIDER_STORAGE_PATH);
-        sb4.append(CAMERA_STORAGE_PATH_TEMP);
-        CAMERA_TEMP_DIRECTORY = sb4.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(PRIMARY_STORAGE_PATH);
-        sb5.append(str);
-        PRIMARY_BUCKET_ID = sb5.toString().toLowerCase(Locale.ENGLISH).hashCode();
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(SECONDARY_STORAGE_PATH);
-        sb6.append(str);
-        SECONDARY_BUCKET_ID = sb6.toString().toLowerCase(Locale.ENGLISH).hashCode();
-        StringBuilder sb7 = new StringBuilder();
-        sb7.append(PRIMARY_STORAGE_PATH);
-        sb7.append(str);
-        sb7.append(str2);
-        PRIMARY_RAW_BUCKET_ID = sb7.toString().toLowerCase(Locale.ENGLISH).hashCode();
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append(SECONDARY_STORAGE_PATH);
-        sb8.append(str);
-        sb8.append(str2);
-        SECONDARY_RAW_BUCKET_ID = sb8.toString().toLowerCase(Locale.ENGLISH).hashCode();
-        StringBuilder sb9 = new StringBuilder();
-        sb9.append(DIRECTORY);
-        sb9.append(File.separator);
-        sb9.append(AVOID_SCAN_FILE_NAME);
-        File file = new File(sb9.toString());
+        File file = new File(DIRECTORY + File.separator + AVOID_SCAN_FILE_NAME);
         if (file.exists()) {
             file.delete();
         }
@@ -178,26 +136,23 @@ public class Storage {
         ContentValues contentValues = new ContentValues(7);
         contentValues.put("title", substring);
         contentValues.put("_display_name", name);
-        contentValues.put("media_type", Integer.valueOf(1));
+        contentValues.put("media_type", 1);
         contentValues.put("mime_type", "image/x-adobe-dng");
         contentValues.put("_data", str);
         contentValues.put("width", Integer.valueOf(i));
         contentValues.put("height", Integer.valueOf(i2));
         contentValues.put("orientation", Integer.valueOf(i3));
         try {
-            return context.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, contentValues);
+            return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
         } catch (Exception e2) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to write MediaStore, path ");
-            sb.append(str);
-            Log.e(str2, sb.toString(), e2);
+            Log.e(str2, "Failed to write MediaStore, path " + str, e2);
             return null;
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:148:0x01c0  */
-    /* JADX WARNING: Removed duplicated region for block: B:150:0x01c2  */
+    /* JADX WARNING: Removed duplicated region for block: B:148:0x01c0 A[RETURN] */
+    /* JADX WARNING: Removed duplicated region for block: B:149:0x01c2  */
     public static Uri addImage(Context context, String str, long j, Location location, int i, byte[] bArr, int i2, int i3, boolean z, boolean z2, boolean z3, boolean z4, boolean z5, String str2, PictureInfo pictureInfo) {
         byte[] bArr2;
         boolean z6;
@@ -212,27 +167,15 @@ public class Storage {
         Throwable th3;
         Throwable th4;
         final Context context2 = context;
-        String str5 = str;
         long j2 = j;
         Location location2 = location;
         int i4 = i;
-        boolean z9 = z2;
-        boolean z10 = z3;
-        String str6 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("addImage: parallel=");
-        sb.append(z5);
-        sb.append(" appendExif=");
-        sb.append(z4);
-        Log.d(str6, sb.toString());
+        boolean z9 = z3;
+        Log.d(TAG, "addImage: parallel=" + z5 + " appendExif=" + z4);
         byte[] updateExif = updateExif(bArr, z5, str2, pictureInfo, i, i2, i3);
-        String generateFilepath4Jpeg = generateFilepath4Jpeg(str5, z9, z10);
-        String str7 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("addImage: path=");
-        sb2.append(generateFilepath4Jpeg);
-        Log.d(str7, sb2.toString());
-        boolean z11 = z4;
+        String generateFilepath4Jpeg = generateFilepath4Jpeg(str, z2, z9);
+        Log.d(TAG, "addImage: path=" + generateFilepath4Jpeg);
+        boolean z10 = z4;
         int i5 = 0;
         while (true) {
             try {
@@ -253,7 +196,7 @@ public class Storage {
                     try {
                         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream2);
                         if (!z) {
-                            z8 = z11;
+                            z8 = z10;
                             bArr2 = updateExif;
                             byte[] bArr4 = new byte[4096];
                             while (true) {
@@ -265,10 +208,10 @@ public class Storage {
                             }
                         } else {
                             try {
-                                boolean z12 = i4 % 180 == 0;
-                                z8 = z11;
+                                boolean z11 = i4 % 180 == 0;
+                                z8 = z10;
                                 try {
-                                    Bitmap flipJpeg = flipJpeg(updateExif, z12, !z12);
+                                    Bitmap flipJpeg = flipJpeg(updateExif, z11, !z11);
                                     if (flipJpeg == null) {
                                         bArr2 = updateExif;
                                         byte[] bArr5 = new byte[4096];
@@ -284,7 +227,7 @@ public class Storage {
                                         byte[] thumbnailBytes = exif.getThumbnailBytes();
                                         bArr2 = updateExif;
                                         if (thumbnailBytes != null) {
-                                            Bitmap flipJpeg2 = flipJpeg(thumbnailBytes, z12, !z12);
+                                            Bitmap flipJpeg2 = flipJpeg(thumbnailBytes, z11, !z11);
                                             if (flipJpeg2 != null) {
                                                 exif.setCompressedThumbnail(flipJpeg2);
                                                 flipJpeg2.recycle();
@@ -301,14 +244,14 @@ public class Storage {
                                 }
                             } catch (Throwable th7) {
                                 th = th7;
-                                z8 = z11;
+                                z8 = z10;
                                 bArr2 = updateExif;
                                 th3 = th;
                                 throw th3;
                             }
                         }
-                        z11 = z8;
-                        if (z11) {
+                        z10 = z8;
+                        if (z10) {
                             try {
                                 bufferedOutputStream.flush();
                                 if (!isUseDocumentMode()) {
@@ -319,7 +262,7 @@ public class Storage {
                                         try {
                                             ExifHelper.writeExifByFd(parcelFileDescriptor.getFileDescriptor(), i4, location2, j2);
                                             if (parcelFileDescriptor != null) {
-                                                $closeResource(null, parcelFileDescriptor);
+                                                $closeResource((Throwable) null, parcelFileDescriptor);
                                             }
                                         } catch (Throwable th8) {
                                             Throwable th9 = th8;
@@ -331,23 +274,19 @@ public class Storage {
                                             throw th9;
                                         }
                                     } catch (Exception e2) {
-                                        String str8 = TAG;
-                                        StringBuilder sb3 = new StringBuilder();
-                                        sb3.append("write exif failed, file is ");
-                                        sb3.append(generateFilepath4Jpeg);
-                                        Log.e(str8, sb3.toString(), e2);
+                                        Log.e(TAG, "write exif failed, file is " + generateFilepath4Jpeg, e2);
                                     }
                                 }
                             } catch (Throwable th10) {
                                 th3 = th10;
-                                z8 = z11;
+                                z8 = z10;
                             }
                         }
                         try {
-                            $closeResource(null, bufferedOutputStream);
+                            $closeResource((Throwable) null, bufferedOutputStream);
                             if (outputStream2 != null) {
                                 try {
-                                    $closeResource(null, outputStream2);
+                                    $closeResource((Throwable) null, outputStream2);
                                 } catch (Throwable th11) {
                                     th = th11;
                                     th = th;
@@ -360,7 +299,7 @@ public class Storage {
                             throw th2;
                         }
                         try {
-                            $closeResource(null, bufferedInputStream);
+                            $closeResource((Throwable) null, bufferedInputStream);
                             z6 = false;
                             break;
                         } catch (Exception e3) {
@@ -372,21 +311,21 @@ public class Storage {
                         }
                     } catch (Throwable th15) {
                         th = th15;
-                        z8 = z11;
+                        z8 = z10;
                         bArr2 = updateExif;
                         th2 = th;
                         throw th2;
                     }
                 } catch (Throwable th16) {
                     th = th16;
-                    z8 = z11;
+                    z8 = z10;
                     bArr2 = updateExif;
                     th = th;
                     throw th;
                 }
             } catch (Exception e4) {
                 e = e4;
-                z8 = z11;
+                z8 = z10;
                 bArr2 = updateExif;
                 dumpExceptionEnv(e, generateFilepath4Jpeg);
                 Log.e(TAG, "Failed to write image", e);
@@ -415,55 +354,54 @@ public class Storage {
                 } else {
                     int i6 = i3;
                     context2 = context;
-                    String str9 = str;
+                    String str5 = str;
                     location2 = location;
-                    boolean z13 = z2;
+                    boolean z12 = z2;
                     updateExif = bArr2;
                 }
             }
             int i62 = i3;
             context2 = context;
-            String str92 = str;
+            String str52 = str;
             location2 = location;
-            boolean z132 = z2;
+            boolean z122 = z2;
             updateExif = bArr2;
         }
         if (!z6) {
             return null;
         }
-        if (z10) {
+        if (z9) {
             boolean isProduceFocusInfoSuccess = Util.isProduceFocusInfoSuccess(bArr2);
             bArr3 = bArr2;
             int centerFocusDepthIndex = Util.getCenterFocusDepthIndex(bArr3, i2, i3);
-            String str10 = "_";
-            String str11 = UBIFOCUS_SUFFIX;
-            String str12 = str;
-            str3 = str12.substring(0, isProduceFocusInfoSuccess ? str12.lastIndexOf(str10) : str12.lastIndexOf(str11));
+            String str6 = "_";
+            String str7 = str;
+            str3 = str7.substring(0, isProduceFocusInfoSuccess ? str7.lastIndexOf(str6) : str7.lastIndexOf(UBIFOCUS_SUFFIX));
             String generateFilepath4Jpeg2 = generateFilepath4Jpeg(str3, false, false);
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append(str3);
+            StringBuilder sb = new StringBuilder();
+            sb.append(str3);
             if (!isProduceFocusInfoSuccess) {
-                str10 = str11;
+                str6 = UBIFOCUS_SUFFIX;
             }
-            sb4.append(str10);
-            sb4.append(centerFocusDepthIndex);
+            sb.append(str6);
+            sb.append(centerFocusDepthIndex);
             z7 = z2;
-            String generateFilepath4Jpeg3 = generateFilepath4Jpeg(sb4.toString(), z7, false);
+            String generateFilepath4Jpeg3 = generateFilepath4Jpeg(sb.toString(), z7, false);
             if (generateFilepath4Jpeg2 == null || generateFilepath4Jpeg3 == null) {
-                String str13 = TAG;
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("oldPath: ");
-                String str14 = TEDefine.FACE_BEAUTY_NULL;
+                String str8 = TAG;
+                StringBuilder sb2 = new StringBuilder();
+                sb2.append("oldPath: ");
+                String str9 = TEDefine.FACE_BEAUTY_NULL;
                 if (generateFilepath4Jpeg3 == null) {
-                    generateFilepath4Jpeg3 = str14;
+                    generateFilepath4Jpeg3 = str9;
                 }
-                sb5.append(generateFilepath4Jpeg3);
-                sb5.append(" newPath: ");
+                sb2.append(generateFilepath4Jpeg3);
+                sb2.append(" newPath: ");
                 if (generateFilepath4Jpeg2 != null) {
-                    str14 = generateFilepath4Jpeg2;
+                    str9 = generateFilepath4Jpeg2;
                 }
-                sb5.append(str14);
-                Log.e(str13, sb5.toString());
+                sb2.append(str9);
+                Log.e(str8, sb2.toString());
             } else {
                 new File(generateFilepath4Jpeg3).renameTo(new File(generateFilepath4Jpeg2));
             }
@@ -478,29 +416,22 @@ public class Storage {
             bArr3 = bArr2;
             str4 = generateFilepath4Jpeg;
         }
-        if (z7 && !z10) {
+        if (z7 && !z9) {
             return null;
         }
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(str3);
-        sb6.append(JPEG_SUFFIX);
-        boolean z14 = false;
+        boolean z13 = false;
         byte[] bArr6 = bArr3;
-        Uri insertToMediaStore = insertToMediaStore(context, str3, sb6.toString(), j, "image/jpeg", i, str4, new File(str4).length(), i2, i3, location, z5);
+        Uri insertToMediaStore = insertToMediaStore(context, str3, str3 + JPEG_SUFFIX, j, "image/jpeg", i, str4, new File(str4).length(), i2, i3, location, z5);
         if (insertToMediaStore == null) {
-            String str15 = TAG;
-            StringBuilder sb7 = new StringBuilder();
-            sb7.append("failed to insert to DB: ");
-            sb7.append(str4);
-            Log.e(str15, sb7.toString());
+            Log.e(TAG, "failed to insert to DB: " + str4);
             return null;
         }
         long length = (long) bArr6.length;
         long parseId = ContentUris.parseId(insertToMediaStore);
         if (location == null) {
-            z14 = true;
+            z13 = true;
         }
-        saveToCloudAlbum(context, str4, length, z5, parseId, z14);
+        saveToCloudAlbum(context, str4, length, z5, parseId, z13);
         return insertToMediaStore;
     }
 
@@ -516,10 +447,7 @@ public class Storage {
                 file = new File(str2);
             } catch (Exception e2) {
                 String str3 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Failed to open panorama file: ");
-                sb.append(e2.getMessage());
-                Log.e(str3, sb.toString(), e2);
+                Log.e(str3, "Failed to open panorama file: " + e2.getMessage(), e2);
                 file = null;
             }
             if (file != null && file.exists()) {
@@ -537,19 +465,12 @@ public class Storage {
         return addImage(context, str, j, location, i, bArr, i2, i3, z, z2, z3, false, false, str2, pictureInfo);
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:38:0x009d, code lost:
-        r0 = move-exception;
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:41:?, code lost:
-        $closeResource(r1, r14);
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:42:0x00a2, code lost:
-        throw r2;
-     */
+    /* JADX INFO: finally extract failed */
     public static Uri addRawImage(Context context, String str, CameraCharacteristics cameraCharacteristics, CaptureResult captureResult, byte[] bArr, int i, int i2, int i3) {
         OutputStream outputStream;
         long j;
         BufferedOutputStream bufferedOutputStream;
+        Throwable th;
         Context context2 = context;
         int i4 = i;
         int i5 = i2;
@@ -570,71 +491,67 @@ public class Storage {
                                 dngCreator.writeInputStream(bufferedOutputStream2, new Size(i4, i5), bufferedInputStream, 0);
                                 Uri addDNGToDataBase = addDNGToDataBase(context2, generateRawFilepath, i4, i5, i3);
                                 String str2 = TAG;
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("addRawImage path ");
-                                sb.append(generateRawFilepath);
-                                sb.append(", uri = ");
-                                sb.append(addDNGToDataBase);
-                                Log.d(str2, sb.toString());
+                                Log.d(str2, "addRawImage path " + generateRawFilepath + ", uri = " + addDNGToDataBase);
                                 saveToCloudAlbum(context2, generateRawFilepath, -1, currentLocation == null);
-                                $closeResource(null, bufferedOutputStream);
+                                $closeResource((Throwable) null, bufferedOutputStream);
                                 if (outputStream != null) {
-                                    $closeResource(null, outputStream);
+                                    $closeResource((Throwable) null, outputStream);
                                 }
-                                $closeResource(null, bufferedInputStream);
-                                $closeResource(null, dngCreator);
+                                $closeResource((Throwable) null, bufferedInputStream);
+                                $closeResource((Throwable) null, dngCreator);
                                 return addDNGToDataBase;
-                            } catch (Throwable th) {
+                            } catch (Throwable th2) {
+                                th = th2;
                                 th = th;
-                                Throwable th2 = th;
-                                throw th2;
+                                throw th;
                             }
                         } catch (Throwable th3) {
                             th = th3;
                             bufferedOutputStream = bufferedOutputStream2;
-                            Throwable th22 = th;
-                            throw th22;
+                            th = th;
+                            throw th;
                         }
+                    } catch (Throwable th4) {
+                        $closeResource(th, bufferedOutputStream);
+                        throw j;
                     } finally {
+                        j = th4;
                         try {
-                        } catch (Throwable th4) {
-                            Throwable th5 = th4;
+                        } catch (Throwable th5) {
+                            Throwable th6 = th5;
                             if (outputStream != null) {
                                 $closeResource(j, outputStream);
                             }
-                            throw th5;
+                            throw th6;
                         }
                     }
                 } finally {
                     outputStream = th;
                     try {
-                    } catch (Throwable th6) {
-                        Throwable th7 = th6;
+                    } catch (Throwable th7) {
+                        Throwable th8 = th7;
                         $closeResource(outputStream, bufferedInputStream);
-                        throw th7;
+                        throw th8;
                     }
                 }
-            } finally {
-                Throwable th8 = th;
+            } catch (Throwable th9) {
+                Throwable th10 = th9;
                 try {
-                } catch (Throwable th9) {
-                    Throwable th10 = th9;
-                    $closeResource(th8, dngCreator);
                     throw th10;
+                } catch (Throwable th11) {
+                    Throwable th12 = th11;
+                    $closeResource(th10, dngCreator);
+                    throw th12;
                 }
             }
-        } catch (Throwable th11) {
+        } catch (Throwable th13) {
             String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("addRawImage failed, path ");
-            sb2.append(generateRawFilepath);
-            Log.w(str3, sb2.toString(), th11);
+            Log.w(str3, "addRawImage failed, path " + generateRawFilepath, th13);
             return null;
         }
     }
 
     public static void deleteImage(String str) {
-        File[] listFiles;
         File file = new File(HIDEDIRECTORY);
         if (file.exists() && file.isDirectory()) {
             for (File file2 : file.listFiles()) {
@@ -666,10 +583,7 @@ public class Storage {
             long freeMemory = Runtime.getRuntime().freeMemory();
             File file = new File(str);
             try {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(".ex");
-                File file2 = new File(sb.toString());
+                File file2 = new File(str + ".ex");
                 z = file2.createNewFile();
                 file2.delete();
             } catch (IOException unused) {
@@ -693,7 +607,7 @@ public class Storage {
         if (bArr == null) {
             return null;
         }
-        Options options = new Options();
+        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPurgeable = true;
         Bitmap decodeByteArray = BitmapFactory.decodeByteArray(bArr, 0, bArr.length, options);
         Matrix matrix = new Matrix();
@@ -719,20 +633,11 @@ public class Storage {
     }
 
     public static String generateFilepath(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DIRECTORY);
-        sb.append('/');
-        sb.append(str);
-        return sb.toString();
+        return DIRECTORY + '/' + str;
     }
 
     public static String generateFilepath(String str, String str2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DIRECTORY);
-        sb.append('/');
-        sb.append(str);
-        sb.append(str2);
-        return sb.toString();
+        return DIRECTORY + '/' + str + str2;
     }
 
     public static String generateFilepath4Jpeg(String str) {
@@ -752,41 +657,23 @@ public class Storage {
     }
 
     public static String generatePrimaryDirectoryPath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PRIMARY_STORAGE_PATH);
-        sb.append(CAMERA_STORAGE_PATH_SUFFIX);
-        return sb.toString();
+        return PRIMARY_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX;
     }
 
     public static String generatePrimaryFilepath(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(generatePrimaryDirectoryPath());
-        sb.append('/');
-        sb.append(str);
-        return sb.toString();
+        return generatePrimaryDirectoryPath() + '/' + str;
     }
 
     public static String generatePrimaryTempFile() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PRIMARY_STORAGE_PATH);
-        sb.append(CAMERA_STORAGE_PATH_TEMP);
-        return sb.toString();
+        return PRIMARY_STORAGE_PATH + CAMERA_STORAGE_PATH_TEMP;
     }
 
     public static String generateRawFilepath(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(RAW_DIRECTORY);
-        sb.append("/");
-        sb.append(str);
-        sb.append(RAW_SUFFIX);
-        return sb.toString();
+        return RAW_DIRECTORY + "/" + str + RAW_SUFFIX;
     }
 
     public static String generateTempFilepath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DIRECTORY);
-        sb.append("/.temp");
-        return sb.toString();
+        return DIRECTORY + "/.temp";
     }
 
     public static long getAvailableSpace() {
@@ -801,41 +688,19 @@ public class Storage {
         File file = new File(str);
         boolean mkdirs = isUseDocumentMode() ? FileCompat.mkdirs(str) : Util.mkdirs(file, FrameMetricsAggregator.EVERY_DURATION, -1, -1);
         if (!file.exists() || !file.isDirectory()) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("getAvailableSpace path = ");
-            sb.append(str);
-            sb.append(", exists = ");
-            sb.append(file.exists());
-            sb.append(", isDirectory = ");
-            sb.append(file.isDirectory());
-            sb.append(", canWrite = ");
-            sb.append(file.canWrite());
-            Log.w(str2, sb.toString());
+            Log.w(TAG, "getAvailableSpace path = " + str + ", exists = " + file.exists() + ", isDirectory = " + file.isDirectory() + ", canWrite = " + file.canWrite());
             return -1;
         }
         if (mkdirs && str.endsWith(CAMERA_STORAGE_PATH_SUFFIX)) {
             if (MediaProviderUtil.insertCameraDirectory(CameraAppImpl.getAndroidContext(), str) != null) {
-                String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("insertDirectory success, path ");
-                sb2.append(str);
-                Log.d(str3, sb2.toString());
+                Log.d(TAG, "insertDirectory success, path " + str);
             } else {
-                String str4 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("insertDirectory fail, path ");
-                sb3.append(str);
-                Log.w(str4, sb3.toString());
+                Log.w(TAG, "insertDirectory fail, path " + str);
             }
         }
         try {
             if (HIDEDIRECTORY.equals(str)) {
-                StringBuilder sb4 = new StringBuilder();
-                sb4.append(HIDEDIRECTORY);
-                sb4.append(File.separator);
-                sb4.append(AVOID_SCAN_FILE_NAME);
-                Util.createFile(new File(sb4.toString()));
+                Util.createFile(new File(HIDEDIRECTORY + File.separator + AVOID_SCAN_FILE_NAME));
             }
             long availableBytes = new StatFs(str).getAvailableBytes();
             if (DIRECTORY.equals(str)) {
@@ -866,29 +731,24 @@ public class Storage {
     public static long getLeftSpace() {
         long j = LEFT_SPACE.get();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("getLeftSpace() return ");
-        sb.append(j);
-        Log.i(str, sb.toString());
+        Log.i(str, "getLeftSpace() return " + j);
         return j;
     }
 
     private static Intent getSaveToCloudIntent(Context context, String str, long j, boolean z, long j2, boolean z2) {
         Intent intent = new Intent(SAVE_TO_CLOUD_ALBUM_ACTION);
-        String str2 = "com.miui.gallery";
-        intent.setPackage(str2);
-        List queryBroadcastReceivers = context.getPackageManager().queryBroadcastReceivers(intent, 0);
+        intent.setPackage("com.miui.gallery");
+        List<ResolveInfo> queryBroadcastReceivers = context.getPackageManager().queryBroadcastReceivers(intent, 0);
         if (queryBroadcastReceivers != null && queryBroadcastReceivers.size() > 0) {
-            intent.setComponent(new ComponentName(str2, ((ResolveInfo) queryBroadcastReceivers.get(0)).activityInfo.name));
+            intent.setComponent(new ComponentName("com.miui.gallery", queryBroadcastReceivers.get(0).activityInfo.name));
         }
         intent.putExtra(SAVE_TO_CLOUD_ALBUM_PATH_KAY, str);
         intent.putExtra(SAVE_TO_CLOUD_ALBUM_FILE_LENGTH, j);
-        String str3 = SAVE_TO_CLOUD_ALBUM_TEMP_FILE_KAY;
         if (z) {
-            intent.putExtra(str3, true);
+            intent.putExtra(SAVE_TO_CLOUD_ALBUM_TEMP_FILE_KAY, true);
             intent.putExtra(SAVE_TO_CLOUD_ALBUM_STORE_ID_KAY, j2);
         } else {
-            intent.putExtra(str3, false);
+            intent.putExtra(SAVE_TO_CLOUD_ALBUM_TEMP_FILE_KAY, false);
         }
         if (z2) {
             intent.putExtra(SAVE_TO_CLOUD_ALBUM_CACHE_LOCATION_KEY, LocationManager.instance().getLastKnownLocation());
@@ -898,21 +758,11 @@ public class Storage {
     }
 
     public static boolean hasSecondaryStorage() {
-        boolean z = true;
-        if (VERSION.SDK_INT == 28) {
-            if (UserHandle.myUserId() != 0 || !b.sj() || SECONDARY_STORAGE_PATH == null) {
-                z = false;
-            }
-            return z;
-        }
-        if (!b.sj() || SECONDARY_STORAGE_PATH == null) {
-            z = false;
-        }
-        return z;
+        return Build.VERSION.SDK_INT == 28 ? UserHandle.myUserId() == 0 && b.sj() && SECONDARY_STORAGE_PATH != null : b.sj() && SECONDARY_STORAGE_PATH != null;
     }
 
     private static void initQuota(Context context) {
-        if (VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26) {
             StorageStatsManager storageStatsManager = (StorageStatsManager) context.getSystemService(StorageStatsManager.class);
             Class[] clsArr = {StorageStatsManager.class};
             Method method = Util.getMethod(clsArr, "isQuotaSupported", "(Ljava/util/UUID;)Z");
@@ -923,12 +773,7 @@ public class Storage {
                     sQuotaBytes = (long) (((float) totalBytes) * 0.9f);
                     sReserveBytes = totalBytes - sQuotaBytes;
                     String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("quota: ");
-                    sb.append(sQuotaBytes);
-                    sb.append("|");
-                    sb.append(sReserveBytes);
-                    Log.d(str, sb.toString());
+                    Log.d(str, "quota: " + sQuotaBytes + "|" + sReserveBytes);
                 }
             }
         }
@@ -940,16 +785,10 @@ public class Storage {
             FileCompat.updateSDPath();
             String sdcardPath = CompatibilityUtils.getSdcardPath(context);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("initStorage sd=");
-            sb.append(sdcardPath);
-            Log.v(str, sb.toString());
+            Log.v(str, "initStorage sd=" + sdcardPath);
             if (sdcardPath != null) {
                 SECONDARY_STORAGE_PATH = sdcardPath;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(SECONDARY_STORAGE_PATH);
-                sb2.append(CAMERA_STORAGE_PATH_SUFFIX);
-                SECONDARY_BUCKET_ID = sb2.toString().toLowerCase(Locale.ENGLISH).hashCode();
+                SECONDARY_BUCKET_ID = (SECONDARY_STORAGE_PATH + CAMERA_STORAGE_PATH_SUFFIX).toLowerCase(Locale.ENGLISH).hashCode();
             } else {
                 SECONDARY_STORAGE_PATH = null;
             }
@@ -972,41 +811,22 @@ public class Storage {
             contentValues.put("latitude", Double.valueOf(location.getLatitude()));
             contentValues.put("longitude", Double.valueOf(location.getLongitude()));
         }
-        String str5 = ", uri = ";
-        String str6 = ", orientation = ";
         if (!z) {
             try {
-                Uri insert = context.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, contentValues);
-                String str7 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("insert: title ");
-                sb.append(str);
-                sb.append(str6);
-                sb.append(i);
-                sb.append(str5);
-                sb.append(insert);
-                Log.d(str7, sb.toString());
+                Uri insert = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+                String str5 = TAG;
+                Log.d(str5, "insert: title " + str + ", orientation = " + i + ", uri = " + insert);
                 return insert;
             } catch (Exception e2) {
-                String str8 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Failed to write MediaStore:");
-                sb2.append(e2.getMessage());
-                Log.e(str8, sb2.toString(), e2);
+                String str6 = TAG;
+                Log.e(str6, "Failed to write MediaStore:" + e2.getMessage(), e2);
                 return null;
             }
         } else {
-            Uri insert2 = context.getContentResolver().insert(Files.getContentUri("external"), contentValues);
+            Uri insert2 = context.getContentResolver().insert(MediaStore.Files.getContentUri("external"), contentValues);
             ParallelUtil.insertImageToParallelService(context, ContentUris.parseId(insert2), str4);
-            String str9 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("parallel insert: title ");
-            sb3.append(str);
-            sb3.append(str6);
-            sb3.append(i);
-            sb3.append(str5);
-            sb3.append(insert2);
-            Log.d(str9, sb3.toString());
+            String str7 = TAG;
+            Log.d(str7, "parallel insert: title " + str + ", orientation = " + i + ", uri = " + insert2);
             return insert2;
         }
     }
@@ -1070,13 +890,10 @@ public class Storage {
         contentValues.put("height", Integer.valueOf(i3));
         contentValues.put("mime_type", "image/jpeg");
         try {
-            return context.getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, contentValues);
+            return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
         } catch (Exception e2) {
             String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to new image");
-            sb.append(e2);
-            Log.e(str2, sb.toString());
+            Log.e(str2, "Failed to new image" + e2);
             return null;
         }
     }
@@ -1112,24 +929,13 @@ public class Storage {
     }
 
     public static void saveMorphoPanoramaOriginalPic(ByteBuffer byteBuffer, int i, String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DIRECTORY);
-        sb.append(File.separator);
-        sb.append(str);
-        sb.append(File.separator);
-        File file = new File(sb.toString());
+        File file = new File(DIRECTORY + File.separator + str + File.separator);
         if (!file.exists()) {
             file.mkdirs();
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(File.separator);
-        sb2.append(str);
-        sb2.append("_");
-        sb2.append(i);
         FileChannel fileChannel = null;
         try {
-            File file2 = new File(generateFilepath4Jpeg(sb2.toString()));
+            File file2 = new File(generateFilepath4Jpeg(str + File.separator + str + "_" + i));
             if (!file2.exists()) {
                 file2.createNewFile();
             }
@@ -1140,20 +946,18 @@ public class Storage {
             }
         } catch (Exception e2) {
             String str2 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("saveMorphoPanoramaOriginalPic  ");
-            sb3.append(e2.toString());
-            Log.e(str2, sb3.toString());
+            Log.e(str2, "saveMorphoPanoramaOriginalPic  " + e2.toString());
             if (fileChannel == null) {
                 return;
             }
-        } finally {
+        } catch (Throwable th) {
             if (fileChannel != null) {
                 try {
                     fileChannel.close();
                 } catch (Exception unused) {
                 }
             }
+            throw th;
         }
         try {
             fileChannel.close();
@@ -1165,24 +969,13 @@ public class Storage {
     /* JADX WARNING: Removed duplicated region for block: B:26:0x0082 A[SYNTHETIC, Splitter:B:26:0x0082] */
     /* JADX WARNING: Removed duplicated region for block: B:32:? A[RETURN, SYNTHETIC] */
     public static void saveOriginalPic(byte[] bArr, int i, String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DIRECTORY);
-        sb.append(File.separator);
-        sb.append(str);
-        sb.append(File.separator);
-        File file = new File(sb.toString());
+        File file = new File(DIRECTORY + File.separator + str + File.separator);
         if (!file.exists()) {
             file.mkdirs();
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(File.separator);
-        sb2.append(str);
-        sb2.append("_");
-        sb2.append(i);
         FileOutputStream fileOutputStream = null;
         try {
-            File file2 = new File(generateFilepath4Jpeg(sb2.toString()));
+            File file2 = new File(generateFilepath4Jpeg(str + File.separator + str + "_" + i));
             if (!file2.exists()) {
                 file2.createNewFile();
             }
@@ -1248,11 +1041,7 @@ public class Storage {
     private static void setLeftSpace(long j) {
         LEFT_SPACE.set(j);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setLeftSpace(");
-        sb.append(j);
-        sb.append(")");
-        Log.i(str, sb.toString());
+        Log.i(str, "setLeftSpace(" + j + ")");
     }
 
     public static void setStorageListener(StorageListener storageListener) {
@@ -1269,17 +1058,10 @@ public class Storage {
                 str2 = PRIMARY_STORAGE_PATH;
             }
             String str3 = sCurrentStoragePath;
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            String str4 = CAMERA_STORAGE_PATH_SUFFIX;
-            sb.append(str4);
-            if (!isLowStorageSpace(sb.toString())) {
+            if (!isLowStorageSpace(str + CAMERA_STORAGE_PATH_SUFFIX)) {
                 sCurrentStoragePath = str;
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str2);
-                sb2.append(str4);
-                if (!isLowStorageSpace(sb2.toString())) {
+                if (!isLowStorageSpace(str2 + CAMERA_STORAGE_PATH_SUFFIX)) {
                     sCurrentStoragePath = str2;
                 } else {
                     return;
@@ -1292,15 +1074,8 @@ public class Storage {
                     ((StorageListener) sStorageListener.get()).onStoragePathChanged();
                 }
             }
-            String str5 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Storage path is switched path = ");
-            sb3.append(DIRECTORY);
-            sb3.append(", FIRST_CONSIDER_STORAGE_PATH = ");
-            sb3.append(FIRST_CONSIDER_STORAGE_PATH);
-            sb3.append(", SECONDARY_STORAGE_PATH = ");
-            sb3.append(SECONDARY_STORAGE_PATH);
-            Log.d(str5, sb3.toString());
+            String str4 = TAG;
+            Log.d(str4, "Storage path is switched path = " + DIRECTORY + ", FIRST_CONSIDER_STORAGE_PATH = " + FIRST_CONSIDER_STORAGE_PATH + ", SECONDARY_STORAGE_PATH = " + SECONDARY_STORAGE_PATH);
         }
     }
 
@@ -1319,18 +1094,9 @@ public class Storage {
     }
 
     private static void updateDirectory() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(sCurrentStoragePath);
-        sb.append(CAMERA_STORAGE_PATH_SUFFIX);
-        DIRECTORY = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(DIRECTORY);
-        sb2.append(RAW_PATH_SUFFIX);
-        RAW_DIRECTORY = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(sCurrentStoragePath);
-        sb3.append(HIDE_CAMERA_STORAGE_PATH_SUFFIX);
-        HIDEDIRECTORY = sb3.toString();
+        DIRECTORY = sCurrentStoragePath + CAMERA_STORAGE_PATH_SUFFIX;
+        RAW_DIRECTORY = DIRECTORY + RAW_PATH_SUFFIX;
+        HIDEDIRECTORY = sCurrentStoragePath + HIDE_CAMERA_STORAGE_PATH_SUFFIX;
         BUCKET_ID = DIRECTORY.toLowerCase(Locale.ENGLISH).hashCode();
     }
 
@@ -1348,20 +1114,12 @@ public class Storage {
             }
             if (!TextUtils.isEmpty(str)) {
                 String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("save algorithm: ");
-                sb.append(str);
-                Log.d(str2, sb.toString());
+                Log.d(str2, "save algorithm: " + str);
                 exifInterface.addAlgorithmComment(str);
             }
             if (pictureInfo != null) {
                 String str3 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("save xiaomi comment: ");
-                sb2.append(pictureInfo.getInfoString());
-                sb2.append(", aiType = ");
-                sb2.append(pictureInfo.getAiType());
-                Log.d(str3, sb2.toString());
+                Log.d(str3, "save xiaomi comment: " + pictureInfo.getInfoString() + ", aiType = " + pictureInfo.getAiType());
                 exifInterface.addAiType(pictureInfo.getAiType());
                 if (pictureInfo.isBokehFrontCamera()) {
                     exifInterface.addFrontMirror(pictureInfo.isFrontMirror() ? 1 : 0);
@@ -1374,25 +1132,16 @@ public class Storage {
             bArr = byteArray;
         } catch (Exception e2) {
             String str4 = TAG;
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("updateExif error ");
-            sb3.append(e2.getMessage());
-            Log.e(str4, sb3.toString(), e2);
+            Log.e(str4, "updateExif error " + e2.getMessage(), e2);
         }
         String str5 = TAG;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append("update exif cost=");
-        sb4.append(System.currentTimeMillis() - currentTimeMillis);
-        Log.v(str5, sb4.toString());
+        Log.v(str5, "update exif cost=" + (System.currentTimeMillis() - currentTimeMillis));
         return bArr;
     }
 
     /* JADX WARNING: Can't wrap try/catch for region: R(4:24|25|26|27) */
     /* JADX WARNING: Code restructure failed: missing block: B:37:0x0086, code lost:
         r0 = move-exception;
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:38:0x0087, code lost:
-        r1 = r0;
      */
     /* JADX WARNING: Code restructure failed: missing block: B:40:?, code lost:
         throw r1;
@@ -1453,17 +1202,16 @@ public class Storage {
                         fileOutputStream.write(bArr2);
                     }
                     if (fileOutputStream != null) {
-                        $closeResource(null, fileOutputStream);
+                        $closeResource((Throwable) null, fileOutputStream);
                     }
-                    $closeResource(null, bufferedInputStream);
-                } catch (Throwable th) {
-                    Throwable th2 = th;
+                    $closeResource((Throwable) null, bufferedInputStream);
+                } finally {
+                    Throwable th = th;
                     try {
-                        throw th2;
-                    } catch (Throwable th3) {
-                        Throwable th4 = th3;
-                        $closeResource(th2, bufferedInputStream);
-                        throw th4;
+                    } catch (Throwable th2) {
+                        Throwable th3 = th2;
+                        $closeResource(th, bufferedInputStream);
+                        throw th3;
                     }
                 }
             } catch (Exception e2) {
@@ -1474,37 +1222,24 @@ public class Storage {
             str3 = generateFilepath4Jpeg(str2);
         }
         long length = file.length();
-        String str6 = "renameTo failed, tmpPath = ";
         if (!isUseDocumentMode()) {
             boolean renameTo = file.renameTo(new File(generateFilepath4Jpeg));
             if (!(exifInterface2 == null || str5 == null)) {
                 try {
                     new File(generateFilepath4Jpeg(str2)).delete();
                 } catch (Exception e3) {
-                    String str7 = TAG;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("Exception when delete old file ");
-                    sb2.append(str5);
-                    Log.e(str7, sb2.toString(), e3);
+                    Log.e(TAG, "Exception when delete old file " + str5, e3);
                 }
             }
             if (!renameTo) {
-                String str8 = TAG;
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str6);
-                sb3.append(str3);
-                Log.w(str8, sb3.toString());
+                Log.w(TAG, "renameTo failed, tmpPath = " + str3);
                 return false;
             }
         }
         ContentValues contentValues = new ContentValues(10);
         contentValues.put("title", str4);
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str4);
-        sb4.append(JPEG_SUFFIX);
-        contentValues.put("_display_name", sb4.toString());
-        String str9 = isUseDocumentMode() ? str3 : generateFilepath4Jpeg;
-        String str10 = "_data";
+        contentValues.put("_display_name", str4 + JPEG_SUFFIX);
+        String str6 = isUseDocumentMode() ? str3 : generateFilepath4Jpeg;
         if (bArr2 != null) {
             contentValues.put("mime_type", "image/jpeg");
             contentValues.put("orientation", Integer.valueOf(i));
@@ -1515,51 +1250,30 @@ public class Storage {
                 contentValues.put("latitude", Double.valueOf(location.getLatitude()));
                 contentValues.put("longitude", Double.valueOf(location.getLongitude()));
             }
-            contentValues.put(str10, str9);
+            contentValues.put("_data", str6);
         } else if (str5 != null) {
-            contentValues.put(str10, str9);
+            contentValues.put("_data", str6);
         }
-        context.getContentResolver().update(uri, contentValues, null, null);
+        context.getContentResolver().update(uri, contentValues, (String) null, (String[]) null);
         if (!z3 && isUseDocumentMode()) {
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append(generateFilepath4Jpeg);
-            sb5.append(".mid");
-            String sb6 = sb5.toString();
-            String str11 = " to ";
-            String str12 = "fail to rename ";
-            if (renameSdcardFile(generateFilepath4Jpeg, sb6)) {
+            String str7 = generateFilepath4Jpeg + ".mid";
+            if (renameSdcardFile(generateFilepath4Jpeg, str7)) {
                 z = renameSdcardFile(str3, generateFilepath4Jpeg);
                 if (z) {
-                    deleteSdcardFile(sb6);
+                    deleteSdcardFile(str7);
                 } else {
-                    String str13 = TAG;
-                    StringBuilder sb7 = new StringBuilder();
-                    sb7.append(str12);
-                    sb7.append(str3);
-                    sb7.append(str11);
-                    sb7.append(generateFilepath4Jpeg);
-                    Log.w(str13, sb7.toString());
+                    Log.w(TAG, "fail to rename " + str3 + " to " + generateFilepath4Jpeg);
                     deleteSdcardFile(str3);
                 }
             } else {
-                String str14 = TAG;
-                StringBuilder sb8 = new StringBuilder();
-                sb8.append(str12);
-                sb8.append(generateFilepath4Jpeg);
-                sb8.append(str11);
-                sb8.append(sb6);
-                Log.w(str14, sb8.toString());
-                deleteSdcardFile(sb6);
+                Log.w(TAG, "fail to rename " + generateFilepath4Jpeg + " to " + str7);
+                deleteSdcardFile(str7);
                 z = false;
             }
             FileCompat.removeDocumentFileForPath(str3);
             FileCompat.removeDocumentFileForPath(generateFilepath4Jpeg);
             if (!z) {
-                String str15 = TAG;
-                StringBuilder sb9 = new StringBuilder();
-                sb9.append(str6);
-                sb9.append(str3);
-                Log.w(str15, sb9.toString());
+                Log.w(TAG, "renameTo failed, tmpPath = " + str3);
                 return false;
             }
         }
@@ -1575,14 +1289,11 @@ public class Storage {
         ContentValues contentValues = new ContentValues(1);
         contentValues.put("_size", Long.valueOf(j));
         try {
-            contentResolver.update(uri, contentValues, null, null);
+            contentResolver.update(uri, contentValues, (String) null, (String[]) null);
             return true;
         } catch (Exception e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to updateMediaStore");
-            sb.append(e2);
-            Log.e(str, sb.toString());
+            Log.e(str, "Failed to updateMediaStore" + e2);
             return false;
         }
     }

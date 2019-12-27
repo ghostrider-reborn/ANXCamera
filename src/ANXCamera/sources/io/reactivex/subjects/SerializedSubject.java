@@ -3,11 +3,10 @@ package io.reactivex.subjects;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.util.AppendOnlyLinkedArrayList;
-import io.reactivex.internal.util.AppendOnlyLinkedArrayList.NonThrowingPredicate;
 import io.reactivex.internal.util.NotificationLite;
 import io.reactivex.plugins.RxJavaPlugins;
 
-final class SerializedSubject<T> extends Subject<T> implements NonThrowingPredicate<Object> {
+final class SerializedSubject<T> extends Subject<T> implements AppendOnlyLinkedArrayList.NonThrowingPredicate<Object> {
     final Subject<T> actual;
     volatile boolean done;
     boolean emitting;
@@ -17,7 +16,7 @@ final class SerializedSubject<T> extends Subject<T> implements NonThrowingPredic
         this.actual = subject;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void emitLoop() {
         AppendOnlyLinkedArrayList<Object> appendOnlyLinkedArrayList;
         while (true) {
@@ -156,10 +155,10 @@ final class SerializedSubject<T> extends Subject<T> implements NonThrowingPredic
         }
         if (z) {
             disposable.dispose();
-        } else {
-            this.actual.onSubscribe(disposable);
-            emitLoop();
+            return;
         }
+        this.actual.onSubscribe(disposable);
+        emitLoop();
     }
 
     /* access modifiers changed from: protected */
@@ -168,6 +167,6 @@ final class SerializedSubject<T> extends Subject<T> implements NonThrowingPredic
     }
 
     public boolean test(Object obj) {
-        return NotificationLite.acceptFull(obj, (Observer<? super T>) this.actual);
+        return NotificationLite.acceptFull(obj, this.actual);
     }
 }

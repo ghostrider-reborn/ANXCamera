@@ -6,15 +6,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
-import okhttp3.Headers.Builder;
 import okhttp3.Interceptor;
-import okhttp3.Interceptor.Chain;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
-import okhttp3.internal.cache.CacheStrategy.Factory;
+import okhttp3.internal.cache.CacheStrategy;
 import okhttp3.internal.http.HttpHeaders;
 import okhttp3.internal.http.HttpMethod;
 import okhttp3.internal.http.RealResponseBody;
@@ -84,7 +83,7 @@ public final class CacheInterceptor implements Interceptor {
     }
 
     private static Headers combine(Headers headers, Headers headers2) {
-        Builder builder = new Builder();
+        Headers.Builder builder = new Headers.Builder();
         int size = headers.size();
         for (int i = 0; i < size; i++) {
             String name = headers.name(i);
@@ -108,13 +107,13 @@ public final class CacheInterceptor implements Interceptor {
     }
 
     private static Response stripBody(Response response) {
-        return (response == null || response.body() == null) ? response : response.newBuilder().body(null).build();
+        return (response == null || response.body() == null) ? response : response.newBuilder().body((ResponseBody) null).build();
     }
 
-    public Response intercept(Chain chain) throws IOException {
+    public Response intercept(Interceptor.Chain chain) throws IOException {
         InternalCache internalCache = this.cache;
         Response response = internalCache != null ? internalCache.get(chain.request()) : null;
-        CacheStrategy cacheStrategy = new Factory(System.currentTimeMillis(), chain.request(), response).get();
+        CacheStrategy cacheStrategy = new CacheStrategy.Factory(System.currentTimeMillis(), chain.request(), response).get();
         Request request = cacheStrategy.networkRequest;
         Response response2 = cacheStrategy.cacheResponse;
         InternalCache internalCache2 = this.cache;

@@ -8,9 +8,9 @@ import java.nio.ByteBuffer;
 public class a implements e<ByteBuffer> {
     private final ByteBuffer buffer;
 
-    /* renamed from: com.bumptech.glide.load.b.a.a$a reason: collision with other inner class name */
+    /* renamed from: com.bumptech.glide.load.b.a.a$a  reason: collision with other inner class name */
     /* compiled from: ByteBufferRewinder */
-    public static class C0006a implements com.bumptech.glide.load.a.e.a<ByteBuffer> {
+    public static class C0006a implements e.a<ByteBuffer> {
         @NonNull
         public Class<ByteBuffer> M() {
             return ByteBuffer.class;

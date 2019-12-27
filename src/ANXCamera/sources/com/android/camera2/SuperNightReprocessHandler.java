@@ -2,10 +2,8 @@ package com.android.camera2;
 
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureRequest.Builder;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.os.Handler;
@@ -48,20 +46,19 @@ public class SuperNightReprocessHandler extends Handler {
     }
 
     private void clearCache() {
-        String str = TAG;
-        Log.e(str, "clearCache: E");
+        Log.e(TAG, "clearCache: E");
         this.mUnprocessedMeta.clear();
-        Iterator it = this.mUnprocessedData.iterator();
+        Iterator<Image> it = this.mUnprocessedData.iterator();
         while (it.hasNext()) {
-            ((Image) it.next()).close();
+            it.next().close();
         }
         this.mUnprocessedData.clear();
-        Log.e(str, "clearCache: X");
+        Log.e(TAG, "clearCache: X");
     }
 
     private boolean convert(Rect rect) {
-        int width = ((Image) this.mUnprocessedData.get(0)).getWidth();
-        int height = ((Image) this.mUnprocessedData.get(0)).getHeight();
+        int width = this.mUnprocessedData.get(0).getWidth();
+        int height = this.mUnprocessedData.get(0).getHeight();
         int i = rect.left;
         int i2 = width - rect.right;
         if (i > i2) {
@@ -114,14 +111,11 @@ public class SuperNightReprocessHandler extends Handler {
         return rect.intersect(HybridZoomingSystem.toCropRegion(this.mCameraDevice.getZoomRatio(), activeArraySize));
     }
 
-    private CaptureCallback generateReprocessCaptureCallback() {
-        return new CaptureCallback() {
+    private CameraCaptureSession.CaptureCallback generateReprocessCaptureCallback() {
+        return new CameraCaptureSession.CaptureCallback() {
             public void onCaptureBufferLost(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull Surface surface, long j) {
                 super.onCaptureBufferLost(cameraCaptureSession, captureRequest, surface, j);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureBufferLost:<JPEG>: frameNumber = ");
-                sb.append(j);
-                Log.e(SuperNightReprocessHandler.TAG, sb.toString());
+                Log.e(SuperNightReprocessHandler.TAG, "onCaptureBufferLost:<JPEG>: frameNumber = " + j);
                 if (SuperNightReprocessHandler.this.mCameraDevice.getSuperNight()) {
                     SuperNightReprocessHandler.this.mCameraDevice.setAWBLock(false);
                 }
@@ -130,10 +124,7 @@ public class SuperNightReprocessHandler extends Handler {
             }
 
             public void onCaptureCompleted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull TotalCaptureResult totalCaptureResult) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureCompleted:<JPEG>: ");
-                sb.append(totalCaptureResult.getFrameNumber());
-                Log.d(SuperNightReprocessHandler.TAG, sb.toString());
+                Log.d(SuperNightReprocessHandler.TAG, "onCaptureCompleted:<JPEG>: " + totalCaptureResult.getFrameNumber());
                 if (SuperNightReprocessHandler.this.mCameraDevice.getSuperNight()) {
                     SuperNightReprocessHandler.this.mCameraDevice.setAWBLock(false);
                 }
@@ -143,10 +134,7 @@ public class SuperNightReprocessHandler extends Handler {
 
             public void onCaptureFailed(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, @NonNull CaptureFailure captureFailure) {
                 super.onCaptureFailed(cameraCaptureSession, captureRequest, captureFailure);
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureFailed:<JPEG>: reason = ");
-                sb.append(captureFailure.getReason());
-                Log.e(SuperNightReprocessHandler.TAG, sb.toString());
+                Log.e(SuperNightReprocessHandler.TAG, "onCaptureFailed:<JPEG>: reason = " + captureFailure.getReason());
                 if (SuperNightReprocessHandler.this.mCameraDevice.getSuperNight()) {
                     SuperNightReprocessHandler.this.mCameraDevice.setAWBLock(false);
                 }
@@ -155,54 +143,42 @@ public class SuperNightReprocessHandler extends Handler {
             }
 
             public void onCaptureStarted(@NonNull CameraCaptureSession cameraCaptureSession, @NonNull CaptureRequest captureRequest, long j, long j2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onCaptureStarted:<JPEG>: ");
-                sb.append(j2);
-                Log.d(SuperNightReprocessHandler.TAG, sb.toString());
+                Log.d(SuperNightReprocessHandler.TAG, "onCaptureStarted:<JPEG>: " + j2);
                 super.onCaptureStarted(cameraCaptureSession, captureRequest, j, j2);
             }
         };
     }
 
     private void sendReprocessRequest() {
-        int size = this.mUnprocessedData.size();
-        int i = this.mMaxInputImageCount;
-        String str = TAG;
-        if (size == i && this.mUnprocessedMeta.size() == this.mMaxInputImageCount && this.mSuperNightProcess != null && !this.mIsCancelled.get()) {
+        if (this.mUnprocessedData.size() == this.mMaxInputImageCount && this.mUnprocessedMeta.size() == this.mMaxInputImageCount && this.mSuperNightProcess != null && !this.mIsCancelled.get()) {
             Collections.reverse(this.mUnprocessedData);
             Collections.reverse(this.mUnprocessedMeta);
-            Log.d(str, "sendReprocessRequest:<SNP>: E");
-            this.mSuperNightProcess.init(1793, ((Image) this.mUnprocessedData.get(0)).getWidth(), ((Image) this.mUnprocessedData.get(0)).getHeight(), ((Image) this.mUnprocessedData.get(0)).getPlanes()[0].getRowStride());
+            Log.d(TAG, "sendReprocessRequest:<SNP>: E");
+            this.mSuperNightProcess.init(1793, this.mUnprocessedData.get(0).getWidth(), this.mUnprocessedData.get(0).getHeight(), this.mUnprocessedData.get(0).getPlanes()[0].getRowStride());
             Image dequeueInputImage = this.mCameraDevice.getRawImageWriter().dequeueInputImage();
             Rect rect = new Rect();
             this.mSuperNightProcess.addAllInputInfo(this.mUnprocessedData, this.mUnprocessedMeta, SuperNightProcess.ASVL_PAF_RAW12_GRBG_16B, dequeueInputImage, rect);
             this.mSuperNightProcess.unInit();
-            Log.d(str, "sendReprocessRequest:<SNP>: X");
+            Log.d(TAG, "sendReprocessRequest:<SNP>: X");
             if (this.mIsCancelled.get()) {
                 clearCache();
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("sendReprocessRequest:<CROP>: E ");
-            sb.append(rect);
-            Log.d(str, sb.toString());
+            Log.d(TAG, "sendReprocessRequest:<CROP>: E " + rect);
             convert(rect);
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("sendReprocessRequest:<CROP>: X ");
-            sb2.append(rect);
-            Log.d(str, sb2.toString());
-            TotalCaptureResult totalCaptureResult = (TotalCaptureResult) this.mUnprocessedMeta.get((this.mMaxInputImageCount - 1) - 3);
+            Log.d(TAG, "sendReprocessRequest:<CROP>: X " + rect);
+            TotalCaptureResult totalCaptureResult = this.mUnprocessedMeta.get(this.mMaxInputImageCount + -1 + -3);
             try {
-                Log.d(str, "sendReprocessRequest:<CAM>: E");
+                Log.d(TAG, "sendReprocessRequest:<CAM>: E");
                 this.mCameraDevice.getRawImageWriter().queueInputImage(dequeueInputImage);
-                Builder createReprocessCaptureRequest = this.mCameraDevice.getCameraDevice().createReprocessCaptureRequest(totalCaptureResult);
+                CaptureRequest.Builder createReprocessCaptureRequest = this.mCameraDevice.getCameraDevice().createReprocessCaptureRequest(totalCaptureResult);
                 this.mCameraDevice.applySettingsForJpeg(createReprocessCaptureRequest);
                 createReprocessCaptureRequest.addTarget(this.mCameraDevice.getPhotoImageReader().getSurface());
                 createReprocessCaptureRequest.set(CaptureRequest.SCALER_CROP_REGION, rect);
                 this.mCameraDevice.getCaptureSession().capture(createReprocessCaptureRequest.build(), generateReprocessCaptureCallback(), this.mCaptureStateHandler);
-                Log.d(str, "sendReprocessRequest:<CAM>: X");
+                Log.d(TAG, "sendReprocessRequest:<CAM>: X");
             } catch (Exception e2) {
-                Log.d(str, "sendReprocessRequest:<CAM>", e2);
+                Log.d(TAG, "sendReprocessRequest:<CAM>", e2);
             } catch (Throwable th) {
                 clearCache();
                 throw th;
@@ -210,17 +186,16 @@ public class SuperNightReprocessHandler extends Handler {
             clearCache();
         } else if (this.mIsCancelled.get()) {
             clearCache();
-            Log.d(str, "sendReprocessRequest:<CAM>: CANCELLED");
+            Log.d(TAG, "sendReprocessRequest:<CAM>: CANCELLED");
         }
     }
 
     public void cancel() {
         if (this.mSuperNightProcess != null) {
-            String str = TAG;
-            Log.d(str, "cancelSuperNight: E");
+            Log.d(TAG, "cancelSuperNight: E");
             this.mIsCancelled.set(true);
             this.mSuperNightProcess.cancelSuperNight();
-            Log.d(str, "cancelSuperNight: X");
+            Log.d(TAG, "cancelSuperNight: X");
         }
         obtainMessage(19).sendToTarget();
     }

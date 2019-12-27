@@ -4,8 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.widget.SeekBar;
 import com.android.camera.R;
@@ -17,13 +16,8 @@ import com.android.camera.constant.BeautyConstant;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.log.Log;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.CameraModuleSpecial;
-import com.android.camera.protocol.ModeProtocol.MakeupProtocol;
-import com.android.camera.protocol.ModeProtocol.MiBeautyProtocol;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.ui.SeekBarCompat;
-import com.android.camera.ui.SeekBarCompat.OnSeekBarCompatChangeListener;
-import com.android.camera.ui.SeekBarCompat.OnSeekBarCompatTouchListener;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -36,7 +30,7 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.List;
 
 @Deprecated
-public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol, Consumer<Integer> {
+public class FragmentPopupMakeup extends BaseFragment implements ModeProtocol.MakeupProtocol, Consumer<Integer> {
     public static final int FRAGMENT_INFO = 252;
     private static final int INTERVAL = 5;
     /* access modifiers changed from: private */
@@ -76,30 +70,27 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
     public void initView(View view) {
         this.mIsRTL = Util.isLayoutRTL(getContext());
         this.mRootView = view;
-        ((MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources()) + getResources().getDimensionPixelSize(R.dimen.beauty_fragment_height);
-        view.setOnClickListener(new OnClickListener() {
+        ((ViewGroup.MarginLayoutParams) view.getLayoutParams()).bottomMargin = Util.getBottomHeight(getResources()) + getResources().getDimensionPixelSize(R.dimen.beauty_fragment_height);
+        view.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             }
         });
         this.mDisposable = Flowable.create(new FlowableOnSubscribe<Integer>() {
             public void subscribe(FlowableEmitter<Integer> flowableEmitter) throws Exception {
-                FragmentPopupMakeup.this.mFlowableEmitter = flowableEmitter;
+                FlowableEmitter unused = FragmentPopupMakeup.this.mFlowableEmitter = flowableEmitter;
             }
         }, BackpressureStrategy.DROP).observeOn(Schedulers.computation()).onBackpressureDrop(new Consumer<Integer>() {
             public void accept(@NonNull Integer num) throws Exception {
-                StringBuilder sb = new StringBuilder();
-                sb.append("seekbar change too fast :");
-                sb.append(num.toString());
-                Log.e(Log.VIEW_TAG, sb.toString());
+                Log.e(Log.VIEW_TAG, "seekbar change too fast :" + num.toString());
             }
-        }).subscribe((Consumer<? super T>) this);
+        }).subscribe(this);
         this.modeSettingBusiness = new BeautyModeSettingBusiness();
         this.mSeekBar = (SeekBarCompat) view.findViewById(R.id.makeup_params_level);
         this.mSeekBar.setProgressDrawable(getResources().getDrawable(R.drawable.seekbar_style));
-        this.mSeekBar.setOnSeekBarChangeListener(new OnSeekBarCompatChangeListener() {
+        this.mSeekBar.setOnSeekBarChangeListener(new SeekBarCompat.OnSeekBarCompatChangeListener() {
             public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
                 if (i == 0 || i == FragmentPopupMakeup.SEEKBAR_PROGRESS_MAX || Math.abs(i - FragmentPopupMakeup.this.mActiveProgress) > 5) {
-                    FragmentPopupMakeup.this.mActiveProgress = i;
+                    int unused = FragmentPopupMakeup.this.mActiveProgress = i;
                     FragmentPopupMakeup.this.mFlowableEmitter.onNext(Integer.valueOf(i / 1));
                 }
             }
@@ -110,7 +101,7 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-        this.mSeekBar.setOnSeekBarCompatTouchListener(new OnSeekBarCompatTouchListener() {
+        this.mSeekBar.setOnSeekBarCompatTouchListener(new SeekBarCompat.OnSeekBarCompatTouchListener() {
             private int getNextProgress(MotionEvent motionEvent) {
                 int width = FragmentPopupMakeup.this.mSeekBar.getWidth();
                 int x = (int) (((FragmentPopupMakeup.this.mIsRTL ? ((float) width) - motionEvent.getX() : motionEvent.getX()) / ((float) width)) * ((float) FragmentPopupMakeup.SEEKBAR_PROGRESS_MAX));
@@ -151,8 +142,8 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
     public void onDestroyView() {
         super.onDestroyView();
         if (this.mCurrentMode == 163) {
-            MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
-            CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+            ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+            ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
             if (cameraModuleSpecial != null) {
                 cameraModuleSpecial.showOrHideChip(miBeautyProtocol == null || !miBeautyProtocol.isBeautyPanelShow());
             }
@@ -171,7 +162,7 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
     public void onViewCreated(View view, @Nullable Bundle bundle) {
         super.onViewCreated(view, bundle);
         if (this.mCurrentMode == 163) {
-            CameraModuleSpecial cameraModuleSpecial = (CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
+            ModeProtocol.CameraModuleSpecial cameraModuleSpecial = (ModeProtocol.CameraModuleSpecial) ModeCoordinatorImpl.getInstance().getAttachProtocol(195);
             if (cameraModuleSpecial != null) {
                 cameraModuleSpecial.showOrHideChip(false);
             }
@@ -183,7 +174,7 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
         int i3 = (i == 163 || i == 165) ? 1 : -1;
         if (getView().getTag() == null || ((Integer) getView().getTag()).intValue() != i3) {
             getView().setTag(Integer.valueOf(i3));
-            MiBeautyProtocol miBeautyProtocol = (MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
+            ModeProtocol.MiBeautyProtocol miBeautyProtocol = (ModeProtocol.MiBeautyProtocol) ModeCoordinatorImpl.getInstance().getAttachProtocol(194);
             if (miBeautyProtocol == null || !miBeautyProtocol.isBeautyPanelShow()) {
                 i3 = -1;
             }
@@ -215,7 +206,7 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         modeCoordinator.attachProtocol(180, this);
         this.mIsShow = true;
@@ -236,7 +227,7 @@ public class FragmentPopupMakeup extends BaseFragment implements MakeupProtocol,
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         modeCoordinator.detachProtocol(180, this);
         Disposable disposable = this.mDisposable;

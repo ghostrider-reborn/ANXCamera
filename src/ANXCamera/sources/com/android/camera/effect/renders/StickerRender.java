@@ -3,7 +3,7 @@ package com.android.camera.effect.renders;
 import android.opengl.GLES20;
 import android.text.TextUtils;
 import com.android.camera.effect.EffectController;
-import com.android.camera.effect.renders.Render.FrameBufferCallback;
+import com.android.camera.effect.renders.Render;
 import com.android.camera.log.Log;
 import com.android.camera.sticker.StickerHelper;
 import com.android.camera.sticker.beautyprocessor.StickerBeautyProcessor;
@@ -87,10 +87,7 @@ public class StickerRender extends PixelEffectRender {
         int createInstance = this.mStBeautifyNative.createInstance(this.mPreviewWidth, this.mPreviewHeight);
         this.mMakeupProcessor = new StickerBeautyProcessor(this.mStBeautifyNative);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("initBeautify: result=");
-        sb.append(createInstance);
-        Log.d(str, sb.toString());
+        Log.d(str, "initBeautify: result=" + createInstance);
         if (createInstance == 0) {
             this.mStBeautifyNative.setParam(1, 0.36f);
             this.mStBeautifyNative.setParam(3, 0.74f);
@@ -109,13 +106,10 @@ public class StickerRender extends PixelEffectRender {
                     if (createInstance == 0) {
                         StickerRender.this.mSTHumanActionNative.setParam(2, 0.35f);
                     }
-                    StickerRender.this.mHumanActionInitDone = true;
+                    boolean unused = StickerRender.this.mHumanActionInitDone = true;
                     StickerRender.this.mHumanActionHandleLock.notify();
                     String access$300 = StickerRender.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("initHumanAction: result=");
-                    sb.append(createInstance);
-                    Log.d(access$300, sb.toString());
+                    Log.d(access$300, "initHumanAction: result=" + createInstance);
                 }
             }
         }).start();
@@ -124,10 +118,7 @@ public class StickerRender extends PixelEffectRender {
     private void initSticker() {
         int createInstance = this.mStStickerNative.createInstance(this.mCurrentSticker);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("initSticker: result=");
-        sb.append(createInstance);
-        Log.d(str, sb.toString());
+        Log.d(str, "initSticker: result=" + createInstance);
     }
 
     private void onDestroy() {
@@ -195,7 +186,7 @@ public class StickerRender extends PixelEffectRender {
             } else {
                 i5 = i;
             }
-            FrameBufferCallback frameBufferCallback = getFrameBufferCallback();
+            Render.FrameBufferCallback frameBufferCallback = getFrameBufferCallback();
             if (frameBufferCallback != null) {
                 ByteBuffer allocate = ByteBuffer.allocate(i6 * i7 * 4);
                 ByteBuffer byteBuffer = allocate;
@@ -212,13 +203,7 @@ public class StickerRender extends PixelEffectRender {
         if (i8 == 0) {
             return this.mTextureOutId[0];
         }
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("processTexture: result=");
-        sb.append(i8);
-        sb.append(" outTexId=");
-        sb.append(this.mTextureOutId[0]);
-        Log.e(str, sb.toString());
+        Log.e(TAG, "processTexture: result=" + i8 + " outTexId=" + this.mTextureOutId[0]);
         return i5;
     }
 
@@ -231,10 +216,7 @@ public class StickerRender extends PixelEffectRender {
     public void drawTexture(BasicTexture basicTexture, float f2, float f3, float f4, float f5, boolean z) {
         if (!basicTexture.onBind(this.mGLCanvas)) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("drawTexture: fail to bind texture ");
-            sb.append(basicTexture.getId());
-            Log.e(str, sb.toString());
+            Log.e(str, "drawTexture: fail to bind texture " + basicTexture.getId());
             return;
         }
         super.drawTexture(processTexture(basicTexture.getId(), this.mFrameBufferId, this.mFrameBufferWidth, this.mFrameBufferHeight), f2, f3, f4, f5, z);
@@ -273,10 +255,7 @@ public class StickerRender extends PixelEffectRender {
 
     public void setSticker(String str) {
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSticker: ");
-        sb.append(str);
-        Log.d(str2, sb.toString());
+        Log.d(str2, "setSticker: " + str);
         if (!TextUtils.equals(str, this.mCurrentSticker)) {
             this.mStStickerNative.changeSticker(str);
         }

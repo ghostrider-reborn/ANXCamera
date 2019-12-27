@@ -2,7 +2,7 @@ package android.support.v4.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.pm.PackageManager;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -77,11 +77,11 @@ public final class AccessibilityServiceInfoCompat {
     }
 
     public static int getCapabilities(@NonNull AccessibilityServiceInfo accessibilityServiceInfo) {
-        return VERSION.SDK_INT >= 18 ? accessibilityServiceInfo.getCapabilities() : accessibilityServiceInfo.getCanRetrieveWindowContent() ? 1 : 0;
+        return Build.VERSION.SDK_INT >= 18 ? accessibilityServiceInfo.getCapabilities() : accessibilityServiceInfo.getCanRetrieveWindowContent() ? 1 : 0;
     }
 
     @Nullable
     public static String loadDescription(@NonNull AccessibilityServiceInfo accessibilityServiceInfo, @NonNull PackageManager packageManager) {
-        return VERSION.SDK_INT >= 16 ? accessibilityServiceInfo.loadDescription(packageManager) : accessibilityServiceInfo.getDescription();
+        return Build.VERSION.SDK_INT >= 16 ? accessibilityServiceInfo.loadDescription(packageManager) : accessibilityServiceInfo.getDescription();
     }
 }

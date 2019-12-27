@@ -129,22 +129,18 @@ public class DataItemConfig extends DataItemBase {
     }
 
     public String provideKey() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("camera_settings_simple_mode_local_");
-        sb.append(provideLocalId(this.mCameraId, this.mIntentType));
-        return sb.toString();
+        return "camera_settings_simple_mode_local_" + provideLocalId(this.mCameraId, this.mIntentType);
     }
 
     public boolean reConfigBokehIfHdrChanged(int i, String str) {
-        if (!TextUtils.isEmpty(str) && !"off".equals(str)) {
-            if ("on".equals(this.mComponentBokeh.getComponentValue(i))) {
-                this.mComponentBokeh.toggle(i);
-                return true;
-            }
+        if (TextUtils.isEmpty(str) || "off".equals(str) || !"on".equals(this.mComponentBokeh.getComponentValue(i))) {
+            return false;
         }
-        return false;
+        this.mComponentBokeh.toggle(i);
+        return true;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     /* JADX WARNING: Code restructure failed: missing block: B:22:0x004f, code lost:
         if (r8 != 3) goto L_0x0075;
      */
@@ -213,35 +209,31 @@ public class DataItemConfig extends DataItemBase {
     }
 
     public boolean reConfigHdrIfBokehChanged(int i, String str) {
-        if ("on".equals(str)) {
-            String str2 = "off";
-            if (!str2.equals(this.mComponentHdr.getComponentValue(i))) {
-                this.mComponentHdr.setComponentValue(i, str2);
-                return true;
-            }
+        if (!"on".equals(str) || "off".equals(this.mComponentHdr.getComponentValue(i))) {
+            return false;
         }
-        return false;
+        this.mComponentHdr.setComponentValue(i, "off");
+        return true;
     }
 
     public boolean reConfigHhrIfFlashChanged(int i, String str) {
         String persistValue = getComponentHdr().getPersistValue(i);
-        String str2 = "live";
-        String str3 = "off";
+        String str2 = "off";
         if ("3".equals(str) || ComponentConfigFlash.FLASH_VALUE_SCREEN_LIGHT_AUTO.equals(str)) {
-            if ("normal".equals(persistValue) || str2.equals(persistValue)) {
+            if ("normal".equals(persistValue) || "live".equals(persistValue)) {
                 if (getComponentHdr().isSupportAutoHdr()) {
-                    str3 = "auto";
+                    str2 = "auto";
                 }
-                if (str3 != null || persistValue.equals(str3)) {
+                if (str2 != null || persistValue.equals(str2)) {
                     return false;
                 }
-                getComponentHdr().setComponentValue(i, str3);
+                getComponentHdr().setComponentValue(i, str2);
                 return !getComponentHdr().isEmpty();
             }
         } else if (!"1".equals(str)) {
         }
-        str3 = null;
-        if (str3 != null) {
+        str2 = null;
+        if (str2 != null) {
         }
         return false;
     }

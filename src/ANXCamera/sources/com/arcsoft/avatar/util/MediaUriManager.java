@@ -3,26 +3,25 @@ package com.arcsoft.avatar.util;
 import android.content.Context;
 import android.database.sqlite.SQLiteFullException;
 import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaUriManager implements MediaScannerConnectionClient {
+public class MediaUriManager implements MediaScannerConnection.MediaScannerConnectionClient {
 
-    /* renamed from: c reason: collision with root package name */
+    /* renamed from: c  reason: collision with root package name */
     private static final int f130c = 100;
 
-    /* renamed from: a reason: collision with root package name */
+    /* renamed from: a  reason: collision with root package name */
     private Context f131a;
 
-    /* renamed from: b reason: collision with root package name */
+    /* renamed from: b  reason: collision with root package name */
     private MediaScannerConnection f132b;
 
-    /* renamed from: d reason: collision with root package name */
+    /* renamed from: d  reason: collision with root package name */
     private List<Uri> f133d = new ArrayList();
 
-    /* renamed from: e reason: collision with root package name */
+    /* renamed from: e  reason: collision with root package name */
     private String f134e;
 
     public MediaUriManager(Context context) {
@@ -51,7 +50,7 @@ public class MediaUriManager implements MediaScannerConnectionClient {
         if (this.f133d.isEmpty()) {
             return null;
         }
-        return (Uri) this.f133d.get(0);
+        return this.f133d.get(0);
     }
 
     public List<Uri> getUris() {
@@ -65,7 +64,7 @@ public class MediaUriManager implements MediaScannerConnectionClient {
 
     public void onMediaScannerConnected() {
         try {
-            this.f132b.scanFile(this.f134e, null);
+            this.f132b.scanFile(this.f134e, (String) null);
         } catch (SQLiteFullException e2) {
             e2.printStackTrace();
         }

@@ -51,19 +51,12 @@ public class Camera2DataContainer {
             iArr[i] = this.mOrderedCameraIds[i];
             iArr2[i] = this.mOrderedCameraIds[(this.mOrderedCameraIds.length / 2) + i];
         }
-        String str = "====================================================================";
-        Log.d(TAG, str);
+        Log.d(TAG, "====================================================================");
+        String str = TAG;
+        Log.d(str, " BACK: [main, aux, sat, bokeh, virtual, infrared] = " + Arrays.toString(iArr));
         String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append(" BACK: [main, aux, sat, bokeh, virtual, infrared] = ");
-        sb.append(Arrays.toString(iArr));
-        Log.d(str2, sb.toString());
-        String str3 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("FRONT: [main, aux, sat, bokeh, virtual, infrared] = ");
-        sb2.append(Arrays.toString(iArr2));
-        Log.d(str3, sb2.toString());
-        Log.d(TAG, str);
+        Log.d(str2, "FRONT: [main, aux, sat, bokeh, virtual, infrared] = " + Arrays.toString(iArr2));
+        Log.d(TAG, "====================================================================");
     }
 
     public static Camera2DataContainer getInstance() {
@@ -89,11 +82,7 @@ public class Camera2DataContainer {
         try {
             reset();
             String[] cameraIdList = cameraManager.getCameraIdList();
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("All available camera ids: ");
-            sb.append(Arrays.deepToString(cameraIdList));
-            Log.d(str, sb.toString());
+            Log.d(TAG, "All available camera ids: " + Arrays.deepToString(cameraIdList));
             int max = Math.max(6, cameraIdList.length);
             this.mOrderedCameraIds = new int[(max * 2)];
             Arrays.fill(this.mOrderedCameraIds, -1);
@@ -103,10 +92,10 @@ public class Camera2DataContainer {
             int i2 = max;
             int i3 = 0;
             while (i < length) {
-                String str2 = cameraIdList[i];
+                String str = cameraIdList[i];
                 try {
-                    int parseInt = Integer.parseInt(str2);
-                    CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(str2);
+                    int parseInt = Integer.parseInt(str);
+                    CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(str);
                     this.mCapabilities.put(parseInt, new CameraCapabilities(cameraCharacteristics, parseInt));
                     if (DataRepository.dataItemFeature().isSupportUltraWide()) {
                         if (21 != parseInt) {
@@ -120,39 +109,25 @@ public class Camera2DataContainer {
                     } else if (!DataRepository.dataItemFeature().ec() || 23 != parseInt) {
                         Integer num = (Integer) cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
                         if (num == null) {
-                            String str3 = TAG;
-                            StringBuilder sb2 = new StringBuilder();
-                            sb2.append("Unknown facing direction of camera ");
-                            sb2.append(parseInt);
-                            Log.d(str3, sb2.toString());
+                            Log.d(TAG, "Unknown facing direction of camera " + parseInt);
                         } else if (num.intValue() == 1) {
-                            int i4 = i3 + 1;
                             this.mOrderedCameraIds[i3] = parseInt;
-                            i3 = i4;
+                            i3++;
                         } else if (num.intValue() == 0) {
-                            int i5 = i2 + 1;
                             this.mOrderedCameraIds[i2] = parseInt;
-                            i2 = i5;
+                            i2++;
                         }
                         i++;
                     } else {
                         i++;
                     }
                 } catch (NumberFormatException unused) {
-                    String str4 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("non-integer camera id: ");
-                    sb3.append(str2);
-                    Log.e(str4, sb3.toString());
+                    Log.e(TAG, "non-integer camera id: " + str);
                 }
             }
             dumpCameraIds();
         } catch (Exception e2) {
-            String str5 = TAG;
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("Failed to init Camera2DataContainer: ");
-            sb4.append(e2);
-            Log.e(str5, sb4.toString());
+            Log.e(TAG, "Failed to init Camera2DataContainer: " + e2);
             reset();
         }
         Log.d(TAG, "X: init()");
@@ -162,6 +137,7 @@ public class Camera2DataContainer {
         return (this.mCapabilities == null || this.mOrderedCameraIds == null) ? false : true;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public synchronized int getActualOpenCameraId(int i, int i2) {
         int i3;
         if (!isInitialized()) {
@@ -199,10 +175,7 @@ public class Camera2DataContainer {
                                         if (HybridZoomingSystem.IS_3_OR_MORE_SAT) {
                                             float f2 = HybridZoomingSystem.toFloat(HybridZoomingSystem.getZoomRatioHistory(i2, "1.0"), 1.0f);
                                             String str = TAG;
-                                            StringBuilder sb = new StringBuilder();
-                                            sb.append("Currently user selected zoom ratio is ");
-                                            sb.append(f2);
-                                            Log.d(str, sb.toString());
+                                            Log.d(str, "Currently user selected zoom ratio is " + f2);
                                             if (f2 >= 1.0f) {
                                                 if (HybridZoomingSystem.IS_4_SAT && f2 >= 2.0f) {
                                                     i3 = getAuxCameraId();
@@ -237,10 +210,7 @@ public class Camera2DataContainer {
                             if (!CameraSettings.isSupportedOpticalZoom() && HybridZoomingSystem.IS_3_OR_MORE_SAT && !CameraSettings.isUltraPixelOn()) {
                                 float f3 = HybridZoomingSystem.toFloat(HybridZoomingSystem.getZoomRatioHistory(i2, "1.0"), 1.0f);
                                 String str2 = TAG;
-                                StringBuilder sb2 = new StringBuilder();
-                                sb2.append("Currently user selected zoom ratio is ");
-                                sb2.append(f3);
-                                Log.d(str2, sb2.toString());
+                                Log.d(str2, "Currently user selected zoom ratio is " + f3);
                                 if (f3 < 1.0f) {
                                     i3 = getUltraWideCameraId();
                                     break;
@@ -370,13 +340,10 @@ public class Camera2DataContainer {
             Log.d(TAG, "Warning: getCapabilities(): #init() failed.");
             return null;
         }
-        CameraCapabilities cameraCapabilities = (CameraCapabilities) this.mCapabilities.get(i);
+        CameraCapabilities cameraCapabilities = this.mCapabilities.get(i);
         if (cameraCapabilities == null) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Warning: getCapabilities(): return null for camera: ");
-            sb.append(i);
-            Log.d(str, sb.toString());
+            Log.d(str, "Warning: getCapabilities(): return null for camera: " + i);
         }
     }
 

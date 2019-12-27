@@ -6,7 +6,6 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.TextView.BufferType;
 import com.android.camera.R;
 
 @SuppressLint({"AppCompatCustomView"})
@@ -38,13 +37,10 @@ public class AdaptiveTextView extends TextView {
         TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, R.styleable.AdaptiveTextView);
         this.mMaxFontScale = obtainStyledAttributes.getFloat(0, 1.4f);
         obtainStyledAttributes.recycle();
-        StringBuilder sb = new StringBuilder();
-        sb.append("init:  mMaxFontScale :");
-        sb.append(this.mMaxFontScale);
-        Log.i(TAG, sb.toString());
+        Log.i(TAG, "init:  mMaxFontScale :" + this.mMaxFontScale);
     }
 
-    public void setText(CharSequence charSequence, BufferType bufferType) {
+    public void setText(CharSequence charSequence, TextView.BufferType bufferType) {
         super.setText(charSequence, bufferType);
         if (this.mMaxFontScale > 0.0f) {
             float f2 = getResources().getConfiguration().fontScale;
@@ -53,12 +49,7 @@ public class AdaptiveTextView extends TextView {
                     this.mRealFontScale = getTextSize() * (this.mMaxFontScale / f2);
                 }
                 setTextSize(0, this.mRealFontScale);
-                StringBuilder sb = new StringBuilder();
-                sb.append("setText:  mMaxFontScale :");
-                sb.append(this.mMaxFontScale);
-                sb.append("   mRealFontScale : ");
-                sb.append(this.mRealFontScale);
-                Log.i(TAG, sb.toString());
+                Log.i(TAG, "setText:  mMaxFontScale :" + this.mMaxFontScale + "   mRealFontScale : " + this.mRealFontScale);
             }
         }
     }

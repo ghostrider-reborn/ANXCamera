@@ -1,6 +1,6 @@
 package com.facebook.rebound;
 
-import com.facebook.rebound.ChoreographerCompat.FrameCallback;
+import com.facebook.rebound.ChoreographerCompat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -11,7 +11,7 @@ public class AnimationQueue {
     private final Queue<Double> mAnimationQueue = new LinkedList();
     private final List<Callback> mCallbacks = new ArrayList();
     private final ChoreographerCompat mChoreographer = ChoreographerCompat.getInstance();
-    private final FrameCallback mChoreographerCallback = new FrameCallback() {
+    private final ChoreographerCompat.FrameCallback mChoreographerCallback = new ChoreographerCompat.FrameCallback() {
         public void doFrame(long j) {
             AnimationQueue.this.onFrame(j);
         }
@@ -27,9 +27,9 @@ public class AnimationQueue {
     /* access modifiers changed from: private */
     public void onFrame(long j) {
         int i;
-        Double d2 = (Double) this.mPendingQueue.poll();
-        if (d2 != null) {
-            this.mAnimationQueue.offer(d2);
+        Double poll = this.mPendingQueue.poll();
+        if (poll != null) {
+            this.mAnimationQueue.offer(poll);
             i = 0;
         } else {
             i = Math.max(this.mCallbacks.size() - this.mAnimationQueue.size(), 0);
@@ -41,10 +41,10 @@ public class AnimationQueue {
             if (size <= -1) {
                 break;
             }
-            Double d3 = (Double) this.mTempValues.get(size);
+            Double d2 = this.mTempValues.get(size);
             int size2 = ((this.mTempValues.size() - 1) - size) + i;
             if (this.mCallbacks.size() > size2) {
-                ((Callback) this.mCallbacks.get(size2)).onFrame(d3);
+                this.mCallbacks.get(size2).onFrame(d2);
             }
         }
         this.mTempValues.clear();

@@ -88,7 +88,7 @@ public final class FlowableCollectSingle<T, U> extends Single<U> implements Fuse
     }
 
     public Flowable<U> fuseToFlowable() {
-        return RxJavaPlugins.onAssembly((Flowable<T>) new FlowableCollect<T>(this.source, this.initialSupplier, this.collector));
+        return RxJavaPlugins.onAssembly(new FlowableCollect(this.source, this.initialSupplier, this.collector));
     }
 
     /* access modifiers changed from: protected */
@@ -96,9 +96,9 @@ public final class FlowableCollectSingle<T, U> extends Single<U> implements Fuse
         try {
             Object call = this.initialSupplier.call();
             ObjectHelper.requireNonNull(call, "The initialSupplier returned a null value");
-            this.source.subscribe((FlowableSubscriber<? super T>) new CollectSubscriber<Object>(singleObserver, call, this.collector));
+            this.source.subscribe(new CollectSubscriber(singleObserver, call, this.collector));
         } catch (Throwable th) {
-            EmptyDisposable.error(th, singleObserver);
+            EmptyDisposable.error(th, (SingleObserver<?>) singleObserver);
         }
     }
 }

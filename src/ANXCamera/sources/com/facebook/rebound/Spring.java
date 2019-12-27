@@ -51,11 +51,10 @@ public class Spring {
 
     private void interpolate(double d2) {
         PhysicsState physicsState = this.mCurrentState;
-        double d3 = physicsState.position * d2;
         PhysicsState physicsState2 = this.mPreviousState;
-        double d4 = 1.0d - d2;
-        physicsState.position = d3 + (physicsState2.position * d4);
-        physicsState.velocity = (physicsState.velocity * d2) + (physicsState2.velocity * d4);
+        double d3 = 1.0d - d2;
+        physicsState.position = (physicsState.position * d2) + (physicsState2.position * d3);
+        physicsState.velocity = (physicsState.velocity * d2) + (physicsState2.velocity * d3);
     }
 
     public Spring addListener(SpringListener springListener) {
@@ -66,7 +65,7 @@ public class Spring {
         throw new IllegalArgumentException("newListener is required");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void advance(double d2) {
         double d3;
         boolean z;
@@ -144,15 +143,15 @@ public class Spring {
             } else {
                 z3 = false;
             }
-            Iterator it = this.mListeners.iterator();
+            Iterator<SpringListener> it = this.mListeners.iterator();
             while (it.hasNext()) {
-                SpringListener springListener = (SpringListener) it.next();
+                SpringListener next = it.next();
                 if (z) {
-                    springListener.onSpringActivate(this);
+                    next.onSpringActivate(this);
                 }
-                springListener.onSpringUpdate(this);
+                next.onSpringUpdate(this);
                 if (z3) {
-                    springListener.onSpringAtRest(this);
+                    next.onSpringAtRest(this);
                 }
             }
         }
@@ -245,9 +244,9 @@ public class Spring {
         this.mStartValue = d2;
         this.mCurrentState.position = d2;
         this.mSpringSystem.activateSpring(getId());
-        Iterator it = this.mListeners.iterator();
+        Iterator<SpringListener> it = this.mListeners.iterator();
         while (it.hasNext()) {
-            ((SpringListener) it.next()).onSpringUpdate(this);
+            it.next().onSpringUpdate(this);
         }
         if (z) {
             setAtRest();
@@ -262,9 +261,9 @@ public class Spring {
         this.mStartValue = getCurrentValue();
         this.mEndValue = d2;
         this.mSpringSystem.activateSpring(getId());
-        Iterator it = this.mListeners.iterator();
+        Iterator<SpringListener> it = this.mListeners.iterator();
         while (it.hasNext()) {
-            ((SpringListener) it.next()).onSpringEndStateChange(this);
+            it.next().onSpringEndStateChange(this);
         }
         return this;
     }

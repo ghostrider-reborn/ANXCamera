@@ -4,8 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore.Images.Thumbnails;
-import android.provider.MediaStore.Video;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
@@ -36,7 +35,7 @@ public class c implements d<InputStream> {
 
         public Cursor b(Uri uri) {
             String lastPathSegment = uri.getLastPathSegment();
-            return this.ae.query(Thumbnails.EXTERNAL_CONTENT_URI, je, ke, new String[]{lastPathSegment}, null);
+            return this.ae.query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, je, ke, new String[]{lastPathSegment}, (String) null);
         }
     }
 
@@ -52,7 +51,7 @@ public class c implements d<InputStream> {
 
         public Cursor b(Uri uri) {
             String lastPathSegment = uri.getLastPathSegment();
-            return this.ae.query(Video.Thumbnails.EXTERNAL_CONTENT_URI, je, ke, new String[]{lastPathSegment}, null);
+            return this.ae.query(MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI, je, ke, new String[]{lastPathSegment}, (String) null);
         }
     }
 
@@ -85,14 +84,13 @@ public class c implements d<InputStream> {
         return InputStream.class;
     }
 
-    public void a(@NonNull Priority priority, @NonNull com.bumptech.glide.load.a.d.a<? super InputStream> aVar) {
+    public void a(@NonNull Priority priority, @NonNull d.a<? super InputStream> aVar) {
         try {
             this.inputStream = ck();
             aVar.b(this.inputStream);
         } catch (FileNotFoundException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Failed to find thumbnail file", e2);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to find thumbnail file", e2);
             }
             aVar.b((Exception) e2);
         }

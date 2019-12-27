@@ -3,8 +3,6 @@ package com.android.camera.fragment;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.AdapterDataObserver;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import java.lang.reflect.ParameterizedType;
@@ -12,14 +10,14 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolder> {
+public class RecyclerAdapterWrapper<T extends RecyclerView.Adapter> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int FOOTER_VIEW_TYPE = -2000;
     private static final int HEADER_VIEW_TYPE = -1000;
     private final T mBase;
-    private final Class<? extends ViewHolder> mBaseHolderClass;
+    private final Class<? extends RecyclerView.ViewHolder> mBaseHolderClass;
     private final List<View> mFooters = new ArrayList();
     private final List<View> mHeaders = new ArrayList();
-    private AdapterDataObserver o;
+    private RecyclerView.AdapterDataObserver o;
 
     public RecyclerAdapterWrapper(T t) {
         this.mBase = t;
@@ -29,13 +27,13 @@ public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolde
             if (type instanceof Class) {
                 this.mBaseHolderClass = (Class) type;
             } else {
-                this.mBaseHolderClass = ViewHolder.class;
+                this.mBaseHolderClass = RecyclerView.ViewHolder.class;
             }
         } else {
-            this.mBaseHolderClass = ViewHolder.class;
+            this.mBaseHolderClass = RecyclerView.ViewHolder.class;
         }
         T t2 = this.mBase;
-        AnonymousClass1 r0 = new AdapterDataObserver() {
+        AnonymousClass1 r0 = new RecyclerView.AdapterDataObserver() {
             public void onChanged() {
                 super.onChanged();
                 RecyclerAdapterWrapper.this.notifyDataSetChanged();
@@ -88,7 +86,7 @@ public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolde
     }
 
     public void detach() {
-        AdapterDataObserver adapterDataObserver = this.o;
+        RecyclerView.AdapterDataObserver adapterDataObserver = this.o;
         if (adapterDataObserver != null) {
             T t = this.mBase;
             if (t != null) {
@@ -99,7 +97,7 @@ public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolde
 
     public View getFooter(int i) {
         if (i < this.mFooters.size()) {
-            return (View) this.mFooters.get(i);
+            return this.mFooters.get(i);
         }
         return null;
     }
@@ -110,7 +108,7 @@ public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolde
 
     public View getHeader(int i) {
         if (i < this.mHeaders.size()) {
-            return (View) this.mHeaders.get(i);
+            return this.mHeaders.get(i);
         }
         return null;
     }
@@ -149,20 +147,20 @@ public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolde
         this.mBase.onAttachedToRecyclerView(recyclerView);
     }
 
-    public void onBindViewHolder(ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
         if (i >= this.mHeaders.size() && i < this.mHeaders.size() + this.mBase.getItemCount()) {
             this.mBase.onBindViewHolder(viewHolder, i - this.mHeaders.size());
         }
     }
 
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         if (isHeader(i)) {
-            return new ViewHolder((View) this.mHeaders.get(Math.abs(i + 1000))) {
+            return new RecyclerView.ViewHolder(this.mHeaders.get(Math.abs(i + 1000))) {
             };
         } else if (!isFooter(i)) {
             return this.mBase.onCreateViewHolder(viewGroup, i);
         } else {
-            return new ViewHolder((View) this.mFooters.get(Math.abs(i + 2000))) {
+            return new RecyclerView.ViewHolder(this.mFooters.get(Math.abs(i + 2000))) {
             };
         }
     }
@@ -171,25 +169,25 @@ public class RecyclerAdapterWrapper<T extends Adapter> extends Adapter<ViewHolde
         this.mBase.onDetachedFromRecyclerView(recyclerView);
     }
 
-    public boolean onFailedToRecycleView(ViewHolder viewHolder) {
-        return this.mBaseHolderClass.isInstance(viewHolder) ? this.mBase.onFailedToRecycleView((ViewHolder) this.mBaseHolderClass.cast(viewHolder)) : super.onFailedToRecycleView(viewHolder);
+    public boolean onFailedToRecycleView(RecyclerView.ViewHolder viewHolder) {
+        return this.mBaseHolderClass.isInstance(viewHolder) ? this.mBase.onFailedToRecycleView((RecyclerView.ViewHolder) this.mBaseHolderClass.cast(viewHolder)) : super.onFailedToRecycleView(viewHolder);
     }
 
-    public void onViewAttachedToWindow(ViewHolder viewHolder) {
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder viewHolder) {
         if (this.mBaseHolderClass.isInstance(viewHolder)) {
-            this.mBase.onViewAttachedToWindow((ViewHolder) this.mBaseHolderClass.cast(viewHolder));
+            this.mBase.onViewAttachedToWindow((RecyclerView.ViewHolder) this.mBaseHolderClass.cast(viewHolder));
         }
     }
 
-    public void onViewDetachedFromWindow(ViewHolder viewHolder) {
+    public void onViewDetachedFromWindow(RecyclerView.ViewHolder viewHolder) {
         if (this.mBaseHolderClass.isInstance(viewHolder)) {
-            this.mBase.onViewDetachedFromWindow((ViewHolder) this.mBaseHolderClass.cast(viewHolder));
+            this.mBase.onViewDetachedFromWindow((RecyclerView.ViewHolder) this.mBaseHolderClass.cast(viewHolder));
         }
     }
 
-    public void onViewRecycled(ViewHolder viewHolder) {
+    public void onViewRecycled(RecyclerView.ViewHolder viewHolder) {
         if (this.mBaseHolderClass.isInstance(viewHolder)) {
-            this.mBase.onViewRecycled((ViewHolder) this.mBaseHolderClass.cast(viewHolder));
+            this.mBase.onViewRecycled((RecyclerView.ViewHolder) this.mBaseHolderClass.cast(viewHolder));
         }
     }
 

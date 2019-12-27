@@ -9,7 +9,7 @@ public class TextureRotationUtil {
     public static final float[] TEXTURE_ROTATED_270 = {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
     public static final float[] TEXTURE_ROTATED_90 = {1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
 
-    /* renamed from: com.miui.filtersdk.utils.TextureRotationUtil$1 reason: invalid class name */
+    /* renamed from: com.miui.filtersdk.utils.TextureRotationUtil$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$utils$Rotation = new int[Rotation.values().length];
 

@@ -70,11 +70,7 @@ public class EGLWrapper {
         int eglGetError = EGL14.eglGetError();
         if (eglGetError != 12288) {
             new Exception("NOT_ERROR_JUST_SEE_CALL_STACK").printStackTrace();
-            StringBuilder sb = new StringBuilder();
-            sb.append(str);
-            sb.append(": EGL_ERROR_CODE: 0x");
-            sb.append(Integer.toHexString(eglGetError));
-            throw new RuntimeException(sb.toString());
+            throw new RuntimeException(str + ": EGL_ERROR_CODE: 0x" + Integer.toHexString(eglGetError));
         }
     }
 
@@ -101,10 +97,9 @@ public class EGLWrapper {
             int[] iArr = new int[2];
             if (EGL14.eglInitialize(eGLDisplay, iArr, 0, iArr, 1)) {
                 int[] iArr2 = this.mIsPbuffSurface ? new int[]{12339, 1, 12352, 4, 12324, 8, 12323, 8, 12322, 8, 12321, 8, 12325, 8, 12610, 1, 12344} : new int[]{12339, 4, 12352, 4, 12324, 8, 12323, 8, 12322, 8, 12321, 8, 12325, 8, 12610, 1, 12344};
-                int[] iArr3 = new int[1];
                 EGLDisplay eGLDisplay2 = this.mEGLDisplay;
                 EGLConfig[] eGLConfigArr = this.mEGLConfigs;
-                if (EGL14.eglChooseConfig(eGLDisplay2, iArr2, 0, eGLConfigArr, 0, eGLConfigArr.length, iArr3, 0)) {
+                if (EGL14.eglChooseConfig(eGLDisplay2, iArr2, 0, eGLConfigArr, 0, eGLConfigArr.length, new int[1], 0)) {
                     this.mEGLContext = EGL14.eglCreateContext(this.mEGLDisplay, this.mEGLConfigs[0], this.EGL_SHARE_CONTEXT, new int[]{12440, 2, 12344}, 0);
                     checkEglError("eglCreateContext");
                     if (this.mEGLContext != null) {
@@ -161,10 +156,7 @@ public class EGLWrapper {
                     checkEglError("makeCurrent");
                 }
                 String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("makeCurrent()-> ");
-                sb.append(eglMakeCurrent);
-                Log.d(str, sb.toString());
+                Log.d(str, "makeCurrent()-> " + eglMakeCurrent);
                 return eglMakeCurrent;
             }
         }
@@ -197,10 +189,7 @@ public class EGLWrapper {
             }
         } catch (Exception e2) {
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("release release mSurface failed : ");
-            sb.append(e2.getMessage());
-            Log.e(str, sb.toString());
+            Log.e(str, "release release mSurface failed : " + e2.getMessage());
         }
         this.mSurface = null;
     }
@@ -212,17 +201,18 @@ public class EGLWrapper {
 
     public boolean swapBuffers() {
         EGLDisplay eGLDisplay = this.mEGLDisplay;
-        if (eGLDisplay != null) {
-            EGLSurface eGLSurface = this.mEGLSurface;
-            if (eGLSurface != null) {
-                boolean eglSwapBuffers = EGL14.eglSwapBuffers(eGLDisplay, eGLSurface);
-                if (!eglSwapBuffers) {
-                    checkEglError("makeCurrent");
-                }
-                return eglSwapBuffers;
-            }
+        if (eGLDisplay == null) {
+            return false;
         }
-        return false;
+        EGLSurface eGLSurface = this.mEGLSurface;
+        if (eGLSurface == null) {
+            return false;
+        }
+        boolean eglSwapBuffers = EGL14.eglSwapBuffers(eGLDisplay, eGLSurface);
+        if (!eglSwapBuffers) {
+            checkEglError("makeCurrent");
+        }
+        return eglSwapBuffers;
     }
 
     public void updateSize(int i, int i2) {

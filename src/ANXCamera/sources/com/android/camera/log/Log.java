@@ -53,15 +53,8 @@ public final class Log {
     }
 
     public static int c(String str, String str2) {
-        StringBuilder sb = new StringBuilder();
-        String str3 = CONTINUAL;
-        sb.append(str3);
-        sb.append(str);
-        String tagFormat = tagFormat(sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(CAMERA_LOGTAG_PREFIX);
-        sb2.append(str3);
-        if (shouldLogForDebug(sb2.toString(), 2)) {
+        String tagFormat = tagFormat(CONTINUAL + str);
+        if (shouldLogForDebug(CAMERA_LOGTAG_PREFIX + CONTINUAL, 2)) {
             return android.util.Log.v(tagFormat, str2);
         }
         return -1;
@@ -85,12 +78,7 @@ public final class Log {
 
     private static void dumpComponentName(String str, ComponentName componentName) {
         if (componentName != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Component: ");
-            sb.append(componentName.getPackageName());
-            sb.append("/");
-            sb.append(componentName.getClassName());
-            android.util.Log.v(str, sb.toString());
+            android.util.Log.v(str, "Component: " + componentName.getPackageName() + "/" + componentName.getClassName());
             return;
         }
         android.util.Log.v(str, "Component: null");
@@ -104,18 +92,9 @@ public final class Log {
                     dumpExtras(str, (Bundle) obj);
                 } else {
                     try {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Extra[");
-                        sb.append(str2);
-                        sb.append("] :");
-                        sb.append(String.valueOf(bundle.get(str2)));
-                        android.util.Log.v(str, sb.toString());
+                        android.util.Log.v(str, "Extra[" + str2 + "] :" + String.valueOf(bundle.get(str2)));
                     } catch (BadParcelableException e2) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Extra contains unknown class instance for [");
-                        sb2.append(str2);
-                        sb2.append("]: ");
-                        android.util.Log.w(str, sb2.toString(), e2);
+                        android.util.Log.w(str, "Extra contains unknown class instance for [" + str2 + "]: ", e2);
                     }
                 }
             }
@@ -128,33 +107,19 @@ public final class Log {
         } else if (intent == null) {
             android.util.Log.v(str, "intent is null.");
         } else {
-            String str2 = "=================================================================";
-            android.util.Log.v(str, str2);
+            android.util.Log.v(str, "=================================================================");
+            android.util.Log.v(str, "Intent[@" + Integer.toHexString(intent.hashCode()) + "] content:");
             StringBuilder sb = new StringBuilder();
-            sb.append("Intent[@");
-            sb.append(Integer.toHexString(intent.hashCode()));
-            sb.append("] content:");
+            sb.append("Action   : ");
+            sb.append(intent.getAction());
             android.util.Log.v(str, sb.toString());
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("Action   : ");
-            sb2.append(intent.getAction());
-            android.util.Log.v(str, sb2.toString());
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("Category : ");
-            sb3.append(intent.getCategories());
-            android.util.Log.v(str, sb3.toString());
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("Data     : ");
-            sb4.append(intent.getDataString());
-            android.util.Log.v(str, sb4.toString());
+            android.util.Log.v(str, "Category : " + intent.getCategories());
+            android.util.Log.v(str, "Data     : " + intent.getDataString());
             dumpComponentName(str, intent.getComponent());
             Bundle extras = intent.getExtras();
-            StringBuilder sb5 = new StringBuilder();
-            sb5.append("HasExtras: ");
-            sb5.append(hasExtras(extras));
-            android.util.Log.v(str, sb5.toString());
+            android.util.Log.v(str, "HasExtras: " + hasExtras(extras));
             dumpExtras(str, extras);
-            android.util.Log.v(str, str2);
+            android.util.Log.v(str, "=================================================================");
         }
     }
 
@@ -178,20 +143,18 @@ public final class Log {
         return SystemProperties.getInt("camera.debug.log_level", 2);
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:4:0x0007, code lost:
-        if (r3.isEmpty() == false) goto L_0x0014;
-     */
     private static boolean hasExtras(Bundle bundle) {
-        boolean z = true;
         if (bundle != null) {
             try {
+                if (!bundle.isEmpty()) {
+                    return true;
+                }
             } catch (BadParcelableException e2) {
                 android.util.Log.w("IntentLogger", "Extra contains unknown class instance: ", e2);
                 return true;
             }
         }
-        z = false;
-        return z;
+        return false;
     }
 
     public static int i(String str, String str2) {

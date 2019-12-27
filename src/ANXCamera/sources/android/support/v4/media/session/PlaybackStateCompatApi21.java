@@ -1,7 +1,6 @@
 package android.support.v4.media.session;
 
 import android.media.session.PlaybackState;
-import android.media.session.PlaybackState.CustomAction.Builder;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import java.util.Iterator;
@@ -15,23 +14,23 @@ class PlaybackStateCompatApi21 {
         }
 
         public static String getAction(Object obj) {
-            return ((android.media.session.PlaybackState.CustomAction) obj).getAction();
+            return ((PlaybackState.CustomAction) obj).getAction();
         }
 
         public static Bundle getExtras(Object obj) {
-            return ((android.media.session.PlaybackState.CustomAction) obj).getExtras();
+            return ((PlaybackState.CustomAction) obj).getExtras();
         }
 
         public static int getIcon(Object obj) {
-            return ((android.media.session.PlaybackState.CustomAction) obj).getIcon();
+            return ((PlaybackState.CustomAction) obj).getIcon();
         }
 
         public static CharSequence getName(Object obj) {
-            return ((android.media.session.PlaybackState.CustomAction) obj).getName();
+            return ((PlaybackState.CustomAction) obj).getName();
         }
 
         public static Object newInstance(String str, CharSequence charSequence, int i, Bundle bundle) {
-            Builder builder = new Builder(str, charSequence, i);
+            PlaybackState.CustomAction.Builder builder = new PlaybackState.CustomAction.Builder(str, charSequence, i);
             builder.setExtras(bundle);
             return builder.build();
         }
@@ -84,9 +83,9 @@ class PlaybackStateCompatApi21 {
         long j7 = j3;
         builder.setActions(j3);
         builder.setErrorMessage(charSequence);
-        Iterator it = list.iterator();
+        Iterator<Object> it = list.iterator();
         while (it.hasNext()) {
-            builder.addCustomAction((android.media.session.PlaybackState.CustomAction) it.next());
+            builder.addCustomAction((PlaybackState.CustomAction) it.next());
         }
         builder.setActiveQueueItemId(j5);
         return builder.build();

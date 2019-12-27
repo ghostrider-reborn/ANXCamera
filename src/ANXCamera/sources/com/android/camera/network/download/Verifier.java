@@ -45,7 +45,6 @@ public abstract class Verifier {
     }
 
     public static long crc32(File file, int i) {
-        String str = TAG;
         CRC32 crc32 = new CRC32();
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
@@ -60,26 +59,29 @@ public abstract class Verifier {
                 }
                 long value = crc32.getValue();
                 try {
+                    fileInputStream.close();
                 } catch (IOException e2) {
-                    Log.w(str, (Throwable) e2);
+                    Log.w(TAG, (Throwable) e2);
                 }
                 return value;
             } catch (IOException e3) {
-                Log.w(str, (Throwable) e3);
+                Log.w(TAG, (Throwable) e3);
                 try {
+                    fileInputStream.close();
                 } catch (IOException e4) {
-                    Log.w(str, (Throwable) e4);
+                    Log.w(TAG, (Throwable) e4);
                 }
                 return 0;
-            } finally {
+            } catch (Throwable th) {
                 try {
                     fileInputStream.close();
                 } catch (IOException e5) {
-                    Log.w(str, (Throwable) e5);
+                    Log.w(TAG, (Throwable) e5);
                 }
+                throw th;
             }
         } catch (FileNotFoundException e6) {
-            Log.w(str, (Throwable) e6);
+            Log.w(TAG, (Throwable) e6);
             return 0;
         }
     }
@@ -96,10 +98,7 @@ public abstract class Verifier {
                     bArr[i3] = (byte) ((digit << (i2 % 2 == 0 ? 4 : 0)) | bArr[i3]);
                     i2++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str);
-                    sb.append(" is not a hex string");
-                    throw new IllegalArgumentException(sb.toString());
+                    throw new IllegalArgumentException(str + " is not a hex string");
                 }
             }
             return bArr;
@@ -108,7 +107,6 @@ public abstract class Verifier {
     }
 
     public static byte[] hash(File file, String str, int i) {
-        String str2 = TAG;
         try {
             MessageDigest instance = MessageDigest.getInstance(str);
             try {
@@ -124,30 +122,33 @@ public abstract class Verifier {
                     }
                     byte[] digest = instance.digest();
                     try {
+                        fileInputStream.close();
                     } catch (IOException e2) {
-                        Log.w(str2, (Throwable) e2);
+                        Log.w(TAG, (Throwable) e2);
                     }
                     return digest;
                 } catch (IOException e3) {
-                    Log.w(str2, (Throwable) e3);
+                    Log.w(TAG, (Throwable) e3);
                     try {
+                        fileInputStream.close();
                     } catch (IOException e4) {
-                        Log.w(str2, (Throwable) e4);
+                        Log.w(TAG, (Throwable) e4);
                     }
                     return null;
-                } finally {
+                } catch (Throwable th) {
                     try {
                         fileInputStream.close();
                     } catch (IOException e5) {
-                        Log.w(str2, (Throwable) e5);
+                        Log.w(TAG, (Throwable) e5);
                     }
+                    throw th;
                 }
             } catch (FileNotFoundException e6) {
-                Log.w(str2, (Throwable) e6);
+                Log.w(TAG, (Throwable) e6);
                 return null;
             }
         } catch (NoSuchAlgorithmException e7) {
-            Log.w(str2, (Throwable) e7);
+            Log.w(TAG, (Throwable) e7);
             return null;
         }
     }

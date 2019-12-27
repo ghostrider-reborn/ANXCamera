@@ -41,17 +41,17 @@ public final class ObservableRetryPredicate<T> extends AbstractObservableWithUps
             }
             if (j == 0) {
                 this.actual.onError(th);
-            } else {
-                try {
-                    if (!this.predicate.test(th)) {
-                        this.actual.onError(th);
-                        return;
-                    }
+                return;
+            }
+            try {
+                if (!this.predicate.test(th)) {
+                    this.actual.onError(th);
+                } else {
                     subscribeNext();
-                } catch (Throwable th2) {
-                    Exceptions.throwIfFatal(th2);
-                    this.actual.onError(new CompositeException(th, th2));
                 }
+            } catch (Throwable th2) {
+                Exceptions.throwIfFatal(th2);
+                this.actual.onError(new CompositeException(th, th2));
             }
         }
 
@@ -63,7 +63,7 @@ public final class ObservableRetryPredicate<T> extends AbstractObservableWithUps
             this.sa.update(disposable);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void subscribeNext() {
             if (getAndIncrement() == 0) {
                 int i = 1;
@@ -71,6 +71,7 @@ public final class ObservableRetryPredicate<T> extends AbstractObservableWithUps
                     this.source.subscribe(this);
                     i = addAndGet(-i);
                     if (i == 0) {
+                        return;
                     }
                 }
             }

@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.a.d.a;
+import com.bumptech.glide.load.a.d;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -25,14 +25,13 @@ public abstract class m<T> implements d<T> {
     /* access modifiers changed from: protected */
     public abstract T a(Uri uri2, ContentResolver contentResolver) throws FileNotFoundException;
 
-    public final void a(@NonNull Priority priority, @NonNull a<? super T> aVar) {
+    public final void a(@NonNull Priority priority, @NonNull d.a<? super T> aVar) {
         try {
             this.data = a(this.uri, this.ae);
             aVar.b(this.data);
         } catch (FileNotFoundException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 3)) {
-                Log.d(str, "Failed to open Uri", e2);
+            if (Log.isLoggable(TAG, 3)) {
+                Log.d(TAG, "Failed to open Uri", e2);
             }
             aVar.b((Exception) e2);
         }

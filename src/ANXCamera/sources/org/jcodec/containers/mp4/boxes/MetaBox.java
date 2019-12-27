@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class MetaBox extends NodeBox {
     private static final String FOURCC = "meta";
@@ -20,9 +19,9 @@ public class MetaBox extends NodeBox {
     }
 
     private void dropChildBox(List<Box> list, String str) {
-        ListIterator listIterator = list.listIterator();
+        ListIterator<Box> listIterator = list.listIterator();
         while (listIterator.hasNext()) {
-            if (str.equals(((Box) listIterator.next()).getFourcc())) {
+            if (str.equals(listIterator.next().getFourcc())) {
                 listIterator.remove();
             }
         }
@@ -33,9 +32,9 @@ public class MetaBox extends NodeBox {
     }
 
     private DataBox getDataBox(List<Box> list) {
-        for (Box box : list) {
-            if (box instanceof DataBox) {
-                return (DataBox) box;
+        for (Box next : list) {
+            if (next instanceof DataBox) {
+                return (DataBox) next;
             }
         }
         return null;
@@ -47,10 +46,10 @@ public class MetaBox extends NodeBox {
         if (iListBox == null) {
             return linkedHashMap;
         }
-        for (Entry entry : iListBox.getValues().entrySet()) {
-            Integer num = (Integer) entry.getKey();
+        for (Map.Entry next : iListBox.getValues().entrySet()) {
+            Integer num = (Integer) next.getKey();
             if (num != null) {
-                DataBox dataBox = getDataBox((List) entry.getValue());
+                DataBox dataBox = getDataBox((List) next.getValue());
                 if (dataBox != null) {
                     linkedHashMap.put(num, MetaValue.createOtherWithLocale(dataBox.getType(), dataBox.getLocale(), dataBox.getData()));
                 }
@@ -64,10 +63,10 @@ public class MetaBox extends NodeBox {
         IListBox iListBox = (IListBox) NodeBox.findFirst(this, IListBox.class, IListBox.fourcc());
         MdtaBox[] mdtaBoxArr = (MdtaBox[]) NodeBox.findAllPath(this, MdtaBox.class, new String[]{KeysBox.fourcc(), MdtaBox.fourcc()});
         if (!(iListBox == null || mdtaBoxArr.length == 0)) {
-            for (Entry entry : iListBox.getValues().entrySet()) {
-                Integer num = (Integer) entry.getKey();
+            for (Map.Entry next : iListBox.getValues().entrySet()) {
+                Integer num = (Integer) next.getKey();
                 if (num != null) {
-                    DataBox dataBox = getDataBox((List) entry.getValue());
+                    DataBox dataBox = getDataBox((List) next.getValue());
                     if (dataBox != null) {
                         MetaValue createOtherWithLocale = MetaValue.createOtherWithLocale(dataBox.getType(), dataBox.getLocale(), dataBox.getData());
                         if (num.intValue() > 0 && num.intValue() <= mdtaBoxArr.length) {
@@ -90,7 +89,7 @@ public class MetaBox extends NodeBox {
                 map2 = new LinkedHashMap();
             } else {
                 map2 = iListBox.getValues();
-                for (Entry entry : map2.entrySet()) {
+                for (Map.Entry entry : map2.entrySet()) {
                     int intValue = ((Integer) entry.getKey()).intValue();
                     MetaValue metaValue = (MetaValue) linkedHashMap.get(Integer.valueOf(intValue));
                     if (metaValue != null) {
@@ -101,7 +100,7 @@ public class MetaBox extends NodeBox {
                     }
                 }
             }
-            for (Entry entry2 : linkedHashMap.entrySet()) {
+            for (Map.Entry entry2 : linkedHashMap.entrySet()) {
                 int intValue2 = ((Integer) entry2.getKey()).intValue();
                 MetaValue metaValue2 = (MetaValue) entry2.getValue();
                 DataBox createDataBox2 = DataBox.createDataBox(metaValue2.getType(), metaValue2.getLocale(), metaValue2.getData());
@@ -123,9 +122,9 @@ public class MetaBox extends NodeBox {
             KeysBox createKeysBox = KeysBox.createKeysBox();
             LinkedHashMap linkedHashMap = new LinkedHashMap();
             int i = 1;
-            for (Entry entry : map.entrySet()) {
-                createKeysBox.add(MdtaBox.createMdtaBox((String) entry.getKey()));
-                MetaValue metaValue = (MetaValue) entry.getValue();
+            for (Map.Entry next : map.entrySet()) {
+                createKeysBox.add(MdtaBox.createMdtaBox((String) next.getKey()));
+                MetaValue metaValue = (MetaValue) next.getValue();
                 ArrayList arrayList = new ArrayList();
                 arrayList.add(DataBox.createDataBox(metaValue.getType(), metaValue.getLocale(), metaValue.getData()));
                 linkedHashMap.put(Integer.valueOf(i), arrayList);

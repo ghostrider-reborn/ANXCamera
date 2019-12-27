@@ -63,18 +63,17 @@ public final class SingleEquals<T> extends Single<Boolean> {
     /* access modifiers changed from: protected */
     public void subscribeActual(SingleObserver<? super Boolean> singleObserver) {
         AtomicInteger atomicInteger = new AtomicInteger();
-        Object[] objArr = {null, null};
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         singleObserver.onSubscribe(compositeDisposable);
         SingleSource<? extends T> singleSource = this.first;
         CompositeDisposable compositeDisposable2 = compositeDisposable;
-        Object[] objArr2 = objArr;
+        Object[] objArr = {null, null};
         SingleObserver<? super Boolean> singleObserver2 = singleObserver;
         AtomicInteger atomicInteger2 = atomicInteger;
-        InnerObserver innerObserver = new InnerObserver(0, compositeDisposable2, objArr2, singleObserver2, atomicInteger2);
+        InnerObserver innerObserver = new InnerObserver(0, compositeDisposable2, objArr, singleObserver2, atomicInteger2);
         singleSource.subscribe(innerObserver);
         SingleSource<? extends T> singleSource2 = this.second;
-        InnerObserver innerObserver2 = new InnerObserver(1, compositeDisposable2, objArr2, singleObserver2, atomicInteger2);
+        InnerObserver innerObserver2 = new InnerObserver(1, compositeDisposable2, objArr, singleObserver2, atomicInteger2);
         singleSource2.subscribe(innerObserver2);
     }
 }

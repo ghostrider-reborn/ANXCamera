@@ -3,7 +3,6 @@ package com.bumptech.glide.load.resource.gif;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
-import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.engine.A;
 import com.bumptech.glide.load.engine.bitmap_recycle.b;
 import com.bumptech.glide.load.g;
@@ -40,10 +39,10 @@ public class h implements com.bumptech.glide.load.h<InputStream, b> {
                 }
             }
         } catch (IOException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                Log.w(str, "Error reading data from stream", e2);
+            if (!Log.isLoggable(TAG, 5)) {
+                return null;
             }
+            Log.w(TAG, "Error reading data from stream", e2);
             return null;
         }
     }
@@ -58,6 +57,6 @@ public class h implements com.bumptech.glide.load.h<InputStream, b> {
     }
 
     public boolean a(@NonNull InputStream inputStream, @NonNull g gVar) throws IOException {
-        return !((Boolean) gVar.a(g.Wj)).booleanValue() && com.bumptech.glide.load.b.b(this.ne, inputStream, this.Yd) == ImageType.GIF;
+        return !((Boolean) gVar.a(g.Wj)).booleanValue() && com.bumptech.glide.load.b.b(this.ne, inputStream, this.Yd) == ImageHeaderParser.ImageType.GIF;
     }
 }

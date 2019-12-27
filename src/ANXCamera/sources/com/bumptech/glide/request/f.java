@@ -1,8 +1,7 @@
 package com.bumptech.glide.request;
 
-import android.content.res.Resources.Theme;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CheckResult;
@@ -103,7 +102,7 @@ public class f implements Cloneable {
     @NonNull
     private c signature = b.obtain();
     @Nullable
-    private Theme theme;
+    private Resources.Theme theme;
     private boolean yf = true;
 
     @CheckResult
@@ -181,9 +180,9 @@ public class f implements Cloneable {
         }
         r rVar = new r(jVar, z);
         a(Bitmap.class, jVar, z);
-        a(Drawable.class, (j<T>) rVar, z);
+        a(Drawable.class, rVar, z);
         a(BitmapDrawable.class, rVar.Eg(), z);
-        a(com.bumptech.glide.load.resource.gif.b.class, (j<T>) new e<T>(jVar), z);
+        a(com.bumptech.glide.load.resource.gif.b.class, new e(jVar), z);
         Qk();
         return this;
     }
@@ -217,7 +216,7 @@ public class f implements Cloneable {
 
     @CheckResult
     @NonNull
-    public static f b(@NonNull CompressFormat compressFormat) {
+    public static f b(@NonNull Bitmap.CompressFormat compressFormat) {
         return new f().a(compressFormat);
     }
 
@@ -389,7 +388,7 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f F(@IntRange(from = 0) int i) {
-        return a(com.bumptech.glide.load.model.a.b.TIMEOUT, (T) Integer.valueOf(i));
+        return a(com.bumptech.glide.load.model.a.b.TIMEOUT, Integer.valueOf(i));
     }
 
     @NonNull
@@ -404,7 +403,7 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f Pg() {
-        return b(DownsampleStrategy.Ui, (j<Bitmap>) new com.bumptech.glide.load.resource.bitmap.j<Bitmap>());
+        return b(DownsampleStrategy.Ui, (j<Bitmap>) new com.bumptech.glide.load.resource.bitmap.j());
     }
 
     @CheckResult
@@ -416,19 +415,19 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f Tg() {
-        return b(DownsampleStrategy.CENTER_INSIDE, (j<Bitmap>) new l<Bitmap>());
+        return b(DownsampleStrategy.CENTER_INSIDE, (j<Bitmap>) new l());
     }
 
     @CheckResult
     @NonNull
     public f Vg() {
-        return a(com.bumptech.glide.load.resource.bitmap.o.aj, (T) Boolean.valueOf(false));
+        return a(com.bumptech.glide.load.resource.bitmap.o.aj, false);
     }
 
     @CheckResult
     @NonNull
     public f Wg() {
-        return a(com.bumptech.glide.load.resource.gif.g.Wj, (T) Boolean.valueOf(true));
+        return a(com.bumptech.glide.load.resource.gif.g.Wj, true);
     }
 
     @CheckResult
@@ -459,7 +458,7 @@ public class f implements Cloneable {
 
     @CheckResult
     @NonNull
-    public f a(@Nullable Theme theme2) {
+    public f a(@Nullable Resources.Theme theme2) {
         if (this.Ok) {
             return clone().a(theme2);
         }
@@ -471,10 +470,10 @@ public class f implements Cloneable {
 
     @CheckResult
     @NonNull
-    public f a(@NonNull CompressFormat compressFormat) {
-        com.bumptech.glide.load.f<CompressFormat> fVar = com.bumptech.glide.load.resource.bitmap.e.ti;
+    public f a(@NonNull Bitmap.CompressFormat compressFormat) {
+        com.bumptech.glide.load.f<Bitmap.CompressFormat> fVar = com.bumptech.glide.load.resource.bitmap.e.ti;
         i.checkNotNull(compressFormat);
-        return a(fVar, (T) compressFormat);
+        return a(fVar, compressFormat);
     }
 
     @CheckResult
@@ -494,7 +493,7 @@ public class f implements Cloneable {
     @NonNull
     public f a(@NonNull DecodeFormat decodeFormat) {
         i.checkNotNull(decodeFormat);
-        return a(com.bumptech.glide.load.resource.bitmap.o.Yi, (T) decodeFormat).a(com.bumptech.glide.load.resource.gif.g.Yi, (T) decodeFormat);
+        return a(com.bumptech.glide.load.resource.bitmap.o.Yi, decodeFormat).a(com.bumptech.glide.load.resource.gif.g.Yi, decodeFormat);
     }
 
     @CheckResult
@@ -528,10 +527,10 @@ public class f implements Cloneable {
     public f a(@NonNull DownsampleStrategy downsampleStrategy) {
         com.bumptech.glide.load.f<DownsampleStrategy> fVar = DownsampleStrategy.Wi;
         i.checkNotNull(downsampleStrategy);
-        return a(fVar, (T) downsampleStrategy);
+        return a(fVar, downsampleStrategy);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public final f a(@NonNull DownsampleStrategy downsampleStrategy, @NonNull j<Bitmap> jVar) {
         if (this.Ok) {
@@ -550,7 +549,7 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f a(@NonNull j<Bitmap>... jVarArr) {
-        return a((j<Bitmap>) new d<Bitmap>((j<T>[]) jVarArr), true);
+        return a((j<Bitmap>) new d((j<T>[]) jVarArr), true);
     }
 
     @Nullable
@@ -564,7 +563,7 @@ public class f implements Cloneable {
         return a(jVar, false);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @CheckResult
     @NonNull
     public final f b(@NonNull DownsampleStrategy downsampleStrategy, @NonNull j<Bitmap> jVar) {
@@ -695,7 +694,7 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f e(@IntRange(from = 0) long j) {
-        return a(VideoDecoder.Bj, (T) Long.valueOf(j));
+        return a(VideoDecoder.Bj, Long.valueOf(j));
     }
 
     @NonNull
@@ -793,7 +792,7 @@ public class f implements Cloneable {
     }
 
     @Nullable
-    public final Theme getTheme() {
+    public final Resources.Theme getTheme() {
         return this.theme;
     }
 
@@ -860,7 +859,7 @@ public class f implements Cloneable {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean jg() {
         return this.He;
     }
@@ -980,13 +979,13 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f wh() {
-        return a(DownsampleStrategy.Ui, (j<Bitmap>) new com.bumptech.glide.load.resource.bitmap.j<Bitmap>());
+        return a(DownsampleStrategy.Ui, (j<Bitmap>) new com.bumptech.glide.load.resource.bitmap.j());
     }
 
     @CheckResult
     @NonNull
     public f x(@IntRange(from = 0, to = 100) int i) {
-        return a(com.bumptech.glide.load.resource.bitmap.e.ri, (T) Integer.valueOf(i));
+        return a(com.bumptech.glide.load.resource.bitmap.e.ri, Integer.valueOf(i));
     }
 
     @CheckResult
@@ -998,7 +997,7 @@ public class f implements Cloneable {
     @CheckResult
     @NonNull
     public f yh() {
-        return a(DownsampleStrategy.Ui, (j<Bitmap>) new l<Bitmap>());
+        return a(DownsampleStrategy.Ui, (j<Bitmap>) new l());
     }
 
     @NonNull

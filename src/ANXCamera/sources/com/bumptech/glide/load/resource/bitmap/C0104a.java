@@ -12,7 +12,7 @@ import com.bumptech.glide.load.h;
 import com.bumptech.glide.util.i;
 import java.io.IOException;
 
-/* renamed from: com.bumptech.glide.load.resource.bitmap.a reason: case insensitive filesystem */
+/* renamed from: com.bumptech.glide.load.resource.bitmap.a  reason: case insensitive filesystem */
 /* compiled from: BitmapDrawableDecoder */
 public class C0104a<DataType> implements h<DataType, BitmapDrawable> {
     private final h<DataType, Bitmap> decoder;

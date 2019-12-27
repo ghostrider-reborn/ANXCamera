@@ -19,18 +19,13 @@ public class BuildEffectChannelResponse {
 
     private void fillEffectPath(List<Effect> list) {
         if (list != null && !list.isEmpty()) {
-            for (Effect effect : list) {
+            for (Effect next : list) {
+                next.setZipPath(this.mFileDirectory + File.separator + next.getId() + ".zip");
                 StringBuilder sb = new StringBuilder();
                 sb.append(this.mFileDirectory);
                 sb.append(File.separator);
-                sb.append(effect.getId());
-                sb.append(".zip");
-                effect.setZipPath(sb.toString());
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(this.mFileDirectory);
-                sb2.append(File.separator);
-                sb2.append(effect.getId());
-                effect.setUnzipPath(sb2.toString());
+                sb.append(next.getId());
+                next.setUnzipPath(sb.toString());
             }
         }
     }
@@ -38,7 +33,7 @@ public class BuildEffectChannelResponse {
     private List<Effect> getCategoryAllEffects(EffectCategoryModel effectCategoryModel, Map<String, Effect> map) {
         ArrayList arrayList = new ArrayList();
         for (String str : effectCategoryModel.getEffects()) {
-            Effect effect = (Effect) map.get(str);
+            Effect effect = map.get(str);
             if (effect != null) {
                 arrayList.add(effect);
             }
@@ -47,41 +42,41 @@ public class BuildEffectChannelResponse {
     }
 
     private void getChildEffect(List<Effect> list, Map<String, Effect> map) {
-        for (Effect effect : list) {
-            if (effect.getEffectType() == 1) {
+        for (Effect next : list) {
+            if (next.getEffectType() == 1) {
                 ArrayList arrayList = new ArrayList();
-                for (String str : effect.getChildren()) {
-                    Effect effect2 = (Effect) map.get(str);
-                    if (effect2 != null) {
-                        arrayList.add(effect2);
+                for (String str : next.getChildren()) {
+                    Effect effect = map.get(str);
+                    if (effect != null) {
+                        arrayList.add(effect);
                     }
                 }
-                effect.setChildEffects(arrayList);
+                next.setChildEffects(arrayList);
             }
         }
     }
 
     private Effect getEffect(String str, Map<String, Effect> map) {
-        return (Effect) map.get(str);
+        return map.get(str);
     }
 
     private List<EffectCategoryResponse> initCategory(EffectChannelModel effectChannelModel, Map<String, Effect> map) {
         ArrayList arrayList = new ArrayList();
         if (!effectChannelModel.getCategory().isEmpty()) {
-            for (EffectCategoryModel effectCategoryModel : effectChannelModel.getCategory()) {
+            for (EffectCategoryModel next : effectChannelModel.getCategory()) {
                 EffectCategoryResponse effectCategoryResponse = new EffectCategoryResponse();
-                effectCategoryResponse.setId(effectCategoryModel.getId());
-                effectCategoryResponse.setName(effectCategoryModel.getName());
-                effectCategoryResponse.setKey(effectCategoryModel.getKey());
-                if (!effectCategoryModel.getIcon().getUrl_list().isEmpty()) {
-                    effectCategoryResponse.setIcon_normal_url((String) effectCategoryModel.getIcon().getUrl_list().get(0));
+                effectCategoryResponse.setId(next.getId());
+                effectCategoryResponse.setName(next.getName());
+                effectCategoryResponse.setKey(next.getKey());
+                if (!next.getIcon().getUrl_list().isEmpty()) {
+                    effectCategoryResponse.setIcon_normal_url(next.getIcon().getUrl_list().get(0));
                 }
-                if (!effectCategoryModel.getIcon_selected().getUrl_list().isEmpty()) {
-                    effectCategoryResponse.setIcon_selected_url((String) effectCategoryModel.getIcon_selected().getUrl_list().get(0));
+                if (!next.getIcon_selected().getUrl_list().isEmpty()) {
+                    effectCategoryResponse.setIcon_selected_url(next.getIcon_selected().getUrl_list().get(0));
                 }
-                effectCategoryResponse.setTotalEffects(getCategoryAllEffects(effectCategoryModel, map));
-                effectCategoryResponse.setTags(effectCategoryModel.getTags());
-                effectCategoryResponse.setTagsUpdateTime(effectCategoryModel.getTagsUpdateTime());
+                effectCategoryResponse.setTotalEffects(getCategoryAllEffects(next, map));
+                effectCategoryResponse.setTags(next.getTags());
+                effectCategoryResponse.setTagsUpdateTime(next.getTagsUpdateTime());
                 effectCategoryResponse.setCollectionEffect(effectChannelModel.getCollection());
                 arrayList.add(effectCategoryResponse);
             }
@@ -93,11 +88,11 @@ public class BuildEffectChannelResponse {
         System.currentTimeMillis();
         HashMap hashMap = new HashMap();
         HashMap hashMap2 = new HashMap();
-        for (Effect effect : effectChannelModel.getEffects()) {
-            hashMap.put(effect.getEffectId(), effect);
+        for (Effect next : effectChannelModel.getEffects()) {
+            hashMap.put(next.getEffectId(), next);
         }
-        for (Effect effect2 : effectChannelModel.getCollection()) {
-            hashMap2.put(effect2.getEffectId(), effect2);
+        for (Effect next2 : effectChannelModel.getCollection()) {
+            hashMap2.put(next2.getEffectId(), next2);
         }
         EffectChannelResponse effectChannelResponse = new EffectChannelResponse();
         effectChannelResponse.setPanel(this.mPanel);

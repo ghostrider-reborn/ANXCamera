@@ -90,26 +90,18 @@ public class SqlUtils {
     }
 
     public static String createSqlCount(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT COUNT(*) FROM \"");
-        sb.append(str);
-        sb.append('\"');
-        return sb.toString();
+        return "SELECT COUNT(*) FROM \"" + str + '\"';
     }
 
     public static String createSqlDelete(String str, String[] strArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('\"');
-        sb.append(str);
-        sb.append('\"');
-        String sb2 = sb.toString();
-        StringBuilder sb3 = new StringBuilder("DELETE FROM ");
-        sb3.append(sb2);
+        String str2 = '\"' + str + '\"';
+        StringBuilder sb = new StringBuilder("DELETE FROM ");
+        sb.append(str2);
         if (strArr != null && strArr.length > 0) {
-            sb3.append(" WHERE ");
-            appendColumnsEqValue(sb3, sb2, strArr);
+            sb.append(" WHERE ");
+            appendColumnsEqValue(sb, str2, strArr);
         }
-        return sb3.toString();
+        return sb.toString();
     }
 
     public static String createSqlInsert(String str, String str2, String[] strArr) {
@@ -155,26 +147,18 @@ public class SqlUtils {
     }
 
     public static String createSqlUpdate(String str, String[] strArr, String[] strArr2) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('\"');
-        sb.append(str);
-        sb.append('\"');
-        String sb2 = sb.toString();
-        StringBuilder sb3 = new StringBuilder("UPDATE ");
-        sb3.append(sb2);
-        sb3.append(" SET ");
-        appendColumnsEqualPlaceholders(sb3, strArr);
-        sb3.append(" WHERE ");
-        appendColumnsEqValue(sb3, sb2, strArr2);
-        return sb3.toString();
+        String str2 = '\"' + str + '\"';
+        StringBuilder sb = new StringBuilder("UPDATE ");
+        sb.append(str2);
+        sb.append(" SET ");
+        appendColumnsEqualPlaceholders(sb, strArr);
+        sb.append(" WHERE ");
+        appendColumnsEqValue(sb, str2, strArr2);
+        return sb.toString();
     }
 
     public static String escapeBlobArgument(byte[] bArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("X'");
-        sb.append(toHex(bArr));
-        sb.append('\'');
-        return sb.toString();
+        return "X'" + toHex(bArr) + '\'';
     }
 
     public static String toHex(byte[] bArr) {

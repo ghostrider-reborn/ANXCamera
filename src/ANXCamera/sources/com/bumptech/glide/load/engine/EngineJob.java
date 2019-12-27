@@ -1,21 +1,22 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Handler;
-import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pools.Pool;
+import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.c;
+import com.bumptech.glide.load.engine.DecodeJob;
 import com.bumptech.glide.load.engine.b.b;
 import com.bumptech.glide.request.g;
-import com.bumptech.glide.util.a.d.c;
+import com.bumptech.glide.util.a.d;
 import com.bumptech.glide.util.l;
 import java.util.ArrayList;
 import java.util.List;
 
-class EngineJob<R> implements a<R>, c {
+class EngineJob<R> implements DecodeJob.a<R>, d.c {
     private static final Handler Gf = new Handler(Looper.getMainLooper(), new a());
     private static final int Hf = 1;
     private static final int If = 2;
@@ -35,10 +36,10 @@ class EngineJob<R> implements a<R>, c {
     private boolean Ye;
     private DataSource dataSource;
     private GlideException exception;
-    private com.bumptech.glide.load.c key;
+    private c key;
     private final b lf;
     private final r listener;
-    private final Pool<EngineJob<?>> pool;
+    private final Pools.Pool<EngineJob<?>> pool;
     private A<?> resource;
     private final List<g> wf;
     private final EngineResourceFactory xf;
@@ -55,7 +56,7 @@ class EngineJob<R> implements a<R>, c {
         }
     }
 
-    private static class a implements Callback {
+    private static class a implements Handler.Callback {
         a() {
         }
 
@@ -69,21 +70,18 @@ class EngineJob<R> implements a<R>, c {
             } else if (i == 3) {
                 engineJob.pg();
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Unrecognized message: ");
-                sb.append(message.what);
-                throw new IllegalStateException(sb.toString());
+                throw new IllegalStateException("Unrecognized message: " + message.what);
             }
             return true;
         }
     }
 
-    EngineJob(b bVar, b bVar2, b bVar3, b bVar4, r rVar, Pool<EngineJob<?>> pool2) {
+    EngineJob(b bVar, b bVar2, b bVar3, b bVar4, r rVar, Pools.Pool<EngineJob<?>> pool2) {
         this(bVar, bVar2, bVar3, bVar4, rVar, pool2, Sd);
     }
 
     @VisibleForTesting
-    EngineJob(b bVar, b bVar2, b bVar3, b bVar4, r rVar, Pool<EngineJob<?>> pool2, EngineResourceFactory engineResourceFactory) {
+    EngineJob(b bVar, b bVar2, b bVar3, b bVar4, r rVar, Pools.Pool<EngineJob<?>> pool2, EngineResourceFactory engineResourceFactory) {
         this.wf = new ArrayList(2);
         this.Re = com.bumptech.glide.util.a.g.newInstance();
         this.Nb = bVar;
@@ -148,7 +146,7 @@ class EngineJob<R> implements a<R>, c {
         Gf.obtainMessage(2, this).sendToTarget();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(g gVar) {
         l.Ih();
         this.Re.Mh();
@@ -161,7 +159,7 @@ class EngineJob<R> implements a<R>, c {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void b(g gVar) {
         l.Ih();
         this.Re.Mh();
@@ -180,7 +178,7 @@ class EngineJob<R> implements a<R>, c {
         (decodeJob.mg() ? this.Nb : mk()).execute(decodeJob);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void cancel() {
         if (!this.Cf && !this.Bf && !this.Vd) {
             this.Vd = true;
@@ -194,9 +192,9 @@ class EngineJob<R> implements a<R>, c {
         return this.Re;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @VisibleForTesting
-    public EngineJob<R> init(com.bumptech.glide.load.c cVar, boolean z, boolean z2, boolean z3, boolean z4) {
+    public EngineJob<R> init(c cVar, boolean z, boolean z2, boolean z3, boolean z4) {
         this.key = cVar;
         this.yf = z;
         this.zf = z2;
@@ -205,12 +203,12 @@ class EngineJob<R> implements a<R>, c {
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isCancelled() {
         return this.Vd;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void pg() {
         this.Re.Mh();
         if (this.Vd) {
@@ -221,7 +219,7 @@ class EngineJob<R> implements a<R>, c {
         throw new IllegalStateException("Not cancelled");
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void qg() {
         this.Re.Mh();
         if (this.Vd) {
@@ -230,10 +228,10 @@ class EngineJob<R> implements a<R>, c {
             throw new IllegalStateException("Received an exception without any callbacks to notify");
         } else if (!this.Cf) {
             this.Cf = true;
-            this.listener.a(this, this.key, null);
-            for (g gVar : this.wf) {
-                if (!d(gVar)) {
-                    gVar.a(this.exception);
+            this.listener.a(this, this.key, (u<?>) null);
+            for (g next : this.wf) {
+                if (!d(next)) {
+                    next.a(this.exception);
                 }
             }
             release(false);
@@ -242,7 +240,7 @@ class EngineJob<R> implements a<R>, c {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void rg() {
         this.Re.Mh();
         if (this.Vd) {
@@ -257,7 +255,7 @@ class EngineJob<R> implements a<R>, c {
             this.listener.a(this, this.key, this.Ef);
             int size = this.wf.size();
             for (int i = 0; i < size; i++) {
-                g gVar = (g) this.wf.get(i);
+                g gVar = this.wf.get(i);
                 if (!d(gVar)) {
                     this.Ef.acquire();
                     gVar.a(this.Ef, this.dataSource);
@@ -270,7 +268,7 @@ class EngineJob<R> implements a<R>, c {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean sg() {
         return this.Ye;
     }

@@ -2,14 +2,13 @@ package com.android.camera.effect;
 
 import com.android.camera.R;
 import com.miui.filtersdk.filter.helper.FilterFactory;
-import com.miui.filtersdk.filter.helper.FilterFactory.FilterScene;
 import com.miui.filtersdk.filter.helper.FilterType;
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class BeautyInfoFactory {
 
-    /* renamed from: com.android.camera.effect.BeautyInfoFactory$1 reason: invalid class name */
+    /* renamed from: com.android.camera.effect.BeautyInfoFactory$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$filter$helper$FilterType = new int[FilterType.values().length];
 
@@ -95,7 +94,7 @@ public class BeautyInfoFactory {
         int i5;
         ArrayList<FilterInfo> arrayList = new ArrayList<>();
         arrayList.add(new FilterInfo(FilterInfo.FILTER_ID_NONE, R.string.pref_camera_coloreffect_entry_none, R.drawable.portait_effect_image_none, 0));
-        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterScene.BEAUTY);
+        FilterType[] filtersByScene = FilterFactory.getFiltersByScene(FilterFactory.FilterScene.BEAUTY);
         int length = filtersByScene.length;
         int i6 = 0;
         int i7 = 0;

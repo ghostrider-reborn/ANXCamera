@@ -2,11 +2,10 @@ package com.android.camera.effect;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import java.util.Locale;
 
 public class FaceAnalyzeInfo implements Parcelable {
-    public static final Creator<FaceAnalyzeInfo> CREATOR = new Creator<FaceAnalyzeInfo>() {
+    public static final Parcelable.Creator<FaceAnalyzeInfo> CREATOR = new Parcelable.Creator<FaceAnalyzeInfo>() {
         public FaceAnalyzeInfo createFromParcel(Parcel parcel) {
             return new FaceAnalyzeInfo(parcel);
         }

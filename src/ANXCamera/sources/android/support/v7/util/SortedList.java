@@ -54,7 +54,7 @@ public class SortedList<T> {
         }
 
         public void onChanged(int i, int i2) {
-            this.mBatchingListUpdateCallback.onChanged(i, i2, null);
+            this.mBatchingListUpdateCallback.onChanged(i, i2, (Object) null);
         }
 
         public void onChanged(int i, int i2, Object obj) {
@@ -135,9 +135,9 @@ public class SortedList<T> {
                 this.mData = tArr;
                 this.mSize = sortAndDedup;
                 this.mCallback.onInserted(0, sortAndDedup);
-            } else {
-                merge(tArr, sortAndDedup);
+                return;
             }
+            merge(tArr, sortAndDedup);
         }
     }
 
@@ -158,12 +158,7 @@ public class SortedList<T> {
             this.mSize++;
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("cannot add item to ");
-        sb.append(i);
-        sb.append(" because size is ");
-        sb.append(this.mSize);
-        throw new IndexOutOfBoundsException(sb.toString());
+        throw new IndexOutOfBoundsException("cannot add item to " + i + " because size is " + this.mSize);
     }
 
     private T[] copyArray(T[] tArr) {
@@ -185,16 +180,13 @@ public class SortedList<T> {
                 return i4;
             } else {
                 int linearEqualitySearch = linearEqualitySearch(t, i4, i, i2);
-                if (i3 == 1 && linearEqualitySearch == -1) {
-                    linearEqualitySearch = i4;
-                }
-                return linearEqualitySearch;
+                return (i3 == 1 && linearEqualitySearch == -1) ? i4 : linearEqualitySearch;
             }
         }
-        if (i3 != 1) {
-            i = -1;
+        if (i3 == 1) {
+            return i;
         }
-        return i;
+        return -1;
     }
 
     private int findSameItem(T t, T[] tArr, int i, int i2) {
@@ -222,12 +214,13 @@ public class SortedList<T> {
         }
         do {
             i++;
-            if (i < i3) {
-                t2 = this.mData[i];
-                if (this.mCallback.compare(t2, t) != 0) {
-                }
+            if (i >= i3) {
+                return -1;
             }
-            return -1;
+            t2 = this.mData[i];
+            if (this.mCallback.compare(t2, t) != 0) {
+                return -1;
+            }
         } while (!this.mCallback.areItemsTheSame(t2, t));
         return i;
     }
@@ -470,7 +463,7 @@ public class SortedList<T> {
         throwIfInMutationOperation();
         int i = this.mSize;
         if (i != 0) {
-            Arrays.fill(this.mData, 0, i, null);
+            Arrays.fill(this.mData, 0, i, (Object) null);
             this.mSize = 0;
             this.mCallback.onRemoved(0, i);
         }
@@ -491,12 +484,7 @@ public class SortedList<T> {
 
     public T get(int i) throws IndexOutOfBoundsException {
         if (i >= this.mSize || i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Asked to get item at ");
-            sb.append(i);
-            sb.append(" but size is ");
-            sb.append(this.mSize);
-            throw new IndexOutOfBoundsException(sb.toString());
+            throw new IndexOutOfBoundsException("Asked to get item at " + i + " but size is " + this.mSize);
         }
         T[] tArr = this.mOldData;
         if (tArr != null) {
@@ -579,6 +567,7 @@ public class SortedList<T> {
             int add = add(t, false);
             if (i != add) {
                 this.mCallback.onMoved(i, add);
+                return;
             }
             return;
         }

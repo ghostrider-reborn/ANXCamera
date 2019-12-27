@@ -53,8 +53,8 @@ class ExifModifier {
 
     private void modify() {
         this.mByteBuffer.order(getByteOrder());
-        for (TagOffset tagOffset : this.mTagOffsets) {
-            writeTagValue(tagOffset.mTag, tagOffset.mOffset);
+        for (TagOffset next : this.mTagOffsets) {
+            writeTagValue(next.mTag, next.mOffset);
         }
     }
 
@@ -76,7 +76,7 @@ class ExifModifier {
                     return;
                 }
                 this.mByteBuffer.put(stringByte);
-                this.mByteBuffer.put(0);
+                this.mByteBuffer.put((byte) 0);
                 return;
             case 3:
                 int componentCount = exifTag.getComponentCount();

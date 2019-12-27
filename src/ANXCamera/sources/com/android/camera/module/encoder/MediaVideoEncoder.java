@@ -2,14 +2,14 @@ package com.android.camera.module.encoder;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecInfo.CodecCapabilities;
 import android.media.MediaCodecList;
+import android.media.MediaCrypto;
 import android.media.MediaFormat;
 import android.opengl.EGLContext;
 import android.view.Surface;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
 import com.android.camera.log.Log;
-import com.android.camera.module.encoder.MediaEncoder.MediaEncoderListener;
+import com.android.camera.module.encoder.MediaEncoder;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -27,7 +27,7 @@ public class MediaVideoEncoder extends MediaEncoder {
     private final int mVideoHeight;
     private final int mVideoWidth;
 
-    public MediaVideoEncoder(EGLContext eGLContext, MediaMuxerWrapper mediaMuxerWrapper, MediaEncoderListener mediaEncoderListener, int i, int i2) {
+    public MediaVideoEncoder(EGLContext eGLContext, MediaMuxerWrapper mediaMuxerWrapper, MediaEncoder.MediaEncoderListener mediaEncoderListener, int i, int i2) {
         super(mediaMuxerWrapper, mediaEncoderListener);
         Log.d(TAG, String.format(Locale.ENGLISH, "init: videoSize=%dx%d", new Object[]{Integer.valueOf(i), Integer.valueOf(i2)}));
         this.mVideoWidth = i;
@@ -60,16 +60,10 @@ public class MediaVideoEncoder extends MediaEncoder {
 
     /* JADX INFO: finally extract failed */
     protected static final int selectColorFormat(MediaCodecInfo mediaCodecInfo, String str) {
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("selectColorFormat>>>codec:");
-        sb.append(mediaCodecInfo.getName());
-        sb.append("/");
-        sb.append(str);
-        Log.v(str2, sb.toString());
+        Log.v(TAG, "selectColorFormat>>>codec:" + mediaCodecInfo.getName() + "/" + str);
         try {
             Thread.currentThread().setPriority(10);
-            CodecCapabilities capabilitiesForType = mediaCodecInfo.getCapabilitiesForType(str);
+            MediaCodecInfo.CodecCapabilities capabilitiesForType = mediaCodecInfo.getCapabilitiesForType(str);
             Thread.currentThread().setPriority(5);
             int i = 0;
             int i2 = 0;
@@ -85,11 +79,7 @@ public class MediaVideoEncoder extends MediaEncoder {
                 }
                 i2++;
             }
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("selectColorFormat<<<colorFormat=");
-            sb2.append(Integer.toHexString(i));
-            Log.v(str3, sb2.toString());
+            Log.v(TAG, "selectColorFormat<<<colorFormat=" + Integer.toHexString(i));
             return i;
         } catch (Throwable th) {
             Thread.currentThread().setPriority(5);
@@ -98,11 +88,7 @@ public class MediaVideoEncoder extends MediaEncoder {
     }
 
     protected static final MediaCodecInfo selectVideoCodec(String str) {
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("selectVideoCodec>>>");
-        sb.append(str);
-        Log.v(str2, sb.toString());
+        Log.v(TAG, "selectVideoCodec>>>" + str);
         int codecCount = MediaCodecList.getCodecCount();
         for (int i = 0; i < codecCount; i++) {
             MediaCodecInfo codecInfoAt = MediaCodecList.getCodecInfoAt(i);
@@ -140,33 +126,26 @@ public class MediaVideoEncoder extends MediaEncoder {
         this.mTrackIndex = -1;
         this.mMuxerStarted = false;
         this.mIsEOS = false;
-        String str = MIME_TYPE;
-        MediaCodecInfo selectVideoCodec = selectVideoCodec(str);
+        MediaCodecInfo selectVideoCodec = selectVideoCodec(MIME_TYPE);
         if (selectVideoCodec == null) {
             Log.e(TAG, "no appropriate codec for video/avc");
             return;
         }
-        String str2 = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("selected codec: ");
-        sb.append(selectVideoCodec.getName());
-        Log.d(str2, sb.toString());
-        MediaFormat createVideoFormat = MediaFormat.createVideoFormat(str, this.mVideoWidth, this.mVideoHeight);
+        String str = TAG;
+        Log.d(str, "selected codec: " + selectVideoCodec.getName());
+        MediaFormat createVideoFormat = MediaFormat.createVideoFormat(MIME_TYPE, this.mVideoWidth, this.mVideoHeight);
         createVideoFormat.setInteger("color-format", 2130708361);
         createVideoFormat.setInteger("bitrate", calcBitRate());
         createVideoFormat.setInteger("frame-rate", 25);
         createVideoFormat.setFloat("i-frame-interval", 1.0f);
-        String str3 = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("format: ");
-        sb2.append(createVideoFormat);
-        Log.d(str3, sb2.toString());
-        this.mMediaCodec = MediaCodec.createEncoderByType(str);
-        this.mMediaCodec.configure(createVideoFormat, null, null, 1);
+        String str2 = TAG;
+        Log.d(str2, "format: " + createVideoFormat);
+        this.mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
+        this.mMediaCodec.configure(createVideoFormat, (Surface) null, (MediaCrypto) null, 1);
         this.mSurface = this.mMediaCodec.createInputSurface();
         this.mRenderHandler.setEglContext(this.mSharedEGLContext, this.mSurface, true);
         this.mMediaCodec.start();
-        MediaEncoderListener mediaEncoderListener = this.mListener;
+        MediaEncoder.MediaEncoderListener mediaEncoderListener = this.mListener;
         if (mediaEncoderListener != null) {
             mediaEncoderListener.onPrepared(this);
         }

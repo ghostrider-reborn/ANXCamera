@@ -48,10 +48,7 @@ public final class Cookie {
                     this.hostOnly = z;
                     return this;
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected domain: ");
-                sb.append(str);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("unexpected domain: " + str);
             }
             throw new NullPointerException("domain == null");
         }
@@ -181,7 +178,7 @@ public final class Cookie {
     /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
     /* JADX WARNING: Removed duplicated region for block: B:60:0x00f4  */
     /* JADX WARNING: Removed duplicated region for block: B:61:0x00f7  */
-    /* JADX WARNING: Removed duplicated region for block: B:78:0x0131  */
+    /* JADX WARNING: Removed duplicated region for block: B:77:0x0131  */
     @Nullable
     static Cookie parse(long j, HttpUrl httpUrl, String str) {
         long j2;
@@ -313,11 +310,11 @@ public final class Cookie {
     }
 
     public static List<Cookie> parseAll(HttpUrl httpUrl, Headers headers) {
-        List values = headers.values("Set-Cookie");
+        List<String> values = headers.values("Set-Cookie");
         int size = values.size();
         ArrayList arrayList = null;
         for (int i = 0; i < size; i++) {
-            Cookie parse = parse(httpUrl, (String) values.get(i));
+            Cookie parse = parse(httpUrl, values.get(i));
             if (parse != null) {
                 if (arrayList == null) {
                     arrayList = new ArrayList();
@@ -329,9 +326,8 @@ public final class Cookie {
     }
 
     private static String parseDomain(String str) {
-        String str2 = ".";
-        if (!str.endsWith(str2)) {
-            if (str.startsWith(str2)) {
+        if (!str.endsWith(".")) {
+            if (str.startsWith(".")) {
                 str = str.substring(1);
             }
             String canonicalizeHost = Util.canonicalizeHost(str);
@@ -403,19 +399,15 @@ public final class Cookie {
     }
 
     private static long parseMaxAge(String str) {
-        long j = Long.MIN_VALUE;
         try {
             long parseLong = Long.parseLong(str);
-            if (parseLong > 0) {
-                j = parseLong;
+            if (parseLong <= 0) {
+                return Long.MIN_VALUE;
             }
-            return j;
+            return parseLong;
         } catch (NumberFormatException e2) {
             if (str.matches("-?\\d+")) {
-                if (!str.startsWith("-")) {
-                    j = Long.MAX_VALUE;
-                }
-                return j;
+                return str.startsWith("-") ? Long.MIN_VALUE : Long.MAX_VALUE;
             }
             throw e2;
         }
@@ -426,7 +418,10 @@ public final class Cookie {
         if (encodedPath.equals(str)) {
             return true;
         }
-        return encodedPath.startsWith(str) && (str.endsWith("/") || encodedPath.charAt(str.length()) == '/');
+        if (encodedPath.startsWith(str)) {
+            return str.endsWith("/") || encodedPath.charAt(str.length()) == '/';
+        }
+        return false;
     }
 
     public String domain() {
@@ -434,15 +429,11 @@ public final class Cookie {
     }
 
     public boolean equals(@Nullable Object obj) {
-        boolean z = false;
         if (!(obj instanceof Cookie)) {
             return false;
         }
         Cookie cookie = (Cookie) obj;
-        if (cookie.name.equals(this.name) && cookie.value.equals(this.value) && cookie.domain.equals(this.domain) && cookie.path.equals(this.path) && cookie.expiresAt == this.expiresAt && cookie.secure == this.secure && cookie.httpOnly == this.httpOnly && cookie.persistent == this.persistent && cookie.hostOnly == this.hostOnly) {
-            z = true;
-        }
-        return z;
+        return cookie.name.equals(this.name) && cookie.value.equals(this.value) && cookie.domain.equals(this.domain) && cookie.path.equals(this.path) && cookie.expiresAt == this.expiresAt && cookie.secure == this.secure && cookie.httpOnly == this.httpOnly && cookie.persistent == this.persistent && cookie.hostOnly == this.hostOnly;
     }
 
     public long expiresAt() {
@@ -450,9 +441,8 @@ public final class Cookie {
     }
 
     public int hashCode() {
-        int hashCode = (((((((527 + this.name.hashCode()) * 31) + this.value.hashCode()) * 31) + this.domain.hashCode()) * 31) + this.path.hashCode()) * 31;
         long j = this.expiresAt;
-        return ((((((((hashCode + ((int) (j ^ (j >>> 32)))) * 31) + (this.secure ^ true ? 1 : 0)) * 31) + (this.httpOnly ^ true ? 1 : 0)) * 31) + (this.persistent ^ true ? 1 : 0)) * 31) + (this.hostOnly ^ true ? 1 : 0);
+        return ((((((((((((((((527 + this.name.hashCode()) * 31) + this.value.hashCode()) * 31) + this.domain.hashCode()) * 31) + this.path.hashCode()) * 31) + ((int) (j ^ (j >>> 32)))) * 31) + (this.secure ^ true ? 1 : 0)) * 31) + (this.httpOnly ^ true ? 1 : 0)) * 31) + (this.persistent ^ true ? 1 : 0)) * 31) + (this.hostOnly ^ true ? 1 : 0);
     }
 
     public boolean hostOnly() {
@@ -490,7 +480,7 @@ public final class Cookie {
         return toString(false);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public String toString(boolean z) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.name);

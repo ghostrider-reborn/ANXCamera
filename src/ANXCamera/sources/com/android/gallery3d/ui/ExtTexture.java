@@ -5,15 +5,12 @@ import com.android.camera.log.Log;
 
 public class ExtTexture extends BasicTexture {
     private static int[] sTextureId = new int[1];
-    private int mTarget;
+    private int mTarget = 36197;
 
     public ExtTexture() {
         GLES20.glGenTextures(1, sTextureId, 0);
-        StringBuilder sb = new StringBuilder();
-        sb.append("texId=");
-        sb.append(this.mId);
-        Log.d("ExtTexture", sb.toString());
-        this.mTarget = 36197;
+        this.mId = sTextureId[0];
+        Log.d("ExtTexture", "texId=" + this.mId);
     }
 
     private void uploadToCanvas(GLCanvas gLCanvas) {
@@ -45,9 +42,10 @@ public class ExtTexture extends BasicTexture {
     }
 
     public boolean onBind(GLCanvas gLCanvas) {
-        if (!isLoaded()) {
-            uploadToCanvas(gLCanvas);
+        if (isLoaded()) {
+            return true;
         }
+        uploadToCanvas(gLCanvas);
         return true;
     }
 

@@ -58,7 +58,7 @@ public final class ObservableRangeLong extends Observable<Long> {
             return 1;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             if (!this.fused) {
                 Observer<? super Long> observer = this.actual;

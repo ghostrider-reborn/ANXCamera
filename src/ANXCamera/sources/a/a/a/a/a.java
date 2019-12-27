@@ -12,7 +12,7 @@ public final class a {
     public int pid;
     public long ptr;
 
-    /* renamed from: a.a.a.a.a$a reason: collision with other inner class name */
+    /* renamed from: a.a.a.a.a$a  reason: collision with other inner class name */
     /* compiled from: DebugInfo */
     public static final class C0000a {
         public static final int IS_32BIT = 2;
@@ -33,10 +33,7 @@ public final class a {
                 i2 |= 2;
             }
             if (i != i2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("0x");
-                sb.append(Integer.toHexString(i & (~i2)));
-                arrayList.add(sb.toString());
+                arrayList.add("0x" + Integer.toHexString(i & (~i2)));
             }
             return String.join(" | ", arrayList);
         }
@@ -51,10 +48,7 @@ public final class a {
             if (i == 2) {
                 return "IS_32BIT";
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("0x");
-            sb.append(Integer.toHexString(i));
-            return sb.toString();
+            return "0x" + Integer.toHexString(i);
         }
     }
 
@@ -79,7 +73,7 @@ public final class a {
         hwBlob.putBool(12, false);
         HwBlob hwBlob2 = new HwBlob(size * 24);
         for (int i = 0; i < size; i++) {
-            ((a) arrayList.get(i)).writeEmbeddedToBlob(hwBlob2, (long) (i * 24));
+            arrayList.get(i).writeEmbeddedToBlob(hwBlob2, (long) (i * 24));
         }
         hwBlob.putBlob(0, hwBlob2);
         hwParcel.writeBuffer(hwBlob);
@@ -111,16 +105,7 @@ public final class a {
     }
 
     public final String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append(".pid = ");
-        sb.append(this.pid);
-        sb.append(", .ptr = ");
-        sb.append(this.ptr);
-        sb.append(", .arch = ");
-        sb.append(C0000a.toString(this.arch));
-        sb.append("}");
-        return sb.toString();
+        return "{" + ".pid = " + this.pid + ", .ptr = " + this.ptr + ", .arch = " + C0000a.toString(this.arch) + "}";
     }
 
     public final void writeEmbeddedToBlob(HwBlob hwBlob, long j) {

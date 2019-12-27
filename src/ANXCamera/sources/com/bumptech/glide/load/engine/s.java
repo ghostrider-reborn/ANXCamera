@@ -60,27 +60,7 @@ class s implements c {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("EngineKey{model=");
-        sb.append(this.model);
-        sb.append(", width=");
-        sb.append(this.width);
-        sb.append(", height=");
-        sb.append(this.height);
-        sb.append(", resourceClass=");
-        sb.append(this.Be);
-        sb.append(", transcodeClass=");
-        sb.append(this.uc);
-        sb.append(", signature=");
-        sb.append(this.signature);
-        sb.append(", hashCode=");
-        sb.append(this.hashCode);
-        sb.append(", transformations=");
-        sb.append(this.Ld);
-        sb.append(", options=");
-        sb.append(this.options);
-        sb.append('}');
-        return sb.toString();
+        return "EngineKey{model=" + this.model + ", width=" + this.width + ", height=" + this.height + ", resourceClass=" + this.Be + ", transcodeClass=" + this.uc + ", signature=" + this.signature + ", hashCode=" + this.hashCode + ", transformations=" + this.Ld + ", options=" + this.options + '}';
     }
 
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {

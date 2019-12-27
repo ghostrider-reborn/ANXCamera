@@ -25,7 +25,7 @@ public final class CompletableConcatIterable extends Completable {
             this.sources = it;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void next() {
             if (!this.sd.isDisposed() && getAndIncrement() == 0) {
                 Iterator<? extends CompletableSource> it = this.sources;
@@ -75,7 +75,7 @@ public final class CompletableConcatIterable extends Completable {
 
     public void subscribeActual(CompletableObserver completableObserver) {
         try {
-            Iterator it = this.sources.iterator();
+            Iterator<? extends CompletableSource> it = this.sources.iterator();
             ObjectHelper.requireNonNull(it, "The iterator returned is null");
             ConcatInnerObserver concatInnerObserver = new ConcatInnerObserver(completableObserver, it);
             completableObserver.onSubscribe(concatInnerObserver.sd);

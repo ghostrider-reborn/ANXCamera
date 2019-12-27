@@ -69,7 +69,7 @@ public class SpringChain implements SpringListener {
     }
 
     public Spring getControlSpring() {
-        return (Spring) this.mSprings.get(this.mControlSpringIndex);
+        return this.mSprings.get(this.mControlSpringIndex);
     }
 
     public SpringConfig getMainSpringConfig() {
@@ -77,22 +77,22 @@ public class SpringChain implements SpringListener {
     }
 
     public void onSpringActivate(Spring spring) {
-        ((SpringListener) this.mListeners.get(this.mSprings.indexOf(spring))).onSpringActivate(spring);
+        this.mListeners.get(this.mSprings.indexOf(spring)).onSpringActivate(spring);
     }
 
     public void onSpringAtRest(Spring spring) {
-        ((SpringListener) this.mListeners.get(this.mSprings.indexOf(spring))).onSpringAtRest(spring);
+        this.mListeners.get(this.mSprings.indexOf(spring)).onSpringAtRest(spring);
     }
 
     public void onSpringEndStateChange(Spring spring) {
-        ((SpringListener) this.mListeners.get(this.mSprings.indexOf(spring))).onSpringEndStateChange(spring);
+        this.mListeners.get(this.mSprings.indexOf(spring)).onSpringEndStateChange(spring);
     }
 
     public void onSpringUpdate(Spring spring) {
         int i;
         int i2;
         int indexOf = this.mSprings.indexOf(spring);
-        SpringListener springListener = (SpringListener) this.mListeners.get(indexOf);
+        SpringListener springListener = this.mListeners.get(indexOf);
         int i3 = this.mControlSpringIndex;
         if (indexOf == i3) {
             i = indexOf - 1;
@@ -108,17 +108,17 @@ public class SpringChain implements SpringListener {
             i = -1;
         }
         if (i2 > -1 && i2 < this.mSprings.size()) {
-            ((Spring) this.mSprings.get(i2)).setEndValue(spring.getCurrentValue());
+            this.mSprings.get(i2).setEndValue(spring.getCurrentValue());
         }
         if (i > -1 && i < this.mSprings.size()) {
-            ((Spring) this.mSprings.get(i)).setEndValue(spring.getCurrentValue());
+            this.mSprings.get(i).setEndValue(spring.getCurrentValue());
         }
         springListener.onSpringUpdate(spring);
     }
 
     public SpringChain setControlSpringIndex(int i) {
         this.mControlSpringIndex = i;
-        if (((Spring) this.mSprings.get(this.mControlSpringIndex)) == null) {
+        if (this.mSprings.get(this.mControlSpringIndex) == null) {
             return null;
         }
         for (Spring springConfig : this.mSpringSystem.getAllSprings()) {

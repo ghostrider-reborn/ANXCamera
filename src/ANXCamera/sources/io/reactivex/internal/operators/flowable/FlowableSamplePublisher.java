@@ -27,7 +27,7 @@ public final class FlowableSamplePublisher<T> extends Flowable<T> {
             super(subscriber, publisher);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeMain() {
             this.done = true;
             if (this.wip.getAndIncrement() == 0) {
@@ -36,7 +36,7 @@ public final class FlowableSamplePublisher<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeOther() {
             this.done = true;
             if (this.wip.getAndIncrement() == 0) {
@@ -45,7 +45,7 @@ public final class FlowableSamplePublisher<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             if (this.wip.getAndIncrement() == 0) {
                 do {
@@ -67,17 +67,17 @@ public final class FlowableSamplePublisher<T> extends Flowable<T> {
             super(subscriber, publisher);
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeMain() {
             this.actual.onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void completeOther() {
             this.actual.onComplete();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void run() {
             emit();
         }
@@ -106,15 +106,15 @@ public final class FlowableSamplePublisher<T> extends Flowable<T> {
             completeOther();
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void completeMain();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void completeOther();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void emit() {
-            Object andSet = getAndSet(null);
+            Object andSet = getAndSet((Object) null);
             if (andSet == null) {
                 return;
             }
@@ -163,10 +163,10 @@ public final class FlowableSamplePublisher<T> extends Flowable<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public abstract void run();
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean setOther(Subscription subscription) {
             return SubscriptionHelper.setOnce(this.other, subscription);
         }

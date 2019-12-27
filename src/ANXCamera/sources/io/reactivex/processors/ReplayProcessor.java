@@ -122,7 +122,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
             return this.error;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public TimedNode<T> getHead() {
             TimedNode<T> timedNode;
             TimedNode<T> timedNode2 = this.head;
@@ -217,10 +217,11 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                                 Throwable th = this.error;
                                 if (th == null) {
                                     subscriber.onComplete();
+                                    return;
                                 } else {
                                     subscriber.onError(th);
+                                    return;
                                 }
-                                return;
                             } else if (z2) {
                                 break;
                             } else {
@@ -240,10 +241,11 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                             Throwable th2 = this.error;
                             if (th2 == null) {
                                 subscriber.onComplete();
+                                return;
                             } else {
                                 subscriber.onError(th2);
+                                return;
                             }
-                            return;
                         }
                     }
                     replaySubscription.index = timedNode;
@@ -257,7 +259,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
             return size(getHead());
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int size(TimedNode<T> timedNode) {
             int i = 0;
             while (i != Integer.MAX_VALUE) {
@@ -270,7 +272,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
             return i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trim() {
             int i = this.size;
             if (i > this.maxSize) {
@@ -293,7 +295,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trimFinal() {
             long now = this.scheduler.now(this.unit) - this.maxAge;
             TimedNode<T> timedNode = this.head;
@@ -418,10 +420,11 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                                 Throwable th = this.error;
                                 if (th == null) {
                                     subscriber.onComplete();
+                                    return;
                                 } else {
                                     subscriber.onError(th);
+                                    return;
                                 }
-                                return;
                             } else if (z2) {
                                 break;
                             } else {
@@ -441,10 +444,11 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                             Throwable th2 = this.error;
                             if (th2 == null) {
                                 subscriber.onComplete();
+                                return;
                             } else {
                                 subscriber.onError(th2);
+                                return;
                             }
-                            return;
                         }
                     }
                     replaySubscription.index = node;
@@ -467,7 +471,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
             return i;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void trim() {
             int i = this.size;
             if (i > this.maxSize) {
@@ -560,7 +564,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                 if (num != null) {
                     i2 = num.intValue();
                 } else {
-                    replaySubscription.index = Integer.valueOf(0);
+                    replaySubscription.index = 0;
                 }
                 long j = replaySubscription.emitted;
                 int i3 = 1;
@@ -582,10 +586,11 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                                 Throwable th = this.error;
                                 if (th == null) {
                                     subscriber.onComplete();
+                                    return;
                                 } else {
                                     subscriber.onError(th);
+                                    return;
                                 }
-                                return;
                             } else if (i2 == i4) {
                                 break;
                             } else {
@@ -608,10 +613,11 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                             Throwable th2 = this.error;
                             if (th2 == null) {
                                 subscriber.onComplete();
+                                return;
                             } else {
                                 subscriber.onError(th2);
+                                return;
                             }
-                            return;
                         }
                     }
                     replaySubscription.index = Integer.valueOf(i2);
@@ -661,7 +667,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
         return new ReplayProcessor<>(sizeAndTimeBoundReplayBuffer);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean add(ReplaySubscription<T> replaySubscription) {
         ReplaySubscription[] replaySubscriptionArr;
         ReplaySubscription[] replaySubscriptionArr2;
@@ -761,7 +767,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void remove(ReplaySubscription<T> replaySubscription) {
         ReplaySubscription<T>[] replaySubscriptionArr;
         ReplaySubscription[] replaySubscriptionArr2;
@@ -793,11 +799,13 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
                 } else {
                     return;
                 }
+            } else {
+                return;
             }
         } while (!this.subscribers.compareAndSet(replaySubscriptionArr, replaySubscriptionArr2));
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int size() {
         return this.buffer.size();
     }
@@ -813,7 +821,7 @@ public final class ReplayProcessor<T> extends FlowableProcessor<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int subscriberCount() {
         return ((ReplaySubscription[]) this.subscribers.get()).length;
     }

@@ -122,7 +122,7 @@ public final class BidiFormatter {
             do {
                 int i = this.charIndex;
                 if (i >= this.length) {
-                    break;
+                    return 12;
                 }
                 CharSequence charSequence = this.text;
                 this.charIndex = i + 1;
@@ -204,7 +204,7 @@ public final class BidiFormatter {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public byte dirTypeBackward() {
             this.lastChar = this.text.charAt(this.charIndex - 1);
             if (Character.isLowSurrogate(this.lastChar)) {
@@ -214,18 +214,14 @@ public final class BidiFormatter {
             }
             this.charIndex--;
             byte cachedDirectionality = getCachedDirectionality(this.lastChar);
-            if (this.isHtml) {
-                char c2 = this.lastChar;
-                if (c2 == '>') {
-                    cachedDirectionality = skipTagBackward();
-                } else if (c2 == ';') {
-                    cachedDirectionality = skipEntityBackward();
-                }
+            if (!this.isHtml) {
+                return cachedDirectionality;
             }
-            return cachedDirectionality;
+            char c2 = this.lastChar;
+            return c2 == '>' ? skipTagBackward() : c2 == ';' ? skipEntityBackward() : cachedDirectionality;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public byte dirTypeForward() {
             this.lastChar = this.text.charAt(this.charIndex);
             if (Character.isHighSurrogate(this.lastChar)) {
@@ -235,18 +231,14 @@ public final class BidiFormatter {
             }
             this.charIndex++;
             byte cachedDirectionality = getCachedDirectionality(this.lastChar);
-            if (this.isHtml) {
-                char c2 = this.lastChar;
-                if (c2 == '<') {
-                    cachedDirectionality = skipTagForward();
-                } else if (c2 == '&') {
-                    cachedDirectionality = skipEntityForward();
-                }
+            if (!this.isHtml) {
+                return cachedDirectionality;
             }
-            return cachedDirectionality;
+            char c2 = this.lastChar;
+            return c2 == '<' ? skipTagForward() : c2 == '&' ? skipEntityForward() : cachedDirectionality;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public int getEntryDir() {
             this.charIndex = 0;
             int i = 0;
@@ -311,7 +303,7 @@ public final class BidiFormatter {
             return 0;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         /* JADX WARNING: Code restructure failed: missing block: B:18:0x002b, code lost:
             r2 = r2 - 1;
          */
@@ -398,12 +390,12 @@ public final class BidiFormatter {
 
     private String markAfter(CharSequence charSequence, TextDirectionHeuristicCompat textDirectionHeuristicCompat) {
         boolean isRtl = textDirectionHeuristicCompat.isRtl(charSequence, 0, charSequence.length());
-        return (this.mIsRtlContext || (!isRtl && getExitDir(charSequence) != 1)) ? (!this.mIsRtlContext || (isRtl && getExitDir(charSequence) != -1)) ? "" : RLM_STRING : LRM_STRING;
+        return (this.mIsRtlContext || (!isRtl && getExitDir(charSequence) != 1)) ? this.mIsRtlContext ? (!isRtl || getExitDir(charSequence) == -1) ? RLM_STRING : "" : "" : LRM_STRING;
     }
 
     private String markBefore(CharSequence charSequence, TextDirectionHeuristicCompat textDirectionHeuristicCompat) {
         boolean isRtl = textDirectionHeuristicCompat.isRtl(charSequence, 0, charSequence.length());
-        return (this.mIsRtlContext || (!isRtl && getEntryDir(charSequence) != 1)) ? (!this.mIsRtlContext || (isRtl && getEntryDir(charSequence) != -1)) ? "" : RLM_STRING : LRM_STRING;
+        return (this.mIsRtlContext || (!isRtl && getEntryDir(charSequence) != 1)) ? this.mIsRtlContext ? (!isRtl || getEntryDir(charSequence) == -1) ? RLM_STRING : "" : "" : LRM_STRING;
     }
 
     public boolean getStereoReset() {

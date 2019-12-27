@@ -17,12 +17,8 @@ public final class ObservableLift<R, T> extends AbstractObservableWithUpstream<T
 
     public void subscribeActual(Observer<? super R> observer) {
         try {
-            Observer apply = this.operator.apply(observer);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Operator ");
-            sb.append(this.operator);
-            sb.append(" returned a null Observer");
-            ObjectHelper.requireNonNull(apply, sb.toString());
+            Observer<? super Object> apply = this.operator.apply(observer);
+            ObjectHelper.requireNonNull(apply, "Operator " + this.operator + " returned a null Observer");
             this.source.subscribe(apply);
         } catch (NullPointerException e2) {
             throw e2;

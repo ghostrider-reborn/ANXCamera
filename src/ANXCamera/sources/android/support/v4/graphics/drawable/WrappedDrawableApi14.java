@@ -4,30 +4,28 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Drawable.Callback;
-import android.graphics.drawable.Drawable.ConstantState;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 
-class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable, TintAwareDrawable {
-    static final Mode DEFAULT_TINT_MODE = Mode.SRC_IN;
+class WrappedDrawableApi14 extends Drawable implements Drawable.Callback, WrappedDrawable, TintAwareDrawable {
+    static final PorterDuff.Mode DEFAULT_TINT_MODE = PorterDuff.Mode.SRC_IN;
     private boolean mColorFilterSet;
     private int mCurrentColor;
-    private Mode mCurrentMode;
+    private PorterDuff.Mode mCurrentMode;
     Drawable mDrawable;
     private boolean mMutated;
     DrawableWrapperState mState;
 
-    protected static abstract class DrawableWrapperState extends ConstantState {
+    protected static abstract class DrawableWrapperState extends Drawable.ConstantState {
         int mChangingConfigurations;
-        ConstantState mDrawableState;
+        Drawable.ConstantState mDrawableState;
         ColorStateList mTint = null;
-        Mode mTintMode = WrappedDrawableApi14.DEFAULT_TINT_MODE;
+        PorterDuff.Mode mTintMode = WrappedDrawableApi14.DEFAULT_TINT_MODE;
 
         DrawableWrapperState(@Nullable DrawableWrapperState drawableWrapperState, @Nullable Resources resources) {
             if (drawableWrapperState != null) {
@@ -38,20 +36,20 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public boolean canConstantState() {
             return this.mDrawableState != null;
         }
 
         public int getChangingConfigurations() {
             int i = this.mChangingConfigurations;
-            ConstantState constantState = this.mDrawableState;
+            Drawable.ConstantState constantState = this.mDrawableState;
             return (constantState != null ? constantState.getChangingConfigurations() : 0) | i;
         }
 
         @NonNull
         public Drawable newDrawable() {
-            return newDrawable(null);
+            return newDrawable((Resources) null);
         }
 
         @NonNull
@@ -82,7 +80,7 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
     private void updateLocalState(@Nullable Resources resources) {
         DrawableWrapperState drawableWrapperState = this.mState;
         if (drawableWrapperState != null) {
-            ConstantState constantState = drawableWrapperState.mDrawableState;
+            Drawable.ConstantState constantState = drawableWrapperState.mDrawableState;
             if (constantState != null) {
                 setWrappedDrawable(constantState.newDrawable(resources));
             }
@@ -95,7 +93,7 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
         }
         DrawableWrapperState drawableWrapperState = this.mState;
         ColorStateList colorStateList = drawableWrapperState.mTint;
-        Mode mode = drawableWrapperState.mTintMode;
+        PorterDuff.Mode mode = drawableWrapperState.mTintMode;
         if (colorStateList == null || mode == null) {
             this.mColorFilterSet = false;
             clearColorFilter();
@@ -123,7 +121,7 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
     }
 
     @Nullable
-    public ConstantState getConstantState() {
+    public Drawable.ConstantState getConstantState() {
         DrawableWrapperState drawableWrapperState = this.mState;
         if (drawableWrapperState == null || !drawableWrapperState.canConstantState()) {
             return null;
@@ -224,10 +222,10 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
         return this;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public DrawableWrapperState mutateConstantState() {
-        return new DrawableWrapperStateBase(this.mState, null);
+        return new DrawableWrapperStateBase(this.mState, (Resources) null);
     }
 
     /* access modifiers changed from: protected */
@@ -285,7 +283,7 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
         updateTint(getState());
     }
 
-    public void setTintMode(@NonNull Mode mode) {
+    public void setTintMode(@NonNull PorterDuff.Mode mode) {
         this.mState.mTintMode = mode;
         updateTint(getState());
     }
@@ -297,7 +295,7 @@ class WrappedDrawableApi14 extends Drawable implements Callback, WrappedDrawable
     public final void setWrappedDrawable(Drawable drawable) {
         Drawable drawable2 = this.mDrawable;
         if (drawable2 != null) {
-            drawable2.setCallback(null);
+            drawable2.setCallback((Drawable.Callback) null);
         }
         this.mDrawable = drawable;
         if (drawable != null) {

@@ -8,10 +8,10 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import com.android.camera.Camera;
 import com.android.camera.effect.draw_mode.DrawExtTexAttribute;
-import com.android.camera.protocol.ModeProtocol.BaseProtocol;
+import com.android.camera.protocol.ModeProtocol;
 import java.util.List;
 
-public interface Module extends BaseProtocol {
+public interface Module extends ModeProtocol.BaseProtocol {
     boolean canIgnoreFocusChanged();
 
     void checkActivityOrientation();

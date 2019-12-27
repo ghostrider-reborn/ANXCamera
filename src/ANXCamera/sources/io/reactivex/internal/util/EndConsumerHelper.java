@@ -15,13 +15,7 @@ public final class EndConsumerHelper {
     }
 
     public static String composeMessage(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("It is not allowed to subscribe with a(n) ");
-        sb.append(str);
-        sb.append(" multiple times. Please create a fresh instance of ");
-        sb.append(str);
-        sb.append(" and subscribe that to the target source instead.");
-        return sb.toString();
+        return "It is not allowed to subscribe with a(n) " + str + " multiple times. Please create a fresh instance of " + str + " and subscribe that to the target source instead.";
     }
 
     public static void reportDoubleSubscription(Class<?> cls) {
@@ -30,25 +24,27 @@ public final class EndConsumerHelper {
 
     public static boolean setOnce(AtomicReference<Disposable> atomicReference, Disposable disposable, Class<?> cls) {
         ObjectHelper.requireNonNull(disposable, "next is null");
-        if (atomicReference.compareAndSet(null, disposable)) {
+        if (atomicReference.compareAndSet((Object) null, disposable)) {
             return true;
         }
         disposable.dispose();
-        if (atomicReference.get() != DisposableHelper.DISPOSED) {
-            reportDoubleSubscription(cls);
+        if (atomicReference.get() == DisposableHelper.DISPOSED) {
+            return false;
         }
+        reportDoubleSubscription(cls);
         return false;
     }
 
     public static boolean setOnce(AtomicReference<Subscription> atomicReference, Subscription subscription, Class<?> cls) {
         ObjectHelper.requireNonNull(subscription, "next is null");
-        if (atomicReference.compareAndSet(null, subscription)) {
+        if (atomicReference.compareAndSet((Object) null, subscription)) {
             return true;
         }
         subscription.cancel();
-        if (atomicReference.get() != SubscriptionHelper.CANCELLED) {
-            reportDoubleSubscription(cls);
+        if (atomicReference.get() == SubscriptionHelper.CANCELLED) {
+            return false;
         }
+        reportDoubleSubscription(cls);
         return false;
     }
 
@@ -58,9 +54,10 @@ public final class EndConsumerHelper {
             return true;
         }
         disposable2.dispose();
-        if (disposable != DisposableHelper.DISPOSED) {
-            reportDoubleSubscription(cls);
+        if (disposable == DisposableHelper.DISPOSED) {
+            return false;
         }
+        reportDoubleSubscription(cls);
         return false;
     }
 
@@ -70,9 +67,10 @@ public final class EndConsumerHelper {
             return true;
         }
         subscription2.cancel();
-        if (subscription != SubscriptionHelper.CANCELLED) {
-            reportDoubleSubscription(cls);
+        if (subscription == SubscriptionHelper.CANCELLED) {
+            return false;
         }
+        reportDoubleSubscription(cls);
         return false;
     }
 }

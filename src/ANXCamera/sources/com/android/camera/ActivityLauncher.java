@@ -42,10 +42,7 @@ public class ActivityLauncher {
         if (TextUtils.isEmpty(language) || TextUtils.isEmpty(country)) {
             str = URL_MIUI_PRIVACY_POLICY;
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(URL_MIUI_PRIVACY_POLICY);
-            sb.append("%s_%s");
-            str = String.format(sb.toString(), new Object[]{language, country});
+            str = String.format(URL_MIUI_PRIVACY_POLICY + "%s_%s", new Object[]{language, country});
         }
         intent.setData(Uri.parse(str));
         context.startActivity(intent);

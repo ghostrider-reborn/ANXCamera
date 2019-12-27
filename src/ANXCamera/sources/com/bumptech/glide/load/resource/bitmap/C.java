@@ -1,12 +1,12 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.support.annotation.NonNull;
-import com.bumptech.glide.load.f.a;
+import com.bumptech.glide.load.f;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 /* compiled from: VideoDecoder */
-class C implements a<Integer> {
+class C implements f.a<Integer> {
     private final ByteBuffer buffer = ByteBuffer.allocate(4);
 
     C() {

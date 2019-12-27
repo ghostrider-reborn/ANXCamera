@@ -27,16 +27,16 @@ public class d {
     @Nullable
     public List<Class<?>> d(@NonNull Class<?> cls, @NonNull Class<?> cls2) {
         List<Class<?>> list;
-        h hVar = (h) this.wk.getAndSet(null);
-        if (hVar == null) {
-            hVar = new h(cls, cls2);
+        h andSet = this.wk.getAndSet((Object) null);
+        if (andSet == null) {
+            andSet = new h(cls, cls2);
         } else {
-            hVar.h(cls, cls2);
+            andSet.h(cls, cls2);
         }
         synchronized (this.xk) {
-            list = (List) this.xk.get(hVar);
+            list = this.xk.get(andSet);
         }
-        this.wk.set(hVar);
+        this.wk.set(andSet);
         return list;
     }
 }

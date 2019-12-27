@@ -34,21 +34,16 @@ public class SupportRequestManagerFragment extends Fragment {
         public Set<m> H() {
             Set<SupportRequestManagerFragment> O = SupportRequestManagerFragment.this.O();
             HashSet hashSet = new HashSet(O.size());
-            for (SupportRequestManagerFragment supportRequestManagerFragment : O) {
-                if (supportRequestManagerFragment.Q() != null) {
-                    hashSet.add(supportRequestManagerFragment.Q());
+            for (SupportRequestManagerFragment next : O) {
+                if (next.Q() != null) {
+                    hashSet.add(next.Q());
                 }
             }
             return hashSet;
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(super.toString());
-            sb.append("{fragment=");
-            sb.append(SupportRequestManagerFragment.this);
-            sb.append("}");
-            return sb.toString();
+            return super.toString() + "{fragment=" + SupportRequestManagerFragment.this + "}";
         }
     }
 
@@ -108,7 +103,7 @@ public class SupportRequestManagerFragment extends Fragment {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public Set<SupportRequestManagerFragment> O() {
         SupportRequestManagerFragment supportRequestManagerFragment = this.ea;
@@ -119,15 +114,15 @@ public class SupportRequestManagerFragment extends Fragment {
             return Collections.unmodifiableSet(this.ca);
         }
         HashSet hashSet = new HashSet();
-        for (SupportRequestManagerFragment supportRequestManagerFragment2 : this.ea.O()) {
-            if (d(supportRequestManagerFragment2.Oj())) {
-                hashSet.add(supportRequestManagerFragment2);
+        for (SupportRequestManagerFragment next : this.ea.O()) {
+            if (d(next.Oj())) {
+                hashSet.add(next);
             }
         }
         return Collections.unmodifiableSet(hashSet);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     @NonNull
     public a P() {
         return this.aa;
@@ -143,7 +138,7 @@ public class SupportRequestManagerFragment extends Fragment {
         return this.ba;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void a(@Nullable Fragment fragment) {
         this.fa = fragment;
         if (fragment != null && fragment.getActivity() != null) {
@@ -160,9 +155,8 @@ public class SupportRequestManagerFragment extends Fragment {
         try {
             d(getActivity());
         } catch (IllegalStateException e2) {
-            String str = TAG;
-            if (Log.isLoggable(str, 5)) {
-                Log.w(str, "Unable to register fragment with root", e2);
+            if (Log.isLoggable(TAG, 5)) {
+                Log.w(TAG, "Unable to register fragment with root", e2);
             }
         }
     }
@@ -190,11 +184,6 @@ public class SupportRequestManagerFragment extends Fragment {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
-        sb.append("{parent=");
-        sb.append(Oj());
-        sb.append("}");
-        return sb.toString();
+        return super.toString() + "{parent=" + Oj() + "}";
     }
 }

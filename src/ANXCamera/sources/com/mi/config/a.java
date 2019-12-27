@@ -1,8 +1,7 @@
 package com.mi.config;
 
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
-import android.os.Build.VERSION;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.os.statistics.E2EScenario;
 import android.support.v4.util.SimpleArrayMap;
@@ -19,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 import java.util.Locale;
-import miui.os.Build;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,30 +36,24 @@ public class a extends DataItemBase implements c {
     }
 
     private static String a(Resources resources) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("feature_");
-        sb.append(b.km);
-        String sb2 = sb.toString();
+        String str = "feature_" + b.km;
         try {
             String string = resources.getString(R.string.device_feature_configuration_file_name);
-            return (string == null || string.length() == 0 || E2EScenario.DEFAULT_CATEGORY.equals(string)) ? sb2 : string;
-        } catch (NotFoundException e2) {
+            return (string == null || string.length() == 0 || E2EScenario.DEFAULT_CATEGORY.equals(string)) ? str : string;
+        } catch (Resources.NotFoundException e2) {
             Log.d(TAG, "Device feature configuration file name undefined", e2);
-            return sb2;
+            return str;
         }
     }
 
     private void y(String str) throws JSONException {
         JSONObject jSONObject = new JSONObject(str);
-        Iterator keys = jSONObject.keys();
-        SimpleArrayMap values = getValues();
+        Iterator<String> keys = jSONObject.keys();
+        SimpleArrayMap<String, Object> values = getValues();
         while (keys.hasNext()) {
-            String str2 = (String) keys.next();
-            if (values.put(str2, jSONObject.opt(str2)) != null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Duplicate key is found in the configuration file: ");
-                sb.append(str2);
-                throw new IllegalStateException(sb.toString());
+            String next = keys.next();
+            if (values.put(next, jSONObject.opt(next)) != null) {
+                throw new IllegalStateException("Duplicate key is found in the configuration file: " + next);
             }
         }
     }
@@ -98,12 +90,6 @@ public class a extends DataItemBase implements c {
         return getBoolean(c.Ks, false);
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:11:0x003b, code lost:
-        y(r2.toString());
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:13:?, code lost:
-        r3.close();
-     */
     /* JADX WARNING: Code restructure failed: missing block: B:17:0x0048, code lost:
         r0 = move-exception;
      */
@@ -125,10 +111,13 @@ public class a extends DataItemBase implements c {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resources.openRawResource(identifier)));
             while (true) {
                 String readLine = bufferedReader.readLine();
-                if (readLine == null) {
-                    break;
+                if (readLine != null) {
+                    sb.append(readLine);
+                } else {
+                    y(sb.toString());
+                    bufferedReader.close();
+                    return;
                 }
-                sb.append(readLine);
             }
         } catch (IOException | JSONException e2) {
             e2.printStackTrace();
@@ -218,7 +207,7 @@ public class a extends DataItemBase implements c {
     }
 
     public boolean Jc() {
-        return VERSION.SDK_INT > 28 ? Vj() : getBoolean(c.Sr, false);
+        return Build.VERSION.SDK_INT > 28 ? Vj() : getBoolean(c.Sr, false);
     }
 
     public int Ka() {
@@ -262,7 +251,7 @@ public class a extends DataItemBase implements c {
     }
 
     public boolean Nb() {
-        return getBoolean(c.qt, false) && !Build.IS_INTERNATIONAL_BUILD;
+        return getBoolean(c.qt, false) && !miui.os.Build.IS_INTERNATIONAL_BUILD;
     }
 
     public boolean Nc() {
@@ -270,12 +259,11 @@ public class a extends DataItemBase implements c {
     }
 
     public Size Oa() {
-        String str = "";
-        String string = getString(c.cu, str);
+        String string = getString(c.cu, "");
         if (TextUtils.isEmpty(string)) {
             return null;
         }
-        String[] split = string.replace(" ", str).split("x");
+        String[] split = string.replace(" ", "").split("x");
         if (split.length < 2) {
             return null;
         }
@@ -291,7 +279,7 @@ public class a extends DataItemBase implements c {
     }
 
     public String Pa() {
-        return getString(c.ru, null);
+        return getString(c.ru, (String) null);
     }
 
     public boolean Pb() {
@@ -390,7 +378,7 @@ public class a extends DataItemBase implements c {
     }
 
     public boolean Xa() {
-        if (VERSION.SDK_INT < 28) {
+        if (Build.VERSION.SDK_INT < 28) {
             return false;
         }
         return getBoolean(c.Ts, false);
@@ -557,7 +545,7 @@ public class a extends DataItemBase implements c {
     }
 
     public boolean ib() {
-        return Build.getRegion().endsWith("IN");
+        return miui.os.Build.getRegion().endsWith("IN");
     }
 
     public boolean ic() {
@@ -745,7 +733,7 @@ public class a extends DataItemBase implements c {
     }
 
     public boolean uc() {
-        return VERSION.SDK_INT >= 28 && getBoolean(c.Xr, false);
+        return Build.VERSION.SDK_INT >= 28 && getBoolean(c.Xr, false);
     }
 
     public boolean va() {

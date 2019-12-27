@@ -2,13 +2,12 @@ package com.ss.android.vesdk.settings;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.support.annotation.Keep;
-import com.ss.android.vesdk.VEVideoEncodeSettings.ENCODE_BITRATE_MODE;
+import com.ss.android.vesdk.VEVideoEncodeSettings;
 
 @Keep
 public class VEVideoSWEncodeSettings implements Parcelable {
-    public static final Creator<VEVideoSWEncodeSettings> CREATOR = new Creator<VEVideoSWEncodeSettings>() {
+    public static final Parcelable.Creator<VEVideoSWEncodeSettings> CREATOR = new Parcelable.Creator<VEVideoSWEncodeSettings>() {
         public VEVideoSWEncodeSettings createFromParcel(Parcel parcel) {
             return new VEVideoSWEncodeSettings(parcel);
         }
@@ -17,7 +16,7 @@ public class VEVideoSWEncodeSettings implements Parcelable {
             return new VEVideoSWEncodeSettings[i];
         }
     };
-    public int mBitrateMode = ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
+    public int mBitrateMode = VEVideoEncodeSettings.ENCODE_BITRATE_MODE.ENCODE_BITRATE_CRF.ordinal();
     public int mBps = 4000000;
     public int mCrf = 15;
     public int mGop = 35;

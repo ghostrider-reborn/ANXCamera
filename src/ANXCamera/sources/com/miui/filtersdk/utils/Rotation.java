@@ -6,7 +6,7 @@ public enum Rotation {
     ROTATION_180,
     ROTATION_270;
 
-    /* renamed from: com.miui.filtersdk.utils.Rotation$1 reason: invalid class name */
+    /* renamed from: com.miui.filtersdk.utils.Rotation$1  reason: invalid class name */
     static /* synthetic */ class AnonymousClass1 {
         static final /* synthetic */ int[] $SwitchMap$com$miui$filtersdk$utils$Rotation = null;
 
@@ -44,10 +44,7 @@ public enum Rotation {
         if (i == 360) {
             return NORMAL;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(i);
-        sb.append(" is an unknown rotation. Needs to be either 0, 90, 180 or 270!");
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException(i + " is an unknown rotation. Needs to be either 0, 90, 180 or 270!");
     }
 
     public int asInt() {

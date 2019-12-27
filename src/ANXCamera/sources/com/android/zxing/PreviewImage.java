@@ -30,11 +30,7 @@ public class PreviewImage {
         convertYUV420ToNV21(image);
         this.mOrientation = i;
         this.mPreviewStatus = 2;
-        StringBuilder sb = new StringBuilder();
-        sb.append("PreviewDecodeManager convertYUV420ToNV21: cost = ");
-        sb.append(System.currentTimeMillis() - currentTimeMillis);
-        sb.append("ms");
-        Log.d(TAG, sb.toString());
+        Log.d(TAG, "PreviewDecodeManager convertYUV420ToNV21: cost = " + (System.currentTimeMillis() - currentTimeMillis) + "ms");
     }
 
     private void convertYUV420ToNV21(Image image) {
@@ -52,17 +48,7 @@ public class PreviewImage {
                     ByteBuffer buffer2 = image.getPlanes()[2].getBuffer();
                     int limit = buffer.limit();
                     int limit2 = buffer2.limit();
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("convertYUV420888ToNV21: size = ");
-                    sb.append(this.mWidth);
-                    sb.append("x");
-                    sb.append(this.mHeight);
-                    sb.append(", yStride = ");
-                    sb.append(rowStride);
-                    sb.append(", uvStride = ");
-                    sb.append(rowStride2);
-                    Log.v(str, sb.toString());
+                    Log.v(TAG, "convertYUV420888ToNV21: size = " + this.mWidth + "x" + this.mHeight + ", yStride = " + rowStride + ", uvStride = " + rowStride2);
                     this.mData = new byte[(limit + limit2)];
                     buffer.get(this.mData, 0, limit);
                     buffer2.get(this.mData, limit, limit2);
@@ -78,20 +64,20 @@ public class PreviewImage {
                             i2++;
                         }
                         while (true) {
-                            int i5 = this.mHeight;
-                            if (i >= i5 / 2) {
-                                break;
-                            }
-                            if (i == (i5 / 2) - 1) {
-                                System.arraycopy(this.mData, i3, bArr, i4, this.mWidth - 1);
+                            if (i < this.mHeight / 2) {
+                                if (i == (r0 / 2) - 1) {
+                                    System.arraycopy(this.mData, i3, bArr, i4, this.mWidth - 1);
+                                } else {
+                                    System.arraycopy(this.mData, i3, bArr, i4, this.mWidth);
+                                }
+                                i3 += rowStride2;
+                                i4 += this.mWidth;
+                                i++;
                             } else {
-                                System.arraycopy(this.mData, i3, bArr, i4, this.mWidth);
+                                this.mData = bArr;
+                                return;
                             }
-                            i3 += rowStride2;
-                            i4 += this.mWidth;
-                            i++;
                         }
-                        this.mData = bArr;
                     }
                 }
             } catch (Exception unused) {
@@ -132,18 +118,6 @@ public class PreviewImage {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("PreviewImage{mData=");
-        sb.append(Arrays.toString(this.mData));
-        sb.append(", mTimestamp=");
-        sb.append(this.mTimestamp);
-        sb.append(", mWidth=");
-        sb.append(this.mWidth);
-        sb.append(", mHeight=");
-        sb.append(this.mHeight);
-        sb.append(", mFormat=");
-        sb.append(this.mFormat);
-        sb.append('}');
-        return sb.toString();
+        return "PreviewImage{mData=" + Arrays.toString(this.mData) + ", mTimestamp=" + this.mTimestamp + ", mWidth=" + this.mWidth + ", mHeight=" + this.mHeight + ", mFormat=" + this.mFormat + '}';
     }
 }

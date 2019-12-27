@@ -3,7 +3,7 @@ package com.bumptech.glide.load.a;
 import android.content.ContentResolver;
 import android.content.UriMatcher;
 import android.net.Uri;
-import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,13 +19,12 @@ public class o extends m<InputStream> {
     private static final UriMatcher ge = new UriMatcher(-1);
 
     static {
-        String str = "com.android.contacts";
-        ge.addURI(str, "contacts/lookup/*/#", 1);
-        ge.addURI(str, "contacts/lookup/*", 1);
-        ge.addURI(str, "contacts/#/photo", 2);
-        ge.addURI(str, "contacts/#", 3);
-        ge.addURI(str, "contacts/#/display_photo", 4);
-        ge.addURI(str, "phone_lookup/*", 5);
+        ge.addURI("com.android.contacts", "contacts/lookup/*/#", 1);
+        ge.addURI("com.android.contacts", "contacts/lookup/*", 1);
+        ge.addURI("com.android.contacts", "contacts/#/photo", 2);
+        ge.addURI("com.android.contacts", "contacts/#", 3);
+        ge.addURI("com.android.contacts", "contacts/#/display_photo", 4);
+        ge.addURI("com.android.contacts", "phone_lookup/*", 5);
     }
 
     public o(ContentResolver contentResolver, Uri uri) {
@@ -42,7 +41,7 @@ public class o extends m<InputStream> {
                 return contentResolver.openInputStream(uri);
             }
         }
-        Uri lookupContact = Contacts.lookupContact(contentResolver, uri);
+        Uri lookupContact = ContactsContract.Contacts.lookupContact(contentResolver, uri);
         if (lookupContact != null) {
             return openContactPhotoInputStream(contentResolver, lookupContact);
         }
@@ -50,7 +49,7 @@ public class o extends m<InputStream> {
     }
 
     private InputStream openContactPhotoInputStream(ContentResolver contentResolver, Uri uri) {
-        return Contacts.openContactPhotoInputStream(contentResolver, uri, true);
+        return ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, uri, true);
     }
 
     @NonNull
@@ -64,10 +63,7 @@ public class o extends m<InputStream> {
         if (b2 != null) {
             return b2;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("InputStream is null for ");
-        sb.append(uri);
-        throw new FileNotFoundException(sb.toString());
+        throw new FileNotFoundException("InputStream is null for " + uri);
     }
 
     /* access modifiers changed from: protected */

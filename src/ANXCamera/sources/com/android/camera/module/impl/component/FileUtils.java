@@ -3,7 +3,6 @@ package com.android.camera.module.impl.component;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.os.Environment;
 import android.text.TextUtils;
 import com.android.camera.log.Log;
@@ -26,97 +25,36 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class FileUtils {
-    public static final String BEAUTY_12_DIR;
+    public static final String BEAUTY_12_DIR = (RESOURCE_DIR + "Beauty_12/");
     public static final String BEAUTY_12_FILENAME = "Beauty_12.zip";
-    public static final String CACHE;
-    public static final String CONCAT_VIDEO_DIR;
-    public static final String DOC;
+    public static final String CACHE = (ROOT_DIR + "cache/");
+    public static final String CONCAT_VIDEO_DIR = (ROOT_DIR + "concat/");
+    public static final String DOC = (ROOT_DIR + "doc/");
     public static final String FACE_RESHAPE = "FaceReshape_V2.zip";
-    public static final String FILTER;
-    public static final String FILTER_DIR;
-    public static final String MODELS_DIR;
-    public static final String MUSIC;
+    public static final String FILTER = (FILTER_DIR + "Filter_02/");
+    public static final String FILTER_DIR = (RESOURCE_DIR + "filter/");
+    public static final String MODELS_DIR = (ROOT_DIR + "model/");
+    public static final String MUSIC = (ROOT_DIR + "music/");
     public static final String MUSIC_EFFECT_DIR = RESOURCE_DIR;
-    public static final String MUSIC_LOCAL;
-    public static final String MUSIC_ONLINE;
+    public static final String MUSIC_LOCAL = (MUSIC + "local/");
+    public static final String MUSIC_ONLINE = (MUSIC + "online/");
     public static final String PHONEPARAM = "phoneParams.txt";
-    public static final String RESHAPE_DIR_NAME;
-    public static final String RESOURCE_DIR;
+    public static final String RESHAPE_DIR_NAME = (RESOURCE_DIR + "FaceReshape_V2/");
+    public static final String RESOURCE_DIR = (ROOT_DIR + "resource/");
     public static List<String> RESOURCE_LIST_CN = new ArrayList();
     public static List<String> RESOURCE_LIST_GLOBAL = new ArrayList();
-    public static final String ROOT_DIR;
-    public static final String STICKER_RESOURCE_DIR;
+    public static final String ROOT_DIR = (Environment.getExternalStorageDirectory().getPath() + "/MIUI/Camera/");
+    public static final String STICKER_RESOURCE_DIR = (RESOURCE_DIR + "stickers/");
     public static final String SUFFIX = ".zip";
     public static final String TAG = "FileUtils";
-    public static final String VIDEO_TMP;
+    public static final String VIDEO_TMP = (ROOT_DIR + "tmp/");
     public static final List<String> musicList = new ArrayList();
 
     static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Environment.getExternalStorageDirectory().getPath());
-        sb.append("/MIUI/Camera/");
-        ROOT_DIR = sb.toString();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(ROOT_DIR);
-        sb2.append("resource/");
-        RESOURCE_DIR = sb2.toString();
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(RESOURCE_DIR);
-        sb3.append("stickers/");
-        STICKER_RESOURCE_DIR = sb3.toString();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(ROOT_DIR);
-        sb4.append("model/");
-        MODELS_DIR = sb4.toString();
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(ROOT_DIR);
-        sb5.append("tmp/");
-        VIDEO_TMP = sb5.toString();
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(ROOT_DIR);
-        sb6.append("concat/");
-        CONCAT_VIDEO_DIR = sb6.toString();
-        StringBuilder sb7 = new StringBuilder();
-        sb7.append(ROOT_DIR);
-        sb7.append("cache/");
-        CACHE = sb7.toString();
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append(ROOT_DIR);
-        sb8.append("music/");
-        MUSIC = sb8.toString();
-        StringBuilder sb9 = new StringBuilder();
-        sb9.append(ROOT_DIR);
-        sb9.append("doc/");
-        DOC = sb9.toString();
-        StringBuilder sb10 = new StringBuilder();
-        sb10.append(RESOURCE_DIR);
-        sb10.append("filter/");
-        FILTER_DIR = sb10.toString();
-        StringBuilder sb11 = new StringBuilder();
-        sb11.append(FILTER_DIR);
-        sb11.append("Filter_02/");
-        FILTER = sb11.toString();
-        StringBuilder sb12 = new StringBuilder();
-        sb12.append(RESOURCE_DIR);
-        sb12.append("Beauty_12/");
-        BEAUTY_12_DIR = sb12.toString();
-        StringBuilder sb13 = new StringBuilder();
-        sb13.append(RESOURCE_DIR);
-        sb13.append("FaceReshape_V2/");
-        RESHAPE_DIR_NAME = sb13.toString();
-        StringBuilder sb14 = new StringBuilder();
-        sb14.append(MUSIC);
-        sb14.append("local/");
-        MUSIC_LOCAL = sb14.toString();
-        StringBuilder sb15 = new StringBuilder();
-        sb15.append(MUSIC);
-        sb15.append("online/");
-        MUSIC_ONLINE = sb15.toString();
         RESOURCE_LIST_CN.add("0eb0e0214f7bc7f7bbfb4e9f4dba7f99");
         RESOURCE_LIST_CN.add("a75682e81788cc12f68682b9c9067f70");
-        String str = "24991e783f23920397ac8aeed15994c2";
-        RESOURCE_LIST_CN.add(str);
-        RESOURCE_LIST_GLOBAL.add(str);
+        RESOURCE_LIST_CN.add("24991e783f23920397ac8aeed15994c2");
+        RESOURCE_LIST_GLOBAL.add("24991e783f23920397ac8aeed15994c2");
         RESOURCE_LIST_GLOBAL.add("9b74385fe7e8cb81e1b88ce3b293bdf2");
         RESOURCE_LIST_GLOBAL.add("0a673064d64fce91ee41b405c6f74dca");
         musicList.add("music00001.mp3");
@@ -135,11 +73,8 @@ public class FileUtils {
     }
 
     public static void UnZipAssetFolder(Context context, String str, String str2) throws Exception {
-        StringBuilder sb = new StringBuilder();
-        sb.append("live/");
-        sb.append(str);
-        String sb2 = sb.toString();
-        InputStream open = context.getAssets().open(sb2);
+        String str3 = "live/" + str;
+        InputStream open = context.getAssets().open(str3);
         File file = new File(str2);
         if (!file.exists()) {
             file.mkdirs();
@@ -147,21 +82,13 @@ public class FileUtils {
             file.delete();
             file.mkdirs();
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str2);
-        sb3.append(File.separator);
-        sb3.append(GetFileName(sb2));
-        File file2 = new File(sb3.toString());
+        File file2 = new File(str2 + File.separator + GetFileName(str3));
         if (file2.exists()) {
             deleteDir(file2);
         }
         file2.mkdirs();
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str2);
-        sb4.append(GetFileName(sb2));
-        String sb5 = sb4.toString();
         open.close();
-        UnZipFolder(context.getAssets().open(sb2), sb5);
+        UnZipFolder(context.getAssets().open(str3), str2 + GetFileName(str3));
     }
 
     public static int UnZipFileFolder(String str, String str2) throws IOException {
@@ -173,22 +100,13 @@ public class FileUtils {
             file.delete();
             file.mkdirs();
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(str2);
-        sb.append(File.separator);
-        sb.append(GetFileName(str));
-        File file2 = new File(sb.toString());
+        File file2 = new File(str2 + File.separator + GetFileName(str));
         if (file2.exists()) {
             deleteDir(file2);
         }
         file2.mkdirs();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str2);
-        sb2.append(File.separator);
-        sb2.append(GetFileName(str));
-        String sb3 = sb2.toString();
         fileInputStream.close();
-        UnZipFolder(new FileInputStream(new File(str)), sb3);
+        UnZipFolder(new FileInputStream(new File(str)), str2 + File.separator + GetFileName(str));
         return 0;
     }
 
@@ -202,20 +120,12 @@ public class FileUtils {
             String name = nextEntry.getName();
             if (nextEntry.isDirectory()) {
                 String substring = name.substring(0, name.length() - 1);
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(File.separator);
-                sb.append(substring);
-                File file = new File(sb.toString());
+                File file = new File(str + File.separator + substring);
                 if (!file.exists()) {
                     file.mkdirs();
                 }
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str);
-                sb2.append(File.separator);
-                sb2.append(name);
-                File file2 = new File(sb2.toString());
+                File file2 = new File(str + File.separator + name);
                 if (file2.exists()) {
                     break;
                 }
@@ -244,34 +154,27 @@ public class FileUtils {
     /* JADX WARNING: Can't wrap try/catch for region: R(7:10|11|12|13|14|20|15) */
     /* JADX WARNING: Missing exception handler attribute for start block: B:13:0x0072 */
     public static boolean copyAssetsDirectory(Context context, String str, String str2) {
-        String[] list;
+        String str3;
         File file = new File(str2);
         if (!file.exists()) {
             file.mkdirs();
         }
         AssetManager assets = context.getAssets();
         try {
+            int i = 0;
             if (str.endsWith("/")) {
                 str = str.substring(0, str.length() - 1);
             }
-            for (String str3 : assets.list(str)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(str);
-                sb.append(File.separator);
-                sb.append(str3);
-                String sb2 = sb.toString();
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append(str2);
-                sb3.append(File.separator);
-                sb3.append(str3);
-                String sb4 = sb3.toString();
-                InputStream open = assets.open(sb2);
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append(str2);
-                sb5.append(File.separator);
-                copyFileIfNeed(context, sb5.toString(), sb2, str3);
+            String[] list = assets.list(str);
+            int length = list.length;
+            while (i < length) {
+                String str4 = str + File.separator + str3;
+                String str5 = str2 + File.separator + str3;
+                InputStream open = assets.open(str4);
+                copyFileIfNeed(context, str2 + File.separator, str4, str3);
                 open.close();
-                copyAssetsDirectory(context, sb2, sb4);
+                copyAssetsDirectory(context, str4, str5);
+                i++;
             }
         } catch (IOException e2) {
             e2.printStackTrace();
@@ -293,71 +196,58 @@ public class FileUtils {
     }
 
     private static boolean copyFileIfNeed(Context context, String str, String str2, String str3) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("live/");
-        sb.append(str2);
-        String sb2 = sb.toString();
+        String str4 = "live/" + str2;
         File file = new File(str);
         if (!file.exists()) {
             file.mkdirs();
         }
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str);
-        sb3.append(str3);
-        String sb4 = sb3.toString();
-        if (!sb4.isEmpty()) {
-            File file2 = new File(sb4);
-            if (!file2.exists()) {
-                try {
-                    file2.createNewFile();
-                    InputStream open = context.getApplicationContext().getAssets().open(sb2);
-                    if (open == null) {
-                        return false;
-                    }
-                    FileOutputStream fileOutputStream = new FileOutputStream(file2);
-                    byte[] bArr = new byte[4096];
-                    while (true) {
-                        int read = open.read(bArr);
-                        if (read <= 0) {
-                            break;
-                        }
-                        fileOutputStream.write(bArr, 0, read);
-                    }
+        String str5 = str + str3;
+        if (str5.isEmpty()) {
+            return true;
+        }
+        File file2 = new File(str5);
+        if (file2.exists()) {
+            return true;
+        }
+        try {
+            file2.createNewFile();
+            InputStream open = context.getApplicationContext().getAssets().open(str4);
+            if (open == null) {
+                return false;
+            }
+            FileOutputStream fileOutputStream = new FileOutputStream(file2);
+            byte[] bArr = new byte[4096];
+            while (true) {
+                int read = open.read(bArr);
+                if (read > 0) {
+                    fileOutputStream.write(bArr, 0, read);
+                } else {
                     open.close();
                     fileOutputStream.close();
-                } catch (IOException unused) {
-                    file2.delete();
-                    return false;
+                    return true;
                 }
             }
+        } catch (IOException unused) {
+            file2.delete();
+            return false;
         }
-        return true;
     }
 
     public static synchronized String createtFileName(String str, String str2) {
-        String sb;
+        String str3;
         synchronized (FileUtils.class) {
             String format = new SimpleDateFormat("MMddHHmmssSSS").format(new Date(System.currentTimeMillis()));
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(str);
-            sb2.append(format);
-            sb2.append('.');
-            sb2.append(str2);
-            sb = sb2.toString();
+            str3 = str + format + '.' + str2;
         }
-        return sb;
+        return str3;
     }
 
     public static boolean delDir(String str) {
-        boolean z = false;
         if (str.isEmpty()) {
             return false;
         }
         File file = new File(str);
-        if (!file.isFile() && file.exists() && deleteDir(file)) {
-            z = true;
-        }
-        return z;
+        return !file.isFile() && file.exists() && deleteDir(file);
     }
 
     private static boolean deleteDir(File file) {
@@ -411,17 +301,11 @@ public class FileUtils {
     private static void doDeleteEmptyDir(String str) {
         if (new File(str).delete()) {
             PrintStream printStream = System.out;
-            StringBuilder sb = new StringBuilder();
-            sb.append("Successfully deleted empty directory: ");
-            sb.append(str);
-            printStream.println(sb.toString());
+            printStream.println("Successfully deleted empty directory: " + str);
             return;
         }
         PrintStream printStream2 = System.out;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("Failed to delete empty directory: ");
-        sb2.append(str);
-        printStream2.println(sb2.toString());
+        printStream2.println("Failed to delete empty directory: " + str);
     }
 
     /* JADX WARNING: Removed duplicated region for block: B:53:0x007c A[SYNTHETIC, Splitter:B:53:0x007c] */
@@ -565,13 +449,7 @@ public class FileUtils {
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
         if (file.exists() || file.mkdirs()) {
             String format = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINESE).format(new Date());
-            StringBuilder sb = new StringBuilder();
-            sb.append(file.getPath());
-            sb.append(File.separator);
-            sb.append("IMG_");
-            sb.append(format);
-            sb.append(Storage.JPEG_SUFFIX);
-            return new File(sb.toString());
+            return new File(file.getPath() + File.separator + "IMG_" + format + Storage.JPEG_SUFFIX);
         }
         Log.e("FileUtil", "failed to create directory");
         return null;
@@ -619,7 +497,6 @@ public class FileUtils {
     }
 
     public static void saveBitmap(Bitmap bitmap, String str) {
-        String str2 = TAG;
         try {
             File file = new File(str);
             if (!file.exists()) {
@@ -627,16 +504,13 @@ public class FileUtils {
                 file.createNewFile();
             }
             FileOutputStream fileOutputStream = new FileOutputStream(file);
-            bitmap.compress(CompressFormat.PNG, 100, fileOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
             fileOutputStream.flush();
             fileOutputStream.close();
-            StringBuilder sb = new StringBuilder();
-            sb.append("saveBitmap: ");
-            sb.append(file.getAbsolutePath());
-            Log.d(str2, sb.toString());
+            Log.d(TAG, "saveBitmap: " + file.getAbsolutePath());
         } catch (IOException e2) {
             e2.printStackTrace();
-            Log.d(str2, "saveBitmap: return");
+            Log.d(TAG, "saveBitmap: return");
         }
     }
 }

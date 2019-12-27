@@ -3,7 +3,6 @@ package com.xiaomi.camera.base;
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureResult;
 import android.os.Parcelable;
@@ -26,38 +25,38 @@ public final class CameraDeviceUtil {
             return 17;
         }
         if (i != 2) {
-            if (i != 3) {
-                if (i != 4) {
-                    if (i != 20) {
-                        if (i == 21) {
-                            return 3;
-                        }
-                        if (i == 40) {
-                            return 18;
-                        }
-                        if (i == 80) {
-                            return 515;
-                        }
-                        if (i == 81) {
-                            return 771;
-                        }
-                        switch (i) {
-                            case 60:
-                                break;
-                            case 61:
-                                break;
-                            case 62:
-                                return 514;
-                            case 63:
-                                return 770;
-                            default:
-                                return 0;
-                        }
-                    }
-                }
+            if (i == 3) {
+                return 513;
+            }
+            if (i == 4) {
                 return 769;
             }
-            return 513;
+            if (i != 20) {
+                if (i == 21) {
+                    return 3;
+                }
+                if (i == 40) {
+                    return 18;
+                }
+                if (i == 80) {
+                    return 515;
+                }
+                if (i == 81) {
+                    return 771;
+                }
+                switch (i) {
+                    case 60:
+                        return 513;
+                    case 61:
+                        return 769;
+                    case 62:
+                        return 514;
+                    case 63:
+                        return 770;
+                    default:
+                        return 0;
+                }
+            }
         }
         return 2;
     }
@@ -68,10 +67,7 @@ public final class CameraDeviceUtil {
             method.setAccessible(true);
             Parcelable parcelable = (Parcelable) method.invoke(captureResult, new Object[0]);
             String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("getCustomCaptureResult: cameraMetadataNative =");
-            sb.append(parcelable);
-            Log.d(str, sb.toString());
+            Log.d(str, "getCustomCaptureResult: cameraMetadataNative =" + parcelable);
             ICustomCaptureResult iCustomCaptureResult = new ICustomCaptureResult();
             iCustomCaptureResult.setFrameNumber(captureResult.getFrameNumber());
             iCustomCaptureResult.setRequest(captureResult.getRequest());
@@ -82,10 +78,7 @@ public final class CameraDeviceUtil {
                 iCustomCaptureResult.setTimeStamp(l.longValue());
             }
             String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("getCustomCaptureResult: ");
-            sb2.append(iCustomCaptureResult);
-            Log.d(str2, sb2.toString());
+            Log.d(str2, "getCustomCaptureResult: " + iCustomCaptureResult);
             return iCustomCaptureResult;
         } catch (Exception e2) {
             Log.e(TAG, "getCustomCaptureResult: getCustomCaptureResult", e2);
@@ -100,7 +93,7 @@ public final class CameraDeviceUtil {
             if (num != null) {
                 boolean z = num.intValue() == 0;
                 try {
-                    byte[] bArr = (byte[]) cameraCharacteristics.get((Key) Class.forName("android.hardware.camera2.CameraCharacteristics$Key").getDeclaredConstructor(new Class[]{String.class, Class.class}).newInstance(new Object[]{"com.xiaomi.camera.algoup.dualCalibrationData", byte[].class}));
+                    byte[] bArr = (byte[]) cameraCharacteristics.get((CameraCharacteristics.Key) Class.forName("android.hardware.camera2.CameraCharacteristics$Key").getDeclaredConstructor(new Class[]{String.class, Class.class}).newInstance(new Object[]{"com.xiaomi.camera.algoup.dualCalibrationData", byte[].class}));
                     if (bArr != null) {
                         CommonUtil.saveCameraCalibrationToFile(context, bArr, z);
                     }

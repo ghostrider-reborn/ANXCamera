@@ -14,7 +14,7 @@ public class DaoSession extends AbstractDaoSession {
 
     public DaoSession(Database database, IdentityScopeType identityScopeType, Map<Class<? extends AbstractDao<?, ?>>, DaoConfig> map) {
         super(database);
-        this.saveTaskDaoConfig = ((DaoConfig) map.get(SaveTaskDao.class)).clone();
+        this.saveTaskDaoConfig = map.get(SaveTaskDao.class).clone();
         this.saveTaskDaoConfig.initIdentityScope(identityScopeType);
         registerDao(SaveTask.class, this.saveTaskDao);
     }

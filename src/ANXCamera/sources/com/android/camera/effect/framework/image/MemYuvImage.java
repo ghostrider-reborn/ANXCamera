@@ -1,7 +1,6 @@
 package com.android.camera.effect.framework.image;
 
 import android.media.Image;
-import android.media.Image.Plane;
 import com.android.camera.effect.ShaderNativeUtil;
 import java.nio.ByteBuffer;
 
@@ -14,7 +13,7 @@ public class MemYuvImage {
         int width = image.getWidth();
         int height = image.getHeight();
         image.getFormat();
-        Plane[] planes = image.getPlanes();
+        Image.Plane[] planes = image.getPlanes();
         int pixelStride = planes[0].getPixelStride();
         int rowStride = planes[0].getRowStride();
         ByteBuffer buffer = planes[0].getBuffer();

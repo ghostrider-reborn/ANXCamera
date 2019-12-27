@@ -13,6 +13,8 @@ public class LinkedArrayList {
         this.capacityHint = i;
     }
 
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r5v3, resolved type: java.lang.Object[]} */
+    /* JADX WARNING: Multi-variable type inference failed */
     public void add(Object obj) {
         if (this.size == 0) {
             this.head = new Object[(this.capacityHint + 1)];

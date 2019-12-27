@@ -6,8 +6,7 @@ import java.util.ListIterator;
 import org.greenrobot.greendao.AbstractDao;
 import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.Property;
-import org.greenrobot.greendao.query.WhereCondition.PropertyCondition;
-import org.greenrobot.greendao.query.WhereCondition.StringCondition;
+import org.greenrobot.greendao.query.WhereCondition;
 
 class WhereCollector<T> {
     private final AbstractDao<T, ?> dao;
@@ -19,7 +18,7 @@ class WhereCollector<T> {
         this.tablePrefix = str;
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void add(WhereCondition whereCondition, WhereCondition... whereConditionArr) {
         checkCondition(whereCondition);
         this.whereConditions.add(whereCondition);
@@ -29,34 +28,34 @@ class WhereCollector<T> {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void addCondition(StringBuilder sb, List<Object> list, WhereCondition whereCondition) {
         checkCondition(whereCondition);
         whereCondition.appendTo(sb, this.tablePrefix);
         whereCondition.appendValuesTo(list);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void appendWhereClause(StringBuilder sb, String str, List<Object> list) {
-        ListIterator listIterator = this.whereConditions.listIterator();
+        ListIterator<WhereCondition> listIterator = this.whereConditions.listIterator();
         while (listIterator.hasNext()) {
             if (listIterator.hasPrevious()) {
                 sb.append(" AND ");
             }
-            WhereCondition whereCondition = (WhereCondition) listIterator.next();
-            whereCondition.appendTo(sb, str);
-            whereCondition.appendValuesTo(list);
+            WhereCondition next = listIterator.next();
+            next.appendTo(sb, str);
+            next.appendValuesTo(list);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void checkCondition(WhereCondition whereCondition) {
-        if (whereCondition instanceof PropertyCondition) {
-            checkProperty(((PropertyCondition) whereCondition).property);
+        if (whereCondition instanceof WhereCondition.PropertyCondition) {
+            checkProperty(((WhereCondition.PropertyCondition) whereCondition).property);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void checkProperty(Property property) {
         AbstractDao<T, ?> abstractDao = this.dao;
         if (abstractDao != null) {
@@ -75,32 +74,27 @@ class WhereCollector<T> {
                 }
             }
             if (!z) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Property '");
-                sb.append(property.name);
-                sb.append("' is not part of ");
-                sb.append(this.dao);
-                throw new DaoException(sb.toString());
+                throw new DaoException("Property '" + property.name + "' is not part of " + this.dao);
             }
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public WhereCondition combineWhereConditions(String str, WhereCondition whereCondition, WhereCondition whereCondition2, WhereCondition... whereConditionArr) {
         StringBuilder sb = new StringBuilder("(");
         ArrayList arrayList = new ArrayList();
         addCondition(sb, arrayList, whereCondition);
         sb.append(str);
         addCondition(sb, arrayList, whereCondition2);
-        for (WhereCondition whereCondition3 : whereConditionArr) {
+        for (WhereCondition addCondition : whereConditionArr) {
             sb.append(str);
-            addCondition(sb, arrayList, whereCondition3);
+            addCondition(sb, arrayList, addCondition);
         }
         sb.append(')');
-        return new StringCondition(sb.toString(), arrayList.toArray());
+        return new WhereCondition.StringCondition(sb.toString(), arrayList.toArray());
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public boolean isEmpty() {
         return this.whereConditions.isEmpty();
     }

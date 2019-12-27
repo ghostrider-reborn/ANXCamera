@@ -14,9 +14,7 @@ public final class CircularIntArray {
         if (i < 1) {
             throw new IllegalArgumentException("capacity must be >= 1");
         } else if (i <= 1073741824) {
-            if (Integer.bitCount(i) != 1) {
-                i = Integer.highestOneBit(i - 1) << 1;
-            }
+            i = Integer.bitCount(i) != 1 ? Integer.highestOneBit(i - 1) << 1 : i;
             this.mCapacityBitmask = i - 1;
             this.mElements = new int[i];
         } else {

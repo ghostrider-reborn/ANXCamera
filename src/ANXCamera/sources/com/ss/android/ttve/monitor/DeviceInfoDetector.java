@@ -2,10 +2,8 @@ package com.ss.android.ttve.monitor;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.text.TextUtils;
-import com.ss.android.ttve.monitor.GPUModelDetector.ENvGpuSubModel;
-import com.ss.android.ttve.monitor.GPUModelDetector.GPUModelInfo;
+import com.ss.android.ttve.monitor.GPUModelDetector;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,29 +46,24 @@ public class DeviceInfoDetector {
     private static String ve_version;
 
     public static String get(String str) {
-        return (String) toMap().get(str);
+        return toMap().get(str);
     }
 
     private static String getCpuAbi() {
-        String str = ",";
-        if (VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             StringBuilder sb = new StringBuilder();
             String[] strArr = Build.SUPPORTED_ABIS;
             if (strArr != null) {
                 for (int i = 0; i < strArr.length; i++) {
                     sb.append(strArr[i]);
                     if (i != strArr.length - 1) {
-                        sb.append(str);
+                        sb.append(",");
                     }
                 }
             }
             return sb.toString();
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(Build.CPU_ABI);
-        sb2.append(str);
-        sb2.append(Build.CPU_ABI2);
-        return sb2.toString();
+        return Build.CPU_ABI + "," + Build.CPU_ABI2;
     }
 
     public static void init(Context context) {
@@ -87,14 +80,10 @@ public class DeviceInfoDetector {
     private static void initInternal(Context context) {
         String str;
         String language = Locale.getDefault().getLanguage();
-        String country = Locale.getDefault().getCountry();
-        if (TextUtils.isEmpty(country)) {
+        if (TextUtils.isEmpty(Locale.getDefault().getCountry())) {
             str = "";
         } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("_");
-            sb.append(country.toUpperCase());
-            str = sb.toString();
+            str = "_" + r1.toUpperCase();
         }
         model = Build.MODEL;
         cpu = DeviceInfoUtils.readCpuHardware();
@@ -103,15 +92,12 @@ public class DeviceInfoDetector {
         memory = String.valueOf(DeviceInfoUtils.getTotalMemory());
         storage = String.valueOf(DeviceInfoUtils.getInternalStorage());
         external_storage = String.valueOf(DeviceInfoUtils.getExternalStorage(context));
-        os_sdk_int = String.valueOf(VERSION.SDK_INT);
+        os_sdk_int = String.valueOf(Build.VERSION.SDK_INT);
         screen_width = String.valueOf(DeviceInfoUtils.getScreenWidth(context));
         screen_height = String.valueOf(DeviceInfoUtils.getRealScreenHeight(context));
         appid = context.getPackageName();
         abi = getCpuAbi();
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(language);
-        sb2.append(str);
-        locale = sb2.toString();
+        locale = language + str;
         sim_operator = DeviceInfoUtils.getSimOperator(context);
         device_brand = Build.BRAND;
     }
@@ -134,8 +120,8 @@ public class DeviceInfoDetector {
         hashMap.put("sim_operator", sim_operator);
         hashMap.put("brand", device_brand);
         if (!nativeInited) {
-            GPUModelInfo gPUModel = GPUModelDetector.getInstance().getGPUModel();
-            ENvGpuSubModel gPUSubModel = gPUModel.getGPUSubModel();
+            GPUModelDetector.GPUModelInfo gPUModel = GPUModelDetector.getInstance().getGPUModel();
+            GPUModelDetector.ENvGpuSubModel gPUSubModel = gPUModel.getGPUSubModel();
             int gPUModelNumber = gPUModel.getGPUModelNumber();
             gpu = gPUSubModel == null ? "" : gPUSubModel.name();
             gpu_ver = String.valueOf(gPUModelNumber);

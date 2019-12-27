@@ -43,13 +43,10 @@ public final class MediaType {
             String group = matcher2.group(1);
             if (group != null && group.equalsIgnoreCase(HttpRequest.PARAM_CHARSET)) {
                 String group2 = matcher2.group(2);
-                if (group2 != null) {
-                    String str3 = "'";
-                    if (group2.startsWith(str3) && group2.endsWith(str3) && group2.length() > 2) {
-                        group2 = group2.substring(1, group2.length() - 1);
-                    }
-                } else {
+                if (group2 == null) {
                     group2 = matcher2.group(3);
+                } else if (group2.startsWith("'") && group2.endsWith("'") && group2.length() > 2) {
+                    group2 = group2.substring(1, group2.length() - 1);
                 }
                 if (str2 != null && !group2.equalsIgnoreCase(str2)) {
                     return null;
@@ -62,7 +59,7 @@ public final class MediaType {
 
     @Nullable
     public Charset charset() {
-        return charset(null);
+        return charset((Charset) null);
     }
 
     @Nullable

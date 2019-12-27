@@ -1,16 +1,15 @@
 package com.ss.android.vesdk;
 
-import android.arch.lifecycle.Lifecycle.Event;
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -22,10 +21,8 @@ import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback2;
 import android.view.SurfaceView;
 import android.view.TextureView;
-import android.view.TextureView.SurfaceTextureListener;
 import com.ss.android.medialib.FFMpegInvoker;
 import com.ss.android.medialib.FileUtils;
 import com.ss.android.ttve.common.TECommonCallback;
@@ -36,24 +33,12 @@ import com.ss.android.ttve.model.MVResourceBean;
 import com.ss.android.ttve.monitor.MonitorUtils;
 import com.ss.android.ttve.monitor.TEMonitor;
 import com.ss.android.ttve.monitor.TEMonitorFilterMgr;
-import com.ss.android.ttve.monitor.TEMonitorFilterMgr.TEMonitorFilter;
 import com.ss.android.ttve.monitor.TEMonitorNewKeys;
-import com.ss.android.ttve.nativePort.NativeCallbacks.IEncoderDataCallback;
-import com.ss.android.ttve.nativePort.NativeCallbacks.IGetImageCallback;
-import com.ss.android.ttve.nativePort.NativeCallbacks.IOpenGLCallback;
+import com.ss.android.ttve.nativePort.NativeCallbacks;
 import com.ss.android.ttve.nativePort.TEInterface;
 import com.ss.android.ttve.nativePort.TEVideoUtils;
-import com.ss.android.vesdk.VEListener.VEEditorCompileListener;
-import com.ss.android.vesdk.VEListener.VEEditorEffectListener;
-import com.ss.android.vesdk.VEListener.VEEditorGenReverseListener;
-import com.ss.android.vesdk.VEListener.VEEditorSeekListener;
-import com.ss.android.vesdk.VEListener.VEEncoderListener;
-import com.ss.android.vesdk.VEListener.VEFirstFrameListener;
-import com.ss.android.vesdk.VEListener.VEGetImageListener;
-import com.ss.android.vesdk.VEVideoEncodeSettings.Builder;
-import com.ss.android.vesdk.VEVideoEncodeSettings.COMPILE_TYPE;
-import com.ss.android.vesdk.VEVideoEncodeSettings.ENCODE_PRESET;
-import com.ss.android.vesdk.VEVideoEncodeSettings.ENCODE_PROFILE;
+import com.ss.android.vesdk.VEListener;
+import com.ss.android.vesdk.VEVideoEncodeSettings;
 import com.ss.android.vesdk.keyvaluepair.VEKeyValue;
 import com.ss.android.vesdk.runtime.VEEditorResManager;
 import com.ss.android.vesdk.runtime.VEEffectConfig;
@@ -65,7 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
+public class VEEditor implements SurfaceTexture.OnFrameAvailableListener, LifecycleObserver {
     private static final String AUDIO_VOLUME = "audio volume";
     private static final String EFFECT_REQ_ID = "effect req id";
     private static final String EFFECT_RES_PATH = "effect res path";
@@ -121,19 +106,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     private boolean mCancelReverse;
     private int mColorFilterIndex;
     /* access modifiers changed from: private */
-    public volatile VEEditorCompileListener mCompileListener;
+    public volatile VEListener.VEEditorCompileListener mCompileListener;
     private String mCompileType;
     private FilterBean mCurColorFilter;
     private Bitmap mCurrentBmp;
-    private IEncoderDataCallback mEncoderDataCallback;
+    private NativeCallbacks.IEncoderDataCallback mEncoderDataCallback;
     /* access modifiers changed from: private */
-    public VEEncoderListener mEncoderListener;
+    public VEListener.VEEncoderListener mEncoderListener;
     /* access modifiers changed from: private */
-    public volatile VEFirstFrameListener mFirstFrameListener;
+    public volatile VEListener.VEFirstFrameListener mFirstFrameListener;
     private boolean mFirstTimeSurfaceCreate;
-    private IGetImageCallback mGetImageCallback;
+    private NativeCallbacks.IGetImageCallback mGetImageCallback;
     /* access modifiers changed from: private */
-    public VEGetImageListener mGetImageListener;
+    public VEListener.VEGetImageListener mGetImageListener;
     private int mInPoint;
     private int mInitDisplayHeight;
     private int mInitDisplayWidth;
@@ -145,7 +130,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     /* access modifiers changed from: private */
     public VEEditorMessageHandler mMessageHandler;
     private int mMusicSRTEffectFilterIndex;
-    private IOpenGLCallback mOpenGLCallback;
+    private NativeCallbacks.IOpenGLCallback mOpenGLCallback;
     private int mOutPoint;
     private String mOutputFile;
     private int mPageMode;
@@ -154,10 +139,10 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     private VEEditorResManager mResManager;
     private boolean mReverseDone;
     /* access modifiers changed from: private */
-    public volatile VEEditorSeekListener mSeekListener;
+    public volatile VEListener.VEEditorSeekListener mSeekListener;
     /* access modifiers changed from: private */
     public Surface mSurface;
-    private Callback2 mSurfaceCallback;
+    private SurfaceHolder.Callback2 mSurfaceCallback;
     /* access modifiers changed from: private */
     public int mSurfaceHeight;
     /* access modifiers changed from: private */
@@ -168,7 +153,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     private TEMonitorFilterMgr mTEMonitorFilterMgr;
     private TECommonCallback mTeCommonErrorCallback;
     private TECommonCallback mTeCommonInfoCallback;
-    private final SurfaceTextureListener mTextureListener;
+    private final TextureView.SurfaceTextureListener mTextureListener;
     private TextureView mTextureView;
     private TETrackIndexManager mTrackIndexManager;
     /* access modifiers changed from: private */
@@ -198,19 +183,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     private double waterMarkOffsetY;
     private double waterMarkWidth;
 
-    /* renamed from: com.ss.android.vesdk.VEEditor$10 reason: invalid class name */
+    /* renamed from: com.ss.android.vesdk.VEEditor$10  reason: invalid class name */
     static /* synthetic */ class AnonymousClass10 {
-        static final /* synthetic */ int[] $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE = new int[COMPILE_TYPE.values().length];
+        static final /* synthetic */ int[] $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE = new int[VEVideoEncodeSettings.COMPILE_TYPE.values().length];
 
         /* JADX WARNING: Can't wrap try/catch for region: R(8:0|1|2|3|4|5|6|8) */
         /* JADX WARNING: Failed to process nested try/catch */
         /* JADX WARNING: Missing exception handler attribute for start block: B:3:0x0014 */
         /* JADX WARNING: Missing exception handler attribute for start block: B:5:0x001f */
         static {
-            $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE[COMPILE_TYPE.COMPILE_TYPE_MP4.ordinal()] = 1;
-            $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE[COMPILE_TYPE.COMPILE_TYPE_GIF.ordinal()] = 2;
+            $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE[VEVideoEncodeSettings.COMPILE_TYPE.COMPILE_TYPE_MP4.ordinal()] = 1;
+            $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE[VEVideoEncodeSettings.COMPILE_TYPE.COMPILE_TYPE_GIF.ordinal()] = 2;
             try {
-                $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE[COMPILE_TYPE.COMPILE_TYPE_HIGH_GIF.ordinal()] = 3;
+                $SwitchMap$com$ss$android$vesdk$VEVideoEncodeSettings$COMPILE_TYPE[VEVideoEncodeSettings.COMPILE_TYPE.COMPILE_TYPE_HIGH_GIF.ordinal()] = 3;
             } catch (NoSuchFieldError unused) {
             }
         }
@@ -262,42 +247,40 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mInputFile = str;
             this.mOutputFile = str2;
             this.mCallback = vECommonCallback;
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.mOutputFile);
-            sb.append(".png");
-            this.mPaletteFile = sb.toString();
+            this.mPaletteFile = this.mOutputFile + ".png";
         }
 
         public void run() {
             String str;
-            String str2 = "";
             if (TextUtils.isEmpty(this.mInputFile) || TextUtils.isEmpty(this.mOutputFile) || this.mIsRunning) {
                 VECommonCallback vECommonCallback = this.mCallback;
                 if (vECommonCallback != null) {
-                    vECommonCallback.onCallback(4103, VEResult.TER_BAD_FILE, 0.0f, str2);
+                    vECommonCallback.onCallback(4103, VEResult.TER_BAD_FILE, 0.0f, "");
+                    return;
                 }
                 return;
             }
             this.mIsRunning = true;
-            int executeFFmpegCommand = TEVideoUtils.executeFFmpegCommand(String.format("ffmpeg -y -i %s -vf palettegen %s", new Object[]{this.mInputFile, this.mPaletteFile}), null);
+            int executeFFmpegCommand = TEVideoUtils.executeFFmpegCommand(String.format("ffmpeg -y -i %s -vf palettegen %s", new Object[]{this.mInputFile, this.mPaletteFile}), (TEVideoUtils.ExecuteCommandListener) null);
             if (executeFFmpegCommand != 0) {
                 this.mIsRunning = false;
                 VECommonCallback vECommonCallback2 = this.mCallback;
                 if (vECommonCallback2 != null) {
-                    vECommonCallback2.onCallback(4103, executeFFmpegCommand, 0.0f, str2);
+                    vECommonCallback2.onCallback(4103, executeFFmpegCommand, 0.0f, "");
+                    return;
                 }
                 return;
             }
-            String str3 = this.waterMarkFile;
-            if (str3 != null) {
-                str = String.format(Locale.US, "ffmpeg -y -i %s -i %s -i %s -filter_complex [2:v]scale=w=%d:h=%d[o0];[0:v][o0]overlay=x=%d-w/2:y=%d-h/2[o1];[o1][1:v]paletteuse -f gif %s", new Object[]{this.mInputFile, this.mPaletteFile, str3, Integer.valueOf(this.waterMarkWidth), Integer.valueOf(this.waterMarkHeight), Integer.valueOf(this.waterMarkOffsetX), Integer.valueOf(this.waterMarkOffsetY), this.mOutputFile});
+            String str2 = this.waterMarkFile;
+            if (str2 != null) {
+                str = String.format(Locale.US, "ffmpeg -y -i %s -i %s -i %s -filter_complex [2:v]scale=w=%d:h=%d[o0];[0:v][o0]overlay=x=%d-w/2:y=%d-h/2[o1];[o1][1:v]paletteuse -f gif %s", new Object[]{this.mInputFile, this.mPaletteFile, str2, Integer.valueOf(this.waterMarkWidth), Integer.valueOf(this.waterMarkHeight), Integer.valueOf(this.waterMarkOffsetX), Integer.valueOf(this.waterMarkOffsetY), this.mOutputFile});
             } else {
                 str = String.format(Locale.US, "ffmpeg -y -i %s -i %s -lavfi paletteuse -f gif %s", new Object[]{this.mInputFile, this.mPaletteFile, this.mOutputFile});
             }
-            int executeFFmpegCommand2 = TEVideoUtils.executeFFmpegCommand(str, null);
+            int executeFFmpegCommand2 = TEVideoUtils.executeFFmpegCommand(str, (TEVideoUtils.ExecuteCommandListener) null);
             VECommonCallback vECommonCallback3 = this.mCallback;
             if (vECommonCallback3 != null) {
-                vECommonCallback3.onCallback(4103, executeFFmpegCommand2, 0.0f, str2);
+                vECommonCallback3.onCallback(4103, executeFFmpegCommand2, 0.0f, "");
             }
             this.mIsRunning = false;
         }
@@ -316,11 +299,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 this.mPaletteFile = null;
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(new File(this.mOutputFile).getParent());
-            sb.append(File.separatorChar);
-            sb.append("palette.png");
-            this.mPaletteFile = sb.toString();
+            this.mPaletteFile = new File(this.mOutputFile).getParent() + File.separatorChar + "palette.png";
         }
 
         public void setWaterMarkFile(String str) {
@@ -395,7 +374,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 if (i != 4103) {
                     if (i != 4105) {
                         if (i == 4117 && VEEditor.this.mGetImageListener != null) {
-                            VEEditor.this.mGetImageListener.onGetImageData(null, -1, -1, -1);
+                            VEEditor.this.mGetImageListener.onGetImageData((byte[]) null, -1, -1, -1);
                         }
                     } else if (VEEditor.this.mCompileListener != null) {
                         VEEditor.this.mCompileListener.onCompileProgress(((Float) message.obj).floatValue());
@@ -406,11 +385,11 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     } else {
                         VEEditor.this.mCompileListener.onCompileDone();
                     }
-                    VEEditor.this.mCompileListener = null;
+                    VEListener.VEEditorCompileListener unused = VEEditor.this.mCompileListener = null;
                 }
             } else if (VEEditor.this.mSeekListener != null) {
                 VEEditor.this.mSeekListener.onSeekDone(0);
-                VEEditor.this.mSeekListener = null;
+                VEListener.VEEditorSeekListener unused2 = VEEditor.this.mSeekListener = null;
             }
         }
     }
@@ -514,7 +493,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     } else if (VEEditor.this.mBCompileHighQualityGif) {
                         VEEditor.this.mp4ToGIFConverter.setCallback(VEEditor.this.mUserCommonInfoCallback);
                         new Thread(VEEditor.this.mp4ToGIFConverter).start();
-                        VEEditor.this.mBCompileHighQualityGif = false;
+                        boolean unused = VEEditor.this.mBCompileHighQualityGif = false;
                     } else {
                         if (i2 == 1 || i2 == 0) {
                             VEEditor.this.onMonitorCompile();
@@ -564,7 +543,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.mSurfaceHeight = 0;
         this.mInitDisplayWidth = 0;
         this.mInitDisplayHeight = 0;
-        this.mbSeparateAV = Boolean.valueOf(false);
+        this.mbSeparateAV = false;
         this.mAudioEffectfilterIndex = -1;
         this.mMasterTrackIndex = 0;
         this.mVideoEditor = TEInterface.createEngine();
@@ -595,17 +574,17 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.scaleH = 1.0f;
         this.mPageMode = -1;
         this.mBackGroundColor = ViewCompat.MEASURED_STATE_MASK;
-        this.mTextureListener = new SurfaceTextureListener() {
+        this.mTextureListener = new TextureView.SurfaceTextureListener() {
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i2) {
                 if (VEEditor.this.mSurfaceTexture == surfaceTexture) {
                     VEEditor vEEditor = VEEditor.this;
                     vEEditor.onSurfaceCreated(vEEditor.mSurface);
                 } else {
-                    VEEditor.this.mSurface = new Surface(surfaceTexture);
+                    Surface unused = VEEditor.this.mSurface = new Surface(surfaceTexture);
                     VEEditor vEEditor2 = VEEditor.this;
                     vEEditor2.onSurfaceCreated(vEEditor2.mSurface);
                 }
-                VEEditor.this.mSurfaceTexture = surfaceTexture;
+                SurfaceTexture unused2 = VEEditor.this.mSurfaceTexture = surfaceTexture;
             }
 
             public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
@@ -615,19 +594,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             }
 
             public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i2) {
-                VEEditor.this.mSurfaceWidth = i;
-                VEEditor.this.mSurfaceHeight = i2;
+                int unused = VEEditor.this.mSurfaceWidth = i;
+                int unused2 = VEEditor.this.mSurfaceHeight = i2;
                 VEEditor.this.updateInitDisplaySize();
             }
 
             public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
             }
         };
-        this.mSurfaceCallback = new Callback2() {
+        this.mSurfaceCallback = new SurfaceHolder.Callback2() {
             public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
                 VELogUtil.d(VEEditor.TAG, String.format("surfaceChanged: pixel format [%d], size [%d, %d]", new Object[]{Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(i3)}));
-                VEEditor.this.mSurfaceWidth = i2;
-                VEEditor.this.mSurfaceHeight = i3;
+                int unused = VEEditor.this.mSurfaceWidth = i2;
+                int unused2 = VEEditor.this.mSurfaceHeight = i3;
                 VEEditor.this.updateInitDisplaySize();
                 VEEditor.this.onSurfaceChanged(i2, i3);
             }
@@ -644,32 +623,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 VELogUtil.d(VEEditor.TAG, "surfaceRedrawNeeded...");
             }
         };
-        this.mOpenGLCallback = new IOpenGLCallback() {
+        this.mOpenGLCallback = new NativeCallbacks.IOpenGLCallback() {
             public int onOpenGLCreate(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLCreate: ret = ");
-                sb.append(i);
-                VELogUtil.d(VEEditor.TAG, sb.toString());
+                VELogUtil.d(VEEditor.TAG, "onOpenGLCreate: ret = " + i);
                 return 0;
             }
 
             public int onOpenGLDestroy(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLDestroy: ret = ");
-                sb.append(i);
-                VELogUtil.d(VEEditor.TAG, sb.toString());
+                VELogUtil.d(VEEditor.TAG, "onOpenGLDestroy: ret = " + i);
                 return 0;
             }
 
             public int onOpenGLDrawAfter(int i, double d2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLDrawing: tex = ");
-                sb.append(i);
-                sb.append(" timeStamp = ");
-                sb.append(d2);
-                String sb2 = sb.toString();
-                String str = VEEditor.TAG;
-                VELogUtil.v(str, sb2);
+                VELogUtil.v(VEEditor.TAG, "onOpenGLDrawing: tex = " + i + " timeStamp = " + d2);
                 if (VEEditor.this.miFrameCount == 0) {
                     TEMonitor.perfLong(1, TEMonitorNewKeys.TE_EDIT_FIRST_FRAME_TIME, System.currentTimeMillis() - VEEditor.this.mlLastTimeMS);
                     if (VEEditor.this.mFirstFrameListener != null) {
@@ -678,16 +644,13 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 }
                 VEEditor.access$1804(VEEditor.this);
                 if (VEEditor.this.miFrameCount == 30) {
-                    VEEditor.this.mlCurTimeMS = System.currentTimeMillis();
+                    long unused = VEEditor.this.mlCurTimeMS = System.currentTimeMillis();
                     if (VEEditor.this.mlLastTimeMS != VEEditor.this.mlCurTimeMS) {
                         float access$2100 = 30000.0f / ((float) (VEEditor.this.mlCurTimeMS - VEEditor.this.mlLastTimeMS));
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Render FPS = ");
-                        sb3.append(access$2100);
-                        VELogUtil.d(str, sb3.toString());
+                        VELogUtil.d(VEEditor.TAG, "Render FPS = " + access$2100);
                         VEEditor vEEditor = VEEditor.this;
-                        vEEditor.mlLastTimeMS = vEEditor.mlCurTimeMS;
-                        VEEditor.this.miFrameCount = 0;
+                        long unused2 = vEEditor.mlLastTimeMS = vEEditor.mlCurTimeMS;
+                        int unused3 = VEEditor.this.miFrameCount = 0;
                     }
                 }
                 return 0;
@@ -701,7 +664,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 return 0;
             }
         };
-        this.mEncoderDataCallback = new IEncoderDataCallback() {
+        this.mEncoderDataCallback = new NativeCallbacks.IEncoderDataCallback() {
             public int onCompressBuffer(byte[] bArr, int i, int i2, boolean z) {
                 if (bArr == null || i < 0 || i2 <= 0) {
                     return -1;
@@ -713,7 +676,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 return 0;
             }
         };
-        this.mGetImageCallback = new IGetImageCallback() {
+        this.mGetImageCallback = new NativeCallbacks.IGetImageCallback() {
             public int onImageData(byte[] bArr, int i, int i2, int i3) {
                 if (VEEditor.this.mGetImageListener == null) {
                     return -100;
@@ -731,13 +694,10 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mResManager = new VEEditorResManager(str);
             this.mVideoEditor.setInfoListener(this.mTeCommonInfoCallback);
             this.mVideoEditor.setErrorListener(this.mTeCommonErrorCallback);
-            MonitorUtils.monitorStatistics("iesve_veeditor_offscreen", 1, null);
+            MonitorUtils.monitorStatistics("iesve_veeditor_offscreen", 1, (VEKeyValue) null);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("workspace is: ");
-        sb.append(str);
-        throw new VEException(-100, sb.toString());
+        throw new VEException(-100, "workspace is: " + str);
     }
 
     public VEEditor(String str, SurfaceView surfaceView) {
@@ -769,7 +729,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     } else if (VEEditor.this.mBCompileHighQualityGif) {
                         VEEditor.this.mp4ToGIFConverter.setCallback(VEEditor.this.mUserCommonInfoCallback);
                         new Thread(VEEditor.this.mp4ToGIFConverter).start();
-                        VEEditor.this.mBCompileHighQualityGif = false;
+                        boolean unused = VEEditor.this.mBCompileHighQualityGif = false;
                     } else {
                         if (i2 == 1 || i2 == 0) {
                             VEEditor.this.onMonitorCompile();
@@ -819,7 +779,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.mSurfaceHeight = 0;
         this.mInitDisplayWidth = 0;
         this.mInitDisplayHeight = 0;
-        this.mbSeparateAV = Boolean.valueOf(false);
+        this.mbSeparateAV = false;
         this.mAudioEffectfilterIndex = -1;
         this.mMasterTrackIndex = 0;
         this.mVideoEditor = TEInterface.createEngine();
@@ -850,17 +810,17 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.scaleH = 1.0f;
         this.mPageMode = -1;
         this.mBackGroundColor = ViewCompat.MEASURED_STATE_MASK;
-        this.mTextureListener = new SurfaceTextureListener() {
+        this.mTextureListener = new TextureView.SurfaceTextureListener() {
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i2) {
                 if (VEEditor.this.mSurfaceTexture == surfaceTexture) {
                     VEEditor vEEditor = VEEditor.this;
                     vEEditor.onSurfaceCreated(vEEditor.mSurface);
                 } else {
-                    VEEditor.this.mSurface = new Surface(surfaceTexture);
+                    Surface unused = VEEditor.this.mSurface = new Surface(surfaceTexture);
                     VEEditor vEEditor2 = VEEditor.this;
                     vEEditor2.onSurfaceCreated(vEEditor2.mSurface);
                 }
-                VEEditor.this.mSurfaceTexture = surfaceTexture;
+                SurfaceTexture unused2 = VEEditor.this.mSurfaceTexture = surfaceTexture;
             }
 
             public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
@@ -870,19 +830,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             }
 
             public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i2) {
-                VEEditor.this.mSurfaceWidth = i;
-                VEEditor.this.mSurfaceHeight = i2;
+                int unused = VEEditor.this.mSurfaceWidth = i;
+                int unused2 = VEEditor.this.mSurfaceHeight = i2;
                 VEEditor.this.updateInitDisplaySize();
             }
 
             public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
             }
         };
-        this.mSurfaceCallback = new Callback2() {
+        this.mSurfaceCallback = new SurfaceHolder.Callback2() {
             public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
                 VELogUtil.d(VEEditor.TAG, String.format("surfaceChanged: pixel format [%d], size [%d, %d]", new Object[]{Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(i3)}));
-                VEEditor.this.mSurfaceWidth = i2;
-                VEEditor.this.mSurfaceHeight = i3;
+                int unused = VEEditor.this.mSurfaceWidth = i2;
+                int unused2 = VEEditor.this.mSurfaceHeight = i3;
                 VEEditor.this.updateInitDisplaySize();
                 VEEditor.this.onSurfaceChanged(i2, i3);
             }
@@ -899,32 +859,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 VELogUtil.d(VEEditor.TAG, "surfaceRedrawNeeded...");
             }
         };
-        this.mOpenGLCallback = new IOpenGLCallback() {
+        this.mOpenGLCallback = new NativeCallbacks.IOpenGLCallback() {
             public int onOpenGLCreate(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLCreate: ret = ");
-                sb.append(i);
-                VELogUtil.d(VEEditor.TAG, sb.toString());
+                VELogUtil.d(VEEditor.TAG, "onOpenGLCreate: ret = " + i);
                 return 0;
             }
 
             public int onOpenGLDestroy(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLDestroy: ret = ");
-                sb.append(i);
-                VELogUtil.d(VEEditor.TAG, sb.toString());
+                VELogUtil.d(VEEditor.TAG, "onOpenGLDestroy: ret = " + i);
                 return 0;
             }
 
             public int onOpenGLDrawAfter(int i, double d2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLDrawing: tex = ");
-                sb.append(i);
-                sb.append(" timeStamp = ");
-                sb.append(d2);
-                String sb2 = sb.toString();
-                String str = VEEditor.TAG;
-                VELogUtil.v(str, sb2);
+                VELogUtil.v(VEEditor.TAG, "onOpenGLDrawing: tex = " + i + " timeStamp = " + d2);
                 if (VEEditor.this.miFrameCount == 0) {
                     TEMonitor.perfLong(1, TEMonitorNewKeys.TE_EDIT_FIRST_FRAME_TIME, System.currentTimeMillis() - VEEditor.this.mlLastTimeMS);
                     if (VEEditor.this.mFirstFrameListener != null) {
@@ -933,16 +880,13 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 }
                 VEEditor.access$1804(VEEditor.this);
                 if (VEEditor.this.miFrameCount == 30) {
-                    VEEditor.this.mlCurTimeMS = System.currentTimeMillis();
+                    long unused = VEEditor.this.mlCurTimeMS = System.currentTimeMillis();
                     if (VEEditor.this.mlLastTimeMS != VEEditor.this.mlCurTimeMS) {
                         float access$2100 = 30000.0f / ((float) (VEEditor.this.mlCurTimeMS - VEEditor.this.mlLastTimeMS));
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Render FPS = ");
-                        sb3.append(access$2100);
-                        VELogUtil.d(str, sb3.toString());
+                        VELogUtil.d(VEEditor.TAG, "Render FPS = " + access$2100);
                         VEEditor vEEditor = VEEditor.this;
-                        vEEditor.mlLastTimeMS = vEEditor.mlCurTimeMS;
-                        VEEditor.this.miFrameCount = 0;
+                        long unused2 = vEEditor.mlLastTimeMS = vEEditor.mlCurTimeMS;
+                        int unused3 = VEEditor.this.miFrameCount = 0;
                     }
                 }
                 return 0;
@@ -956,7 +900,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 return 0;
             }
         };
-        this.mEncoderDataCallback = new IEncoderDataCallback() {
+        this.mEncoderDataCallback = new NativeCallbacks.IEncoderDataCallback() {
             public int onCompressBuffer(byte[] bArr, int i, int i2, boolean z) {
                 if (bArr == null || i < 0 || i2 <= 0) {
                     return -1;
@@ -968,7 +912,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 return 0;
             }
         };
-        this.mGetImageCallback = new IGetImageCallback() {
+        this.mGetImageCallback = new NativeCallbacks.IGetImageCallback() {
             public int onImageData(byte[] bArr, int i, int i2, int i3) {
                 if (VEEditor.this.mGetImageListener == null) {
                     return -100;
@@ -992,10 +936,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mVideoEditor.setErrorListener(this.mTeCommonErrorCallback);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("workspace is: ");
-        sb.append(str);
-        throw new VEException(-100, sb.toString());
+        throw new VEException(-100, "workspace is: " + str);
     }
 
     public VEEditor(String str, SurfaceView surfaceView, @NonNull LifecycleOwner lifecycleOwner) {
@@ -1035,7 +976,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     } else if (VEEditor.this.mBCompileHighQualityGif) {
                         VEEditor.this.mp4ToGIFConverter.setCallback(VEEditor.this.mUserCommonInfoCallback);
                         new Thread(VEEditor.this.mp4ToGIFConverter).start();
-                        VEEditor.this.mBCompileHighQualityGif = false;
+                        boolean unused = VEEditor.this.mBCompileHighQualityGif = false;
                     } else {
                         if (i2 == 1 || i2 == 0) {
                             VEEditor.this.onMonitorCompile();
@@ -1085,7 +1026,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.mSurfaceHeight = 0;
         this.mInitDisplayWidth = 0;
         this.mInitDisplayHeight = 0;
-        this.mbSeparateAV = Boolean.valueOf(false);
+        this.mbSeparateAV = false;
         this.mAudioEffectfilterIndex = -1;
         this.mMasterTrackIndex = 0;
         this.mVideoEditor = TEInterface.createEngine();
@@ -1116,17 +1057,17 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.scaleH = 1.0f;
         this.mPageMode = -1;
         this.mBackGroundColor = ViewCompat.MEASURED_STATE_MASK;
-        this.mTextureListener = new SurfaceTextureListener() {
+        this.mTextureListener = new TextureView.SurfaceTextureListener() {
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i2) {
                 if (VEEditor.this.mSurfaceTexture == surfaceTexture) {
                     VEEditor vEEditor = VEEditor.this;
                     vEEditor.onSurfaceCreated(vEEditor.mSurface);
                 } else {
-                    VEEditor.this.mSurface = new Surface(surfaceTexture);
+                    Surface unused = VEEditor.this.mSurface = new Surface(surfaceTexture);
                     VEEditor vEEditor2 = VEEditor.this;
                     vEEditor2.onSurfaceCreated(vEEditor2.mSurface);
                 }
-                VEEditor.this.mSurfaceTexture = surfaceTexture;
+                SurfaceTexture unused2 = VEEditor.this.mSurfaceTexture = surfaceTexture;
             }
 
             public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
@@ -1136,19 +1077,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             }
 
             public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i2) {
-                VEEditor.this.mSurfaceWidth = i;
-                VEEditor.this.mSurfaceHeight = i2;
+                int unused = VEEditor.this.mSurfaceWidth = i;
+                int unused2 = VEEditor.this.mSurfaceHeight = i2;
                 VEEditor.this.updateInitDisplaySize();
             }
 
             public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
             }
         };
-        this.mSurfaceCallback = new Callback2() {
+        this.mSurfaceCallback = new SurfaceHolder.Callback2() {
             public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
                 VELogUtil.d(VEEditor.TAG, String.format("surfaceChanged: pixel format [%d], size [%d, %d]", new Object[]{Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(i3)}));
-                VEEditor.this.mSurfaceWidth = i2;
-                VEEditor.this.mSurfaceHeight = i3;
+                int unused = VEEditor.this.mSurfaceWidth = i2;
+                int unused2 = VEEditor.this.mSurfaceHeight = i3;
                 VEEditor.this.updateInitDisplaySize();
                 VEEditor.this.onSurfaceChanged(i2, i3);
             }
@@ -1165,32 +1106,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 VELogUtil.d(VEEditor.TAG, "surfaceRedrawNeeded...");
             }
         };
-        this.mOpenGLCallback = new IOpenGLCallback() {
+        this.mOpenGLCallback = new NativeCallbacks.IOpenGLCallback() {
             public int onOpenGLCreate(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLCreate: ret = ");
-                sb.append(i);
-                VELogUtil.d(VEEditor.TAG, sb.toString());
+                VELogUtil.d(VEEditor.TAG, "onOpenGLCreate: ret = " + i);
                 return 0;
             }
 
             public int onOpenGLDestroy(int i) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLDestroy: ret = ");
-                sb.append(i);
-                VELogUtil.d(VEEditor.TAG, sb.toString());
+                VELogUtil.d(VEEditor.TAG, "onOpenGLDestroy: ret = " + i);
                 return 0;
             }
 
             public int onOpenGLDrawAfter(int i, double d2) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("onOpenGLDrawing: tex = ");
-                sb.append(i);
-                sb.append(" timeStamp = ");
-                sb.append(d2);
-                String sb2 = sb.toString();
-                String str = VEEditor.TAG;
-                VELogUtil.v(str, sb2);
+                VELogUtil.v(VEEditor.TAG, "onOpenGLDrawing: tex = " + i + " timeStamp = " + d2);
                 if (VEEditor.this.miFrameCount == 0) {
                     TEMonitor.perfLong(1, TEMonitorNewKeys.TE_EDIT_FIRST_FRAME_TIME, System.currentTimeMillis() - VEEditor.this.mlLastTimeMS);
                     if (VEEditor.this.mFirstFrameListener != null) {
@@ -1199,16 +1127,13 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 }
                 VEEditor.access$1804(VEEditor.this);
                 if (VEEditor.this.miFrameCount == 30) {
-                    VEEditor.this.mlCurTimeMS = System.currentTimeMillis();
+                    long unused = VEEditor.this.mlCurTimeMS = System.currentTimeMillis();
                     if (VEEditor.this.mlLastTimeMS != VEEditor.this.mlCurTimeMS) {
                         float access$2100 = 30000.0f / ((float) (VEEditor.this.mlCurTimeMS - VEEditor.this.mlLastTimeMS));
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("Render FPS = ");
-                        sb3.append(access$2100);
-                        VELogUtil.d(str, sb3.toString());
+                        VELogUtil.d(VEEditor.TAG, "Render FPS = " + access$2100);
                         VEEditor vEEditor = VEEditor.this;
-                        vEEditor.mlLastTimeMS = vEEditor.mlCurTimeMS;
-                        VEEditor.this.miFrameCount = 0;
+                        long unused2 = vEEditor.mlLastTimeMS = vEEditor.mlCurTimeMS;
+                        int unused3 = VEEditor.this.miFrameCount = 0;
                     }
                 }
                 return 0;
@@ -1222,7 +1147,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 return 0;
             }
         };
-        this.mEncoderDataCallback = new IEncoderDataCallback() {
+        this.mEncoderDataCallback = new NativeCallbacks.IEncoderDataCallback() {
             public int onCompressBuffer(byte[] bArr, int i, int i2, boolean z) {
                 if (bArr == null || i < 0 || i2 <= 0) {
                     return -1;
@@ -1234,7 +1159,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 return 0;
             }
         };
-        this.mGetImageCallback = new IGetImageCallback() {
+        this.mGetImageCallback = new NativeCallbacks.IGetImageCallback() {
             public int onImageData(byte[] bArr, int i, int i2, int i3) {
                 if (VEEditor.this.mGetImageListener == null) {
                     return -100;
@@ -1258,10 +1183,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mVideoEditor.setErrorListener(this.mTeCommonErrorCallback);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("workspace is: ");
-        sb.append(str);
-        throw new VEException(-100, sb.toString());
+        throw new VEException(-100, "workspace is: " + str);
     }
 
     public VEEditor(String str, TextureView textureView, @NonNull LifecycleOwner lifecycleOwner) {
@@ -1290,7 +1212,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     } else {
                         ByteBuffer allocateDirect = ByteBuffer.allocateDirect(displayRect.width * displayRect.height * 4);
                         this.mVideoEditor.getDisplayImage(allocateDirect.array(), displayRect.width, displayRect.height);
-                        this.mCurrentBmp = Bitmap.createBitmap(displayRect.width, displayRect.height, Config.ARGB_8888);
+                        this.mCurrentBmp = Bitmap.createBitmap(displayRect.width, displayRect.height, Bitmap.Config.ARGB_8888);
                         this.mCurrentBmp.copyPixelsFromBuffer(allocateDirect);
                         Matrix matrix = new Matrix();
                         matrix.postRotate(this.rotate);
@@ -1318,11 +1240,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     if (this.mp4ToGIFConverter == null) {
                         this.mp4ToGIFConverter = new Mp4ToHighQualityGIFConverter();
                     }
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(new File(this.mOutputFile).getParent());
-                    sb.append(File.separatorChar);
-                    sb.append("gif.mp4");
-                    str3 = sb.toString();
+                    str3 = new File(this.mOutputFile).getParent() + File.separatorChar + "gif.mp4";
                     this.mp4ToGIFConverter.setInputFile(str3);
                     this.mp4ToGIFConverter.setOutputFile(this.mOutputFile);
                     this.mp4ToGIFConverter.setWaterMarkFile(this.waterMarkFile);
@@ -1344,7 +1262,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     this.mVideoEditor.setEncoderDataListener(this.mEncoderDataCallback);
                 } else {
                     this.mVideoEditor.setEncoderParallel(false);
-                    this.mVideoEditor.setEncoderDataListener(null);
+                    this.mVideoEditor.setEncoderDataListener((NativeCallbacks.IEncoderDataCallback) null);
                 }
                 this.mVideoEditor.setWidthHeight(vEVideoEncodeSettings.getVideoRes().width, vEVideoEncodeSettings.getVideoRes().height);
                 VEWatermarkParam watermarkParam = vEVideoEncodeSettings.getWatermarkParam();
@@ -1412,73 +1330,69 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             ArrayList arrayList8 = new ArrayList();
             double d3 = 0.0d;
             double d4 = 0.0d;
-            for (MVResourceBean mVResourceBean : arrayList6) {
-                if (!arrayList7.contains(Integer.valueOf(mVResourceBean.rid))) {
-                    boolean equals = MVConsts.TYPE_VIDEO.equals(mVResourceBean.type);
-                    String str = MVConsts.TYPE_IMG;
-                    if (equals || str.equals(mVResourceBean.type)) {
+            for (MVResourceBean next : arrayList6) {
+                if (!arrayList7.contains(Integer.valueOf(next.rid))) {
+                    if (MVConsts.TYPE_VIDEO.equals(next.type) || MVConsts.TYPE_IMG.equals(next.type)) {
                         List<String> list3 = list2;
                         arrayList2 = arrayList5;
                         arrayList = arrayList6;
-                        if (mVResourceBean.seqIn >= d3) {
-                            MVResourceBean mVResourceBean2 = new MVResourceBean();
-                            mVResourceBean2.seqIn = mVResourceBean.seqIn * 1000.0d;
-                            mVResourceBean2.seqOut = mVResourceBean.seqOut * 1000.0d;
-                            mVResourceBean2.trimIn = mVResourceBean.trimIn * 1000.0d;
-                            mVResourceBean2.trimOut = mVResourceBean.trimOut * 1000.0d;
-                            if (!str.equals(mVResourceBean.type)) {
+                        if (next.seqIn >= d3) {
+                            MVResourceBean mVResourceBean = new MVResourceBean();
+                            mVResourceBean.seqIn = next.seqIn * 1000.0d;
+                            mVResourceBean.seqOut = next.seqOut * 1000.0d;
+                            mVResourceBean.trimIn = next.trimIn * 1000.0d;
+                            mVResourceBean.trimOut = next.trimOut * 1000.0d;
+                            if (!MVConsts.TYPE_IMG.equals(next.type)) {
                                 d2 = d4;
-                            } else if (mVResourceBean2.trimOut == 0.0d) {
+                            } else if (mVResourceBean.trimOut == 0.0d) {
                                 d2 = d4;
-                                mVResourceBean2.trimOut = mVResourceBean2.seqOut - mVResourceBean2.seqIn;
+                                mVResourceBean.trimOut = mVResourceBean.seqOut - mVResourceBean.seqIn;
                             } else {
                                 d2 = d4;
                             }
-                            mVResourceBean2.content = mVResourceBean.content;
-                            mVResourceBean2.type = mVResourceBean.type;
-                            mVResourceBean2.rid = mVResourceBean.rid;
-                            arrayList8.add(mVResourceBean2);
-                            double d5 = mVResourceBean.seqOut;
-                            arrayList7.add(Integer.valueOf(mVResourceBean2.rid));
-                            list.add(mVResourceBean2.content);
+                            mVResourceBean.content = next.content;
+                            mVResourceBean.type = next.type;
+                            mVResourceBean.rid = next.rid;
+                            arrayList8.add(mVResourceBean);
+                            double d5 = next.seqOut;
+                            arrayList7.add(Integer.valueOf(mVResourceBean.rid));
+                            list.add(mVResourceBean.content);
                             d3 = d5;
                         } else {
                             List<String> list4 = list;
                             d2 = d4;
                         }
+                    } else if (!MVConsts.TYPE_AUDIO.equals(next.type) || next.seqIn < d4) {
+                        List<String> list5 = list2;
+                        arrayList2 = arrayList5;
+                        arrayList = arrayList6;
+                        d2 = d4;
+                        List<String> list6 = list;
                     } else {
-                        if (!MVConsts.TYPE_AUDIO.equals(mVResourceBean.type) || mVResourceBean.seqIn < d4) {
-                            List<String> list5 = list2;
-                            arrayList2 = arrayList5;
-                            arrayList = arrayList6;
-                            d2 = d4;
-                            List<String> list6 = list;
-                        } else {
-                            ArrayList arrayList9 = new ArrayList();
-                            MVResourceBean mVResourceBean3 = new MVResourceBean();
-                            mVResourceBean3.seqIn = mVResourceBean.seqIn * 1000.0d;
-                            mVResourceBean3.seqOut = mVResourceBean.seqOut * 1000.0d;
-                            mVResourceBean3.trimIn = mVResourceBean.trimIn * 1000.0d;
-                            mVResourceBean3.trimOut = mVResourceBean.trimOut * 1000.0d;
-                            mVResourceBean3.content = mVResourceBean.content;
-                            mVResourceBean3.type = mVResourceBean.type;
-                            mVResourceBean3.rid = mVResourceBean.rid;
-                            if (this.mMVBackgroundAudioRid == 0) {
-                                this.mMVBackgroundAudioRid = mVResourceBean3.rid;
-                            }
-                            arrayList9.add(mVResourceBean3);
-                            d4 = mVResourceBean.seqOut;
-                            arrayList7.add(Integer.valueOf(mVResourceBean3.rid));
-                            list2.add(mVResourceBean3.content);
-                            if (arrayList9.size() > 0) {
-                                arrayList5.add(arrayList9);
-                            }
-                            arrayList2 = arrayList5;
-                            arrayList = arrayList6;
-                            List<String> list7 = list;
-                            arrayList6 = arrayList;
-                            arrayList5 = arrayList2;
+                        ArrayList arrayList9 = new ArrayList();
+                        MVResourceBean mVResourceBean2 = new MVResourceBean();
+                        mVResourceBean2.seqIn = next.seqIn * 1000.0d;
+                        mVResourceBean2.seqOut = next.seqOut * 1000.0d;
+                        mVResourceBean2.trimIn = next.trimIn * 1000.0d;
+                        mVResourceBean2.trimOut = next.trimOut * 1000.0d;
+                        mVResourceBean2.content = next.content;
+                        mVResourceBean2.type = next.type;
+                        mVResourceBean2.rid = next.rid;
+                        if (this.mMVBackgroundAudioRid == 0) {
+                            this.mMVBackgroundAudioRid = mVResourceBean2.rid;
                         }
+                        arrayList9.add(mVResourceBean2);
+                        d4 = next.seqOut;
+                        arrayList7.add(Integer.valueOf(mVResourceBean2.rid));
+                        list2.add(mVResourceBean2.content);
+                        if (arrayList9.size() > 0) {
+                            arrayList5.add(arrayList9);
+                        }
+                        arrayList2 = arrayList5;
+                        arrayList = arrayList6;
+                        List<String> list7 = list;
+                        arrayList6 = arrayList;
+                        arrayList5 = arrayList2;
                     }
                     d4 = d2;
                     arrayList6 = arrayList;
@@ -1500,31 +1414,25 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
 
     private void genResourcesArr(List<MVResourceBean> list, int[] iArr, int[] iArr2, int[] iArr3, int[] iArr4, String[] strArr, int[] iArr5) {
         int i = 0;
-        for (MVResourceBean mVResourceBean : list) {
-            iArr[i] = (int) mVResourceBean.trimIn;
-            iArr2[i] = (int) mVResourceBean.trimOut;
-            iArr3[i] = (int) mVResourceBean.seqIn;
-            iArr4[i] = (int) mVResourceBean.seqOut;
-            strArr[i] = mVResourceBean.content;
-            iArr5[i] = mVResourceBean.rid;
+        for (MVResourceBean next : list) {
+            iArr[i] = (int) next.trimIn;
+            iArr2[i] = (int) next.trimOut;
+            iArr3[i] = (int) next.seqIn;
+            iArr4[i] = (int) next.seqOut;
+            strArr[i] = next.content;
+            iArr5[i] = next.rid;
             i++;
         }
     }
 
-    public static synchronized VEEditor genReverseVideo(VEEditorResManager vEEditorResManager, VETimelineParams vETimelineParams, int i, int i2, VEEditorGenReverseListener vEEditorGenReverseListener) {
+    public static synchronized VEEditor genReverseVideo(VEEditorResManager vEEditorResManager, VETimelineParams vETimelineParams, int i, int i2, VEListener.VEEditorGenReverseListener vEEditorGenReverseListener) {
         VEEditor vEEditor;
         VEEditorResManager vEEditorResManager2 = vEEditorResManager;
         VETimelineParams vETimelineParams2 = vETimelineParams;
         int i3 = i;
         int i4 = i2;
         synchronized (VEEditor.class) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("genReverseVideo with param:startTime:");
-            sb.append(i3);
-            sb.append("endTime:");
-            sb.append(i4);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "genReverseVideo with param:startTime:" + i3 + "endTime:" + i4);
             VEEditor vEEditor2 = new VEEditor(vEEditorResManager.getWorkspace());
             vEEditorResManager2.mReverseDone = false;
             float[] fArr = new float[vETimelineParams2.speed.length];
@@ -1537,19 +1445,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             String[] strArr2 = vETimelineParams2.audioFilePaths;
             int[] iArr3 = vETimelineParams2.aTrimIn;
             int[] iArr4 = vETimelineParams2.aTrimOut;
-            vEEditor2.init2(strArr, iArr, iArr2, null, strArr2, iArr3, iArr4, fArr, vETimelineParams2.rotate, VIDEO_RATIO.VIDEO_OUT_RATIO_ORIGINAL);
-            VEVideoEncodeSettings build = new Builder(2).setVideoRes(-1, -1).setFps(30).setHwEnc(false).setSWCRF(13).setGopSize(1).setWatermarkParam(null).setEncodeProfile(ENCODE_PROFILE.ENCODE_PROFILE_BASELINE).setEncodePreset(ENCODE_PRESET.ENCODE_LEVEL_ULTRAFAST).build();
+            vEEditor2.init2(strArr, iArr, iArr2, (String[]) null, strArr2, iArr3, iArr4, fArr, vETimelineParams2.rotate, VIDEO_RATIO.VIDEO_OUT_RATIO_ORIGINAL);
+            VEVideoEncodeSettings build = new VEVideoEncodeSettings.Builder(2).setVideoRes(-1, -1).setFps(30).setHwEnc(false).setSWCRF(13).setGopSize(1).setWatermarkParam((VEWatermarkParam) null).setEncodeProfile(VEVideoEncodeSettings.ENCODE_PROFILE.ENCODE_PROFILE_BASELINE).setEncodePreset(VEVideoEncodeSettings.ENCODE_PRESET.ENCODE_LEVEL_ULTRAFAST).build();
             vEEditor2.setTimeRange(i3, i4, SET_RANGE_MODE.EDITOR_TIMERANGE_FLAG_BEFORE_SPEED);
             String genReverseVideoPath = vEEditorResManager2.genReverseVideoPath(0);
             String genReverseVideoPath2 = vEEditorResManager2.genReverseVideoPath(1);
             String genSeqAudioPath = vEEditorResManager2.genSeqAudioPath(0);
             VEEditor vEEditor3 = vEEditor2;
-            final String str2 = genReverseVideoPath;
-            final String str3 = genReverseVideoPath2;
+            final String str = genReverseVideoPath;
+            final String str2 = genReverseVideoPath2;
             final VEEditorResManager vEEditorResManager3 = vEEditorResManager;
-            final String str4 = genSeqAudioPath;
+            final String str3 = genSeqAudioPath;
             vEEditor = vEEditor2;
-            final VEEditorGenReverseListener vEEditorGenReverseListener2 = vEEditorGenReverseListener;
+            final VEListener.VEEditorGenReverseListener vEEditorGenReverseListener2 = vEEditorGenReverseListener;
             AnonymousClass8 r1 = new VECommonCallback(vEEditor3) {
                 final /* synthetic */ VEEditor val$mVideoCompiler;
 
@@ -1559,17 +1467,17 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
 
                 public void onCallback(int i, int i2, float f2, String str) {
                     if (i == 4103 && this.val$mVideoCompiler.isValid()) {
-                        TEVideoUtils.reverseAllIVideo(str2, str3);
+                        TEVideoUtils.reverseAllIVideo(str, str2);
                         new Thread(new Runnable() {
                             public void run() {
                                 AnonymousClass8.this.val$mVideoCompiler.destroy();
                                 AnonymousClass8 r5 = AnonymousClass8.this;
                                 VEEditorResManager vEEditorResManager = vEEditorResManager3;
-                                vEEditorResManager.mVideoPaths = new String[]{str2};
-                                vEEditorResManager.mReverseAudioPaths = new String[]{str4};
-                                vEEditorResManager.mReverseVideoPath = new String[]{str3};
+                                vEEditorResManager.mVideoPaths = new String[]{str};
+                                vEEditorResManager.mReverseAudioPaths = new String[]{str3};
+                                vEEditorResManager.mReverseVideoPath = new String[]{str2};
                                 vEEditorResManager.mReverseDone = true;
-                                VEEditorGenReverseListener vEEditorGenReverseListener = vEEditorGenReverseListener2;
+                                VEListener.VEEditorGenReverseListener vEEditorGenReverseListener = vEEditorGenReverseListener2;
                                 if (vEEditorGenReverseListener != null) {
                                     vEEditorGenReverseListener.onReverseDone(0);
                                 }
@@ -1579,7 +1487,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 }
             };
             vEEditor.setOnInfoListener(r1);
-            final VEEditorGenReverseListener vEEditorGenReverseListener3 = vEEditorGenReverseListener;
+            final VEListener.VEEditorGenReverseListener vEEditorGenReverseListener3 = vEEditorGenReverseListener;
             vEEditor.setOnErrorListener(new VECommonCallback(vEEditor) {
                 final /* synthetic */ VEEditor val$mVideoCompiler;
 
@@ -1591,7 +1499,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     new Thread(new Runnable() {
                         public void run() {
                             AnonymousClass9.this.val$mVideoCompiler.destroy();
-                            VEEditorGenReverseListener vEEditorGenReverseListener = vEEditorGenReverseListener3;
+                            VEListener.VEEditorGenReverseListener vEEditorGenReverseListener = vEEditorGenReverseListener3;
                             if (vEEditorGenReverseListener != null) {
                                 vEEditorGenReverseListener.onReverseDone(-1);
                             }
@@ -1607,42 +1515,25 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     /* access modifiers changed from: private */
     public void onMonitorCompile() {
         long currentTimeMillis = System.currentTimeMillis() - this.mlCompileStartTime;
-        String str = "te_composition_time";
-        TEMonitor.perfLong(str, currentTimeMillis);
-        TEMonitor.perfLong(1, str, currentTimeMillis);
-        String str2 = "";
+        TEMonitor.perfLong("te_composition_time", currentTimeMillis);
+        TEMonitor.perfLong(1, "te_composition_time", currentTimeMillis);
         if (FileUtils.checkFileExists(this.mOutputFile)) {
             int[] iArr = new int[10];
             if (TEVideoUtils.getVideoFileInfo(this.mOutputFile, iArr) == 0) {
                 long length = new File(this.mOutputFile).length();
-                String str3 = "te_composition_page_mode";
-                TEMonitor.perfLong(str3, (long) this.mPageMode);
+                TEMonitor.perfLong("te_composition_page_mode", (long) this.mPageMode);
                 double d2 = (((double) length) / 1024.0d) / 1024.0d;
-                String str4 = "te_composition_file_size";
-                TEMonitor.perfDouble(str4, d2);
-                String str5 = "te_composition_file_duration";
-                TEMonitor.perfDouble(str5, (double) iArr[3]);
-                String str6 = "te_composition_bit_rate";
-                TEMonitor.perfDouble(str6, (double) iArr[6]);
-                String str7 = "te_composition_fps";
-                TEMonitor.perfDouble(str7, (double) iArr[7]);
-                StringBuilder sb = new StringBuilder();
-                sb.append(str2);
-                sb.append(iArr[0]);
-                sb.append("x");
-                sb.append(iArr[1]);
-                TEMonitor.perfString("te_composition_resolution", sb.toString());
-                TEMonitor.perfLong(1, str3, (long) this.mPageMode);
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append(str2);
-                sb2.append(iArr[0]);
-                sb2.append("x");
-                sb2.append(iArr[1]);
-                TEMonitor.perfString(1, "te_composition_resolution", sb2.toString());
-                TEMonitor.perfDouble(1, str7, (double) iArr[7]);
-                TEMonitor.perfDouble(1, str6, (double) iArr[6]);
-                TEMonitor.perfDouble(1, str5, (double) iArr[3]);
-                TEMonitor.perfDouble(1, str4, d2);
+                TEMonitor.perfDouble("te_composition_file_size", d2);
+                TEMonitor.perfDouble("te_composition_file_duration", (double) iArr[3]);
+                TEMonitor.perfDouble("te_composition_bit_rate", (double) iArr[6]);
+                TEMonitor.perfDouble("te_composition_fps", (double) iArr[7]);
+                TEMonitor.perfString("te_composition_resolution", "" + iArr[0] + "x" + iArr[1]);
+                TEMonitor.perfLong(1, "te_composition_page_mode", (long) this.mPageMode);
+                TEMonitor.perfString(1, "te_composition_resolution", "" + iArr[0] + "x" + iArr[1]);
+                TEMonitor.perfDouble(1, "te_composition_fps", (double) iArr[7]);
+                TEMonitor.perfDouble(1, "te_composition_bit_rate", (double) iArr[6]);
+                TEMonitor.perfDouble(1, "te_composition_file_duration", (double) iArr[3]);
+                TEMonitor.perfDouble(1, "te_composition_file_size", d2);
                 int timeEffectType = this.mTEMonitorFilterMgr.getTimeEffectType();
                 if (timeEffectType != 0) {
                     TEMonitor.perfLong(1, TEMonitorNewKeys.TE_COMPOSITION_TIME_FILTER_TYPE, (long) timeEffectType);
@@ -1668,7 +1559,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         TEMonitor.report(TEMonitor.MONITOR_ACTION_COMPILE);
         TEMonitor.perfString(1, "iesve_veeditor_composition_finish_file", this.mCompileType);
         TEMonitor.perfString(1, "iesve_veeditor_composition_finish_result", "succ");
-        TEMonitor.perfString(1, "iesve_veeditor_composition_finish_reason", str2);
+        TEMonitor.perfString(1, "iesve_veeditor_composition_finish_reason", "");
         TEMonitor.reportWithType(1);
     }
 
@@ -1707,25 +1598,15 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     /* access modifiers changed from: private */
     public void onSurfaceCreated(Surface surface) {
         Rect rect;
-        String str = TAG;
-        VELogUtil.i(str, "surfaceCreated...");
+        VELogUtil.i(TAG, "surfaceCreated...");
         this.mFirstTimeSurfaceCreate = false;
         if (this.mReDrawSurface && this.mCurrentBmp != null) {
-            Canvas lockCanvas = surface.lockCanvas(null);
+            Canvas lockCanvas = surface.lockCanvas((Rect) null);
             int width = lockCanvas.getWidth();
             int height = lockCanvas.getHeight();
             int width2 = this.mCurrentBmp.getWidth();
             int height2 = this.mCurrentBmp.getHeight();
-            StringBuilder sb = new StringBuilder();
-            sb.append("width ");
-            sb.append(width);
-            sb.append(" height ");
-            sb.append(height);
-            sb.append(" image width ");
-            sb.append(width2);
-            sb.append(" image height ");
-            sb.append(height2);
-            VELogUtil.i(str, sb.toString());
+            VELogUtil.i(TAG, "width " + width + " height " + height + " image width " + width2 + " image height " + height2);
             float f2 = (float) width;
             float f3 = (float) height;
             float f4 = ((float) width2) / ((float) height2);
@@ -1736,7 +1617,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 int i2 = (width - ((int) (f3 * f4))) / 2;
                 rect = new Rect(i2, 0, width - i2, height);
             }
-            lockCanvas.drawBitmap(this.mCurrentBmp, null, rect, null);
+            lockCanvas.drawBitmap(this.mCurrentBmp, (Rect) null, rect, (Paint) null);
             surface.unlockCanvasAndPost(lockCanvas);
             if (this.mReDrawSurfaceOnce) {
                 Bitmap bitmap = this.mCurrentBmp;
@@ -1759,74 +1640,36 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     private void setAudioEffectParam(int i, int i2, int i3, VEAudioEffectBean vEAudioEffectBean) {
         VELogUtil.w(TAG, "setAudioEffectParam...");
         TEInterface tEInterface = this.mVideoEditor;
-        StringBuilder sb = new StringBuilder();
-        String str = "";
-        sb.append(str);
-        sb.append(vEAudioEffectBean.type);
-        tEInterface.setFilterParam(i3, "audioEffectType", sb.toString());
-        String str2 = "1";
-        String str3 = "0";
-        this.mVideoEditor.setFilterParam(i3, "formatShiftOn", vEAudioEffectBean.formatShiftOn ? str2 : str3);
+        tEInterface.setFilterParam(i3, "audioEffectType", "" + vEAudioEffectBean.type);
+        String str = "1";
+        this.mVideoEditor.setFilterParam(i3, "formatShiftOn", vEAudioEffectBean.formatShiftOn ? str : "0");
         TEInterface tEInterface2 = this.mVideoEditor;
         if (!vEAudioEffectBean.smoothOn) {
-            str2 = str3;
+            str = "0";
         }
-        tEInterface2.setFilterParam(i3, "smoothOn", str2);
+        tEInterface2.setFilterParam(i3, "smoothOn", str);
         TEInterface tEInterface3 = this.mVideoEditor;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(str);
-        sb2.append(vEAudioEffectBean.processChMode);
-        tEInterface3.setFilterParam(i3, "processChMode", sb2.toString());
+        tEInterface3.setFilterParam(i3, "processChMode", "" + vEAudioEffectBean.processChMode);
         TEInterface tEInterface4 = this.mVideoEditor;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str);
-        sb3.append(vEAudioEffectBean.transientDetectMode);
-        tEInterface4.setFilterParam(i3, "transientDetectMode", sb3.toString());
+        tEInterface4.setFilterParam(i3, "transientDetectMode", "" + vEAudioEffectBean.transientDetectMode);
         TEInterface tEInterface5 = this.mVideoEditor;
-        StringBuilder sb4 = new StringBuilder();
-        sb4.append(str);
-        sb4.append(vEAudioEffectBean.phaseResetMode);
-        tEInterface5.setFilterParam(i3, "phaseResetMode", sb4.toString());
+        tEInterface5.setFilterParam(i3, "phaseResetMode", "" + vEAudioEffectBean.phaseResetMode);
         TEInterface tEInterface6 = this.mVideoEditor;
-        StringBuilder sb5 = new StringBuilder();
-        sb5.append(str);
-        sb5.append(vEAudioEffectBean.phaseAdjustMethod);
-        tEInterface6.setFilterParam(i3, "phaseAdjustMethod", sb5.toString());
+        tEInterface6.setFilterParam(i3, "phaseAdjustMethod", "" + vEAudioEffectBean.phaseAdjustMethod);
         TEInterface tEInterface7 = this.mVideoEditor;
-        StringBuilder sb6 = new StringBuilder();
-        sb6.append(str);
-        sb6.append(vEAudioEffectBean.windowMode);
-        tEInterface7.setFilterParam(i3, "windowMode", sb6.toString());
+        tEInterface7.setFilterParam(i3, "windowMode", "" + vEAudioEffectBean.windowMode);
         TEInterface tEInterface8 = this.mVideoEditor;
-        StringBuilder sb7 = new StringBuilder();
-        sb7.append(str);
-        sb7.append(vEAudioEffectBean.pitchTunerMode);
-        tEInterface8.setFilterParam(i3, "pitchTunerMode", sb7.toString());
+        tEInterface8.setFilterParam(i3, "pitchTunerMode", "" + vEAudioEffectBean.pitchTunerMode);
         TEInterface tEInterface9 = this.mVideoEditor;
-        StringBuilder sb8 = new StringBuilder();
-        sb8.append(str);
-        sb8.append(vEAudioEffectBean.blockSize);
-        tEInterface9.setFilterParam(i3, "blockSize", sb8.toString());
+        tEInterface9.setFilterParam(i3, "blockSize", "" + vEAudioEffectBean.blockSize);
         TEInterface tEInterface10 = this.mVideoEditor;
-        StringBuilder sb9 = new StringBuilder();
-        sb9.append(str);
-        sb9.append(vEAudioEffectBean.centtone);
-        tEInterface10.setFilterParam(i3, "centtone", sb9.toString());
+        tEInterface10.setFilterParam(i3, "centtone", "" + vEAudioEffectBean.centtone);
         TEInterface tEInterface11 = this.mVideoEditor;
-        StringBuilder sb10 = new StringBuilder();
-        sb10.append(str);
-        sb10.append(vEAudioEffectBean.semiton);
-        tEInterface11.setFilterParam(i3, "semiton", sb10.toString());
+        tEInterface11.setFilterParam(i3, "semiton", "" + vEAudioEffectBean.semiton);
         TEInterface tEInterface12 = this.mVideoEditor;
-        StringBuilder sb11 = new StringBuilder();
-        sb11.append(str);
-        sb11.append(vEAudioEffectBean.octative);
-        tEInterface12.setFilterParam(i3, "octative", sb11.toString());
+        tEInterface12.setFilterParam(i3, "octative", "" + vEAudioEffectBean.octative);
         TEInterface tEInterface13 = this.mVideoEditor;
-        StringBuilder sb12 = new StringBuilder();
-        sb12.append(str);
-        sb12.append(vEAudioEffectBean.speedRatio);
-        tEInterface13.setFilterParam(i3, "speedRatio", sb12.toString());
+        tEInterface13.setFilterParam(i3, "speedRatio", "" + vEAudioEffectBean.speedRatio);
     }
 
     private void setBitrateOptions(VEVideoEncodeSettings vEVideoEncodeSettings) {
@@ -1858,24 +1701,18 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     this.mCurColorFilter.setUseFilterResIntensity(z);
                     this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_PATH_LEFT, str);
                     this.mVideoEditor.setFilterParam(this.mColorFilterIndex, USE_FILTER_RES_INTENSITY, String.valueOf(z));
-                    TEInterface tEInterface = this.mVideoEditor;
-                    int i = this.mColorFilterIndex;
-                    String str2 = FILTER_INTENSITY;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("");
-                    sb.append(f2);
-                    tEInterface.setFilterParam(i, str2, sb.toString());
+                    this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_INTENSITY, "" + f2);
                     this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_PATH_RIGHT, "");
                     this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_POSITION, "1.0");
                     VEKeyValue vEKeyValue = new VEKeyValue();
-                    String str3 = "";
+                    String str2 = "";
                     if (!TextUtils.isEmpty(str)) {
                         String[] split = str.split(File.separator);
                         if (split.length > 0) {
-                            str3 = split[split.length - 1];
+                            str2 = split[split.length - 1];
                         }
                     }
-                    vEKeyValue.add("iesve_veeditor_set_filter_click_filter_id", str3);
+                    vEKeyValue.add("iesve_veeditor_set_filter_click_filter_id", str2);
                     MonitorUtils.monitorStatistics("iesve_veeditor_set_filter_click", 1, vEKeyValue);
                     TEMonitor.perfString(1, TEMonitorNewKeys.TE_COMPOSITION_FILTER_ID, str);
                     return 0;
@@ -1885,7 +1722,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:40:0x0124  */
+    /* JADX WARNING: Removed duplicated region for block: B:39:0x0124  */
     private int setColorFilter(String str, String str2, float f2, float f3, boolean z) {
         String str3;
         if (this.mColorFilterIndex < 0) {
@@ -1911,32 +1748,18 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.mCurColorFilter.setPosition(f2);
         this.mCurColorFilter.setIntensity(f3);
         this.mCurColorFilter.setUseFilterResIntensity(z);
-        StringBuilder sb = new StringBuilder();
-        sb.append("leftFilterPath: ");
-        sb.append(str);
-        sb.append("\nrightFilterPath: ");
-        sb.append(str2);
-        sb.append(" position: ");
-        sb.append(f2);
-        sb.append(" intensity: ");
-        sb.append(f3);
-        VELogUtil.d(TAG, sb.toString());
+        VELogUtil.d(TAG, "leftFilterPath: " + str + "\nrightFilterPath: " + str2 + " position: " + f2 + " intensity: " + f3);
         this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_PATH_LEFT, str);
         this.mVideoEditor.setFilterParam(this.mColorFilterIndex, USE_FILTER_RES_INTENSITY, String.valueOf(z));
         TEInterface tEInterface = this.mVideoEditor;
         int i = this.mColorFilterIndex;
-        StringBuilder sb2 = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         String str4 = "";
-        sb2.append(str4);
-        sb2.append(f3);
-        tEInterface.setFilterParam(i, FILTER_INTENSITY, sb2.toString());
+        sb.append(str4);
+        sb.append(f3);
+        tEInterface.setFilterParam(i, FILTER_INTENSITY, sb.toString());
         this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_PATH_RIGHT, str2);
-        TEInterface tEInterface2 = this.mVideoEditor;
-        int i2 = this.mColorFilterIndex;
-        StringBuilder sb3 = new StringBuilder();
-        sb3.append(str4);
-        sb3.append(f2);
-        tEInterface2.setFilterParam(i2, FILTER_POSITION, sb3.toString());
+        this.mVideoEditor.setFilterParam(this.mColorFilterIndex, FILTER_POSITION, str4 + f2);
         VEKeyValue vEKeyValue = new VEKeyValue();
         if (!TextUtils.isEmpty(str)) {
             String[] split = str.split(File.separator);
@@ -1967,13 +1790,11 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public void updateInitDisplaySize() {
         VESize vESize = this.mInitSize;
         int i = vESize.width;
-        float f2 = (float) i;
         int i2 = vESize.height;
-        float f3 = f2 / ((float) i2);
+        float f2 = ((float) i) / ((float) i2);
         int i3 = this.mSurfaceWidth;
-        float f4 = (float) i3;
         int i4 = this.mSurfaceHeight;
-        if (f3 > f4 / ((float) i4)) {
+        if (f2 > ((float) i3) / ((float) i4)) {
             this.mInitDisplayWidth = i3;
             this.mInitDisplayHeight = (int) (((float) i3) / (((float) i) / ((float) i2)));
             return;
@@ -1983,9 +1804,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int addAudioCleanFilter(int i, int i2, int i3, int i4) {
-        String str;
-        str = "audio cleaner";
-        return this.mVideoEditor.addFilters(new int[]{i}, new String[]{str}, new int[]{i3}, new int[]{i4}, new int[]{i2}, new int[]{1})[0];
+        return this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio cleaner"}, new int[]{i3}, new int[]{i4}, new int[]{i2}, new int[]{1})[0];
     }
 
     public synchronized int addAudioDRCFilter(int i, @NonNull float[] fArr, int i2, int i3) {
@@ -1994,16 +1813,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         }
         int[] addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio drc"}, new int[]{i2}, new int[]{i3}, new int[]{1}, new int[]{1});
         for (int i4 = 0; i4 < fArr.length; i4++) {
-            TEInterface tEInterface = this.mVideoEditor;
-            int i5 = addFilters[0];
-            StringBuilder sb = new StringBuilder();
-            sb.append("drc_params_");
-            sb.append(i4);
-            String sb2 = sb.toString();
-            StringBuilder sb3 = new StringBuilder();
-            sb3.append("");
-            sb3.append(fArr[i4]);
-            tEInterface.setFilterParam(i5, sb2, sb3.toString());
+            this.mVideoEditor.setFilterParam(addFilters[0], "drc_params_" + i4, "" + fArr[i4]);
         }
         return addFilters[0];
     }
@@ -2072,13 +1882,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             } else if (i2 <= i || i < 0) {
                 return -100;
             } else {
-                MonitorUtils.monitorStatistics("iesve_veeditor_import_music", 1, null);
+                MonitorUtils.monitorStatistics("iesve_veeditor_import_music", 1, (VEKeyValue) null);
                 int addTrack = this.mTrackIndexManager.addTrack(1, this.mVideoEditor.addAudioTrack(str, 0, i2 - i, i, i2, z));
-                String str2 = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("addAudioTrack... ");
-                sb.append(addTrack);
-                VELogUtil.w(str2, sb.toString());
+                VELogUtil.w(TAG, "addAudioTrack... " + addTrack);
                 return addTrack;
             }
         }
@@ -2114,20 +1920,18 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized int addEqualizer(int i, int i2, int i3, int i4, int i5) {
         int[] addFilters;
         addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio equalizer"}, new int[]{i4}, new int[]{i5}, new int[]{i2}, new int[]{1});
-        StringBuilder sb = new StringBuilder();
-        sb.append("");
-        sb.append(i3);
-        this.mVideoEditor.setFilterParam(addFilters[0], "preset_id", sb.toString());
+        TEInterface tEInterface = this.mVideoEditor;
+        int i6 = addFilters[0];
+        tEInterface.setFilterParam(i6, "preset_id", "" + i3);
         return addFilters[0];
     }
 
     public synchronized int addEqualizer(int i, VEEqualizerParams vEEqualizerParams, int i2, int i3) {
         int[] addFilters;
         addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio equalizer"}, new int[]{i2}, new int[]{i3}, new int[]{1}, new int[]{1});
-        StringBuilder sb = new StringBuilder();
-        sb.append("");
-        sb.append(vEEqualizerParams.getParamsAsString());
-        this.mVideoEditor.setFilterParam(addFilters[0], "equalizer_params", sb.toString());
+        TEInterface tEInterface = this.mVideoEditor;
+        int i4 = addFilters[0];
+        tEInterface.setFilterParam(i4, "equalizer_params", "" + vEEqualizerParams.getParamsAsString());
         return addFilters[0];
     }
 
@@ -2138,9 +1942,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             VELogUtil.w(TAG, "addSticker...");
             if (i5 <= i6 && i5 >= 0) {
                 if (!TextUtils.isEmpty(str)) {
-                    MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, null);
+                    MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, (VEKeyValue) null);
                     int[] iArr = {i5};
-                    int addSticker = this.mVideoEditor.addSticker(new String[]{str}, null, iArr, new int[]{i6}, new int[]{i3}, new int[]{i4}, (double) f4, (double) f5, (double) f2, (double) f3);
+                    int addSticker = this.mVideoEditor.addSticker(new String[]{str}, (String[]) null, iArr, new int[]{i6}, new int[]{i3}, new int[]{i4}, (double) f4, (double) f5, (double) f2, (double) f3);
                     return addSticker;
                 }
             }
@@ -2151,28 +1955,24 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized int addFFmpegPitchTempo(int i, float f2, float f3, int i2, int i3) {
         int[] addFilters;
         addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio ffmpeg pitch tempo"}, new int[]{i2}, new int[]{i3}, new int[]{1}, new int[]{1});
-        StringBuilder sb = new StringBuilder();
-        sb.append("");
-        sb.append(f2);
-        this.mVideoEditor.setFilterParam(addFilters[0], "pitch_scale", sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("");
-        sb2.append(f3);
-        this.mVideoEditor.setFilterParam(addFilters[0], "time_ratio", sb2.toString());
+        TEInterface tEInterface = this.mVideoEditor;
+        int i4 = addFilters[0];
+        tEInterface.setFilterParam(i4, "pitch_scale", "" + f2);
+        TEInterface tEInterface2 = this.mVideoEditor;
+        int i5 = addFilters[0];
+        tEInterface2.setFilterParam(i5, "time_ratio", "" + f3);
         return addFilters[0];
     }
 
     public synchronized int addFadeInFadeOut(int i, int i2, int i3, int i4, int i5, int i6) {
         int[] addFilters;
         addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio fading"}, new int[]{i3}, new int[]{i4}, new int[]{i2}, new int[]{1});
-        StringBuilder sb = new StringBuilder();
-        sb.append("");
-        sb.append(i5 * 1000);
-        this.mVideoEditor.setFilterParam(addFilters[0], "fade_int_length", sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("");
-        sb2.append(i6 * 1000);
-        this.mVideoEditor.setFilterParam(addFilters[0], "fade_out_length", sb2.toString());
+        TEInterface tEInterface = this.mVideoEditor;
+        int i7 = addFilters[0];
+        tEInterface.setFilterParam(i7, "fade_int_length", "" + (i5 * 1000));
+        TEInterface tEInterface2 = this.mVideoEditor;
+        int i8 = addFilters[0];
+        tEInterface2.setFilterParam(i8, "fade_out_length", "" + (i6 * 1000));
         return addFilters[0];
     }
 
@@ -2219,21 +2019,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         for (int i2 = 0; i2 < length; i2++) {
             this.mVideoEditor.setFilterParam(addFilters[i2], EFFECT_RES_PATH, strArr[i2]);
             this.mVideoEditor.setFilterParam(addFilters[i2], EFFECT_USE_AMAZING, zArr[i2] ? "true" : "false");
-            TEInterface tEInterface = this.mVideoEditor;
-            int i3 = addFilters[i2];
-            String str = EFFECT_STICKER_ID;
-            StringBuilder sb = new StringBuilder();
-            sb.append(iArr3[i2]);
-            sb.append("");
-            tEInterface.setFilterParam(i3, str, sb.toString());
-            TEInterface tEInterface2 = this.mVideoEditor;
-            int i4 = addFilters[i2];
-            String str2 = EFFECT_REQ_ID;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append(iArr4[i2]);
-            sb2.append("");
-            tEInterface2.setFilterParam(i4, str2, sb2.toString());
-            TEMonitorFilter tEMonitorFilter = new TEMonitorFilter();
+            this.mVideoEditor.setFilterParam(addFilters[i2], EFFECT_STICKER_ID, iArr3[i2] + "");
+            this.mVideoEditor.setFilterParam(addFilters[i2], EFFECT_REQ_ID, iArr4[i2] + "");
+            TEMonitorFilterMgr.TEMonitorFilter tEMonitorFilter = new TEMonitorFilterMgr.TEMonitorFilter();
             tEMonitorFilter.path = strArr[i2];
             tEMonitorFilter.start = iArr[i2];
             tEMonitorFilter.duration = iArr2[i2] - iArr[i2];
@@ -2247,7 +2035,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         if (TextUtils.isEmpty(str)) {
             return -100;
         }
-        MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, (VEKeyValue) null);
         return this.mVideoEditor.addInfoSticker(str, new String[]{String.valueOf(f2), String.valueOf(f3), String.valueOf(f4), String.valueOf(f5)});
     }
 
@@ -2257,11 +2045,11 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         if (TextUtils.isEmpty(str)) {
             return -100;
         }
-        MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, null);
+        MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, (VEKeyValue) null);
         synchronized (this) {
             addInfoSticker = this.mVideoEditor.addInfoSticker(str, strArr);
         }
-        TEMonitorFilter tEMonitorFilter = new TEMonitorFilter();
+        TEMonitorFilterMgr.TEMonitorFilter tEMonitorFilter = new TEMonitorFilterMgr.TEMonitorFilter();
         tEMonitorFilter.path = str;
         this.mTEMonitorFilterMgr.addFilter(1, addInfoSticker, tEMonitorFilter);
         return addInfoSticker;
@@ -2283,58 +2071,38 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized int addPitchTempo(int i, int i2, float f2, float f3, int i3, int i4) {
         int[] addFilters;
         addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio pitch tempo"}, new int[]{i3}, new int[]{i4}, new int[]{i2}, new int[]{1});
-        StringBuilder sb = new StringBuilder();
-        sb.append("");
-        sb.append(f2);
-        this.mVideoEditor.setFilterParam(addFilters[0], "pitch_scale", sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("");
-        sb2.append(f3);
-        this.mVideoEditor.setFilterParam(addFilters[0], "time_ratio", sb2.toString());
+        TEInterface tEInterface = this.mVideoEditor;
+        int i5 = addFilters[0];
+        tEInterface.setFilterParam(i5, "pitch_scale", "" + f2);
+        TEInterface tEInterface2 = this.mVideoEditor;
+        int i6 = addFilters[0];
+        tEInterface2.setFilterParam(i6, "time_ratio", "" + f3);
         return addFilters[0];
     }
 
     public synchronized int addRepeatEffect(int i, int i2, int i3, int i4, int i5) {
         synchronized (this) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("addRepeatEffect... ");
-            sb.append(i);
-            sb.append(" ");
-            sb.append(i2);
-            sb.append(" ");
-            sb.append(i3);
-            sb.append(" ");
-            sb.append(i4);
-            sb.append(" ");
-            sb.append(i5);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "addRepeatEffect... " + i + " " + i2 + " " + i3 + " " + i4 + " " + i5);
             int pauseSync = this.mVideoEditor.pauseSync();
             if (pauseSync == 0 || pauseSync == -101) {
                 int duration = getDuration();
                 int[] addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"timeEffect repeating"}, new int[]{i3}, new int[]{duration}, new int[]{i2}, new int[]{6});
                 this.mAudioEffectfilterIndex = addFilters[0];
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("");
-                sb2.append(i5);
-                this.mVideoEditor.setFilterParam(addFilters[0], "timeEffect repeating duration", sb2.toString());
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("");
-                sb3.append(i4);
-                this.mVideoEditor.setFilterParam(addFilters[0], "timeEffect repeating times", sb3.toString());
+                TEInterface tEInterface = this.mVideoEditor;
+                int i6 = addFilters[0];
+                tEInterface.setFilterParam(i6, "timeEffect repeating duration", "" + i5);
+                TEInterface tEInterface2 = this.mVideoEditor;
+                int i7 = addFilters[0];
+                tEInterface2.setFilterParam(i7, "timeEffect repeating times", "" + i4);
                 this.mVideoEditor.createTimeline();
                 VEKeyValue vEKeyValue = new VEKeyValue();
                 vEKeyValue.add("iesve_veeditor_time_effect_id", "repeat");
                 MonitorUtils.monitorStatistics("iesve_veeditor_time_effect", 1, vEKeyValue);
                 this.mTEMonitorFilterMgr.setTimeEffectType(1);
-                int i6 = addFilters[0];
-                return i6;
+                int i8 = addFilters[0];
+                return i8;
             }
-            String str2 = TAG;
-            StringBuilder sb4 = new StringBuilder();
-            sb4.append("pauseSync failed in addRepeatEffect, ret ");
-            sb4.append(pauseSync);
-            VELogUtil.e(str2, sb4.toString());
+            VELogUtil.e(TAG, "pauseSync failed in addRepeatEffect, ret " + pauseSync);
             return -1;
         }
     }
@@ -2349,15 +2117,10 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized int addReverb2(int i, VEReverb2Params vEReverb2Params, int i2, int i3) {
         int[] addFilters;
         addFilters = this.mVideoEditor.addFilters(new int[]{i}, new String[]{"audio reverb2"}, new int[]{i2}, new int[]{i3}, new int[]{1}, new int[]{1});
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("addReverb2...");
-        sb.append(addFilters[0]);
-        VELogUtil.w(str, sb.toString());
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("");
-        sb2.append(vEReverb2Params.getParamsAsString());
-        this.mVideoEditor.setFilterParam(addFilters[0], "reverb2_params", sb2.toString());
+        VELogUtil.w(TAG, "addReverb2..." + addFilters[0]);
+        TEInterface tEInterface = this.mVideoEditor;
+        int i4 = addFilters[0];
+        tEInterface.setFilterParam(i4, "reverb2_params", "" + vEReverb2Params.getParamsAsString());
         return addFilters[0];
     }
 
@@ -2372,13 +2135,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         }
         addFilters = this.mVideoEditor.addFilters(iArr, strArr, iArr3, iArr4, iArr2, iArr5);
         for (int i2 = 0; i2 < length; i2++) {
-            TEInterface tEInterface = this.mVideoEditor;
-            int i3 = addFilters[i2];
-            String str = AUDIO_VOLUME;
-            StringBuilder sb = new StringBuilder();
-            sb.append("");
-            sb.append(fArr[i2]);
-            tEInterface.setFilterParam(i3, str, sb.toString());
+            this.mVideoEditor.setFilterParam(addFilters[i2], AUDIO_VOLUME, "" + fArr[i2]);
         }
         return addFilters;
     }
@@ -2392,51 +2149,30 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         float f5 = f3;
         synchronized (this) {
             synchronized (this) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("addSlowMotionEffect... ");
-                sb.append(i5);
-                sb.append(" ");
-                sb.append(i6);
-                sb.append(" ");
-                sb.append(i7);
-                sb.append(" ");
-                sb.append(i8);
-                sb.append(" ");
-                sb.append(f4);
-                sb.append(" ");
-                sb.append(f5);
-                VELogUtil.w(str, sb.toString());
+                VELogUtil.w(TAG, "addSlowMotionEffect... " + i5 + " " + i6 + " " + i7 + " " + i8 + " " + f4 + " " + f5);
                 int pauseSync = this.mVideoEditor.pauseSync();
                 if (pauseSync == 0 || pauseSync == -101) {
                     int duration = getDuration();
                     int[] addFilters = this.mVideoEditor.addFilters(new int[]{i5}, new String[]{"timeEffect slow motion"}, new int[]{i7}, new int[]{duration}, new int[]{i6}, new int[]{6});
                     this.mAudioEffectfilterIndex = addFilters[0];
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append("");
-                    sb2.append(i8);
-                    this.mVideoEditor.setFilterParam(addFilters[0], "timeEffect slow motion duration", sb2.toString());
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("");
-                    sb3.append(f4);
-                    this.mVideoEditor.setFilterParam(addFilters[0], "timeEffect slow motion speed", sb3.toString());
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("");
-                    sb4.append(f5);
-                    this.mVideoEditor.setFilterParam(addFilters[0], "timeEffect fast motion speed", sb4.toString());
+                    TEInterface tEInterface = this.mVideoEditor;
+                    int i9 = addFilters[0];
+                    tEInterface.setFilterParam(i9, "timeEffect slow motion duration", "" + i8);
+                    TEInterface tEInterface2 = this.mVideoEditor;
+                    int i10 = addFilters[0];
+                    tEInterface2.setFilterParam(i10, "timeEffect slow motion speed", "" + f4);
+                    TEInterface tEInterface3 = this.mVideoEditor;
+                    int i11 = addFilters[0];
+                    tEInterface3.setFilterParam(i11, "timeEffect fast motion speed", "" + f5);
                     this.mVideoEditor.createTimeline();
                     VEKeyValue vEKeyValue = new VEKeyValue();
                     vEKeyValue.add("iesve_veeditor_time_effect_id", "slow");
                     MonitorUtils.monitorStatistics("iesve_veeditor_time_effect", 1, vEKeyValue);
                     this.mTEMonitorFilterMgr.setTimeEffectType(2);
-                    int i9 = addFilters[0];
-                    return i9;
+                    int i12 = addFilters[0];
+                    return i12;
                 }
-                String str2 = TAG;
-                StringBuilder sb5 = new StringBuilder();
-                sb5.append("pauseSync failed in addSlowMotionEffect, ret ");
-                sb5.append(pauseSync);
-                VELogUtil.e(str2, sb5.toString());
+                VELogUtil.e(TAG, "pauseSync failed in addSlowMotionEffect, ret " + pauseSync);
                 return -1;
             }
         }
@@ -2457,9 +2193,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             VELogUtil.w(TAG, "addSticker...");
             if (i5 <= i6 && i5 >= 0) {
                 if (!TextUtils.isEmpty(str)) {
-                    MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, null);
+                    MonitorUtils.monitorStatistics("iesve_veeditor_import_sticker", 1, (VEKeyValue) null);
                     int[] iArr = {i5};
-                    int addSticker = this.mVideoEditor.addSticker(new String[]{str}, null, iArr, new int[]{i6}, new int[]{i3}, new int[]{i4}, (double) f4, (double) f5, (double) f2, (double) f3);
+                    int addSticker = this.mVideoEditor.addSticker(new String[]{str}, (String[]) null, iArr, new int[]{i6}, new int[]{i3}, new int[]{i4}, (double) f4, (double) f5, (double) f2, (double) f3);
                     return addSticker;
                 }
             }
@@ -2471,7 +2207,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         int addWaterMark;
         synchronized (this) {
             VELogUtil.w(TAG, "addWaterMark...");
-            addWaterMark = this.mVideoEditor.addWaterMark(new String[]{str}, null, new int[]{0}, new int[]{this.mVideoEditor.getDuration()}, d4, d5, d2, d3);
+            addWaterMark = this.mVideoEditor.addWaterMark(new String[]{str}, (String[]) null, new int[]{0}, new int[]{this.mVideoEditor.getDuration()}, d4, d5, d2, d3);
         }
         return addWaterMark;
     }
@@ -2508,20 +2244,12 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         VELogUtil.i(TAG, "reInit...");
         int stop = this.mVideoEditor.stop();
         if (stop != 0) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("stop in changeRes failed, ret = ");
-            sb.append(stop);
-            VELogUtil.i(str, sb.toString());
+            VELogUtil.i(TAG, "stop in changeRes failed, ret = " + stop);
             return -1;
         }
         int init2 = init2(strArr, iArr, iArr2, strArr2, strArr3, iArr3, iArr4, video_ratio);
         if (init2 != 0) {
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("init2 in changeRes failed, ret = ");
-            sb2.append(init2);
-            VELogUtil.e(str2, sb2.toString());
+            VELogUtil.e(TAG, "init2 in changeRes failed, ret = " + init2);
             return init2;
         }
         this.mVideoEditor.createTimeline();
@@ -2533,20 +2261,12 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             VELogUtil.i(TAG, "reInit...");
             int stop = this.mVideoEditor.stop();
             if (stop != 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("stop in changeRes failed, ret = ");
-                sb.append(stop);
-                VELogUtil.i(str, sb.toString());
+                VELogUtil.i(TAG, "stop in changeRes failed, ret = " + stop);
                 return -1;
             }
-            int init2 = init2(strArr, iArr, iArr2, strArr2, strArr3, iArr3, iArr4, fArr, null, video_ratio);
+            int init2 = init2(strArr, iArr, iArr2, strArr2, strArr3, iArr3, iArr4, fArr, (ROTATE_DEGREE[]) null, video_ratio);
             if (init2 != 0) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("init2 in changeRes failed, ret = ");
-                sb2.append(init2);
-                VELogUtil.e(str2, sb2.toString());
+                VELogUtil.e(TAG, "init2 in changeRes failed, ret = " + init2);
                 return init2;
             }
             this.mVideoEditor.createTimeline();
@@ -2564,7 +2284,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         return _compile(str, str2, vEVideoEncodeSettings);
     }
 
-    public synchronized boolean compile(String str, String str2, VEVideoEncodeSettings vEVideoEncodeSettings, VEEditorCompileListener vEEditorCompileListener) throws VEException {
+    public synchronized boolean compile(String str, String str2, VEVideoEncodeSettings vEVideoEncodeSettings, VEListener.VEEditorCompileListener vEEditorCompileListener) throws VEException {
         this.mCompileListener = vEEditorCompileListener;
         return _compile(str, str2, vEVideoEncodeSettings);
     }
@@ -2572,11 +2292,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized int deleteAudioFilters(int[] iArr) {
         int removeFilter;
         synchronized (this) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("deleteAudioFilter...");
-            sb.append(iArr[0]);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "deleteAudioFilter..." + iArr[0]);
             removeFilter = this.mVideoEditor.removeFilter(iArr);
         }
         return removeFilter;
@@ -2604,11 +2320,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
 
     public synchronized int deleteRepeatEffect(int i) {
         synchronized (this) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("deleteRepeatEffect... ");
-            sb.append(i);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "deleteRepeatEffect... " + i);
             int pauseSync = this.mVideoEditor.pauseSync();
             if (pauseSync == 0 || pauseSync == -101) {
                 int removeFilter = this.mVideoEditor.removeFilter(new int[]{i});
@@ -2616,22 +2328,14 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 this.mVideoEditor.createTimeline();
                 return removeFilter;
             }
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("pauseSync failed, ret ");
-            sb2.append(pauseSync);
-            VELogUtil.i(str2, sb2.toString());
+            VELogUtil.i(TAG, "pauseSync failed, ret " + pauseSync);
             return -1;
         }
     }
 
     public synchronized int deleteSlowEffect(int i) {
         synchronized (this) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("deleteSlowEffect... ");
-            sb.append(i);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "deleteSlowEffect... " + i);
             int pauseSync = this.mVideoEditor.pauseSync();
             if (pauseSync == 0 || pauseSync == -101) {
                 int removeFilter = this.mVideoEditor.removeFilter(new int[]{i});
@@ -2639,11 +2343,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 this.mTEMonitorFilterMgr.setTimeEffectType(0);
                 return removeFilter;
             }
-            String str2 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("pauseSync failed, ret ");
-            sb2.append(pauseSync);
-            VELogUtil.w(str2, sb2.toString());
+            VELogUtil.w(TAG, "pauseSync failed, ret " + pauseSync);
             return -1;
         }
     }
@@ -2666,7 +2366,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     /* JADX WARNING: Code restructure failed: missing block: B:29:0x0072, code lost:
         return;
      */
-    @OnLifecycleEvent(Event.ON_DESTROY)
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public synchronized void destroy() {
         synchronized (this) {
             this.mInitSuccess = false;
@@ -2677,14 +2377,14 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             if (this.mSurfaceView != null) {
                 this.mSurfaceView.getHolder().removeCallback(this.mSurfaceCallback);
             } else if (this.mTextureView != null && this.mTextureView.getSurfaceTextureListener() == this.mTextureListener) {
-                this.mTextureView.setSurfaceTextureListener(null);
+                this.mTextureView.setSurfaceTextureListener((TextureView.SurfaceTextureListener) null);
             }
             this.mSurfaceView = null;
             this.mTextureView = null;
             if (this.mVideoEditor != null) {
-                this.mVideoEditor.setOpenGLListeners(null);
-                this.mVideoEditor.setInfoListener(null);
-                this.mVideoEditor.setErrorListener(null);
+                this.mVideoEditor.setOpenGLListeners((NativeCallbacks.IOpenGLCallback) null);
+                this.mVideoEditor.setInfoListener((TECommonCallback) null);
+                this.mVideoEditor.setErrorListener((TECommonCallback) null);
                 this.mVideoEditor.destroyEngine();
             }
             this.mResManager = null;
@@ -2707,7 +2407,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         if (i < 0 || i2 < 0) {
             return -100;
         }
-        TEMonitorFilter tEMonitorFilter = (TEMonitorFilter) this.mTEMonitorFilterMgr.effectMap.get(Integer.valueOf(i));
+        TEMonitorFilterMgr.TEMonitorFilter tEMonitorFilter = this.mTEMonitorFilterMgr.effectMap.get(Integer.valueOf(i));
         if (tEMonitorFilter != null) {
             tEMonitorFilter.duration = i2 - tEMonitorFilter.start;
         }
@@ -2748,29 +2448,21 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     this.mVideoEditor.setFilterParam(addFilters[0], EFFECT_USE_AMAZING, z ? "true" : "false");
                     TEInterface tEInterface = this.mVideoEditor;
                     int i4 = addFilters[0];
-                    String str2 = EFFECT_STICKER_ID;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(i2);
-                    sb.append("");
-                    tEInterface.setFilterParam(i4, str2, sb.toString());
+                    tEInterface.setFilterParam(i4, EFFECT_STICKER_ID, i2 + "");
                     TEInterface tEInterface2 = this.mVideoEditor;
                     int i5 = addFilters[0];
-                    String str3 = EFFECT_REQ_ID;
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(i3);
-                    sb2.append("");
-                    tEInterface2.setFilterParam(i5, str3, sb2.toString());
+                    tEInterface2.setFilterParam(i5, EFFECT_REQ_ID, i3 + "");
                     VEKeyValue vEKeyValue = new VEKeyValue();
-                    String str4 = "";
+                    String str2 = "";
                     if (!TextUtils.isEmpty(str)) {
                         String[] split = str.split(File.separator);
                         if (split.length > 0) {
-                            str4 = split[split.length - 1];
+                            str2 = split[split.length - 1];
                         }
                     }
-                    vEKeyValue.add("iesve_veeditor_filter_effect_id", str4);
+                    vEKeyValue.add("iesve_veeditor_filter_effect_id", str2);
                     MonitorUtils.monitorStatistics("iesve_veeditor_filter_effect", 1, vEKeyValue);
-                    TEMonitorFilter tEMonitorFilter = new TEMonitorFilter();
+                    TEMonitorFilterMgr.TEMonitorFilter tEMonitorFilter = new TEMonitorFilterMgr.TEMonitorFilter();
                     tEMonitorFilter.path = str;
                     tEMonitorFilter.start = i;
                     this.mTEMonitorFilterMgr.addFilter(0, addFilters[0], tEMonitorFilter);
@@ -2789,11 +2481,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
      */
     public synchronized int enableReversePlay(boolean z) {
         synchronized (this) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("enableReversePlay:");
-            sb.append(z);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "enableReversePlay:" + z);
             if (!this.mResManager.mReverseDone) {
                 VELogUtil.e(TAG, "enableReversePlay error: reverse video is not ready!");
                 return -100;
@@ -2803,33 +2491,19 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     this.mVideoEditor.stop();
                     int updateTrackClips = this.mVideoEditor.updateTrackClips(0, 0, z ? this.mResManager.mReverseVideoPath : this.mResManager.mVideoPaths);
                     if (updateTrackClips != 0) {
-                        String str2 = TAG;
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("Create Scene failed, ret = ");
-                        sb2.append(updateTrackClips);
-                        VELogUtil.e(str2, sb2.toString());
+                        VELogUtil.e(TAG, "Create Scene failed, ret = " + updateTrackClips);
                         return updateTrackClips;
                     }
                     if (!(this.mResManager.mReverseAudioPaths == null || this.mResManager.mOriginalSoundTrackType == 1)) {
                         this.mResManager.mOriginalSoundTrackIndex = this.mVideoEditor.addAudioTrack(this.mResManager.mReverseAudioPaths[0], 0, this.mVideoEditor.getDuration(), 0, this.mVideoEditor.getDuration(), false);
                         this.mResManager.mOriginalSoundTrackType = 1;
-                        String str3 = TAG;
-                        StringBuilder sb3 = new StringBuilder();
-                        sb3.append("add org audio track index ");
-                        sb3.append(this.mResManager.mOriginalSoundTrackIndex);
-                        sb3.append(" type ");
-                        sb3.append(this.mResManager.mOriginalSoundTrackType);
-                        VELogUtil.e(str3, sb3.toString());
+                        VELogUtil.e(TAG, "add org audio track index " + this.mResManager.mOriginalSoundTrackIndex + " type " + this.mResManager.mOriginalSoundTrackType);
                     }
                     this.mVideoEditor.updateTrackFilter(0, 0, z != this.mBReversePlay);
                     this.mVideoEditor.createTimeline();
                     int prepareEngine = this.mVideoEditor.prepareEngine(0);
                     if (prepareEngine != 0) {
-                        String str4 = TAG;
-                        StringBuilder sb4 = new StringBuilder();
-                        sb4.append("enableReversePlay() prepareEngine failed: result: ");
-                        sb4.append(prepareEngine);
-                        VELogUtil.e(str4, sb4.toString());
+                        VELogUtil.e(TAG, "enableReversePlay() prepareEngine failed: result: " + prepareEngine);
                         return prepareEngine;
                     }
                     this.mMusicSRTEffectFilterIndex = -1;
@@ -2849,11 +2523,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized void enableSimpleProcessor(boolean z) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("enableSimpleProcessor: ");
-        sb.append(String.valueOf(z));
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "enableSimpleProcessor: " + String.valueOf(z));
         this.mVideoEditor.enableSimpleProcessor(z);
     }
 
@@ -2862,11 +2532,10 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public int genReverseVideo() throws VEException {
-        String str = TAG;
-        VELogUtil.w(str, "genReverseVideo");
+        VELogUtil.w(TAG, "genReverseVideo");
         String[] strArr = this.mResManager.mVideoPaths;
         if (strArr == null || strArr.length <= 0) {
-            VELogUtil.e(str, "genReverseVideo error:invalid videoPaths");
+            VELogUtil.e(TAG, "genReverseVideo error:invalid videoPaths");
             return -100;
         }
         long currentTimeMillis = System.currentTimeMillis();
@@ -2880,17 +2549,14 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 String genReverseVideoPath = vEEditorResManager2.genReverseVideoPath(i);
                 int addFastReverseVideo = fFMpegInvoker.addFastReverseVideo(this.mResManager.mVideoPaths[i], genReverseVideoPath);
                 if (this.mCancelReverse) {
-                    VELogUtil.w(str, "genReverseVideo fail: cancel reverse");
+                    VELogUtil.w(TAG, "genReverseVideo fail: cancel reverse");
                     this.mCancelReverse = false;
                     return -1;
                 } else if (addFastReverseVideo == 0) {
                     this.mResManager.mReverseVideoPath[i] = genReverseVideoPath;
                     i++;
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("reverse mResManager.mVideoPaths[i] failed: ");
-                    sb.append(addFastReverseVideo);
-                    throw new VEException(-1, sb.toString());
+                    throw new VEException(-1, "reverse mResManager.mVideoPaths[i] failed: " + addFastReverseVideo);
                 }
             } else {
                 vEEditorResManager2.mReverseDone = true;
@@ -2912,18 +2578,11 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         return getCurrDisplayImage(-1);
     }
 
-    /* JADX INFO: used method not loaded: com.ss.android.vesdk.VELogUtil.e(java.lang.String, java.lang.String):null, types can be incorrect */
     /* JADX WARNING: Code restructure failed: missing block: B:23:0x0045, code lost:
         if (r3 == 0) goto L_0x005f;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:24:0x0047, code lost:
-        r6 = TAG;
-     */
     /* JADX WARNING: Code restructure failed: missing block: B:26:?, code lost:
-        r0 = new java.lang.StringBuilder();
-        r0.append("getDisplayImage failed ");
-        r0.append(r3);
-        com.ss.android.vesdk.VELogUtil.e(r6, r0.toString());
+        com.ss.android.vesdk.VELogUtil.e(TAG, "getDisplayImage failed " + r3);
      */
     /* JADX WARNING: Code restructure failed: missing block: B:27:0x005d, code lost:
         monitor-exit(r5);
@@ -2938,14 +2597,8 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     /* JADX WARNING: Code restructure failed: missing block: B:31:0x006e, code lost:
         r6 = move-exception;
      */
-    /* JADX WARNING: Code restructure failed: missing block: B:32:0x006f, code lost:
-        r0 = TAG;
-     */
     /* JADX WARNING: Code restructure failed: missing block: B:34:?, code lost:
-        r1 = new java.lang.StringBuilder();
-        r1.append("getDisplayImage createBitmap failed ");
-        r1.append(r6.getMessage());
-        com.ss.android.vesdk.VELogUtil.e(r0, r1.toString());
+        com.ss.android.vesdk.VELogUtil.e(TAG, "getDisplayImage createBitmap failed " + r6.getMessage());
      */
     /* JADX WARNING: Removed duplicated region for block: B:17:0x002a A[Catch:{ Exception -> 0x006e }] */
     /* JADX WARNING: Removed duplicated region for block: B:20:0x0030 A[Catch:{ Exception -> 0x006e }] */
@@ -2989,7 +2642,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         return this.mVideoEditor.getDuration();
     }
 
-    public synchronized int getImages(int[] iArr, int i, int i2, VEGetImageListener vEGetImageListener) {
+    public synchronized int getImages(int[] iArr, int i, int i2, VEListener.VEGetImageListener vEGetImageListener) {
         this.mGetImageListener = vEGetImageListener;
         this.mVideoEditor.setGetImageCallback(this.mGetImageCallback);
         return this.mVideoEditor.getImages(iArr, i, i2);
@@ -3031,8 +2684,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         synchronized (this) {
             VELogUtil.w(TAG, "getMetadata...");
             if (TextUtils.isEmpty(str)) {
-                String str2 = "";
-                return str2;
+                return "";
             }
             String metaData = this.mVideoEditor.getMetaData(str);
             return metaData;
@@ -3106,13 +2758,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             TEMonitor.initStats(1);
             this.mlLastTimeMS = System.currentTimeMillis();
             VELogUtil.i(TAG, "init...");
-            int createScene = this.mVideoEditor.createScene(this.mResManager.getWorkspace(), strArr, strArr3, strArr2, null, video_ratio.ordinal());
+            int createScene = this.mVideoEditor.createScene(this.mResManager.getWorkspace(), strArr, strArr3, strArr2, (String[][]) null, video_ratio.ordinal());
             if (createScene != 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Create Scene failed, ret = ");
-                sb.append(createScene);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "Create Scene failed, ret = " + createScene);
                 onMonitorError();
                 this.mInitSuccess = false;
                 return createScene;
@@ -3173,9 +2821,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                     isMVInit = true;
                     ArrayList arrayList = new ArrayList();
                     ArrayList arrayList2 = new ArrayList();
-                    List genMVResourceTracks = genMVResourceTracks(this.mvInfo, arrayList, arrayList2);
+                    List<List<List<MVResourceBean>>> genMVResourceTracks = genMVResourceTracks(this.mvInfo, arrayList, arrayList2);
                     if (genMVResourceTracks.size() != 0) {
-                        List<List> list = (List) genMVResourceTracks.get(0);
+                        List<List> list = genMVResourceTracks.get(0);
                         if (list.size() != 0) {
                             int size = ((List) list.get(0)).size();
                             int[] iArr = new int[size];
@@ -3184,14 +2832,11 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                             int[] iArr4 = new int[size];
                             String[] strArr5 = new String[size];
                             int[] iArr5 = new int[size];
-                            int[] iArr6 = iArr5;
-                            String[] strArr6 = strArr5;
-                            int[] iArr7 = iArr4;
-                            int[] iArr8 = iArr3;
-                            int[] iArr9 = iArr2;
-                            int[] iArr10 = iArr;
-                            genResourcesArr((List) list.get(0), iArr, iArr2, iArr3, iArr7, strArr6, iArr6);
-                            List<List> list2 = (List) genMVResourceTracks.get(1);
+                            int[] iArr6 = iArr3;
+                            int[] iArr7 = iArr2;
+                            int[] iArr8 = iArr;
+                            genResourcesArr((List) list.get(0), iArr, iArr2, iArr3, iArr5, strArr5, iArr4);
+                            List<List> list2 = genMVResourceTracks.get(1);
                             VIDEO_RATIO video_ratio = VIDEO_RATIO.VIDEO_OUT_RATIO_ORIGINAL;
                             float f2 = ((((float) this.mvInfo.width) * 1.0f) / ((float) this.mvInfo.height)) * 1.0f;
                             if (f2 == 1.0f) {
@@ -3206,13 +2851,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                                 video_ratio = VIDEO_RATIO.VIDEO_OUT_RATIO_9_16;
                             }
                             VIDEO_RATIO video_ratio2 = video_ratio;
-                            int createScene2 = this.mVideoEditor.createScene2(strArr6, iArr10, iArr9, iArr8, iArr7, null, null, null, null, null, iArr6, null, null, null, video_ratio2.ordinal());
+                            int createScene2 = this.mVideoEditor.createScene2(strArr5, iArr8, iArr7, iArr6, iArr5, (String[]) null, (int[]) null, (int[]) null, (int[]) null, (int[]) null, iArr4, (String[]) null, (String[][]) null, (float[]) null, video_ratio2.ordinal());
                             if (createScene2 != 0) {
-                                String str3 = TAG;
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("Create Scene failed, ret = ");
-                                sb.append(createScene2);
-                                VELogUtil.e(str3, sb.toString());
+                                VELogUtil.e(TAG, "Create Scene failed, ret = " + createScene2);
                                 onMonitorError();
                                 this.mInitSuccess = false;
                                 return createScene2;
@@ -3224,54 +2865,46 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                                     z2 = false;
                                 } else {
                                     int size2 = list3.size();
+                                    int[] iArr9 = new int[size2];
+                                    int[] iArr10 = new int[size2];
+                                    String[] strArr6 = new String[size2];
                                     int[] iArr11 = new int[size2];
                                     int[] iArr12 = new int[size2];
-                                    String[] strArr7 = new String[size2];
                                     int[] iArr13 = new int[size2];
-                                    int[] iArr14 = new int[size2];
-                                    int[] iArr15 = new int[size2];
-                                    int[] iArr16 = iArr12;
-                                    int[] iArr17 = iArr11;
-                                    int i = createScene2;
-                                    VIDEO_RATIO video_ratio3 = video_ratio2;
-                                    genResourcesArr(list3, iArr11, iArr12, iArr15, iArr14, strArr7, iArr13);
-                                    this.mVideoEditor.addVideoTrackForMV(strArr7, null, iArr15, iArr14, iArr17, iArr16, iArr13);
-                                    createScene2 = i;
-                                    video_ratio2 = video_ratio3;
+                                    genResourcesArr(list3, iArr9, iArr10, iArr13, iArr12, strArr6, iArr11);
+                                    this.mVideoEditor.addVideoTrackForMV(strArr6, (String[]) null, iArr13, iArr12, iArr9, iArr10, iArr11);
+                                    createScene2 = createScene2;
+                                    video_ratio2 = video_ratio2;
                                 }
                             }
-                            int i2 = createScene2;
-                            VIDEO_RATIO video_ratio4 = video_ratio2;
+                            int i = createScene2;
+                            VIDEO_RATIO video_ratio3 = video_ratio2;
                             for (List list4 : list2) {
                                 if (list4.size() != 0) {
-                                    int i3 = (int) ((MVResourceBean) list4.get(0)).trimIn;
-                                    int i4 = (int) ((MVResourceBean) list4.get(0)).trimOut;
-                                    int i5 = (int) ((MVResourceBean) list4.get(0)).seqIn;
-                                    int i6 = (int) ((MVResourceBean) list4.get(0)).seqOut;
-                                    String str4 = ((MVResourceBean) list4.get(0)).content;
-                                    int i7 = ((MVResourceBean) list4.get(0)).rid;
-                                    int addAudioTrackForMV = this.mVideoEditor.addAudioTrackForMV(str4, i5, i6, i3, i4, i7, true);
-                                    if (i7 == this.mMVBackgroundAudioRid) {
+                                    String str3 = ((MVResourceBean) list4.get(0)).content;
+                                    int i2 = ((MVResourceBean) list4.get(0)).rid;
+                                    int addAudioTrackForMV = this.mVideoEditor.addAudioTrackForMV(str3, (int) ((MVResourceBean) list4.get(0)).seqIn, (int) ((MVResourceBean) list4.get(0)).seqOut, (int) ((MVResourceBean) list4.get(0)).trimIn, (int) ((MVResourceBean) list4.get(0)).trimOut, i2, true);
+                                    if (i2 == this.mMVBackgroundAudioRid) {
                                         this.mMVBackgroundAudioTrackIndex = addAudioTrackForMV;
                                     }
                                 }
                             }
                             this.mInitSuccess = true;
                             this.mReverseDone = false;
-                            this.mVideoOutRes = video_ratio4;
+                            this.mVideoOutRes = video_ratio3;
                             this.mResManager.mAudioPaths = new String[arrayList2.size()];
                             this.mResManager.mVideoPaths = new String[arrayList2.size()];
                             arrayList2.toArray(this.mResManager.mAudioPaths);
                             arrayList.toArray(this.mResManager.mVideoPaths);
                             this.mResManager.mTransitions = null;
                             this.mMusicSRTEffectFilterIndex = -1;
-                            this.mbSeparateAV = Boolean.valueOf(false);
+                            this.mbSeparateAV = false;
                             this.mResManager.mOriginalSoundTrackType = 0;
                             this.mResManager.mOriginalSoundTrackIndex = 0;
                             this.mMasterTrackIndex = 0;
                             this.mVideoEditor.setWidthHeight(this.mvInfo.width, this.mvInfo.height);
                             this.mColorFilterIndex = this.mVideoEditor.addFilters(new int[]{0}, new String[]{"color filter"}, new int[]{0}, new int[]{this.mOutPoint}, new int[]{0}, new int[]{7})[0];
-                            return i2;
+                            return i;
                         }
                         throw new VEException(-1, "没有MV视频信息");
                     }
@@ -3298,13 +2931,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 TEMonitor.initStats(1);
                 this.mlLastTimeMS = System.currentTimeMillis();
                 VELogUtil.i(TAG, "init...");
-                int createImageScene = this.mVideoEditor.createImageScene(bitmapArr, iArr, iArr2, strArr2, iArr3, iArr4, strArr, null, fArr, video_ratio.ordinal());
+                int createImageScene = this.mVideoEditor.createImageScene(bitmapArr, iArr, iArr2, strArr2, iArr3, iArr4, strArr, (String[][]) null, fArr, video_ratio.ordinal());
                 if (createImageScene != 0) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Create Scene failed, ret = ");
-                    sb.append(createImageScene);
-                    VELogUtil.e(str, sb.toString());
+                    VELogUtil.e(TAG, "Create Scene failed, ret = " + createImageScene);
                     this.mInitSuccess = false;
                     return createImageScene;
                 }
@@ -3333,7 +2962,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         } catch (Throwable th) {
             throw th;
         }
-        return init2(strArr, iArr, iArr2, strArr2, strArr3, iArr3, iArr4, null, null, video_ratio);
+        return init2(strArr, iArr, iArr2, strArr2, strArr3, iArr3, iArr4, (float[]) null, (ROTATE_DEGREE[]) null, video_ratio);
     }
 
     /* JADX WARNING: Can't wrap try/catch for region: R(3:36|37|38) */
@@ -3352,13 +2981,9 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
                 TEMonitor.initStats(1);
                 this.mlLastTimeMS = System.currentTimeMillis();
                 VELogUtil.i(TAG, "init...");
-                int createScene2 = this.mVideoEditor.createScene2(strArr, iArr, iArr2, strArr3, iArr3, iArr4, strArr2, null, fArr, ROTATE_DEGREE.toIntArray(rotate_degreeArr), video_ratio.ordinal());
+                int createScene2 = this.mVideoEditor.createScene2(strArr, iArr, iArr2, strArr3, iArr3, iArr4, strArr2, (String[][]) null, fArr, ROTATE_DEGREE.toIntArray(rotate_degreeArr), video_ratio.ordinal());
                 if (createScene2 != 0) {
-                    String str = TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Create Scene failed, ret = ");
-                    sb.append(createScene2);
-                    VELogUtil.e(str, sb.toString());
+                    VELogUtil.e(TAG, "Create Scene failed, ret = " + createScene2);
                     onMonitorError();
                     this.mInitSuccess = false;
                     return createScene2;
@@ -3435,11 +3060,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             VELogUtil.w(TAG, "prepare...");
             prepareEngine = this.mVideoEditor.prepareEngine(0);
             if (prepareEngine != 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("prepare() prepareEngine failed: result: ");
-                sb.append(prepareEngine);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "prepare() prepareEngine failed: result: " + prepareEngine);
                 onMonitorError();
             }
             int[] initResolution = this.mVideoEditor.getInitResolution();
@@ -3499,11 +3120,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int removeInfoSticker(int i) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("removeInfoSticker... index: ");
-        sb.append(i);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "removeInfoSticker... index: " + i);
         if (i < 0) {
             return -100;
         }
@@ -3521,22 +3138,12 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized boolean restore(@NonNull VEEditorModel vEEditorModel) {
         String str = vEEditorModel.projectXML;
         if (!FileUtils.checkFileExists(str)) {
-            String str2 = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("projectXML not exists: ");
-            sb.append(str);
-            VELogUtil.e(str2, sb.toString());
+            VELogUtil.e(TAG, "projectXML not exists: " + str);
             return false;
         }
         int restore = this.mVideoEditor.restore(str);
         if (restore < 0) {
-            String str3 = TAG;
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("video editor restore failed: result: ");
-            sb2.append(restore);
-            sb2.append(", project xml: ");
-            sb2.append(str);
-            VELogUtil.e(str3, sb2.toString());
+            VELogUtil.e(TAG, "video editor restore failed: result: " + restore + ", project xml: " + str);
             return false;
         }
         this.mInPoint = vEEditorModel.inPoint;
@@ -3611,7 +3218,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         return this.mVideoEditor.seek(i, this.mSurfaceWidth, this.mSurfaceHeight, seek_mode.getValue());
     }
 
-    public synchronized int seek(int i, SEEK_MODE seek_mode, VEEditorSeekListener vEEditorSeekListener) {
+    public synchronized int seek(int i, SEEK_MODE seek_mode, VEListener.VEEditorSeekListener vEEditorSeekListener) {
         int seek;
         VELogUtil.w(TAG, "seek...");
         if ((seek_mode.getValue() | SEEK_MODE.EDITOR_SEEK_FLAG_LastSeek.getValue()) != 0) {
@@ -3619,11 +3226,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         }
         seek = this.mVideoEditor.seek(i, this.mSurfaceWidth, this.mSurfaceHeight, seek_mode.getValue());
         if (seek != 0) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("seek failed, result = ");
-            sb.append(seek);
-            VELogUtil.e(str, sb.toString());
+            VELogUtil.e(TAG, "seek failed, result = " + seek);
             this.mSeekListener = null;
         }
         return seek;
@@ -3673,7 +3276,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         return setColorFilter(str, str2, f2, f3, false);
     }
 
-    public synchronized void setCompileListener(VEEditorCompileListener vEEditorCompileListener, Looper looper) {
+    public synchronized void setCompileListener(VEListener.VEEditorCompileListener vEEditorCompileListener, Looper looper) {
         this.mCompileListener = vEEditorCompileListener;
         if (looper != null) {
             this.mMessageHandler = new VEEditorMessageHandler(looper);
@@ -3694,17 +3297,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized void setDisplayPos(int i, int i2, int i3, int i4) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setDisplayPos... ");
-        sb.append(i);
-        sb.append(" ");
-        sb.append(i2);
-        sb.append(" ");
-        sb.append(i3);
-        sb.append(" ");
-        sb.append(i4);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setDisplayPos... " + i + " " + i2 + " " + i3 + " " + i4);
         setDisplayState(((float) i3) / ((float) this.mInitDisplayWidth), ((float) i4) / ((float) this.mInitDisplayHeight), 0.0f, -(((this.mSurfaceWidth / 2) - (i3 / 2)) - i), ((this.mSurfaceHeight / 2) - (i4 / 2)) - i2);
     }
 
@@ -3715,19 +3308,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.rotate = f4;
         this.scaleW = f3;
         this.scaleH = f3;
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setDisplayState... ");
-        sb.append(f2);
-        sb.append(" ");
-        sb.append(f3);
-        sb.append(" ");
-        sb.append(f4);
-        sb.append(" ");
-        sb.append(i);
-        sb.append(" ");
-        sb.append(i2);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setDisplayState... " + f2 + " " + f3 + " " + f4 + " " + i + " " + i2);
         this.mVideoEditor.setDisplayState(f2, f3, f4, 0.0f, i, i2, false);
     }
 
@@ -3739,7 +3320,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         this.mVideoEditor.setDleEnabled(z);
     }
 
-    public synchronized int setEffectListener(VEEditorEffectListener vEEditorEffectListener) {
+    public synchronized int setEffectListener(VEListener.VEEditorEffectListener vEEditorEffectListener) {
         TEEffectCallback tEEffectCallback = new TEEffectCallback();
         tEEffectCallback.setListener(vEEditorEffectListener);
         VERuntime.getInstance().setEffectCallback(tEEffectCallback);
@@ -3755,23 +3336,13 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setFileRotate(int i, int i2, ROTATE_DEGREE rotate_degree) {
-        StringBuilder sb;
-        String str = TAG;
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append("setFileRotate...");
-        sb2.append(i);
-        sb2.append(" ");
-        sb2.append(i2);
-        sb2.append(" ");
-        sb2.append(rotate_degree);
-        VELogUtil.i(str, sb2.toString());
-        sb = new StringBuilder();
-        sb.append("");
-        sb.append(rotate_degree.ordinal());
-        return this.mVideoEditor.setClipAttr(0, i, i2, "clip rotate", sb.toString());
+        TEInterface tEInterface;
+        VELogUtil.i(TAG, "setFileRotate..." + i + " " + i2 + " " + rotate_degree);
+        tEInterface = this.mVideoEditor;
+        return tEInterface.setClipAttr(0, i, i2, "clip rotate", "" + rotate_degree.ordinal());
     }
 
-    public synchronized void setFirstFrameListener(VEFirstFrameListener vEFirstFrameListener) {
+    public synchronized void setFirstFrameListener(VEListener.VEFirstFrameListener vEFirstFrameListener) {
         this.mFirstFrameListener = vEFirstFrameListener;
     }
 
@@ -3781,13 +3352,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             VEKeyValue vEKeyValue = new VEKeyValue();
             vEKeyValue.add("iesve_veeditor_cut_duration", i2 - i);
             MonitorUtils.monitorStatistics("iesve_veeditor_cut_duration", 1, vEKeyValue);
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setInOut... ");
-            sb.append(i);
-            sb.append(" ");
-            sb.append(i2);
-            VELogUtil.i(str, sb.toString());
+            VELogUtil.i(TAG, "setInOut... " + i + " " + i2);
             this.mVideoEditor.stop();
             this.mVideoEditor.setTimeRange(i, i2, 0);
             prepareEngine = this.mVideoEditor.prepareEngine(0);
@@ -3801,15 +3366,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             VEKeyValue vEKeyValue = new VEKeyValue();
             vEKeyValue.add("iesve_veeditor_cut_duration", i2 - i);
             MonitorUtils.monitorStatistics("iesve_veeditor_cut_duration", 1, vEKeyValue);
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setInOut... ");
-            sb.append(i);
-            sb.append(" ");
-            sb.append(i2);
-            sb.append(" mode ");
-            sb.append(set_range_mode.getValue());
-            VELogUtil.i(str, sb.toString());
+            VELogUtil.i(TAG, "setInOut... " + i + " " + i2 + " mode " + set_range_mode.getValue());
             this.mVideoEditor.stop();
             this.mVideoEditor.setTimeRange(i, i2, set_range_mode.getValue());
             prepareEngine = this.mVideoEditor.prepareEngine(0);
@@ -3818,13 +3375,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setInfoStickerAlpha(int i, float f2) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setInfoStickerAlpha... index: ");
-        sb.append(i);
-        sb.append("alpha: ");
-        sb.append(f2);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setInfoStickerAlpha... index: " + i + "alpha: " + f2);
         if (i < 0) {
             return -100;
         }
@@ -3836,13 +3387,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setInfoStickerLayer(int i, int i2) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setInfoStickerLayer... index: ");
-        sb.append(i);
-        sb.append("layer: ");
-        sb.append(i2);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setInfoStickerLayer... index: " + i + "layer: " + i2);
         if (i < 0) {
             return -100;
         }
@@ -3850,15 +3395,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setInfoStickerPosition(int i, float f2, float f3) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setInfoStickerPosition... index: ");
-        sb.append(i);
-        sb.append("offsetX: ");
-        sb.append(f2);
-        sb.append("offsetY: ");
-        sb.append(f3);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setInfoStickerPosition... index: " + i + "offsetX: " + f2 + "offsetY: " + f3);
         if (i < 0) {
             return -100;
         }
@@ -3866,13 +3403,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setInfoStickerRotation(int i, float f2) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setInfoStickerRotation... index: ");
-        sb.append(i);
-        sb.append("degree: ");
-        sb.append(f2);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setInfoStickerRotation... index: " + i + "degree: " + f2);
         if (i < 0) {
             return -100;
         }
@@ -3880,13 +3411,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setInfoStickerScale(int i, float f2) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setInfoStickerScale... index: ");
-        sb.append(i);
-        sb.append("scale: ");
-        sb.append(f2);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setInfoStickerScale... index: " + i + "scale: " + f2);
         if (i < 0) {
             return -100;
         }
@@ -3894,19 +3419,11 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setInfoStickerTime(int i, int i2, int i3) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setInfoStickerTime... index: ");
-        sb.append(i);
-        sb.append("startTime: ");
-        sb.append(i2);
-        sb.append("endTime: ");
-        sb.append(i3);
-        VELogUtil.i(str, sb.toString());
+        VELogUtil.i(TAG, "setInfoStickerTime... index: " + i + "startTime: " + i2 + "endTime: " + i3);
         if (i < 0) {
             return -100;
         }
-        TEMonitorFilter tEMonitorFilter = (TEMonitorFilter) this.mTEMonitorFilterMgr.infoStickerMap.get(Integer.valueOf(i));
+        TEMonitorFilterMgr.TEMonitorFilter tEMonitorFilter = this.mTEMonitorFilterMgr.infoStickerMap.get(Integer.valueOf(i));
         if (tEMonitorFilter != null) {
             tEMonitorFilter.start = i2;
             tEMonitorFilter.duration = i3 - i2;
@@ -4019,11 +3536,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     }
 
     public synchronized int setSpeedRatioAndUpdate(float f2) {
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("setSpeedRatioAndUpdate ");
-        sb.append(f2);
-        VELogUtil.w(str, sb.toString());
+        VELogUtil.w(TAG, "setSpeedRatioAndUpdate " + f2);
         this.mVideoEditor.stop();
         if (f2 > 3.0f) {
             f2 = 3.0f;
@@ -4068,7 +3581,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         }
     }
 
-    public synchronized void setVEEncoderListener(VEEncoderListener vEEncoderListener) {
+    public synchronized void setVEEncoderListener(VEListener.VEEncoderListener vEEncoderListener) {
         this.mEncoderListener = vEEncoderListener;
     }
 
@@ -4080,13 +3593,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
     public synchronized boolean setVolume(int i, int i2, float f2) {
         boolean trackVolume;
         synchronized (this) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("setVolume... index ");
-            sb.append(i);
-            sb.append(" type ");
-            sb.append(i2);
-            VELogUtil.w(str, sb.toString());
+            VELogUtil.w(TAG, "setVolume... index " + i + " type " + i2);
             trackVolume = this.mVideoEditor.setTrackVolume(i2, this.mTrackIndexManager.getNativeTrackIndex(1, i), f2);
         }
         return trackVolume;
@@ -4167,11 +3674,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mVideoEditor.stop();
             int updateSceneFileOrder = this.mVideoEditor.updateSceneFileOrder(vETimelineParams);
             if (updateSceneFileOrder < 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("updateSceneFileOrder failed, ret = ");
-                sb.append(updateSceneFileOrder);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "updateSceneFileOrder failed, ret = " + updateSceneFileOrder);
                 return updateSceneFileOrder;
             }
             this.mMasterTrackIndex = vETimelineParams.videoFileIndex[0];
@@ -4179,11 +3682,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mVideoEditor.setTimeRange(0, updateSceneFileOrder, 0);
             int prepareEngine = this.mVideoEditor.prepareEngine(0);
             if (prepareEngine != 0) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Prepare Engine failed, ret = ");
-                sb2.append(prepareEngine);
-                VELogUtil.e(str2, sb2.toString());
+                VELogUtil.e(TAG, "Prepare Engine failed, ret = " + prepareEngine);
                 return prepareEngine;
             }
             return 0;
@@ -4196,22 +3695,14 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mVideoEditor.stop();
             int updateSenceTime = this.mVideoEditor.updateSenceTime(vETimelineParams);
             if (updateSenceTime < 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("updateSceneTime failed, ret = ");
-                sb.append(updateSenceTime);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "updateSceneTime failed, ret = " + updateSenceTime);
                 return updateSenceTime;
             }
             this.mMasterTrackIndex = 0;
             this.mVideoEditor.setTimeRange(0, updateSenceTime, 0);
             int prepareEngine = this.mVideoEditor.prepareEngine(0);
             if (prepareEngine != 0) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Prepare Engine failed, ret = ");
-                sb2.append(prepareEngine);
-                VELogUtil.e(str2, sb2.toString());
+                VELogUtil.e(TAG, "Prepare Engine failed, ret = " + prepareEngine);
                 return prepareEngine;
             }
             return 0;
@@ -4224,22 +3715,14 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mVideoEditor.stop();
             int updateSenceTime = this.mVideoEditor.updateSenceTime(vETimelineParams);
             if (updateSenceTime < 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("updateSceneTime failed, ret = ");
-                sb.append(updateSenceTime);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "updateSceneTime failed, ret = " + updateSenceTime);
                 return updateSenceTime;
             }
             this.mMasterTrackIndex = 0;
             this.mVideoEditor.setTimeRange(i, i2, 0);
             int prepareEngine = this.mVideoEditor.prepareEngine(0);
             if (prepareEngine != 0) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Prepare Engine failed, ret = ");
-                sb2.append(prepareEngine);
-                VELogUtil.e(str2, sb2.toString());
+                VELogUtil.e(TAG, "Prepare Engine failed, ret = " + prepareEngine);
                 return prepareEngine;
             }
             return 0;
@@ -4256,12 +3739,7 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
         if (f2 > 1.0f) {
             f2 = 1.0f;
         }
-        TEInterface tEInterface = this.mVideoEditor;
-        String str = AUDIO_VOLUME;
-        StringBuilder sb = new StringBuilder();
-        sb.append("");
-        sb.append(f2);
-        return tEInterface.setFilterParam(i, str, sb.toString());
+        return this.mVideoEditor.setFilterParam(i, AUDIO_VOLUME, "" + f2);
     }
 
     public synchronized int updateVideoClips(String[] strArr, int[] iArr, int[] iArr2) {
@@ -4272,22 +3750,14 @@ public class VEEditor implements OnFrameAvailableListener, LifecycleObserver {
             this.mMusicSRTEffectFilterIndex = -1;
             int updateScene = this.mVideoEditor.updateScene(strArr, iArr, iArr2);
             if (updateScene != 0) {
-                String str = TAG;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Create Scene failed, ret = ");
-                sb.append(updateScene);
-                VELogUtil.e(str, sb.toString());
+                VELogUtil.e(TAG, "Create Scene failed, ret = " + updateScene);
             }
             this.mResManager.mVideoPaths = strArr;
             this.mMasterTrackIndex = 0;
             this.mVideoEditor.createTimeline();
             int prepareEngine = this.mVideoEditor.prepareEngine(0);
             if (prepareEngine != 0) {
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Prepare Engine failed, ret = ");
-                sb2.append(prepareEngine);
-                VELogUtil.e(str2, sb2.toString());
+                VELogUtil.e(TAG, "Prepare Engine failed, ret = " + prepareEngine);
                 return prepareEngine;
             }
             seek(0, SEEK_MODE.EDITOR_SEEK_FLAG_LastSeek);

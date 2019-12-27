@@ -2,11 +2,10 @@ package com.ss.android.vesdk;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import io.reactivex.annotations.SchedulerSupport;
 
 public class VEEqualizerParams implements Parcelable {
-    public static final Creator<VEEqualizerParams> CREATOR = new Creator<VEEqualizerParams>() {
+    public static final Parcelable.Creator<VEEqualizerParams> CREATOR = new Parcelable.Creator<VEEqualizerParams>() {
         public VEEqualizerParams createFromParcel(Parcel parcel) {
             return new VEEqualizerParams(parcel);
         }
@@ -319,103 +318,11 @@ public class VEEqualizerParams implements Parcelable {
     }
 
     public String getParamsAsString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.name);
-        String str = ",";
-        sb.append(str);
-        sb.append(this.preamp);
-        sb.append(str);
-        sb.append(this.freqWidth31);
-        sb.append(str);
-        sb.append(this.freqWidth63);
-        sb.append(str);
-        sb.append(this.freqWidth125);
-        sb.append(str);
-        sb.append(this.freqWidth250);
-        sb.append(str);
-        sb.append(this.freqWidth500);
-        sb.append(str);
-        sb.append(this.freqWidth1000);
-        sb.append(str);
-        sb.append(this.freqWidth2000);
-        sb.append(str);
-        sb.append(this.freqWidth4000);
-        sb.append(str);
-        sb.append(this.freqWidth8000);
-        sb.append(str);
-        sb.append(this.freqWidth16000);
-        sb.append(str);
-        sb.append(this.amp31);
-        sb.append(str);
-        sb.append(this.amp63);
-        sb.append(str);
-        sb.append(this.amp125);
-        sb.append(str);
-        sb.append(this.amp250);
-        sb.append(str);
-        sb.append(this.amp500);
-        sb.append(str);
-        sb.append(this.amp1000);
-        sb.append(str);
-        sb.append(this.amp2000);
-        sb.append(str);
-        sb.append(this.amp4000);
-        sb.append(str);
-        sb.append(this.amp8000);
-        sb.append(str);
-        sb.append(this.amp16000);
-        return sb.toString();
+        return this.name + "," + this.preamp + "," + this.freqWidth31 + "," + this.freqWidth63 + "," + this.freqWidth125 + "," + this.freqWidth250 + "," + this.freqWidth500 + "," + this.freqWidth1000 + "," + this.freqWidth2000 + "," + this.freqWidth4000 + "," + this.freqWidth8000 + "," + this.freqWidth16000 + "," + this.amp31 + "," + this.amp63 + "," + this.amp125 + "," + this.amp250 + "," + this.amp500 + "," + this.amp1000 + "," + this.amp2000 + "," + this.amp4000 + "," + this.amp8000 + "," + this.amp16000;
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("VEEqualizerParams{name='");
-        sb.append(this.name);
-        sb.append('\'');
-        sb.append(", preamp=");
-        sb.append(this.preamp);
-        sb.append(", amp31=");
-        sb.append(this.amp31);
-        sb.append(", amp63=");
-        sb.append(this.amp63);
-        sb.append(", amp125=");
-        sb.append(this.amp125);
-        sb.append(", amp250=");
-        sb.append(this.amp250);
-        sb.append(", amp500=");
-        sb.append(this.amp500);
-        sb.append(", amp1000=");
-        sb.append(this.amp1000);
-        sb.append(", amp2000=");
-        sb.append(this.amp2000);
-        sb.append(", amp4000=");
-        sb.append(this.amp4000);
-        sb.append(", amp8000=");
-        sb.append(this.amp8000);
-        sb.append(", amp16000=");
-        sb.append(this.amp16000);
-        sb.append(", freqWidth31=");
-        sb.append(this.freqWidth31);
-        sb.append(", freqWidth63=");
-        sb.append(this.freqWidth63);
-        sb.append(", freqWidth125=");
-        sb.append(this.freqWidth125);
-        sb.append(", freqWidth250=");
-        sb.append(this.freqWidth250);
-        sb.append(", freqWidth500=");
-        sb.append(this.freqWidth500);
-        sb.append(", freqWidth1000=");
-        sb.append(this.freqWidth1000);
-        sb.append(", freqWidth2000=");
-        sb.append(this.freqWidth2000);
-        sb.append(", freqWidth4000=");
-        sb.append(this.freqWidth4000);
-        sb.append(", freqWidth8000=");
-        sb.append(this.freqWidth8000);
-        sb.append(", freqWidth16000=");
-        sb.append(this.freqWidth16000);
-        sb.append('}');
-        return sb.toString();
+        return "VEEqualizerParams{name='" + this.name + '\'' + ", preamp=" + this.preamp + ", amp31=" + this.amp31 + ", amp63=" + this.amp63 + ", amp125=" + this.amp125 + ", amp250=" + this.amp250 + ", amp500=" + this.amp500 + ", amp1000=" + this.amp1000 + ", amp2000=" + this.amp2000 + ", amp4000=" + this.amp4000 + ", amp8000=" + this.amp8000 + ", amp16000=" + this.amp16000 + ", freqWidth31=" + this.freqWidth31 + ", freqWidth63=" + this.freqWidth63 + ", freqWidth125=" + this.freqWidth125 + ", freqWidth250=" + this.freqWidth250 + ", freqWidth500=" + this.freqWidth500 + ", freqWidth1000=" + this.freqWidth1000 + ", freqWidth2000=" + this.freqWidth2000 + ", freqWidth4000=" + this.freqWidth4000 + ", freqWidth8000=" + this.freqWidth8000 + ", freqWidth16000=" + this.freqWidth16000 + '}';
     }
 
     public void writeToParcel(Parcel parcel, int i) {

@@ -9,14 +9,13 @@ import android.content.ContentProvider;
 import android.content.Intent;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 
 @RequiresApi(api = 28)
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class CoreComponentFactory extends AppComponentFactory {
     private static final String TAG = "CoreComponentFactory";
 
-    @RestrictTo({Scope.LIBRARY_GROUP})
+    @RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
     public interface CompatWrapped {
         Object getWrapper();
     }

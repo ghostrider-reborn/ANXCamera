@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextUtils;
@@ -29,9 +27,9 @@ public class CameraSnapPaintCenterVV extends CameraPaintBase {
         obtainStyledAttributes.recycle();
         this.mTextPaint = new Paint();
         this.mTextPaint.setColor(color);
-        this.mTextPaint.setStyle(Style.FILL);
+        this.mTextPaint.setStyle(Paint.Style.FILL);
         this.mTextPaint.setTextSize((float) context.getResources().getDimensionPixelSize(R.dimen.vv_progress_center_text));
-        this.mTextPaint.setTextAlign(Align.LEFT);
+        this.mTextPaint.setTextAlign(Paint.Align.LEFT);
         this.mTextPaint.setAntiAlias(true);
         this.mTextPaint.setAlpha(255);
         this.mTextBound = new Rect();
@@ -41,15 +39,14 @@ public class CameraSnapPaintCenterVV extends CameraPaintBase {
     public void draw(Canvas canvas) {
         float f2 = this.mBaseRadius * this.mCurrentRoundRectRadius;
         float f3 = this.mMiddleX;
-        float f4 = f3 - f2;
-        float f5 = f3 + f2;
-        float f6 = this.mMiddleY;
-        this.mRectF.set(f4, f6 - f2, f5, f6 + f2);
+        float f4 = this.mMiddleY;
+        RectF rectF = this.mRectF;
+        rectF.set(f3 - f2, f4 - f2, f3 + f2, f4 + f2);
         this.mPaint.setColor(-1417668);
         if (!this.isRecording) {
-            RectF rectF = this.mRectF;
-            float f7 = this.mRoundingProgress;
-            canvas.drawRoundRect(rectF, f2 * f7, f2 * f7, this.mPaint);
+            RectF rectF2 = this.mRectF;
+            float f5 = this.mRoundingProgress;
+            canvas.drawRoundRect(rectF2, f2 * f5, f2 * f5, this.mPaint);
         }
         if (!TextUtils.isEmpty(this.mDurationText)) {
             Paint paint = this.mTextPaint;
@@ -62,7 +59,7 @@ public class CameraSnapPaintCenterVV extends CameraPaintBase {
     /* access modifiers changed from: protected */
     public void initPaint(Context context) {
         this.mPaint.setAntiAlias(true);
-        this.mPaint.setStyle(Style.FILL);
+        this.mPaint.setStyle(Paint.Style.FILL);
         this.mRectF = new RectF();
     }
 

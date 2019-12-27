@@ -44,10 +44,7 @@ public abstract class RequestBody {
             charset = mediaType.charset();
             if (charset == null) {
                 charset = Util.UTF_8;
-                StringBuilder sb = new StringBuilder();
-                sb.append(mediaType);
-                sb.append("; charset=utf-8");
-                mediaType = MediaType.parse(sb.toString());
+                mediaType = MediaType.parse(mediaType + "; charset=utf-8");
             }
         }
         return create(mediaType, str.getBytes(charset));

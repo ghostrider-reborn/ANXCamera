@@ -8,8 +8,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
 abstract class AbstractDirectTask extends AtomicReference<Future<?>> implements Disposable, SchedulerRunnableIntrospection {
-    protected static final FutureTask<Void> DISPOSED = new FutureTask<>(Functions.EMPTY_RUNNABLE, null);
-    protected static final FutureTask<Void> FINISHED = new FutureTask<>(Functions.EMPTY_RUNNABLE, null);
+    protected static final FutureTask<Void> DISPOSED = new FutureTask<>(Functions.EMPTY_RUNNABLE, (Object) null);
+    protected static final FutureTask<Void> FINISHED = new FutureTask<>(Functions.EMPTY_RUNNABLE, (Object) null);
     private static final long serialVersionUID = 1811839108042568751L;
     protected final Runnable runnable;
     protected Thread runner;

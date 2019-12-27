@@ -1,10 +1,10 @@
 package androidx.versionedparcelable;
 
 import android.os.Parcel;
-import android.os.Parcelable.Creator;
+import android.os.Parcelable;
 
 /* compiled from: ParcelImpl */
-class d implements Creator<ParcelImpl> {
+class d implements Parcelable.Creator<ParcelImpl> {
     d() {
     }
 

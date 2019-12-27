@@ -19,12 +19,8 @@ class e extends BroadcastReceiver {
         boolean z = fVar.isConnected;
         fVar.isConnected = fVar.isConnected(context);
         if (z != this.this$0.isConnected) {
-            String str = "ConnectivityMonitor";
-            if (Log.isLoggable(str, 3)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("connectivity changed, isConnected: ");
-                sb.append(this.this$0.isConnected);
-                Log.d(str, sb.toString());
+            if (Log.isLoggable("ConnectivityMonitor", 3)) {
+                Log.d("ConnectivityMonitor", "connectivity changed, isConnected: " + this.this$0.isConnected);
             }
             f fVar2 = this.this$0;
             fVar2.listener.d(fVar2.isConnected);

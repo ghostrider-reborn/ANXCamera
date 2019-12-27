@@ -15,7 +15,7 @@ public final class ObservableIgnoreElementsCompletable<T> extends Completable im
     static final class IgnoreObservable<T> implements Observer<T>, Disposable {
         final CompletableObserver actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f319d;
 
         IgnoreObservable(CompletableObserver completableObserver) {
@@ -52,7 +52,7 @@ public final class ObservableIgnoreElementsCompletable<T> extends Completable im
     }
 
     public Observable<T> fuseToObservable() {
-        return RxJavaPlugins.onAssembly((Observable<T>) new ObservableIgnoreElements<T>(this.source));
+        return RxJavaPlugins.onAssembly(new ObservableIgnoreElements(this.source));
     }
 
     public void subscribeActual(CompletableObserver completableObserver) {

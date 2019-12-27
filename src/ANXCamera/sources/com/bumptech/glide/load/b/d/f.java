@@ -34,17 +34,12 @@ public class f {
         if (cls2.isAssignableFrom(cls)) {
             return g.get();
         }
-        for (a aVar : this.ck) {
-            if (aVar.c(cls, cls2)) {
-                return aVar.hf;
+        for (a next : this.ck) {
+            if (next.c(cls, cls2)) {
+                return next.hf;
             }
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("No transcoder registered to transcode from ");
-        sb.append(cls);
-        sb.append(" to ");
-        sb.append(cls2);
-        throw new IllegalArgumentException(sb.toString());
+        throw new IllegalArgumentException("No transcoder registered to transcode from " + cls + " to " + cls2);
     }
 
     @NonNull
@@ -54,7 +49,7 @@ public class f {
             arrayList.add(cls2);
             return arrayList;
         }
-        for (a c2 : this.ck) {
+        for (a<?, ?> c2 : this.ck) {
             if (c2.c(cls, cls2)) {
                 arrayList.add(cls2);
             }

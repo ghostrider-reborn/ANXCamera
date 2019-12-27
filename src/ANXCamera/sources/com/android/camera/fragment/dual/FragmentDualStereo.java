@@ -1,15 +1,12 @@
 package com.android.camera.fragment.dual;
 
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import com.android.camera.data.data.ComponentData;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.manually.ManuallyListener;
-import com.android.camera.protocol.ModeProtocol.DualController;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
+import com.android.camera.protocol.ModeProtocol;
 
-public class FragmentDualStereo extends BaseFragment implements OnClickListener, OnLongClickListener, ManuallyListener, HandleBackTrace, DualController {
+public class FragmentDualStereo extends BaseFragment implements View.OnClickListener, View.OnLongClickListener, ManuallyListener, ModeProtocol.HandleBackTrace, ModeProtocol.DualController {
     public static final int FRAGMENT_INFO = 4085;
 
     public int getFragmentInto() {

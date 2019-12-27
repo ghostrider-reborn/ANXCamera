@@ -12,7 +12,6 @@ public final class Header {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (this == obj) {
             return true;
         }
@@ -20,10 +19,7 @@ public final class Header {
             return false;
         }
         Header header = (Header) obj;
-        if (!TextUtils.equals(this.mName, header.mName) || !TextUtils.equals(this.mValue, header.mValue)) {
-            z = false;
-        }
-        return z;
+        return TextUtils.equals(this.mName, header.mName) && TextUtils.equals(this.mValue, header.mValue);
     }
 
     public final String getName() {
@@ -39,12 +35,6 @@ public final class Header {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Header[name=");
-        sb.append(this.mName);
-        sb.append(",value=");
-        sb.append(this.mValue);
-        sb.append("]");
-        return sb.toString();
+        return "Header[name=" + this.mName + ",value=" + this.mValue + "]";
     }
 }

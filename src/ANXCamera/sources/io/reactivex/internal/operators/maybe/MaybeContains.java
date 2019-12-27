@@ -16,7 +16,7 @@ public final class MaybeContains<T> extends Single<Boolean> implements HasUpstre
     static final class ContainsMaybeObserver implements MaybeObserver<Object>, Disposable {
         final SingleObserver<? super Boolean> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f278d;
         final Object value;
 
@@ -36,7 +36,7 @@ public final class MaybeContains<T> extends Single<Boolean> implements HasUpstre
 
         public void onComplete() {
             this.f278d = DisposableHelper.DISPOSED;
-            this.actual.onSuccess(Boolean.valueOf(false));
+            this.actual.onSuccess(false);
         }
 
         public void onError(Throwable th) {

@@ -1,6 +1,6 @@
 package com.android.camera.constant;
 
-import android.hardware.camera2.CaptureRequest.Key;
+import android.hardware.camera2.CaptureRequest;
 import com.android.camera.CameraSettings;
 import com.android.camera.Util;
 import com.android.camera.module.ModuleManager;
@@ -15,15 +15,15 @@ import java.util.Map;
 public class BeautyConstant {
     public static final int AI_HUMAN_BEAUTY_SMOOTH_LEVEL = 10;
     public static final String[] BEAUTY_CATEGORY_BACK_FIGURE = {"pref_beauty_whole_body_slim_ratio", "key_beauty_leg_slim_ratio", "pref_beauty_head_slim_ratio", "pref_beauty_body_slim_ratio", "pref_beauty_shoulder_slim_ratio"};
-    public static final String[] BEAUTY_CATEGORY_FRONT_ADVANCE;
+    public static final String[] BEAUTY_CATEGORY_FRONT_ADVANCE = {"pref_beautify_skin_smooth_ratio_key", "pref_beautify_slim_face_ratio_key", "pref_beautify_enlarge_eye_ratio_key", "pref_beautify_skin_color_ratio_key"};
     public static final String[] BEAUTY_CATEGORY_FRONT_MAKEUP = {"pref_beautify_eyebrow_dye_ratio_key", "pref_beautify_pupil_line_ratio_key", "pref_beautify_jelly_lips_ratio_key", "pref_eye_light_type_key", "pref_beautify_blusher_ratio_key"};
     public static final String[] BEAUTY_CATEGORY_FRONT_REMODELING = {"pref_beautify_slim_face_ratio_key", "pref_beautify_enlarge_eye_ratio_key", "pref_beautify_nose_ratio_key", "pref_beautify_chin_ratio_key", "pref_beautify_lips_ratio_key", "pref_beautify_risorius_ratio_key", "pref_beautify_neck_ratio_key", "pref_beautify_smile_ratio_key", "pref_beautify_slim_nose_ratio_key", "pref_beautify_hairline_ratio_key"};
-    public static final String[] BEAUTY_CATEGORY_LEVEL;
+    public static final String[] BEAUTY_CATEGORY_LEVEL = {"pref_beautify_level_key_capture", "pref_beautify_skin_smooth_ratio_key"};
     public static final String[] BEAUTY_CATEGORY_LIVE = {"key_live_shrink_face_ratio", "key_live_enlarge_eye_ratio", "key_live_smooth_strength"};
     public static final int BEAUTY_INVALID_VALUE = 0;
     public static final String BEAUTY_LEVEL = "pref_beautify_level_key_capture";
     public static final String BEAUTY_RESET = "RESET";
-    public static final Map<String, VendorTag<Key<Integer>>> BEAUTY_TYPE_VENDOR_TAG_MAP = Collections.unmodifiableMap(new HashMap<String, VendorTag<Key<Integer>>>() {
+    public static final Map<String, VendorTag<CaptureRequest.Key<Integer>>> BEAUTY_TYPE_VENDOR_TAG_MAP = Collections.unmodifiableMap(new HashMap<String, VendorTag<CaptureRequest.Key<Integer>>>() {
         {
             put("pref_beautify_skin_color_ratio_key", CaptureRequestVendorTags.BEAUTY_SKIN_COLOR);
             put("pref_beautify_slim_face_ratio_key", CaptureRequestVendorTags.BEAUTY_SLIM_FACE);
@@ -95,12 +95,6 @@ public class BeautyConstant {
     public @interface Type {
     }
 
-    static {
-        String str = "pref_beautify_skin_smooth_ratio_key";
-        BEAUTY_CATEGORY_LEVEL = new String[]{"pref_beautify_level_key_capture", str};
-        BEAUTY_CATEGORY_FRONT_ADVANCE = new String[]{str, "pref_beautify_slim_face_ratio_key", "pref_beautify_enlarge_eye_ratio_key", "pref_beautify_skin_color_ratio_key"};
-    }
-
     private static boolean defaultOffRegion() {
         for (String equals : DEFAULT_OFF_REGION) {
             if (equals.equals(Util.sRegion)) {
@@ -110,9 +104,9 @@ public class BeautyConstant {
         return false;
     }
 
+    /* JADX WARNING: Can't fix incorrect switch cases order */
     public static int getDefaultValueByKey(String str) {
         char c2;
-        int i = 3;
         switch (str.hashCode()) {
             case -2110473153:
                 if (str.equals("key_live_smooth_strength")) {
@@ -149,36 +143,23 @@ public class BeautyConstant {
                 break;
         }
         if (c2 != 0) {
-            int i2 = 40;
             if (c2 != 1) {
                 if (c2 == 2) {
-                    if (defaultOffRegion() || !CameraSettings.isFrontCamera()) {
-                        i2 = 0;
-                    }
-                    return i2;
-                } else if (c2 != 3 && c2 != 4 && c2 != 5) {
-                    return 0;
-                } else {
-                    if (defaultOffRegion()) {
-                        i2 = 0;
-                    }
-                    return i2;
+                    return (defaultOffRegion() || !CameraSettings.isFrontCamera()) ? 0 : 40;
                 }
+                if (c2 == 3 || c2 == 4 || c2 == 5) {
+                    return !defaultOffRegion() ? 40 : 0;
+                }
+                return 0;
             } else if (ModuleManager.isVideoModule()) {
                 return 0;
             } else {
-                if (defaultOffRegion() || !CameraSettings.isFrontCamera()) {
-                    i2 = 0;
-                }
-                return i2;
+                return (defaultOffRegion() || !CameraSettings.isFrontCamera()) ? 0 : 40;
             }
         } else if (ModuleManager.isVideoModule()) {
             return 0;
         } else {
-            if (defaultOffRegion() || !CameraSettings.isFrontCamera()) {
-                i = 0;
-            }
-            return i;
+            return (defaultOffRegion() || !CameraSettings.isFrontCamera()) ? 0 : 3;
         }
     }
 
@@ -245,9 +226,6 @@ public class BeautyConstant {
         return str;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:16:0x0029, code lost:
-        return r2;
-     */
     public static String wrappedSettingKey(String str) {
         int activeModuleIndex = ModuleManager.getActiveModuleIndex();
         if (activeModuleIndex == 161) {
@@ -262,10 +240,9 @@ public class BeautyConstant {
                 case 175:
                     break;
                 case 174:
-                    break;
+                    return str;
                 case 176:
-                    str = wrappedSettingKeyForWideSelfie(str);
-                    break;
+                    return wrappedSettingKeyForWideSelfie(str);
                 case 177:
                     return wrappedSettingKeyForMimoji(str);
                 default:
@@ -276,44 +253,26 @@ public class BeautyConstant {
     }
 
     public static String wrappedSettingKeyForCapture(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(163);
-        sb.append(str);
-        return sb.toString();
+        return 163 + str;
     }
 
     public static String wrappedSettingKeyForFun(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(161);
-        sb.append(str);
-        return sb.toString();
+        return 161 + str;
     }
 
     public static String wrappedSettingKeyForMimoji(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(177);
-        sb.append(str);
-        return sb.toString();
+        return 177 + str;
     }
 
     public static String wrappedSettingKeyForPortrait(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(171);
-        sb.append(str);
-        return sb.toString();
+        return 171 + str;
     }
 
     public static String wrappedSettingKeyForVideo(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(162);
-        sb.append(str);
-        return sb.toString();
+        return 162 + str;
     }
 
     public static String wrappedSettingKeyForWideSelfie(String str) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(176);
-        sb.append(str);
-        return sb.toString();
+        return 176 + str;
     }
 }

@@ -5,9 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
-import android.graphics.Paint.Style;
-import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -33,17 +31,17 @@ public class VVProgressDrawable extends Drawable {
 
     public VVProgressDrawable(Context context) {
         this.mBgPaint.setAntiAlias(true);
-        this.mBgPaint.setStyle(Style.FILL);
+        this.mBgPaint.setStyle(Paint.Style.FILL);
         this.mBgPaint.setColor(context.getColor(R.color.vv_progress_bg_color));
         this.mLinePaint = new Paint();
         this.mLinePaint.setAntiAlias(true);
-        this.mLinePaint.setStyle(Style.FILL);
+        this.mLinePaint.setStyle(Paint.Style.FILL);
         this.mLinePaint.setColor(-1);
         this.mSplitPaint = new Paint();
         this.mSplitPaint.setAntiAlias(true);
-        this.mSplitPaint.setStyle(Style.FILL);
+        this.mSplitPaint.setStyle(Paint.Style.FILL);
         this.mSplitPaint.setColor(ViewCompat.MEASURED_STATE_MASK);
-        this.mSplitPaint.setXfermode(new PorterDuffXfermode(Mode.DST_OUT));
+        this.mSplitPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
         this.mSplitOffset = context.getResources().getDimensionPixelSize(R.dimen.vv_duration_split_offset);
         TypedArray obtainStyledAttributes = context.obtainStyledAttributes(R.style.SettingStatusBarText, new int[]{16842901, 16842904});
         int color = obtainStyledAttributes.getColor(obtainStyledAttributes.getIndex(1), -1);
@@ -51,22 +49,20 @@ public class VVProgressDrawable extends Drawable {
         obtainStyledAttributes.recycle();
         this.mTextPaint = new Paint();
         this.mTextPaint.setColor(color);
-        this.mTextPaint.setStyle(Style.FILL);
+        this.mTextPaint.setStyle(Paint.Style.FILL);
         this.mTextPaint.setTextSize((float) dimensionPixelSize);
-        this.mTextPaint.setTextAlign(Align.LEFT);
+        this.mTextPaint.setTextAlign(Paint.Align.LEFT);
         this.mTextPaint.setAntiAlias(true);
         this.mTextPaint.setAlpha(192);
         this.mTotalRectF = new RectF();
     }
 
     private void drawDurationText(Canvas canvas, float f2, float f3, float f4) {
-        float f5 = (f3 + f4) / 2.0f;
-        float f6 = f2 / 1000.0f;
-        String format = String.format(Locale.ENGLISH, "%.1fs", new Object[]{Float.valueOf(Math.abs(f6))});
+        String format = String.format(Locale.ENGLISH, "%.1fs", new Object[]{Float.valueOf(Math.abs(f2 / 1000.0f))});
         Rect rect = new Rect();
         this.mTextPaint.getTextBounds(format, 0, format.length(), rect);
         canvas.save();
-        canvas.translate((this.mWidth / 2.0f) - (((float) rect.height()) / 2.0f), f5 - (((float) rect.width()) / 2.0f));
+        canvas.translate((this.mWidth / 2.0f) - (((float) rect.height()) / 2.0f), ((f3 + f4) / 2.0f) - (((float) rect.width()) / 2.0f));
         canvas.rotate(90.0f);
         canvas.drawText(format, 0.0f, 0.0f, this.mTextPaint);
         canvas.restore();
@@ -78,12 +74,12 @@ public class VVProgressDrawable extends Drawable {
         float f2 = this.mHeight - ((float) (this.mSplitOffset * i));
         float f3 = 0.0f;
         for (int i2 = 0; i2 < size; i2++) {
-            float abs = (((float) Math.abs(((Long) this.mDurationList.get(i2)).longValue())) / ((float) this.mTotalDuration)) * f2;
+            float abs = (((float) Math.abs(this.mDurationList.get(i2).longValue())) / ((float) this.mTotalDuration)) * f2;
             if (i2 < i) {
                 float f4 = f3 + abs;
                 canvas.drawRect(new RectF(0.0f, f4, this.mWidth, ((float) this.mSplitOffset) + f4), this.mSplitPaint);
             }
-            if (((Long) this.mDurationList.get(i2)).longValue() < 0) {
+            if (this.mDurationList.get(i2).longValue() < 0) {
                 canvas.drawRect(new RectF(0.0f, f3 - 1.0f, this.mWidth, f3 + abs + 1.0f), this.mSplitPaint);
             }
             f3 = f3 + abs + ((float) this.mSplitOffset);
@@ -96,7 +92,7 @@ public class VVProgressDrawable extends Drawable {
         float f2 = this.mHeight - ((float) (this.mSplitOffset * i));
         float f3 = 0.0f;
         for (int i2 = 0; i2 < size; i2++) {
-            float abs = (((float) Math.abs(((Long) this.mDurationList.get(i2)).longValue())) / ((float) this.mTotalDuration)) * f2;
+            float abs = (((float) Math.abs(this.mDurationList.get(i2).longValue())) / ((float) this.mTotalDuration)) * f2;
             if (i2 < i) {
                 float f4 = f3 + abs;
                 canvas.drawRect(new RectF(0.0f, f4, this.mWidth, ((float) this.mSplitOffset) + f4), this.mSplitPaint);
@@ -109,7 +105,7 @@ public class VVProgressDrawable extends Drawable {
         RectF rectF = this.mTotalRectF;
         float f2 = this.mWidth;
         canvas.drawRoundRect(rectF, f2 / 2.0f, f2 / 2.0f, this.mBgPaint);
-        int saveLayer = canvas.saveLayer(0.0f, 0.0f, this.mWidth, this.mHeight, null, 31);
+        int saveLayer = canvas.saveLayer(0.0f, 0.0f, this.mWidth, this.mHeight, (Paint) null, 31);
         RectF rectF2 = this.mTotalRectF;
         float f3 = this.mWidth;
         canvas.drawRoundRect(rectF2, f3 / 2.0f, f3 / 2.0f, this.mLinePaint);

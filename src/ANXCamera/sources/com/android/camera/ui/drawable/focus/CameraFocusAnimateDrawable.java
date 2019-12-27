@@ -1,11 +1,9 @@
 package com.android.camera.ui.drawable.focus;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -95,7 +93,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         this.mPaintEvAdjust.setCurrentAlpha(0).setTargetAlpha(255);
         ValueAnimator ofFloat = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         ofFloat.setDuration(200);
-        ofFloat.addUpdateListener(new AnimatorUpdateListener() {
+        ofFloat.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 CameraFocusAnimateDrawable.this.mPaintBigCircle.updateValue(floatValue);
@@ -113,7 +111,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         ValueAnimator ofFloat2 = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         ofFloat2.setDuration(200);
         ofFloat2.setStartDelay(200);
-        ofFloat2.addUpdateListener(new AnimatorUpdateListener() {
+        ofFloat2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 CameraFocusAnimateDrawable.this.mPaintBigCircle.updateValue(floatValue);
@@ -132,7 +130,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         ValueAnimator ofFloat3 = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
         ofFloat3.setDuration(300);
         ofFloat3.setStartDelay(400);
-        ofFloat3.addUpdateListener(new AnimatorUpdateListener() {
+        ofFloat3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float floatValue = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 CameraFocusAnimateDrawable.this.mPaintCenterIndicator.updateValue(floatValue);
@@ -173,13 +171,13 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
         this.mFocusingAnimator.setDuration(200);
         this.mFocusingAnimator.setRepeatMode(2);
         this.mFocusingAnimator.setRepeatCount(-1);
-        this.mFocusingAnimator.addUpdateListener(new AnimatorUpdateListener() {
+        this.mFocusingAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 CameraFocusAnimateDrawable.this.mPaintCenterIndicator.mCurrentWidthPercent = ((Float) valueAnimator.getAnimatedValue()).floatValue();
                 CameraFocusAnimateDrawable.this.invalidateSelf();
             }
         });
-        this.mFocusingAnimator.addListener(new AnimatorListener() {
+        this.mFocusingAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -225,7 +223,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
                 return interpolation;
             }
         });
-        ofFloat.addListener(new AnimatorListener() {
+        ofFloat.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
@@ -262,7 +260,7 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
     }
 
     public void draw(@NonNull Canvas canvas) {
-        if (!(canvas == null || this.mMiddleX == -1.0f || this.mMiddleY == -1.0f)) {
+        if (canvas != null && this.mMiddleX != -1.0f && this.mMiddleY != -1.0f) {
             canvas.save();
             this.mPaintBigCircle.drawCanvas(canvas);
             canvas.restore();
@@ -309,13 +307,13 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
             this.mResetCenterAnimator.setRepeatCount(1);
             this.mResetCenterAnimator.setDuration(85);
             this.mResetCenterAnimator.setInterpolator(new CubicEaseOutInterpolator());
-            this.mResetCenterAnimator.addUpdateListener(new AnimatorUpdateListener() {
+            this.mResetCenterAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     CameraFocusAnimateDrawable.this.mPaintCenterIndicator.setCurrentAlpha(((Integer) valueAnimator.getAnimatedValue()).intValue());
                     CameraFocusAnimateDrawable.this.invalidateSelf();
                 }
             });
-            this.mResetCenterAnimator.addListener(new AnimatorListener() {
+            this.mResetCenterAnimator.addListener(new Animator.AnimatorListener() {
                 public void onAnimationCancel(Animator animator) {
                     CameraFocusAnimateDrawable.this.mPaintCenterIndicator.setCurrentAlpha(240);
                 }
@@ -462,14 +460,14 @@ public class CameraFocusAnimateDrawable extends Drawable implements Animatable {
                 return interpolation;
             }
         });
-        this.mTouchDownAnimator.addListener(new AnimatorListener() {
+        this.mTouchDownAnimator.addListener(new Animator.AnimatorListener() {
             public void onAnimationCancel(Animator animator) {
             }
 
             public void onAnimationEnd(Animator animator) {
                 if (CameraFocusAnimateDrawable.this.mTouchDownAnimator != null) {
                     CameraFocusAnimateDrawable.this.mTouchDownAnimator.cancel();
-                    CameraFocusAnimateDrawable.this.mTouchDownAnimator = null;
+                    ValueAnimator unused = CameraFocusAnimateDrawable.this.mTouchDownAnimator = null;
                 }
                 int access$300 = CameraFocusAnimateDrawable.this.pendingState;
                 if (access$300 == 1) {

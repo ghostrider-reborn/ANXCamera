@@ -4,13 +4,14 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.location.Location;
 import android.net.Uri;
-import android.provider.MediaStore.Images.Media;
+import android.provider.MediaStore;
 import com.android.camera.Exif;
 import com.android.camera.Thumbnail;
 import com.android.camera.Util;
 import com.android.camera.db.DbRepository;
 import com.android.camera.db.element.SaveTask;
 import com.android.camera.log.Log;
+import com.android.gallery3d.exif.ExifInterface;
 import com.xiaomi.camera.base.PerformanceTracker;
 import com.xiaomi.camera.core.ParallelTaskData;
 import com.xiaomi.camera.core.PictureInfo;
@@ -79,25 +80,15 @@ public final class ParallelSaveRequest extends AbstractSaveRequest {
         boolean z;
         boolean z2;
         parserParallelTaskData();
-        String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("save: ");
-        sb.append(this.mSavePath);
-        sb.append(" | ");
-        sb.append(this.mStartTime);
-        Log.d(str, sb.toString());
+        Log.d(TAG, "save: " + this.mSavePath + " | " + this.mStartTime);
         synchronized (this.mSavePath.intern()) {
             SaveTask itemByPath = DbRepository.dbItemSaveTask().getItemByPath(this.mSavePath);
             if (itemByPath == null) {
                 SaveTask saveTask = (SaveTask) DbRepository.dbItemSaveTask().generateItem(System.currentTimeMillis());
                 saveTask.setPath(this.mSavePath);
-                saveTask.setStartTime(Long.valueOf(-1));
+                saveTask.setStartTime(-1L);
                 DbRepository.dbItemSaveTask().endItemAndInsert(saveTask, 0);
-                String str2 = TAG;
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("insert full size picture:");
-                sb2.append(this.mSavePath);
-                Log.w(str2, sb2.toString());
+                Log.w(TAG, "insert full size picture:" + this.mSavePath);
             }
             int i = this.width;
             int i2 = this.height;
@@ -111,32 +102,16 @@ public final class ParallelSaveRequest extends AbstractSaveRequest {
                 if (itemByPath.isValid()) {
                     String fileTitleFromPath = Util.getFileTitleFromPath(this.mSavePath);
                     Uri resultUri = ParallelUtil.getResultUri(itemByPath.getMediaStoreId().longValue());
-                    String str3 = TAG;
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("algo mark: uri: ");
-                    sb3.append(resultUri.toString());
-                    sb3.append(" | ");
-                    sb3.append(itemByPath.getPath());
-                    Log.d(str3, sb3.toString());
-                    String str4 = TAG;
-                    StringBuilder sb4 = new StringBuilder();
-                    sb4.append("algo mark: ");
-                    sb4.append(this.mJpegRotation);
-                    sb4.append(" | ");
-                    sb4.append(i);
-                    sb4.append(" | ");
-                    sb4.append(i2);
-                    sb4.append(" | ");
-                    sb4.append(orientation);
-                    Log.d(str4, sb4.toString());
-                    Storage.updateImageWithExtraExif(this.mContext, this.mData, null, ContentUris.withAppendedId(Media.EXTERNAL_CONTENT_URI, itemByPath.getMediaStoreId().longValue()), fileTitleFromPath, this.mLocation, orientation, i, i2, null, false, false, this.mAlgorithmName, this.mInfo);
+                    Log.d(TAG, "algo mark: uri: " + resultUri.toString() + " | " + itemByPath.getPath());
+                    Log.d(TAG, "algo mark: " + this.mJpegRotation + " | " + i + " | " + i2 + " | " + orientation);
+                    Storage.updateImageWithExtraExif(this.mContext, this.mData, (ExifInterface) null, ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, itemByPath.getMediaStoreId().longValue()), fileTitleFromPath, this.mLocation, orientation, i, i2, (String) null, false, false, this.mAlgorithmName, this.mInfo);
                     ParallelUtil.markTaskFinish(this.mContext, itemByPath, false);
                 }
             }
             long currentTimeMillis = System.currentTimeMillis();
             String fileTitleFromPath2 = this.mSavePath != null ? Util.getFileTitleFromPath(this.mSavePath) : Util.createJpegName(currentTimeMillis);
             SaveTask saveTask2 = itemByPath;
-            String str5 = fileTitleFromPath2;
+            String str = fileTitleFromPath2;
             Uri addImage = Storage.addImage(this.mContext, fileTitleFromPath2, currentTimeMillis, this.mLocation, orientation, this.mData, i, i2, false, false, false, false, itemByPath != null, this.mAlgorithmName, this.mInfo);
             if (addImage != null) {
                 if (this.mNeedThumbnail) {
@@ -145,13 +120,9 @@ public final class ParallelSaveRequest extends AbstractSaveRequest {
                         z = true;
                         this.mSaverCallback.postUpdateThumbnail(createThumbnail, true);
                         z2 = true;
-                        this.mSaverCallback.notifyNewMediaData(addImage, str5, 2);
+                        this.mSaverCallback.notifyNewMediaData(addImage, str, 2);
                         if (saveTask2 == null) {
-                            String str6 = TAG;
-                            StringBuilder sb5 = new StringBuilder();
-                            sb5.append("algo mark: ");
-                            sb5.append(addImage.toString());
-                            Log.d(str6, sb5.toString());
+                            Log.d(TAG, "algo mark: " + addImage.toString());
                             SaveTask saveTask3 = saveTask2;
                             saveTask3.setMediaStoreId(Long.valueOf(ContentUris.parseId(addImage)));
                             ParallelUtil.markTaskFinish(this.mContext, saveTask3, false);
@@ -172,7 +143,7 @@ public final class ParallelSaveRequest extends AbstractSaveRequest {
                     z = true;
                 }
                 z2 = false;
-                this.mSaverCallback.notifyNewMediaData(addImage, str5, 2);
+                this.mSaverCallback.notifyNewMediaData(addImage, str, 2);
                 if (saveTask2 == null) {
                 }
             }

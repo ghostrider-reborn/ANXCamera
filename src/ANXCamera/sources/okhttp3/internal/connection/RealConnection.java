@@ -6,7 +6,6 @@ import java.lang.ref.Reference;
 import java.net.ConnectException;
 import java.net.ProtocolException;
 import java.net.Proxy;
-import java.net.Proxy.Type;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -27,11 +26,10 @@ import okhttp3.ConnectionSpec;
 import okhttp3.EventListener;
 import okhttp3.Handshake;
 import okhttp3.HttpUrl;
-import okhttp3.Interceptor.Chain;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
-import okhttp3.Request.Builder;
 import okhttp3.Response;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
@@ -43,17 +41,16 @@ import okhttp3.internal.http1.Http1Codec;
 import okhttp3.internal.http2.ErrorCode;
 import okhttp3.internal.http2.Http2Codec;
 import okhttp3.internal.http2.Http2Connection;
-import okhttp3.internal.http2.Http2Connection.Listener;
 import okhttp3.internal.http2.Http2Stream;
 import okhttp3.internal.platform.Platform;
 import okhttp3.internal.tls.OkHostnameVerifier;
-import okhttp3.internal.ws.RealWebSocket.Streams;
+import okhttp3.internal.ws.RealWebSocket;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Source;
 
-public final class RealConnection extends Listener implements Connection {
+public final class RealConnection extends Http2Connection.Listener implements Connection {
     private static final int MAX_TUNNEL_ATTEMPTS = 21;
     private static final String NPE_THROW_WITH_NULL = "throw with null exception";
     public int allocationLimit = 1;
@@ -78,7 +75,7 @@ public final class RealConnection extends Listener implements Connection {
 
     private void connectSocket(int i, int i2, Call call, EventListener eventListener) throws IOException {
         Proxy proxy = this.route.proxy();
-        this.rawSocket = (proxy.type() == Type.DIRECT || proxy.type() == Type.HTTP) ? this.route.address().socketFactory().createSocket() : new Socket(proxy);
+        this.rawSocket = (proxy.type() == Proxy.Type.DIRECT || proxy.type() == Proxy.Type.HTTP) ? this.route.address().socketFactory().createSocket() : new Socket(proxy);
         eventListener.connectStart(call, this.route.socketAddress(), proxy);
         this.rawSocket.setSoTimeout(i2);
         try {
@@ -92,28 +89,29 @@ public final class RealConnection extends Listener implements Connection {
                 }
             }
         } catch (ConnectException e3) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Failed to connect to ");
-            sb.append(this.route.socketAddress());
-            ConnectException connectException = new ConnectException(sb.toString());
+            ConnectException connectException = new ConnectException("Failed to connect to " + this.route.socketAddress());
             connectException.initCause(e3);
             throw connectException;
         }
     }
 
-    /* JADX WARNING: type inference failed for: r2v1 */
-    /* JADX WARNING: type inference failed for: r2v2 */
-    /* JADX WARNING: type inference failed for: r2v6 */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v0, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v1, resolved type: javax.net.ssl.SSLSocket} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v1, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v2, resolved type: javax.net.ssl.SSLSocket} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v4, resolved type: javax.net.ssl.SSLSocket} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v2, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v4, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v5, resolved type: java.lang.String} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r1v5, resolved type: javax.net.ssl.SSLSocket} */
     /* JADX WARNING: Multi-variable type inference failed */
     /* JADX WARNING: Removed duplicated region for block: B:31:0x0115 A[Catch:{ all -> 0x010b }] */
     /* JADX WARNING: Removed duplicated region for block: B:33:0x011b A[Catch:{ all -> 0x010b }] */
     /* JADX WARNING: Removed duplicated region for block: B:35:0x011e  */
-    /* JADX WARNING: Unknown variable types count: 1 */
     private void connectTls(ConnectionSpecSelector connectionSpecSelector) throws IOException {
         SSLSocket sSLSocket;
-        ? r2;
         Address address = this.route.address();
-        String str = 0;
+        String str = null;
         try {
             SSLSocket sSLSocket2 = (SSLSocket) address.sslSocketFactory().createSocket(this.rawSocket, address.url().host(), address.url().port(), true);
             try {
@@ -132,7 +130,7 @@ public final class RealConnection extends Listener implements Connection {
                     this.source = Okio.buffer(Okio.source(this.socket));
                     this.sink = Okio.buffer(Okio.sink(this.socket));
                     this.handshake = handshake2;
-                    this.protocol = str != 0 ? Protocol.get(str) : Protocol.HTTP_1_1;
+                    this.protocol = str != null ? Protocol.get(str) : Protocol.HTTP_1_1;
                     if (sSLSocket2 != 0) {
                         Platform.get().afterHandshake(sSLSocket2);
                         return;
@@ -140,25 +138,16 @@ public final class RealConnection extends Listener implements Connection {
                     return;
                 }
                 X509Certificate x509Certificate = (X509Certificate) handshake2.peerCertificates().get(0);
-                StringBuilder sb = new StringBuilder();
-                sb.append("Hostname ");
-                sb.append(address.url().host());
-                sb.append(" not verified:\n    certificate: ");
-                sb.append(CertificatePinner.pin(x509Certificate));
-                sb.append("\n    DN: ");
-                sb.append(x509Certificate.getSubjectDN().getName());
-                sb.append("\n    subjectAltNames: ");
-                sb.append(OkHostnameVerifier.allSubjectAltNames(x509Certificate));
-                throw new SSLPeerUnverifiedException(sb.toString());
+                throw new SSLPeerUnverifiedException("Hostname " + address.url().host() + " not verified:\n    certificate: " + CertificatePinner.pin(x509Certificate) + "\n    DN: " + x509Certificate.getSubjectDN().getName() + "\n    subjectAltNames: " + OkHostnameVerifier.allSubjectAltNames(x509Certificate));
             } catch (AssertionError e2) {
                 e = e2;
-                r2 = sSLSocket2;
+                str = sSLSocket2;
                 try {
                     if (!Util.isAndroidGetsocknameError(e)) {
                     }
                 } catch (Throwable th) {
                     th = th;
-                    sSLSocket = r2;
+                    sSLSocket = str;
                     if (sSLSocket != 0) {
                         Platform.get().afterHandshake(sSLSocket);
                     }
@@ -175,7 +164,6 @@ public final class RealConnection extends Listener implements Connection {
             }
         } catch (AssertionError e3) {
             e = e3;
-            r2 = str;
             if (!Util.isAndroidGetsocknameError(e)) {
                 throw new IOException(e);
             }
@@ -195,7 +183,7 @@ public final class RealConnection extends Listener implements Connection {
                 this.rawSocket = null;
                 this.sink = null;
                 this.source = null;
-                eventListener.connectEnd(call, this.route.socketAddress(), this.route.proxy(), null);
+                eventListener.connectEnd(call, this.route.socketAddress(), this.route.proxy(), (Protocol) null);
                 i4++;
             } else {
                 return;
@@ -204,16 +192,12 @@ public final class RealConnection extends Listener implements Connection {
     }
 
     private Request createTunnel(int i, int i2, Request request, HttpUrl httpUrl) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CONNECT ");
-        sb.append(Util.hostHeader(httpUrl, true));
-        sb.append(" HTTP/1.1");
-        String sb2 = sb.toString();
+        String str = "CONNECT " + Util.hostHeader(httpUrl, true) + " HTTP/1.1";
         while (true) {
-            Http1Codec http1Codec = new Http1Codec(null, null, this.source, this.sink);
+            Http1Codec http1Codec = new Http1Codec((OkHttpClient) null, (StreamAllocation) null, this.source, this.sink);
             this.source.timeout().timeout((long) i, TimeUnit.MILLISECONDS);
             this.sink.timeout().timeout((long) i2, TimeUnit.MILLISECONDS);
-            http1Codec.writeRequest(request.headers(), sb2);
+            http1Codec.writeRequest(request.headers(), str);
             http1Codec.finishRequest();
             Response build = http1Codec.readResponseHeaders(false).request(request).build();
             long contentLength = HttpHeaders.contentLength(build);
@@ -227,19 +211,15 @@ public final class RealConnection extends Listener implements Connection {
             if (code != 200) {
                 if (code == 407) {
                     Request authenticate = this.route.address().proxyAuthenticator().authenticate(this.route, build);
-                    if (authenticate != null) {
-                        if ("close".equalsIgnoreCase(build.header(HTTP.CONN_DIRECTIVE))) {
-                            return authenticate;
-                        }
-                        request = authenticate;
-                    } else {
+                    if (authenticate == null) {
                         throw new IOException("Failed to authenticate with proxy");
+                    } else if ("close".equalsIgnoreCase(build.header(HTTP.CONN_DIRECTIVE))) {
+                        return authenticate;
+                    } else {
+                        request = authenticate;
                     }
                 } else {
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append("Unexpected response code for CONNECT: ");
-                    sb3.append(build.code());
-                    throw new IOException(sb3.toString());
+                    throw new IOException("Unexpected response code for CONNECT: " + build.code());
                 }
             } else if (this.source.buffer().exhausted() && this.sink.buffer().exhausted()) {
                 return null;
@@ -250,7 +230,7 @@ public final class RealConnection extends Listener implements Connection {
     }
 
     private Request createTunnelRequest() {
-        return new Builder().url(this.route.address().url()).header(HTTP.TARGET_HOST, Util.hostHeader(this.route.address().url(), true)).header("Proxy-Connection", HTTP.CONN_KEEP_ALIVE).header("User-Agent", Version.userAgent()).build();
+        return new Request.Builder().url(this.route.address().url()).header(HTTP.TARGET_HOST, Util.hostHeader(this.route.address().url(), true)).header("Proxy-Connection", HTTP.CONN_KEEP_ALIVE).header("User-Agent", Version.userAgent()).build();
     }
 
     private void establishProtocol(ConnectionSpecSelector connectionSpecSelector, Call call, EventListener eventListener) throws IOException {
@@ -290,17 +270,12 @@ public final class RealConnection extends Listener implements Connection {
         Call call2 = call;
         EventListener eventListener2 = eventListener;
         if (this.protocol == null) {
-            List connectionSpecs = this.route.address().connectionSpecs();
+            List<ConnectionSpec> connectionSpecs = this.route.address().connectionSpecs();
             ConnectionSpecSelector connectionSpecSelector = new ConnectionSpecSelector(connectionSpecs);
             if (this.route.address().sslSocketFactory() == null) {
                 if (connectionSpecs.contains(ConnectionSpec.CLEARTEXT)) {
-                    String host = this.route.address().url().host();
-                    if (!Platform.get().isCleartextTrafficPermitted(host)) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("CLEARTEXT communication to ");
-                        sb.append(host);
-                        sb.append(" not permitted by network security policy");
-                        throw new RouteException(new UnknownServiceException(sb.toString()));
+                    if (!Platform.get().isCleartextTrafficPermitted(this.route.address().url().host())) {
+                        throw new RouteException(new UnknownServiceException("CLEARTEXT communication to " + r0 + " not permitted by network security policy"));
                     }
                 } else {
                     throw new RouteException(new UnknownServiceException("CLEARTEXT communication not enabled for client"));
@@ -339,7 +314,7 @@ public final class RealConnection extends Listener implements Connection {
                             this.handshake = null;
                             this.protocol = null;
                             this.http2Connection = null;
-                            eventListener.connectFailed(call, this.route.socketAddress(), this.route.proxy(), null, e);
+                            eventListener.connectFailed(call, this.route.socketAddress(), this.route.proxy(), (Protocol) null, e);
                             if (routeException != null) {
                             }
                             if (z) {
@@ -366,7 +341,7 @@ public final class RealConnection extends Listener implements Connection {
                     this.handshake = null;
                     this.protocol = null;
                     this.http2Connection = null;
-                    eventListener.connectFailed(call, this.route.socketAddress(), this.route.proxy(), null, e);
+                    eventListener.connectFailed(call, this.route.socketAddress(), this.route.proxy(), (Protocol) null, e);
                     if (routeException != null) {
                         routeException = new RouteException(e);
                     } else {
@@ -395,7 +370,7 @@ public final class RealConnection extends Listener implements Connection {
         if (address.url().host().equals(route().address().url().host())) {
             return true;
         }
-        if (this.http2Connection == null || route2 == null || route2.proxy().type() != Type.DIRECT || this.route.proxy().type() != Type.DIRECT || !this.route.socketAddress().equals(route2.socketAddress()) || route2.address().hostnameVerifier() != OkHostnameVerifier.INSTANCE || !supportsUrl(address.url())) {
+        if (this.http2Connection == null || route2 == null || route2.proxy().type() != Proxy.Type.DIRECT || this.route.proxy().type() != Proxy.Type.DIRECT || !this.route.socketAddress().equals(route2.socketAddress()) || route2.address().hostnameVerifier() != OkHostnameVerifier.INSTANCE || !supportsUrl(address.url())) {
             return false;
         }
         try {
@@ -440,7 +415,7 @@ public final class RealConnection extends Listener implements Connection {
         return this.http2Connection != null;
     }
 
-    public HttpCodec newCodec(OkHttpClient okHttpClient, Chain chain, StreamAllocation streamAllocation) throws SocketException {
+    public HttpCodec newCodec(OkHttpClient okHttpClient, Interceptor.Chain chain, StreamAllocation streamAllocation) throws SocketException {
         Http2Connection http2Connection2 = this.http2Connection;
         if (http2Connection2 != null) {
             return new Http2Codec(okHttpClient, chain, streamAllocation, http2Connection2);
@@ -451,12 +426,12 @@ public final class RealConnection extends Listener implements Connection {
         return new Http1Codec(okHttpClient, streamAllocation, this.source, this.sink);
     }
 
-    public Streams newWebSocketStreams(StreamAllocation streamAllocation) {
+    public RealWebSocket.Streams newWebSocketStreams(StreamAllocation streamAllocation) {
         final StreamAllocation streamAllocation2 = streamAllocation;
-        AnonymousClass1 r0 = new Streams(true, this.source, this.sink) {
+        AnonymousClass1 r0 = new RealWebSocket.Streams(true, this.source, this.sink) {
             public void close() throws IOException {
                 StreamAllocation streamAllocation = streamAllocation2;
-                streamAllocation.streamFinished(true, streamAllocation.codec(), -1, null);
+                streamAllocation.streamFinished(true, streamAllocation.codec(), -1, (IOException) null);
             }
         };
         return r0;
@@ -488,11 +463,10 @@ public final class RealConnection extends Listener implements Connection {
         if (httpUrl.port() != this.route.address().url().port()) {
             return false;
         }
-        boolean z = true;
-        if (!httpUrl.host().equals(this.route.address().url().host()) && (this.handshake == null || !OkHostnameVerifier.INSTANCE.verify(httpUrl.host(), (X509Certificate) this.handshake.peerCertificates().get(0)))) {
-            z = false;
+        if (!httpUrl.host().equals(this.route.address().url().host())) {
+            return this.handshake != null && OkHostnameVerifier.INSTANCE.verify(httpUrl.host(), (X509Certificate) this.handshake.peerCertificates().get(0));
         }
-        return z;
+        return true;
     }
 
     public String toString() {

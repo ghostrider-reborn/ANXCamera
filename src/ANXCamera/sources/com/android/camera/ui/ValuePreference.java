@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.Preference;
 import android.text.TextUtils;
-import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,7 +17,7 @@ public class ValuePreference extends Preference {
     private boolean mShowArrow;
 
     public ValuePreference(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public ValuePreference(Context context, AttributeSet attributeSet) {
@@ -43,7 +42,7 @@ public class ValuePreference extends Preference {
         ImageView imageView = (ImageView) view.findViewById(R.id.arrow_right);
         if (textView != null) {
             if (this.mMaxEms != -1) {
-                textView.setEllipsize(TruncateAt.END);
+                textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setMaxEms(this.mMaxEms);
                 textView.setSingleLine();
             }

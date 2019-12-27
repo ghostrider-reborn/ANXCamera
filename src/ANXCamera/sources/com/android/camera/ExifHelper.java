@@ -5,7 +5,7 @@ import android.media.ExifInterface;
 import android.os.Build;
 import android.text.TextUtils;
 import com.android.camera.log.Log;
-import com.android.gallery3d.exif.ExifInterface.GpsLongitudeRef;
+import com.android.gallery3d.exif.ExifInterface;
 import com.mi.config.b;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -33,27 +33,10 @@ public class ExifHelper {
         double d3 = (double) floor;
         double floor2 = Math.floor((Math.abs(d2) - d3) * 60.0d);
         double floor3 = Math.floor(((Math.abs(d2) - d3) - (floor2 / 60.0d)) * 3600000.0d);
-        String str = "/1000";
-        String str2 = "/1,";
         if (d2 < 0.0d) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("-");
-            sb.append(floor);
-            sb.append(str2);
-            sb.append((int) floor2);
-            sb.append(str2);
-            sb.append((int) floor3);
-            sb.append(str);
-            return sb.toString();
+            return "-" + floor + "/1," + ((int) floor2) + "/1," + ((int) floor3) + "/1000";
         }
-        StringBuilder sb2 = new StringBuilder();
-        sb2.append(floor);
-        sb2.append(str2);
-        sb2.append((int) floor2);
-        sb2.append(str2);
-        sb2.append((int) floor3);
-        sb2.append(str);
-        return sb2.toString();
+        return floor + "/1," + ((int) floor2) + "/1," + ((int) floor3) + "/1000";
     }
 
     public static String getExifOrientation(int i) {
@@ -69,14 +52,10 @@ public class ExifHelper {
         if (i == 270) {
             return String.valueOf(8);
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append("invalid: ");
-        sb.append(i);
-        throw new AssertionError(sb.toString());
+        throw new AssertionError("invalid: " + i);
     }
 
     private static void writeExif(String str, FileDescriptor fileDescriptor, int i, Location location, long j) {
-        String str2 = TAG;
         try {
             if (TextUtils.isEmpty(str) || (Util.isPathExist(str) && new File(str).length() != 0)) {
                 ExifInterface exifInterface = fileDescriptor == null ? new ExifInterface(str) : new ExifInterface(fileDescriptor);
@@ -90,50 +69,40 @@ public class ExifHelper {
                     double longitude = location.getLongitude();
                     exifInterface.setAttribute("GPSLatitude", convertDoubleToLaLon(latitude));
                     exifInterface.setAttribute("GPSLongitude", convertDoubleToLaLon(longitude));
-                    String str3 = "GPSLatitudeRef";
                     if (latitude > 0.0d) {
-                        exifInterface.setAttribute(str3, "N");
+                        exifInterface.setAttribute("GPSLatitudeRef", "N");
                     } else {
-                        exifInterface.setAttribute(str3, "S");
+                        exifInterface.setAttribute("GPSLatitudeRef", "S");
                     }
-                    String str4 = "GPSLongitudeRef";
                     if (longitude > 0.0d) {
-                        exifInterface.setAttribute(str4, GpsLongitudeRef.EAST);
+                        exifInterface.setAttribute("GPSLongitudeRef", ExifInterface.GpsLongitudeRef.EAST);
                     } else {
-                        exifInterface.setAttribute(str4, GpsLongitudeRef.WEST);
+                        exifInterface.setAttribute("GPSLongitudeRef", ExifInterface.GpsLongitudeRef.WEST);
                     }
                 }
-                String str5 = "Model";
                 if (!b.tm) {
                     if (!b.IS_MI2A) {
-                        exifInterface.setAttribute(str5, b.sm);
+                        exifInterface.setAttribute("Model", b.sm);
                         exifInterface.saveAttributes();
                         return;
                     }
                 }
-                exifInterface.setAttribute(str5, "MiTwo");
+                exifInterface.setAttribute("Model", "MiTwo");
                 exifInterface.setAttribute("FocalLength", "354/100");
                 exifInterface.saveAttributes();
                 return;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append("writeExif. the file:[");
-            sb.append(str);
-            sb.append("] is not exist or empty");
-            Log.e(str2, sb.toString());
+            Log.e(TAG, "writeExif. the file:[" + str + "] is not exist or empty");
         } catch (Exception e2) {
-            StringBuilder sb2 = new StringBuilder();
-            sb2.append("write exif error, filePath = ");
-            sb2.append(str);
-            Log.w(str2, sb2.toString(), e2);
+            Log.w(TAG, "write exif error, filePath = " + str, e2);
         }
     }
 
     public static void writeExifByFd(FileDescriptor fileDescriptor, int i, Location location, long j) {
-        writeExif(null, fileDescriptor, i, location, j);
+        writeExif((String) null, fileDescriptor, i, location, j);
     }
 
     public static void writeExifByFilePath(String str, int i, Location location, long j) {
-        writeExif(str, null, i, location, j);
+        writeExif(str, (FileDescriptor) null, i, location, j);
     }
 }

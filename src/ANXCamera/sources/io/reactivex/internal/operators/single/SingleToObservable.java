@@ -13,7 +13,7 @@ public final class SingleToObservable<T> extends Observable<T> {
     static final class SingleToObservableObserver<T> implements SingleObserver<T>, Disposable {
         final Observer<? super T> actual;
 
-        /* renamed from: d reason: collision with root package name */
+        /* renamed from: d  reason: collision with root package name */
         Disposable f338d;
 
         SingleToObservableObserver(Observer<? super T> observer) {

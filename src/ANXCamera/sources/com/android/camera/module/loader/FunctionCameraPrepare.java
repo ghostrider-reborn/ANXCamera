@@ -25,7 +25,7 @@ import com.android.camera.data.data.global.DataItemGlobal;
 import com.android.camera.data.data.runing.ComponentRunningAutoZoom;
 import com.android.camera.data.data.runing.ComponentRunningSuperEIS;
 import com.android.camera.data.data.runing.DataItemRunning;
-import com.android.camera.data.provider.DataProvider.ProviderEditor;
+import com.android.camera.data.provider.DataProvider;
 import com.android.camera.log.Log;
 import com.android.camera.module.BaseModule;
 import com.android.camera.permission.PermissionManager;
@@ -52,10 +52,8 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         int i;
         boolean z2;
         boolean z3;
-        boolean z4 = this.mNeedReConfigureData;
-        String str = CameraSettings.KEY_ZOOM;
-        if (!z4) {
-            DataRepository.dataItemConfig().editor().remove(str).apply();
+        if (!this.mNeedReConfigureData) {
+            DataRepository.dataItemConfig().editor().remove(CameraSettings.KEY_ZOOM).apply();
             return;
         }
         CameraSettings.upgradeGlobalPreferences();
@@ -64,11 +62,11 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         DataItemConfig dataItemConfig2 = DataRepository.dataItemConfig();
         int lastCameraId = dataItemGlobal.getLastCameraId();
         ComponentConfigFlash componentFlash = dataItemConfig2.getComponentFlash();
-        ProviderEditor editor = dataItemConfig2.editor();
-        ProviderEditor editor2 = dataItemGlobal.editor();
-        ProviderEditor editor3 = DataRepository.dataItemLive().editor();
+        DataProvider.ProviderEditor editor = dataItemConfig2.editor();
+        DataProvider.ProviderEditor editor2 = dataItemGlobal.editor();
+        DataProvider.ProviderEditor editor3 = DataRepository.dataItemLive().editor();
         DataBackUp backUp = DataRepository.getInstance().backUp();
-        editor.remove(str).remove(CameraSettings.KEY_EXPOSURE);
+        editor.remove(CameraSettings.KEY_ZOOM).remove(CameraSettings.KEY_EXPOSURE);
         ComponentRunningAutoZoom componentRunningAutoZoom = dataItemRunning.getComponentRunningAutoZoom();
         if (componentRunningAutoZoom != null) {
             componentRunningAutoZoom.reInitIntentType(dataItemGlobal.getIntentType() == 0);
@@ -78,15 +76,13 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
             componentRunningSuperEIS.reInitIntentType(dataItemGlobal.getIntentType() == 0);
         }
         String persistValue = componentFlash.getPersistValue(this.mTargetMode);
-        String str2 = "2";
         if (!componentFlash.isValidFlashValue(persistValue)) {
             editor.remove(componentFlash.getKey(this.mTargetMode));
-        } else if (persistValue.equals(str2) || componentFlash.getPersistValue(this.mTargetMode).equals("5")) {
+        } else if (persistValue.equals("2") || componentFlash.getPersistValue(this.mTargetMode).equals("5")) {
             editor.putString(componentFlash.getKey(this.mTargetMode), componentFlash.getDefaultValue(this.mTargetMode));
         }
         ComponentConfigRatio componentConfigRatio = dataItemConfig2.getComponentConfigRatio();
         int i2 = this.mTargetMode;
-        String str3 = TAG;
         int i3 = lastCameraId;
         if (i2 == 163 || i2 == 165 || i2 == 167 || i2 == 173 || i2 == 175 || i2 == 171) {
             String[] fullSupportRatioValues = componentConfigRatio.getFullSupportRatioValues();
@@ -105,7 +101,7 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
                 }
             }
             if (!z3 && (this.mTargetMode == 165 || !persistValue2.equals(ComponentConfigRatio.RATIO_1X1))) {
-                Log.d(str3, "reconfigureData: clear DATA_CONFIG_RATIO");
+                Log.d(TAG, "reconfigureData: clear DATA_CONFIG_RATIO");
                 editor.remove("pref_camera_picturesize_key");
             }
         }
@@ -127,16 +123,12 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
                 }
             }
             if (!z2) {
-                Log.d(str3, "reconfigureData: clear DATA_CONFIG_NEW_SLOW_MOTION_KEY");
+                Log.d(TAG, "reconfigureData: clear DATA_CONFIG_NEW_SLOW_MOTION_KEY");
                 editor.remove(DataItemConfig.DATA_CONFIG_NEW_SLOW_MOTION_KEY);
             }
         }
-        if (this.mTargetMode == 167) {
-            String string = CameraAppImpl.getAndroidContext().getString(R.string.pref_camera_iso_default);
-            String str4 = CameraSettings.KEY_QC_ISO;
-            if (!Util.isStringValueContained((Object) dataItemConfig2.getString(str4, string), (int) R.array.pref_camera_iso_entryvalues)) {
-                editor.remove(str4);
-            }
+        if (this.mTargetMode == 167 && !Util.isStringValueContained((Object) dataItemConfig2.getString(CameraSettings.KEY_QC_ISO, CameraAppImpl.getAndroidContext().getString(R.string.pref_camera_iso_default)), (int) R.array.pref_camera_iso_entryvalues)) {
+            editor.remove(CameraSettings.KEY_QC_ISO);
         }
         if (!b.lj()) {
             editor.remove(CameraSettings.KEY_QC_FOCUS_POSITION);
@@ -150,9 +142,8 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         if (!Util.isLabOptionsVisible()) {
             editor2.remove(CameraSettings.KEY_FACE_DETECTION).remove(CameraSettings.KEY_CAMERA_PORTRAIT_WITH_FACEBEAUTY).remove(CameraSettings.KEY_CAMERA_FACE_DETECTION_AUTO_HIDDEN).remove(CameraSettings.KEY_CAMERA_DUAL_ENABLE).remove(CameraSettings.KEY_CAMERA_DUAL_SAT_ENABLE).remove(CameraSettings.KEY_CAMERA_MFNR_SAT_ENABLE).remove(CameraSettings.KEY_CAMERA_SR_ENABLE);
         }
-        String str5 = CameraSettings.KEY_ANTIBANDING;
-        if (!Util.isValidValue(dataItemGlobal.getString(str5, "1"))) {
-            editor2.remove(str5);
+        if (!Util.isValidValue(dataItemGlobal.getString(CameraSettings.KEY_ANTIBANDING, "1"))) {
+            editor2.remove(CameraSettings.KEY_ANTIBANDING);
         }
         if (!b.Wh()) {
             editor2.remove(CameraSettings.KEY_FINGERPRINT_CAPTURE);
@@ -162,7 +153,7 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
             case 7:
                 z = false;
                 backUp.revertRunning(dataItemRunning, dataItemGlobal.getDataBackUpKey(this.mTargetMode), dataItemGlobal.getCurrentCameraId());
-                if (componentFlash.getPersistValue(this.mTargetMode).equals(str2)) {
+                if (componentFlash.getPersistValue(this.mTargetMode).equals("2")) {
                     editor.putString(componentFlash.getKey(this.mTargetMode), componentFlash.getDefaultValue(this.mTargetMode));
                     break;
                 }
@@ -184,7 +175,7 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
                     z = false;
                     dataItemConfig = (DataItemConfig) DataRepository.provider().dataConfig(0);
                 }
-                ProviderEditor editor4 = dataItemConfig.editor();
+                DataProvider.ProviderEditor editor4 = dataItemConfig.editor();
                 resetFlash(dataItemConfig.getComponentFlash(), editor4);
                 resetHdr(dataItemConfig.getComponentHdr(), editor4);
                 resetFrontBokenh(dataItemConfig.getComponentBokeh(), editor4);
@@ -253,8 +244,7 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         componentRunningAutoZoom.clearArrayMap();
     }
 
-    private void resetBeautyBackLevel(ProviderEditor providerEditor) {
-        String[] strArr;
+    private void resetBeautyBackLevel(DataProvider.ProviderEditor providerEditor) {
         for (String str : BeautyConstant.BEAUTY_CATEGORY_LEVEL) {
             providerEditor.remove(BeautyConstant.wrappedSettingKeyForCapture(str));
             providerEditor.remove(BeautyConstant.wrappedSettingKeyForVideo(str));
@@ -263,38 +253,38 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         }
     }
 
-    private void resetBeautyCaptureFigure(ProviderEditor providerEditor) {
+    private void resetBeautyCaptureFigure(DataProvider.ProviderEditor providerEditor) {
         for (String wrappedSettingKeyForCapture : BeautyConstant.BEAUTY_CATEGORY_BACK_FIGURE) {
             providerEditor.remove(BeautyConstant.wrappedSettingKeyForCapture(wrappedSettingKeyForCapture));
         }
     }
 
-    private void resetBeautyVideoFront(ProviderEditor providerEditor) {
+    private void resetBeautyVideoFront(DataProvider.ProviderEditor providerEditor) {
         for (String wrappedSettingKeyForVideo : BeautyConstant.BEAUTY_CATEGORY_LEVEL) {
             providerEditor.remove(BeautyConstant.wrappedSettingKeyForVideo(wrappedSettingKeyForVideo));
         }
     }
 
-    private void resetFlash(ComponentConfigFlash componentConfigFlash, ProviderEditor providerEditor) {
+    private void resetFlash(ComponentConfigFlash componentConfigFlash, DataProvider.ProviderEditor providerEditor) {
         if (!componentConfigFlash.getPersistValue(this.mTargetMode).equals("3")) {
             providerEditor.putString(componentConfigFlash.getKey(this.mTargetMode), componentConfigFlash.getDefaultValue(this.mTargetMode));
         }
     }
 
-    private void resetFrontBokenh(ComponentConfigBokeh componentConfigBokeh, ProviderEditor providerEditor) {
+    private void resetFrontBokenh(ComponentConfigBokeh componentConfigBokeh, DataProvider.ProviderEditor providerEditor) {
         if ("on".equals(componentConfigBokeh.getPersistValue(this.mTargetMode))) {
             componentConfigBokeh.setComponentValue(this.mTargetMode, "off");
         }
     }
 
-    private void resetHdr(ComponentConfigHdr componentConfigHdr, ProviderEditor providerEditor) {
+    private void resetHdr(ComponentConfigHdr componentConfigHdr, DataProvider.ProviderEditor providerEditor) {
         String persistValue = componentConfigHdr.getPersistValue(this.mTargetMode);
         if (!persistValue.equals("auto") && !persistValue.equals("off")) {
             providerEditor.putString(componentConfigHdr.getKey(this.mTargetMode), componentConfigHdr.getDefaultValue(this.mTargetMode));
         }
     }
 
-    private void resetLensType(ComponentConfigUltraWide componentConfigUltraWide, ComponentManuallyDualLens componentManuallyDualLens, ProviderEditor providerEditor) {
+    private void resetLensType(ComponentConfigUltraWide componentConfigUltraWide, ComponentManuallyDualLens componentManuallyDualLens, DataProvider.ProviderEditor providerEditor) {
         if (componentConfigUltraWide != null && componentManuallyDualLens != null) {
             componentManuallyDualLens.resetLensType(componentConfigUltraWide, providerEditor);
         }
@@ -308,13 +298,13 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         componentRunningSuperEIS.clearArrayMap();
     }
 
-    private void resetUltraWide(ComponentConfigUltraWide componentConfigUltraWide, ProviderEditor providerEditor) {
+    private void resetUltraWide(ComponentConfigUltraWide componentConfigUltraWide, DataProvider.ProviderEditor providerEditor) {
         if (componentConfigUltraWide != null) {
             componentConfigUltraWide.resetUltraWide(providerEditor);
         }
     }
 
-    private void resetVideoBeauty(ComponentConfigBeauty componentConfigBeauty, ProviderEditor providerEditor) {
+    private void resetVideoBeauty(ComponentConfigBeauty componentConfigBeauty, DataProvider.ProviderEditor providerEditor) {
         String persistValue = componentConfigBeauty.getPersistValue(162);
         String defaultValue = componentConfigBeauty.getDefaultValue(162);
         if (!TextUtils.equals(persistValue, defaultValue)) {
@@ -329,7 +319,7 @@ public class FunctionCameraPrepare extends Func1Base<Camera, BaseModule> {
         if (!PermissionManager.checkCameraLaunchPermissions()) {
             return NullHolder.ofNullable(null, 229);
         }
-        Camera camera = (Camera) nullHolder.get();
+        Camera camera = nullHolder.get();
         if (camera.isFinishing()) {
             Log.d(TAG, "activity is finishing, the content of BaseModuleHolder is set to null");
             return NullHolder.ofNullable(null, 235);

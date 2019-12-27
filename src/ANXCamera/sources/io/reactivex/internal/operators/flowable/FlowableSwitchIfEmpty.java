@@ -55,6 +55,6 @@ public final class FlowableSwitchIfEmpty<T> extends AbstractFlowableWithUpstream
     public void subscribeActual(Subscriber<? super T> subscriber) {
         SwitchIfEmptySubscriber switchIfEmptySubscriber = new SwitchIfEmptySubscriber(subscriber, this.other);
         subscriber.onSubscribe(switchIfEmptySubscriber.arbiter);
-        this.source.subscribe((FlowableSubscriber<? super T>) switchIfEmptySubscriber);
+        this.source.subscribe(switchIfEmptySubscriber);
     }
 }

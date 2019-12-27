@@ -2,7 +2,6 @@ package android.support.v4.content.res;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.AnyRes;
@@ -10,13 +9,12 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.StyleableRes;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import org.xmlpull.v1.XmlPullParser;
 
-@RestrictTo({Scope.LIBRARY_GROUP})
+@RestrictTo({RestrictTo.Scope.LIBRARY_GROUP})
 public class TypedArrayUtils {
     private static final String NAMESPACE = "http://schemas.android.com/apk/res/android";
 
@@ -101,7 +99,7 @@ public class TypedArrayUtils {
     }
 
     @NonNull
-    public static TypedArray obtainAttributes(@NonNull Resources resources, @Nullable Theme theme, @NonNull AttributeSet attributeSet, @NonNull int[] iArr) {
+    public static TypedArray obtainAttributes(@NonNull Resources resources, @Nullable Resources.Theme theme, @NonNull AttributeSet attributeSet, @NonNull int[] iArr) {
         return theme == null ? resources.obtainAttributes(attributeSet, iArr) : theme.obtainStyledAttributes(attributeSet, iArr, 0, 0);
     }
 

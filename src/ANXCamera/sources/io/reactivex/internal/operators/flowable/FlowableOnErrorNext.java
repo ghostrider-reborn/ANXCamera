@@ -88,6 +88,6 @@ public final class FlowableOnErrorNext<T> extends AbstractFlowableWithUpstream<T
     public void subscribeActual(Subscriber<? super T> subscriber) {
         OnErrorNextSubscriber onErrorNextSubscriber = new OnErrorNextSubscriber(subscriber, this.nextSupplier, this.allowFatal);
         subscriber.onSubscribe(onErrorNextSubscriber.arbiter);
-        this.source.subscribe((FlowableSubscriber<? super T>) onErrorNextSubscriber);
+        this.source.subscribe(onErrorNextSubscriber);
     }
 }

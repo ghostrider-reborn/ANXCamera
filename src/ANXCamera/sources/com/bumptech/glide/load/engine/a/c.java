@@ -30,7 +30,7 @@ final class c {
         b() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void a(a aVar) {
             synchronized (this.pool) {
                 if (this.pool.size() < 10) {
@@ -39,24 +39,24 @@ final class c {
             }
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public a obtain() {
-            a aVar;
+            a poll;
             synchronized (this.pool) {
-                aVar = (a) this.pool.poll();
+                poll = this.pool.poll();
             }
-            return aVar == null ? new a() : aVar;
+            return poll == null ? new a() : poll;
         }
     }
 
     c() {
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void r(String str) {
         a aVar;
         synchronized (this) {
-            aVar = (a) this.Bg.get(str);
+            aVar = this.Bg.get(str);
             if (aVar == null) {
                 aVar = this.Cg.obtain();
                 this.Bg.put(str, aVar);
@@ -66,37 +66,25 @@ final class c {
         aVar.lock.lock();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void s(String str) {
         a aVar;
         synchronized (this) {
-            Object obj = this.Bg.get(str);
-            i.checkNotNull(obj);
-            aVar = (a) obj;
+            a aVar2 = this.Bg.get(str);
+            i.checkNotNull(aVar2);
+            aVar = aVar2;
             if (aVar.zg >= 1) {
                 aVar.zg--;
                 if (aVar.zg == 0) {
-                    a aVar2 = (a) this.Bg.remove(str);
-                    if (aVar2.equals(aVar)) {
-                        this.Cg.a(aVar2);
+                    a remove = this.Bg.remove(str);
+                    if (remove.equals(aVar)) {
+                        this.Cg.a(remove);
                     } else {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("Removed the wrong lock, expected to remove: ");
-                        sb.append(aVar);
-                        sb.append(", but actually removed: ");
-                        sb.append(aVar2);
-                        sb.append(", safeKey: ");
-                        sb.append(str);
-                        throw new IllegalStateException(sb.toString());
+                        throw new IllegalStateException("Removed the wrong lock, expected to remove: " + aVar + ", but actually removed: " + remove + ", safeKey: " + str);
                     }
                 }
             } else {
-                StringBuilder sb2 = new StringBuilder();
-                sb2.append("Cannot release a lock that is not held, safeKey: ");
-                sb2.append(str);
-                sb2.append(", interestedThreads: ");
-                sb2.append(aVar.zg);
-                throw new IllegalStateException(sb2.toString());
+                throw new IllegalStateException("Cannot release a lock that is not held, safeKey: " + str + ", interestedThreads: " + aVar.zg);
             }
         }
         aVar.lock.unlock();

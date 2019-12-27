@@ -2,7 +2,6 @@ package com.android.camera.fragment.mimoji;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -12,12 +11,9 @@ import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewStub;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.android.camera.R;
@@ -26,25 +22,17 @@ import com.android.camera.data.DataRepository;
 import com.android.camera.fragment.BaseFragment;
 import com.android.camera.fragment.FragmentUtils;
 import com.android.camera.fragment.beauty.LinearLayoutManagerWrapper;
-import com.android.camera.fragment.mimoji.MimojiTypeAdapter.OnSelectListener;
+import com.android.camera.fragment.mimoji.MimojiTypeAdapter;
 import com.android.camera.log.Log;
 import com.android.camera.module.impl.component.FileUtils;
 import com.android.camera.module.impl.component.MimojiStatusManager;
 import com.android.camera.protocol.ModeCoordinatorImpl;
-import com.android.camera.protocol.ModeProtocol.ActionProcessing;
-import com.android.camera.protocol.ModeProtocol.BaseDelegate;
-import com.android.camera.protocol.ModeProtocol.HandleBackTrace;
-import com.android.camera.protocol.ModeProtocol.MimojiAlert;
-import com.android.camera.protocol.ModeProtocol.MimojiAvatarEngine;
-import com.android.camera.protocol.ModeProtocol.MimojiEditor;
-import com.android.camera.protocol.ModeProtocol.ModeCoordinator;
-import com.android.camera.protocol.ModeProtocol.TopAlert;
+import com.android.camera.protocol.ModeProtocol;
 import com.android.camera.statistic.CameraStat;
 import com.android.camera.statistic.CameraStatUtil;
 import com.android.camera.ui.MimojiEditGLTextureView;
 import com.android.camera.ui.autoselectview.AutoSelectHorizontalView;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigType;
-import com.arcsoft.avatar.AvatarConfig.ASAvatarConfigValue;
+import com.arcsoft.avatar.AvatarConfig;
 import com.arcsoft.avatar.AvatarEngine;
 import io.reactivex.Completable;
 import java.text.SimpleDateFormat;
@@ -54,9 +42,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, OnClickListener, OnTouchListener, HandleBackTrace {
+public class FragmentMimojiEdit extends BaseFragment implements ModeProtocol.MimojiEditor, View.OnClickListener, View.OnTouchListener, ModeProtocol.HandleBackTrace {
     private static final int EDIT_ABANDON = 4;
     private static final int EDIT_ABANDON_CAPTURE = 3;
     private static final int EDIT_BACK = 1;
@@ -82,7 +69,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     public Context mContext;
     private AlertDialog mCurrentAlertDialog;
     /* access modifiers changed from: private */
-    public String mCurrentConfigPath;
+    public String mCurrentConfigPath = "";
     /* access modifiers changed from: private */
     public int mCurrentTopPannelState = -1;
     /* access modifiers changed from: private */
@@ -93,10 +80,44 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     /* access modifiers changed from: private */
     public boolean mEnterFromMimoji = false;
     @SuppressLint({"HandlerLeak"})
-    private Handler mHandler;
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message message) {
+            int i = message.what;
+            if (i == 4) {
+                Bitmap thumbnailBitmapFromData = MimojiHelper.getThumbnailBitmapFromData((byte[]) message.obj, 200, 200);
+                String format = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault()).format(new Date());
+                String str = MimojiHelper.CUSTOM_DIR + format + "/";
+                String str2 = str + format + "config.dat";
+                String str3 = str + format + "pic.png";
+                FileUtils.saveBitmap(thumbnailBitmapFromData, str3);
+                int saveConfig = FragmentMimojiEdit.this.mAvatar.saveConfig(str2);
+                FragmentMimojiEdit.this.mAvatar.loadConfig(str2);
+                Log.d(FragmentMimojiEdit.TAG, "res = " + saveConfig + "  save path : " + str2);
+                if (FragmentMimojiEdit.this.mCurrentTopPannelState == 4) {
+                    FileUtils.deleteFile(FragmentMimojiEdit.this.mPopSaveDeletePath);
+                }
+                MimojiInfo mimojiInfo = new MimojiInfo();
+                mimojiInfo.mConfigPath = str2;
+                mimojiInfo.mAvatarTemplatePath = AvatarEngineManager.PersonTemplatePath;
+                mimojiInfo.mThumbnailUrl = str3;
+                DataRepository.dataItemLive().getMimojiStatusManager().setmCurrentMimojiInfo(mimojiInfo);
+                FragmentMimojiEdit.this.goBack(false, true);
+            } else if (i == 5) {
+                Bundle bundle = (Bundle) message.obj;
+                FragmentMimojiEdit.this.mEditLevelListAdapter.notifyThumbnailUpdate(bundle.getInt("TYPE"), bundle.getInt("OUTER"), bundle.getInt("INNER"));
+            } else if (i == 6) {
+                int selectType = AvatarEngineManager.getInstance().getSelectType();
+                boolean isColorSelected = AvatarEngineManager.getInstance().isColorSelected();
+                FragmentMimojiEdit.this.mEditLevelListAdapter.refreshData(AvatarEngineManager.getInstance().getSubConfigList(FragmentMimojiEdit.this.mContext, selectType), !AvatarEngineManager.getInstance().isNeedUpdate(selectType), isColorSelected);
+                if (AvatarEngineManager.getInstance().isNeedUpdate(selectType)) {
+                    FragmentMimojiEdit.this.mRenderThread.draw(false);
+                }
+            }
+        }
+    };
     private boolean mIsSaveBtnClicked = false;
     /* access modifiers changed from: private */
-    public boolean mIsShowDialog;
+    public boolean mIsShowDialog = false;
     /* access modifiers changed from: private */
     public boolean mIsStartEdit;
     /* access modifiers changed from: private */
@@ -112,79 +133,14 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     private AutoSelectHorizontalView mMimojiTypeSelectView;
     private LinearLayout mOperateSelectLayout;
     /* access modifiers changed from: private */
-    public String mPopSaveDeletePath;
+    public String mPopSaveDeletePath = "";
     private TextView mReCaptureTextView;
     /* access modifiers changed from: private */
     public MimojiThumbnailRenderThread mRenderThread;
     private LinearLayout mRlAllEditContent;
     private TextView mSaveTextView;
-    private boolean mSetupCompleted;
+    private boolean mSetupCompleted = false;
     private Thread mSetupThread;
-
-    public FragmentMimojiEdit() {
-        String str = "";
-        this.mCurrentConfigPath = str;
-        this.mPopSaveDeletePath = str;
-        this.mIsShowDialog = false;
-        this.mSetupCompleted = false;
-        this.mHandler = new Handler() {
-            public void handleMessage(Message message) {
-                int i = message.what;
-                if (i == 4) {
-                    Bitmap thumbnailBitmapFromData = MimojiHelper.getThumbnailBitmapFromData((byte[]) message.obj, 200, 200);
-                    String format = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault()).format(new Date());
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(MimojiHelper.CUSTOM_DIR);
-                    sb.append(format);
-                    sb.append("/");
-                    String sb2 = sb.toString();
-                    StringBuilder sb3 = new StringBuilder();
-                    sb3.append(sb2);
-                    sb3.append(format);
-                    sb3.append("config.dat");
-                    String sb4 = sb3.toString();
-                    StringBuilder sb5 = new StringBuilder();
-                    sb5.append(sb2);
-                    sb5.append(format);
-                    sb5.append("pic.png");
-                    String sb6 = sb5.toString();
-                    FileUtils.saveBitmap(thumbnailBitmapFromData, sb6);
-                    int saveConfig = FragmentMimojiEdit.this.mAvatar.saveConfig(sb4);
-                    FragmentMimojiEdit.this.mAvatar.loadConfig(sb4);
-                    String str = FragmentMimojiEdit.TAG;
-                    StringBuilder sb7 = new StringBuilder();
-                    sb7.append("res = ");
-                    sb7.append(saveConfig);
-                    sb7.append("  save path : ");
-                    sb7.append(sb4);
-                    Log.d(str, sb7.toString());
-                    if (FragmentMimojiEdit.this.mCurrentTopPannelState == 4) {
-                        FileUtils.deleteFile(FragmentMimojiEdit.this.mPopSaveDeletePath);
-                    }
-                    MimojiInfo mimojiInfo = new MimojiInfo();
-                    mimojiInfo.mConfigPath = sb4;
-                    mimojiInfo.mAvatarTemplatePath = AvatarEngineManager.PersonTemplatePath;
-                    mimojiInfo.mThumbnailUrl = sb6;
-                    DataRepository.dataItemLive().getMimojiStatusManager().setmCurrentMimojiInfo(mimojiInfo);
-                    FragmentMimojiEdit.this.goBack(false, true);
-                } else if (i == 5) {
-                    Bundle bundle = (Bundle) message.obj;
-                    int i2 = bundle.getInt("OUTER");
-                    int i3 = bundle.getInt("INNER");
-                    FragmentMimojiEdit.this.mEditLevelListAdapter.notifyThumbnailUpdate(bundle.getInt("TYPE"), i2, i3);
-                } else if (i == 6) {
-                    int selectType = AvatarEngineManager.getInstance().getSelectType();
-                    boolean isColorSelected = AvatarEngineManager.getInstance().isColorSelected();
-                    CopyOnWriteArrayList subConfigList = AvatarEngineManager.getInstance().getSubConfigList(FragmentMimojiEdit.this.mContext, selectType);
-                    boolean isNeedUpdate = AvatarEngineManager.getInstance().isNeedUpdate(selectType);
-                    FragmentMimojiEdit.this.mEditLevelListAdapter.refreshData(subConfigList, !isNeedUpdate, isColorSelected);
-                    if (isNeedUpdate) {
-                        FragmentMimojiEdit.this.mRenderThread.draw(false);
-                    }
-                }
-            }
-        };
-    }
 
     /* access modifiers changed from: private */
     public void doSetup() {
@@ -208,7 +164,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
                 }
             });
         }
-        MimojiAvatarEngine mimojiAvatarEngine = (MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
+        ModeProtocol.MimojiAvatarEngine mimojiAvatarEngine = (ModeProtocol.MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
         if (mimojiAvatarEngine != null) {
             mimojiAvatarEngine.backToPreview(z2, !z);
             if (z) {
@@ -216,7 +172,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
             }
         }
         if (z2) {
-            MimojiAlert mimojiAlert = (MimojiAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(226);
+            ModeProtocol.MimojiAlert mimojiAlert = (ModeProtocol.MimojiAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(226);
             if (mimojiAlert != null) {
                 CameraStatUtil.trackMimojiCount(Integer.toString(mimojiAlert.refreshMimojiList()));
             }
@@ -237,7 +193,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
 
     private void initConfigList() {
         this.mRenderThread.initAvatar(this.mEnterFromMimoji ? this.mCurrentConfigPath : AvatarEngineManager.TempOriginalConfigPath);
-        ASAvatarConfigValue aSAvatarConfigValue = new ASAvatarConfigValue();
+        AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue = new AvatarConfig.ASAvatarConfigValue();
         this.mAvatar.getConfigValue(aSAvatarConfigValue);
         this.mAvatarEngineManager.setASAvatarConfigValue(aSAvatarConfigValue);
         this.mAvatarEngineManager.setConfigTypeList(this.mAvatar.getSupportConfigType(this.mAvatarEngineManager.getASAvatarConfigValue().gender));
@@ -245,7 +201,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
             if (this.mEditLevelListAdapter == null) {
                 this.mEditLevelListAdapter = new EditLevelListAdapter(this.mContext, new ItfGvOnItemClickListener() {
                     public void notifyUIChanged() {
-                        FragmentMimojiEdit.this.mEditState = true;
+                        boolean unused = FragmentMimojiEdit.this.mEditState = true;
                         if (FragmentMimojiEdit.this.fromTag == 105) {
                             FragmentMimojiEdit.this.updateTitleState(3);
                             FragmentMimojiEdit.this.mMimojiPageChangeAnimManager.resetLayoutPosition(4);
@@ -259,19 +215,16 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
         }
         this.mEditLevelListAdapter.setIsColorNeedNotify(true);
         if (this.mMimojiTypeAdapter == null) {
-            this.mMimojiTypeAdapter = new MimojiTypeAdapter(null);
-            this.mMimojiTypeAdapter.setOnSelectListener(new OnSelectListener() {
-                public void onSelectListener(ASAvatarConfigType aSAvatarConfigType, int i) {
+            this.mMimojiTypeAdapter = new MimojiTypeAdapter((ArrayList<MimojiTypeBean>) null);
+            this.mMimojiTypeAdapter.setOnSelectListener(new MimojiTypeAdapter.OnSelectListener() {
+                public void onSelectListener(AvatarConfig.ASAvatarConfigType aSAvatarConfigType, int i) {
                     String str = FragmentMimojiEdit.TAG;
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("onSelectListener position  : ");
-                    sb.append(i);
-                    Log.v(str, sb.toString());
+                    Log.v(str, "onSelectListener position  : " + i);
                     FragmentMimojiEdit.this.mMimojiPageChangeAnimManager.updateLayoutPosition();
                     if (FragmentMimojiEdit.this.mEditLevelListAdapter != null) {
                         FragmentMimojiEdit.this.mEditLevelListAdapter.setIsColorNeedNotify(true);
                     }
-                    MimojiEditor mimojiEditor = (MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
+                    ModeProtocol.MimojiEditor mimojiEditor = (ModeProtocol.MimojiEditor) ModeCoordinatorImpl.getInstance().getAttachProtocol(224);
                     if (!(mimojiEditor == null || aSAvatarConfigType == null)) {
                         mimojiEditor.onTypeConfigSelect(aSAvatarConfigType.configType);
                     }
@@ -280,24 +233,18 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
             });
             this.mMimojiTypeSelectView.setAdapter(this.mMimojiTypeAdapter);
         }
-        ArrayList configTypeList = AvatarEngineManager.getInstance().getConfigTypeList();
+        ArrayList<AvatarConfig.ASAvatarConfigType> configTypeList = AvatarEngineManager.getInstance().getConfigTypeList();
         ArrayList arrayList = new ArrayList();
-        Iterator it = configTypeList.iterator();
+        Iterator<AvatarConfig.ASAvatarConfigType> it = configTypeList.iterator();
         while (it.hasNext()) {
-            ASAvatarConfigType aSAvatarConfigType = (ASAvatarConfigType) it.next();
-            ArrayList config = AvatarEngineManager.getInstance().queryAvatar().getConfig(aSAvatarConfigType.configType, AvatarEngineManager.getInstance().getASAvatarConfigValue().gender);
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("putConfigList:");
-            sb.append(aSAvatarConfigType.configTypeDesc);
-            sb.append(":");
-            sb.append(aSAvatarConfigType.configType);
-            Log.i(str, sb.toString());
-            AvatarEngineManager.getInstance().putConfigList(aSAvatarConfigType.configType, config);
-            if (!AvatarEngineManager.filterTypeTitle(aSAvatarConfigType.configType)) {
+            AvatarConfig.ASAvatarConfigType next = it.next();
+            ArrayList<AvatarConfig.ASAvatarConfigInfo> config = AvatarEngineManager.getInstance().queryAvatar().getConfig(next.configType, AvatarEngineManager.getInstance().getASAvatarConfigValue().gender);
+            Log.i(TAG, "putConfigList:" + next.configTypeDesc + ":" + next.configType);
+            AvatarEngineManager.getInstance().putConfigList(next.configType, config);
+            if (!AvatarEngineManager.filterTypeTitle(next.configType)) {
                 MimojiTypeBean mimojiTypeBean = new MimojiTypeBean();
                 mimojiTypeBean.setAlpha(0);
-                mimojiTypeBean.setASAvatarConfigType(aSAvatarConfigType);
+                mimojiTypeBean.setASAvatarConfigType(next);
                 arrayList.add(mimojiTypeBean);
             }
         }
@@ -317,7 +264,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     }
 
     private void initMimojiEdit(View view) {
-        view.setOnClickListener(new OnClickListener() {
+        view.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             }
         });
@@ -354,7 +301,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
         }
         this.mEditLevelListAdapter = new EditLevelListAdapter(this.mContext, new ItfGvOnItemClickListener() {
             public void notifyUIChanged() {
-                FragmentMimojiEdit.this.mEditState = true;
+                boolean unused = FragmentMimojiEdit.this.mEditState = true;
                 if (FragmentMimojiEdit.this.fromTag == 105) {
                     FragmentMimojiEdit.this.updateTitleState(3);
                 } else {
@@ -382,10 +329,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
         }
         this.mEditLevelListAdapter.notifyDataSetChanged();
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("resetData   mEnterFromMimoji :");
-        sb.append(this.mEnterFromMimoji);
-        Log.i(str, sb.toString());
+        Log.i(str, "resetData   mEnterFromMimoji :" + this.mEnterFromMimoji);
         this.mAvatar.loadConfig(this.mEnterFromMimoji ? this.mCurrentConfigPath : AvatarEngineManager.TempOriginalConfigPath);
     }
 
@@ -397,7 +341,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
         if (!this.mEnterFromMimoji) {
             this.mAvatar.setTemplatePath(AvatarEngineManager.PersonTemplatePath);
         }
-        ASAvatarConfigValue aSAvatarConfigValue = new ASAvatarConfigValue();
+        AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue = new AvatarConfig.ASAvatarConfigValue();
         this.mAvatar.getConfigValue(aSAvatarConfigValue);
         this.mAvatarEngineManager.setASAvatarConfigValue(aSAvatarConfigValue);
         this.mAvatarEngineManager.setASAvatarConfigValueDefault(aSAvatarConfigValue);
@@ -418,7 +362,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
         if (!this.mIsShowDialog) {
             int i2 = (i == 1 || i == 2) ? R.string.mimoji_edit_cancel_alert : i != 3 ? (i == 4 || i == 5) ? R.string.mimoji_edit_abandon_alert : -1 : R.string.mimoji_edit_abandon_capture_alert;
             if (i2 != -1) {
-                Builder builder = new Builder(getActivity());
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(i2);
                 builder.setCancelable(false);
                 builder.setPositiveButton(R.string.mimoji_confirm, new DialogInterface.OnClickListener() {
@@ -441,12 +385,12 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
                         } else if (i3 == 5) {
                             CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_EDIT_CANCEL);
                         }
-                        FragmentMimojiEdit.this.mIsShowDialog = false;
+                        boolean unused = FragmentMimojiEdit.this.mIsShowDialog = false;
                     }
                 });
                 builder.setNegativeButton(R.string.mimoji_cancle, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        FragmentMimojiEdit.this.mIsShowDialog = false;
+                        boolean unused = FragmentMimojiEdit.this.mIsShowDialog = false;
                     }
                 });
                 this.mIsShowDialog = true;
@@ -457,25 +401,22 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
 
     public void directlyEnterEditMode(MimojiInfo mimojiInfo, int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("configPath = ");
-        sb.append(this.mCurrentConfigPath);
-        Log.d(str, sb.toString());
+        Log.d(str, "configPath = " + this.mCurrentConfigPath);
         this.mPopSaveDeletePath = mimojiInfo.mPackPath;
         this.mCurrentConfigPath = mimojiInfo.mConfigPath;
         this.mEnterFromMimoji = true;
         this.mIsStartEdit = true;
         DataRepository.dataItemLive().getMimojiStatusManager().setMode(MimojiStatusManager.MIMOJI_EIDT);
-        ActionProcessing actionProcessing = (ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
+        ModeProtocol.ActionProcessing actionProcessing = (ModeProtocol.ActionProcessing) ModeCoordinatorImpl.getInstance().getAttachProtocol(162);
         if (actionProcessing != null) {
             actionProcessing.forceSwitchFront();
         }
         startMimojiEdit(false, i);
-        MimojiAvatarEngine mimojiAvatarEngine = (MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
+        ModeProtocol.MimojiAvatarEngine mimojiAvatarEngine = (ModeProtocol.MimojiAvatarEngine) ModeCoordinatorImpl.getInstance().getAttachProtocol(217);
         if (mimojiAvatarEngine != null) {
             mimojiAvatarEngine.setDisableSingleTapUp(true);
         }
-        ((TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).disableMenuItem(true, 197, 193);
+        ((ModeProtocol.TopAlert) ModeCoordinatorImpl.getInstance().getAttachProtocol(172)).disableMenuItem(true, 197, 193);
         if (101 == i) {
             updateTitleState(4);
         } else {
@@ -505,18 +446,19 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     }
 
     public boolean onBackEvent(int i) {
-        if (i == 1 && !this.mIsSaveBtnClicked) {
-            if (this.mIsStartEdit) {
-                showAlertDialog(4);
-                return true;
-            }
-            View view = this.mMimojiEditViewLayout;
-            if (!(view == null || view.getVisibility() == 8)) {
-                showAlertDialog(3);
-                return true;
-            }
+        if (i != 1 || this.mIsSaveBtnClicked) {
+            return false;
         }
-        return false;
+        if (this.mIsStartEdit) {
+            showAlertDialog(4);
+            return true;
+        }
+        View view = this.mMimojiEditViewLayout;
+        if (view == null || view.getVisibility() == 8) {
+            return false;
+        }
+        showAlertDialog(3);
+        return true;
     }
 
     public void onClick(View view) {
@@ -525,7 +467,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
             if (id != R.id.btn_confirm) {
                 if (id != R.id.tv_back) {
                     switch (id) {
-                        case R.id.tv_edit /*2131296578*/:
+                        case R.id.tv_edit:
                             updateTitleState(2);
                             this.mOperateSelectLayout.setVisibility(8);
                             this.mRlAllEditContent.setVisibility(0);
@@ -534,22 +476,26 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
                             DataRepository.dataItemLive().getMimojiStatusManager().setMode(MimojiStatusManager.MIMOJI_EIDT);
                             this.mIsStartEdit = true;
                             CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_PREVIEW_MID_EDIT);
-                            break;
-                        case R.id.tv_recapture /*2131296579*/:
+                            return;
+                        case R.id.tv_recapture:
                             if (!this.mIsSaveBtnClicked) {
                                 showAlertDialog(2);
-                                break;
+                                return;
                             }
+                            return;
+                        case R.id.tv_save:
                             break;
-                        case R.id.tv_save /*2131296580*/:
-                            break;
+                        default:
+                            return;
                     }
                 } else if (!this.mIsSaveBtnClicked) {
                     int i = this.fromTag;
                     if (i == 101) {
                         showAlertDialog(5);
+                        return;
                     } else if (i == 105 && this.mCurrentTopPannelState == 1) {
                         showAlertDialog(1);
+                        return;
                     } else if (this.mEditState) {
                         ClickCheck clickCheck = this.mClickCheck;
                         if (clickCheck == null || clickCheck.checkClickable()) {
@@ -557,31 +503,33 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
                             updateTitleState(2);
                             resetData();
                             CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_EDIT_RESET);
-                        } else {
                             return;
                         }
+                        return;
+                    } else {
+                        return;
                     }
+                } else {
+                    return;
                 }
             }
             if (!this.mIsSaveBtnClicked) {
                 this.mIsSaveBtnClicked = true;
                 this.mMimojiEditGLTextureView.setSaveConfigThum(true);
                 if (this.mIsStartEdit) {
-                    ASAvatarConfigValue aSAvatarConfigValue = new ASAvatarConfigValue();
+                    AvatarConfig.ASAvatarConfigValue aSAvatarConfigValue = new AvatarConfig.ASAvatarConfigValue();
                     this.mAvatar.getConfigValue(aSAvatarConfigValue);
-                    Map mimojiConfigValue = AvatarEngineManager.getMimojiConfigValue(aSAvatarConfigValue);
+                    Map<String, String> mimojiConfigValue = AvatarEngineManager.getMimojiConfigValue(aSAvatarConfigValue);
                     if (this.mEnterFromMimoji) {
-                        String str = CameraStat.PARAM_MIMOJI_CLICK_EDIT_SAVE_OLD;
-                        CameraStatUtil.trackMimojiClick(str);
-                        CameraStatUtil.trackMimojiSavePara(str, mimojiConfigValue);
-                    } else {
-                        String str2 = CameraStat.PARAM_MIMOJI_CLICK_EDIT_SAVE_NEW;
-                        CameraStatUtil.trackMimojiClick(str2);
-                        CameraStatUtil.trackMimojiSavePara(str2, mimojiConfigValue);
+                        CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_EDIT_SAVE_OLD);
+                        CameraStatUtil.trackMimojiSavePara(CameraStat.PARAM_MIMOJI_CLICK_EDIT_SAVE_OLD, mimojiConfigValue);
+                        return;
                     }
-                } else {
-                    CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_PREVIEW_MID_SAVE);
+                    CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_EDIT_SAVE_NEW);
+                    CameraStatUtil.trackMimojiSavePara(CameraStat.PARAM_MIMOJI_CLICK_EDIT_SAVE_NEW, mimojiConfigValue);
+                    return;
                 }
+                CameraStatUtil.trackMimojiClick(CameraStat.PARAM_MIMOJI_CLICK_PREVIEW_MID_SAVE);
             }
         }
     }
@@ -611,47 +559,45 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
 
     public boolean onTouch(View view, MotionEvent motionEvent) {
         switch (view.getId()) {
-            case R.id.tv_edit /*2131296578*/:
-                if (motionEvent.getActionMasked() != 0) {
-                    if (motionEvent.getActionMasked() == 1) {
-                        this.mEditTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_default));
-                        this.mEditTextView.setTextColor(getResources().getColor(R.color.white));
-                        break;
-                    }
-                } else {
+            case R.id.tv_edit:
+                if (motionEvent.getActionMasked() == 0) {
                     this.mEditTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_selected));
                     this.mEditTextView.setTextColor(getResources().getColor(R.color.white_alpha_cc));
-                    break;
-                }
-                break;
-            case R.id.tv_recapture /*2131296579*/:
-                if (motionEvent.getActionMasked() != 0) {
-                    if (motionEvent.getActionMasked() == 1) {
-                        this.mReCaptureTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_default));
-                        this.mReCaptureTextView.setTextColor(getResources().getColor(R.color.white));
-                        break;
-                    }
+                    return false;
+                } else if (motionEvent.getActionMasked() != 1) {
+                    return false;
                 } else {
+                    this.mEditTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_default));
+                    this.mEditTextView.setTextColor(getResources().getColor(R.color.white));
+                    return false;
+                }
+            case R.id.tv_recapture:
+                if (motionEvent.getActionMasked() == 0) {
                     this.mReCaptureTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_selected));
                     this.mReCaptureTextView.setTextColor(getResources().getColor(R.color.white_alpha_cc));
-                    break;
-                }
-                break;
-            case R.id.tv_save /*2131296580*/:
-                if (motionEvent.getActionMasked() != 0) {
-                    if (motionEvent.getActionMasked() == 1) {
-                        this.mSaveTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_save_default));
-                        this.mSaveTextView.setTextColor(getResources().getColor(R.color.white));
-                        break;
-                    }
+                    return false;
+                } else if (motionEvent.getActionMasked() != 1) {
+                    return false;
                 } else {
+                    this.mReCaptureTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_default));
+                    this.mReCaptureTextView.setTextColor(getResources().getColor(R.color.white));
+                    return false;
+                }
+            case R.id.tv_save:
+                if (motionEvent.getActionMasked() == 0) {
                     this.mSaveTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_save_selected));
                     this.mSaveTextView.setTextColor(getResources().getColor(R.color.white_alpha_cc));
-                    break;
+                    return false;
+                } else if (motionEvent.getActionMasked() != 1) {
+                    return false;
+                } else {
+                    this.mSaveTextView.setBackground(getResources().getDrawable(R.drawable.shape_round_corner_save_default));
+                    this.mSaveTextView.setTextColor(getResources().getColor(R.color.white));
+                    return false;
                 }
-                break;
+            default:
+                return false;
         }
-        return false;
     }
 
     public void onTypeConfigSelect(int i) {
@@ -669,12 +615,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     public void provideAnimateElement(int i, List<Completable> list, int i2) {
         super.provideAnimateElement(i, list, i2);
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("provideAnimateElement, animateInElements");
-        sb.append(list);
-        sb.append("resetType = ");
-        sb.append(i2);
-        Log.d(str, sb.toString());
+        Log.d(str, "provideAnimateElement, animateInElements" + list + "resetType = " + i2);
         View view = this.mMimojiEditViewLayout;
         if (view != null && view.getVisibility() == 0 && i2 == 3) {
             Log.d(TAG, "mimoji edit timeout");
@@ -686,12 +627,12 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
                 alertDialog.dismiss();
                 this.mCurrentAlertDialog = null;
             }
-            ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getAnimationComposite().remove(getFragmentInto());
+            ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getAnimationComposite().remove(getFragmentInto());
         }
     }
 
     /* access modifiers changed from: protected */
-    public void register(ModeCoordinator modeCoordinator) {
+    public void register(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.register(modeCoordinator);
         registerBackStack(modeCoordinator, this);
         ModeCoordinatorImpl.getInstance().attachProtocol(224, this);
@@ -735,10 +676,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
 
     public void startMimojiEdit(boolean z, final int i) {
         String str = TAG;
-        StringBuilder sb = new StringBuilder();
-        sb.append("startMimojiEdit：");
-        sb.append(i);
-        Log.d(str, sb.toString());
+        Log.d(str, "startMimojiEdit：" + i);
         this.mSetupCompleted = false;
         if (this.mMimojiEditViewLayout == null) {
             this.mMimojiEditViewLayout = this.mMimojiEditViewStub.inflate();
@@ -746,7 +684,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
         }
         RecyclerView recyclerView = this.mLevelRecyleView;
         if (recyclerView != null) {
-            LayoutParams layoutParams = (LayoutParams) recyclerView.getLayoutParams();
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) recyclerView.getLayoutParams();
             if (layoutParams != null) {
                 if (!Util.isFullScreenNavBarHidden(getContext())) {
                     layoutParams.bottomMargin = getResources().getDimensionPixelSize(R.dimen.mimoji_edit_config_bottom);
@@ -756,12 +694,12 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
             }
         }
         this.mIsSaveBtnClicked = false;
-        ((BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getAnimationComposite().put(getFragmentInto(), this);
+        ((ModeProtocol.BaseDelegate) ModeCoordinatorImpl.getInstance().getAttachProtocol(160)).getAnimationComposite().put(getFragmentInto(), this);
         this.mMimojiEditViewLayout.setVisibility(0);
         this.mMimojiEditGLTextureView.setStopRender(true);
         this.mMimojiEditGLTextureView.setVisibility(4);
         this.fromTag = i;
-        this.mMimojiEditViewLayout.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+        this.mMimojiEditViewLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             public void onGlobalLayout() {
                 FragmentMimojiEdit.this.mMimojiEditViewLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 FragmentMimojiEdit.this.mMimojiEditGLTextureView.setVisibility(0);
@@ -785,7 +723,7 @@ public class FragmentMimojiEdit extends BaseFragment implements MimojiEditor, On
     }
 
     /* access modifiers changed from: protected */
-    public void unRegister(ModeCoordinator modeCoordinator) {
+    public void unRegister(ModeProtocol.ModeCoordinator modeCoordinator) {
         super.unRegister(modeCoordinator);
         unRegisterBackStack(modeCoordinator, this);
         ModeCoordinatorImpl.getInstance().detachProtocol(224, this);

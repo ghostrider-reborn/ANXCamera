@@ -1,6 +1,6 @@
 package org.jcodec.containers.mp4.boxes;
 
-import com.android.gallery3d.exif.ExifInterface.ColorSpace;
+import com.android.gallery3d.exif.ExifInterface;
 import java.nio.ByteBuffer;
 import org.jcodec.platform.Platform;
 
@@ -22,21 +22,7 @@ public class SegmentIndexBox extends FullBox {
         public long subsegment_duration;
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Reference [reference_type=");
-            sb.append(this.reference_type);
-            sb.append(", referenced_size=");
-            sb.append(this.referenced_size);
-            sb.append(", subsegment_duration=");
-            sb.append(this.subsegment_duration);
-            sb.append(", starts_with_SAP=");
-            sb.append(this.starts_with_SAP);
-            sb.append(", SAP_type=");
-            sb.append(this.SAP_type);
-            sb.append(", SAP_delta_time=");
-            sb.append(this.SAP_delta_time);
-            sb.append("]");
-            return sb.toString();
+            return "Reference [reference_type=" + this.reference_type + ", referenced_size=" + this.referenced_size + ", subsegment_duration=" + this.subsegment_duration + ", starts_with_SAP=" + this.starts_with_SAP + ", SAP_type=" + this.SAP_type + ", SAP_delta_time=" + this.SAP_delta_time + "]";
         }
     }
 
@@ -70,10 +56,10 @@ public class SegmentIndexBox extends FullBox {
             Reference reference = this.references[i];
             int i2 = (int) (((long) ((reference.reference_type ? 1 : 0) << true)) | reference.referenced_size);
             int i3 = (int) reference.subsegment_duration;
-            int i4 = (int) (((long) ((reference.starts_with_SAP ? Integer.MIN_VALUE : 0) | ((reference.SAP_type & 7) << 28))) | (reference.SAP_delta_time & 268435455));
+            int i4 = reference.starts_with_SAP ? Integer.MIN_VALUE : 0;
             byteBuffer.putInt(i2);
             byteBuffer.putInt(i3);
-            byteBuffer.putInt(i4);
+            byteBuffer.putInt((int) (((long) (i4 | ((reference.SAP_type & 7) << 28))) | (reference.SAP_delta_time & 268435455)));
         }
     }
 
@@ -93,7 +79,7 @@ public class SegmentIndexBox extends FullBox {
             this.first_offset = byteBuffer.getLong();
         }
         this.reserved = byteBuffer.getShort();
-        this.reference_count = byteBuffer.getShort() & ColorSpace.UNCALIBRATED;
+        this.reference_count = byteBuffer.getShort() & ExifInterface.ColorSpace.UNCALIBRATED;
         this.references = new Reference[this.reference_count];
         for (int i = 0; i < this.reference_count; i++) {
             long unsignedInt = Platform.unsignedInt(byteBuffer.getInt());
@@ -115,28 +101,6 @@ public class SegmentIndexBox extends FullBox {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SegmentIndexBox [reference_ID=");
-        sb.append(this.reference_ID);
-        sb.append(", timescale=");
-        sb.append(this.timescale);
-        sb.append(", earliest_presentation_time=");
-        sb.append(this.earliest_presentation_time);
-        sb.append(", first_offset=");
-        sb.append(this.first_offset);
-        sb.append(", reserved=");
-        sb.append(this.reserved);
-        sb.append(", reference_count=");
-        sb.append(this.reference_count);
-        sb.append(", references=");
-        sb.append(Platform.arrayToString(this.references));
-        sb.append(", version=");
-        sb.append(this.version);
-        sb.append(", flags=");
-        sb.append(this.flags);
-        sb.append(", header=");
-        sb.append(this.header);
-        sb.append("]");
-        return sb.toString();
+        return "SegmentIndexBox [reference_ID=" + this.reference_ID + ", timescale=" + this.timescale + ", earliest_presentation_time=" + this.earliest_presentation_time + ", first_offset=" + this.first_offset + ", reserved=" + this.reserved + ", reference_count=" + this.reference_count + ", references=" + Platform.arrayToString(this.references) + ", version=" + this.version + ", flags=" + this.flags + ", header=" + this.header + "]";
     }
 }

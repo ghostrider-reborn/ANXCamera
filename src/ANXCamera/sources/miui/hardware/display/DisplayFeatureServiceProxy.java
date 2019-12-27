@@ -48,9 +48,9 @@ class DisplayFeatureServiceProxy {
         int i3 = -1;
         try {
             obtain.writeInterfaceToken(this.mDescriptor);
-            for (Object obj : objArr) {
-                if (obj instanceof Integer) {
-                    obtain.writeInt(((Integer) obj).intValue());
+            for (Integer num : objArr) {
+                if (num instanceof Integer) {
+                    obtain.writeInt(num.intValue());
                 }
             }
             if (this.mService.transact(i, obtain, obtain2, i2)) {
@@ -58,11 +58,7 @@ class DisplayFeatureServiceProxy {
                 i3 = obtain2.readInt();
             }
         } catch (RemoteException e2) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("callBinderTransact transact fail. ");
-            sb.append(e2);
-            Slog.e(str, sb.toString());
+            Slog.e(TAG, "callBinderTransact transact fail. " + e2);
         } catch (Throwable th) {
             obtain2.recycle();
             obtain.recycle();
@@ -78,22 +74,18 @@ class DisplayFeatureServiceProxy {
         try {
             HwParcel hwParcel2 = new HwParcel();
             hwParcel2.writeInterfaceToken(this.mDescriptor);
-            for (Object obj : objArr) {
-                if (obj instanceof Integer) {
-                    hwParcel2.writeInt32(((Integer) obj).intValue());
-                } else if (obj instanceof IHwInterface) {
-                    hwParcel2.writeStrongBinder(((IHwInterface) obj).asBinder());
+            for (Integer num : objArr) {
+                if (num instanceof Integer) {
+                    hwParcel2.writeInt32(num.intValue());
+                } else if (num instanceof IHwInterface) {
+                    hwParcel2.writeStrongBinder(num.asBinder());
                 }
             }
             this.mHwService.transact(i, hwParcel2, hwParcel, i2);
             hwParcel.verifySuccess();
             hwParcel2.releaseTemporaryStorage();
         } catch (RemoteException e2) {
-            String str = TAG;
-            StringBuilder sb = new StringBuilder();
-            sb.append("callHwBinderTransact transact fail. ");
-            sb.append(e2);
-            Slog.e(str, sb.toString());
+            Slog.e(TAG, "callHwBinderTransact transact fail. " + e2);
         } catch (Throwable th) {
             hwParcel.release();
             throw th;
@@ -115,14 +107,14 @@ class DisplayFeatureServiceProxy {
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void registerCallback(int i, Object obj) {
         if (DeviceFeature.SUPPORT_DISPLAYFEATURE_HIDL) {
             callHwBinderTransact(2, 0, Integer.valueOf(i), obj);
         }
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void setFeature(int i, int i2, int i3, int i4) {
         if (DeviceFeature.SUPPORT_DISPLAYFEATURE_HIDL) {
             callHwBinderTransact(1, 0, Integer.valueOf(i), Integer.valueOf(i2), Integer.valueOf(i3), Integer.valueOf(i4));

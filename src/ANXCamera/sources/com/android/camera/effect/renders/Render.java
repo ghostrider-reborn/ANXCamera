@@ -1,7 +1,7 @@
 package com.android.camera.effect.renders;
 
 import android.opengl.GLES20;
-import com.android.camera.effect.EffectController.EffectRectAttribute;
+import com.android.camera.effect.EffectController;
 import com.android.camera.effect.draw_mode.DrawAttribute;
 import com.android.camera.log.Log;
 import com.android.gallery3d.ui.GLCanvas;
@@ -61,15 +61,12 @@ public abstract class Render {
         return this.mId;
     }
 
-    public void setEffectRangeAttribute(EffectRectAttribute effectRectAttribute) {
+    public void setEffectRangeAttribute(EffectController.EffectRectAttribute effectRectAttribute) {
     }
 
     public void setFrameBufferCallback(FrameBufferCallback frameBufferCallback, int i) {
         if (i == this.mId || i < 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("setFrameBufferCallback: id=0x");
-            sb.append(Integer.toHexString(i));
-            Log.v(TAG, sb.toString());
+            Log.v(TAG, "setFrameBufferCallback: id=0x" + Integer.toHexString(i));
             synchronized (this) {
                 this.mFrameBufferCallback = frameBufferCallback;
             }

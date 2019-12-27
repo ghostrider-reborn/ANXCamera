@@ -77,6 +77,6 @@ public final class FlowableUnsubscribeOn<T> extends AbstractFlowableWithUpstream
 
     /* access modifiers changed from: protected */
     public void subscribeActual(Subscriber<? super T> subscriber) {
-        this.source.subscribe((FlowableSubscriber<? super T>) new UnsubscribeSubscriber<Object>(subscriber, this.scheduler));
+        this.source.subscribe(new UnsubscribeSubscriber(subscriber, this.scheduler));
     }
 }

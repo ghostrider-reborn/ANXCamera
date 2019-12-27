@@ -21,12 +21,12 @@ public final class SerialDisposable implements Disposable {
 
     @Nullable
     public Disposable get() {
-        Disposable disposable = (Disposable) this.resource.get();
+        Disposable disposable = this.resource.get();
         return disposable == DisposableHelper.DISPOSED ? Disposables.disposed() : disposable;
     }
 
     public boolean isDisposed() {
-        return DisposableHelper.isDisposed((Disposable) this.resource.get());
+        return DisposableHelper.isDisposed(this.resource.get());
     }
 
     public boolean replace(@Nullable Disposable disposable) {

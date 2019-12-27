@@ -36,20 +36,17 @@ public class CameraSize implements Comparable<CameraSize> {
     }
 
     public boolean equals(Object obj) {
-        boolean z = false;
         if (obj == null) {
             return false;
         }
         if (this == obj) {
             return true;
         }
-        if (obj instanceof CameraSize) {
-            CameraSize cameraSize = (CameraSize) obj;
-            if (this.width == cameraSize.width && this.height == cameraSize.height) {
-                z = true;
-            }
+        if (!(obj instanceof CameraSize)) {
+            return false;
         }
-        return z;
+        CameraSize cameraSize = (CameraSize) obj;
+        return this.width == cameraSize.width && this.height == cameraSize.height;
     }
 
     public int getHeight() {
@@ -85,10 +82,6 @@ public class CameraSize implements Comparable<CameraSize> {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.width);
-        sb.append("x");
-        sb.append(this.height);
-        return sb.toString();
+        return this.width + "x" + this.height;
     }
 }

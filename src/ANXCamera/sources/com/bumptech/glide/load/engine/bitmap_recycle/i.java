@@ -31,7 +31,7 @@ public final class i implements b {
             this.pool = bVar;
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public void c(int i, Class<?> cls) {
             this.size = i;
             this.fg = cls;
@@ -52,13 +52,7 @@ public final class i implements b {
         }
 
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Key{size=");
-            sb.append(this.size);
-            sb.append("array=");
-            sb.append(this.fg);
-            sb.append('}');
-            return sb.toString();
+            return "Key{size=" + this.size + "array=" + this.fg + '}';
         }
 
         public void u() {
@@ -71,7 +65,7 @@ public final class i implements b {
         b() {
         }
 
-        /* access modifiers changed from: 0000 */
+        /* access modifiers changed from: package-private */
         public a a(int i, Class<?> cls) {
             a aVar = (a) get();
             aVar.c(i, cls);
@@ -109,11 +103,7 @@ public final class i implements b {
             this.ig -= v.a(removeLast) * v.E();
             d(v.a(removeLast), removeLast.getClass());
             if (Log.isLoggable(v.getTag(), 2)) {
-                String tag = v.getTag();
-                StringBuilder sb = new StringBuilder();
-                sb.append("evicted: ");
-                sb.append(v.a(removeLast));
-                Log.v(tag, sb.toString());
+                Log.v(v.getTag(), "evicted: " + v.a(removeLast));
             }
         }
     }
@@ -128,7 +118,7 @@ public final class i implements b {
     }
 
     private <T> T a(a aVar, Class<T> cls) {
-        a m = m(cls);
+        a<T> m = m(cls);
         T a2 = a(aVar);
         if (a2 != null) {
             this.ig -= m.a(a2) * m.E();
@@ -138,12 +128,7 @@ public final class i implements b {
             return a2;
         }
         if (Log.isLoggable(m.getTag(), 2)) {
-            String tag = m.getTag();
-            StringBuilder sb = new StringBuilder();
-            sb.append("Allocated ");
-            sb.append(aVar.size);
-            sb.append(" bytes");
-            Log.v(tag, sb.toString());
+            Log.v(m.getTag(), "Allocated " + aVar.size + " bytes");
         }
         return m.newArray(aVar.size);
     }
@@ -153,15 +138,10 @@ public final class i implements b {
     }
 
     private void d(int i, Class<?> cls) {
-        NavigableMap n = n(cls);
+        NavigableMap<Integer, Integer> n = n(cls);
         Integer num = (Integer) n.get(Integer.valueOf(i));
         if (num == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Tried to decrement empty size, size: ");
-            sb.append(i);
-            sb.append(", this: ");
-            sb.append(this);
-            throw new NullPointerException(sb.toString());
+            throw new NullPointerException("Tried to decrement empty size, size: " + i + ", this: " + this);
         } else if (num.intValue() == 1) {
             n.remove(Integer.valueOf(i));
         } else {
@@ -170,17 +150,14 @@ public final class i implements b {
     }
 
     private <T> a<T> m(Class<T> cls) {
-        a<T> aVar = (a) this.hg.get(cls);
+        a<T> aVar = this.hg.get(cls);
         if (aVar == null) {
             if (cls.equals(int[].class)) {
-                aVar = new h<>();
+                aVar = new h();
             } else if (cls.equals(byte[].class)) {
-                aVar = new f<>();
+                aVar = new f();
             } else {
-                StringBuilder sb = new StringBuilder();
-                sb.append("No array pool found for: ");
-                sb.append(cls.getSimpleName());
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("No array pool found for: " + cls.getSimpleName());
             }
             this.hg.put(cls, aVar);
         }
@@ -188,7 +165,7 @@ public final class i implements b {
     }
 
     private NavigableMap<Integer, Integer> n(Class<?> cls) {
-        NavigableMap<Integer, Integer> navigableMap = (NavigableMap) this.gg.get(cls);
+        NavigableMap<Integer, Integer> navigableMap = this.gg.get(cls);
         if (navigableMap != null) {
             return navigableMap;
         }
@@ -214,21 +191,21 @@ public final class i implements b {
         P(0);
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public int J() {
         int i = 0;
-        for (Class cls : this.gg.keySet()) {
-            for (Integer num : ((NavigableMap) this.gg.get(cls)).keySet()) {
-                i += num.intValue() * ((Integer) ((NavigableMap) this.gg.get(cls)).get(num)).intValue() * m(cls).E();
+        for (Class next : this.gg.keySet()) {
+            for (Integer num : this.gg.get(next).keySet()) {
+                i += num.intValue() * ((Integer) this.gg.get(next).get(num)).intValue() * m(next).E();
             }
         }
         return i;
     }
 
     public synchronized <T> T a(int i, Class<T> cls) {
-        Integer num;
-        num = (Integer) n(cls).ceilingKey(Integer.valueOf(i));
-        return a(a(i, num) ? this.cg.a(num.intValue(), cls) : this.cg.a(i, cls), cls);
+        Integer ceilingKey;
+        ceilingKey = n(cls).ceilingKey(Integer.valueOf(i));
+        return a(a(i, ceilingKey) ? this.cg.a(ceilingKey.intValue(), cls) : this.cg.a(i, cls), cls);
     }
 
     @Deprecated
@@ -241,14 +218,14 @@ public final class i implements b {
     }
 
     public synchronized <T> void put(T t) {
-        Class cls = t.getClass();
-        a m = m(cls);
+        Class<?> cls = t.getClass();
+        a<?> m = m(cls);
         int a2 = m.a(t);
         int E = m.E() * a2;
         if (Q(E)) {
             a a3 = this.cg.a(a2, cls);
             this.dg.a(a3, t);
-            NavigableMap n = n(cls);
+            NavigableMap<Integer, Integer> n = n(cls);
             Integer num = (Integer) n.get(Integer.valueOf(a3.size));
             Integer valueOf = Integer.valueOf(a3.size);
             int i = 1;

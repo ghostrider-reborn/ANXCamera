@@ -1,26 +1,25 @@
 package com.android.volley.toolbox;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.annotation.MainThread;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader.ImageContainer;
-import com.android.volley.toolbox.ImageLoader.ImageListener;
+import com.android.volley.toolbox.ImageLoader;
 
 public class NetworkImageView extends ImageView {
     /* access modifiers changed from: private */
     public int mDefaultImageId;
     /* access modifiers changed from: private */
     public int mErrorImageId;
-    private ImageContainer mImageContainer;
+    private ImageLoader.ImageContainer mImageContainer;
     private ImageLoader mImageLoader;
     private String mUrl;
 
     public NetworkImageView(Context context) {
-        this(context, null);
+        this(context, (AttributeSet) null);
     }
 
     public NetworkImageView(Context context, AttributeSet attributeSet) {
@@ -36,7 +35,7 @@ public class NetworkImageView extends ImageView {
         if (i != 0) {
             setImageResource(i);
         } else {
-            setImageBitmap(null);
+            setImageBitmap((Bitmap) null);
         }
     }
 
@@ -46,13 +45,13 @@ public class NetworkImageView extends ImageView {
         invalidate();
     }
 
-    /* access modifiers changed from: 0000 */
+    /* access modifiers changed from: package-private */
     public void loadImageIfNecessary(final boolean z) {
         boolean z2;
         boolean z3;
         int width = getWidth();
         int height = getHeight();
-        ScaleType scaleType = getScaleType();
+        ImageView.ScaleType scaleType = getScaleType();
         boolean z4 = true;
         if (getLayoutParams() != null) {
             z3 = getLayoutParams().width == -2;
@@ -66,7 +65,7 @@ public class NetworkImageView extends ImageView {
         }
         if (width != 0 || height != 0 || z4) {
             if (TextUtils.isEmpty(this.mUrl)) {
-                ImageContainer imageContainer = this.mImageContainer;
+                ImageLoader.ImageContainer imageContainer = this.mImageContainer;
                 if (imageContainer != null) {
                     imageContainer.cancelRequest();
                     this.mImageContainer = null;
@@ -74,7 +73,7 @@ public class NetworkImageView extends ImageView {
                 setDefaultImageOrNull();
                 return;
             }
-            ImageContainer imageContainer2 = this.mImageContainer;
+            ImageLoader.ImageContainer imageContainer2 = this.mImageContainer;
             if (!(imageContainer2 == null || imageContainer2.getRequestUrl() == null)) {
                 if (!this.mImageContainer.getRequestUrl().equals(this.mUrl)) {
                     this.mImageContainer.cancelRequest();
@@ -86,7 +85,7 @@ public class NetworkImageView extends ImageView {
             if (z3) {
                 width = 0;
             }
-            this.mImageContainer = this.mImageLoader.get(this.mUrl, new ImageListener() {
+            this.mImageContainer = this.mImageLoader.get(this.mUrl, new ImageLoader.ImageListener() {
                 public void onErrorResponse(VolleyError volleyError) {
                     if (NetworkImageView.this.mErrorImageId != 0) {
                         NetworkImageView networkImageView = NetworkImageView.this;
@@ -94,21 +93,19 @@ public class NetworkImageView extends ImageView {
                     }
                 }
 
-                public void onResponse(final ImageContainer imageContainer, boolean z) {
-                    if (!z || !z) {
-                        if (imageContainer.getBitmap() != null) {
-                            NetworkImageView.this.setImageBitmap(imageContainer.getBitmap());
-                        } else if (NetworkImageView.this.mDefaultImageId != 0) {
-                            NetworkImageView networkImageView = NetworkImageView.this;
-                            networkImageView.setImageResource(networkImageView.mDefaultImageId);
-                        }
-                        return;
+                public void onResponse(final ImageLoader.ImageContainer imageContainer, boolean z) {
+                    if (z && z) {
+                        NetworkImageView.this.post(new Runnable() {
+                            public void run() {
+                                AnonymousClass1.this.onResponse(imageContainer, false);
+                            }
+                        });
+                    } else if (imageContainer.getBitmap() != null) {
+                        NetworkImageView.this.setImageBitmap(imageContainer.getBitmap());
+                    } else if (NetworkImageView.this.mDefaultImageId != 0) {
+                        NetworkImageView networkImageView = NetworkImageView.this;
+                        networkImageView.setImageResource(networkImageView.mDefaultImageId);
                     }
-                    NetworkImageView.this.post(new Runnable() {
-                        public void run() {
-                            AnonymousClass1.this.onResponse(imageContainer, false);
-                        }
-                    });
                 }
             }, width, z2 ? 0 : height, scaleType);
         }
@@ -116,10 +113,10 @@ public class NetworkImageView extends ImageView {
 
     /* access modifiers changed from: protected */
     public void onDetachedFromWindow() {
-        ImageContainer imageContainer = this.mImageContainer;
+        ImageLoader.ImageContainer imageContainer = this.mImageContainer;
         if (imageContainer != null) {
             imageContainer.cancelRequest();
-            setImageBitmap(null);
+            setImageBitmap((Bitmap) null);
             this.mImageContainer = null;
         }
         super.onDetachedFromWindow();

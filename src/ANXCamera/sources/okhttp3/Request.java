@@ -4,6 +4,7 @@ import com.ss.android.vesdk.runtime.cloudconfig.HttpRequest;
 import java.net.URL;
 import java.util.List;
 import javax.annotation.Nullable;
+import okhttp3.Headers;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpMethod;
 
@@ -18,14 +19,14 @@ public final class Request {
 
     public static class Builder {
         RequestBody body;
-        okhttp3.Headers.Builder headers;
+        Headers.Builder headers;
         String method;
         Object tag;
         HttpUrl url;
 
         public Builder() {
             this.method = "GET";
-            this.headers = new okhttp3.Headers.Builder();
+            this.headers = new Headers.Builder();
         }
 
         Builder(Request request) {
@@ -50,9 +51,7 @@ public final class Request {
 
         public Builder cacheControl(CacheControl cacheControl) {
             String cacheControl2 = cacheControl.toString();
-            boolean isEmpty = cacheControl2.isEmpty();
-            String str = HttpRequest.HEADER_CACHE_CONTROL;
-            return isEmpty ? removeHeader(str) : header(str, cacheControl2);
+            return cacheControl2.isEmpty() ? removeHeader(HttpRequest.HEADER_CACHE_CONTROL) : header(HttpRequest.HEADER_CACHE_CONTROL, cacheControl2);
         }
 
         public Builder delete() {
@@ -64,11 +63,11 @@ public final class Request {
         }
 
         public Builder get() {
-            return method("GET", null);
+            return method("GET", (RequestBody) null);
         }
 
         public Builder head() {
-            return method(HttpRequest.METHOD_HEAD, null);
+            return method(HttpRequest.METHOD_HEAD, (RequestBody) null);
         }
 
         public Builder header(String str, String str2) {
@@ -84,27 +83,16 @@ public final class Request {
         public Builder method(String str, @Nullable RequestBody requestBody) {
             if (str == null) {
                 throw new NullPointerException("method == null");
-            } else if (str.length() != 0) {
-                String str2 = "method ";
-                if (requestBody != null && !HttpMethod.permitsRequestBody(str)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(str2);
-                    sb.append(str);
-                    sb.append(" must not have a request body.");
-                    throw new IllegalArgumentException(sb.toString());
-                } else if (requestBody != null || !HttpMethod.requiresRequestBody(str)) {
-                    this.method = str;
-                    this.body = requestBody;
-                    return this;
-                } else {
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(str2);
-                    sb2.append(str);
-                    sb2.append(" must have a request body.");
-                    throw new IllegalArgumentException(sb2.toString());
-                }
-            } else {
+            } else if (str.length() == 0) {
                 throw new IllegalArgumentException("method.length() == 0");
+            } else if (requestBody != null && !HttpMethod.permitsRequestBody(str)) {
+                throw new IllegalArgumentException("method " + str + " must not have a request body.");
+            } else if (requestBody != null || !HttpMethod.requiresRequestBody(str)) {
+                this.method = str;
+                this.body = requestBody;
+                return this;
+            } else {
+                throw new IllegalArgumentException("method " + str + " must have a request body.");
             }
         }
 
@@ -133,26 +121,15 @@ public final class Request {
         public Builder url(String str) {
             if (str != null) {
                 if (str.regionMatches(true, 0, "ws:", 0, 3)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("http:");
-                    sb.append(str.substring(3));
-                    str = sb.toString();
-                } else {
-                    if (str.regionMatches(true, 0, "wss:", 0, 4)) {
-                        StringBuilder sb2 = new StringBuilder();
-                        sb2.append("https:");
-                        sb2.append(str.substring(4));
-                        str = sb2.toString();
-                    }
+                    str = "http:" + str.substring(3);
+                } else if (str.regionMatches(true, 0, "wss:", 0, 4)) {
+                    str = "https:" + str.substring(4);
                 }
                 HttpUrl parse = HttpUrl.parse(str);
                 if (parse != null) {
                     return url(parse);
                 }
-                StringBuilder sb3 = new StringBuilder();
-                sb3.append("unexpected url: ");
-                sb3.append(str);
-                throw new IllegalArgumentException(sb3.toString());
+                throw new IllegalArgumentException("unexpected url: " + str);
             }
             throw new NullPointerException("url == null");
         }
@@ -163,10 +140,7 @@ public final class Request {
                 if (httpUrl != null) {
                     return url(httpUrl);
                 }
-                StringBuilder sb = new StringBuilder();
-                sb.append("unexpected url: ");
-                sb.append(url2);
-                throw new IllegalArgumentException(sb.toString());
+                throw new IllegalArgumentException("unexpected url: " + url2);
             }
             throw new NullPointerException("url == null");
         }
@@ -185,11 +159,7 @@ public final class Request {
         this.method = builder.method;
         this.headers = builder.headers.build();
         this.body = builder.body;
-        Object obj = builder.tag;
-        if (obj == 0) {
-            obj = this;
-        }
-        this.tag = obj;
+        this.tag = builder.tag == null ? this : builder.tag;
     }
 
     @Nullable

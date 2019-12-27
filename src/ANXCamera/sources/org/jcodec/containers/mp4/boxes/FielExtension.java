@@ -24,22 +24,11 @@ public class FielExtension extends Box {
     }
 
     public String getOrderInterpretation() {
-        if (isInterlaced()) {
-            int i = this.order;
-            if (i == 1) {
-                return "top";
-            }
-            if (i == 6) {
-                return "bottom";
-            }
-            if (i == 9) {
-                return "bottomtop";
-            }
-            if (i == 14) {
-                return "topbottom";
-            }
+        if (!isInterlaced()) {
+            return "";
         }
-        return "";
+        int i = this.order;
+        return i != 1 ? i != 6 ? i != 9 ? i != 14 ? "" : "topbottom" : "bottomtop" : "bottom" : "top";
     }
 
     public boolean isInterlaced() {
