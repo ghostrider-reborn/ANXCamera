@@ -11,7 +11,7 @@
 .method static constructor <clinit>()V
     .locals 6
 
-    const/4 v0, 0x6
+    const/4 v0, 0x7
 
     new-array v1, v0, [[I
 
@@ -59,11 +59,28 @@
 
     aput-object v4, v1, v3
 
-    new-array v0, v0, [I
 
-    fill-array-data v0, :array_4
 
-    aput-object v0, v1, v2
+    const/4 v3, 0x6
+
+    new-array v4, v3, [I
+
+    fill-array-data v4, :array_4
+
+    aput-object v4, v1, v2
+
+
+
+
+    const/4 v3, 0x7
+    const/4 v2, 0x6
+
+    new-array v4, v3, [I
+
+    fill-array-data v4, :array_5
+
+    aput-object v4, v1, v2
+
 
     sput-object v1, Lcom/android/camera/data/data/config/TopViewPositionArray;->VIEW_POSITION_ARRAY:[[I
 
@@ -106,6 +123,17 @@
         0x0
         0x1
         0x4
+        0x6
+        0x9
+        0xa
+    .end array-data
+
+    :array_5
+    .array-data 4
+        0x0
+        0x1
+        0x4
+        0x5
         0x6
         0x9
         0xa

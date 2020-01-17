@@ -3,7 +3,7 @@ package com.android.camera.data.data.config;
 import java.util.List;
 
 public class TopViewPositionArray {
-    private static final int[][] VIEW_POSITION_ARRAY = {new int[]{10}, new int[]{0, 10}, new int[]{0, 5, 10}, new int[]{0, 3, 7, 10}, new int[]{0, 2, 5, 8, 10}, new int[]{0, 1, 4, 6, 9, 10}};
+    private static final int[][] VIEW_POSITION_ARRAY = {new int[]{10}, new int[]{0, 10}, new int[]{0, 5, 10}, new int[]{0, 3, 7, 10}, new int[]{0, 2, 5, 8, 10}, new int[]{0, 1, 4, 6, 9, 10}, new int[]{0, 1, 4, 5, 6, 9, 10}};
 
     public static SupportedConfigs fillNotUseViewPosition(List<TopConfigItem> list) {
         int size;
